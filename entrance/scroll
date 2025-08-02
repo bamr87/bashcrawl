@@ -3,15 +3,42 @@ It is pitch black in these catacombs.
 You have a magickal spell that lists all items in a room.
 
 To see in the dark, type:     ls
-To move around, type:         cd <directory>
+To move around, type:         cd `directory`
+
+MAGICKAL VIEWING SPELLS:
+
+To see room contents:         ls              (list all items)
+To view scrolls fully:        cat `filename`  (display entire scroll)
+To read long scrolls:         less `filename` (page through text, 'q' to quit)
+To peek at scroll start:      head `filename` (see first 10 lines)
+To check scroll ending:       tail `filename` (see last 10 lines)
+To count scroll contents:     wc `filename`   (count lines, words, characters)
 
 Try looking around this room.
 Then move into one of the next rooms.
 
-EXAMPLE:
+EXAMPLE INCANTATIONS:
 
 $ ls
+$ cat scroll
+$ less scroll
+$ head scroll
+$ tail scroll
+$ wc scroll
 $ cd cellar
 
-Remember to cast ``ls`` when you get into the next room!
+Remember to cast these spells when you discover new scrolls and treasures!
 
+=== THE FIRST CHALLENGE ===
+
+Before you venture deeper into the catacombs, you must prove your mastery
+of the viewing spells. Practice reading this very scroll with different
+commands to understand their power.
+
+When you're ready, seek the CELLAR - a chamber that lies beneath this entrance.
+The cellar holds ancient secrets about seeing through illusions and
+distinguishing between doorways and objects.
+
+Use your navigation spell to descend: cd cellar
+
+May your terminal skills grow strong, brave adventurer!
