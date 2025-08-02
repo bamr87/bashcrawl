@@ -1,0 +1,61 @@
+name: 📚 Documentation Improvement
+description: Suggest improvements to documentation
+title: "[Docs]: "
+labels: ["documentation", "improvement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve our documentation! Please provide specific suggestions.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: 📋 Documentation Type
+      description: What type of documentation needs improvement?
+      options:
+        - README
+        - API Documentation
+        - Installation Guide
+        - User Guide
+        - Contributing Guidelines
+        - Code Comments
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-issue
+    attributes:
+      label: 🔍 Current Issue
+      description: What's wrong with the current documentation?
+      placeholder: The current documentation is unclear about...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: ✨ Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: I suggest we add/change/remove...
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: 📍 Location
+      description: Where is this documentation located? (file path, URL, etc.)
+
+  - type: checkboxes
+    id: help-offered
+    attributes:
+      label: 🤝 Contribution
+      description: Can you help improve this documentation?
+      options:
+        - label: I can write the improved documentation
+        - label: I can review the changes
+        - label: I can provide examples or use cases

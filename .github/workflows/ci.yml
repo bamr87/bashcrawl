@@ -1,0 +1,61 @@
+name: 🔄 Continuous Integration
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  RUBY_VERSION: '3.1'
+
+jobs:
+  test:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Detect changes
+      uses: dorny/paths-filter@v2
+      id: changes
+      with:
+        filters: |
+          src:
+            - 'src/**'
+            - 'lib/**'
+            - '*.js'
+            - '*.ts'
+            - '*.py'
+            - '*.rb'
+          docs:
+            - 'docs/**'
+            - '*.md'
+            - '_posts/**'
+          config:
+            - '*.yml'
+            - '*.yaml'
+            - '*.json'
+            - 'Dockerfile*'
+            - 'docker-compose*'
+            
+    - name: 🔍 Run basic checks
+      run: |
+        echo "Running basic project checks..."
+        find . -name "*.sh" -exec shellcheck {} \; || true
+        find . -name "*.yml" -o -name "*.yaml" | xargs yamllint || true
+        
+    - name: 🧪 Test if present
+      run: |
+        if [ -f "test.sh" ]; then
+          chmod +x test.sh
+          ./test.sh
+        elif [ -f "Makefile" ] && grep -q "test" Makefile; then
+          make test
+        else
+          echo "No test suite found"
+        fi

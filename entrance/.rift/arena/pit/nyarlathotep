@@ -1,0 +1,451 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+#import global functions from toplevel directory
+FUNCTIONS=$(pwd)
+FUNCTIONS=${FUNCTIONS%entrance*}entrance/.functions
+. $FUNCTIONS
+
+roll() {
+    echo "Enter a number."
+    read NUM
+    ALPHA=$RANDOM
+    OMEGA=$RANDOM
+    A=`echo $ALPHA | cut -b 1-2`
+    O=`echo $OMEGA | cut -b 1-2`
+    let "NUM=$ALPHA % $OMEGA"
+    MONSTER=$RANDOM
+    MONSTER=`echo $MONSTER | cut -b 1-2`
+    NUM=`echo $NUM | cut -b 1-2`
+
+    let "MONSTER=MONSTER+3"
+
+    if [ ! -e drum ]; then
+       let "MONSTER=MONSTER-2"
+    fi
+
+    echo "The monster rolled " $MONSTER
+    echo "You rolled " $NUM
+
+    if [[ -e wizard-dark && -e wizard-light ]]; then
+	let "NUM=NUM+2"
+	echo "+2 Arnnisen the Gray"
+    fi
+
+    if [[ -e ../../.bless ]]; then
+	let "NUM=NUM+2"
+	echo "+2 POSIX wizard bonus!"
+    fi
+    resolve
+}
+
+flee () {
+    cat << EOF
+You turn to flee but find that you cannot.  You spend 1000
+years as a mindless servant to the crawling chaos.  When you
+awaken, you may attempt to fight for your liberation.
+
+EOF
+}
+
+resolve() {
+    if [[ $MONSTER -eq $NUM ]]; then
+        cat << EOF
+You dodge an attack, but you miss your mark as a result.
+Roll again...
+
+EOF
+	roll
+    fi
+
+    if [[ $MONSTER -lt $NUM ]]; then
+        cat << EOF
+A hit! A palpable hit!  You have vanquished the elder god of
+chaos!
+
+EOF
+       cat << EOF > treasure
+#!/bin/bash
+if ! grep  --quiet --only-matching hair <<< \$I; then
+    cat << eof
+You have found a lock of the **hair** of a god!  Add it to your inventory.
+
+eof
+else
+    echo "This treasure has already been taken."
+fi
+
+EOF
+       chmod +x treasure
+       cat << EOF > platinum
+#!/bin/bash
+if ! grep  --quiet --only-matching bracelet <<< \$I; then
+    cat << eof
+You have found an enchanted *bracelet* of chaotic
+necromancy!  Add it to your inventory.
+
+eof
+else
+    echo "This treasure has already been taken."
+fi
+
+EOF
+        chmod +x platinum
+        cat << EOF > end
+You have reached the end of the game.  You know enough Bash
+now to use it for every day activities.  Practice makes
+perfect, so be sure to use it often.  For continued Bash
+tips, visit opensource.com often.
+
+And eventually, we hope to see you contribute your own
+dungeon rooms to Bashcrawl!
+
+EOF
+
+    else
+        cat << EOF
+Your sword swings harmlessly through the air.  You take 10
+points damage from your foe. Deduct this from your HP.
+
+let "HP=HP-10"
+
+EOF
+        let HP=HP-10
+        export HP
+        if [ "$HP" -le 0 ]; then
+            cat << EOF
+The elder god of chaos consumes your body and soul.  You
+have been slain.
+
+GAME OVER!
+
+EOF
+            gameover
+            exit 1
+        fi
+	    roll
+    fi
+}
+
+cat << EOF
+In the blink of an eye, Nyarlathotep is standing before you.
+From its hands emanate black necrotic rays, and your mind
+screams.
+
+EOF
+printf "Are you armed? y/n  "
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+
+    if grep  --quiet --only-matching "sword" <<< $I; then
+        roll
+    else
+        cat << EOF
+Oh, no!  You have lost your blade!  Nyarlathotep, the elder
+god of chaos, senses your weakness.
+
+EOF
+        flee
+    fi
+else
+    flee
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+#
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./nyarlathotep
+#
+# If you're not seeing the * after
+# this file name, you're probably
+# forgetting to use ls -F
+

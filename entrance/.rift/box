@@ -1,0 +1,344 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+cat << EOF
+A metal box sits upon the ground.  It appears to be
+illuminated from within.  There is a window in the box. The
+window is black, but there is luminescent writing.
+
+EOF
+printf "Do you want to read the writing? y/n  "
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+    cat << EOF
+
+.--------------------------------,
+|       Welcome to POSIX         |
+|   Enter your username:         |
+'--------------------------------'
+EOF
+   read RESP
+
+   if [ "$RESP" = "$USER" ]; then
+       cat << EOF > armour
+#!/bin/bash
+cat << eof
+Welcome, ${USER}, to your POSIX system.  You have learnt much,
+and now you have the basic knowledge you need to become a
+truly powerful wizard.
+
+You have found magickal armour.  Add it to your inventory.
+
+eof
+touch .armour
+touch .bless
+
+EOF
+        chmod +x armour
+        echo "You feel magic in the air."
+   fi
+else
+    cat << EOF
+The box is full of mystery, and it's often best not to look
+too deeply into puzzles.
+
+EOF
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+#
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./box
+#
+# If you're not seeing the * after
+# this file name, you're probably
+# forgetting to use ls -F
+

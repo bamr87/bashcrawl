@@ -1,0 +1,15 @@
+=====================
+Welcome to bashcrawl!
+=====================
+
+This is a game to teach you the basics of using a POSIX (Linux, BSD,
+UNIX) terminal, like the one where you are reading this message now.
+
+Your first move is very important.
+Type this into the terminal, and press RETURN:
+
+    cat scroll
+
+You are now playing the game.
+May the gods save you.
+

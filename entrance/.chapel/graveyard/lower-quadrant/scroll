@@ -1,0 +1,20 @@
+# In the lower quadrant of the graveyard, the land dips slightly,
+# and fog clings to the uneven ground. The gravestones here are
+# modest and small, many leaning with age, with inscriptions
+# barely legible beneath creeping ivy.
+#
+# The air is damp and heavy, carrying the scent of wet earth and
+# decay. The faint sound of trickling water from an unseen stream
+# accentuates the stillness of the graveyard.
+#
+# As you try to make sense of the gravestones, a spell comes
+# to your mind that could be helpful.
+# You can sort the gravestones by date with the spell:
+#
+# sort gravestones
+#
+# Once you do this, look for a familiar name and take 
+# note of the year of death. Add the year to your Inventory:
+#
+# export I=<year of death>,$I
+

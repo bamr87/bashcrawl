@@ -1,0 +1,15 @@
+# Inside the decayed mausoleum, you catch glimpses of
+# tarnished silver urns, rusted candlesticks, and ornate chests
+# scattered among the debris. The grand chamber is filled with
+# relics of a bygone era, half-buried and cloaked in dust. 
+#
+# It would be unwise to sift through the loot, for there are
+# often traps protecting the belongings of the dead.
+#
+# Check the contents of the room with:
+# 
+# cat room
+#
+# Once you have found the number of the correct item, pick it up
+# by running the "loot" script.
+

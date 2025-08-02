@@ -1,0 +1,418 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+#import global functions from toplevel directory
+FUNCTIONS=$(pwd)
+FUNCTIONS=${FUNCTIONS%entrance*}entrance/.functions
+. $FUNCTIONS
+
+# this runs after the statue has been "destroyed"
+# and this file has been renamed to 'pieces'
+if [ "$0" = "./pieces" ]; then
+    cat << EOF
+You sift through the pieces of a shattered statue.
+
+You find nothing of interest in the statue's remains.
+
+EOF
+    exit 1
+fi
+
+# start the statue encounter
+cat << EOF
+A rugged statue stands in the corner of the room.
+
+EOF
+printf "Do you approach it? y/n  "
+
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+    cat << EOF
+The statue springs to life, rumbling:
+
+WHO DARES INTRUDE UPON THE CHAMBER OF SPIRITS?
+
+It thrusts a fist at you, hitting you for 5 damage.
+
+EOF
+
+    # this does not change the user's HP,
+    # it only calculates it after damage
+    let "HP=HP-5"
+    if [ "$HP" -le 0 ]; then
+        cat << EOF
+You have been slain by the statue.
+
+GAME OVER!
+
+EOF
+        gameover
+        exit 1
+    fi
+
+    perl -pe 's/coins/diamonds/' -i ./treasure
+    printf "Do you have a sword? y/n  "
+    read RESP
+    if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+       if grep  --quiet --only-matching 'sword' <<< $I; then
+           cat <<EOF
+You strike the statue and it breaks to pieces!
+
+However, you have taken damage.
+Deduct 5 from your HP variable:
+
+let "HP=HP-5"
+
+EOF
+           mv statue pieces
+       else
+           cat << EOF
+No you don't!  Run!
+You have taken damage from the animated statue.
+Deduct 5 from your HP variable:
+
+let "HP=HP-5"
+
+EOF
+           rm treasure
+           rm spell
+      fi
+    else
+        cat <<EOF
+Run!
+You have taken damage from the animated statue.
+Deduct 5 from your HP variable:
+
+let "HP=HP-5"
+
+EOF
+   fi
+else
+    cat << EOF
+You cautiously avoid the statue, recalling stories of living
+stone lying in wait, deep within haunted catacombs.
+
+EOF
+
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./statue
+

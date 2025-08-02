@@ -1,0 +1,19 @@
+# Before you is the columbarium, a weathered stone structure
+# adorned with carvings of angels and vines. Rows of niches
+# line its walls, some with long burnt-out candles, others
+# with worn inscriptions and small tokens of remembrance.
+#
+# Many have distinctive symbols on their front. Maybe you 
+# can find one that is helpful.
+#
+# If you think you have found the right niche, you can touch
+# it with the following command:
+# 
+# touch <number of niche>
+#
+# This creates an empty file in the current room (directory).
+# After you have created the file, try to "open" the niche.
+#
+# If you know a spell that helps you search, you can make it easier
+# for yourself.
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $USER != "jovyan" ]; then
+    echo This script is for configuration of mybinder.org sessions
+    echo It should not be used otherwise
+    exit 0
+fi
+
+cat >> ~/.bashrc << EOF
+set +x +e
+export PS1="bashcrawler\$ "
+alias ls='ls --color=never'
+cd entrance
+cat ../.binder/welcome_message
+EOF
+
+exec "$@"

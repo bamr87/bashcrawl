@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+#import global functions from toplevel directory
+FUNCTIONS=$(pwd)
+FUNCTIONS=${FUNCTIONS%entrance*}entrance/.functions
+. $FUNCTIONS
+
+cat << EOF
+As your hand hovers over the array of chests, you feel an eerie
+pull toward one in particular.
+
+EOF
+printf "What is the number of your choice?  "
+
+read RESP
+
+if [ "$RESP" -eq "27121981" ]; then
+   
+    cat << EOF
+As you pry it open, a soft creak reveals its contents. You find a
+trove of ancient **gold coins**, a jewel-encrusted **bracelet**
+with a large emerald, and a set of **silver keys** engraved with 
+mysterious runes. The treasures glimmer with a hint of long-
+forgotten wealth and secrets.
+
+Add the Items to your inventory with:
+
+export I=goldcoins,bracelet,silverkeys,\$I,
+
+EOF
+else
+    cat << EOF
+Ignoring the subtle warnings, you lift the lid, and in that instant,
+a deep rumble echoes through the chamber. The marble walls crack wider,
+and dust cascades from the ceiling. The room shudders violently, debris
+raining down as the ancient structure begins to collapse around you,
+triggered by an unwise choice.
+
+You have been slain by the collapsed mausoleum.
+
+EOF
+    mv ../mausoleum ../.mausoleum
+    gameover
+
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+#
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./loot
+#
+# If you're not seeing the * after
+# this file name, you're probably
+# forgetting to use ls -F
+
+

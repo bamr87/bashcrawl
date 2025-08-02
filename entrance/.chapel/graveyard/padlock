@@ -1,0 +1,353 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+cat << EOF
+The old padlock features three dials, each adorned with a distinct
+symbol:
+  an amulet
+  a crown
+  a tombstone with the initials F.K. 
+
+The dials are worn and scratched, their numbers barely visible beneath
+layers of rust and grime. The intricate symbols, though faded, hint at
+the lock's connection to ancient, enigmatic lore.
+
+EOF
+printf "have you found the numbers? y/n  "
+
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+
+cat << EOF
+
+The old crumbling mausoleum stands silent and imposing, its weathered
+stone facade adorned with creeping ivy and shattered stained glass
+windows. The heavy, rusted padlock on the large, ornately carved wooden
+door glints faintly in the dim light as you prepare to enter, the ancient
+numbers you've gathered poised to reveal the secrets within.
+
+EOF
+
+    if grep  --quiet --only-matching '2712' <<< $I && \
+       grep  --quiet --only-matching '1765' <<< $I && \
+       grep  --quiet --only-matching '7432' <<< $I; then
+
+        cat << EOF
+As the padlock clatters to the ground, the mausoleum's door creaks open,
+revealing a dimly lit interior cloaked in dust and cobwebs.
+
+EOF
+        mv .mausoleum mausoleum
+    else
+        cat << EOF
+One or more Numbers are wrong or missing in your Inventory.
+Remember, you can check your inventory with:
+
+echo \$I
+
+EOF
+
+    fi
+
+else
+    cat << EOF
+Continue your search for the numbers on the graveyard.
+
+EOF
+
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+#
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./padlock
+#
+# If you're not seeing the * after
+# this file name, you're probably
+# forgetting to use ls -F
+
+

@@ -1,0 +1,80 @@
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+# 
+
+# This is a custom function.
+# A function is a snippet of code that you can use in other files.
+# Whenever you see the `gameover`command in a file of this
+# dungeon, that's a "call" to this function.
+gameover () {
+    CORPSE=$(mktemp corpse.XXX)
+    cat << EOF2 > $CORPSE
+#!/bin/bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+# 
+CORPSE=\$(basename \$0)
+
+echo
+if [ ! -e .\$CORPSE.looted ]; then
+    cat << EOF
+You see the corpse of a slain adventurer on the floor of the
+dungeon.  You find the following items on the corpse:  
+
+${I}
+
+EOF
+
+    touch .\$CORPSE.looted
+else
+    echo "This corpse has already been looted."
+    echo
+fi
+EOF2
+
+    for i in {0..327}; do
+        echo >>$CORPSE
+    done
+
+    cat << EOF2 >> $CORPSE
+# Hmm, that didn't work.
+# Remember, when files end in a * 
+# it means they are applications.
+# Try this:
+#
+# ./$CORPSE
+
+
+EOF2
+    chmod +x $CORPSE
+
+    curr=`basename $PWD`
+    while [ "$curr" != "entrance" ]; do
+        pushd .. &> /dev/null
+        dirs -c
+        curr=`basename $PWD`
+    done
+    unset I
+    unset HP
+    $SHELL
+}

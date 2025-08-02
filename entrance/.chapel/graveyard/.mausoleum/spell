@@ -1,0 +1,16 @@
+# As you hastily scan the room, your gaze falls upon a tattered,
+# ancient scroll partially protruding from beneath a crumbled
+# chest. Ignoring the other trinkets, you pull it free, revealing
+# faded runes scratched onto the fragile parchment. Unfurling the
+# scroll, you recognize it as a spell of aid:
+# 
+# In decayed rooms where shadows stay,
+# 'uniq' will charm the clones away.
+#
+# You can combine spells (commands) with a pipe (|) character.
+# The "uniq" command omits repeated lines.
+# Sort the room, and then pipe its output
+# to "uniq" for a short list. Try the incantation:
+#
+# sort room | uniq
+

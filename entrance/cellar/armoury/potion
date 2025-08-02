@@ -1,0 +1,346 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+# check if we found that bottle already ...
+if [[ -v HP ]] ; then
+  cat <<EOF
+You checked that bottle already. 
+EOF
+else
+# let's investigate the bottle...
+cat << EOF
+You have found a potion bottle of swirling
+green liquid. Do you want to drink it?  y/n
+
+EOF
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+   cat << EOF
+The taste of a rustic green plant fills your mouth.  It
+warms and strengthens you.
+
+Create a variable for your health points (HP).  You have
+15HP:
+
+export HP=15
+
+EOF
+else
+    cat << EOF
+You weren't born yestermorn.  This potion is probably
+poison.
+
+Create a variable for your health points (HP).  You have
+10HP:
+
+export HP=10
+
+EOF
+
+fi
+
+cat << EOF
+You can check your health at any time:
+
+echo \$HP
+
+EOF
+mv ../../.chapel ../../chapel 2>/dev/null
+mv ../../.vault ../../vault 2>/dev/null
+mv ../../.scrap ../../scrap 2>/dev/null
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hmm, that didn't work.
+# Remember, when files end in a *
+# it means they are applications.
+# Try this:
+#
+# ./potion
+
