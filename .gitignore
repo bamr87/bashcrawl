@@ -1,3 +1,16 @@
 # This is a configuration file for Git.
 # Items listed here are ignored by Git.
 .backups
+
+# Bashcrawl Player Logs (Personal Journey Data)
+logs/player-progress.log
+logs/command-history.log
+logs/room-visits.log
+logs/treasure-collection.log
+logs/session-*.log
+logs/learning-notes.txt
+logs/temp/
+
+# Temporary files
+*.tmp
+.DS_Store

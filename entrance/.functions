@@ -78,3 +78,29 @@ EOF2
     unset HP
     $SHELL
 }
+
+# Intelligent Help System Function
+help() {
+    local help_script_path
+    
+    # Try to find the help script in the bashcrawl root
+    if [ -f "$(dirname "$(pwd)")/help" ]; then
+        help_script_path="$(dirname "$(pwd)")/help"
+    elif [ -f "../help" ]; then
+        help_script_path="../help"
+    elif [ -f "../../help" ]; then
+        help_script_path="../../help"
+    elif [ -f "./help" ]; then
+        help_script_path="./help"
+    else
+        # Fallback: try to find it anywhere in the bashcrawl directory tree
+        help_script_path=$(find . -name "help" -type f -executable 2>/dev/null | head -1)
+        if [ -z "$help_script_path" ]; then
+            echo "❌ Help system not found. Make sure you're in the bashcrawl directory."
+            return 1
+        fi
+    fi
+    
+    # Execute the help script with any arguments passed
+    "$help_script_path" "$@"
+}

@@ -1,96 +1,120 @@
-# Copilot Instructions
+# Bashcrawl Copilot Instructions
 
-These instructions guide AI-powered development practices following the path-based development approach and IT-Journey principles.
+## Project Overview
 
-## Core Development Principles
+Bashcrawl is an educational text-based adventure game that teaches terminal/shell commands through immersive gameplay. The codebase is structured as an interactive learning environment where directories represent game rooms and executable files are interactive encounters.
 
-### Design for Failure (DFF)
-- Always implement error handling and graceful degradation in generated code
-- Include try-catch blocks with meaningful error messages
-- Suggest redundancy and fallback mechanisms
-- Add monitoring and logging capabilities where appropriate
-- Consider edge cases and potential failure points
+## Core Architecture Patterns
 
-### Don't Repeat Yourself (DRY)
-- Extract common functionality into reusable functions, components, or modules
-- Suggest refactoring when duplicate code patterns are detected
-- Create utility functions for repeated operations
-- Use configuration files for repeated constants or settings
-- Recommend template patterns for similar structures
+### Directory-as-Room Structure
+- Each directory represents a game room/chamber with specific learning objectives
+- `entrance/` → `cellar/` → `armoury/` → `chamber/` represents progressive skill building
+- Hidden directories (`.vault`, `.chapel`, `.rift`) unlock after collecting specific treasures
+- Use descriptive directory names that reinforce the fantasy theme while teaching file navigation
 
-### Keep It Simple (KIS)
-- Prefer clear, readable code over clever optimizations
-- Use descriptive variable and function names
-- Break complex functions into smaller, focused units
-- Avoid unnecessary abstractions or over-engineering
-- Choose well-established patterns over custom solutions
+### Educational Content Files
+- **`scroll` files**: Markdown documentation teaching specific terminal concepts
+- **Executable files** (`treasure`, `potion`, etc.): Interactive bash scripts that demonstrate commands
+- **`README.md` files**: Comprehensive guides for each major area
+- All content follows fantasy/RPG metaphors to make learning engaging
 
-### Release Early and Often (REnO)
-- Suggest incremental development approaches
-- Recommend feature flags for gradual rollouts
-- Focus on minimal viable implementations first
-- Include versioning strategies in code suggestions
-- Encourage continuous integration practices
+### Game Mechanics Implementation
 
-### Minimum Viable Product (MVP)
-- Prioritize core functionality over advanced features
-- Suggest starting with basic implementations that can be enhanced later
-- Focus on solving the primary user problem first
-- Recommend iterative improvement approaches
-- Avoid feature creep in initial implementations
+#### Inventory System
+```bash
+export I=item,\$I           # Add item to comma-separated inventory
+echo \$I                    # Display current inventory
+grep item <<< \$I           # Check if item exists in inventory
+```
 
-### Collaboration (COLAB)
-- Write self-documenting code with clear comments
-- Follow consistent coding standards and conventions
-- Include comprehensive README and documentation suggestions
-- Use semantic commit messages and PR descriptions
-- Consider team workflows in code organization
+#### Room Unlocking Pattern
+```bash
+mv ../hidden_room ../visible_room 2>/dev/null
+```
+Hidden directories (prefixed with `.`) become visible after treasure collection.
 
-### AI-Powered Development (AIPD)
-- Leverage AI tools effectively for code generation and review
-- Suggest AI-assisted testing and documentation approaches
-- Recommend AI integration patterns for enhanced productivity
-- Balance AI assistance with human oversight and review
-- Use AI for learning and skill development, not replacement
+#### Interactive Executables
+All executable files follow this pattern:
+```bash
+#!/usr/bin/env bash
+# Educational comment explaining the concept
+# Game logic checking prerequisites
+# Output teaching specific terminal skills
+```
 
-## Path-Based Development Standards
+## Content Creation Standards
 
-### Code Organization
-- **Entry Points**: Define clear starting paths with descriptive comments
-- **Flow Control**: Use path-based logic that follows natural decision trees
-- **Modular Paths**: Break code into functions that represent path segments
-- **Path Documentation**: Comment each path junction and destination
+### Scroll (Documentation) Guidelines
+- Start with fantasy-themed introduction using emojis and rich formatting
+- Explain the "why" behind each command, not just syntax
+- Include progressive challenges: Basic → Intermediate → Advanced
+- End with practical applications connecting game skills to real development
+- Use consistent emoji language: 🗡️ for executables, 🏰 for directories, 💰 for treasures
 
-### Error Handling Paths
-- **Path Preservation**: Errors maintain context about which path failed
-- **Fallback Paths**: Define alternative routes when primary paths fail
-- **Path Logging**: Track the journey through the code for debugging
+### Interactive Script Patterns
+- Check game state (inventory, previous actions) before proceeding
+- Provide educational comments explaining what each command does
+- Use `cat << EOF` for multi-line output with embedded variables
+- Include safety checks and error handling as teaching opportunities
 
-### Testing Along Natural Paths
-- **Happy Paths**: Test the most common, successful routes
-- **Edge Paths**: Explore boundary conditions and unusual routes
-- **Error Paths**: Verify failure handling along exception routes
+### Room Progression Logic
+- Each room should teach 1-3 related terminal concepts
+- Build on previous knowledge while introducing new skills
+- Provide multiple paths through content (different learning styles)
+- Include "easter eggs" for curious learners who explore the source code
 
-## Technology-Specific Guidelines
+## Development Workflows
 
-### Container-First Development
-- **Build Paths**: Multi-stage Dockerfiles create clear transformation paths
-- **Deployment Paths**: Containers flow through development → staging → production
-- **Network Paths**: Service discovery creates dynamic communication routes
-- **Volume Paths**: Data flows through well-defined storage pathways
+### Testing New Content
+```bash
+cd entrance                 # Start at game beginning
+export I=""                # Reset inventory
+./treasure                 # Test executable interactions
+ls -F                      # Verify file type indicators
+```
 
-### Documentation Standards
-- Generate comprehensive README files for all projects
-- Include installation, usage, and contribution guidelines
-- Add inline code documentation for complex logic
-- Create user guides and API documentation when relevant
-- Maintain changelogs and version documentation
+### Adding New Rooms
+1. Create directory structure following existing patterns
+2. Add `scroll` file with educational content
+3. Create interactive executables with proper permissions (`chmod +x`)
+4. Add unlock mechanism in prerequisite rooms
+5. Test complete learning path
 
-### Quality Standards
-- **Security Best Practices**: Validate inputs, secure authentication, avoid hardcoded secrets
-- **Performance Considerations**: Optimize for readability first, performance second
-- **Accessibility & Inclusivity**: Follow WCAG guidelines, use inclusive language
+### Content Validation
+- Verify all markdown follows game formatting conventions
+- Test executable scripts work in different shell environments
+- Ensure progressive difficulty curve is maintained
+- Check that real terminal skills map to fantasy metaphors
 
----
+## Project-Specific Conventions
 
-*These instructions embody the path-based development philosophy, emphasizing natural flow, organic growth, and AI-enhanced development practices.*
+### File Naming
+- `scroll`: Primary educational content (markdown)
+- `treasure`: Inventory/progression mechanics
+- `potion`, `spell`, `ghost`: Themed interactive encounters
+- Avoid generic names; use fantasy terms that hint at functionality
+
+### Permission Management
+- Executables must have `+x` permissions for game mechanics
+- Use `ls -F` patterns throughout to teach file type recognition
+- Hidden files (`.filename`) used for game state and unlockable content
+
+### Cross-Platform Compatibility
+- Use POSIX-compatible commands (avoid GNU-specific flags)
+- Test on macOS and Linux environments
+- Provide alternative command examples when platform differences exist
+
+## Integration Points
+
+### External Dependencies
+- Git for distribution (GitHub/GitLab hosting)
+- Standard POSIX shell tools (no exotic dependencies)
+- Binder for online play without installation
+
+### Learning Path Integration
+- Game maps to real-world development workflows
+- Each room teaches transferable terminal skills
+- Scaffolds from basic navigation to advanced shell scripting
+- Connects to broader IT education goals
+
+When modifying this codebase, maintain the educational integrity while enhancing the adventure experience. Every change should teach something valuable about terminal/shell usage.

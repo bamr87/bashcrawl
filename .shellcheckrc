@@ -1,0 +1,8 @@
+# ShellCheck configuration for educational shell scripts
+disable=SC2034  # Unused variables (common in educational examples)
+disable=SC2086  # Double quote to prevent globbing (sometimes intentional)
+disable=SC1091  # Not following sourced files (can't always resolve paths)
+
+# Enable additional checks
+enable=check-sourced
+enable=check-unassigned-uppercase
