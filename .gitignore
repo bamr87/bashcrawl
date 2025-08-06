@@ -10,9 +10,10 @@ logs/treasure-collection.log
 logs/session-*.log
 logs/learning-notes.txt
 logs/temp/
+logs/bashcrawl.log
+logs/setup.log
 
 # Temporary files
 *.tmp
 .DS_Store
-.game_history
-.game_state
+.game_*
