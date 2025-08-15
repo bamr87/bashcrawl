@@ -40,7 +40,7 @@ jobs:
         
     - name: 🐍 Setup Python
       if: steps.check_files.outputs.has_requirements == 'true'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -63,7 +63,7 @@ jobs:
         pip freeze > requirements.txt
         
     - name: 📝 Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: 'chore: update dependencies'
