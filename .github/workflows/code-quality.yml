@@ -110,7 +110,7 @@ jobs:
         cat quality-report.md
         
     - name: 💾 Upload quality report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: quality-report
         path: quality-report.md
