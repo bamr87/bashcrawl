@@ -10,17 +10,18 @@ command-line champion by battling monsters, collecting treasures, and:
 - Achievement badges for completing different quest lines
 - Integration with external learning platforms
 
-## 🎮 New! Interactive Terminal Emulator
+## 🎮 New! Streamlined Experience
 
-**Experience Bashcrawl in a safe, contained environment perfect for beginners:**
+**Get started with the new unified launcher:**
 
 ```bash
 git clone https://github.com/bamr87/bashcrawl.git
 cd bashcrawl
-./start-adventure.sh
+./setup.sh    # One-time setup
+./main.sh     # Start your adventure
 ```
 
-✨ **Features**: Safe sandbox • Built-in help • Game integration • Real terminal commands
+✨ **Features**: Simple setup • Multiple game modes • Safe sandbox • Real terminal commands
 
 ## 🌟 What Makes This Journey Special
 
@@ -32,9 +33,7 @@ cd bashcrawl
 
 ## 🚀 Quick Start Your Adventure
 
-### 🎮 Option 1: Interactive Terminal Emulator (Recommended for Beginners)
-
-Experience Bashcrawl in a safe, contained terminal environment:
+### Step 1: Get Bashcrawl
 
 ```bash
 # Clone the repository (download a copy to your computer)
@@ -42,15 +41,34 @@ git clone https://github.com/bamr87/bashcrawl.git
 
 # Navigate into the downloaded directory
 cd bashcrawl
-
-# 🎯 Launch the interactive terminal emulator
-./start-adventure.sh
-
-# Or directly start the terminal emulator
-./bashcrawl-terminal.sh
 ```
 
-**✨ Features of the Interactive Terminal:**
+### Step 2: One-Time Setup
+
+```bash
+# Run the setup script (creates directories, sets permissions, initializes game)
+./setup.sh
+```
+
+The setup script will:
+- Verify system requirements
+- Create necessary directories and game state files
+- Set up executable permissions for all game files
+- Initialize the help system
+- Verify installation
+
+### Step 3: Start Your Adventure
+
+```bash
+# Launch the main game launcher
+./main.sh
+```
+
+Choose from multiple adventure modes:
+
+#### 🎮 Interactive Terminal Emulator (Recommended for Beginners)
+
+Safe, contained environment perfect for learning:
 
 - **Safe Environment**: Cannot access or modify files outside the game
 - **Built-in Help**: Context-aware assistance with `help` command
@@ -58,32 +76,34 @@ cd bashcrawl
 - **Beginner-Friendly**: Guided experience with tutorials and hints
 - **Real Commands**: Learn actual terminal commands in a safe space
 
-### 🎮 Option 2: Native Terminal Experience (For Experienced Users)
+#### � Native Terminal Experience (For Experienced Users)
 
-Use your actual terminal environment for the traditional experience:
+Use your actual terminal environment:
+
+- **Full Access**: Uses your complete terminal environment
+- **Traditional Experience**: Classic bashcrawl gameplay
+- **Advanced Features**: Full bash/shell capabilities
+- **Help System**: Optional context-aware assistance
+
+#### 🎓 Tutorial & Learning Modes
+
+- **Interactive Tutorial**: Learn the basics step-by-step
+- **Demo Mode**: See examples of gameplay and features
+- **Help Documentation**: Comprehensive guides and references
+
+### 🚀 Quick Commands Reference
+
+Once you're set up, use these commands:
 
 ```bash
-# Clone the repository (download a copy to your computer)
-git clone https://github.com/bamr87/bashcrawl.git
-
-# Navigate into the downloaded directory
-cd bashcrawl
-
-# 🎯 Enable the help system (one simple command!)
-source help/init_help.sh
-
-# Enter the mystical realm - this is where your adventure begins
-cd entrance
-
-# Read the first scroll to start your journey
-cat scroll
-
-# Get intelligent assistance anytime with the help command
-help
+./main.sh                    # Launch interactive menu
+./main.sh --interactive      # Start safe terminal emulator
+./main.sh --native          # Start native terminal experience
+./main.sh --tutorial        # Launch tutorial mode
+./main.sh --help            # View all options
+./setup.sh --verify         # Check installation
+./setup.sh --repair         # Fix installation issues
 ```
-
-> **💡 Pro Tip**: After running `source help/init_help.sh`, you can type `help` from anywhere in the
-> bashcrawl adventure to get context-aware assistance!
 
 #### 🔍 Understanding These Commands
 
