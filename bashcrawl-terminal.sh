@@ -38,6 +38,288 @@ RESET_COLOR='\033[0m'  # Reset
 # Restricted command mode - only allow safe game commands
 RESTRICTED_MODE=true
 
+# Determine the appropriate color flag for ls in a portable way
+declare -a LS_COLOR_FLAGS=()
+if command ls --color=auto >/dev/null 2>&1; then
+    LS_COLOR_FLAGS=(--color=auto)
+elif command ls -G >/dev/null 2>&1; then
+    LS_COLOR_FLAGS=(-G)
+fi
+
+# Quest progression data inspired by Terminal Illness
+declare -a QUEST_TITLES
+declare -a QUEST_OBJECTIVES
+declare -a QUEST_REQUIRED_COMMAND
+declare -a QUEST_HINTS
+declare -a QUEST_TARGET_CONTEXT
+declare -a QUEST_REWARDS
+declare -a QUEST_REWARD_XP
+
+QUEST_TITLES=(
+    "Awakening: Know Thy Place"
+    "Eyes to See"
+    "First Steps"
+    "Shape the World"
+    "Spark of Creation"
+    "Read the Signs"
+    "Seek the Whisper"
+)
+
+QUEST_OBJECTIVES=(
+    "Cast the 'pwd' spell to learn where you stand."
+    "Use 'ls' to reveal what surrounds you."
+    "Travel to the entrance with 'cd entrance'."
+    "Create a new space by running 'mkdir workshop' while in the entrance."
+    "Enter the workshop and conjure 'notes.txt' with 'touch notes.txt'."
+    "Read your freshly created notes with 'cat notes.txt'."
+    "Within the entrance, seek the word 'catacombs' in the scroll using 'grep'."
+)
+
+QUEST_REQUIRED_COMMAND=(pwd ls cd mkdir touch cat grep)
+
+QUEST_HINTS=(
+    "Type 'pwd' and press Enter to see your current chamber."
+    "Try 'ls' to survey the room's contents."
+    "Use 'cd entrance' to step into the dungeon proper."
+    "While standing in the entrance, run 'mkdir workshop' to shape a new workspace."
+    "Move into the workshop with 'cd workshop' and create notes via 'touch notes.txt'."
+    "Inside the workshop, read what you've made: 'cat notes.txt'."
+    "Back in the entrance, run 'grep catacombs scroll' to uncover the hidden clue."
+)
+
+QUEST_TARGET_CONTEXT=(
+    "bashcrawl"
+    "bashcrawl"
+    "entrance"
+    "entrance"
+    "entrance/workshop"
+    "entrance/workshop"
+    "entrance"
+)
+
+QUEST_REWARDS=(
+    "Navigation Novice ribbon"
+    "Glimmering lens"
+    "Pathwalker's charm"
+    "Builder's sigil"
+    "Scribe's quill"
+    "Reader's sigil"
+    "Whisperer's token"
+)
+
+QUEST_REWARD_XP=(50 50 100 100 100 100 150)
+
+readonly QUEST_TOTAL=${#QUEST_TITLES[@]}
+
+CURRENT_QUEST_ID=0
+QUEST_COMPLETED=""
+LEARNED_COMMANDS=""
+GAME_XP=0
+SCROLLS_READ=""
+LAST_COMMAND=""
+LAST_ARGS=""
+LAST_COMMAND_DIR=""
+LAST_RESULT_DIR=""
+LAST_COMMAND_EXIT_CODE=0
+CURRENT_PATH="bashcrawl"
+
+# ============================================================================
+# QUEST AND STATE HELPERS
+# ============================================================================
+
+relative_path() {
+    local abs="${1%/}"
+    local root="${BASHCRAWL_ROOT%/}"
+    if [[ -z "$abs" ]]; then
+        echo "bashcrawl"
+        return
+    fi
+    if [[ "$abs" == "$root" ]]; then
+        echo "bashcrawl"
+        return
+    fi
+    case "$abs" in
+        "$root"/*)
+            echo "${abs#${root}/}"
+            ;;
+        *)
+            echo "$abs"
+            ;;
+    esac
+}
+
+csv_contains() {
+    local list="$1"
+    local item="$2"
+    [[ ",$list," == *",$item,"* ]]
+}
+
+csv_add() {
+    local list="$1"
+    local item="$2"
+    if [[ -z "$item" ]]; then
+        echo "$list"
+        return
+    fi
+    if csv_contains "$list" "$item"; then
+        echo "$list"
+    elif [[ -z "$list" ]]; then
+        echo "$item"
+    else
+        echo "$list,$item"
+    fi
+}
+
+register_command_use() {
+    local cmd="$1"
+    LEARNED_COMMANDS="$(csv_add "$LEARNED_COMMANDS" "$cmd")"
+}
+
+render_quest_status() {
+    local qid=${CURRENT_QUEST_ID:-0}
+    echo -e "${SUCCESS_COLOR}🎯 QUEST TRACKER:${RESET_COLOR}"
+    if (( qid >= QUEST_TOTAL )); then
+        echo "   All quests complete! Explore freely."
+        return
+    fi
+    echo "   Quest $((qid + 1))/${QUEST_TOTAL}: ${QUEST_TITLES[$qid]}"
+    echo "   Objective: ${QUEST_OBJECTIVES[$qid]}"
+    echo "   Reward: ${QUEST_REWARDS[$qid]} (+${QUEST_REWARD_XP[$qid]} XP)"
+}
+
+complete_current_quest() {
+    local qid="$1"
+    QUEST_COMPLETED="$(csv_add "$QUEST_COMPLETED" "$qid")"
+    GAME_XP=$((GAME_XP + QUEST_REWARD_XP[$qid]))
+    echo -e "${SUCCESS_COLOR}✨ Quest complete: ${QUEST_TITLES[$qid]}!${RESET_COLOR}"
+    echo "   Reward: ${QUEST_REWARDS[$qid]} (+${QUEST_REWARD_XP[$qid]} XP)"
+    CURRENT_QUEST_ID=$((qid + 1))
+    save_game_state
+    if (( CURRENT_QUEST_ID >= QUEST_TOTAL )); then
+        echo -e "${SUCCESS_COLOR}🏆 All quests complete! Continue exploring the catacombs.${RESET_COLOR}"
+    else
+        render_quest_status
+    fi
+}
+
+check_quest_progress() {
+    local qid=${CURRENT_QUEST_ID:-0}
+    (( qid < QUEST_TOTAL )) || return
+
+    local required="${QUEST_REQUIRED_COMMAND[$qid]}"
+    if [[ -n "$required" ]] && ! csv_contains "$LEARNED_COMMANDS" "$required"; then
+        return
+    fi
+
+    case "$qid" in
+        0)
+            [[ "$LAST_COMMAND" == "pwd" ]] || return
+            ;;
+        1)
+            [[ "$LAST_COMMAND" == "ls" ]] || return
+            ;;
+        2)
+            [[ "$LAST_COMMAND" == "cd" ]] || return
+            if [[ "$(relative_path "$LAST_RESULT_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
+                return
+            fi
+            ;;
+        3)
+            [[ "$LAST_COMMAND" == "mkdir" ]] || return
+            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
+                return
+            fi
+            local -a __last_args
+            read -ra __last_args <<< "$LAST_ARGS"
+            if [[ "${__last_args[0]:-}" != "workshop" ]]; then
+                return
+            fi
+            ;;
+        4)
+            [[ "$LAST_COMMAND" == "touch" ]] || return
+            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
+                return
+            fi
+            local -a __last_args
+            read -ra __last_args <<< "$LAST_ARGS"
+            if [[ "${__last_args[0]:-}" != "notes.txt" ]]; then
+                return
+            fi
+            ;;
+        5)
+            [[ "$LAST_COMMAND" == "cat" ]] || return
+            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
+                return
+            fi
+            local -a __last_args
+            read -ra __last_args <<< "$LAST_ARGS"
+            if [[ "${__last_args[0]:-}" != "notes.txt" ]]; then
+                return
+            fi
+            ;;
+        6)
+            [[ "$LAST_COMMAND" == "grep" ]] || return
+            (( LAST_COMMAND_EXIT_CODE == 0 )) || return
+            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
+                return
+            fi
+            local -a __last_args
+            read -ra __last_args <<< "$LAST_ARGS"
+            if [[ "${__last_args[0]:-}" != "catacombs" ]]; then
+                return
+            fi
+            local target="${__last_args[1]:-}"
+            case "$target" in
+                "scroll"|"./scroll"|"entrance/scroll") ;;
+                *) return ;;
+            esac
+            ;;
+    esac
+
+    complete_current_quest "$qid"
+}
+
+merlin_hint() {
+    local qid=${CURRENT_QUEST_ID:-0}
+    if (( qid >= QUEST_TOTAL )); then
+        echo -e "${SUCCESS_COLOR}Merlin whispers:${RESET_COLOR} Your quests are complete. Explore and experiment!"
+        return
+    fi
+    echo -e "${SUCCESS_COLOR}Merlin whispers:${RESET_COLOR} ${QUEST_HINTS[$qid]}"
+}
+
+show_quest_command() {
+    render_quest_status
+    if [[ -n "$QUEST_COMPLETED" ]]; then
+        echo "   Completed:"
+        local id
+        IFS=',' read -ra id <<< "$QUEST_COMPLETED"
+        for entry in "${id[@]}"; do
+            [[ -z "$entry" ]] && continue
+            echo "     • ${QUEST_TITLES[$entry]}"
+        done
+    else
+        echo "   Completed: none yet."
+    fi
+    echo "   Total XP: $GAME_XP"
+}
+
+manual_save() {
+    save_game_state
+    echo -e "${SUCCESS_COLOR}💾 Progress saved.${RESET_COLOR}"
+}
+
+manual_load() {
+    if [[ ! -f "$GAME_STATE_FILE" ]]; then
+        echo -e "${ERROR_COLOR}No saved progress found.${RESET_COLOR}"
+        return 1
+    fi
+    load_game_state
+    restore_saved_location
+    echo -e "${SUCCESS_COLOR}📂 Progress loaded.${RESET_COLOR}"
+    render_quest_status
+}
+
 # ============================================================================
 # TERMINAL EMULATOR FUNCTIONS
 # ============================================================================
@@ -100,131 +382,273 @@ generate_prompt() {
 execute_command() {
     local cmd="$1"
     shift
-    local args="$@"
-    
+    local -a original_args=("$@")
+    local args="${original_args[*]:-}"
+    local pre_command_dir="$(pwd)"
+
     # Log command to history
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $cmd $args" >> "$HISTORY_FILE"
-    
+    if [[ -n "$args" ]]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $cmd $args" >> "$HISTORY_FILE"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $cmd" >> "$HISTORY_FILE"
+    fi
+
+    local handled=false
+    local status=0
+
     case "$cmd" in
         # Navigation commands
         "cd")
-            safe_cd "$args"
+            handled=true
+            safe_cd "${original_args[0]:-}"
+            status=$?
             ;;
         "ls")
-            safe_ls "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_ls "${original_args[@]}"
+            else
+                safe_ls
+            fi
+            status=$?
             ;;
         "pwd")
+            handled=true
             pwd
+            status=$?
             ;;
-        
+
         # File viewing commands
         "cat")
-            safe_cat "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_cat "${original_args[@]}"
+            else
+                safe_cat
+            fi
+            status=$?
             ;;
         "less"|"more")
-            safe_pager "$cmd" "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_pager "$cmd" "${original_args[@]}"
+            else
+                safe_pager "$cmd"
+            fi
+            status=$?
             ;;
         "head")
-            safe_head "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_head "${original_args[@]}"
+            else
+                safe_head
+            fi
+            status=$?
             ;;
         "tail")
-            safe_tail "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_tail "${original_args[@]}"
+            else
+                safe_tail
+            fi
+            status=$?
             ;;
         "wc")
-            safe_wc "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_wc "${original_args[@]}"
+            else
+                safe_wc
+            fi
+            status=$?
             ;;
-        
-        # Game-specific commands
-        "inventory"|"i")
-            show_inventory
-            ;;
-        "health"|"hp")
-            show_health
-            ;;
-        "status")
-            show_game_status
-            ;;
-        "map")
-            show_map
-            ;;
-        
-        # Help and information
-        "help")
-            show_contextual_help "$args"
-            ;;
-        "tutorial")
-            show_tutorial
-            ;;
-        "commands")
-            show_available_commands
-            ;;
-        
-        # Adventure commands
-        "start")
-            start_adventure
-            ;;
-        "look")
-            look_around
-            ;;
-        "explore")
-            explore_area
-            ;;
-        
+
         # File operations (limited)
         "touch")
-            if [[ "$args" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
-                touch "$args"
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_touch "${original_args[@]}"
             else
-                echo -e "${ERROR_COLOR}Error: Invalid filename. Only alphanumeric characters, dots, dashes, and underscores allowed.${RESET_COLOR}"
+                safe_touch
             fi
+            status=$?
             ;;
-        
+        "mkdir")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_mkdir "${original_args[@]}"
+            else
+                safe_mkdir
+            fi
+            status=$?
+            ;;
+        "grep")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                safe_grep "${original_args[@]}"
+            else
+                safe_grep
+            fi
+            status=$?
+            ;;
+
+        # Game-specific commands
+        "inventory"|"i")
+            handled=true
+            show_inventory
+            status=$?
+            ;;
+        "health"|"hp")
+            handled=true
+            show_health
+            status=$?
+            ;;
+        "status")
+            handled=true
+            show_game_status
+            status=$?
+            ;;
+        "map")
+            handled=true
+            show_map
+            status=$?
+            ;;
+        "quest"|"quests")
+            handled=true
+            show_quest_command
+            status=$?
+            ;;
+
+        # Help and information
+        "help")
+            handled=true
+            show_contextual_help "$args"
+            status=$?
+            ;;
+        "tutorial")
+            handled=true
+            show_tutorial
+            status=$?
+            ;;
+        "commands")
+            handled=true
+            show_available_commands
+            status=$?
+            ;;
+        "merlin")
+            handled=true
+            merlin_hint
+            status=$?
+            ;;
+
+        # Adventure commands
+        "start")
+            handled=true
+            start_adventure
+            status=$?
+            ;;
+        "look")
+            handled=true
+            look_around
+            status=$?
+            ;;
+        "explore")
+            handled=true
+            explore_area
+            status=$?
+            ;;
+
         # Executable files (game content)
         "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost")
             if [[ -x "$cmd" ]]; then
-                "$cmd" $args
+                handled=true
+                "$cmd" "${original_args[@]}"
+                status=$?
             else
+                status=1
                 echo -e "${ERROR_COLOR}Error: $cmd not found or not executable${RESET_COLOR}"
             fi
             ;;
-        
+
         # System info (safe subset)
         "whoami")
+            handled=true
             echo "bashcrawl_adventurer"
+            status=$?
             ;;
         "date")
+            handled=true
             date
+            status=$?
             ;;
         "echo")
+            handled=true
             echo "$args"
+            status=$?
             ;;
-        
+
         # Terminal control
         "clear")
+            handled=true
             clear
+            status=$?
             ;;
         "history")
+            handled=true
             show_command_history
+            status=$?
             ;;
         "reset")
+            handled=true
             reset_game_state
+            status=$?
             ;;
-        
+        "save")
+            handled=true
+            manual_save
+            status=$?
+            ;;
+        "load")
+            handled=true
+            manual_load
+            status=$?
+            ;;
+
         # Exit commands
         "exit"|"quit"|"q")
             exit_terminal
+            return
             ;;
-        
+
         # Catch-all for unknown commands
         *)
             if [[ -x "./$cmd" ]]; then
-                "./$cmd" $args
+                handled=true
+                "./$cmd" "${original_args[@]}"
+                status=$?
             else
+                status=1
                 echo -e "${ERROR_COLOR}Command not recognized: $cmd${RESET_COLOR}"
                 echo -e "Type 'commands' to see available commands, or 'help' for assistance."
             fi
             ;;
     esac
+
+    if [[ "$handled" == true ]]; then
+        LAST_COMMAND="$cmd"
+        LAST_ARGS="$args"
+        LAST_COMMAND_DIR="$pre_command_dir"
+        LAST_RESULT_DIR="$(pwd)"
+        LAST_COMMAND_EXIT_CODE=$status
+        if [[ $status -eq 0 ]]; then
+            register_command_use "$cmd"
+            check_quest_progress
+        fi
+    fi
+
+    return $status
 }
 
 # ============================================================================
@@ -233,71 +657,88 @@ execute_command() {
 
 safe_cd() {
     local target="$1"
+    local status=0
     
     # Handle special cases
     case "$target" in
         ""|"~")
-            cd "$BASHCRAWL_ROOT"
+            cd "$BASHCRAWL_ROOT" || status=$?
+            update_current_area
             ;;
         "..")
             # Only allow going up within the game directory
             if [[ "$(pwd)" != "$BASHCRAWL_ROOT" ]]; then
-                cd ..
+                cd .. || status=$?
+                update_current_area
             else
                 echo -e "${ERROR_COLOR}You cannot leave the bashcrawl realm!${RESET_COLOR}"
+                status=1
             fi
             ;;
         "/"*)
             echo -e "${ERROR_COLOR}Absolute paths are not allowed in the game environment.${RESET_COLOR}"
+            status=1
             ;;
         *)
             if [[ -d "$target" ]]; then
-                cd "$target"
-                # Update current area for game state
+                cd "$target" || status=$?
                 update_current_area
             else
                 echo -e "${ERROR_COLOR}Directory not found: $target${RESET_COLOR}"
+                status=1
             fi
             ;;
     esac
+    return $status
 }
 
 safe_ls() {
-    local args="$@"
-    
-    # Enhance ls output with game context
-    if [[ -z "$args" ]]; then
-        ls -F --color=auto
-    else
-        ls -F --color=auto "$args"
+    local -a flags=("-F")
+    local status=0
+
+    if (( ${#LS_COLOR_FLAGS[@]} )); then
+        flags+=("${LS_COLOR_FLAGS[@]}")
     fi
-    
-    # Add game-specific information
+
+    if [[ $# -eq 0 ]]; then
+        command ls "${flags[@]}" || status=$?
+    else
+        command ls "${flags[@]}" "$@" || status=$?
+    fi
+
     add_area_context
+    return $status
 }
 
 safe_cat() {
-    local file="$1"
-    
-    if [[ -z "$file" ]]; then
+    if [[ $# -eq 0 ]]; then
         echo -e "${ERROR_COLOR}Usage: cat <filename>${RESET_COLOR}"
         return 1
     fi
-    
-    if [[ -f "$file" ]]; then
-        cat "$file"
-        # Update game state if reading important files
-        if [[ "$file" == "scroll" ]]; then
-            mark_scroll_read
+    local status=0
+    local file
+    for file in "$@"; do
+        if [[ -f "$file" ]]; then
+            if [[ ! -s "$file" ]]; then
+                echo "(empty file)"
+            else
+                cat "$file"
+            fi
+            if [[ "$file" == "scroll" ]]; then
+                mark_scroll_read
+            fi
+        else
+            echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+            status=1
         fi
-    else
-        echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
-    fi
+    done
+    return $status
 }
 
 safe_pager() {
     local cmd="$1"
-    local file="$2"
+    shift
+    local file="$1"
     
     if [[ -z "$file" ]]; then
         echo -e "${ERROR_COLOR}Usage: $cmd <filename>${RESET_COLOR}"
@@ -318,8 +759,10 @@ safe_pager() {
         if [[ "$file" == "scroll" ]]; then
             mark_scroll_read
         fi
+        return 0
     else
         echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+        return 1
     fi
 }
 
@@ -335,6 +778,7 @@ safe_head() {
         head "$file"
     else
         echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+        return 1
     fi
 }
 
@@ -350,6 +794,7 @@ safe_tail() {
         tail "$file"
     else
         echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+        return 1
     fi
 }
 
@@ -365,7 +810,72 @@ safe_wc() {
         wc "$file"
     else
         echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+        return 1
     fi
+}
+
+safe_touch() {
+    if [[ $# -eq 0 ]]; then
+        echo -e "${ERROR_COLOR}Usage: touch <filename>${RESET_COLOR}"
+        return 1
+    fi
+    local name="$1"
+    if [[ "$name" == /* || "$name" == *"../"* || "$name" == *"/.."* ]]; then
+        echo -e "${ERROR_COLOR}Absolute paths and parent directory references are not allowed.${RESET_COLOR}"
+        return 1
+    fi
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_.-/]+$ ]]; then
+        echo -e "${ERROR_COLOR}Invalid filename. Use letters, numbers, dots, dashes, underscores, and slashes only.${RESET_COLOR}"
+        return 1
+    fi
+    touch "$name"
+    return $?
+}
+
+safe_mkdir() {
+    if [[ $# -eq 0 ]]; then
+        echo -e "${ERROR_COLOR}Usage: mkdir <dirname>${RESET_COLOR}"
+        return 1
+    fi
+    local name="$1"
+    if [[ "$name" == /* || "$name" == *"../"* || "$name" == *"/.."* ]]; then
+        echo -e "${ERROR_COLOR}Absolute paths and parent directory references are not allowed.${RESET_COLOR}"
+        return 1
+    fi
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
+        echo -e "${ERROR_COLOR}Invalid directory name. Use letters, numbers, dots, dashes, and underscores only.${RESET_COLOR}"
+        return 1
+    fi
+    if [[ -d "$name" ]]; then
+        echo -e "${SUCCESS_COLOR}Directory already exists: $name${RESET_COLOR}"
+        return 0
+    fi
+    mkdir "$name"
+    return $?
+}
+
+safe_grep() {
+    if [[ $# -lt 2 ]]; then
+        echo -e "${ERROR_COLOR}Usage: grep <pattern> <file>${RESET_COLOR}"
+        return 1
+    fi
+    local pattern="$1"
+    shift
+    local file="$1"
+    if [[ -z "$pattern" ]]; then
+        echo -e "${ERROR_COLOR}Pattern cannot be empty.${RESET_COLOR}"
+        return 1
+    fi
+    if [[ -z "$file" ]]; then
+        echo -e "${ERROR_COLOR}Specify a file to search.${RESET_COLOR}"
+        return 1
+    fi
+    if [[ ! -f "$file" ]]; then
+        echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
+        return 1
+    fi
+    grep --color=auto "$pattern" "$file"
+    return $?
 }
 
 # ============================================================================
@@ -409,15 +919,18 @@ show_game_status() {
     echo "   Location: $(pwd)"
     echo "   Area: $CURRENT_AREA"
     echo "   Level: $GAME_LEVEL"
+    echo "   XP: $GAME_XP"
     echo ""
     show_inventory
     echo ""
     show_health
+    echo ""
+    render_quest_status
 }
 
 show_map() {
     echo -e "${SUCCESS_COLOR}🗺️  CATACOMBS MAP:${RESET_COLOR}"
-    cat << 'EOF'
+    cat << EOF
 
     🏠 bashcrawl (lobby)
         ↓
@@ -436,7 +949,7 @@ Legend:
   🗡️ = Combat areas
   💎 = Treasure areas
   
-Current location: $(basename "$(pwd)")
+Current location: $(relative_path "$(pwd)")
 
 EOF
 }
@@ -470,7 +983,7 @@ add_area_context() {
     fi
     
     local executables
-    executables=$(find . -maxdepth 1 -type f -executable 2>/dev/null | head -3)
+    executables=$({ find . -maxdepth 1 -type f -perm -111 2>/dev/null | head -3; } || true)
     if [[ -n "$executables" ]]; then
         echo -e "⚡ Interactive elements found:"
         echo "$executables" | while read -r exe; do
@@ -541,12 +1054,13 @@ show_contextual_help() {
         echo ""
         echo "Type 'help commands' for a full command list"
         echo "Type 'tutorial' for step-by-step guidance"
+        echo "Type 'merlin' for a hint or 'quest' for objectives"
     fi
 }
 
 show_available_commands() {
     echo -e "${SUCCESS_COLOR}🎯 AVAILABLE COMMANDS:${RESET_COLOR}"
-    cat << 'EOF'
+     cat << 'EOF'
 
 NAVIGATION:
    cd <dir>     Change directory (move between rooms)
@@ -559,6 +1073,11 @@ FILE VIEWING:
    head <file>  Show first 10 lines
    tail <file>  Show last 10 lines
    wc <file>    Count lines, words, characters
+    grep <p> <f> Search for words in scrolls
+
+FILE OPERATIONS:
+    touch <file> Create or update a file
+    mkdir <dir>  Create a new directory
 
 GAME COMMANDS:
    inventory    Show your collected items (alias: i)
@@ -567,7 +1086,11 @@ GAME COMMANDS:
    map          Display catacombs map
    start        Begin the adventure
    look         Examine current area
-   explore      Detailed area exploration
+    explore      Detailed area exploration
+    quest        Show current quest progress
+    merlin       Receive a contextual hint
+    save         Save your progress
+    load         Load your saved progress
 
 HELP & LEARNING:
    help         Context-aware help system
@@ -613,12 +1136,16 @@ STEP 5: Checking Your Status
 STEP 6: Getting Help
    Type 'help' for context-specific assistance anywhere in the game.
 
+STEP 7: Track Your Quest
+    Use 'quest' to see your current objective or 'merlin' for a hint.
+
 PRACTICE SEQUENCE:
    1. Type: pwd
    2. Type: ls
    3. Type: cd entrance
    4. Type: cat scroll
-   5. Type: status
+    5. Type: status
+    6. Type: quest
 
 Ready to begin? Type 'start' to enter the adventure!
 
@@ -635,6 +1162,17 @@ start_adventure() {
     export I=""
     export HP=100
     export GAME_LEVEL="novice"
+    CURRENT_PATH="bashcrawl"
+    CURRENT_QUEST_ID=0
+    QUEST_COMPLETED=""
+    LEARNED_COMMANDS=""
+    GAME_XP=0
+    SCROLLS_READ=""
+    LAST_COMMAND=""
+    LAST_ARGS=""
+    LAST_COMMAND_DIR=""
+    LAST_RESULT_DIR=""
+    LAST_COMMAND_EXIT_CODE=0
     
     # Move to entrance if not already there
     if [[ "$(basename "$(pwd)")" != "entrance" ]]; then
@@ -649,6 +1187,7 @@ start_adventure() {
     echo ""
     
     update_current_area
+    render_quest_status
 }
 
 look_around() {
@@ -679,7 +1218,7 @@ explore_area() {
     local file_count dir_count exec_count
     file_count=$(find . -maxdepth 1 -type f | wc -l)
     dir_count=$(find . -maxdepth 1 -type d | wc -l)
-    exec_count=$(find . -maxdepth 1 -type f -executable | wc -l)
+    exec_count=$({ find . -maxdepth 1 -type f -perm -111 2>/dev/null | wc -l; } || true)
     
     echo "   Files: $file_count"
     echo "   Directories: $((dir_count - 1))"  # Subtract current directory
@@ -697,6 +1236,7 @@ update_current_area() {
     local current_dir
     current_dir=$(basename "$(pwd)")
     CURRENT_AREA="$current_dir"
+    CURRENT_PATH="$(relative_path "$(pwd)")"
     
     # Save game state
     save_game_state
@@ -705,7 +1245,8 @@ update_current_area() {
 mark_scroll_read() {
     local area
     area=$(basename "$(pwd)")
-    echo "scroll_read:$area:$(date)" >> "$GAME_STATE_FILE"
+    SCROLLS_READ="$(csv_add "$SCROLLS_READ" "$area")"
+    save_game_state
 }
 
 save_game_state() {
@@ -715,6 +1256,12 @@ INVENTORY="$I"
 HEALTH="$HP"
 GAME_LEVEL="$GAME_LEVEL"
 LAST_UPDATED="$(date)"
+CURRENT_QUEST_ID="$CURRENT_QUEST_ID"
+QUEST_COMPLETED="$QUEST_COMPLETED"
+LEARNED_COMMANDS="$LEARNED_COMMANDS"
+GAME_XP="$GAME_XP"
+SCROLLS_READ="$SCROLLS_READ"
+CURRENT_PATH="$CURRENT_PATH"
 EOF
 }
 
@@ -725,7 +1272,27 @@ load_game_state() {
         export HP="$HEALTH"
         export CURRENT_AREA
         export GAME_LEVEL
+        export CURRENT_QUEST_ID
+        export QUEST_COMPLETED
+        export LEARNED_COMMANDS
+        export GAME_XP
+        export SCROLLS_READ
+        export CURRENT_PATH
     fi
+}
+
+restore_saved_location() {
+    local rel="${CURRENT_PATH:-bashcrawl}"
+    if [[ "$rel" == "bashcrawl" ]]; then
+        cd "$BASHCRAWL_ROOT"
+    elif [[ -d "$BASHCRAWL_ROOT/$rel" ]]; then
+        cd "$BASHCRAWL_ROOT/$rel"
+    else
+        cd "$BASHCRAWL_ROOT"
+        rel="bashcrawl"
+    fi
+    CURRENT_PATH="$rel"
+    update_current_area
 }
 
 show_command_history() {
@@ -745,6 +1312,17 @@ reset_game_state() {
     export HP=100
     export GAME_LEVEL="novice"
     export CURRENT_AREA="pre-entrance"
+    CURRENT_PATH="bashcrawl"
+    CURRENT_QUEST_ID=0
+    QUEST_COMPLETED=""
+    LEARNED_COMMANDS=""
+    GAME_XP=0
+    SCROLLS_READ=""
+    LAST_COMMAND=""
+    LAST_ARGS=""
+    LAST_COMMAND_DIR=""
+    LAST_RESULT_DIR=""
+    LAST_COMMAND_EXIT_CODE=0
     
     # Clear state files
     rm -f "$GAME_STATE_FILE"
@@ -752,6 +1330,7 @@ reset_game_state() {
     
     # Return to root
     cd "$BASHCRAWL_ROOT"
+    save_game_state
     
     echo "Game state has been reset. Type 'start' to begin a new adventure."
 }
@@ -780,6 +1359,7 @@ main() {
     
     # Load existing game state if available
     load_game_state
+    restore_saved_location
     
     # Show welcome banner
     show_welcome_banner
@@ -801,15 +1381,27 @@ main() {
         # Parse command and arguments
         read -ra cmd_array <<< "$input"
         local command="${cmd_array[0]}"
-        local args="${cmd_array[@]:1}"
-        
-        # Execute command
-        execute_command "$command" $args
-        
+        local -a cmd_args=("${cmd_array[@]:1}")
+
+        local status=0
+        set +e
+        if (( ${#cmd_args[@]} )); then
+            execute_command "$command" "${cmd_args[@]}"
+            status=$?
+        else
+            execute_command "$command"
+            status=$?
+        fi
+        set -e
+
         # Save state after each command
         save_game_state
-        
+
         echo  # Add spacing between commands
+
+        if (( status != 0 )); then
+            continue
+        fi
     done
 }
 

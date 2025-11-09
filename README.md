@@ -27,6 +27,7 @@ cd bashcrawl
 
 - **Learn by Doing**: Master terminal commands through engaging gameplay
 - **Progressive Difficulty**: Skills build naturally as you explore deeper
+- **Quest-Driven Learning**: Earn XP via guided quests with contextual hints
 - **Real Terminal Skills**: Every command you learn applies to real-world development
 - **Hidden Depths**: Secret areas and advanced features reward curious explorers
 - **Multiple Paths**: Different routes through the catacombs teach different skills
@@ -62,6 +63,10 @@ The setup script will:
 ```bash
 # Launch the main game launcher
 ./main.sh
+
+# Jump directly into the interactive emulator
+./main.sh --interactive
+# (or run ./bashcrawl-terminal.sh)
 ```
 
 Choose from multiple adventure modes:
@@ -76,7 +81,7 @@ Safe, contained environment perfect for learning:
 - **Beginner-Friendly**: Guided experience with tutorials and hints
 - **Real Commands**: Learn actual terminal commands in a safe space
 
-#### � Native Terminal Experience (For Experienced Users)
+#### 🖥️ Native Terminal Experience (For Experienced Users)
 
 Use your actual terminal environment:
 
@@ -191,7 +196,6 @@ rmdir dirname       # Delete an empty directory
 - Use `ls` to see what's in a directory before acting
 - Be extra careful with `rm` (delete) commands - there's no recycle bin!
 - When in doubt, use `--help` or `man` to understand a command
-p
 *You are now playing the game. May the gods save you.*
 
 ### ☁️ Option 3: Instant Play Online
@@ -227,6 +231,8 @@ The Interactive Terminal Emulator provides a **safe, contained environment** tha
 - Health tracking (`health` command)  
 - Progress monitoring (`status` command)
 - Interactive map (`map` command)
+- Quest tracker with XP rewards (`quest` command)
+- Merlin hint system for the next step (`merlin` command)
 - Context-aware help system
 
 **📚 Learning Support**
@@ -234,6 +240,7 @@ The Interactive Terminal Emulator provides a **safe, contained environment** tha
 - Command reference (`commands` command)
 - Context-specific help based on your location
 - Step-by-step guidance for new players
+- Quick saves and restores (`save` / `load` commands)
 
 **🎨 Enhanced Experience**
 - Colorized output and prompts
@@ -254,6 +261,12 @@ status      # Complete adventure status
 inventory   # Show collected items (alias: i)
 health      # Show health points (alias: hp)
 map         # Display catacombs map
+quest       # Show current quest and objectives
+merlin      # Receive a contextual hint
+save        # Save your current progress
+load        # Load your saved progress
+reset       # Restart the adventure from scratch
+exit        # Leave the emulator safely
 
 # Learning support  
 help        # Context-aware assistance
@@ -264,8 +277,21 @@ start       # Begin/restart adventure
 # File operations
 cat <file>  # Read scrolls and documents
 less <file> # Page through long content
+touch <file> # Create or update a file
+mkdir <dir>  # Create a new directory
+grep <p> <f> # Search for words in scrolls
 ./treasure  # Interact with game elements
 ```
+
+### 🧭 Quest & Progression System
+
+- **`quest`** highlights your active objective, completed quests, and total XP.
+- **`merlin`** delivers contextual hints tailored to your current quest step.
+- **XP rewards** trigger automatically when required commands are used in the right place.
+- **Auto-save** keeps progress between sessions; use **`save`** anytime and **`load`** to resume.
+- **`reset`** wipes state clean so you can replay without touching project files.
+
+These quests cover foundational commands (`pwd`, `ls`, `cd`, `mkdir`, `touch`, `cat`, `grep`) and ensure players practice each skill before graduating to the next challenge.
 
 ### 🎓 Educational Benefits
 
@@ -567,7 +593,7 @@ Track your progress with built-in checkpoints:
 - Achievement badges for completing different quest lines
 - Integration with external learning platforms
 
-## � Hard Mode: Terminal Power-Ups for Advanced Users
+## 🔥 Hard Mode: Terminal Power-Ups for Advanced Users
 
 Ready to enhance your terminal prowess? These power-ups transform Bashcrawl into an even more immersive and informative experience:
 
