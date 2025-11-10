@@ -17,3 +17,5 @@ logs/setup.log
 *.tmp
 .DS_Store
 .game_*
+
+__pycache__
