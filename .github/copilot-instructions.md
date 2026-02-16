@@ -19,8 +19,8 @@ Bashcrawl is an educational text-based adventure game that teaches terminal/shel
 |-----------|---------|
 | `main.sh` | Launcher with interactive menu, CLI args, and integrated terminal emulator with quest system (pwd→ls→cd→mkdir→touch→cat→grep). Sources `lib/colors.sh` and `lib/log.sh`. Supports `-c`, `--batch`, `--interactive` modes |
 | `setup.sh` | Permissions setup, system checks, makes game files executable. Sources `lib/colors.sh` |
-| `help.sh` | Root-level help entry point with subcommands: `commands`, `map`, `reset`. Sources `help/bashcrawl_help.sh` and `lib/colors.sh` |
-| `help/` | Context-aware help system: `bashcrawl_help.sh` detects player location, `ai_engine.sh` tracks progress patterns, `command_suggester.sh` analyzes directory contents, `init_help.sh` defines `help()` shell function |
+| `help.sh` | Root-level help shim that delegates to `src/help.sh`. Sources `src/help/bashcrawl_help.sh` and `lib/colors.sh` |
+| `src/help/` | Context-aware help system: `bashcrawl_help.sh` detects player location, `ai_engine.sh` tracks progress patterns, `command_suggester.sh` analyzes directory contents, `init_help.sh` defines `help()` shell function. Shared YAML data in `src/help/data/` |
 | `lib/` | Shared libraries: `colors.sh` (color constants), `log.sh` (JSONL session logging), `reset.sh` (game reset), `analyze.sh`/`report.sh` (session analysis) |
 | `entrance/.functions` | Defines `gameover()` — combat death handler, `help()` — delegates to `$BASHCRAWL_ROOT/help.sh` |
 | `src/terminal-illness/` | Python wrapper using `prompt_toolkit`/`rich` — intended to wrap real bash game directories (refactor in progress) |
@@ -82,10 +82,10 @@ cd entrance && cat scroll
 bash help.sh                    # Show help
 bash help.sh commands           # Command reference
 bash help.sh map                # Dungeon map
-source help/init_help.sh        # Enable help() shell function
+source src/help/init_help.sh     # Enable help() shell function
 
 # Lint
-shellcheck *.sh help/*.sh lib/*.sh   # Shell linting (.shellcheckrc disables SC2034, SC2086, SC1091)
+shellcheck *.sh src/help/*.sh lib/*.sh   # Shell linting (.shellcheckrc disables SC2034, SC2086, SC1091)
 # CI also runs: yamllint, markdownlint (max line 120), CodeQL (Python only)
 
 # Test new content

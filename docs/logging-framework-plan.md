@@ -193,7 +193,7 @@ means the executable works identically to today.
 **Start:** Triggered by any of:
 - `main.sh` launch (any mode)
 - `source lib/log.sh && bc_session_start` (manual)
-- `source help/init_help.sh` (which will source `lib/log.sh`)
+- `source src/help/init_help.sh` (which will source `lib/log.sh`)
 - First `bc_log` call auto-starts a session if none exists
 
 **End:** Triggered by:
@@ -322,7 +322,7 @@ echo "   source ${BASHCRAWL_ROOT}/lib/log.sh && bc_install_hooks"
 # log_event() for backward compatibility — it still writes bashcrawl.log
 ```
 
-### `help/init_help.sh` — Help System Init
+### `src/help/init_help.sh` — Help System Init
 
 ```bash
 # Source logging alongside help functions:
@@ -330,7 +330,7 @@ source "${BASHCRAWL_ROOT}/lib/log.sh"
 bc_install_hooks  # Start tracking room navigation
 ```
 
-### `help/ai_engine.sh` — AI Engine
+### `src/help/ai_engine.sh` — AI Engine
 
 Replace `log_action()` internals to delegate to `bc_log`:
 
@@ -374,7 +374,7 @@ _BC_LIB="${0%entrance*}lib/log.sh"
 
 ### Phase 2: Room Navigation Hooks
 **Effort:** ~30 lines added to `lib/log.sh`
-**Files:** Modify `help/init_help.sh`, `main.sh`
+**Files:** Modify `src/help/init_help.sh`, `main.sh`
 **Delivers:** Automatic `room_enter` events via `PROMPT_COMMAND`/`chpwd`
 
 ### Phase 3: Executable Instrumentation
@@ -394,7 +394,7 @@ _BC_LIB="${0%entrance*}lib/log.sh"
 
 ### Phase 6: Retrofit Existing Systems
 **Effort:** Small edits
-**Files:** `main.sh`, `help/ai_engine.sh`
+**Files:** `main.sh`, `src/help/ai_engine.sh`
 **Delivers:** Unified logging across all entry points
 
 ---

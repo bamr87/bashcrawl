@@ -89,8 +89,8 @@ help() {
     
     if [[ -f "${root}help.sh" ]]; then
         bash "${root}help.sh" "$@"
-    elif [[ -f "${root}help/bashcrawl_help.sh" ]]; then
-        bash "${root}help/bashcrawl_help.sh" "$@"
+    elif [[ -f "${root}src/help/bashcrawl_help.sh" ]]; then
+        bash "${root}src/help/bashcrawl_help.sh" "$@"
     else
         echo "Help system not available. Try: cat scroll"
     fi

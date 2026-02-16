@@ -370,7 +370,7 @@ bash help.sh commands    # Command quick reference
 bash help.sh map         # Dungeon map
 
 # Option 2: Enable as persistent shell function
-source help/init_help.sh
+source src/help/init_help.sh
 help                     # Then use from any room
 ```
 

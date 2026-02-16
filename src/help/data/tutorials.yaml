@@ -1,0 +1,119 @@
+# ============================================================================
+# Bashcrawl Tutorial Lessons — src/help/data/tutorials.yaml
+#
+# Shared tutorial content. Consumed by:
+#   - Bash help scripts (src/help/tutorial_engine.sh)
+#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+# ============================================================================
+
+lessons:
+  pwd_lesson:
+    title: "Finding Your Location"
+    command: "pwd"
+    steps:
+      - "Type 'pwd' and press Enter"
+      - "You should see your current directory path"
+      - "The last part of the path is your current room"
+    explanation: |
+      pwd stands for "Print Working Directory" - it shows your
+      exact location in the file system. Think of it as your GPS coordinates!
+
+      Expected output: You'll see a path like /Users/yourname/bashcrawl
+
+      What this means:
+      • You're in a folder called "bashcrawl"
+      • That folder is inside another folder (maybe "yourname")
+      • Which is inside another folder called "Users"
+      • This creates a hierarchy like a filing cabinet
+    achievement_id: "navigator"
+    achievement_name: "Navigator"
+    achievement_description: "Mastered location awareness"
+    achievement_emoji: "🧭"
+
+  ls_lesson:
+    title: "Seeing What's Around You"
+    command: "ls"
+    steps:
+      - "Type 'ls' and press Enter"
+      - "You should see a list of files and directories"
+      - "Type 'ls -F' and press Enter"
+      - "Same list but with special symbols: / after directories, * after executables, @ after links"
+    explanation: |
+      ls stands for "List" - it reveals the contents of your current room.
+
+      Variations:
+      • ls        — basic listing
+      • ls -F     — with type indicators (/ = directory, * = executable)
+      • ls -la    — all files including hidden, with details
+      • ls -lh    — with human-readable file sizes
+    achievement_id: "observer"
+    achievement_name: "Observer"
+    achievement_description: "Can see the digital world clearly"
+    achievement_emoji: "👁️"
+
+  cd_lesson:
+    title: "Moving Around"
+    command: "cd"
+    steps:
+      - "Type 'ls -F' to see available directories"
+      - "Choose a directory name that ends with /"
+      - "Type 'cd [directory_name]' (replace with actual name)"
+      - "Type 'pwd' to confirm you moved"
+      - "Type 'cd ..' to go back up one level"
+    explanation: |
+      cd stands for "Change Directory" - it moves you from room to room.
+
+      Key patterns:
+      • cd dirname   — enter a directory
+      • cd ..        — go back up one level
+      • cd ~         — go to your home directory
+      • cd -         — go to previous directory
+
+      Practice this a few times to become comfortable navigating.
+    achievement_id: "explorer"
+    achievement_name: "Explorer"
+    achievement_description: "Moves confidently through directories"
+    achievement_emoji: "🚶"
+
+menu:
+  paths:
+    - id: 1
+      title: "Absolute Beginner"
+      description: "Start here if terminals are new to you"
+      lessons:
+        - pwd_lesson
+        - ls_lesson
+        - cd_lesson
+    - id: 2
+      title: "Quick Refresher"
+      description: "Review basics if you have some experience"
+      lessons:
+        - ls_lesson
+        - cd_lesson
+    - id: 3
+      title: "Bashcrawl-Specific"
+      description: "Learn game mechanics and special features"
+      lessons: []
+    - id: 4
+      title: "Advanced Techniques"
+      description: "Master power-user commands"
+      lessons: []
+    - id: 5
+      title: "Challenge Mode"
+      description: "Test your skills with progressively harder tasks"
+      lessons: []
+
+# Achievement tiers based on completion percentage
+achievement_tiers:
+  - threshold: 25
+    title: "First Steps"
+    description: "Keep up the great progress!"
+    emoji: "🌱"
+  - threshold: 50
+    title: "Getting There"
+    description: "You're building solid skills!"
+    emoji: "🎯"
+  - threshold: 80
+    title: "Terminal Master"
+    description: "You're ready for advanced challenges!"
+    emoji: "🏆"

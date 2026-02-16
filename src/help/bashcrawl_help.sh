@@ -10,6 +10,21 @@
 # Source additional engines if available
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Resolve BASHCRAWL_ROOT (src/help/ is two levels below root)
+if [[ -z "${BASHCRAWL_ROOT:-}" ]]; then
+    BASHCRAWL_ROOT="$(cd "$SCRIPT_DIR/../.." 2>/dev/null && pwd)"
+fi
+
+# Source shared color constants from lib/colors.sh
+if [[ -f "${BASHCRAWL_ROOT}/lib/colors.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/colors.sh"
+fi
+
+# Source YAML reader for data-driven help
+if [[ -f "${BASHCRAWL_ROOT}/lib/yaml_reader.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/yaml_reader.sh"
+fi
+
 # Try to source AI engine
 if [ -f "$SCRIPT_DIR/ai_engine.sh" ]; then
     source "$SCRIPT_DIR/ai_engine.sh"
@@ -42,25 +57,19 @@ else
     QUICK_REF_AVAILABLE=false
 fi
 
-# Source color definitions and utility functions
-source_colors() {
-    # Color definitions for epic display - using printf format for proper rendering
-    HELP_RED=$(printf '\033[0;31m')
-    HELP_GREEN=$(printf '\033[0;32m')
-    HELP_YELLOW=$(printf '\033[0;33m')
-    HELP_BLUE=$(printf '\033[0;34m')
-    HELP_PURPLE=$(printf '\033[0;35m')
-    HELP_CYAN=$(printf '\033[0;36m')
-    HELP_WHITE=$(printf '\033[0;37m')
-    HELP_BOLD=$(printf '\033[1m')
-    HELP_NC=$(printf '\033[0m') # No Color
-    
-    # Export for use in subshells
-    export HELP_RED HELP_GREEN HELP_YELLOW HELP_BLUE HELP_PURPLE HELP_CYAN HELP_WHITE HELP_BOLD HELP_NC
-}
+# Color aliases for backward compatibility with help scripts
+# These map old HELP_* names to shared COLOR_* from lib/colors.sh
+HELP_RED="${COLOR_RED:-}"
+HELP_GREEN="${COLOR_GREEN:-}"
+HELP_YELLOW="${COLOR_YELLOW:-}"
+HELP_BLUE="${COLOR_BLUE:-}"
+HELP_PURPLE="${COLOR_PURPLE:-}"
+HELP_CYAN="${COLOR_CYAN:-}"
+HELP_WHITE="${COLOR_WHITE:-}"
+HELP_BOLD="${COLOR_BOLD:-}"
+HELP_NC="${COLOR_NC:-}"
 
-# Initialize colors
-source_colors
+export HELP_RED HELP_GREEN HELP_YELLOW HELP_BLUE HELP_PURPLE HELP_CYAN HELP_WHITE HELP_BOLD HELP_NC
 
 # Function to detect current game area
 detect_location() {
@@ -90,8 +99,8 @@ analyze_progress() {
     
     # Count inventory items
     local item_count=0
-    if [ -n "$I" ]; then
-        item_count=$(echo "$I" | tr ',' '\n' | grep -v '^$' | wc -l | tr -d ' ')
+    if [ -n "${I:-}" ]; then
+        item_count=$(echo "${I:-}" | tr ',' '\n' | grep -v '^$' | wc -l | tr -d ' ')
     fi
     
     # Check areas visited (based on directory existence and navigation patterns)
@@ -122,7 +131,7 @@ get_ai_suggestions() {
     if [ "$AI_ENGINE_AVAILABLE" = true ]; then
         init_progress_tracking
         local pattern=$(analyze_player_patterns "$location")
-        get_ai_recommendations "$location" "$pattern" "$I"
+        get_ai_recommendations "$location" "$pattern" "${I:-}"
         
         # Check for stuck patterns
         detect_stuck_patterns
@@ -287,14 +296,14 @@ show_player_status() {
 
 EOF
 
-    if [ -n "$I" ]; then
-        echo -e "   ${HELP_BOLD}Inventory:${HELP_NC} ${HELP_GREEN}$I${HELP_NC}"
+    if [ -n "${I:-}" ]; then
+        echo -e "   ${HELP_BOLD}Inventory:${HELP_NC} ${HELP_GREEN}${I:-}${HELP_NC}"
     else
         echo -e "   ${HELP_BOLD}Inventory:${HELP_NC} ${HELP_RED}Empty - find treasures to collect!${HELP_NC}"
     fi
     
-    if [ -n "$HP" ]; then
-        echo -e "   ${HELP_BOLD}Health:${HELP_NC} ${HELP_GREEN}$HP HP${HELP_NC}"
+    if [ -n "${HP:-}" ]; then
+        echo -e "   ${HELP_BOLD}Health:${HELP_NC} ${HELP_GREEN}${HP:-} HP${HELP_NC}"
     else
         echo -e "   ${HELP_BOLD}Health:${HELP_NC} ${HELP_YELLOW}Not initialized${HELP_NC}"
     fi
@@ -360,7 +369,7 @@ show_advanced_help() {
                     "")
                         init_tutorial
                         show_tutorial_menu
-                        suggest_tutorial_lesson "$(detect_location)" "$I" ""
+                        suggest_tutorial_lesson "$(detect_location)" "${I:-}" ""
                         ;;
                     "progress")
                         show_tutorial_progress
@@ -657,5 +666,7 @@ main() {
     echo
 }
 
-# Run the help system
-main "$@"
+# Run main only when executed directly (not when sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

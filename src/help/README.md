@@ -27,14 +27,14 @@ bash help.sh map          # Dungeon map
 bash help.sh reset        # Reset instructions
 
 # Option 2: Enable as shell function (persistent)
-source help/init_help.sh
+source src/help/init_help.sh
 help                      # Then use from anywhere
 ```
 
 ## How It Works
 
 1. `help.sh` is the single entry point — all other scripts reference it
-2. It sources `help/bashcrawl_help.sh` which detects the player's location
+2. It sources `src/help/bashcrawl_help.sh` which detects the player's location
 3. `ai_engine.sh` tracks progress patterns and detects when players are stuck
 4. `command_suggester.sh` analyzes current directory contents for relevant tips
 5. `init_help.sh` registers `help` as a shell function for seamless gameplay

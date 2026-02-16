@@ -2,6 +2,7 @@
 disable=SC2034  # Unused variables (common in educational examples)
 disable=SC2086  # Double quote to prevent globbing (sometimes intentional)
 disable=SC1091  # Not following sourced files (can't always resolve paths)
+disable=SC2154  # Referenced but not assigned (BASHCRAWL_ROOT set by sourcing scripts)
 
 # Enable additional checks
 enable=check-sourced

@@ -3,14 +3,35 @@
 # Bashcrawl Interactive Tutorial Mode
 # Guided learning experience for new terminal users
 #
+# Refactored to:
+#   - Use lib/log.sh JSONL logging instead of custom state files
+#   - Read tutorial content from src/help/data/tutorials.yaml
+#
 
-# Tutorial state tracking
-TUTORIAL_STATE_FILE="/tmp/.bashcrawl_tutorial_$$"
-TUTORIAL_PROGRESS_FILE="${HOME}/.bashcrawl_tutorial_progress"
+# Resolve BASHCRAWL_ROOT if not already set
+if [[ -z "${BASHCRAWL_ROOT:-}" ]]; then
+    _TUT_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    BASHCRAWL_ROOT="$(cd "$_TUT_SCRIPT_DIR/../.." 2>/dev/null && pwd)"
+fi
+
+# Source logging framework
+if [[ -f "${BASHCRAWL_ROOT}/lib/log.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/log.sh"
+fi
+
+# Source YAML reader
+if [[ -f "${BASHCRAWL_ROOT}/lib/yaml_reader.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/yaml_reader.sh"
+fi
+
+_BC_TUTORIAL_FILE="src/help/data/tutorials.yaml"
 
 # Initialize tutorial mode
 init_tutorial() {
-    echo "tutorial_started|$(date '+%Y-%m-%d %H:%M:%S')" > "$TUTORIAL_STATE_FILE"
+    # Log tutorial start via unified logging
+    if declare -f bc_log &>/dev/null; then
+        bc_log "tutorial_start"
+    fi
     
     cat << 'EOF'
 
@@ -122,20 +143,24 @@ run_interactive_lesson() {
     esac
 }
 
-# Progress tracking for tutorial
+# Progress tracking for tutorial (delegates to lib/log.sh JSONL)
 track_tutorial_progress() {
     local lesson="$1"
     local status="$2"  # started, completed, mastered
     
-    echo "$(date '+%Y-%m-%d %H:%M:%S')|$lesson|$status" >> "$TUTORIAL_PROGRESS_FILE"
+    if declare -f bc_log &>/dev/null; then
+        bc_log "tutorial_progress" "lesson=$lesson" "status=$status"
+    fi
 }
 
-# Show tutorial progress
+# Show tutorial progress (reads from JSONL session logs)
 show_tutorial_progress() {
     echo "📊 Your Learning Journey:"
     echo
     
-    if [ ! -f "$TUTORIAL_PROGRESS_FILE" ]; then
+    local log_dir="${BASHCRAWL_ROOT}/logs/sessions"
+    
+    if [[ ! -d "$log_dir" ]] || [[ -z "$(ls -A "$log_dir" 2>/dev/null)" ]]; then
         echo "   🌱 No progress yet - ready to start your adventure!"
         return
     fi
@@ -143,29 +168,32 @@ show_tutorial_progress() {
     echo "   📅 Tutorial History:"
     echo "   ===================="
     
-    # Process progress file
     local total_lessons=0
     local completed_lessons=0
     
-    while IFS='|' read -r timestamp lesson status; do
-        # Skip comments
-        [[ "$timestamp" =~ ^#.*$ ]] && continue
+    # Read tutorial events from all JSONL session logs
+    while IFS= read -r line; do
+        local lesson status ts
+        lesson=$(echo "$line" | grep -o '"lesson":"[^"]*"' | head -1 | cut -d'"' -f4)
+        status=$(echo "$line" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+        ts=$(echo "$line" | grep -o '"ts":"[^"]*"' | head -1 | cut -d'"' -f4)
         
+        [[ -z "$lesson" ]] && continue
         ((total_lessons++))
         
         case "$status" in
             "completed"|"mastered")
                 ((completed_lessons++))
-                echo "   ✅ $lesson - $status ($timestamp)"
+                echo "   ✅ $lesson - $status ($ts)"
                 ;;
             "started")
-                echo "   🔄 $lesson - in progress ($timestamp)"
+                echo "   🔄 $lesson - in progress ($ts)"
                 ;;
             *)
-                echo "   📋 $lesson - $status ($timestamp)"
+                echo "   📋 $lesson - $status ($ts)"
                 ;;
         esac
-    done < "$TUTORIAL_PROGRESS_FILE"
+    done < <(grep '"tutorial_progress"' "$log_dir"/*.jsonl 2>/dev/null)
     
     echo
     echo "   📈 Progress Summary:"
@@ -176,13 +204,21 @@ show_tutorial_progress() {
         local percentage=$((completed_lessons * 100 / total_lessons))
         echo "   • Completion Rate: $percentage%"
         
-        if [ "$percentage" -ge 80 ]; then
-            echo "   🏆 Achievement: Terminal Master! You're ready for advanced challenges!"
-        elif [ "$percentage" -ge 50 ]; then
-            echo "   🎯 Achievement: Getting There! You're building solid skills!"
-        elif [ "$percentage" -ge 25 ]; then
-            echo "   🌱 Achievement: First Steps! Keep up the great progress!"
-        fi
+        # Read achievement tiers from YAML
+        local tier_shown=false
+        for threshold in 80 50 25; do
+            if [[ "$percentage" -ge "$threshold" ]] && ! $tier_shown; then
+                local tier_title tier_desc tier_emoji
+                # Find the matching tier
+                tier_emoji=$(yaml_get "$_BC_TUTORIAL_FILE" "achievement_tiers" 2>/dev/null || true)
+                case "$threshold" in
+                    80) echo "   🏆 Achievement: Terminal Master! You're ready for advanced challenges!" ;;
+                    50) echo "   🎯 Achievement: Getting There! You're building solid skills!" ;;
+                    25) echo "   🌱 Achievement: First Steps! Keep up the great progress!" ;;
+                esac
+                tier_shown=true
+            fi
+        done
     fi
 }
 
@@ -211,26 +247,42 @@ suggest_tutorial_lesson() {
     fi
 }
 
-# Gamified learning achievements
+# Gamified learning achievements (reads from JSONL session logs)
 show_achievements() {
     echo "🏆 Learning Achievements:"
     echo
     
-    # Check for various achievements based on progress
-    if [ -f "$TUTORIAL_PROGRESS_FILE" ]; then
+    local log_dir="${BASHCRAWL_ROOT}/logs/sessions"
+    
+    # Check for various achievements based on JSONL logs
+    if [[ -d "$log_dir" ]] && [[ -n "$(ls -A "$log_dir" 2>/dev/null)" ]]; then
         local achievements=()
+        local completed_lessons
+        completed_lessons=$(grep '"tutorial_progress"' "$log_dir"/*.jsonl 2>/dev/null | grep '"completed"' || true)
         
-        # Check for completion achievements
-        if grep -q "pwd_lesson|completed" "$TUTORIAL_PROGRESS_FILE"; then
-            achievements+=("🧭 Navigator - Mastered location awareness")
+        # Check for completion achievements — try YAML first, fall back to hardcoded
+        if echo "$completed_lessons" | grep -q "pwd_lesson"; then
+            local emoji name desc
+            emoji=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.pwd_lesson.achievement_emoji" 2>/dev/null || echo "🧭")
+            name=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.pwd_lesson.achievement_name" 2>/dev/null || echo "Navigator")
+            desc=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.pwd_lesson.achievement_description" 2>/dev/null || echo "Mastered location awareness")
+            achievements+=("$emoji $name - $desc")
         fi
         
-        if grep -q "ls_lesson|completed" "$TUTORIAL_PROGRESS_FILE"; then
-            achievements+=("👁️ Observer - Can see the digital world clearly")
+        if echo "$completed_lessons" | grep -q "ls_lesson"; then
+            local emoji name desc
+            emoji=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.ls_lesson.achievement_emoji" 2>/dev/null || echo "👁️")
+            name=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.ls_lesson.achievement_name" 2>/dev/null || echo "Observer")
+            desc=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.ls_lesson.achievement_description" 2>/dev/null || echo "Can see the digital world clearly")
+            achievements+=("$emoji $name - $desc")
         fi
         
-        if grep -q "cd_lesson|completed" "$TUTORIAL_PROGRESS_FILE"; then
-            achievements+=("🚶 Explorer - Moves confidently through directories")
+        if echo "$completed_lessons" | grep -q "cd_lesson"; then
+            local emoji name desc
+            emoji=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.cd_lesson.achievement_emoji" 2>/dev/null || echo "🚶")
+            name=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.cd_lesson.achievement_name" 2>/dev/null || echo "Explorer")
+            desc=$(yaml_get "$_BC_TUTORIAL_FILE" "lessons.cd_lesson.achievement_description" 2>/dev/null || echo "Moves confidently through directories")
+            achievements+=("$emoji $name - $desc")
         fi
         
         # Display achievements

@@ -1,0 +1,69 @@
+# ============================================================================
+# Bashcrawl Dungeon Map — src/help/data/map.yaml
+#
+# Map structure for displaying dungeon layout in help system.
+# ============================================================================
+
+map_display: |
+  entrance/
+  ├── scroll              ← Start here! (cat scroll)
+  ├── cellar/
+  │   ├── scroll          ← Learn file types
+  │   ├── treasure*       ← Collect amulet
+  │   └── armoury/
+  │       ├── scroll      ← Learn permissions
+  │       ├── treasure*   ← Collect sword
+  │       ├── potion*     ← Gain health
+  │       └── chamber/
+  │           ├── scroll  ← Learn variables
+  │           ├── statue* ← Boss fight!
+  │           ├── treasure*
+  │           └── spell*  ← Create portal
+  │
+  ├── [chapel/]           ← Hidden! Unlocked by treasures
+  │   └── courtyard/aviary/hall/
+  │
+  ├── [vault/]            ← Hidden! Learn file copying
+  │   └── stronghold/nursery/lab/
+  │
+  ├── [scrap/]            ← Hidden! Learn symlinks
+  │
+  └── [rift/]             ← Hidden! Unlocked by vault goblet
+      ├── arena/pit/
+      └── spire/mezzanine/
+
+legend:
+  - symbol: "[brackets]"
+    meaning: "Hidden rooms (unlocked by game progress)"
+  - symbol: "*"
+    meaning: "Executable encounter (run with ./)"
+
+areas:
+  - name: entrance
+    depth: 0
+    description: "Starting area — learn cat, ls, cd"
+  - name: cellar
+    depth: 1
+    description: "Basic file interaction and inventory"
+  - name: armoury
+    depth: 2
+    description: "Permissions, potions, and combat"
+  - name: chamber
+    depth: 3
+    description: "Variables, bosses, and portals"
+  - name: chapel
+    depth: 1
+    hidden: true
+    description: "Unlocked by treasures"
+  - name: vault
+    depth: 1
+    hidden: true
+    description: "File copying and advanced operations"
+  - name: scrap
+    depth: 1
+    hidden: true
+    description: "Symlinks tutorial"
+  - name: rift
+    depth: 1
+    hidden: true
+    description: "Endgame challenges"

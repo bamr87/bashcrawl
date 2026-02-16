@@ -21,7 +21,7 @@
 #
 # @relatedFiles
 #   - main.sh: Main game launcher and terminal emulator
-#   - help/: Help system requiring initialization
+#   - src/help/: Help system requiring initialization
 #   - entrance/: Game starting area
 #
 # Path: System Validation → Installation → Configuration → Verification
@@ -287,8 +287,8 @@ setup_executable_permissions() {
     done
     
     # Help system scripts
-    if [[ -d "${BASHCRAWL_ROOT}/help" ]]; then
-        find "${BASHCRAWL_ROOT}/help" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+    if [[ -d "${BASHCRAWL_ROOT}/src/help" ]]; then
+        find "${BASHCRAWL_ROOT}/src/help" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
     fi
     
     log_setup "SUCCESS" "Executable permissions configured" "permissions"
@@ -361,13 +361,13 @@ EOF
 initialize_help_system() {
     log_setup "INFO" "Initializing help system..." "help"
     
-    if [[ ! -d "${BASHCRAWL_ROOT}/help" ]]; then
+    if [[ ! -d "${BASHCRAWL_ROOT}/src/help" ]]; then
         log_setup "WARNING" "Help directory not found - some features may be limited" "help"
         return 0
     fi
     
     # Initialize help system if init script exists
-    local help_init="${BASHCRAWL_ROOT}/help/init_help.sh"
+    local help_init="${BASHCRAWL_ROOT}/src/help/init_help.sh"
     if [[ -f "$help_init" && -x "$help_init" ]]; then
         chmod +x "$help_init"
         log_setup "SUCCESS" "Help system ready" "help"

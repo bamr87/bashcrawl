@@ -1,0 +1,73 @@
+# ============================================================================
+# Bashcrawl Quest Definitions — src/help/data/quests.yaml
+#
+# Shared quest data. Consumed by:
+#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+#   - Bash help system for quest-aware suggestions
+# ============================================================================
+
+quests:
+  - id: 0
+    title: "Awakening: Know Thy Place"
+    description: "You awaken in a strange dungeon. The air hums with arcane energy."
+    objective: "Cast the 'pwd' spell to reveal your place in the dungeon."
+    required_commands:
+      - pwd
+    reward: "50 XP and the 'Navigation Novice' ribbon"
+    xp: 50
+
+  - id: 1
+    title: "Eyes to See"
+    description: "The walls whisper: see what lies around you."
+    objective: "Use 'ls' to reveal nearby rooms and scrolls."
+    required_commands:
+      - ls
+    reward: "50 XP and a glimmering lens"
+    xp: 50
+
+  - id: 2
+    title: "First Steps"
+    description: "A dark passage leads deeper into the dungeon."
+    objective: "Use 'cd cellar' to descend into the cellar."
+    required_commands:
+      - cd
+    reward: "100 XP and the Pathwalker's charm"
+    xp: 100
+    location_check: "cellar"
+
+  - id: 3
+    title: "Ancient Knowledge"
+    description: "A dusty scroll rests on a stone pedestal."
+    objective: "Use 'cat scroll' to read the ancient knowledge."
+    required_commands:
+      - cat
+    reward: "100 XP and a reader's sigil"
+    xp: 100
+
+  - id: 4
+    title: "Shape the World"
+    description: "The workshop calls — create something new."
+    objective: "Navigate to the workshop and use 'mkdir' to create a directory."
+    required_commands:
+      - mkdir
+    reward: "100 XP and a builder's sigil"
+    xp: 100
+
+  - id: 5
+    title: "Spark of Creation"
+    description: "Your workspace yearns for a first artifact."
+    objective: "Use 'touch' to create a new file."
+    required_commands:
+      - touch
+    reward: "100 XP and a scribe's quill"
+    xp: 100
+
+  - id: 6
+    title: "Seek the Whisper"
+    description: "Hidden phrases linger in old scrolls."
+    objective: "Use 'grep' to search for a word within a scroll."
+    required_commands:
+      - grep
+    reward: "150 XP and the Whisperer's token"
+    xp: 150
+    location_check: "armoury|cellar"

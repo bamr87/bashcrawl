@@ -1,0 +1,133 @@
+# ============================================================================
+# Bashcrawl Room Help Data — src/help/data/rooms.yaml
+#
+# Shared help content for each game room. Consumed by:
+#   - Bash help scripts (src/help/bashcrawl_help.sh)
+#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+# ============================================================================
+
+rooms:
+  entrance:
+    emoji: "🚪"
+    title: "THE ENTRANCE HALL"
+    description: "This is your starting point - learn basic navigation here"
+    teaches:
+      - "Basic navigation (cd, ls, pwd)"
+      - "Reading files with cat"
+    key_files:
+      - name: scroll
+        description: "documentation"
+      - name: README.md
+        description: "overview"
+    next_steps: "Explore the cellar/ directory"
+    essential_commands:
+      - command: "cat scroll"
+        description: "Read the area documentation"
+      - command: "ls -F"
+        description: "List files with type indicators"
+      - command: "cd cellar"
+        description: "Move to the next area"
+
+  cellar:
+    emoji: "🏰"
+    title: "THE CELLAR"
+    description: "Learn file types and basic interaction here"
+    teaches:
+      - "File types and type indicators"
+      - "Running executable scripts"
+      - "Inventory management with export"
+    key_files:
+      - name: treasure
+        description: "inventory system"
+    next_steps: "Collect your first amulet, then explore armoury/"
+    essential_commands:
+      - command: "./treasure"
+        description: "Run the treasure script"
+      - command: "export I=amulet,$I"
+        description: "Add items to inventory"
+      - command: "echo $I"
+        description: "Check your inventory"
+
+  armoury:
+    emoji: "🗡️"
+    title: "THE ARMOURY"
+    description: "Advanced area focusing on file permissions and combat"
+    teaches:
+      - "File permissions (chmod)"
+      - "Running potions and combat scripts"
+      - "Health points and variables"
+    key_files:
+      - name: potion
+        description: "health restoration"
+      - name: treasure
+        description: "sword collection"
+    next_steps: "Drink the potion, collect the sword, descend to chamber/"
+    essential_commands:
+      - command: "chmod +x filename"
+        description: "Make files executable"
+      - command: "./potion"
+        description: "Drink a potion for health"
+      - command: "ls -l"
+        description: "Check file permissions"
+
+  chamber:
+    emoji: "💎"
+    title: "THE CHAMBER"
+    description: "Advanced challenges and complex interactions"
+    teaches:
+      - "Shell variables and arithmetic (let)"
+      - "Combat encounters (statue)"
+      - "Symlinks and portals (ln -s)"
+    key_files:
+      - name: statue
+        description: "combat encounter"
+      - name: spell
+        description: "symlink portal creation"
+      - name: treasure
+        description: "final treasure"
+    next_steps: "Face the statue, then cast the spell to create a portal"
+    essential_commands:
+      - command: "./statue"
+        description: "Face the statue boss fight"
+      - command: "./spell"
+        description: "Create a portal (symlink)"
+      - command: "let \"HP=HP-5\""
+        description: "Arithmetic with variables"
+
+  workshop:
+    emoji: "🔨"
+    title: "THE WORKSHOP"
+    description: "Tutorial room for file operations"
+    teaches:
+      - "Creating directories with mkdir"
+      - "Creating files with touch"
+      - "Removing files with rm"
+      - "Copying files with cp"
+      - "Writing to files with echo >"
+    key_files:
+      - name: scroll
+        description: "workshop tutorial"
+    next_steps: "Practice creating and managing files"
+    essential_commands:
+      - command: "mkdir new_room"
+        description: "Create a new directory"
+      - command: "touch artifact"
+        description: "Create a new file"
+      - command: "rm artifact"
+        description: "Remove a file"
+
+  unknown:
+    emoji: "🗺️"
+    title: "UNKNOWN TERRITORY"
+    description: "You're in an uncharted area!"
+    teaches:
+      - "Use navigation commands to orient yourself"
+    key_files: []
+    next_steps: "Use pwd to find your location, ls -la to explore"
+    essential_commands:
+      - command: "pwd"
+        description: "Show current location"
+      - command: "ls -la"
+        description: "List all files including hidden"
+      - command: "cd .."
+        description: "Go back to parent directory"

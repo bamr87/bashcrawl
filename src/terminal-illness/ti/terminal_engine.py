@@ -208,12 +208,78 @@ class TerminalEngine:
     # ------------------------------------------------------------------
 
     def _cmd_help(self, args: List[str]) -> Tuple[str, str, str]:
-        lines = ["Available Commands:"]
-        for name in self.available_commands:
-            lines.append(f"  {name:10s} {self._registry[name].help_text}")
-        lines.append("")
-        lines.append("Run game scripts with: ./treasure, ./potion, etc.")
-        return "info", "help", "\n".join(lines)
+        if not args:
+            lines = ["Available Commands:"]
+            for name in self.available_commands:
+                lines.append(f"  {name:10s} {self._registry[name].help_text}")
+            lines.append("")
+            lines.append("Run game scripts with: ./treasure, ./potion, etc.")
+            lines.append("")
+            lines.append("Subcommands:  help commands | help map | help <room>")
+            return "info", "help", "\n".join(lines)
+
+        sub = args[0].lower()
+
+        if sub == "commands":
+            return self._help_commands()
+        elif sub == "map":
+            return self._help_map()
+        else:
+            return self._help_room(sub)
+
+    def _help_commands(self) -> Tuple[str, str, str]:
+        """Show command reference from shared YAML data."""
+        try:
+            from .help_data import load_commands
+            categories = load_commands()
+            lines = ["=== Command Reference ===", ""]
+            for cat in categories:
+                lines.append(f"[{cat.title}]")
+                for cmd in cat.commands:
+                    desc = cmd.description
+                    lines.append(f"  {cmd.name:14s} {desc}")
+                lines.append("")
+            return "info", "help commands", "\n".join(lines)
+        except Exception:
+            return "info", "help commands", "Command reference unavailable."
+
+    def _help_map(self) -> Tuple[str, str, str]:
+        """Show dungeon map from shared YAML data."""
+        try:
+            from .help_data import load_map
+            map_text = load_map()
+            return "info", "help map", map_text
+        except Exception:
+            return "info", "help map", "Dungeon map unavailable."
+
+    def _help_room(self, room: str) -> Tuple[str, str, str]:
+        """Show context-aware help for a specific room from YAML data."""
+        try:
+            from .help_data import load_rooms
+            rooms = load_rooms()
+            info = rooms.get(room)
+            if not info:
+                return "error", "help", f"No help available for '{room}'."
+            lines = [
+                f"=== {info.title} ===",
+                "",
+                info.description,
+                "",
+                "Teaches: " + ", ".join(info.teaches),
+                "",
+                "Key files:",
+            ]
+            for f in info.key_files:
+                lines.append(f"  {f}")
+            lines.append("")
+            lines.append("Essential commands:")
+            for cmd in info.essential_commands:
+                lines.append(f"  {cmd}")
+            lines.append("")
+            lines.append("Next: " + ", ".join(info.next_steps))
+            return "info", f"help {room}", "\n".join(lines)
+        except Exception:
+            return "error", "help", f"No help available for '{room}'."
 
     def _cmd_pwd(self, args: List[str]) -> Tuple[str, str, str]:
         return "output", "pwd", self._cwd

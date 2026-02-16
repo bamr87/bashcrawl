@@ -1,0 +1,253 @@
+# ============================================================================
+# Bashcrawl AI Recommendation Patterns — src/help/data/recommendations.yaml
+#
+# Pattern-based help recommendations. Consumed by:
+#   - Bash help scripts (src/help/ai_engine.sh)
+#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+# ============================================================================
+
+# Player pattern classifications and their corresponding recommendations
+patterns:
+  struggling_in_area:
+    emoji: "🤖"
+    label: "AI Notice"
+    message: "You've visited this area multiple times. Here are targeted suggestions:"
+    tips:
+      - "Try 'help tips' for advanced techniques"
+      - "Look for hidden files with 'ls -la'"
+      - "Check if you missed any executable files (*)"
+      - "Consider reviewing the scroll again: 'cat scroll'"
+
+  new_area:
+    emoji: "🤖"
+    label: "AI Welcome"
+    message: "First time in this area! Recommended approach:"
+    tips:
+      - "Start by reading any documentation: 'cat scroll' or 'cat README.md'"
+      - "Survey the area: 'ls -F' to see all available options"
+      - "Look for interactive elements (files ending with *)"
+
+  exploring:
+    emoji: "🤖"
+    label: "AI Guidance"
+    message: "You're actively exploring. Smart next steps:"
+    tips:
+      - "Try different command variations for better results"
+      - "Use 'find . -type f' to discover all files"
+      - "Check for patterns in filenames and extensions"
+
+  experienced:
+    emoji: "🤖"
+    label: "AI Challenge"
+    message: "You know this area well. Advanced suggestions:"
+    tips:
+      - "Look for hidden Easter eggs and secret passages"
+      - "Try combining commands with pipes (|) and redirects (>)"
+      - "Experiment with advanced shell features"
+
+  default:
+    emoji: "🤖"
+    label: "AI Assistant"
+    message: "Analyzing your gameplay style..."
+    tips:
+      - "Building personalized recommendations..."
+
+# Rescue mode — triggered when player repeats the same commands
+rescue:
+  emoji: "🆘"
+  label: "AI Rescue Mode"
+  message: "Detected repetitive pattern. Try these alternatives:"
+  tips:
+    - "'help commands' for a comprehensive command list"
+    - "'ls -la' to see everything including hidden files"
+    - "'find . -name \"*\" -type f' to locate all files"
+    - "Change directories: 'cd ..' or 'cd [directory_name]'"
+
+# Executable file type descriptions for smart file recommendations
+file_types:
+  treasure:
+    description: "Likely contains collectible items!"
+    emoji: "💰"
+  potion:
+    description: "May restore health or provide buffs!"
+    emoji: "🧪"
+  monster:
+    description: "Combat encounter (ensure you're prepared!)"
+    emoji: "👹"
+  ghost:
+    description: "Spectral encounter!"
+    emoji: "👻"
+  spell:
+    description: "Magical ability or special action!"
+    emoji: "✨"
+  statue:
+    description: "Stone guardian — combat encounter!"
+    emoji: "🗿"
+  goblet:
+    description: "Mysterious artifact — interact carefully!"
+    emoji: "🏆"
+  default:
+    description: "Interactive element worth exploring!"
+    emoji: "⚡"
+
+# Location-based fallback suggestions (when AI engine is not available)
+location_fallbacks:
+  entrance:
+    novice:
+      - "Start by reading the scroll to understand your quest"
+      - "Use ls -F to see what's available in this area"
+      - "Look for directories marked with / to explore"
+    experienced:
+      - "You seem experienced! Try exploring hidden areas with ls -la"
+      - "Consider revisiting areas with new knowledge"
+
+  cellar:
+    general:
+      - "This area teaches file type recognition"
+      - "Try the treasure executable to learn inventory management"
+    no_items:
+      - "Priority: Collect your first treasure here!"
+
+  armoury:
+    general:
+      - "Focus on file permissions and executable scripts here"
+      - "Use chmod +x if you encounter permission issues"
+      - "Combat mechanics teach process management"
+
+  default:
+    general:
+      - "Use pwd to confirm your exact location"
+      - "Look for scroll files for area-specific guidance"
+      - "Try find . -name scroll to locate documentation"
+
+# Error solution patterns for command_suggester
+error_solutions:
+  permission:
+    title: "Permission Denied"
+    solutions:
+      - command: "chmod +x <filename>"
+        description: "Make file executable"
+      - command: "ls -la <filename>"
+        description: "Check current permissions"
+      - command: "./<filename>"
+        description: "Run with explicit path"
+
+  not_found:
+    title: "Command/File Not Found"
+    solutions:
+      - command: "ls -la"
+        description: "See what files actually exist"
+      - command: "pwd"
+        description: "Check you're in the right directory"
+      - command: "which <command>"
+        description: "Find where command is located"
+
+  no_directory:
+    title: "No Such Directory"
+    solutions:
+      - command: "ls -F"
+        description: "See available directories (marked with /)"
+      - command: "cd .."
+        description: "Go back up one level"
+      - command: "pwd"
+        description: "Confirm current location"
+
+# Workflow suggestions
+workflows:
+  explore_new_area:
+    title: "Exploring a New Area Workflow"
+    emoji: "🗺️"
+    steps:
+      - command: "pwd"
+        description: "Confirm where you are"
+      - command: "ls -F"
+        description: "See what's available"
+      - command: "cat scroll"
+        description: "Read documentation (if available)"
+      - command: "ls -la"
+        description: "Check for hidden files"
+      - command: "./<executable>"
+        description: "Try interactive elements"
+      - command: "cd <directory>"
+        description: "Move to next area"
+
+  collect_treasure:
+    title: "Treasure Collection Workflow"
+    emoji: "💰"
+    steps:
+      - command: "ls -F"
+        description: "Look for executables (*)"
+      - command: "./treasure"
+        description: "Run treasure scripts"
+      - command: "export I=item,$I"
+        description: "Add items to inventory"
+      - command: "echo $I"
+        description: "Verify inventory"
+
+  debug_problem:
+    title: "Problem Debugging Workflow"
+    emoji: "🐛"
+    steps:
+      - command: "pwd"
+        description: "Confirm location"
+      - command: "ls -la"
+        description: "See all files and permissions"
+      - command: "cat scroll"
+        description: "Re-read instructions"
+      - command: "help"
+        description: "Get contextual help"
+      - command: "history"
+        description: "Review recent commands"
+
+# Tips and tricks content
+tips:
+  terminal_mastery:
+    title: "Terminal Mastery"
+    items:
+      - "Use Tab completion extensively - it saves time and prevents typos"
+      - "Ctrl+R for reverse search through command history is incredibly powerful"
+      - "Use alias to create shortcuts: alias ll='ls -la'"
+      - "!! repeats last command - useful for adding sudo: sudo !!"
+      - "Use && to chain commands: cd directory && ls"
+
+  bashcrawl_specific:
+    title: "Bashcrawl-Specific Tips"
+    items:
+      - "Always cat scroll when entering a new area"
+      - "Inventory is crucial - use export I=item,$I to collect treasures"
+      - "Hidden files (starting with .) often contain important game mechanics"
+      - "Executables (*) are interactive - run them with ./<filename>"
+      - "Some areas unlock only after collecting specific treasures"
+
+  navigation_pro:
+    title: "File System Navigation Pro Tips"
+    items:
+      - "cd - toggles between current and previous directories"
+      - "pushd and popd maintain a directory stack"
+      - "Use find . -name \"*.txt\" to locate specific file types"
+      - "ls -la | grep \"^d\" shows only directories"
+
+  safety:
+    title: "Safety and Best Practices"
+    items:
+      - "Always know where you are: use pwd frequently"
+      - "Be careful with rm command - there's no recycle bin!"
+      - "Use ls -la before operating in a new directory"
+      - "Test commands on non-critical files first"
+      - "When in doubt, read the manual: man <command>"
+
+  advanced_exploration:
+    title: "Advanced Exploration"
+    items:
+      - "Look for hidden directories and files: ls -la"
+      - "Some areas have multiple paths - explore thoroughly"
+      - "Easter eggs and secrets reward curious players"
+      - "Game source code is educational - study it when stuck"
+
+  troubleshooting:
+    title: "Troubleshooting"
+    items:
+      - "\"Permission denied\" → try chmod +x <file>"
+      - "\"No such file or directory\" → check spelling and use ls"
+      - "\"Command not found\" → ensure you're in the right directory"
+      - "Stuck? Check scroll files or README.md"

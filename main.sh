@@ -20,11 +20,11 @@
 # @pathContext
 #   - incomingPaths: [setup.sh, user terminal]
 #   - outgoingPaths: [help system, game areas]
-#   - parallelPaths: [help/*.sh, entrance/*, logs/*]
+#   - parallelPaths: [src/help/*.sh, entrance/*, logs/*]
 #
 # @relatedFiles
 #   - setup.sh: Installation and configuration
-#   - help/: Comprehensive help system
+#   - src/help/: Comprehensive help system
 #   - entrance/: Game starting point
 #
 # USAGE:
@@ -223,7 +223,7 @@ log_event() {
 validate_environment() {
     log_event "INFO" "Validating Bashcrawl environment..." "validation"
 
-    local required_dirs=("entrance" "help")
+    local required_dirs=("entrance" "src/help")
     for dir in "${required_dirs[@]}"; do
         if [[ ! -d "${BASHCRAWL_ROOT}/$dir" ]]; then
             log_event "ERROR" "Required directory missing: $dir" "validation"
@@ -232,7 +232,7 @@ validate_environment() {
         fi
     done
 
-    local required_files=("help/bashcrawl_help.sh")
+    local required_files=("src/help/bashcrawl_help.sh")
     for file in "${required_files[@]}"; do
         if [[ ! -f "${BASHCRAWL_ROOT}/$file" ]]; then
             log_event "ERROR" "Required file missing: $file" "validation"
@@ -1319,6 +1319,57 @@ add_area_context() {
     fi
 }
 
+show_navigation_help() {
+    echo -e "${SUCCESS_COLOR}🧭 NAVIGATION HELP:${RESET_COLOR}"
+    cat << 'EOF'
+
+MOVING AROUND:
+   cd <dir>      Move into a directory (room)
+   cd ..         Go back to the previous room
+   cd ~          Return to the bashcrawl lobby
+   pwd           Show your current location
+   ls            List contents of current room
+   ls -a         Show hidden files and directories
+   ls -la        Detailed listing with permissions
+
+TIPS:
+   • Directories are rooms — use 'cd' to explore them
+   • Hidden rooms start with '.' (use 'ls -a' to find them)
+   • You cannot leave the bashcrawl realm
+   • Use 'map' to see the dungeon layout
+
+EOF
+}
+
+show_game_help() {
+    echo -e "${SUCCESS_COLOR}🎮 GAME HELP:${RESET_COLOR}"
+    cat << 'EOF'
+
+GAME INTERACTIONS:
+   ./treasure    Open treasure chests (adds items to inventory)
+   ./potion      Drink potions (restores health)
+   ./spell       Cast spells (creates symlink portals)
+   ./statue      Combat encounters (uses arithmetic)
+   ./monster     Fight monsters in hidden areas
+
+GAME STATE:
+   inventory     Check your collected items
+   health        Check your health points
+   status        Full game status overview
+   quest         View current quest objective
+   merlin        Get a contextual hint
+   save          Save your progress
+   load          Restore saved progress
+
+KEY CONCEPTS:
+   • Run executables with './' prefix (e.g., ./treasure)
+   • Use 'export' to set variables (export I=item,$I)
+   • Use 'let' for arithmetic (let "HP=HP-5")
+   • Read scrolls with 'cat scroll' for instructions
+
+EOF
+}
+
 show_contextual_help() {
     local topic="$1"
     
@@ -1822,7 +1873,7 @@ launch_native_mode() {
     echo "   cat scroll"
     echo ""
     echo -e "${COLOR_PRIMARY}3. Enable the help system (optional):${COLOR_RESET}"
-    echo "   source ${BASHCRAWL_ROOT}/help/init_help.sh"
+    echo "   source ${BASHCRAWL_ROOT}/src/help/init_help.sh"
     echo ""
     echo -e "${COLOR_PRIMARY}4. Enable session logging (optional):${COLOR_RESET}"
     echo "   source ${BASHCRAWL_ROOT}/lib/log.sh && bc_session_start native && bc_install_hooks"
@@ -2141,7 +2192,7 @@ ${COLOR_PRIMARY}LEARNING PATH:${COLOR_RESET}
 ${COLOR_PRIMARY}FILES:${COLOR_RESET}
     ./setup.sh           Run first-time setup and installation
     ./entrance/scroll    Your first adventure instructions
-    ./help/              Comprehensive help system
+    ./src/help/          Comprehensive help system
 
 ${COLOR_PRIMARY}DOCUMENTATION:${COLOR_RESET}
     README.md           Complete project documentation

@@ -79,7 +79,7 @@ Activate context-aware help from anywhere in the game:
 
 ```bash
 # One-time activation (persists in current shell)
-source help/init_help.sh
+source src/help/init_help.sh
 
 # Then use from any room
 help              # Context-aware tips for current location

@@ -5,14 +5,14 @@ on:
     branches: [ main, master, develop ]
     paths:
       - 'entrance/**'
-      - 'help/**'
+      - 'src/help/**'
       - 'lib/**'
       - '*.sh'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'entrance/**'
-      - 'help/**'
+      - 'src/help/**'
       - 'lib/**'
       - '*.sh'
 
@@ -108,7 +108,7 @@ jobs:
     - name: Check shell scripts with ShellCheck
       run: |
         echo "=== ShellCheck on infrastructure scripts ==="
-        shellcheck main.sh setup.sh help.sh lib/*.sh help/*.sh
+        shellcheck main.sh setup.sh help.sh lib/*.sh src/help/*.sh
         
     - name: Run game reset dry-run
       run: |

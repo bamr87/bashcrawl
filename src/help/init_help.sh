@@ -2,13 +2,13 @@
 #
 # Bashcrawl Help System Initialization
 # Source this file to enable the help command anywhere in bashcrawl
-# Usage: source help/init_help.sh
+# Usage: source src/help/init_help.sh
 #
 
-# Get the directory where this script is located (help dir)
+# Get the directory where this script is located (src/help dir)
 # Use BASH_SOURCE in bash, fall back to $0 for zsh compatibility
 _BC_HELP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-BASHCRAWL_ROOT="$(cd "$_BC_HELP_DIR/.." 2>/dev/null && pwd)"
+BASHCRAWL_ROOT="$(cd "$_BC_HELP_DIR/../.." 2>/dev/null && pwd)"
 
 # Initialize logging framework
 if [ -f "${BASHCRAWL_ROOT}/lib/log.sh" ]; then
@@ -21,6 +21,8 @@ fi
 help() {
     if [ -f "${BASHCRAWL_ROOT}/help.sh" ]; then
         bash "${BASHCRAWL_ROOT}/help.sh" "$@"
+    elif [ -f "${BASHCRAWL_ROOT}/src/help.sh" ]; then
+        bash "${BASHCRAWL_ROOT}/src/help.sh" "$@"
     else
         echo "Help system not found at ${BASHCRAWL_ROOT}/help.sh"
         echo "Try: cat scroll"

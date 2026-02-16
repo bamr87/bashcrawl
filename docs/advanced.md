@@ -115,7 +115,8 @@ Key rules:
 | `main.sh` | Interactive launcher with menu system and integrated terminal emulator |
 | `setup.sh` | Permissions setup, system validation |
 | `help.sh` | Context-aware help entry point |
-| `help/` | Help engine components (AI tracking, tutorials) |
+| `help/` | Help shim that delegates to `src/help.sh` |
+| `src/help/` | Help engine components (AI tracking, tutorials, shared YAML data) |
 | `lib/colors.sh` | Shared ANSI color constants |
 | `lib/log.sh` | JSONL gameplay telemetry |
 | `lib/reset.sh` | Comprehensive game state reset |
