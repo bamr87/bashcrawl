@@ -17,9 +17,8 @@ Bashcrawl is an educational text-based adventure game that teaches terminal/shel
 ### Key Components
 | Component | Purpose |
 |-----------|---------|
-| `main.sh` | Launcher with 7-option interactive menu, CLI args (`--interactive`, `--native`, `--help`). Sources `lib/colors.sh` and `lib/log.sh` |
+| `main.sh` | Launcher with interactive menu, CLI args, and integrated terminal emulator with quest system (pwd→ls→cd→mkdir→touch→cat→grep). Sources `lib/colors.sh` and `lib/log.sh`. Supports `-c`, `--batch`, `--interactive` modes |
 | `setup.sh` | Permissions setup, system checks, makes game files executable. Sources `lib/colors.sh` |
-| `bashcrawl-terminal.sh` | Self-contained terminal emulator with quest system (pwd→ls→cd→mkdir→touch→cat→grep). Uses `${LS_COLOR_FLAGS[@]}` for cross-platform `ls` |
 | `help.sh` | Root-level help entry point with subcommands: `commands`, `map`, `reset`. Sources `help/bashcrawl_help.sh` and `lib/colors.sh` |
 | `help/` | Context-aware help system: `bashcrawl_help.sh` detects player location, `ai_engine.sh` tracks progress patterns, `command_suggester.sh` analyzes directory contents, `init_help.sh` defines `help()` shell function |
 | `lib/` | Shared libraries: `colors.sh` (color constants), `log.sh` (JSONL session logging), `reset.sh` (game reset), `analyze.sh`/`report.sh` (session analysis) |

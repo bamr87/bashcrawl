@@ -13,7 +13,7 @@ Three disconnected logging systems exist, each with a different format and scope
 |--------|--------|-------|-----|
 | `main.sh` `log_event()` | `[ts] [LEVEL] [ctx] msg` → `logs/bashcrawl.log` | Launcher lifecycle only | Stops at game launch |
 | `ai_engine.sh` `log_action()` | `ts\|location\|action\|ctx` → `~/.bashcrawl_progress` | Help requests only | Only fires when player asks for help |
-| `bashcrawl-terminal.sh` | `ts - command [args]` → `.game_history` | Emulator commands | Only in emulator mode, not native |
+| `main.sh` (emulator) | `ts - command [args]` → `.game_history` | Emulator commands | Only in emulator mode, not native |
 
 **Native play** (`cd entrance && cat scroll`) — the most common mode — has **zero
 instrumentation**. Game executables (`treasure`, `statue`, `monster`, etc.) perform
@@ -344,7 +344,7 @@ log_action() {
 }
 ```
 
-### `bashcrawl-terminal.sh` — Terminal Emulator
+### `main.sh` — Terminal Emulator (integrated)
 
 Add to the command execution loop:
 
@@ -394,7 +394,7 @@ _BC_LIB="${0%entrance*}lib/log.sh"
 
 ### Phase 6: Retrofit Existing Systems
 **Effort:** Small edits
-**Files:** `main.sh`, `help/ai_engine.sh`, `bashcrawl-terminal.sh`
+**Files:** `main.sh`, `help/ai_engine.sh`
 **Delivers:** Unified logging across all entry points
 
 ---

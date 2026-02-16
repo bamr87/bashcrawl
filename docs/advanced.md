@@ -112,9 +112,8 @@ Key rules:
 
 | Component | Purpose |
 |-----------|---------|
-| `main.sh` | Interactive launcher with menu system |
+| `main.sh` | Interactive launcher with menu system and integrated terminal emulator |
 | `setup.sh` | Permissions setup, system validation |
-| `bashcrawl-terminal.sh` | Self-contained terminal emulator with quest tracking |
 | `help.sh` | Context-aware help entry point |
 | `help/` | Help engine components (AI tracking, tutorials) |
 | `lib/colors.sh` | Shared ANSI color constants |

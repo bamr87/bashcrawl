@@ -60,7 +60,7 @@ bash main.sh
 Self-contained terminal with quest tracking, XP, and guided progression:
 
 ```bash
-bash bashcrawl-terminal.sh
+bash main.sh --interactive
 ```
 
 ### Python Wrapper

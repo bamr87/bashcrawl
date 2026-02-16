@@ -66,7 +66,6 @@ The setup script will:
 
 # Jump directly into the interactive emulator
 ./main.sh --interactive
-# (or run ./bashcrawl-terminal.sh)
 ```
 
 Choose from multiple adventure modes:
@@ -103,11 +102,19 @@ Once you're set up, use these commands:
 ```bash
 ./main.sh                    # Launch interactive menu
 ./main.sh --interactive      # Start safe terminal emulator
-./main.sh --native          # Start native terminal experience
-./main.sh --tutorial        # Launch tutorial mode
-./main.sh --help            # View all options
-./setup.sh --verify         # Check installation
-./setup.sh --repair         # Fix installation issues
+./main.sh --native           # Start native terminal experience
+./main.sh --tutorial         # Launch tutorial mode
+./main.sh --demo             # Run demonstration mode
+./main.sh --status           # Show current game status
+./main.sh --reset            # Reset game state
+./main.sh --version          # Show version info
+./main.sh --debug            # Enable debug logging
+./main.sh --help             # View all options
+./setup.sh --verify          # Check installation
+./setup.sh --repair          # Fix installation issues
+./setup.sh --quick           # Quick setup (skip optional steps)
+./setup.sh --health-check    # Run health diagnostics
+./setup.sh --uninstall       # Remove game setup
 ```
 
 #### 🔍 Understanding These Commands
@@ -409,7 +416,15 @@ Your journey follows a carefully designed progression through interconnected cha
 - **Skills Learned**: Basic navigation (`ls`, `cd`, `pwd`) and comprehensive file viewing
 - **Key Commands**: `cat`, `less`, `head`, `tail`, `wc`
 - **Challenge**: Master all viewing spells before proceeding
+- **Side Path**: Workshop (teaches `mkdir`, `touch`, `rm`, `cp`, `echo >`)
 - **Next Step**: Descend to the Cellar
+
+**🔧 THE WORKSHOP** (Creation & Destruction Tutorial)
+
+- **Skills Learned**: File and directory creation, removal, and output redirection
+- **Key Commands**: `mkdir`, `touch`, `rm`, `rmdir`, `echo >`, `>>`
+- **Challenge**: Complete 5 progressive exercises
+- **Special Features**: Side tutorial room — optional but recommended for beginners
 
 **🏰 THE CELLAR**
 
@@ -417,7 +432,7 @@ Your journey follows a carefully designed progression through interconnected cha
 - **Key Commands**: `ls -F`, `alias`, file type recognition
 - **Challenge**: Learn to see through illusions and identify directories vs executables
 - **Treasures**: Emerald amulet (inventory system introduction)
-- **Next Steps**: Multiple paths unlock - Armoury, Chapel, Vault, or Scrap (symlinks)
+- **Next Steps**: Multiple paths unlock — Armoury, Chapel, Vault, or Scrap (symlinks)
 
 ### 📍 **Phase 2: Specialization Chambers**
 
@@ -435,15 +450,18 @@ Your journey follows a carefully designed progression through interconnected cha
 - **Key Commands**: Hidden/advanced shell operations
 - **Challenge**: Discover secret passages and easter eggs
 - **Special Features**: Unlocked only after collecting treasures
-- **Leads To**: Secret areas and advanced challenges
+- **Sub-Areas**: Courtyard → Aviary → Hall (monster encounter) → Library (tome)
+- **Graveyard**: Columbarium, Royal Tombs, Lower Quadrant, and hidden Mausoleum
+- **Leads To**: Deep exploration and combat challenges
 
 **💰 THE VAULT** (Data Management & Variables)
 
 - **Skills Learned**: Environment variables, data storage, inventory management
 - **Key Commands**: `export`, `echo $VAR`, variable manipulation
 - **Challenge**: Master the inventory and wealth systems
-- **Special Features**: Advanced treasure management
-- **Leads To**: Economic and data management challenges
+- **Special Features**: Stronghold with goblet (unlocks the Rift), orb collection
+- **Sub-Areas**: Stronghold → Nursery → Lab (ghost encounter)
+- **Leads To**: The Rift (via goblet in the Stronghold)
 
 **🔧 THE SCRAP** (Symlinks & Portals)
 
@@ -455,36 +473,39 @@ Your journey follows a carefully designed progression through interconnected cha
 
 ### 📍 **Phase 3: Mastery Chambers**
 
-**🏟️ ARENA CHAMBERS** (Ultimate Challenges)
+**� THE RIFT** (Advanced Challenges — unlocked via Vault's Goblet)
 
 - **Skills Learned**: Complex command chaining, pipes, advanced scripting
 - **Key Commands**: Complex pipelines, advanced bash scripting
-- **Challenge**: Face the ultimate terminal combat scenarios
-- **Special Features**: Boss battles requiring multiple skill combinations
+- **Sub-Areas**:
+  - **Arena → Pit**: Boss encounters (Nyarlathotep, Drummer), end-game treasure
+  - **Spire → Mezzanine**: Hidden elevator leading to a secret satellite station
+- **Special Features**: Deep nested hidden rooms reward thorough exploration
 
-**📚 ANCIENT LIBRARIES** (Documentation & Help Systems)
+**📚 THE LIBRARY** (Documentation & Lore)
 
-- **Skills Learned**: Manual pages, help systems, documentation navigation
+- **Location**: Deep within the Chapel path (`.chapel/courtyard/aviary/hall/library/`)
+- **Skills Learned**: Reading documentation, using `man` pages, self-directed learning
 - **Key Commands**: `man`, `info`, `--help`, documentation tools
-- **Challenge**: Become self-sufficient in learning new commands
-- **Special Features**: Meta-learning and self-directed exploration
+- **Special Features**: Contains the ancient tome — meta-learning and exploration
 
 ### 🎯 **Skill Progression Path**
 
 ```text
 ENTRANCE (File Viewing)
-    ↓
-CELLAR (File Types & Aliases)
-    ↓
-[Choose Your Path]
-    ├── ARMOURY (Combat/Permissions) → Arena Chambers
-    ├── CHAPEL (Secrets/Advanced) → Hidden Areas  
-    ├── VAULT (Variables/Data) → Data Management
-    └── SCRAP (Symlinks/Portals) → Rift
-         ↓
-ANCIENT LIBRARIES (Documentation Mastery)
-    ↓
-[Graduation to Real-World Application]
+    ├── WORKSHOP (mkdir, touch, rm, echo >) — side tutorial
+    │
+    └── CELLAR (File Types & Aliases)
+         └── ARMOURY (Permissions/Combat)
+              └── CHAMBER (Variables/Scripting)
+
+[Hidden rooms unlocked by treasures]
+    ├── CHAPEL → Courtyard → Aviary → Hall (Monster) → Library
+    │            └── Graveyard → Columbarium, Royal Tombs, .Mausoleum
+    ├── VAULT → Stronghold (Goblet) → Nursery → Lab (Ghost)
+    ├── SCRAP (Symlinks/Portals)
+    └── RIFT (unlocked via Vault) → Arena → Pit (Boss Encounters)
+                                  → Spire → Mezzanine → .Elevator → .Satellite
 ```
 
 ### 🔄 **Interconnected Network**
@@ -547,10 +568,10 @@ pwd          # Know your exact location
 
 Collect treasures to unlock secret areas:
 
-- **Chapel** — Hidden prayers and advanced techniques
-- **Vault** — Environment variables and data management
+- **Chapel** — Altar, courtyard, aviary, graveyard (with hidden mausoleum), and the deep library
+- **Vault** — Stronghold with goblet and orb, nursery, and lab (ghost encounter)
 - **Scrap** — Symlinks and portal creation (`ln -s`)
-- **Rift** — Advanced combat challenges (unlocked via Vault)
+- **Rift** — Arena pit (boss encounters), spire, and hidden elevator to satellite station (unlocked via Vault's goblet)
 
 ### 🎲 Combat System
 
@@ -559,6 +580,8 @@ Battle encounters teach arithmetic and variable manipulation:
 ```bash
 ./statue      # Combat in the Chamber
 ./monster     # Battle in the Aviary Hall
+./ghost       # Encounter in the Vault's Lab
+./goblet      # Challenge in the Vault's Stronghold (unlocks the Rift)
 ```
 
 ### 📜 Enhanced Scroll Rendering
@@ -577,13 +600,20 @@ glow scroll           # Rendered markdown view
 Reset your adventure for practice or sharing:
 
 ```bash
-# Method 1: Clean restart
-rm -rf bashcrawl
-git clone <repository-url>
+# Method 1: Use the built-in reset script
+bash lib/reset.sh              # Execute reset
+bash lib/reset.sh --dry        # Preview what will be reset first
 
-# Method 2: Reset inventory and health
+# Method 2: Reset via the launcher
+./main.sh --reset
+
+# Method 3: Reset inventory and health manually
 unset I HP
 cd entrance
+
+# Method 4: Clean restart (re-clone)
+rm -rf bashcrawl
+git clone https://github.com/bamr87/bashcrawl.git
 ```
 
 ## 🌐 Community & Learning Resources

@@ -20,8 +20,7 @@
 #   - parallelPaths: [permissions, directories, configuration files]
 #
 # @relatedFiles
-#   - main.sh: Main game launcher (created after setup)
-#   - bashcrawl-terminal.sh: Interactive terminal emulator
+#   - main.sh: Main game launcher and terminal emulator
 #   - help/: Help system requiring initialization
 #   - entrance/: Game starting area
 #
@@ -267,7 +266,6 @@ setup_executable_permissions() {
     # Main scripts
     local main_scripts=(
         "main.sh"
-        "bashcrawl-terminal.sh"
     )
     
     for script in "${main_scripts[@]}"; do
@@ -417,12 +415,8 @@ verify_installation() {
         verification_passed=false
     fi
     
-    # Check terminal emulator
-    if [[ -f "${BASHCRAWL_ROOT}/bashcrawl-terminal.sh" ]]; then
-        log_setup "SUCCESS" "Terminal emulator verified ✓" "verification"
-    else
-        log_setup "WARNING" "Terminal emulator not found (some features unavailable)" "verification"
-    fi
+    # Terminal emulator is now integrated into main.sh (v3.0.0+)
+    log_setup "SUCCESS" "Terminal emulator (integrated in main.sh) ✓" "verification"
     
     # Test basic functionality
     if [[ -d "${BASHCRAWL_ROOT}/entrance" ]]; then

@@ -55,7 +55,7 @@ Key rules:
 ### Linting
 
 ```bash
-shellcheck main.sh setup.sh bashcrawl-terminal.sh help.sh lib/*.sh help/*.sh
+shellcheck main.sh setup.sh help.sh lib/*.sh help/*.sh
 ```
 
 CI runs ShellCheck, yamllint, markdownlint, and game content validation on every PR.
