@@ -5,8 +5,16 @@
 # Usage: source init_help.sh
 #
 
-# Get the directory where this script is located (bashcrawl root)
-BASHCRAWL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the directory where this script is located (help dir)
+_BC_HELP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASHCRAWL_ROOT="$(cd "$_BC_HELP_DIR/.." 2>/dev/null && pwd)"
+
+# Initialize logging framework
+if [ -f "${BASHCRAWL_ROOT}/lib/log.sh" ]; then
+    source "${BASHCRAWL_ROOT}/lib/log.sh"
+    bc_session_start "help_init"
+    bc_install_hooks
+fi
 
 # Simple help function that works from anywhere in the bashcrawl directory tree
 help() {

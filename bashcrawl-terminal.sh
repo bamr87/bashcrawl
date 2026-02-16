@@ -382,7 +382,10 @@ generate_prompt() {
 execute_command() {
     local cmd="$1"
     shift
-    local -a original_args=("$@")
+    local -a original_args=()
+    if (( $# )); then
+        original_args=("$@")
+    fi
     local args="${original_args[*]:-}"
     local pre_command_dir="$(pwd)"
 
@@ -561,10 +564,14 @@ execute_command() {
             ;;
 
         # Executable files (game content)
-        "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost")
+        "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost"|"./statue"|"./altar"|"./rags"|"./fountain"|"./penguin"|"./crystal"|"./goblet"|"./glass"|"./padlock"|"./statues"|"./open"|"./nyarlathotep"|"./drummer"|"./wizard-light"|"./button"|"./loot"|"./box"|"./tome"|"./pieces"|"./armour"|"./platinum"|"./display"|"./robot"|"./end"|"./carcass"|"./king"|"./window")
             if [[ -x "$cmd" ]]; then
                 handled=true
-                "$cmd" "${original_args[@]}"
+                if (( ${#original_args[@]} )); then
+                    "$cmd" "${original_args[@]}"
+                else
+                    "$cmd"
+                fi
                 status=$?
             else
                 status=1
@@ -585,7 +592,7 @@ execute_command() {
             ;;
         "echo")
             handled=true
-            echo "$args"
+            eval echo "$args"
             status=$?
             ;;
 
@@ -622,11 +629,119 @@ execute_command() {
             return
             ;;
 
+        # Shell builtins: export, let, alias
+        "export")
+            handled=true
+            if [[ -n "$args" ]]; then
+                eval "export $args" 2>/dev/null
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: export VAR=value${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "let")
+            handled=true
+            if [[ -n "$args" ]]; then
+                eval "let $args" 2>/dev/null
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: let \"expression\"${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "alias")
+            handled=true
+            if [[ -n "$args" ]]; then
+                eval "alias $args" 2>/dev/null
+                status=$?
+            else
+                alias
+                status=$?
+            fi
+            ;;
+        "ln")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                ln "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: ln -fs target linkname${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "cp")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                cp "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: cp source dest${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "mv")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                mv "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: mv source dest${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "rm")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                rm "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: rm filename${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "sort")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                sort "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: sort filename${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "find")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                find "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: find . -name \"pattern\"${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "chmod")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                chmod "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: chmod +x filename${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "sed")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                eval "sed $args" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: sed 's/old/new/' file${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+
         # Catch-all for unknown commands
         *)
             if [[ -x "./$cmd" ]]; then
                 handled=true
-                "./$cmd" "${original_args[@]}"
+                if (( ${#original_args[@]} )); then
+                    "./$cmd" "${original_args[@]}"
+                else
+                    "./$cmd"
+                fi
                 status=$?
             else
                 status=1
@@ -1251,6 +1366,7 @@ mark_scroll_read() {
 
 save_game_state() {
     cat > "$GAME_STATE_FILE" << EOF
+# Bashcrawl Game State (terminal-emulator format)
 CURRENT_AREA="$CURRENT_AREA"
 INVENTORY="$I"
 HEALTH="$HP"
@@ -1262,22 +1378,40 @@ LEARNED_COMMANDS="$LEARNED_COMMANDS"
 GAME_XP="$GAME_XP"
 SCROLLS_READ="$SCROLLS_READ"
 CURRENT_PATH="$CURRENT_PATH"
+# Aliases for main.sh compatibility
+PLAYER_INVENTORY="$I"
+PLAYER_HEALTH="$HP"
+PLAYER_LEVEL="$GAME_LEVEL"
+GAME_STARTED="true"
+SESSION_COUNT="${SESSION_COUNT:-0}"
+LAST_SESSION="$(date -Iseconds 2>/dev/null || date '+%Y-%m-%dT%H:%M:%S')"
 EOF
 }
 
 load_game_state() {
     if [[ -f "$GAME_STATE_FILE" ]]; then
+        # Temporarily disable strict mode — the state file may come from
+        # main.sh (PLAYER_* vars) or from a previous terminal-emulator
+        # session (INVENTORY, HEALTH, etc.).  Accept either format.
+        set +u
         source "$GAME_STATE_FILE"
-        export I="$INVENTORY"
-        export HP="$HEALTH"
-        export CURRENT_AREA
-        export GAME_LEVEL
-        export CURRENT_QUEST_ID
-        export QUEST_COMPLETED
-        export LEARNED_COMMANDS
-        export GAME_XP
-        export SCROLLS_READ
-        export CURRENT_PATH
+
+        # Map main.sh variable names to terminal-emulator names
+        INVENTORY="${INVENTORY:-${PLAYER_INVENTORY:-}}"
+        HEALTH="${HEALTH:-${PLAYER_HEALTH:-100}}"
+        GAME_LEVEL="${GAME_LEVEL:-${PLAYER_LEVEL:-novice}}"
+
+        export I="${INVENTORY:-}"
+        export HP="${HEALTH:-100}"
+        export CURRENT_AREA="${CURRENT_AREA:-pre-entrance}"
+        export GAME_LEVEL="${GAME_LEVEL:-novice}"
+        CURRENT_QUEST_ID="${CURRENT_QUEST_ID:-0}"
+        QUEST_COMPLETED="${QUEST_COMPLETED:-}"
+        LEARNED_COMMANDS="${LEARNED_COMMANDS:-}"
+        GAME_XP="${GAME_XP:-0}"
+        SCROLLS_READ="${SCROLLS_READ:-}"
+        CURRENT_PATH="${CURRENT_PATH:-bashcrawl}"
+        set -u
     fi
 }
 
@@ -1377,11 +1511,26 @@ main() {
         if [[ -z "$input" ]]; then
             continue
         fi
+
+        # Handle piped commands (e.g., "sort room | uniq") via eval
+        if [[ "$input" == *"|"* ]] || [[ "$input" == *">"* ]]; then
+            local status=0
+            set +e
+            eval "$input" 2>&1
+            status=$?
+            set -e
+            save_game_state
+            echo
+            continue
+        fi
         
         # Parse command and arguments
         read -ra cmd_array <<< "$input"
         local command="${cmd_array[0]}"
-        local -a cmd_args=("${cmd_array[@]:1}")
+        local -a cmd_args=()
+        if (( ${#cmd_array[@]} > 1 )); then
+            cmd_args=("${cmd_array[@]:1}")
+        fi
 
         local status=0
         set +e

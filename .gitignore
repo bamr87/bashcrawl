@@ -8,6 +8,8 @@ logs/command-history.log
 logs/room-visits.log
 logs/treasure-collection.log
 logs/session-*.log
+logs/sessions/
+logs/feedback/
 logs/learning-notes.txt
 logs/temp/
 logs/bashcrawl.log

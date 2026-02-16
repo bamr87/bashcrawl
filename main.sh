@@ -72,6 +72,12 @@ export BASHCRAWL_MODE="main_launcher"
 export BASHCRAWL_ROOT
 export BASHCRAWL_VERSION="$VERSION"
 
+# Path: Initialize Session Logging
+if [[ -f "${BASHCRAWL_ROOT}/lib/log.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/log.sh"
+    bc_session_start "launcher"
+fi
+
 # ============================================================================
 # CORE UTILITY FUNCTIONS - PATH: FOUNDATION SERVICES
 # ============================================================================
@@ -139,7 +145,7 @@ initialize_game_state() {
     # Create default game state if it doesn't exist
     if [[ ! -f "$GAME_STATE_FILE" ]]; then
         cat > "$GAME_STATE_FILE" << EOF
-# Bashcrawl Game State
+# Bashcrawl Initial Game State
 PLAYER_INVENTORY=""
 PLAYER_HEALTH=100
 PLAYER_LEVEL="novice"
@@ -151,6 +157,16 @@ TREASURES_FOUND=""
 LAST_SESSION="$(date -Iseconds)"
 SESSION_COUNT=0
 TOTAL_PLAYTIME=0
+# Terminal-emulator state (populated on first interactive session)
+INVENTORY=""
+HEALTH=100
+GAME_LEVEL="novice"
+CURRENT_QUEST_ID=0
+QUEST_COMPLETED=""
+LEARNED_COMMANDS=""
+GAME_XP=0
+SCROLLS_READ=""
+CURRENT_PATH="bashcrawl"
 EOF
         log_event "SUCCESS" "Game state initialized" "state"
     else
@@ -268,6 +284,9 @@ launch_native_mode() {
     echo ""
     echo -e "${COLOR_PRIMARY}3. Enable the help system (optional):${COLOR_RESET}"
     echo "   source ${BASHCRAWL_ROOT}/help/init_help.sh"
+    echo ""
+    echo -e "${COLOR_PRIMARY}4. Enable session logging (optional):${COLOR_RESET}"
+    echo "   source ${BASHCRAWL_ROOT}/lib/log.sh && bc_session_start native && bc_install_hooks"
     echo ""
     echo -e "${COLOR_INFO}💡 Type 'help' anytime for context-aware assistance${COLOR_RESET}"
     echo -e "${COLOR_INFO}💡 Type 'map' to see available areas${COLOR_RESET}"
