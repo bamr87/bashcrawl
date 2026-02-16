@@ -200,12 +200,12 @@ rmdir dirname       # Delete an empty directory
 
 ### ☁️ Option 3: Instant Play Online
 
-Launch immediately in your browser:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/nthiery%2Fbashcrawl/HEAD)
+Launch immediately in your browser (no install required):
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD)
-
-*Perfect for quick experimentation - no installation required!*
+| Source | Launch |
+|--------|--------|
+| GitLab (upstream) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/nthiery%2Fbashcrawl/HEAD) |
+| GitHub (fork) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
 
 ## 🛡️ Interactive Terminal Emulator
 
@@ -354,27 +354,26 @@ Bashcrawl features an AI-enhanced, context-aware help system that adapts to your
 - **Location-Specific**: Tailored advice for each dungeon area with relevant commands
 - **Interactive**: Responds to your inventory, health, and exploration progress
 
-### 🚀 Quick Activation
+### Quick Activation
 
 ```bash
-# Option 1: One-time setup (recommended)
-./setup_help.sh
-source .help_alias
-help
+# Option 1: Run directly from project root
+bash help.sh
+bash help.sh commands    # Command quick reference
+bash help.sh map         # Dungeon map
 
-# Option 2: Direct usage
-./help
-
-# Option 3: From any subdirectory
-../help
+# Option 2: Enable as persistent shell function
+source help/init_help.sh
+help                     # Then use from any room
 ```
 
-### 🎯 Usage Examples
+### Usage Examples
 
 ```bash
 help                    # Context-aware help for current location
-help commands          # Detailed command reference with examples
-help tips              # Advanced tips and tricks for terminal mastery
+help commands           # Command quick reference card
+help map                # Dungeon map showing all rooms
+help reset              # How to reset the game
 ```
 
 ### 🧠 Smart Detection
@@ -418,7 +417,7 @@ Your journey follows a carefully designed progression through interconnected cha
 - **Key Commands**: `ls -F`, `alias`, file type recognition
 - **Challenge**: Learn to see through illusions and identify directories vs executables
 - **Treasures**: Emerald amulet (inventory system introduction)
-- **Next Steps**: Multiple paths unlock - Armoury, Chapel, Vault, or Scrap
+- **Next Steps**: Multiple paths unlock - Armoury, Chapel, Vault, or Scrap (symlinks)
 
 ### 📍 **Phase 2: Specialization Chambers**
 
@@ -446,13 +445,13 @@ Your journey follows a carefully designed progression through interconnected cha
 - **Special Features**: Advanced treasure management
 - **Leads To**: Economic and data management challenges
 
-**🔧 THE SCRAP** (System Information & Debugging)
+**🔧 THE SCRAP** (Symlinks & Portals)
 
-- **Skills Learned**: System diagnostics, process management, troubleshooting
-- **Key Commands**: `ps`, `top`, `df`, `du`, system monitoring
-- **Challenge**: Debug system issues and optimize performance
-- **Special Features**: System health monitoring
-- **Leads To**: Administrative and maintenance areas
+- **Skills Learned**: Symbolic links, file shortcuts, portal creation
+- **Key Commands**: `ln -s`, `ls -l`, `readlink`
+- **Challenge**: Create a portal to the hidden Rift
+- **Special Features**: Teaches symlink navigation
+- **Leads To**: The Rift (advanced challenges)
 
 ### 📍 **Phase 3: Mastery Chambers**
 
@@ -481,7 +480,7 @@ CELLAR (File Types & Aliases)
     ├── ARMOURY (Combat/Permissions) → Arena Chambers
     ├── CHAPEL (Secrets/Advanced) → Hidden Areas  
     ├── VAULT (Variables/Data) → Data Management
-    └── SCRAP (System/Debug) → Administration
+    └── SCRAP (Symlinks/Portals) → Rift
          ↓
 ANCIENT LIBRARIES (Documentation Mastery)
     ↓
@@ -542,370 +541,36 @@ cat scroll   # Read instructions and lore
 pwd          # Know your exact location
 ```
 
-## 🚀 Modern Terminal Integration
-
-Bashcrawl seamlessly integrates with contemporary development environments:
-
-### 📱 Universal Compatibility
-
-- **Linux/WSL**: Native bash/zsh experience
-- **macOS**: Works with Terminal.app, iTerm2, and all popular shells
-- **Windows**: Perfect with WSL2, Git Bash, or PowerShell  
-- **Cloud**: Runs on GitHub Codespaces, Replit, and other cloud terminals
-
-### 🔧 Development Workflow Enhancement
-
-Skills learned in Bashcrawl directly apply to:
-
-- **Version Control**: Git command-line mastery
-- **Package Management**: npm, pip, brew navigation
-- **Docker & Containers**: Container shell access and debugging
-- **CI/CD Pipelines**: Script debugging and automation
-- **Server Administration**: Remote system management
-
 ## ⚔️ Advanced Features
 
-### 🎲 Dynamic Combat System
+### 🔮 Hidden Rooms
 
-Engage in tactical battles that teach process management:
+Collect treasures to unlock secret areas:
 
-```bash
-# Combat requires strategy and shell knowledge
-./monster     # Engage in battle
-roll          # Use probability and random numbers
-```
+- **Chapel** — Hidden prayers and advanced techniques
+- **Vault** — Environment variables and data management
+- **Scrap** — Symlinks and portal creation (`ln -s`)
+- **Rift** — Advanced combat challenges (unlocked via Vault)
 
-### 🔮 Hidden Secrets
+### 🎲 Combat System
 
-Discover easter eggs and advanced techniques:
-
-- Secret passages accessible only through hidden commands
-- Bonus areas that teach advanced shell scripting
-- Achievement system for mastering different command categories
-- Special items that unlock new gameplay mechanics
-
-### 🏆 Mastery Validation
-
-Track your progress with built-in checkpoints:
-
-- Skill verification through practical challenges
-- Progressive difficulty that adapts to your learning pace
-- Achievement badges for completing different quest lines
-- Integration with external learning platforms
-
-## 🔥 Hard Mode: Terminal Power-Ups for Advanced Users
-
-Ready to enhance your terminal prowess? These power-ups transform Bashcrawl into an even more immersive and informative experience:
-
-### 📜 Enhanced Markdown Rendering
-
-Install `glow` for beautiful markdown rendering of scrolls and documentation:
+Battle encounters teach arithmetic and variable manipulation:
 
 ```bash
-# macOS (with Homebrew)
-brew install glow
-
-# Linux (Ubuntu/Debian)
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
-sudo apt update && sudo apt install glow
-
-# Linux (using Go)
-go install github.com/charmbracelet/glow@latest
-
-# Now read scrolls in style:
-glow scroll                    # Beautiful rendered markdown
-glow -p scroll                 # Pager mode for long scrolls
-glow -s dark scroll           # Dark theme for dungeon ambiance
+./statue      # Combat in the Chamber
+./monster     # Battle in the Aviary Hall
 ```
 
-### 🎮 Bashcrawl Dashboard Script
+### 📜 Enhanced Scroll Rendering
 
-Create the ultimate adventurer's dashboard to track your progress:
+For richer scroll display, install [glow](https://github.com/charmbracelet/glow):
 
 ```bash
-# Create the dashboard script
-cat << 'EOF' > ~/.bashcrawl-dashboard
-#!/bin/bash
-# Bashcrawl Adventure Dashboard v1.0
-
-# Color definitions for epic display
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[0;37m'
-BOLD='\033[1m'
-NC='\033[0m' # No Color
-
-# Clear screen and show epic header
-clear
-echo -e "${BOLD}${PURPLE}"
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║              ⚔️  BASHCRAWL ADVENTURE DASHBOARD ⚔️           ║"
-echo "║                    Terminal Warrior Status                ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
-echo -e "${NC}"
-
-# Current Location
-echo -e "${BOLD}${BLUE}📍 Current Location:${NC}"
-echo -e "   ${CYAN}$(pwd)${NC}"
-echo
-
-# Inventory Status
-echo -e "${BOLD}${YELLOW}💰 Inventory Status:${NC}"
-if [ -n "$I" ]; then
-    echo -e "   Items: ${GREEN}$I${NC}"
-    item_count=$(echo "$I" | tr ',' '\n' | wc -l | tr -d ' ')
-    echo -e "   Total Items: ${GREEN}$item_count${NC}"
-else
-    echo -e "   ${RED}No items collected yet${NC}"
-fi
-echo
-
-# Health Points
-echo -e "${BOLD}${RED}❤️  Health Status:${NC}"
-if [ -n "$HP" ]; then
-    echo -e "   Health Points: ${GREEN}$HP${NC}"
-else
-    echo -e "   ${YELLOW}Health not initialized${NC}"
-fi
-echo
-
-# Exploration Progress
-echo -e "${BOLD}${PURPLE}🗺️  Exploration Progress:${NC}"
-
-# Find all scroll files and check which ones exist
-declare -A known_areas
-known_areas[entrance]="🚪 Entrance Hall"
-known_areas[cellar]="🏰 The Cellar" 
-known_areas[armoury]="🗡️ The Armoury"
-known_areas[chamber]="💎 The Chamber"
-
-echo -e "   ${BOLD}Areas Discovered:${NC}"
-for area in "${!known_areas[@]}"; do
-    if find . -name "$area" -type d 2>/dev/null | head -1 >/dev/null; then
-        echo -e "   ✅ ${known_areas[$area]}"
-    else
-        echo -e "   ❌ ${known_areas[$area]} ${YELLOW}(not found)${NC}"
-    fi
-done
-echo
-
-# Scrolls Read
-echo -e "${BOLD}${CYAN}📜 Knowledge Acquired:${NC}"
-scroll_count=$(find . -name "scroll" -type f 2>/dev/null | wc -l | tr -d ' ')
-echo -e "   Scrolls Available: ${GREEN}$scroll_count${NC}"
-
-# Show available scrolls
-if [ $scroll_count -gt 0 ]; then
-    echo -e "   ${BOLD}Scroll Locations:${NC}"
-    find . -name "scroll" -type f 2>/dev/null | while read scroll; do
-        dir=$(dirname "$scroll" | sed 's|^\./||')
-        if [ "$dir" = "." ]; then dir="current"; fi
-        echo -e "   📖 $dir/scroll"
-    done
-fi
-echo
-
-# Executables Found (Treasures, Potions, etc.)
-echo -e "${BOLD}${GREEN}⚡ Interactive Elements:${NC}"
-executable_count=$(find . -type f -executable 2>/dev/null | grep -v "^\./\." | wc -l | tr -d ' ')
-echo -e "   Executables Found: ${GREEN}$executable_count${NC}"
-
-if [ $executable_count -gt 0 ]; then
-    echo -e "   ${BOLD}Available Interactions:${NC}"
-    find . -type f -executable 2>/dev/null | grep -v "^\./\." | head -10 | while read exe; do
-        name=$(basename "$exe")
-        dir=$(dirname "$exe" | sed 's|^\./||')
-        if [ "$dir" = "." ]; then dir="current"; fi
-        
-        case "$name" in
-            treasure) icon="💰" ;;
-            potion) icon="🧪" ;;
-            spell) icon="📜" ;;
-            monster) icon="👹" ;;
-            ghost) icon="👻" ;;
-            *) icon="⚡" ;;
-        esac
-        
-        echo -e "   $icon $dir/$name"
-    done
-fi
-echo
-
-# Quick Commands Reference
-echo -e "${BOLD}${WHITE}🎯 Quick Commands:${NC}"
-echo -e "   ${CYAN}ls -F${NC}          List files with type indicators"
-echo -e "   ${CYAN}cat scroll${NC}     Read area documentation"
-echo -e "   ${CYAN}echo \$I${NC}        Check inventory"
-echo -e "   ${CYAN}./treasure${NC}     Interact with treasures"
-echo -e "   ${CYAN}dashboard${NC}      Show this dashboard"
-echo
-
-# Footer
-echo -e "${BOLD}${PURPLE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BOLD}${WHITE}May your commands be swift and your exit codes be zero! ⚔️${NC}"
-echo -e "${BOLD}${PURPLE}═══════════════════════════════════════════════════════════${NC}"
-EOF
-
-# Make it executable
-chmod +x ~/.bashcrawl-dashboard
-
-# Create an alias for easy access
-echo "alias dashboard='~/.bashcrawl-dashboard'" >> ~/.bashrc
-echo "alias dashboard='~/.bashcrawl-dashboard'" >> ~/.zshrc
-
-echo "✅ Dashboard installed! Use 'dashboard' command in any bashcrawl directory"
+brew install glow     # macOS
+glow scroll           # Rendered markdown view
 ```
 
-### 🎨 Terminal Themes for Immersion
-
-Enhance your visual experience with dungeon-appropriate themes:
-
-```bash
-# Install and configure Starship prompt for epic status display
-curl -sS https://starship.rs/install.sh | sh
-
-# Create bashcrawl-specific starship config
-mkdir -p ~/.config
-cat << 'EOF' > ~/.config/starship-bashcrawl.toml
-format = """
-⚔️ $directory$git_branch$character"""
-
-[directory]
-style = "bold purple"
-format = "[$path]($style) "
-
-[character]
-success_symbol = "[⚡](bold green)"
-error_symbol = "[💀](bold red)"
-EOF
-
-# Use the theme when playing bashcrawl
-echo "export STARSHIP_CONFIG=~/.config/starship-bashcrawl.toml" >> ~/.bashcrawl-env
-echo "Run 'source ~/.bashcrawl-env && eval \"\$(starship init bash)\"' for epic prompt"
-```
-
-### 🔍 Advanced File Navigation
-
-Power-up your exploration with modern tools:
-
-```bash
-# Install exa for better ls with colors and icons
-brew install exa  # macOS
-sudo apt install exa  # Linux
-
-# Install fd for faster file finding
-brew install fd  # macOS  
-sudo apt install fd-find  # Linux
-
-# Install bat for syntax-highlighted file viewing
-brew install bat  # macOS
-sudo apt install bat  # Linux
-
-# Create enhanced aliases for bashcrawl
-cat << 'EOF' >> ~/.bashcrawl-aliases
-# Enhanced bashcrawl navigation
-alias ls='exa --icons --group-directories-first'
-alias ll='exa --icons --long --group-directories-first'
-alias la='exa --icons --all --group-directories-first'
-alias tree='exa --tree --icons'
-alias cat='bat --style=header,grid'
-alias find='fd'
-
-# Bashcrawl-specific helpers
-alias inventory='echo "Current inventory: $I"'
-alias health='echo "Health points: $HP"'
-alias location='pwd && echo && ls -F'
-alias explore='echo "=== CURRENT AREA ===" && pwd && echo && echo "=== AVAILABLE ACTIONS ===" && ls -F && echo && echo "=== DOCUMENTATION ===" && [[ -f scroll ]] && echo "📜 Read: cat scroll" || echo "No scroll found"'
-EOF
-
-echo "source ~/.bashcrawl-aliases" >> ~/.bashrc
-echo "source ~/.bashcrawl-aliases" >> ~/.zshrc
-```
-
-### 🎵 Ambient Sound Integration
-
-Create an immersive audio experience:
-
-```bash
-# Install mpv for background audio (optional)
-brew install mpv  # macOS
-sudo apt install mpv  # Linux
-
-# Create ambient dungeon sounds script
-cat << 'EOF' > ~/.bashcrawl-audio
-#!/bin/bash
-# Bashcrawl Ambient Audio Controller
-
-case "$1" in
-    dungeon)
-        echo "🎵 Playing dungeon ambiance..."
-        # You can replace these URLs with local audio files
-        mpv --no-video --loop "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" &
-        echo $! > ~/.bashcrawl-audio-pid
-        ;;
-    stop)
-        if [ -f ~/.bashcrawl-audio-pid ]; then
-            kill $(cat ~/.bashcrawl-audio-pid) 2>/dev/null
-            rm ~/.bashcrawl-audio-pid
-            echo "🔇 Audio stopped"
-        fi
-        ;;
-    *)
-        echo "Usage: $0 {dungeon|stop}"
-        ;;
-esac
-EOF
-
-chmod +x ~/.bashcrawl-audio
-echo "Use '~/.bashcrawl-audio dungeon' for atmospheric sound"
-```
-
-### 🚀 One-Command Setup for Hard Mode
-
-Install everything at once:
-
-```bash
-# The Ultimate Bashcrawl Power-Up Installer
-curl -sL https://raw.githubusercontent.com/your-repo/bashcrawl/main/install-hardmode.sh | bash
-```
-
-### 🎯 Usage in Game
-
-Once installed, enhance your adventure:
-
-```bash
-# Start your enhanced session
-cd bashcrawl/entrance
-dashboard          # View your epic status
-explore            # Enhanced area exploration  
-glow scroll        # Read scrolls in style
-inventory          # Quick inventory check
-~/.bashcrawl-audio dungeon  # Atmospheric audio
-```
-
-### 💡 Pro Tips for Terminal Warriors
-
-- **Multiple Terminals**: Open multiple terminal windows to track different areas
-- **Screen/Tmux**: Use terminal multiplexers for persistent sessions
-- **Custom Hotkeys**: Set up keyboard shortcuts for dashboard and common commands
-- **Progress Tracking**: Use git to track your exploration progress
-- **Automation**: Create scripts that automatically backup your inventory and progress
-
-### 🏆 Terminal Mastery Achievements
-
-Challenge yourself with these advanced goals:
-
-- **📊 Data Master**: Create graphs of your exploration progress using terminal tools
-- **🤖 Automation Wizard**: Write scripts that auto-complete certain challenges
-- **🎨 Theme Creator**: Design custom terminal themes for different dungeon areas
-- **📈 Analytics Ninja**: Build dashboards showing time spent in each area
-- **🔧 Tool Builder**: Contribute new power-up tools to the bashcrawl community
+> For terminal themes, dashboards, and other power-ups, see [docs/advanced.md](docs/advanced.md).
 
 ## 🔄 Starting Fresh
 

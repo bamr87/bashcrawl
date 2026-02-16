@@ -1,4 +1,4 @@
-name: 🔄 Dependency Updates
+name: Dependency Updates
 
 on:
   schedule:
@@ -11,73 +11,42 @@ permissions:
 
 jobs:
   update-dependencies:
-    name: 📦 Update Dependencies
+    name: Update Python Dependencies
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: 🔍 Check for dependency files
-      id: check_files
-      run: |
-        echo "has_package_json=$(test -f package.json && echo true || echo false)" >> $GITHUB_OUTPUT
-        echo "has_gemfile=$(test -f Gemfile && echo true || echo false)" >> $GITHUB_OUTPUT
-        echo "has_requirements=$(test -f requirements.txt && echo true || echo false)" >> $GITHUB_OUTPUT
-        echo "has_go_mod=$(test -f go.mod && echo true || echo false)" >> $GITHUB_OUTPUT
-        
-    - name: 🟢 Setup Node.js
-      if: steps.check_files.outputs.has_package_json == 'true'
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        
-    - name: 💎 Setup Ruby
-      if: steps.check_files.outputs.has_gemfile == 'true'
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.1'
-        
-    - name: 🐍 Setup Python
-      if: steps.check_files.outputs.has_requirements == 'true'
+
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
-    - name: 🔄 Update Node dependencies
-      if: steps.check_files.outputs.has_package_json == 'true'
-      run: |
-        npm update
-        npm audit fix || true
-        
-    - name: 🔄 Update Ruby dependencies
-      if: steps.check_files.outputs.has_gemfile == 'true'
-      run: |
-        bundle update
-        
-    - name: 🔄 Update Python dependencies
-      if: steps.check_files.outputs.has_requirements == 'true'
+    - name: Update Python dependencies
       run: |
         pip install --upgrade pip
+        pip install -r src/terminal-illness/requirements.txt
         pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U || true
-        pip freeze > requirements.txt
+        pip freeze | grep -E '^(rich|prompt-toolkit)' > src/terminal-illness/requirements.txt.new
+        # Only update if versions changed
+        if ! diff -q src/terminal-illness/requirements.txt src/terminal-illness/requirements.txt.new >/dev/null 2>&1; then
+          mv src/terminal-illness/requirements.txt.new src/terminal-illness/requirements.txt
+        else
+          rm src/terminal-illness/requirements.txt.new
+        fi
         
-    - name: 📝 Create Pull Request
+    - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: 'chore: update dependencies'
-        title: '🔄 Automated dependency updates'
+        commit-message: 'chore: update Python dependencies'
+        title: 'Automated Python dependency updates'
         body: |
-          ## 📦 Dependency Updates
+          ## Dependency Updates
           
-          This PR contains automated dependency updates.
-          
-          ### What's Changed
-          - Updated outdated dependencies to their latest versions
-          - Applied security fixes where available
-          
-          ### Review Notes
+          Updated Python dependencies in `src/terminal-illness/requirements.txt`.
+        branch: deps/python-updates
           - Please review the changes carefully
           - Run tests to ensure compatibility
           - Check for any breaking changes in updated packages

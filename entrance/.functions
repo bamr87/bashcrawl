@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # If you are reading this, you have wandered out of bounds
 # and are reading the code that drives the game.
@@ -17,8 +18,8 @@
 # Whenever you see the `gameover`command in a file of this
 # dungeon, that's a "call" to this function.
 gameover () {
-    CORPSE=$(mktemp corpse.XXX)
-    cat << EOF2 > $CORPSE
+    CORPSE="$(mktemp corpse.XXX)"
+    cat << EOF2 > "$CORPSE"
 #!/bin/bash
 #
 # If you are reading this, you have wandered out of bounds
@@ -66,13 +67,13 @@ EOF2
 
 
 EOF2
-    chmod +x $CORPSE
+    chmod +x "$CORPSE"
 
-    curr=`basename $PWD`
+    curr="$(basename "$PWD")"
     while [ "$curr" != "entrance" ]; do
         pushd .. &> /dev/null
         dirs -c
-        curr=`basename $PWD`
+        curr="$(basename "$PWD")"
     done
     unset I
     unset HP
@@ -80,27 +81,17 @@ EOF2
 }
 
 # Intelligent Help System Function
+# Searches for help.sh in the bashcrawl root directory
 help() {
-    local help_script_path
+    local root
+    root="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+    root="${root%entrance*}"
     
-    # Try to find the help script in the bashcrawl root
-    if [ -f "$(dirname "$(pwd)")/help" ]; then
-        help_script_path="$(dirname "$(pwd)")/help"
-    elif [ -f "../help" ]; then
-        help_script_path="../help"
-    elif [ -f "../../help" ]; then
-        help_script_path="../../help"
-    elif [ -f "./help" ]; then
-        help_script_path="./help"
+    if [[ -f "${root}help.sh" ]]; then
+        bash "${root}help.sh" "$@"
+    elif [[ -f "${root}help/bashcrawl_help.sh" ]]; then
+        bash "${root}help/bashcrawl_help.sh" "$@"
     else
-        # Fallback: try to find it anywhere in the bashcrawl directory tree
-        help_script_path=$(find . -name "help" -type f -executable 2>/dev/null | head -1)
-        if [ -z "$help_script_path" ]; then
-            echo "❌ Help system not found. Make sure you're in the bashcrawl directory."
-            return 1
-        fi
+        echo "Help system not available. Try: cat scroll"
     fi
-    
-    # Execute the help script with any arguments passed
-    "$help_script_path" "$@"
 }

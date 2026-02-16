@@ -1,0 +1,10 @@
+#!/bin/bash
+if ! grep  --quiet --only-matching hair <<< $I; then
+    cat << eof
+You have found a lock of the **hair** of a god!  Add it to your inventory.
+
+eof
+else
+    echo "This treasure has already been taken."
+fi
+

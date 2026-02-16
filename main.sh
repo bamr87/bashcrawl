@@ -58,14 +58,20 @@ readonly GAME_DATA_DIR="${BASHCRAWL_ROOT}/.game_data"
 readonly LOG_DIR="${BASHCRAWL_ROOT}/logs"
 
 # Path: Color Configuration for Enhanced UX
-readonly COLOR_PRIMARY='\033[0;36m'     # Cyan
-readonly COLOR_SECONDARY='\033[0;35m'   # Purple  
-readonly COLOR_SUCCESS='\033[0;32m'     # Green
-readonly COLOR_WARNING='\033[0;33m'     # Yellow
-readonly COLOR_ERROR='\033[0;31m'       # Red
-readonly COLOR_INFO='\033[0;34m'        # Blue
-readonly COLOR_BOLD='\033[1m'           # Bold
-readonly COLOR_RESET='\033[0m'          # Reset
+# Source shared color constants
+if [[ -f "${BASHCRAWL_ROOT}/lib/colors.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/colors.sh"
+else
+    # Fallback inline definitions
+    readonly COLOR_PRIMARY=$'\033[0;36m'
+    readonly COLOR_SECONDARY=$'\033[0;35m'
+    readonly COLOR_SUCCESS=$'\033[0;32m'
+    readonly COLOR_WARNING=$'\033[0;33m'
+    readonly COLOR_ERROR=$'\033[0;31m'
+    readonly COLOR_INFO=$'\033[0;34m'
+    readonly COLOR_BOLD=$'\033[1m'
+    readonly COLOR_RESET=$'\033[0m'
+fi
 
 # Path: Game Environment Variables
 export BASHCRAWL_MODE="main_launcher"
@@ -82,18 +88,26 @@ fi
 # CORE UTILITY FUNCTIONS - PATH: FOUNDATION SERVICES
 # ============================================================================
 
-# Path: Logging System with Enhanced Context
+# Path: Logging System — Delegates to lib/log.sh (bc_log) with legacy file fallback
 log_event() {
     local level="$1"
     local message="$2"
     local context="${3:-main}"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$LOG_DIR"
     
-    # Log to file with structured format
+    # Log to legacy file for backward compatibility
     echo "[$timestamp] [$level] [$context] $message" >> "${LOG_DIR}/bashcrawl.log"
+    
+    # Also log to structured JSONL via bc_log if available
+    if declare -f bc_log &>/dev/null; then
+        local level_lower
+        level_lower=$(printf '%s' "$level" | tr '[:upper:]' '[:lower:]')
+        bc_log "launcher_${level_lower}" "context=${context}" "message=${message}"
+    fi
     
     # Display to user with appropriate colors
     case "$level" in
@@ -173,6 +187,7 @@ EOF
         log_event "INFO" "Loading existing game state" "state"
         # Update last session time
         sed -i.bak "s/LAST_SESSION=.*/LAST_SESSION=\"$(date -Iseconds)\"/" "$GAME_STATE_FILE"
+        rm -f "${GAME_STATE_FILE}.bak"
     fi
     
     # Source the game state with error handling
@@ -258,6 +273,7 @@ launch_interactive_mode() {
         local current_count
         current_count=$(grep "SESSION_COUNT=" "$GAME_STATE_FILE" | cut -d= -f2 || echo "0")
         sed -i.bak "s/SESSION_COUNT=.*/SESSION_COUNT=$((current_count + 1))/" "$GAME_STATE_FILE"
+        rm -f "${GAME_STATE_FILE}.bak"
     fi
     
     # Launch the interactive terminal emulator
@@ -295,6 +311,7 @@ launch_native_mode() {
     # Update game state
     if [[ -f "$GAME_STATE_FILE" ]]; then
         sed -i.bak "s/GAME_STARTED=.*/GAME_STARTED=\"true\"/" "$GAME_STATE_FILE"
+        rm -f "${GAME_STATE_FILE}.bak"
     fi
 }
 
@@ -343,6 +360,7 @@ launch_tutorial() {
     # Mark tutorial as viewed
     if [[ -f "$GAME_STATE_FILE" ]]; then
         sed -i.bak "s/TUTORIAL_COMPLETED=.*/TUTORIAL_COMPLETED=\"true\"/" "$GAME_STATE_FILE"
+        rm -f "${GAME_STATE_FILE}.bak"
     fi
     
     echo -n "Press Enter to return to main menu..."
@@ -392,25 +410,27 @@ reset_game_state() {
     echo "   • Areas visited and treasures found"
     echo "   • Session history and statistics"
     echo "   • Tutorial completion status"
+    echo "   • Unlocked hidden rooms (re-hidden)"
+    echo "   • Combat artifacts (corpses, statue pieces)"
     echo ""
     echo -n "Are you sure you want to reset? [y/N]: "
     read -r confirmation
     
     if [[ "$confirmation" =~ ^[Yy]$ ]]; then
-        # Backup current state
-        if [[ -f "$GAME_STATE_FILE" ]]; then
-            cp "$GAME_STATE_FILE" "${GAME_STATE_FILE}.backup.$(date +%s)"
-            log_event "INFO" "Game state backed up before reset" "reset"
+        # Use lib/reset.sh for comprehensive game state reset
+        if [[ -f "${BASHCRAWL_ROOT}/lib/reset.sh" ]]; then
+            bash "${BASHCRAWL_ROOT}/lib/reset.sh"
+            log_event "SUCCESS" "Game state has been reset via lib/reset.sh" "reset"
+        else
+            # Fallback: basic reset
+            log_event "WARNING" "lib/reset.sh not found, performing basic reset" "reset"
+            rm -f "$GAME_STATE_FILE"
+            rm -rf "$GAME_DATA_DIR"
         fi
-        
-        # Remove game state files
-        rm -f "$GAME_STATE_FILE"
-        rm -rf "$GAME_DATA_DIR"
         
         # Reinitialize
         initialize_game_state
         
-        log_event "SUCCESS" "Game state has been reset successfully" "reset"
         echo -e "${COLOR_SUCCESS}✅ Game state reset complete! You can start fresh.${COLOR_RESET}"
     else
         log_event "INFO" "Game state reset cancelled by user" "reset"

@@ -1,177 +1,126 @@
 
-# 🗡️ The Grand Armoury - Mastering Combat and Execution
+################################################################################
+#                  🗡️  THE GRAND ARMOURY                                      #
+#             Mastering Execution and Permissions                              #
+################################################################################
 
-## ⚔️ Welcome to the Warriors' Domain
+ANCIENT WISDOM: The Art of Execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*The metallic clang of weapons echoes through the chamber as you enter the armoury.*
-*Ancient weapons, magical potions, and mystical treasures await those brave enough*
-*to master the art of **executable combat** in the terminal realm.*
+The metallic clang of weapons echoes through the chamber
+as you enter the armoury.  Ancient weapons, magical potions,
+and mystical treasures await those brave enough to master
+the art of EXECUTABLE COMBAT.
 
-**You stand now in the heart of battle preparation.** This sacred armoury teaches
-the essential skills of **executing programs**, **wielding scripts**, and **manipulating
-file permissions** - the true weapons of a terminal warrior.
+Items that end with * when you run  ls -F  are executable
+encounters — programs and scripts you can activate.
 
-## 🎯 The Art of Executable Combat
+################################################################################
+#                     ⚡ RUNNING EXECUTABLES                                  #
+################################################################################
 
-### ⚡ Activation Spells: Running Executable Files
+To activate an executable, use the dot-slash incantation:
 
-Items that end with `*` are **executable encounters** - programs, scripts, and
-magical artifacts that you can activate and wield:
+    ./treasure        Activate the treasure chest
+    ./potion          Consume a magical potion
 
-```bash
-./treasure      # Activate the treasure chest in this room
-./potion        # Consume a magical potion for enhancement
-```
+THE DOT-SLASH EXPLAINED:
+    .   = "right here" (current directory)
+    /   = path separator
+    ./  = "run the thing HERE, not some other command"
 
-### 🔍 Understanding the Dot Path Magic
+Without the dot-slash, the shell looks for system commands
+instead of local files.  Always use  ./  for local scripts.
 
-The `./` prefix is a **relative path incantation**:
+--------------------------------------------------------------------------------
+⚡ RELATIVE vs ABSOLUTE PATHS
+--------------------------------------------------------------------------------
 
-- **`.`** = "Here in this exact chamber" (current directory)
-- **`/`** = Path separator between location and item name
-- **`./item`** = "Execute the item located here in this room"
+RELATIVE PATHS (from where you stand):
 
-### 🧭 Navigation Between Battle Zones
+    ./treasure           Item in THIS room
+    ../treasure          Item in the room ABOVE
+    chamber/spell        Item in the chamber below
 
-Master these movement spells for tactical positioning:
+ABSOLUTE PATHS (from the root of the world):
 
-```bash
-cd ..           # Retreat one level up (parent directory)
-cd chamber      # Advance into the inner chamber
-cd ~            # Teleport to your home base
-cd /            # Travel to the root of all domains
-```
+    /usr/bin/ls          System command at exact location
+    ~/documents/file     File in your home territory
 
-## 🛡️ Advanced Combat Techniques
+--------------------------------------------------------------------------------
+⚡ PERMISSIONS: chmod
+--------------------------------------------------------------------------------
 
-### 🎲 Relative vs Absolute Path Combat
+Some items need permission before you can wield them.
+The chmod spell grants execution power:
 
-**Relative Paths** (position-based):
+    chmod +x item        Make an item executable
+    ls -l item           Inspect an item's permissions
 
-```bash
-./treasure           # Item in current chamber
-../treasure          # Item in the chamber above
-chamber/spell        # Item in the chamber sub-room
-```
+READING PERMISSIONS:
+    -rwxr-xr-x   The 'x' means executable
+    -rw-r--r--   No 'x' means NOT executable
 
-**Absolute Paths** (location-specific):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PERMISSION REFERENCE                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMMAND              │ PURPOSE                                             │
+│ ls -l                │ Show detailed permissions for all files             │
+│ ls -F                │ Show type indicators (* = executable)               │
+│ chmod +x FILE        │ Grant execution permission                         │
+│ cat FILE             │ Read a script before running it                     │
+│ file FILE            │ Identify what type of file something is             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-```bash
-/usr/bin/ls          # System command at exact location
-~/documents/script   # File in your home territory
-```
+################################################################################
+#                        🏆 ARMOURY CHALLENGES                                #
+################################################################################
 
-### 🔐 Permission Mastery: The `chmod` Enchantment
+BASIC TRAINING:
 
-Some items may need permission adjustments before you can wield them:
+    1. See your arsenal:       ls -F
+    2. Inspect permissions:    ls -l
+    3. Claim the treasure:     ./treasure
+    4. Drink the potion:       ./potion
 
-```bash
-ls -l item          # Inspect item permissions and properties
-chmod +x item       # Grant execution permissions (make executable)
-chmod 755 item      # Set full combat readiness (read, write, execute)
-```
+INTERMEDIATE:
 
-## 🏆 Armoury Training Challenges
+    5. Enter the chamber:      cd chamber
+    6. Read the scroll there:  cat scroll
+    7. Come back:              cd ..
 
-### ✅ Basic Warrior Skills
+ADVANCED:
 
-1. **Examine Your Arsenal**: Use `ls -F` to identify all executable items (`*`)
-2. **Activate Treasure**: Execute `./treasure` to claim your reward
-3. **Consume Enhancement**: Try `./potion` to see what magical effects await
-4. **Master Permissions**: Check permissions with `ls -l` for all items
+    8. Check your inventory:   echo $I
+    9. Check your health:      echo $HP
+   10. If a file won't run, fix it:  chmod +x filename
 
-### ⚔️ Intermediate Combat Training
+################################################################################
+#                       ⚠️  COMBAT SAFETY                                    #
+################################################################################
 
-1. **Chamber Exploration**: Navigate to the inner `chamber/` and explore its contents
-2. **Cross-Chamber Combat**: Execute items from different chambers using relative paths
-3. **Permission Debugging**: If an item won't execute, check and fix its permissions
-4. **Strategic Retreat**: Practice moving between chambers with `cd ..` and `cd chamber`
+ALWAYS inspect before executing:
 
-### 🏅 Advanced Warrior Techniques
+    cat item            Read the script before running it
+    file item           Check what type of file it is
+    ls -l item          Verify permissions
 
-1. **Path Mastery**: Execute the same item using both relative and absolute paths
-2. **Combat Chaining**: Execute multiple items in sequence
-3. **Environment Manipulation**: Use executable results to modify your shell environment
-4. **Stealth Operations**: Combine movement and execution in single command chains
+NEVER run a script you haven't read first!
+In the real world, unknown scripts can be dangerous.
 
-## 💡 Combat Wisdom: Understanding Executables
+################################################################################
+#                       🗺️  NAVIGATION                                       #
+################################################################################
 
-### 🧠 Why Execution Matters
+YOUR ARSENAL IN THIS ROOM:
+    🗡️  treasure*    — Collect a weapon for your inventory
+    🧪  potion*      — Gain health points for combat
+    📜  scroll       — You're reading it!
+    🏰  chamber/     — The deepest room (boss fight!)
 
-In the terminal realm, **execution permissions** are your weapons:
+MOVEMENT:
+    cd chamber      Advance to the inner chamber
+    cd ..           Retreat to the cellar
+    pwd             Confirm your location
 
-- **Scripts**: Automated sequences of commands (your spell scrolls)
-- **Programs**: Compiled applications (your enchanted weapons)
-- **System Commands**: Built-in terminal powers (your natural abilities)
-
-### 🛠️ Real-World Battle Applications
-
-These combat skills translate to real development warfare:
-
-- **Running Build Scripts**: Execute compilation and deployment sequences
-- **System Administration**: Manage services and system maintenance scripts
-- **Development Tools**: Run tests, linters, and code formatters
-- **Automation**: Execute custom scripts for repetitive tasks
-
-### ⚠️ Combat Safety Protocols
-
-**Always inspect before executing:**
-
-```bash
-cat item            # Read the scroll before casting the spell
-less item           # Examine long scripts page by page
-file item           # Identify the type of executable encounter
-which item          # Locate system commands in your PATH
-```
-
-## 🗺️ Your Arsenal Inventory
-
-After mastering the armoury's challenges, your combat gear includes:
-
-- **🗡️ Execution Skills**: Run any program or script with confidence
-- **🛡️ Permission Mastery**: Understand and modify file access rights  
-- **🧭 Path Navigation**: Move between directories and execute across boundaries
-- **⚔️ Combat Strategy**: Chain commands and combine operations effectively
-
-## 🚪 Next Battlefields
-
-From the armoury, several paths lead to new challenges:
-
-### 🏰 **THE INNER CHAMBER**
-
-- **Access**: `cd chamber`
-- **Focus**: Advanced spell casting and magical artifact manipulation
-- **Skills**: Complex executable interactions and script parameters
-- **Rewards**: Rare magical items and enhanced combat abilities
-
-### 🔙 **RETURN TO CELLAR**
-
-- **Access**: `cd ..`
-- **Purpose**: Access other specialized training grounds
-- **Options**: Chapel (meditation), Vault (wealth), Scrap (system mastery)
-
-## 💰 Treasure and Rewards
-
-Before leaving the armoury, ensure you've claimed all treasures:
-
-1. **Execute the treasure chest**: `./treasure`
-2. **Test the magical potion**: `./potion`
-3. **Collect any dropped items**: Check your inventory with `echo $I`
-4. **Prepare for advanced combat**: Ensure all weapons are executable
-
-## 🎯 Final Combat Assessment
-
-You are ready to leave the armoury when you can:
-
-- [ ] Execute any file marked with `*` using proper path syntax
-- [ ] Navigate between chambers while executing items
-- [ ] Understand and modify file permissions as needed
-- [ ] Chain multiple executions and navigation commands
-- [ ] Troubleshoot permission errors and path issues
-
----
-
-*"In the armoury, tools become weapons, and commands become conquest."*
-*~ Ancient Terminal Warrior Code*
-
-**May your blade stay sharp and your permissions stay proper, brave warrior!**
+################################################################################

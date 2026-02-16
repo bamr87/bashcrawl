@@ -1,6 +1,6 @@
-### Terminal Illness — A Fantasy Terminal Learning Game
+### Terminal Illness — Bashcrawl Python Wrapper
 
-Run a terminal-based RPG that teaches command-line skills through quests and magical theming. Classic Mode provides a structured path; Dynamic Mode is stubbed for future AI integration.
+A rich Python terminal interface that wraps the real bashcrawl game directories, adding quest tracking, styled output, tab completion, and save/load on top of the actual dungeon rooms.
 
 ### Quickstart
 
@@ -8,71 +8,78 @@ Run a terminal-based RPG that teaches command-line skills through quests and mag
 2) Install dependencies:
 
 ```
+cd src/terminal-illness
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3) Run the game:
+3) Run the game (from the repo root):
 
 ```
 python -m ti
 ```
 
-### Core Features (Classic Mode)
-- Guided quest progression (pwd, ls, cd, mkdir, touch, cat, grep)
-- Virtual filesystem sandbox (safe; doesn’t touch your real files)
-- Styled output with quest tracker and status panels
-- Command history, path-sensitive tab completion, and contextual hints
-- Automatic save/load plus manual `save` command
-- Helpful feedback when viewing empty files (`cat` now reports `(empty file)`)
-
-### Quest Flow at a Glance
-1. **Awakening** – run `pwd` to learn where you are
-2. **Eyes to See** – discover `ls`
-3. **First Steps** – travel with `cd /home/hero`
-4. **Shape the World** – create `workshop` via `mkdir`
-5. **Spark of Creation** – `touch notes.txt` inside the workshop
-6. **Read the Signs** – `cat notes.txt` (now surfaces empty files clearly)
-7. **Seek the Whisper** – `grep Whisper scroll.txt` while in `/forest`
-
-### Workspace Layout
-- `ti/main.py`: Entrypoint and game loop
-- `ti/game_state.py`: Persistent progress tracking
-- `ti/vfs.py`: In-memory virtual filesystem (seed content + safe sandbox)
-- `ti/quests.py`: Classic quests and completion checks
-- `ti/terminal_engine.py`: Command parsing, autocompletion, rendering
-- `ti/ai_agents.py`: Stubs/placeholders for Dynamic Mode
-- Docs & tooling:
-	- `COMPLETE_WALKTHROUGH.md`: Narrative walkthrough of every quest
-	- `INTERACTIVE_TEST_REPORT.md`: Full QA log covering 100% of interactions
-	- `explore_game.py`: Comprehensive exploration harness
-	- `direct_test.py`: Scenario-driven gameplay tester
-	- `interactive_test.sh`: Timed, full playthrough script
-	- `error_test.sh`: Edge-case and error-handling smoke test
-
-### Testing & Quality Assurance
-- Every quest, command, and error path exercised in `INTERACTIVE_TEST_REPORT.md`
-- `explore_game.py` or `direct_test.py` can be run for automated coverage:
+Or specify the game root explicitly:
 
 ```
-source .venv/bin/activate
-python explore_game.py      # full command + quest audit
-python direct_test.py       # targeted scenario testing
-./interactive_test.sh       # scripted terminal playthrough
-./error_test.sh             # regression checks for failures
+python -m ti --game-root /path/to/bashcrawl
 ```
+
+### Architecture
+
+The Python wrapper operates on the **real bashcrawl filesystem** — the same `entrance/`, `cellar/`, `armoury/`, and `chamber/` directories used by the native bash game. All commands (`ls`, `cd`, `cat`, `mkdir`, etc.) execute against real files, sandboxed to the game root.
+
+### Module Layout
+
+| File | Purpose |
+|------|---------|
+| `ti/main.py` | Entry point — auto-detects game root, handles save/load |
+| `ti/filesystem.py` | Real filesystem wrapper with sandbox guard |
+| `ti/terminal_engine.py` | Command parsing, tab completion, Rich UI rendering |
+| `ti/game_state.py` | Persistent progress: quests, inventory (`$I`), HP, env vars |
+| `ti/quests.py` | Quest definitions mapped to bashcrawl rooms |
+| `ti/ai_agents.py` | Stubs for future AI-generated quest/world expansion |
+| `seed_prompt.instructions.md` | LLM prompt template for AI agent integration |
+
+### Quest Flow
+
+1. **Awakening** — run `pwd` to learn your location
+2. **Eyes to See** — `ls` to reveal rooms and scrolls
+3. **First Steps** — `cd cellar` to descend deeper
+4. **Ancient Knowledge** — `cat scroll` to read dungeon lore
+5. **Shape the World** — `mkdir` to create something new
+6. **Spark of Creation** — `touch` to create a file
+7. **Seek the Whisper** — `grep` to search within scrolls
+
+### Game Script Execution
+
+Run bash game scripts directly:
+
+```
+./treasure    # Collect treasure, update inventory
+./potion      # Drink a potion, gain HP
+./statue      # Combat encounter
+```
+
+Scripts run via `subprocess` with the current game environment (`$I`, `$HP`).
+
+### Commands
+
+`pwd`, `ls`, `cd`, `mkdir`, `touch`, `cat`, `grep`, `rm`, `cp`, `mv`, `export`, `echo`, `save`, `load`, `merlin`, `exit`, plus `./script` execution.
 
 ### Dynamic Mode (Preview)
+
 Stubs for AI-generated quests/worlds live in `ti/ai_agents.py`. To wire up an LLM, implement providers there and gate calls on env config (e.g., `OPENAI_API_KEY`).
 
 ### Resetting Progress
-Remove `.ti_save.json` to start fresh:
 
 ```
 rm -f .ti_save.json
 ```
 
 ### Notes
-- The game is self-contained and safe. All file operations happen inside the in-memory VFS.
-- Press Ctrl+C or use the `exit` command to quit; progress saves automatically.
+
+- The game operates on real files within the bashcrawl game root.
+- A sandbox guard prevents navigation outside the game directory.
+- Press Ctrl+C or use `exit` to quit; progress saves automatically.
 

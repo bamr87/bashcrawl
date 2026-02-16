@@ -1,4 +1,4 @@
-name: 🔍 Code Quality & Security
+name: Code Quality & Security
 
 on:
   push:
@@ -15,101 +15,82 @@ permissions:
 
 jobs:
   security-scan:
-    name: 🛡️ Security Analysis
+    name: Security Analysis
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 🔍 Initialize CodeQL
+    - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-        languages: javascript, python, ruby
+        languages: python
         
-    - name: 🏗️ Autobuild
+    - name: Autobuild
       uses: github/codeql-action/autobuild@v3
       
-    - name: 🔍 Perform CodeQL Analysis
+    - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
-      
-    - name: 🔐 Dependency security scan
-      uses: anchore/sbom-action@v0
-      with:
-        path: ./
-        format: spdx-json
         
   lint-and-format:
-    name: 📏 Lint & Format
+    name: Lint & Format
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 🔍 Lint Markdown
+    - name: Lint Markdown
       uses: articulate/actions-markdownlint@v1
       with:
         config: .markdownlint.json
         files: '**/*.md'
         ignore: node_modules
         
-    - name: 🔍 Lint YAML
+    - name: Lint YAML
       uses: ibiqlik/action-yamllint@v3
       with:
         file_or_dir: .
         config_file: .yamllint.yml
         
-    - name: 🔍 Lint Shell scripts
+    - name: Lint Shell scripts
       run: |
-        find . -name "*.sh" -exec shellcheck {} \;
+        find . -name "*.sh" -exec shellcheck {} +
         
   quality-metrics:
-    name: 📊 Quality Metrics
+    name: Quality Metrics
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         
-    - name: 📈 Calculate metrics
+    - name: Calculate metrics
       run: |
-        echo "## 📊 Code Quality Metrics" > quality-report.md
+        echo "## Code Quality Metrics" > quality-report.md
         echo "" >> quality-report.md
         
         # File statistics
-        total_files=$(find . -type f | wc -l)
-        code_files=$(find . -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.rb" | wc -l)
+        total_files=$(find . -type f -not -path './.git/*' | wc -l)
+        shell_files=$(find . -name "*.sh" | wc -l)
+        python_files=$(find . -name "*.py" | wc -l)
         doc_files=$(find . -name "*.md" | wc -l)
+        game_executables=$(find entrance/ -type f -executable 2>/dev/null | wc -l)
+        scroll_files=$(find entrance/ -name "scroll" 2>/dev/null | wc -l)
         
         echo "- **Total Files**: $total_files" >> quality-report.md
-        echo "- **Code Files**: $code_files" >> quality-report.md
-        echo "- **Documentation Files**: $doc_files" >> quality-report.md
-        
-        # Lines of code
-        if [[ $code_files -gt 0 ]]; then
-          loc=$(find . -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.rb" | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
-          echo "- **Lines of Code**: $loc" >> quality-report.md
-        fi
-        
-        # Git statistics
-        commits_this_week=$(git log --since="7 days ago" --oneline | wc -l)
-        contributors=$(git shortlog -sn | wc -l)
-        
-        echo "- **Commits This Week**: $commits_this_week" >> quality-report.md
-        echo "- **Contributors**: $contributors" >> quality-report.md
-        
-        # Documentation ratio
-        if [[ $code_files -gt 0 ]]; then
-          doc_ratio=$((doc_files * 100 / code_files))
-          echo "- **Documentation Ratio**: ${doc_ratio}%" >> quality-report.md
-        fi
+        echo "- **Shell Scripts**: $shell_files" >> quality-report.md
+        echo "- **Python Files**: $python_files" >> quality-report.md
+        echo "- **Documentation**: $doc_files" >> quality-report.md
+        echo "- **Game Executables**: $game_executables" >> quality-report.md
+        echo "- **Scroll Files**: $scroll_files" >> quality-report.md
         
         cat quality-report.md
         
-    - name: 💾 Upload quality report
+    - name: Upload quality report
       uses: actions/upload-artifact@v4
       with:
         name: quality-report

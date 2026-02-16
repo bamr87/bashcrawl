@@ -592,7 +592,17 @@ execute_command() {
             ;;
         "echo")
             handled=true
-            eval echo "$args"
+            # Safe echo: expand $VAR references without eval
+            local expanded_args="$args"
+            # Expand known game variables safely
+            expanded_args="${expanded_args//\$I/$I}"
+            expanded_args="${expanded_args//\$HP/$HP}"
+            expanded_args="${expanded_args//\$GAME_LEVEL/$GAME_LEVEL}"
+            expanded_args="${expanded_args//\$CURRENT_AREA/$CURRENT_AREA}"
+            expanded_args="${expanded_args//\$USER/$USER}"
+            expanded_args="${expanded_args//\$HOME/$HOME}"
+            expanded_args="${expanded_args//\$PWD/$PWD}"
+            echo "$expanded_args"
             status=$?
             ;;
 
@@ -633,8 +643,14 @@ execute_command() {
         "export")
             handled=true
             if [[ -n "$args" ]]; then
-                eval "export $args" 2>/dev/null
-                status=$?
+                # Validate: only allow safe variable assignments (NAME=VALUE)
+                if [[ "$args" =~ ^[A-Za-z_][A-Za-z_0-9]*= ]]; then
+                    eval "export $args" 2>/dev/null
+                    status=$?
+                else
+                    echo -e "${ERROR_COLOR}Invalid export syntax. Use: export VAR=value${RESET_COLOR}"
+                    status=1
+                fi
             else
                 echo -e "${ERROR_COLOR}Usage: export VAR=value${RESET_COLOR}"
                 status=1
@@ -643,8 +659,15 @@ execute_command() {
         "let")
             handled=true
             if [[ -n "$args" ]]; then
-                eval "let $args" 2>/dev/null
-                status=$?
+                # Validate: only allow arithmetic expressions with known vars
+                local let_pattern='^[A-Za-z_0-9=+*/% "'"'"'-]+$'
+                if [[ "$args" =~ $let_pattern ]]; then
+                    eval "let $args" 2>/dev/null
+                    status=$?
+                else
+                    echo -e "${ERROR_COLOR}Invalid let syntax. Use: let \"HP=HP-5\"${RESET_COLOR}"
+                    status=1
+                fi
             else
                 echo -e "${ERROR_COLOR}Usage: let \"expression\"${RESET_COLOR}"
                 status=1
@@ -1312,7 +1335,7 @@ look_around() {
     echo ""
     
     # Enhanced ls with game context
-    ls -F --color=auto
+    ls -F "${LS_COLOR_FLAGS[@]}"
     echo ""
     
     add_area_context
@@ -1326,7 +1349,7 @@ explore_area() {
     echo ""
     
     echo "=== VISIBLE CONTENTS ==="
-    ls -la --color=auto
+    ls -la "${LS_COLOR_FLAGS[@]}"
     echo ""
     
     echo "=== AREA ANALYSIS ==="

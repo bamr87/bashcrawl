@@ -60,4 +60,4 @@ After forging your amulet, new paths will open:
 *   **🗡️ The Armoury**: Learn combat skills and file manipulation.
 *   **⛪ Hidden Chapel**: Discover secret commands and advanced techniques.
 *   **💰 The Vault**: Master inventory management and environment variables.
-*   **🔧 The Scrap**: Explore system information and debugging.
+*   **🔧 The Scrap**: Learn symlinks (ln -s), shortcuts, and portal creation.

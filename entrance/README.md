@@ -50,7 +50,7 @@ The entrance connects to several chambers, each teaching different skills:
 
 - **Chapel**: Prayer and reflection skills
 - **Vault**: Treasure management and inventory systems
-- **Scrap**: Advanced recycling and resource management
+- **Scrap**: Symlinks, shortcuts, and portal creation
 - **Armoury**: Combat skills and executable files
 
 ## 🎮 Game Mechanics

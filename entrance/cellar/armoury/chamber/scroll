@@ -1,15 +1,130 @@
 
-# You seem to have reached the end of this hall.
-#
-# Turn back and try another path.
-#
-# Remember, to back track one directory, you type:
-#
-# cd ..
-#
-# If you are drawing a map of your progress,
-# you can always get the name of your working
-# directory with this command:
-#
-# pwd
+################################################################################
+#                    🏰 THE CHAMBER OF SPIRITS                                #
+################################################################################
+
+ANCIENT WISDOM: The Power of Memory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You stand in a vast underground chamber lit by flickering
+blue torchlight.  Runes carved into the walls pulse with
+an otherworldly energy.  This is where adventurers learn
+the art of MEMORY — the ability to store and recall
+knowledge using the power of variables.
+
+################################################################################
+#                     📜 ENVIRONMENT VARIABLES                                #
+################################################################################
+
+In these catacombs, your memories are stored as VARIABLES.
+A variable is a named container that holds a value.
+
+--------------------------------------------------------------------------------
+⚡ CREATING VARIABLES: export
+--------------------------------------------------------------------------------
+
+The export spell binds a value to a name, making it
+available throughout your adventure:
+
+    export HP=15
+
+This creates a variable called HP with the value 15.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ VARIABLE REFERENCE                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMMAND               │ PURPOSE              │ EXAMPLE                     │
+│ export VAR=value      │ Create a variable    │ export HP=15                │
+│ echo $VAR             │ Read a variable      │ echo $HP                    │
+│ export I=item,$I      │ Append to variable   │ export I=sword,$I           │
+│ let "VAR=VAR-5"       │ Do arithmetic        │ let "HP=HP-5"               │
+│ unset VAR             │ Forget a variable    │ unset HP                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+--------------------------------------------------------------------------------
+⚡ READING VARIABLES: echo
+--------------------------------------------------------------------------------
+
+The echo spell speaks aloud whatever you tell it.
+When you prefix a variable name with $, echo reveals
+its contents:
+
+    echo $HP
+    echo $I
+
+Try it now:
+
+    echo $HP
+
+If nothing appears, you haven't set your HP yet!
+Go back to the armoury and drink the potion first.
+
+--------------------------------------------------------------------------------
+⚡ YOUR INVENTORY: $I
+--------------------------------------------------------------------------------
+
+Your inventory is stored in the variable I (for Inventory).
+Each treasure you collect gets added with a comma:
+
+    export I=coins,$I
+
+To check what you're carrying:
+
+    echo $I
+
+You should see items like:  sword,amulet,
+
+If your inventory is empty, you may have missed treasures
+in earlier rooms.  Use cd .. to retrace your steps.
+
+--------------------------------------------------------------------------------
+⚡ ARITHMETIC: let
+--------------------------------------------------------------------------------
+
+The let spell performs calculations on your variables:
+
+    let "HP=HP-5"       Subtract 5 from HP
+    let "HP=HP+10"      Add 10 to HP
+    let "HP=HP*2"       Double your HP
+
+After arithmetic, check the result:
+
+    echo $HP
+
+################################################################################
+#                        ⚔️  CHALLENGE                                        #
+################################################################################
+
+This chamber holds three encounters:
+
+    🗡️  statue*    — A guardian that tests your combat skills
+    💰  treasure*  — Riches guarded by the statue
+    🔮  spell*     — A portal-creating incantation
+
+RECOMMENDED ORDER:
+    1. Make sure you have a sword:  echo $I
+    2. Check your health:           echo $HP
+    3. Face the statue:             ./statue
+    4. Claim the treasure:          ./treasure
+    5. Learn the spell:             ./spell
+
+WARNING: The statue hits hard!  If your HP reaches 0,
+you will perish.  Make sure you drank the potion first.
+
+################################################################################
+#                        🗺️  NAVIGATION                                      #
+################################################################################
+
+You have reached the deepest room on the main path.
+
+    cd ..              Go back to the armoury
+    cd ../..           Go back to the cellar
+    cd ../../..        Return to the entrance
+    pwd                Show your current location
+
+Once you've completed this chamber, explore the entrance
+for hidden rooms that your treasures may have unlocked.
+Try:  ls -la ../../..
+
+################################################################################
 

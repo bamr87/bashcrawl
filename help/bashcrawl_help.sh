@@ -545,8 +545,8 @@ EOF
 
 # Main help function
 main() {
-    local help_topic="$1"
-    local help_subtopic="$2"
+    local help_topic="${1:-}"
+    local help_subtopic="${2:-}"
     
     # Handle specific help topics first
     case "$help_topic" in
@@ -559,7 +559,7 @@ main() {
             return
             ;;
         suggest)
-            show_advanced_help "suggest" "$help_subtopic" "$3"
+            show_advanced_help "suggest" "$help_subtopic" "${3:-}"
             return
             ;;
         qref|ref|reference)

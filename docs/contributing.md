@@ -1,15 +1,69 @@
 # Contributing
 
-We welcome contributions to Bashcrawl! Here are some ways you can help:
+## Reporting Issues
 
-## Reporting Bugs
+Open an issue at [github.com/bamr87/bashcrawl/issues](https://github.com/bamr87/bashcrawl/issues)
+with steps to reproduce.
 
-If you find a bug, please open an issue on our [GitHub repository](https://github.com/bamr87/bashcrawl/issues).
+## Development Setup
 
-## Suggesting Enhancements
+```bash
+git clone https://github.com/bamr87/bashcrawl.git
+cd bashcrawl
+bash setup.sh
+```
 
-If you have an idea for a new feature or an improvement to an existing one, please open an issue on our [GitHub repository](https://github.com/bamr87/bashcrawl/issues).
+## Adding Game Content
 
-## Submitting Pull Requests
+### New Room
 
-If you'd like to contribute code, please fork the repository and submit a pull request.
+1. Create directory: `mkdir -p entrance/path/to/.newroom`
+2. Add `scroll` file matching the [format standard](advanced.md#scroll-format-standards)
+3. Add encounters (treasure, potion, etc.) with `chmod +x`
+4. Wire unlock in a prerequisite treasure: `mv ../../.newroom ../../newroom 2>/dev/null`
+5. Add reset logic in `lib/reset.sh`
+
+### New Encounter
+
+Follow the [executable template](advanced.md#executable-encounter-template):
+- `#!/usr/bin/env bash` shebang
+- 14-line "wandered out of bounds" boilerplate
+- Story via `cat << EOF` heredocs (plain text, no ANSI)
+- Game state via `export` instructions, `grep` checks, file flags
+- **Never** use `rm`, `mv`, or `perl -i` on tracked game files
+
+### Scroll Content
+
+See `.github/instructions/scrolls.instructions.md` for the full standard.
+Key rules:
+- 80-character width, readable with `cat`
+- Level 1 (entrance): Pure ASCII with `===` dividers
+- Level 2 (intermediate): Unicode box-drawing, emoji, `####` headers
+- Level 3 (advanced): Full formatting
+- Every room on the main path needs a scroll with 50+ lines
+
+## Code Standards
+
+### Shell Scripts
+
+- Shebang: `#!/usr/bin/env bash`
+- Infrastructure scripts: `set -euo pipefail`, source `lib/colors.sh`
+- Game executables: No strict mode, plain text output
+- macOS compatibility: `sed -i.bak` not `sed -i`, detect `ls` color flags
+- Source colors from `lib/colors.sh` instead of defining inline
+
+### Linting
+
+```bash
+shellcheck main.sh setup.sh bashcrawl-terminal.sh help.sh lib/*.sh help/*.sh
+```
+
+CI runs ShellCheck, yamllint, markdownlint, and game content validation on every PR.
+
+## Pull Request Process
+
+1. Fork the repo and create a feature branch
+2. Run `bash lib/reset.sh` and play through your changes
+3. Run `shellcheck` on modified shell scripts
+4. Submit PR against `main` with a description of changes
+5. CI must pass before merge

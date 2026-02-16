@@ -18,7 +18,15 @@ if [[ -e orb1 && -e orb2 && -e orb3 ]]; then
 You have freed the goblet's material form.  Add 'goblet' to
 your inventory.
 
+export I=goblet,\$I
+
+A strange energy pulses through the dungeon walls.
+Somewhere far above, in the entrance hall, a hidden
+passage to the RIFT has opened...
+
 EOF
+    # Unlock the .rift hidden area at entrance level
+    mv ../../.rift ../../rift 2>/dev/null
     exit
 else 
     cat << EOF

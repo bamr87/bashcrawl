@@ -1,48 +1,47 @@
-# 🎯 Bashcrawl Help System
+# Bashcrawl Help System
 
-This directory contains the intelligent help system components for Bashcrawl.
+Context-aware assistance for players navigating the bashcrawl adventure.
 
-## Structure
+## Architecture
 
-- `init_help.sh` - Simple initialization script to enable the help system
-- `bashcrawl_help.sh` - Main help system script with context-aware assistance
-- `ai_engine.sh` - AI learning engine that tracks player progress
-- `command_suggester.sh` - Intelligent command recommendations
-- `tutorial_engine.sh` - Interactive tutorial system
-- `quick_ref.sh` - Quick reference cards and cheat sheets
-- `setup_help.sh` - Advanced setup script (legacy)
-- `demo_help.sh` - Help system demonstration
-- `HELP_REFERENCE.md` - Complete help system documentation
+```
+help.sh                  ← Main entry point (project root)
+help/
+├── init_help.sh         ← Source to enable 'help' shell function
+├── bashcrawl_help.sh    ← Context-aware help engine
+├── ai_engine.sh         ← Player progress tracking & pattern analysis
+├── command_suggester.sh ← Directory-aware command recommendations
+├── tutorial_engine.sh   ← Interactive tutorial system
+├── quick_ref.sh         ← Quick reference cards
+├── HELP_REFERENCE.md    ← Help system documentation
+└── README.md            ← This file
+```
 
-## Usage
-
-The help system is activated by sourcing the `init_help.sh` script in this directory:
+## Quick Start
 
 ```bash
+# Option 1: Run directly
+bash help.sh              # Context-aware help
+bash help.sh commands     # Command quick reference
+bash help.sh map          # Dungeon map
+bash help.sh reset        # Reset instructions
+
+# Option 2: Enable as shell function (persistent)
 source help/init_help.sh
+help                      # Then use from anywhere
 ```
 
-After activation, use `help` from anywhere in the bashcrawl adventure:
+## How It Works
 
-```bash
-help                    # Context-aware help for current location
-help commands          # Detailed command reference
-help tips              # Advanced tips and tricks
-help tutorial          # Interactive tutorial mode
-```
-
-## Features
-
-- **Context-Aware**: Adapts help content based on your current location
-- **Progress-Aware**: Provides different guidance based on your experience level
-- **AI-Enhanced**: Intelligent suggestions based on game state
-- **Location-Specific**: Tailored advice for each dungeon area
-- **Interactive**: Responds to your current inventory and progress
+1. `help.sh` is the single entry point — all other scripts reference it
+2. It sources `help/bashcrawl_help.sh` which detects the player's location
+3. `ai_engine.sh` tracks progress patterns and detects when players are stuck
+4. `command_suggester.sh` analyzes current directory contents for relevant tips
+5. `init_help.sh` registers `help` as a shell function for seamless gameplay
 
 ## Integration
 
-The help system integrates seamlessly with bashcrawl's existing mechanics:
-- Uses the same color scheme and theming
-- Respects game variables and state
-- Provides guidance that enhances rather than spoils gameplay
-- Encourages exploration and learning
+- Uses `lib/colors.sh` for consistent theming
+- Logs help usage via `lib/log.sh` when available
+- Reads game variables (`$I`, `$HP`) for progress-aware guidance
+- Works from any directory within the bashcrawl game tree

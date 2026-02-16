@@ -58,11 +58,18 @@ if [[ -L "$portal" ]]; then
     $DRY_RUN || rm -f "$portal"
 fi
 
-# 3. Restore statue (if renamed to 'pieces')
+# 3. Restore statue (remove .statue_defeated flag)
+statue_flag="$ENTRANCE/cellar/armoury/chamber/.statue_defeated"
+if [[ -f "$statue_flag" ]]; then
+    log "Removing .statue_defeated flag"
+    $DRY_RUN || rm -f "$statue_flag"
+fi
+
+# Also restore legacy pieces→statue rename if present
 pieces="$ENTRANCE/cellar/armoury/chamber/pieces"
 statue="$ENTRANCE/cellar/armoury/chamber/statue"
 if [[ -f "$pieces" && ! -f "$statue" ]]; then
-    log "Restoring statue from pieces"
+    log "Restoring statue from pieces (legacy)"
     $DRY_RUN || mv "$pieces" "$statue"
 fi
 

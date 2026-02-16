@@ -14,20 +14,20 @@
 #
 
 #import global functions from toplevel directory
-FUNCTIONS=$(pwd)
-FUNCTIONS=${FUNCTIONS%entrance*}entrance/.functions
-. $FUNCTIONS
+FUNCTIONS="$(pwd)"
+FUNCTIONS="${FUNCTIONS%entrance*}entrance/.functions"
+. "$FUNCTIONS"
 
-# this runs after the statue has been "destroyed"
-# and this file has been renamed to 'pieces'
-if [ "$0" = "./pieces" ]; then
+# Check if the statue has already been defeated
+if [ -f .statue_defeated ]; then
     cat << EOF
-You sift through the pieces of a shattered statue.
+You see the shattered remains of a stone statue scattered
+across the chamber floor.
 
 You find nothing of interest in the statue's remains.
 
 EOF
-    exit 1
+    exit 0
 fi
 
 # start the statue encounter
@@ -63,13 +63,22 @@ EOF
         exit 1
     fi
 
-    perl -pe 's/coins/diamonds/' -i ./treasure
+    cat << EOF
+The statue's eyes glow with ancient power.
+Behind it, you glimpse a stash of diamonds!
+
+EOF
     printf "Do you have a sword? y/n  "
     read RESP
     if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
-       if grep  --quiet --only-matching 'sword' <<< $I; then
+       if grep  --quiet --only-matching 'sword' <<< "$I"; then
            cat <<EOF
 You strike the statue and it breaks to pieces!
+The diamonds spill onto the floor before you.
+
+Add the diamonds to your inventory:
+
+export I=diamonds,\$I
 
 However, you have taken damage.
 Deduct 5 from your HP variable:
@@ -77,7 +86,7 @@ Deduct 5 from your HP variable:
 let "HP=HP-5"
 
 EOF
-           mv statue pieces
+           touch .statue_defeated
        else
            cat << EOF
 No you don't!  Run!
@@ -86,9 +95,10 @@ Deduct 5 from your HP variable:
 
 let "HP=HP-5"
 
+The statue blocks the way forward, but the treasure
+and spell remain intact. Return with a real sword!
+
 EOF
-           rm treasure
-           rm spell
       fi
     else
         cat <<EOF

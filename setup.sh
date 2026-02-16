@@ -50,14 +50,20 @@ readonly BASHCRAWL_ROOT="$SCRIPT_DIR"
 readonly LOG_FILE="${SCRIPT_DIR}/logs/setup.log"
 
 # Path: Color Configuration for Enhanced UX
-readonly COLOR_PRIMARY='\033[0;36m'     # Cyan
-readonly COLOR_SECONDARY='\033[0;35m'   # Purple  
-readonly COLOR_SUCCESS='\033[0;32m'     # Green
-readonly COLOR_WARNING='\033[0;33m'     # Yellow
-readonly COLOR_ERROR='\033[0;31m'       # Red
-readonly COLOR_INFO='\033[0;34m'        # Blue
-readonly COLOR_BOLD='\033[1m'           # Bold
-readonly COLOR_RESET='\033[0m'          # Reset
+# Source shared color constants
+if [[ -f "${SCRIPT_DIR}/lib/colors.sh" ]]; then
+    source "${SCRIPT_DIR}/lib/colors.sh"
+else
+    # Fallback inline definitions
+    readonly COLOR_PRIMARY=$'\033[0;36m'
+    readonly COLOR_SECONDARY=$'\033[0;35m'
+    readonly COLOR_SUCCESS=$'\033[0;32m'
+    readonly COLOR_WARNING=$'\033[0;33m'
+    readonly COLOR_ERROR=$'\033[0;31m'
+    readonly COLOR_INFO=$'\033[0;34m'
+    readonly COLOR_BOLD=$'\033[1m'
+    readonly COLOR_RESET=$'\033[0m'
+fi
 
 # Path: Setup Configuration
 SETUP_MODE="interactive"
@@ -150,8 +156,12 @@ check_system_requirements() {
     if [[ $bash_major -lt 3 ]]; then
         log_setup "ERROR" "Bash 3.0+ required. Current version: $BASH_VERSION" "validation"
         requirements_met=false
-    elif [[ $bash_major -eq 3 && "${BASH_VERSION#3.}" < "2" ]]; then
-        log_setup "WARNING" "Bash 4.0+ recommended. Current version: $BASH_VERSION" "validation"
+    elif [[ $bash_major -eq 3 ]]; then
+        local bash_minor="${BASH_VERSION#3.}"
+        bash_minor="${bash_minor%%.*}"
+        if [[ $bash_minor -lt 2 ]]; then
+            log_setup "WARNING" "Bash 4.0+ recommended. Current version: $BASH_VERSION" "validation"
+        fi
         log_setup "SUCCESS" "Bash version: $BASH_VERSION (compatible) ✓" "validation"
     else
         log_setup "SUCCESS" "Bash version: $BASH_VERSION ✓" "validation"
@@ -257,8 +267,7 @@ setup_executable_permissions() {
     # Main scripts
     local main_scripts=(
         "main.sh"
-        "bashcrawl-terminal.sh" 
-        "help.sh"
+        "bashcrawl-terminal.sh"
     )
     
     for script in "${main_scripts[@]}"; do
@@ -272,7 +281,7 @@ setup_executable_permissions() {
     done
     
     # Game interaction files
-    local game_executables=("treasure" "potion" "spell" "monster" "ghost" "scroll_reader")
+    local game_executables=("treasure" "potion" "spell" "monster" "ghost" "statue")
     
     for executable in "${game_executables[@]}"; do
         # Find and make executable all files with these names

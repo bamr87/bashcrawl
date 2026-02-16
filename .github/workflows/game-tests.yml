@@ -1,0 +1,116 @@
+name: Game Content Validation
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'entrance/**'
+      - 'help/**'
+      - 'lib/**'
+      - '*.sh'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'entrance/**'
+      - 'help/**'
+      - 'lib/**'
+      - '*.sh'
+
+jobs:
+  validate-game:
+    name: Validate Game Content
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check scroll files exist in game rooms
+      run: |
+        echo "=== Checking scroll files ==="
+        errors=0
+        
+        # Main path rooms must have scrolls
+        for dir in entrance entrance/cellar entrance/cellar/armoury entrance/cellar/armoury/chamber; do
+          if [[ ! -f "$dir/scroll" ]]; then
+            echo "ERROR: Missing scroll in $dir/"
+            errors=$((errors + 1))
+          else
+            lines=$(wc -l < "$dir/scroll")
+            if [[ $lines -lt 30 ]]; then
+              echo "WARNING: $dir/scroll has only $lines lines (expected 30+)"
+            fi
+            echo "OK: $dir/scroll ($lines lines)"
+          fi
+        done
+        
+        # Report all scrolls found
+        echo ""
+        echo "=== All scroll files found ==="
+        find entrance/ -name scroll -type f | sort | while read -r f; do
+          echo "  $f ($(wc -l < "$f") lines)"
+        done
+        
+        [[ $errors -eq 0 ]] && echo "All required scrolls present." || exit 1
+        
+    - name: Check game executables have shebangs
+      run: |
+        echo "=== Checking game executable shebangs ==="
+        errors=0
+        
+        for name in treasure potion spell statue monster ghost goblet; do
+          while IFS= read -r -d '' f; do
+            first_line=$(head -1 "$f")
+            if [[ "$first_line" != "#!/usr/bin/env bash" && "$first_line" != "#!/bin/bash" ]]; then
+              echo "ERROR: $f missing bash shebang (got: $first_line)"
+              errors=$((errors + 1))
+            else
+              echo "OK: $f"
+            fi
+          done < <(find entrance/ -name "$name" -type f -print0 2>/dev/null)
+        done
+        
+        [[ $errors -eq 0 ]] && echo "All shebangs correct." || exit 1
+        
+    - name: Check game executables have boilerplate
+      run: |
+        echo "=== Checking boilerplate comments ==="
+        errors=0
+        
+        for name in treasure potion spell statue monster ghost goblet; do
+          while IFS= read -r -d '' f; do
+            if ! grep -q "wandered out of bounds" "$f" 2>/dev/null; then
+              echo "WARNING: $f missing standard boilerplate comment"
+            else
+              echo "OK: $f"
+            fi
+          done < <(find entrance/ -name "$name" -type f -print0 2>/dev/null)
+        done
+        
+    - name: Check hidden room unlock targets exist
+      run: |
+        echo "=== Checking unlock mechanism targets ==="
+        errors=0
+        
+        # These hidden dirs should exist (may be hidden or visible depending on game state)
+        for dir in .chapel .vault .rift .scrap; do
+          visible="${dir#.}"
+          if [[ -d "entrance/$dir" ]] || [[ -d "entrance/$visible" ]]; then
+            echo "OK: entrance/$dir (or $visible) exists"
+          else
+            echo "ERROR: entrance/$dir does not exist (unlock target missing)"
+            errors=$((errors + 1))
+          fi
+        done
+        
+        [[ $errors -eq 0 ]] && echo "All unlock targets present." || exit 1
+
+    - name: Check shell scripts with ShellCheck
+      run: |
+        echo "=== ShellCheck on infrastructure scripts ==="
+        shellcheck main.sh setup.sh bashcrawl-terminal.sh help.sh lib/*.sh help/*.sh
+        
+    - name: Run game reset dry-run
+      run: |
+        echo "=== Testing reset script ==="
+        bash lib/reset.sh --dry

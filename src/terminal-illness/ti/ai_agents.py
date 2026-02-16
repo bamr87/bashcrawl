@@ -32,7 +32,8 @@ class WorldBuilderAgent:
         ...
 
     def expand_world(self, seed: str) -> List[str]:
-        return ["/valley", "/valley/altar"]
+        # Placeholder — would create new rooms relative to game root
+        return ["entrance/garden", "entrance/garden/fountain"]
 
 
 class NarrativeMasterAgent:

@@ -14,7 +14,7 @@
 #
 
 # check if we found that bottle already ...
-if [ -n "$HP" ] ; then
+if [ "${HP:-0}" -gt 0 ] ; then
   cat <<EOF
 You checked that bottle already. 
 EOF

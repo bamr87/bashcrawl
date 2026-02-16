@@ -1,0 +1,85 @@
+
+================================================================================
+                        THE WORKSHOP
+================================================================================
+
+You enter a cluttered workspace filled with half-finished
+projects and dusty tools.  A workbench sits in the center,
+covered with plans for building and organizing.
+
+This is a place of creation and destruction — where you
+learn to shape the dungeon itself.
+
+================================================================================
+                    CREATION SPELLS
+================================================================================
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+mkdir NAME         Create a room                Make a new directory
+touch NAME         Create an object             Make a new empty file
+cp SRC DEST        Duplicate an object          Copy a file
+
+================================================================================
+                    DESTRUCTION SPELLS
+================================================================================
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+rm NAME            Destroy an object            Delete a file
+rmdir NAME         Collapse a room              Delete an empty directory
+rm -r NAME         Obliterate a room            Delete directory and contents
+
+       *** WARNING: rm CANNOT BE UNDONE! ***
+       *** There is no "undo" in the terminal! ***
+
+================================================================================
+                    WORKSHOP CHALLENGES
+================================================================================
+
+CHALLENGE 1: Build a storage room
+    mkdir storage
+
+CHALLENGE 2: Create a note inside it
+    touch storage/note.txt
+
+CHALLENGE 3: Write to the note (using echo and redirection)
+    echo "My first note" > storage/note.txt
+
+CHALLENGE 4: Read your note
+    cat storage/note.txt
+
+CHALLENGE 5: Clean up when done
+    rm storage/note.txt
+    rmdir storage
+
+VERIFY your work at each step with:
+    ls -F
+
+================================================================================
+                    ADVANCED: REDIRECTION
+================================================================================
+
+The > symbol redirects output INTO a file:
+
+    echo "hello" > greeting.txt    Write "hello" to a file
+    cat scroll > backup.txt        Copy scroll contents to backup
+
+The >> symbol APPENDS to a file (does not overwrite):
+
+    echo "line 1" > log.txt       Create file with first line
+    echo "line 2" >> log.txt      Add second line
+
+You can view the result:
+    cat log.txt
+
+================================================================================
+                    NAVIGATION
+================================================================================
+
+This workshop is a side room off the main path.
+Return to the entrance when you're ready:
+
+    cd ..
+
+================================================================================

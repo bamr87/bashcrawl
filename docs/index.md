@@ -1,10 +1,22 @@
-# Welcome to Bashcrawl Documentation
+# Bashcrawl Documentation
 
-This documentation provides a comprehensive guide to Bashcrawl, the terminal adventure game designed to teach you the fundamentals of POSIX terminal navigation.
+Learn terminal commands by exploring a fantasy dungeon. Directories are rooms, files
+are scrolls, and executables are encounters.
 
-## Table of Contents
+## Contents
 
-*   [Getting Started](./getting-started.md)
-*   [Gameplay Guide](./gameplay.md)
-*   [Advanced Features](./advanced.md)
-*   [Contributing](./contributing.md)
+- [Getting Started](getting-started.md) — Installation, setup, and your first game
+- [Gameplay Guide](gameplay.md) — Mechanics, rooms, inventory, combat, and progression
+- [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, scroll standards
+- [Contributing](contributing.md) — How to add rooms, write scrolls, and submit changes
+- [Improvement Plan](improvement-plan.md) — Known issues and planned enhancements
+- [Logging Framework](logging-framework-plan.md) — Architecture for gameplay analytics
+
+## Quick Start
+
+```bash
+git clone https://github.com/bamr87/bashcrawl.git
+cd bashcrawl
+bash setup.sh
+cd entrance && cat scroll
+```

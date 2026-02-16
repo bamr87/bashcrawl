@@ -1,0 +1,11 @@
+#!/bin/bash
+if ! grep  --quiet --only-matching bracelet <<< $I; then
+    cat << eof
+You have found an enchanted *bracelet* of chaotic
+necromancy!  Add it to your inventory.
+
+eof
+else
+    echo "This treasure has already been taken."
+fi
+
