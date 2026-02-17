@@ -275,8 +275,12 @@ class DemoRunner:
         var = match.group(1)
         rhs = match.group(2)
 
-        # Replace variable references with their values
-        for env_var, env_val in self.env.items():
+        # Replace variable references with their values.
+        # Sort by name length descending so that longer names (e.g. "HP")
+        # are replaced before shorter prefixes (e.g. "H").
+        for env_var, env_val in sorted(
+            self.env.items(), key=lambda kv: len(kv[0]), reverse=True
+        ):
             if env_var in rhs:
                 try:
                     rhs = rhs.replace(env_var, str(int(env_val)))
@@ -298,6 +302,9 @@ class DemoRunner:
     def _do_echo(self, cmd: str) -> TerminalSnapshot:
         """Handle ``echo`` by expanding variables."""
         arg = cmd[5:].strip()
+        # Strip surrounding quotes (single or double)
+        if len(arg) >= 2 and arg[0] == arg[-1] and arg[0] in ('"', "'"):
+            arg = arg[1:-1]
         output = self._expand_vars(arg)
         return TerminalSnapshot(
             command=cmd,

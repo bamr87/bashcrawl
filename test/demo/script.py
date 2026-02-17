@@ -652,7 +652,7 @@ CHAPTER_7: list[DemoStep] = [
         stdin_input="y\ny\n",
     ),
     DemoStep(
-        command="export I=$(echo $I | sed 's/fish//;s/,,/,/')",
+        command='export I=$(sed "s/fish//; s/,,/,/" <<< $I)',
         chapter=_CH7,
         section="Removing the Fish",
         explanation=(
@@ -660,9 +660,11 @@ CHAPTER_7: list[DemoStep] = [
             "substitution. ``s/fish//`` removes 'fish' from our "
             "inventory string, and ``s/,,/,/`` cleans up any double "
             "commas left behind. The ``$()`` syntax runs a command and "
-            "captures its output — called command substitution."
+            "captures its output — called command substitution. The "
+            "``<<<`` operator is a here-string that feeds a variable "
+            "directly to a command's stdin."
         ),
-        concepts=["sed", "command substitution", "$()"],
+        concepts=["sed", "command substitution", "$()", "here-string"],
         is_setup=True,
     ),
     DemoStep(
@@ -677,7 +679,6 @@ CHAPTER_7: list[DemoStep] = [
             "often have a purpose later."
         ),
         concepts=["./"],
-        stdin_input="y\n",
     ),
     DemoStep(
         command="export I=crystal,$I",
@@ -746,7 +747,7 @@ CHAPTER_8: list[DemoStep] = [
             "arithmetic, and ``grep`` to check for the sword."
         ),
         concepts=["$RANDOM", "let", "grep", "game combat"],
-        stdin_input="5\n",
+        stdin_input="y\n5\n",
     ),
     DemoStep(
         command="ls -F",
@@ -1088,7 +1089,7 @@ CHAPTER_10: list[DemoStep] = [
         stdin_input="27121981\n",
     ),
     DemoStep(
-        command="export I=goldcoins,bracelet,silverkeys,$I",
+        command="export I=goldcoins,bracelet,silverkeys,$I,",
         chapter=_CH10,
         section="Mausoleum Loot",
         explanation="We collect all three items from the mausoleum.",
@@ -1287,7 +1288,7 @@ CHAPTER_11: list[DemoStep] = [
             "the ghost drops an emerald and platinum coins."
         ),
         concepts=["./", "combat", "$RANDOM", "game bonuses"],
-        stdin_input="3\n",
+        stdin_input="y\n3\n",
     ),
     DemoStep(
         command="cd ../../../..",
@@ -1486,7 +1487,7 @@ CHAPTER_13: list[DemoStep] = [
             "command learned throughout the game."
         ),
         concepts=["./", "combat", "game finale"],
-        stdin_input="7\n",
+        stdin_input="y\n7\n",
     ),
     DemoStep(
         command="ls -F",

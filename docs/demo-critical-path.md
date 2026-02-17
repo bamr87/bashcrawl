@@ -1,8 +1,8 @@
 # Bashcrawl: Complete Game Walkthrough
 
-> **Auto-generated** from a test demo run on 2026-02-16 20:30
+> **Auto-generated** from a test demo run on 2026-02-16 20:43
 >
-> Duration: 0.2s | Steps: 29 | Rooms: 4 | Errors: 0
+> Duration: 0.1s | Steps: 29 | Rooms: 4 | Errors: 0
 
 ---
 
@@ -858,7 +858,7 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | Metric | Value |
 |--------|-------|
 | **Total Steps** | 29 |
-| **Duration** | 0.2 seconds |
+| **Duration** | 0.1 seconds |
 | **Rooms Visited** | 4 |
 | **Items Collected** | 4 |
 | **Encounters** | 6 |

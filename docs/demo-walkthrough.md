@@ -1,8 +1,8 @@
 # Bashcrawl: Complete Game Walkthrough
 
-> **Auto-generated** from a test demo run on 2026-02-16 20:30
+> **Auto-generated** from a test demo run on 2026-02-16 20:43
 >
-> Duration: 0.4s | Steps: 119 | Rooms: 23 | Errors: 0
+> Duration: 0.5s | Steps: 119 | Rooms: 23 | Errors: 0
 
 ---
 
@@ -1125,13 +1125,13 @@ export I=$(sed "s/fish//; s/,,/,/" <<< $I)
 
 ### Removing the Fish
 
-The ``sed`` command (stream editor) performs text substitution. ``s/fish//`` removes 'fish' from our inventory string, and ``s/,,/,/`` cleans up any double commas left behind. The ``$()`` syntax runs a command and captures its output — called command substitution.
+The ``sed`` command (stream editor) performs text substitution. ``s/fish//`` removes 'fish' from our inventory string, and ``s/,,/,/`` cleans up any double commas left behind. The ``$()`` syntax runs a command and captures its output — called command substitution. The ``<<<`` operator is a here-string that feeds a variable directly to a command's stdin.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=$(echo $I | sed 's/fish//;s/,,/,/')
+bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=$(sed "s/fish//; s/,,/,/" <<< $I)
 ```
 
-> **Concepts:** `sed`, `command substitution`, `$()`
+> **Concepts:** `sed`, `command substitution`, `$()`, `here-string`
 
 > 🎮 **Player Action:** Run this command to update your game state.
 
@@ -1141,7 +1141,6 @@ A white crystal forged by the Queen of Winter lies in the icy pond. We collect i
 
 ```bash
 bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ ./crystal
-# (input) y
 A white crystal, forged by the Queen of Winter, on the
 frosty ground.
 
@@ -1281,6 +1280,7 @@ The monster encounter is a random combat system. You pick a number, and both you
 
 ```bash
 bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ./monster
+# (input) y
 # (input) 5
 A hulking three-legged beast, with a mouth full of fangs and
 a barbed tail and 8 arms, lumbers toward you.
@@ -1288,8 +1288,25 @@ a barbed tail and 8 arms, lumbers toward you.
 If you have a sword, you can attack.  Otherwise, you should
 run.
 
-Do you want to attack? y/n  You wisely turn and flee.  Quickly cd to the previous
-directory.
+Do you want to attack? y/n  Enter a number:  The monster rolled  47
+You rolled  24
+
+Your attack is deflected off the monster's leathery flesh.
+You take 5 points damage. Deduct this from your HP.
+
+let HP=HP-5
+
+Enter a number:  The monster rolled  19
+You rolled  13
+
+Your attack is deflected off the monster's leathery flesh.
+You take 5 points damage. Deduct this from your HP.
+
+let HP=HP-5
+
+You have been slain by the monster.
+
+GAME OVER!
 ```
 
 > **Concepts:** `$RANDOM`, `let`, `grep`, `game combat`
@@ -1300,6 +1317,7 @@ After defeating the monster, new files appear: ``treasure`` and ``carcass`` (the
 
 ```bash
 bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ls -F
+corpse.6hz*
 library/
 monster*
 scroll
@@ -1926,7 +1944,7 @@ export I=goldcoins,bracelet,silverkeys,$I,
 We collect all three items from the mausoleum.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ export I=goldcoins,bracelet,silverkeys,$I
+bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ export I=goldcoins,bracelet,silverkeys,$I,
 ```
 
 > **Concepts:** `export`
@@ -2197,6 +2215,7 @@ The ghost of an evil wizard manifests. This is another random combat encounter u
 
 ```bash
 bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ ./ghost
+# (input) y
 # (input) 3
 The room shakes, a gust of wind blasts you from nowhere.
 You sense that a presence has entered the room.  The pain
@@ -2206,8 +2225,11 @@ ghostly entity!
 If you have a sword, you can attack.  Otherwise, you should
 run.
 
-Do you want to attack? y/n  You wisely turn and flee.  Quickly cd to the previous
-directory.
+Do you want to attack? y/n  Enter a number:  The monster rolled  17
+You rolled  28
++2 bonus from a mysterious wintry patron!
+A hit! A palpable hit!  You have slain the spirit of the
+evil wizard.
 ```
 
 > **Concepts:** `./`, `combat`, `$RANDOM`, `game bonuses`
@@ -2493,11 +2515,8 @@ The pit contains ``drummer`` (to weaken Nyarlathotep), ``nyarlathotep`` (the fin
 bamr87@bashcrawl:~/entrance/rift/arena/pit$ ls -F
 drum
 drummer*
-end
 nyarlathotep*
-platinum*
 scroll
-treasure*
 wizard-light*
 ```
 
@@ -2535,14 +2554,17 @@ Nyarlathotep — the crawling chaos — is the final boss. The combat uses the s
 
 ```bash
 bamr87@bashcrawl:~/entrance/rift/arena/pit$ ./nyarlathotep
+# (input) y
 # (input) 7
 In the blink of an eye, Nyarlathotep is standing before you.
 From its hands emanate black necrotic rays, and your mind
 screams.
 
-Are you armed? y/n  You turn to flee but find that you cannot.  You spend 1000
-years as a mindless servant to the crawling chaos.  When you
-awaken, you may attempt to fight for your liberation.
+Are you armed? y/n  Enter a number.
+The monster rolled  23
+You rolled  57
+A hit! A palpable hit!  You have vanquished the elder god of
+chaos!
 ```
 
 > **Concepts:** `./`, `combat`, `game finale`
@@ -2721,6 +2743,7 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | `environmental storytelling` | environmental storytelling |
 | `exploration` | exploration |
 | `tab completion` | Press TAB to auto-complete commands/filenames |
+| `here-string` | here-string |
 | `$RANDOM` | $RANDOM |
 | `dynamic file creation` | dynamic file creation |
 | `interactive puzzles` | interactive puzzles |
@@ -2741,7 +2764,7 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | Metric | Value |
 |--------|-------|
 | **Total Steps** | 119 |
-| **Duration** | 0.4 seconds |
+| **Duration** | 0.5 seconds |
 | **Rooms Visited** | 23 |
 | **Items Collected** | 15 |
 | **Encounters** | 20 |
