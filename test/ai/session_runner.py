@@ -1,0 +1,490 @@
+"""Non-interactive session runner for the TerminalEngine.
+
+Drives the game engine programmatically without prompt_toolkit REPL,
+enabling AI agents and test scripts to play through the game.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Optional
+
+from ti.filesystem import GameFileSystem
+from ti.game_state import GameState
+from ti.quests import check_quest_completion, quest_list
+
+# Import log capture if available (optional dependency)
+try:
+    from fixtures.log_capture import TestLogCapture
+except ImportError:
+    TestLogCapture = None  # type: ignore[misc,assignment]
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class CommandResult:
+    """Result of executing a single command."""
+
+    command: str
+    output: str
+    kind: str  # success, error, output, info, magic, exit
+    location: str
+    inventory: str
+    hp: int
+    quest_completed: Optional[str] = None
+
+
+@dataclass
+class SessionResult:
+    """Result of a complete non-interactive session."""
+
+    commands: list[CommandResult] = field(default_factory=list)
+    total_turns: int = 0
+    final_location: str = ""
+    final_inventory: str = ""
+    final_hp: int = 0
+    quests_completed: list[str] = field(default_factory=list)
+    rooms_visited: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    exit_reason: str = ""
+
+    @property
+    def success(self) -> bool:
+        return self.exit_reason in ("exit", "max_commands", "source_exhausted")
+
+
+class NonInteractiveEngine:
+    """Drives a TerminalEngine without prompt_toolkit.
+
+    Provides:
+    - ``execute_command(cmd)`` — run one command and return output
+    - ``run_session(source, max_commands)`` — loop with a command source
+
+    The command source is a callable: ``f(output: str) -> str`` that
+    receives the previous command's output and returns the next command.
+    This is the interface the AI TestAgent implements.
+    """
+
+    def __init__(
+        self,
+        game_root: Path,
+        state: GameState | None = None,
+        initial_env: dict[str, str] | None = None,
+        log_capture: "TestLogCapture | None" = None,
+    ) -> None:
+        self.fs = GameFileSystem(game_root)
+        self.state = state or GameState()
+        self._cwd = self.state.current_location or "/entrance"
+        self._rooms_visited: list[str] = []
+        self._log_capture = log_capture
+
+        # Apply initial environment
+        if initial_env:
+            for key, val in initial_env.items():
+                self.state.set_env(key, val)
+
+        # Build command dispatch table
+        self._handlers: dict[str, Callable] = {
+            "pwd": self._cmd_pwd,
+            "ls": self._cmd_ls,
+            "cd": self._cmd_cd,
+            "cat": self._cmd_cat,
+            "mkdir": self._cmd_mkdir,
+            "touch": self._cmd_touch,
+            "grep": self._cmd_grep,
+            "rm": self._cmd_rm,
+            "cp": self._cmd_cp,
+            "mv": self._cmd_mv,
+            "export": self._cmd_export,
+            "echo": self._cmd_echo,
+            "help": self._cmd_help,
+            "save": self._cmd_save,
+            "exit": self._cmd_exit,
+        }
+
+        self._track_room()
+
+    @property
+    def cwd(self) -> str:
+        return self._cwd
+
+    @property
+    def rooms_visited(self) -> list[str]:
+        return list(self._rooms_visited)
+
+    def _track_room(self) -> None:
+        """Track current room in visited list and emit log event."""
+        room = self._cwd.lstrip("/").replace("entrance/", "").replace("entrance", "entrance")
+        if not room:
+            room = "entrance"
+        if not self._rooms_visited or self._rooms_visited[-1] != room:
+            self._rooms_visited.append(room)
+            if self._log_capture:
+                self._log_capture.log_event("room_enter", room=room)
+
+    def execute_command(self, cmd: str) -> CommandResult:
+        """Execute a single command and return the result.
+
+        This is the core method that the AI agent and test harness use
+        to interact with the game.
+        """
+        cmd = cmd.strip()
+        if not cmd:
+            return CommandResult(
+                command="",
+                output="",
+                kind="info",
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
+
+        self.state.log("command", cmd)
+        parts = cmd.split()
+        base_cmd = parts[0]
+        args = parts[1:]
+
+        # Handle executable scripts (./treasure, ./potion, etc.)
+        if base_cmd.startswith("./"):
+            return self._run_script(base_cmd[2:], args)
+
+        # Handle y/n responses (for interactive script prompts)
+        if base_cmd in ("y", "n", "yes", "no"):
+            return CommandResult(
+                command=cmd,
+                output=f"(response: {base_cmd})",
+                kind="info",
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
+
+        # Handle let (arithmetic)
+        if base_cmd == "let":
+            return self._cmd_let(args)
+
+        handler = self._handlers.get(base_cmd)
+        if not handler:
+            return CommandResult(
+                command=cmd,
+                output=f"Unknown command: {base_cmd}. Try 'help'.",
+                kind="error",
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
+
+        try:
+            kind, output = handler(args)
+        except Exception as e:
+            kind, output = "error", f"{type(e).__name__}: {e}"
+
+        # Track learned commands
+        if base_cmd not in self.state.learned_commands and kind != "error":
+            self.state.learned_commands.append(base_cmd)
+
+        # Check quest completion
+        quest_name = None
+        if check_quest_completion(self.state, self._cwd):
+            quests = quest_list()
+            if self.state.current_quest_id < len(quests):
+                q = quests[self.state.current_quest_id]
+                quest_name = q.title
+                self.state.completed_quest_ids.append(q.id)
+                self.state.current_quest_id += 1
+                self.state.experience_points += q.xp
+                output += f"\n✨ Quest complete: {q.title}! Reward: {q.reward}"
+
+        result = CommandResult(
+            command=cmd,
+            output=output,
+            kind=kind,
+            location=self._cwd,
+            inventory=self.state.inventory,
+            hp=self.state.hp,
+            quest_completed=quest_name,
+        )
+
+        self.state.log(kind, output[:500])
+
+        # Emit JSONL log events
+        if self._log_capture:
+            room = self._cwd.lstrip("/")
+            self._log_capture.log_command(cmd, output=output[:200], room=room)
+            if quest_name:
+                self._log_capture.log_event("encounter", type="quest", quest=quest_name, room=room)
+
+        return result
+
+    def run_session(
+        self,
+        command_source: Callable[[str], str],
+        max_commands: int = 100,
+        on_command: Callable[[CommandResult], None] | None = None,
+    ) -> SessionResult:
+        """Run a complete session with a command source.
+
+        Args:
+            command_source: Callable that receives previous output and returns
+                the next command. This is typically ``agent.next_command``.
+            max_commands: Maximum number of commands to execute.
+            on_command: Optional callback invoked after each command.
+
+        Returns:
+            SessionResult with full session data.
+        """
+        session = SessionResult()
+        last_output = self._get_initial_output()
+
+        for i in range(max_commands):
+            try:
+                cmd = command_source(last_output)
+            except Exception as e:
+                session.exit_reason = f"source_error: {e}"
+                session.errors.append(str(e))
+                break
+
+            if not cmd or cmd.lower() in ("exit", "quit"):
+                session.exit_reason = "exit"
+                break
+
+            result = self.execute_command(cmd)
+            session.commands.append(result)
+            session.total_turns = i + 1
+
+            if result.quest_completed:
+                session.quests_completed.append(result.quest_completed)
+
+            if on_command:
+                on_command(result)
+
+            last_output = result.output
+
+            if result.kind == "exit":
+                session.exit_reason = "exit"
+                break
+        else:
+            session.exit_reason = "max_commands"
+
+        session.final_location = self._cwd
+        session.final_inventory = self.state.inventory
+        session.final_hp = self.state.hp
+        session.rooms_visited = list(self._rooms_visited)
+
+        return session
+
+    def _get_initial_output(self) -> str:
+        """Generate initial context for the AI agent."""
+        entries = self.fs.ls(self._cwd)
+        return (
+            f"You are in {self._cwd}.\n"
+            f"Contents: {', '.join(entries)}\n"
+            f"Inventory: {self.state.inventory or 'empty'}\n"
+            f"HP: {self.state.hp}\n"
+            "Use 'cat scroll' to read the scroll, 'ls' to look around, "
+            "'cd <dir>' to move."
+        )
+
+    # ------------------------------------------------------------------
+    # Command implementations (simplified, return (kind, output))
+    # ------------------------------------------------------------------
+
+    def _cmd_pwd(self, args: list[str]) -> tuple[str, str]:
+        return "output", self._cwd
+
+    def _cmd_ls(self, args: list[str]) -> tuple[str, str]:
+        path = args[0] if args else ""
+        show_hidden = "-a" in args or "-la" in args or "-al" in args
+        if show_hidden and path in ("-a", "-la", "-al"):
+            path = ""
+        if show_hidden and len(args) > 1:
+            path = [a for a in args if not a.startswith("-")]
+            path = path[0] if path else ""
+
+        items = self.fs.ls(self._cwd, path)
+        if show_hidden:
+            # GameFileSystem.ls already shows hidden files
+            pass
+        return "output", "  ".join(items) if items else "(empty)"
+
+    def _cmd_cd(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "cd requires a path"
+        try:
+            new_cwd = self.fs.cd(self._cwd, args[0])
+            self._cwd = new_cwd
+            self.state.current_location = new_cwd
+            self._track_room()
+            # Auto-show room contents
+            entries = self.fs.ls(self._cwd)
+            return "success", f"Moved to {new_cwd}\nContents: {', '.join(entries)}"
+        except (NotADirectoryError, FileNotFoundError, PermissionError) as e:
+            return "error", str(e)
+
+    def _cmd_cat(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "cat requires a file path"
+        try:
+            content = self.fs.read_file(self._cwd, args[0])
+            return "output", content if content else "(empty file)"
+        except FileNotFoundError as e:
+            return "error", str(e)
+
+    def _cmd_mkdir(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "mkdir requires a directory name"
+        self.fs.mkdir(self._cwd, args[0])
+        return "success", f"Created {args[0]}"
+
+    def _cmd_touch(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "touch requires a file name"
+        self.fs.touch(self._cwd, args[0])
+        return "success", f"Touched {args[0]}"
+
+    def _cmd_grep(self, args: list[str]) -> tuple[str, str]:
+        if len(args) < 2:
+            return "error", "grep requires a pattern and a file"
+        pattern, filepath = args[0], args[1]
+        try:
+            text = self.fs.read_file(self._cwd, filepath)
+            matches = [l for l in text.splitlines() if pattern in l]
+            return "output", "\n".join(matches) if matches else f"(no matches for '{pattern}')"
+        except FileNotFoundError as e:
+            return "error", str(e)
+
+    def _cmd_rm(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "rm requires a file path"
+        self.fs.rm(self._cwd, args[0])
+        return "success", f"Removed {args[0]}"
+
+    def _cmd_cp(self, args: list[str]) -> tuple[str, str]:
+        if len(args) < 2:
+            return "error", "cp requires source and destination"
+        self.fs.cp(self._cwd, args[0], args[1])
+        return "success", f"Copied {args[0]} → {args[1]}"
+
+    def _cmd_mv(self, args: list[str]) -> tuple[str, str]:
+        if len(args) < 2:
+            return "error", "mv requires source and destination"
+        self.fs.mv(self._cwd, args[0], args[1])
+        return "success", f"Moved {args[0]} → {args[1]}"
+
+    def _cmd_export(self, args: list[str]) -> tuple[str, str]:
+        if not args:
+            return "error", "export requires VAR=value"
+        assignment = " ".join(args)
+        if "=" not in assignment:
+            return "error", "Usage: export VAR=value"
+        key, value = assignment.split("=", 1)
+        self.state.set_env(key.strip(), value.strip())
+        return "success", f"Exported {key.strip()}={value.strip()}"
+
+    def _cmd_echo(self, args: list[str]) -> tuple[str, str]:
+        text = " ".join(args)
+        replacements = {
+            "$I": self.state.inventory,
+            "$HP": str(self.state.hp),
+            "$PWD": self._cwd,
+        }
+        for var, val in replacements.items():
+            text = text.replace(var, val)
+        for key, val in self.state.env_vars.items():
+            text = text.replace(f"${key}", val)
+        return "output", text
+
+    def _cmd_help(self, args: list[str]) -> tuple[str, str]:
+        commands = sorted(self._handlers.keys())
+        lines = ["Available commands: " + ", ".join(commands)]
+        lines.append("Run game scripts with: ./treasure, ./potion, etc.")
+        return "info", "\n".join(lines)
+
+    def _cmd_save(self, args: list[str]) -> tuple[str, str]:
+        self.state.save()
+        return "success", "Progress saved."
+
+    def _cmd_exit(self, args: list[str]) -> tuple[str, str]:
+        return "exit", "Goodbye!"
+
+    def _cmd_let(self, args: list[str]) -> tuple[str, str]:
+        """Handle 'let' arithmetic expressions."""
+        if not args:
+            return "error", "let requires an expression"
+        expr = " ".join(args).strip('"').strip("'")
+        # Parse simple assignment: HP=HP-5
+        match = re.match(r"(\w+)=(.+)", expr)
+        if match:
+            var_name = match.group(1)
+            rhs = match.group(2)
+            # Replace variable references with values
+            rhs = rhs.replace("HP", str(self.state.hp))
+            rhs = rhs.replace("I", f'"{self.state.inventory}"')
+            try:
+                result = eval(rhs)  # Safe enough for simple arithmetic
+                self.state.set_env(var_name, str(int(result)))
+                return "success", f"{var_name}={int(result)}"
+            except Exception as e:
+                return "error", f"Arithmetic error: {e}"
+        return "error", f"Cannot parse: {expr}"
+
+    # ------------------------------------------------------------------
+    # Script execution
+    # ------------------------------------------------------------------
+
+    def _run_script(self, script: str, args: list[str]) -> CommandResult:
+        """Execute a bash game script via subprocess."""
+        try:
+            output, exit_code, _ = self.fs.run_script(
+                self._cwd, script, env_vars=self.state.game_env,
+            )
+
+            # Parse export instructions from script output
+            self._parse_export_instructions(output)
+
+            # Emit encounter log events
+            if self._log_capture:
+                room = self._cwd.lstrip("/")
+                script_type = script  # treasure, potion, statue, etc.
+                self._log_capture.log_event(
+                    "encounter",
+                    type=script_type,
+                    room=room,
+                    exit_code=exit_code,
+                    output_preview=output[:200] if output else "",
+                )
+
+            return CommandResult(
+                command=f"./{script}",
+                output=output.rstrip() if output else "(no output)",
+                kind="output" if exit_code == 0 else "error",
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
+        except (FileNotFoundError, PermissionError) as e:
+            return CommandResult(
+                command=f"./{script}",
+                output=str(e),
+                kind="error",
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
+
+    def _parse_export_instructions(self, output: str) -> None:
+        """Detect 'export VAR=value' instructions in script output.
+
+        Scripts tell the player to run export commands. We auto-detect
+        these instructions so the AI agent doesn't have to.
+        Note: We don't auto-apply them — the agent must still run export.
+        But we log them so tests can verify the agent follows instructions.
+        """
+        # Just log detected instructions — don't auto-apply
+        for match in re.finditer(r"export\s+(\w+)=([^\s]+)", output):
+            key, value = match.group(1), match.group(2)
+            logger.debug("Script suggests: export %s=%s", key, value)

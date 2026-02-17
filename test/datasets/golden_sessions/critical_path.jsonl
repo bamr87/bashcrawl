@@ -1,0 +1,29 @@
+{"ts":"2026-02-16T10:00:00","sid":"GOLDEN01","event":"session_start","mode":"manual","source":"golden_session"}
+{"ts":"2026-02-16T10:00:05","sid":"GOLDEN01","event":"command","command":"pwd","room":"entrance"}
+{"ts":"2026-02-16T10:00:06","sid":"GOLDEN01","event":"room_enter","room":"entrance"}
+{"ts":"2026-02-16T10:00:10","sid":"GOLDEN01","event":"command","command":"ls","room":"entrance"}
+{"ts":"2026-02-16T10:00:15","sid":"GOLDEN01","event":"command","command":"cat scroll","room":"entrance"}
+{"ts":"2026-02-16T10:00:30","sid":"GOLDEN01","event":"command","command":"cd cellar","room":"entrance"}
+{"ts":"2026-02-16T10:00:31","sid":"GOLDEN01","event":"room_enter","room":"cellar"}
+{"ts":"2026-02-16T10:00:35","sid":"GOLDEN01","event":"command","command":"cat scroll","room":"cellar"}
+{"ts":"2026-02-16T10:00:40","sid":"GOLDEN01","event":"command","command":"ls","room":"cellar"}
+{"ts":"2026-02-16T10:00:45","sid":"GOLDEN01","event":"command","command":"./treasure","room":"cellar"}
+{"ts":"2026-02-16T10:00:46","sid":"GOLDEN01","event":"encounter","type":"treasure","item":"amulet","outcome":"collected","room":"cellar"}
+{"ts":"2026-02-16T10:00:50","sid":"GOLDEN01","event":"command","command":"export I=amulet,$I","room":"cellar"}
+{"ts":"2026-02-16T10:01:00","sid":"GOLDEN01","event":"command","command":"cd armoury","room":"cellar"}
+{"ts":"2026-02-16T10:01:01","sid":"GOLDEN01","event":"room_enter","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:05","sid":"GOLDEN01","event":"command","command":"cat scroll","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:10","sid":"GOLDEN01","event":"command","command":"./treasure","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:11","sid":"GOLDEN01","event":"encounter","type":"treasure","item":"sword","outcome":"collected","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:15","sid":"GOLDEN01","event":"command","command":"export I=sword,$I","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:20","sid":"GOLDEN01","event":"command","command":"./potion","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:21","sid":"GOLDEN01","event":"encounter","type":"potion","outcome":"drank","hp":15,"room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:25","sid":"GOLDEN01","event":"command","command":"export HP=15","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:30","sid":"GOLDEN01","event":"command","command":"cd chamber","room":"cellar/armoury"}
+{"ts":"2026-02-16T10:01:31","sid":"GOLDEN01","event":"room_enter","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:01:35","sid":"GOLDEN01","event":"command","command":"cat scroll","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:01:40","sid":"GOLDEN01","event":"command","command":"./statue","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:01:41","sid":"GOLDEN01","event":"encounter","type":"statue","outcome":"victory","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:01:45","sid":"GOLDEN01","event":"command","command":"./treasure","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:01:46","sid":"GOLDEN01","event":"encounter","type":"treasure","item":"coins","outcome":"collected","room":"cellar/armoury/chamber"}
+{"ts":"2026-02-16T10:02:00","sid":"GOLDEN01","event":"session_end","duration_sec":120,"rooms_visited":4,"encounters":5,"deaths":0,"help_requests":0}

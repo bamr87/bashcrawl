@@ -1,0 +1,206 @@
+name: Test Framework
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'entrance/**'
+      - 'src/**'
+      - 'lib/**'
+      - 'test/**'
+      - '*.sh'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'entrance/**'
+      - 'src/**'
+      - 'lib/**'
+      - 'test/**'
+      - '*.sh'
+  workflow_dispatch:
+    inputs:
+      run_ai_tests:
+        description: 'Run AI playthrough tests'
+        required: false
+        default: 'false'
+        type: boolean
+      scenario:
+        description: 'AI scenario to run (all, new_player, critical_path, full_playthrough)'
+        required: false
+        default: 'critical_path'
+        type: string
+  schedule:
+    # Weekly AI playthrough on Sundays at 06:00 UTC
+    - cron: '0 6 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  unit-and-integration:
+    name: Unit & Integration Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r test/requirements.txt
+          pip install -r src/terminal-illness/requirements.txt
+
+      - name: Make game files executable
+        run: bash setup.sh
+
+      - name: Run unit tests
+        run: |
+          cd test
+          python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
+
+      - name: Run integration tests
+        run: |
+          cd test
+          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml --timeout=60
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
+          BASHCRAWL_ROOT: ${{ github.workspace }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: test/reports/
+          retention-days: 30
+
+  ai-playthrough:
+    name: AI Playthrough Tests
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'schedule' ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_ai_tests == 'true')
+    needs: unit-and-integration
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r test/requirements.txt
+          pip install -r src/terminal-illness/requirements.txt
+
+      - name: Make game files executable
+        run: bash setup.sh
+
+      - name: Run AI playthrough tests
+        run: |
+          cd test
+          SCENARIO="${{ github.event.inputs.scenario || 'critical_path' }}"
+          if [ "$SCENARIO" = "all" ]; then
+            python -m pytest ai/ -v --tb=long -m ai --timeout=600 \
+              --junitxml=reports/ai-results.xml
+          else
+            python -m pytest ai/ -v --tb=long -m ai --timeout=300 \
+              -k "$SCENARIO" --junitxml=reports/ai-results.xml
+          fi
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
+          BASHCRAWL_ROOT: ${{ github.workspace }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Generate coverage report
+        if: always()
+        run: |
+          cd test
+          python -m analysis.coverage_report \
+            --sessions reports/sessions/ \
+            --json > reports/coverage.json || true
+          python -m analysis.coverage_report \
+            --sessions reports/sessions/ > reports/coverage.md || true
+        env:
+          PYTHONPATH: ${{ github.workspace }}/test
+
+      - name: Upload AI test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-playthrough-results
+          path: |
+            test/reports/
+            test/datasets/golden_sessions/
+          retention-days: 90
+
+  log-analysis:
+    name: Session Log Analysis
+    runs-on: ubuntu-latest
+    needs: ai-playthrough
+    if: always() && needs.ai-playthrough.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r test/requirements.txt
+
+      - name: Download AI test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ai-playthrough-results
+          path: test/
+
+      - name: Compare with golden sessions
+        run: |
+          cd test
+          for golden in datasets/golden_sessions/*.jsonl; do
+            name=$(basename "$golden" .jsonl)
+            session_file=$(ls reports/sessions/*.jsonl 2>/dev/null | head -1)
+            if [ -n "$session_file" ]; then
+              python -m analysis.compare_sessions \
+                --golden "$golden" \
+                --test "$session_file" > "reports/comparison_${name}.md" || true
+            fi
+          done
+        env:
+          PYTHONPATH: ${{ github.workspace }}/test
+
+      - name: Generate AI review
+        if: env.ANTHROPIC_API_KEY != ''
+        run: |
+          cd test
+          python -m analysis.generate_review \
+            --sessions reports/sessions/ \
+            --output reports/ai_review.md || true
+        env:
+          PYTHONPATH: ${{ github.workspace }}/test
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload analysis reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-reports
+          path: test/reports/
+          retention-days: 90

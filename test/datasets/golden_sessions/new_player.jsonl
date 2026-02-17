@@ -1,0 +1,12 @@
+{"ts":"2026-02-16T10:00:00","sid":"GOLDEN02","event":"session_start","mode":"manual","source":"golden_session"}
+{"ts":"2026-02-16T10:00:05","sid":"GOLDEN02","event":"command","command":"pwd","room":"entrance"}
+{"ts":"2026-02-16T10:00:06","sid":"GOLDEN02","event":"room_enter","room":"entrance"}
+{"ts":"2026-02-16T10:00:10","sid":"GOLDEN02","event":"command","command":"cat scroll","room":"entrance"}
+{"ts":"2026-02-16T10:00:15","sid":"GOLDEN02","event":"command","command":"ls","room":"entrance"}
+{"ts":"2026-02-16T10:00:20","sid":"GOLDEN02","event":"command","command":"cd cellar","room":"entrance"}
+{"ts":"2026-02-16T10:00:21","sid":"GOLDEN02","event":"room_enter","room":"cellar"}
+{"ts":"2026-02-16T10:00:25","sid":"GOLDEN02","event":"command","command":"cat scroll","room":"cellar"}
+{"ts":"2026-02-16T10:00:30","sid":"GOLDEN02","event":"command","command":"ls","room":"cellar"}
+{"ts":"2026-02-16T10:00:35","sid":"GOLDEN02","event":"command","command":"./treasure","room":"cellar"}
+{"ts":"2026-02-16T10:00:36","sid":"GOLDEN02","event":"encounter","type":"treasure","item":"amulet","outcome":"collected","room":"cellar"}
+{"ts":"2026-02-16T10:00:40","sid":"GOLDEN02","event":"session_end","duration_sec":40,"rooms_visited":2,"encounters":1,"deaths":0,"help_requests":0}

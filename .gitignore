@@ -22,3 +22,8 @@ logs/setup.log
 
 __pycache__
 .setup_complete
+
+# Test framework
+test/reports/
+test/.pytest_cache/
+.pytest_cache/
