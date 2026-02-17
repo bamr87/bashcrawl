@@ -249,26 +249,15 @@ CHAPTER_3: list[DemoStep] = [
         chapter=_CH3,
         section="Drinking the Potion",
         explanation=(
-            "The potion script uses ``read`` to ask for your input — "
-            "a y/n prompt. By answering 'y', the potion grants you 15 "
-            "health points (HP). Potions use a variable called ``$HP`` "
-            "to track your health, which you'll need for combat."
+            "The potion script checks your ``$HP`` variable. In "
+            "``main.sh``'s interactive mode, HP starts at 100, so the "
+            "potion sees you're already healthy and skips the offer. "
+            "In native mode (where HP starts at 0), it would ask y/n "
+            "and grant 15 HP. This shows how scripts use variable "
+            "checks (``if [ \"${HP:-0}\" -gt 0 ]``) to branch."
         ),
-        concepts=["read", "interactive scripts", "stdin"],
-        stdin_input="y\n",
-        expected_contains=["HP", "15"],
-    ),
-    DemoStep(
-        command="export HP=15",
-        chapter=_CH3,
-        section="Setting Health Points",
-        explanation=(
-            "As instructed by the potion, we set our HP to 15. In bash, "
-            "variables don't have types — ``HP`` is stored as a string "
-            "but can be used in arithmetic with the ``let`` command."
-        ),
-        concepts=["export", "numeric variables"],
-        is_setup=True,
+        concepts=["read", "conditional logic", "variable checks"],
+        expected_contains=["checked"],
     ),
 ]
 
@@ -337,10 +326,11 @@ CHAPTER_4: list[DemoStep] = [
         explanation=(
             "We also check our HP. The statue deals 5 damage during "
             "the encounter, so we need at least 6 HP to survive. With "
-            "15 HP from the potion, we're well prepared."
+            "100 HP from the interactive emulator's default, we're "
+            "well prepared."
         ),
         concepts=["echo", "HP tracking"],
-        expected_contains=["15"],
+        expected_contains=["100"],
     ),
     DemoStep(
         command="./statue",
@@ -378,7 +368,7 @@ CHAPTER_4: list[DemoStep] = [
         explanation=(
             "The ``let`` command performs integer arithmetic in bash. "
             "The statue hit us for 5 damage, so we subtract it from our "
-            "HP. After this, HP drops from 15 to 10. In real scripting, "
+            "HP. After this, HP drops from 100 to 95. In real scripting, "
             "``let`` is used for counters, calculations, and loop "
             "conditions."
         ),

@@ -402,9 +402,14 @@ check_quest_progress() {
             fi
             local -a __last_args
             read -ra __last_args <<< "$LAST_ARGS"
-            if [[ "${__last_args[0]:-}" != "workshop" ]]; then
-                return
+            local dirname=""
+            if [[ "${__last_args[0]:-}" == "-p" ]]; then
+                dirname="${__last_args[1]:-}"
+            else
+                dirname="${__last_args[0]:-}"
             fi
+            # Accept workshop or workshop/ (from mkdir -p)
+            [[ "${dirname%%/*}" == "workshop" ]] || return
             ;;
         4)
             [[ "$LAST_COMMAND" == "touch" ]] || return
@@ -541,14 +546,68 @@ generate_prompt() {
         "entrance")
             echo -e "${PROMPT_COLOR}🚪 entrance${RESET_COLOR} ${DIRECTORY_COLOR}[starting hall]${RESET_COLOR} ⚔️  "
             ;;
+        "workshop")
+            echo -e "${PROMPT_COLOR}🔧 workshop${RESET_COLOR} ${DIRECTORY_COLOR}[creation tutorial]${RESET_COLOR} ⚔️  "
+            ;;
         "cellar")
             echo -e "${PROMPT_COLOR}🏰 cellar${RESET_COLOR} ${DIRECTORY_COLOR}[underground]${RESET_COLOR} ⚔️  "
             ;;
         "armoury")
             echo -e "${PROMPT_COLOR}🗡️ armoury${RESET_COLOR} ${DIRECTORY_COLOR}[weapons hall]${RESET_COLOR} ⚔️  "
             ;;
+        "chamber")
+            echo -e "${PROMPT_COLOR}💎 chamber${RESET_COLOR} ${DIRECTORY_COLOR}[treasure room]${RESET_COLOR} ⚔️  "
+            ;;
+        ".chapel")
+            echo -e "${PROMPT_COLOR}⛪ chapel${RESET_COLOR} ${DIRECTORY_COLOR}[hidden sanctuary]${RESET_COLOR} ⚔️  "
+            ;;
+        "courtyard")
+            echo -e "${PROMPT_COLOR}🌿 courtyard${RESET_COLOR} ${DIRECTORY_COLOR}[chapel grounds]${RESET_COLOR} ⚔️  "
+            ;;
+        "aviary")
+            echo -e "${PROMPT_COLOR}🦅 aviary${RESET_COLOR} ${DIRECTORY_COLOR}[bird sanctuary]${RESET_COLOR} ⚔️  "
+            ;;
+        "hall")
+            echo -e "${PROMPT_COLOR}🏛️ hall${RESET_COLOR} ${DIRECTORY_COLOR}[grand chamber]${RESET_COLOR} ⚔️  "
+            ;;
+        "library")
+            echo -e "${PROMPT_COLOR}📚 library${RESET_COLOR} ${DIRECTORY_COLOR}[ancient tomes]${RESET_COLOR} ⚔️  "
+            ;;
+        "graveyard")
+            echo -e "${PROMPT_COLOR}🪦 graveyard${RESET_COLOR} ${DIRECTORY_COLOR}[resting place]${RESET_COLOR} ⚔️  "
+            ;;
+        ".vault")
+            echo -e "${PROMPT_COLOR}💰 vault${RESET_COLOR} ${DIRECTORY_COLOR}[treasure hold]${RESET_COLOR} ⚔️  "
+            ;;
+        "stronghold")
+            echo -e "${PROMPT_COLOR}🏰 stronghold${RESET_COLOR} ${DIRECTORY_COLOR}[vault heart]${RESET_COLOR} ⚔️  "
+            ;;
+        "nursery")
+            echo -e "${PROMPT_COLOR}🌱 nursery${RESET_COLOR} ${DIRECTORY_COLOR}[vault garden]${RESET_COLOR} ⚔️  "
+            ;;
+        "lab")
+            echo -e "${PROMPT_COLOR}🧪 lab${RESET_COLOR} ${DIRECTORY_COLOR}[alchemy room]${RESET_COLOR} ⚔️  "
+            ;;
+        ".scrap")
+            echo -e "${PROMPT_COLOR}🔗 scrap${RESET_COLOR} ${DIRECTORY_COLOR}[symlink portal]${RESET_COLOR} ⚔️  "
+            ;;
+        ".rift")
+            echo -e "${PROMPT_COLOR}🌀 rift${RESET_COLOR} ${DIRECTORY_COLOR}[advanced realm]${RESET_COLOR} ⚔️  "
+            ;;
+        "arena")
+            echo -e "${PROMPT_COLOR}⚔️ arena${RESET_COLOR} ${DIRECTORY_COLOR}[combat pit]${RESET_COLOR} ⚔️  "
+            ;;
+        "pit")
+            echo -e "${PROMPT_COLOR}🕳️ pit${RESET_COLOR} ${DIRECTORY_COLOR}[boss lair]${RESET_COLOR} ⚔️  "
+            ;;
+        "spire")
+            echo -e "${PROMPT_COLOR}🗼 spire${RESET_COLOR} ${DIRECTORY_COLOR}[tower ascent]${RESET_COLOR} ⚔️  "
+            ;;
+        "mezzanine")
+            echo -e "${PROMPT_COLOR}🪜 mezzanine${RESET_COLOR} ${DIRECTORY_COLOR}[elevator access]${RESET_COLOR} ⚔️  "
+            ;;
         *)
-            echo -e "${PROMPT_COLOR}📍 $current_dir${RESET_COLOR} ${DIRECTORY_COLOR}[unknown]${RESET_COLOR} ⚔️  "
+            echo -e "${PROMPT_COLOR}📍 $current_dir${RESET_COLOR} ${DIRECTORY_COLOR}[exploring]${RESET_COLOR} ⚔️  "
             ;;
     esac
 }
@@ -1150,24 +1209,55 @@ safe_touch() {
 
 safe_mkdir() {
     if [[ $# -eq 0 ]]; then
-        echo -e "${ERROR_COLOR}Usage: mkdir <dirname>${RESET_COLOR}"
+        echo -e "${ERROR_COLOR}Usage: mkdir <dirname> or mkdir -p <dirname>${RESET_COLOR}"
         return 1
     fi
-    local name="$1"
-    if [[ "$name" == /* || "$name" == *"../"* || "$name" == *"/.."* ]]; then
-        echo -e "${ERROR_COLOR}Absolute paths and parent directory references are not allowed.${RESET_COLOR}"
+    local -a dirs=()
+    local use_parents=false
+
+    if [[ "$1" == "-p" ]]; then
+        use_parents=true
+        shift
+    fi
+
+    if [[ $# -eq 0 ]]; then
+        echo -e "${ERROR_COLOR}Usage: mkdir <dirname> or mkdir -p <dirname>${RESET_COLOR}"
         return 1
     fi
-    if [[ ! "$name" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
-        echo -e "${ERROR_COLOR}Invalid directory name. Use letters, numbers, dots, dashes, and underscores only.${RESET_COLOR}"
-        return 1
-    fi
-    if [[ -d "$name" ]]; then
-        echo -e "${SUCCESS_COLOR}Directory already exists: $name${RESET_COLOR}"
-        return 0
-    fi
-    mkdir "$name"
-    return $?
+
+    for name in "$@"; do
+        if [[ "$name" == /* || "$name" == *"../"* || "$name" == *"/.."* ]]; then
+            echo -e "${ERROR_COLOR}Absolute paths and parent directory references are not allowed.${RESET_COLOR}"
+            return 1
+        fi
+        if [[ "$name" == */* ]]; then
+            if [[ "$use_parents" != true ]]; then
+                echo -e "${ERROR_COLOR}Use 'mkdir -p' to create nested directories.${RESET_COLOR}"
+                return 1
+            fi
+            if [[ ! "$name" =~ ^[a-zA-Z0-9_./-]+$ ]]; then
+                echo -e "${ERROR_COLOR}Invalid path. Use letters, numbers, dots, dashes, slashes, and underscores only.${RESET_COLOR}"
+                return 1
+            fi
+        elif [[ ! "$name" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
+            echo -e "${ERROR_COLOR}Invalid directory name. Use letters, numbers, dots, dashes, and underscores only.${RESET_COLOR}"
+            return 1
+        fi
+        dirs+=("$name")
+    done
+
+    for name in "${dirs[@]}"; do
+        if [[ -d "$name" ]]; then
+            echo -e "${SUCCESS_COLOR}Directory already exists: $name${RESET_COLOR}"
+        else
+            if [[ "$use_parents" == true ]]; then
+                mkdir -p "$name" || return $?
+            else
+                mkdir "$name" || return $?
+            fi
+        fi
+    done
+    return 0
 }
 
 safe_grep() {
@@ -1252,21 +1342,19 @@ show_map() {
     cat << EOF
 
     🏠 bashcrawl (lobby)
-        ↓
-    🚪 entrance (starting hall)
-        ↓
-    🏰 cellar (underground chambers)
-        ↓
-    🗡️ armoury (weapons hall)
-        ↓
-    💎 chamber (treasure room)
+        └── 🚪 entrance (starting hall)
+                ├── 🏰 cellar → armoury → 💎 chamber (main path)
+                ├── 🔧 workshop (creation tutorial)
+                ├── ⛪ .chapel (hidden) → courtyard → aviary → hall → 📚 library
+                │       └── 🪦 graveyard → columbarium, royal-tombs, .mausoleum
+                ├── 💰 .vault (hidden) → stronghold → nursery → lab
+                ├── 🔗 .scrap (hidden, symlinks)
+                └── 🌀 .rift (unlock via goblet) → arena → pit | spire → mezzanine
 
 Legend:
-  🏠 = Main lobby area
-  🚪 = Starting entrance
-  🏰 = Underground areas  
-  🗡️ = Combat areas
-  💎 = Treasure areas
+  🏠 = Lobby    🚪 = Entrance    🔧 = Workshop    🏰 = Cellar
+  🗡️ = Armoury  💎 = Chamber     ⛪ = Chapel      📚 = Library
+  💰 = Vault    🔗 = Scrap       🌀 = Rift        🪦 = Graveyard
   
 Current location: $(relative_path "$(pwd)")
 
@@ -1286,13 +1374,41 @@ add_area_context() {
             echo ""
             echo -e "${SUCCESS_COLOR}🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.${RESET_COLOR}"
             ;;
+        "workshop")
+            echo ""
+            echo -e "${SUCCESS_COLOR}🔧 The workshop teaches creation: mkdir, touch, rm, echo >. Practice shaping the world!${RESET_COLOR}"
+            ;;
         "cellar")
             echo ""
-            echo -e "${SUCCESS_COLOR}🏰 You are in the underground cellar. Explore carefully!${RESET_COLOR}"
+            echo -e "${SUCCESS_COLOR}🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!${RESET_COLOR}"
             ;;
         "armoury")
             echo ""
-            echo -e "${SUCCESS_COLOR}🗡️ You have entered the armoury. Weapons and combat await!${RESET_COLOR}"
+            echo -e "${SUCCESS_COLOR}🗡️ You have entered the armoury. Master chmod and ./script for combat!${RESET_COLOR}"
+            ;;
+        "chamber")
+            echo ""
+            echo -e "${SUCCESS_COLOR}💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.${RESET_COLOR}"
+            ;;
+        ".chapel"|"courtyard"|"aviary"|"hall"|"library")
+            echo ""
+            echo -e "${SUCCESS_COLOR}⛪ Chapel path: Discover hidden commands and the ancient library tome.${RESET_COLOR}"
+            ;;
+        "graveyard")
+            echo ""
+            echo -e "${SUCCESS_COLOR}🪦 The graveyard holds secrets. Use ls -a to find the hidden mausoleum.${RESET_COLOR}"
+            ;;
+        ".vault"|"stronghold"|"nursery"|"lab")
+            echo ""
+            echo -e "${SUCCESS_COLOR}💰 Vault path: Master variables, collect the goblet to unlock the Rift!${RESET_COLOR}"
+            ;;
+        ".scrap")
+            echo ""
+            echo -e "${SUCCESS_COLOR}🔗 The Scrap teaches symlinks: ln -s creates portals. Find the path to the Rift!${RESET_COLOR}"
+            ;;
+        ".rift"|"arena"|"pit"|"spire"|"mezzanine")
+            echo ""
+            echo -e "${SUCCESS_COLOR}🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!${RESET_COLOR}"
             ;;
     esac
     
@@ -1805,7 +1921,7 @@ run_batch() {
 
     while IFS= read -r input || [[ -n "$input" ]]; do
         echo -e "$(generate_prompt)${input}"
-        _dispatch_input "$input"
+        _dispatch_input "$input" || true   # don't let set -e kill the loop
         echo
     done
 }
@@ -1851,7 +1967,7 @@ launch_interactive_mode() {
             continue
         fi
 
-        _dispatch_input "$input"
+        _dispatch_input "$input" || true   # don't let set -e kill the loop
         echo
     done
 }

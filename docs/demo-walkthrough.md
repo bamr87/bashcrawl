@@ -1,8 +1,8 @@
 # Bashcrawl: Complete Game Walkthrough
 
-> **Auto-generated** from a test demo run on 2026-02-16 20:43
+> **Auto-generated** from a test demo run on 2026-02-16 22:23
 >
-> Duration: 0.5s | Steps: 119 | Rooms: 23 | Errors: 0
+> Duration: 7.5s | Steps: 118 | Rooms: 23 | Errors: 0
 
 ---
 
@@ -15,6 +15,11 @@ potions, monsters, and spells.
 This walkthrough demonstrates a complete playthrough — every command
 a player would type, the terminal output they would see, and an
 explanation of what each command teaches.
+
+The output is captured from ``main.sh``'s interactive terminal
+emulator running in batch mode, so prompts, area context, quest
+completions, and game-script output appear exactly as a real player
+would see them.
 
 
 ## Table of Contents
@@ -54,7 +59,10 @@ cd bashcrawl
 # Make game files executable
 bash setup.sh
 
-# Start playing!
+# Start playing (interactive terminal emulator)
+bash main.sh --interactive
+
+# Or play natively
 cd entrance
 cat scroll
 ```
@@ -71,7 +79,7 @@ The adventure begins at the dungeon entrance. Here you learn the three most fund
 Every adventure begins with a single step. In the terminal, ``cd`` (change directory) moves you into a new directory — think of it as walking through a door. We step into the ``entrance/`` directory to begin the game.
 
 ```bash
-bamr87@bashcrawl:~$ cd entrance
+📍 game [exploring] ⚔️cd entrance
 ```
 
 > **Concepts:** `cd`, `directory navigation`
@@ -81,8 +89,14 @@ bamr87@bashcrawl:~$ cd entrance
 The ``pwd`` command (print working directory) shows your current location in the filesystem. In the game, this is like checking a map — it tells you which room you're standing in.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ pwd
+🚪 entrance [starting hall] ⚔️pwd
 ~/entrance
+✨ Quest complete: Awakening: Know Thy Place!
+   Reward: Navigation Novice ribbon (+50 XP)
+🎯 QUEST TRACKER:
+   Quest 2/7: Eyes to See
+   Objective: Use 'ls' to reveal what surrounds you.
+   Reward: Glimmering lens (+50 XP)
 ```
 
 > **Concepts:** `pwd`, `working directory`
@@ -92,11 +106,20 @@ bamr87@bashcrawl:~/entrance$ pwd
 The ``ls`` command lists the contents of the current directory. In the dungeon, this is like looking around the room to see what's here — files, directories, scrolls, and treasures.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ ls
+🚪 entrance [starting hall] ⚔️ls
 README.md
-cellar
+cellar/
 scroll
-workshop
+workshop/
+
+🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.
+📜 There is a scroll here. Read it with: cat scroll
+✨ Quest complete: Eyes to See!
+   Reward: Glimmering lens (+50 XP)
+🎯 QUEST TRACKER:
+   Quest 3/7: First Steps
+   Objective: Travel to the entrance with 'cd entrance'.
+   Reward: Pathwalker's charm (+100 XP)
 ```
 
 > **Concepts:** `ls`, `listing files`
@@ -106,7 +129,7 @@ workshop
 The ``cat`` command displays the contents of a file. Scrolls are the game's tutorial texts — they teach you new terminal commands as you progress deeper into the dungeon. This first scroll introduces the basic commands you'll need to navigate: ``ls``, ``cd``, and ``cat``.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cat scroll
+🚪 entrance [starting hall] ⚔️cat scroll
 
 ================================================================================
                            ANCIENT SCROLL OF SIGHT
@@ -176,9 +199,7 @@ May your terminal skills grow strong, brave adventurer!
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance` |
-| **Inventory** | (empty) |
-| **HP** | 0 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -194,7 +215,7 @@ The cellar lies beneath the entrance and introduces enhanced file listing with `
 We descend deeper into the dungeon. The cellar is the second room and teaches more advanced listing techniques. Notice how each directory is a room, and navigating between them with ``cd`` is like walking through doorways.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd cellar
+🚪 entrance [starting hall] ⚔️cd cellar
 ```
 
 > **Concepts:** `cd`, `nested directories`
@@ -204,7 +225,7 @@ bamr87@bashcrawl:~/entrance$ cd cellar
 This scroll teaches ``ls -F``, which adds special symbols after filenames to show their type: ``/`` for directories, ``*`` for executable files, and ``@`` for symbolic links. It's like having enchanted vision that reveals the nature of objects in the room.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ cat scroll
+🏰 cellar [underground] ⚔️cat scroll
 
 ################################################################################
 #                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #
@@ -255,7 +276,7 @@ When you cast `ls -F`, the mystical energies reveal secrets through their symbol
 └─────────────────┴────────────────────────────┴──────────────────────────────┘
 
 ################################################################################
-... (187 more lines) ...
+... (182 more lines) ...
 *"In the depths of the cellar, sight becomes insight, and knowledge becomes power."*
 *~ Ancient Terminal Wisdom*
 
@@ -270,11 +291,16 @@ When you cast `ls -F`, the mystical energies reveal secrets through their symbol
 With ``ls -F``, we can now distinguish between regular files, directories (marked with ``/``), and executables (marked with ``*``). The ``treasure`` file shows up with an asterisk — it's a program we can run!
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ ls -F
+🏰 cellar [underground] ⚔️ls -F
 README.md
 armoury/
 scroll
 treasure*
+
+🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
 ```
 
 > **Concepts:** `ls -F`, `executable indicator *`
@@ -284,7 +310,7 @@ treasure*
 The ``./`` prefix tells the shell to execute the file in the current directory. Running ``./treasure`` triggers the treasure script, which reveals an emerald amulet. The script also secretly unlocks three hidden areas accessible from the entrance level: the chapel, vault, and scrap yard.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ ./treasure
+🏰 cellar [underground] ⚔️./treasure
 You have found an emerald **amulet**!
 
 To collect treasure, you must have a variable to hold your inventory.
@@ -305,7 +331,7 @@ echo $I
 The ``export`` command sets an environment variable. Here we add ``amulet`` to our inventory variable ``$I``. The ``$I`` at the end preserves anything already in inventory. In real-world Linux, ``export`` makes variables available to child processes.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ export I=amulet,$I
+🏰 cellar [underground] ⚔️export I=amulet,$I
 ```
 
 > **Concepts:** `export`, `environment variables`, `inventory`
@@ -317,7 +343,7 @@ bamr87@bashcrawl:~/entrance/cellar$ export I=amulet,$I
 ``echo`` prints text to the terminal. When combined with ``$I``, it expands the variable and shows our current inventory. This is how you check what treasures you've collected throughout the game.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ echo $I
+🏰 cellar [underground] ⚔️echo $I
 amulet,
 ```
 
@@ -328,9 +354,7 @@ amulet,
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar` |
-| **Inventory** | amulet |
-| **HP** | 0 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -346,7 +370,7 @@ The armoury is stocked with weapons, potions, and knowledge about file execution
 The armoury is the third room on the main path. Here we learn about file permissions, executing scripts, and encounter our first interactive game elements — a treasure, a potion, and more.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ cd armoury
+🏰 cellar [underground] ⚔️cd armoury
 ```
 
 > **Concepts:** `cd`, `game progression`
@@ -356,7 +380,7 @@ bamr87@bashcrawl:~/entrance/cellar$ cd armoury
 This scroll teaches about executing files with ``./``, the difference between relative and absolute paths, and the ``chmod`` command for managing file permissions. In Linux, a file must have execute permission to be run as a program.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ cat scroll
+🗡️ armoury [weapons hall] ⚔️cat scroll
 
 ################################################################################
 #                  🗡️  THE GRAND ARMOURY                                      #
@@ -422,12 +446,18 @@ ABSOLUTE PATHS (from the root of the world):
 Listing with ``-F`` reveals the armoury's contents. Executables (marked ``*``) include ``treasure``, ``potion``, and deeper in, the ``chamber/`` directory awaits.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ls -F
+🗡️ armoury [weapons hall] ⚔️ls -F
 README.md
 chamber/
 potion*
 scroll
 treasure*
+
+🗡️ You have entered the armoury. Master chmod and ./script for combat!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+   🧪 potion - Restore health
 ```
 
 > **Concepts:** `ls -F`
@@ -437,7 +467,7 @@ treasure*
 The armoury's treasure reveals a gleaming silver sword. The sword is essential for combat encounters later in the game — without it, you cannot defeat the statue, monster, or ghost. Always collect every treasure you find!
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ./treasure
+🗡️ armoury [weapons hall] ⚔️./treasure
 You have found a gleaming silver **sword**!  You marvel at
 its craftsmanship, and you recall tales from your childhood
 of the great mystic king Rannismir who bore such a sword to
@@ -459,7 +489,7 @@ echo $I
 We add the sword to our comma-separated inventory variable. Notice the pattern: ``export I=newitem,$I`` — this prepends the new item while keeping everything already collected. Our inventory now contains both the sword and the amulet.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ export I=sword,$I
+🗡️ armoury [weapons hall] ⚔️export I=sword,$I
 ```
 
 > **Concepts:** `export`, `string concatenation`
@@ -468,49 +498,21 @@ bamr87@bashcrawl:~/entrance/cellar/armoury$ export I=sword,$I
 
 ### Drinking the Potion
 
-The potion script uses ``read`` to ask for your input — a y/n prompt. By answering 'y', the potion grants you 15 health points (HP). Potions use a variable called ``$HP`` to track your health, which you'll need for combat.
+The potion script checks your ``$HP`` variable. In ``main.sh``'s interactive mode, HP starts at 100, so the potion sees you're already healthy and skips the offer. In native mode (where HP starts at 0), it would ask y/n and grant 15 HP. This shows how scripts use variable checks (``if [ "${HP:-0}" -gt 0 ]``) to branch.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ./potion
-# (input) y
-You have found a potion bottle of swirling
-green liquid. Do you want to drink it?  y/n
-
-The taste of a rustic green plant fills your mouth.  It
-warms and strengthens you.
-
-Create a variable for your health points (HP).  You have
-15HP:
-
-export HP=15
-
-You can check your health at any time:
-
-echo $HP
+🗡️ armoury [weapons hall] ⚔️./potion
+You checked that bottle already.
 ```
 
-> **Concepts:** `read`, `interactive scripts`, `stdin`
-
-### Setting Health Points
-
-As instructed by the potion, we set our HP to 15. In bash, variables don't have types — ``HP`` is stored as a string but can be used in arithmetic with the ``let`` command.
-
-```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ export HP=15
-```
-
-> **Concepts:** `export`, `numeric variables`
-
-> 🎮 **Player Action:** Run this command to update your game state.
+> **Concepts:** `read`, `conditional logic`, `variable checks`
 
 <details>
 <summary>📊 <strong>State after this chapter</strong></summary>
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar/armoury` |
-| **Inventory** | sword, amulet |
-| **HP** | 15 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -526,7 +528,7 @@ The Chamber of Spirits is the climax of the main quest. You face the living stat
 The chamber is the deepest room on the main quest path. It contains three encounters: a living statue (combat), a treasure chest (loot), and a spell inscription (magic). This is where you'll learn about environment variables, arithmetic, and symbolic links.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ cd chamber
+🗡️ armoury [weapons hall] ⚔️cd chamber
 ```
 
 > **Concepts:** `cd`, `deep navigation`
@@ -536,7 +538,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury$ cd chamber
 The chamber's scroll teaches ``export``, ``echo``, ``let``, and ``unset`` — the core commands for managing environment variables. These concepts apply directly to real shell scripting: variables store data, ``let`` performs math, and ``export`` shares values with child processes.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ cat scroll
+💎 chamber [treasure room] ⚔️cat scroll
 
 ################################################################################
 #                    🏰 THE CHAMBER OF SPIRITS                                #
@@ -602,11 +604,18 @@ Try:  ls -la ../../..
 The chamber contains three executable encounters (marked with ``*``): the ``statue``, ``treasure``, and ``spell``. We need to fight the statue first — it guards the way forward.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ls -F
+💎 chamber [treasure room] ⚔️ls -F
 scroll
 spell*
 statue*
 treasure*
+
+💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+   💰 treasure - Collect treasures
+   ⚡ statue - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -616,7 +625,7 @@ treasure*
 Before engaging the statue, we verify our inventory with ``echo $I``. The sword is required to win the fight. This is a good habit — always check your gear before a battle.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $I
+💎 chamber [treasure room] ⚔️echo $I
 sword,amulet,
 ```
 
@@ -624,11 +633,11 @@ sword,amulet,
 
 ### Pre-Combat Health Check
 
-We also check our HP. The statue deals 5 damage during the encounter, so we need at least 6 HP to survive. With 15 HP from the potion, we're well prepared.
+We also check our HP. The statue deals 5 damage during the encounter, so we need at least 6 HP to survive. With 100 HP from the interactive emulator's default, we're well prepared.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $HP
-15
+💎 chamber [treasure room] ⚔️echo $HP
+100
 ```
 
 > **Concepts:** `echo`, `HP tracking`
@@ -638,7 +647,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $HP
 The statue encounter is the main quest's combat challenge. It springs to life and attacks, dealing 5 damage. When asked if we approach and if we have a sword, we answer 'y' to both. With the sword in our inventory (verified by ``grep``), we shatter the statue and claim the diamonds within. The script uses ``let`` for HP arithmetic and ``grep`` to check inventory — two real shell techniques.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./statue
+💎 chamber [treasure room] ⚔️./statue
 # (input) y
 # (input) y
 A rugged statue stands in the corner of the room.
@@ -672,7 +681,7 @@ let "HP=HP-5"
 We add the diamonds to our growing inventory. The comma-separated format makes it easy to add items with ``export I=newitem,$I``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=diamonds,$I
+💎 chamber [treasure room] ⚔️export I=diamonds,$I
 ```
 
 > **Concepts:** `export`, `inventory management`
@@ -681,10 +690,10 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=diamonds,$I
 
 ### Accounting for Damage
 
-The ``let`` command performs integer arithmetic in bash. The statue hit us for 5 damage, so we subtract it from our HP. After this, HP drops from 15 to 10. In real scripting, ``let`` is used for counters, calculations, and loop conditions.
+The ``let`` command performs integer arithmetic in bash. The statue hit us for 5 damage, so we subtract it from our HP. After this, HP drops from 100 to 95. In real scripting, ``let`` is used for counters, calculations, and loop conditions.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ let "HP=HP-5"
+💎 chamber [treasure room] ⚔️let "HP=HP-5"
 ```
 
 > **Concepts:** `let`, `bash arithmetic`
@@ -696,7 +705,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ let "HP=HP-5"
 With the statue defeated, we claim the treasure — a stash of coins. Every treasure script follows the same pattern: check if the item is already in inventory, display it if not, and instruct the player to ``export`` it.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./treasure
+💎 chamber [treasure room] ⚔️./treasure
 
 You have found a stash of **coins**!  They are old and worn
 with age,  but they still gleam in the magickal light
@@ -718,7 +727,7 @@ echo $I
 We add the coins to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=coins,$I
+💎 chamber [treasure room] ⚔️export I=coins,$I
 ```
 
 > **Concepts:** `export`
@@ -730,7 +739,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=coins,$I
 The spell inscription on the wall teaches one of the most powerful concepts in Linux: symbolic links (symlinks). A symlink is a shortcut that points to another file or directory. The runes instruct us to create a portal — a symlink — connecting this chamber to a distant part of the dungeon.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./spell
+💎 chamber [treasure room] ⚔️./spell
 # (input) y
 Runes, the language of the ancient mystics that once ruled
 this land, are inscribed upon the western wall.
@@ -756,7 +765,7 @@ ln -fs ../../../chapel/courtyard/aviary/hall portal
 The ``ln -s`` command creates a symbolic link. Here, ``portal`` becomes a shortcut to the distant aviary hall deep inside the chapel. The ``-f`` flag forces creation even if a link already exists. Symlinks are one of the most useful features in Linux — they let you create shortcuts to files and directories anywhere in the system.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ln -fs ../../../chapel/courtyard/aviary/hall portal
+💎 chamber [treasure room] ⚔️ln -fs ../../../chapel/courtyard/aviary/hall portal
 ```
 
 > **Concepts:** `ln -s`, `ln -f`, `relative paths`, `symlinks`
@@ -766,9 +775,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ln -fs ../../../chapel/court
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar/armoury/chamber` |
-| **Inventory** | coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -784,7 +791,13 @@ The workshop is a side room off the entrance that serves as a hands-on practice 
 We navigate back to the entrance using ``..`` (parent directory) three times — from chamber to armoury to cellar to entrance. Each ``..`` moves up one level in the directory hierarchy.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ cd ../../..
+💎 chamber [treasure room] ⚔️cd ../../..
+✨ Quest complete: First Steps!
+   Reward: Pathwalker's charm (+100 XP)
+🎯 QUEST TRACKER:
+   Quest 4/7: Shape the World
+   Objective: Create a new space by running 'mkdir workshop' while in the entrance.
+   Reward: Builder's sigil (+100 XP)
 ```
 
 > **Concepts:** `cd ..`, `parent directory`
@@ -794,7 +807,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ cd ../../..
 The workshop is a tutorial room off the main path that teaches file manipulation commands. It's a safe space to practice creating, copying, and deleting files.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd workshop
+🚪 entrance [starting hall] ⚔️cd workshop
 ```
 
 > **Concepts:** `cd`, `side paths`
@@ -804,7 +817,7 @@ bamr87@bashcrawl:~/entrance$ cd workshop
 This scroll teaches essential file management commands: ``mkdir`` (create directories), ``touch`` (create empty files), ``cp`` (copy files), ``rm`` (delete files), ``rmdir`` (delete empty directories), ``rm -r`` (delete recursively), and ``echo 'text' > file`` (write to files). These are the everyday tools of a system administrator.
 
 ```bash
-bamr87@bashcrawl:~/entrance/workshop$ cat scroll
+🔧 workshop [creation tutorial] ⚔️cat scroll
 
 ================================================================================
                         THE WORKSHOP
@@ -870,7 +883,7 @@ Return to the entrance when you're ready:
 We return to the entrance to continue exploring.
 
 ```bash
-bamr87@bashcrawl:~/entrance/workshop$ cd ..
+🔧 workshop [creation tutorial] ⚔️cd ..
 ```
 
 > **Concepts:** `cd ..`
@@ -881,8 +894,6 @@ bamr87@bashcrawl:~/entrance/workshop$ cd ..
 | Property | Value |
 |----------|-------|
 | **Location** | `entrance` |
-| **Inventory** | coins, diamonds, sword, amulet |
-| **HP** | 10 |
 
 </details>
 
@@ -898,14 +909,17 @@ With the amulet collected, the chapel's doors swing open. This hidden area intro
 After collecting the cellar treasure, three previously hidden directories were unlocked: ``chapel/``, ``vault/``, and ``scrap/``. In the original game, these were hidden as dot-directories (``.chapel``, etc.) — in Linux, files and directories starting with ``.`` are hidden from ``ls`` unless you use ``ls -a``. The treasure script used ``mv`` to rename them, revealing them.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ ls
+🚪 entrance [starting hall] ⚔️ls
 README.md
-cellar
-chapel
-scrap
+cellar/
+chapel/
+scrap/
 scroll
-vault
-workshop
+vault/
+workshop/
+
+🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.
+📜 There is a scroll here. Read it with: cat scroll
 ```
 
 > **Concepts:** `hidden files`, `ls -a`, `mv`, `dot-directories`
@@ -915,7 +929,7 @@ workshop
 The chapel is the first of three hidden areas unlocked after collecting the amulet. It contains an elaborate sub-dungeon with a courtyard, aviary, graveyard, and more.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd chapel
+🚪 entrance [starting hall] ⚔️cd chapel
 ```
 
 > **Concepts:** `cd`, `hidden areas`
@@ -925,7 +939,7 @@ bamr87@bashcrawl:~/entrance$ cd chapel
 The chapel scroll teaches command history — using the UP and DOWN arrow keys to recall previous commands. This is one of the most time-saving features of any shell.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel$ cat scroll
+📍 chapel [exploring] ⚔️cat scroll
 
 # There is writing upon the wall.
 #
@@ -949,11 +963,14 @@ bamr87@bashcrawl:~/entrance/chapel$ cat scroll
 The chapel has several items and passages, including an ``altar`` (executable — an interactive puzzle), a ``courtyard/`` directory, and a ``graveyard/`` directory. Each branch leads deeper into the chapel's mysteries.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel$ ls -F
+📍 chapel [exploring] ⚔️ls -F
 altar*
 courtyard/
 graveyard/
 scroll
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ altar - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -963,7 +980,7 @@ scroll
 The courtyard is an open area with a fountain, some rags on the ground, and a passage to the aviary. There are hidden items here that will help in later encounters.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel$ cd courtyard
+📍 chapel [exploring] ⚔️cd courtyard
 ```
 
 > **Concepts:** `cd`
@@ -973,7 +990,7 @@ bamr87@bashcrawl:~/entrance/chapel$ cd courtyard
 The courtyard scroll is atmospheric — it describes the scene rather than teaching commands directly. Not every scroll is a tutorial; some set the mood and provide clues.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard$ cat scroll
+🌿 courtyard [chapel grounds] ⚔️cat scroll
 
 There is a great fountain in the center of this courtyard.
 The waters are bright and clear in the magickal light
@@ -995,7 +1012,7 @@ Perhaps there are fish that yet live in the fountain?
 Under the rags on the courtyard floor, we find a salted fish. This seems insignificant now, but the fish is essential for befriending the penguin in the aviary later. Game design teaches us to explore thoroughly — similarly, in Linux, important files can be in unexpected places.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard$ ./rags
+🌿 courtyard [chapel grounds] ⚔️./rags
 # (input) y
 There's a pile of old **rags**.  They are old and worn with
 age, and probably fell off of some poor adventurer.
@@ -1018,7 +1035,7 @@ echo $I
 We add the rags and fish to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard$ export I=rags,fish,$I
+🌿 courtyard [chapel grounds] ⚔️export I=rags,fish,$I
 ```
 
 > **Concepts:** `export`
@@ -1030,9 +1047,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard$ export I=rags,fish,$I
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/chapel/courtyard` |
-| **Inventory** | rags, fish, coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -1048,7 +1063,7 @@ The frost-bitten aviary houses penguins and an ice crystal. Here you learn tab c
 The aviary is a cold, frost-bitten room inhabited by penguins and containing an icy pond with a crystal. This area teaches tab completion and introduces ``grep``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard$ cd aviary
+🌿 courtyard [chapel grounds] ⚔️cd aviary
 ```
 
 > **Concepts:** `cd`
@@ -1058,7 +1073,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard$ cd aviary
 This scroll introduces tab completion — pressing TAB after typing part of a filename or command will auto-complete it. Try ``cd h`` + TAB to complete to ``cd hall/``. This is one of the most essential productivity features in any terminal.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ cat scroll
+🦅 aviary [bird sanctuary] ⚔️cat scroll
 
 You enter a room that has been magickally frost-bitten.
 
@@ -1087,11 +1102,17 @@ and then press TAB.
 The aviary contains a ``crystal`` (executable), a ``penguin`` (executable encounter), a ``scroll``, and the ``hall/`` directory leading deeper.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ ls -F
+🦅 aviary [bird sanctuary] ⚔️ls -F
 crystal*
 hall/
 penguin*
 scroll
+
+⛪ Chapel path: Discover hidden commands and the ancient library tome.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ penguin - Interactive element
+   ⚡ crystal - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -1101,7 +1122,7 @@ scroll
 The penguin approaches us. Since we have the salted fish in our inventory, we can offer it to the penguin. The script uses ``grep`` to check if 'fish' is in our ``$I`` variable. After feeding the penguin, it teaches us ``sed`` — a stream editor that can modify text. We use it to remove the fish from our inventory string.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ ./penguin
+🦅 aviary [bird sanctuary] ⚔️./penguin
 # (input) y
 # (input) y
 One of the birds finally notices your presence.  It turns
@@ -1128,7 +1149,7 @@ export I=$(sed "s/fish//; s/,,/,/" <<< $I)
 The ``sed`` command (stream editor) performs text substitution. ``s/fish//`` removes 'fish' from our inventory string, and ``s/,,/,/`` cleans up any double commas left behind. The ``$()`` syntax runs a command and captures its output — called command substitution. The ``<<<`` operator is a here-string that feeds a variable directly to a command's stdin.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=$(sed "s/fish//; s/,,/,/" <<< $I)
+🦅 aviary [bird sanctuary] ⚔️export I=$(sed "s/fish//; s/,,/,/" <<< $I)
 ```
 
 > **Concepts:** `sed`, `command substitution`, `$()`, `here-string`
@@ -1140,7 +1161,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=$(sed "s/fish//; s
 A white crystal forged by the Queen of Winter lies in the icy pond. We collect it — this crystal will be needed later in the vault to enchant our sword for the ghost fight. Pay attention to items that seem decorative; they often have a purpose later.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ ./crystal
+🦅 aviary [bird sanctuary] ⚔️./crystal
 A white crystal, forged by the Queen of Winter, on the
 frosty ground.
 
@@ -1160,7 +1181,7 @@ echo $I
 We add the crystal to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=crystal,$I
+🦅 aviary [bird sanctuary] ⚔️export I=crystal,$I
 ```
 
 > **Concepts:** `export`
@@ -1172,9 +1193,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ export I=crystal,$I
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/chapel/courtyard/aviary` |
-| **Inventory** | crystal, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -1190,7 +1209,7 @@ The great hall introduces ``grep`` — one of Linux's most powerful search tools
 The hall is a large chamber at the end of the aviary path. A fearsome monster guards a library beyond. This room teaches ``grep`` — one of the most powerful search commands in Linux.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ cd hall
+🦅 aviary [bird sanctuary] ⚔️cd hall
 ```
 
 > **Concepts:** `cd`
@@ -1200,7 +1219,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary$ cd hall
 This scroll teaches ``grep`` — a command that searches for patterns in text. ``grep WORD file`` finds lines containing WORD. ``grep -r`` searches recursively through directories. ``grep WORD <<< "$VAR"`` searches a variable. The ``--quiet`` flag suppresses output and is used in scripts for silent checks.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ cat scroll
+🏛️ hall [grand chamber] ⚔️cat scroll
 
 ################################################################################
 #                      🏚️  THE DARKENED HALL                                  #
@@ -1266,10 +1285,15 @@ GOOD LUCK, ADVENTURER.
 The hall contains the ``monster`` (executable combat encounter), the ``library/`` directory, and a scroll.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ls -F
+🏛️ hall [grand chamber] ⚔️ls -F
 library/
 monster*
 scroll
+
+⛪ Chapel path: Discover hidden commands and the ancient library tome.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   👹 monster - Combat encounter
 ```
 
 > **Concepts:** `ls -F`
@@ -1279,7 +1303,7 @@ scroll
 The monster encounter is a random combat system. You pick a number, and both you and the monster get random attack rolls. Having the sword gives a significant bonus. On victory, the monster is slain and drops a crown treasure. On defeat, you take 5 HP damage and can try again. The combat uses bash's ``$RANDOM`` variable, ``let`` for arithmetic, and ``grep`` to check for the sword.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ./monster
+🏛️ hall [grand chamber] ⚔️./monster
 # (input) y
 # (input) 5
 A hulking three-legged beast, with a mouth full of fangs and
@@ -1288,25 +1312,9 @@ a barbed tail and 8 arms, lumbers toward you.
 If you have a sword, you can attack.  Otherwise, you should
 run.
 
-Do you want to attack? y/n  Enter a number:  The monster rolled  47
-You rolled  24
-
-Your attack is deflected off the monster's leathery flesh.
-You take 5 points damage. Deduct this from your HP.
-
-let HP=HP-5
-
-Enter a number:  The monster rolled  19
-You rolled  13
-
-Your attack is deflected off the monster's leathery flesh.
-You take 5 points damage. Deduct this from your HP.
-
-let HP=HP-5
-
-You have been slain by the monster.
-
-GAME OVER!
+Do you want to attack? y/n  Enter a number:  The monster rolled  18
+You rolled  62
+A hit! A palpable hit!  You have slain the beast.
 ```
 
 > **Concepts:** `$RANDOM`, `let`, `grep`, `game combat`
@@ -1316,11 +1324,17 @@ GAME OVER!
 After defeating the monster, new files appear: ``treasure`` and ``carcass`` (the defeated monster renamed). The monster script dynamically created the treasure file — showing how scripts can modify the filesystem.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ls -F
-corpse.6hz*
+🏛️ hall [grand chamber] ⚔️ls -F
+carcass*
 library/
-monster*
 scroll
+treasure*
+
+⛪ Chapel path: Discover hidden commands and the ancient library tome.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ carcass - Interactive element
+   💰 treasure - Collect treasures
 ```
 
 > **Concepts:** `ls`, `dynamic file creation`
@@ -1330,20 +1344,19 @@ scroll
 The monster dropped a crown. This treasure will be needed at the royal tombs in the graveyard.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ ./treasure
+🏛️ hall [grand chamber] ⚔️./treasure
 # (input) y
+You have found a **crown**!  Add it to your inventory.
 ```
 
 > **Concepts:** `./`
-
-> ⚠️ **Note:** bash: ./treasure: No such file or directory
 
 ### Collecting the Crown
 
 We add the crown to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ export I=crown,$I
+🏛️ hall [grand chamber] ⚔️export I=crown,$I
 ```
 
 > **Concepts:** `export`
@@ -1355,9 +1368,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ export I=crown,$I
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/chapel/courtyard/aviary/hall` |
-| **Inventory** | crown, crystal, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -1373,7 +1384,7 @@ A small, atmospheric library with dusty tomes. A brief respite before the gravey
 A small library with dusty shelves and an ancient tome. This room is more atmospheric — it hints at the deeper lore of the dungeon.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ cd library
+🏛️ hall [grand chamber] ⚔️cd library
 ```
 
 > **Concepts:** `cd`
@@ -1383,7 +1394,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall$ cd library
 The library scroll describes the room's atmosphere.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall/library$ cat scroll
+📚 library [ancient tomes] ⚔️cat scroll
 #
 # You are in a small library.  There are
 # shelves on all sides of the room,
@@ -1400,7 +1411,7 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall/library$ cat scroll
 We navigate from the library back up through the hall, aviary, courtyard, and chapel, then into the graveyard. Using multiple ``..`` segments lets us traverse large distances in the directory tree in one command.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall/library$ cd ../../../../graveyard
+📚 library [ancient tomes] ⚔️cd ../../../../graveyard
 ```
 
 > **Concepts:** `cd`, `relative paths`, `..`
@@ -1411,8 +1422,6 @@ bamr87@bashcrawl:~/entrance/chapel/courtyard/aviary/hall/library$ cd ../../../..
 | Property | Value |
 |----------|-------|
 | **Location** | `entrance/chapel/graveyard` |
-| **Inventory** | crown, crystal, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
 
 </details>
 
@@ -1428,7 +1437,7 @@ The graveyard is an elaborate puzzle area teaching ``touch``, ``sort``, pipes (`
 The graveyard scroll sets 'a haunting scene — tombstones, skeletal trees, and a mausoleum sealed with a rusty padlock. We need to find three numbers to unlock it.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard$ cat scroll
+🪦 graveyard [resting place] ⚔️cat scroll
 # The graveyard is a haunting place, shrouded in mist and silence.
 #
 # Rusted iron gates creak in the cold wind, leading to a field of
@@ -1451,12 +1460,17 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard$ cat scroll
 The graveyard has several sub-areas: ``columbarium/``, ``lower-quadrant/``, ``royal-tombs/``. The ``padlock`` executable guards the hidden mausoleum. Three numbers are hidden across these sub-areas.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard$ ls -F
+🪦 graveyard [resting place] ⚔️ls -F
 columbarium/
 lower-quadrant/
 padlock*
 royal-tombs/
 scroll
+
+🪦 The graveyard holds secrets. Use ls -a to find the hidden mausoleum.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ padlock - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -1466,7 +1480,7 @@ scroll
 The columbarium — a wall of burial niches. We need to find the right niche number and create a file with ``touch``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard$ cd columbarium
+🪦 graveyard [resting place] ⚔️cd columbarium
 ```
 
 > **Concepts:** `cd`
@@ -1476,7 +1490,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard$ cd columbarium
 The scroll teaches ``touch`` — creating empty files. We need to create a file named ``15`` (the correct niche number), then run ``./open`` to receive the first code.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ cat scroll
+📍 columbarium [exploring] ⚔️cat scroll
 # Before you is the columbarium, a weathered stone structure
 # adorned with carvings of angels and vines. Rows of niches
 # line its walls, some with long burnt-out candles, others
@@ -1504,7 +1518,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ cat scroll
 ``touch`` creates an empty file with the given name. In this case, creating file ``15`` signals to the ``open`` script that we've found the right niche. In real Linux, ``touch`` is commonly used to create placeholder files or update file timestamps.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ touch 15
+📍 columbarium [exploring] ⚔️touch 15
 ```
 
 > **Concepts:** `touch`
@@ -1514,7 +1528,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ touch 15
 The niche reveals the number **2712** — the first of three codes needed to unlock the mausoleum padlock.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ ./open
+📍 columbarium [exploring] ⚔️./open
 You open the niche, revealing a hidden plaque with a number etched 
 into its surface. The quiet of the graveyard thickens as the number 
 **2712** emerges from the shadows.
@@ -1531,7 +1545,7 @@ export I=2712,$I
 We store the first padlock code in our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ export I=2712,$I
+📍 columbarium [exploring] ⚔️export I=2712,$I
 ```
 
 > **Concepts:** `export`
@@ -1543,7 +1557,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ export I=2712,$I
 The lower quadrant of the graveyard has old gravestones that need to be sorted to find a key date.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ cd ../lower-quadrant
+📍 columbarium [exploring] ⚔️cd ../lower-quadrant
 ```
 
 > **Concepts:** `cd`
@@ -1553,7 +1567,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/columbarium$ cd ../lower-quadrant
 This scroll teaches the ``sort`` command — it arranges lines of text in alphabetical or numerical order. We use it to sort the gravestones and find a familiar name with an important year.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ cat scroll
+📍 lower-quadrant [exploring] ⚔️cat scroll
 # In the lower quadrant of the graveyard, the land dips slightly,
 # and fog clings to the uneven ground. The gravestones here are
 # modest and small, many leaning with age, with inscriptions
@@ -1582,7 +1596,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ cat scroll
 ``sort`` arranges the gravestone entries. We look for a name that connects to the game's lore and note the year **1765** — the second padlock code.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ sort gravestones
+📍 lower-quadrant [exploring] ⚔️sort gravestones
 1765,1702,Frederick Kingsley
 1781,1724,Henry Abernathy
 1787,1736,Agnes Merriweather
@@ -1633,7 +1647,7 @@ Year of Death,Birth Year,Name
 We store the second padlock code.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ export I=1765,$I
+📍 lower-quadrant [exploring] ⚔️export I=1765,$I
 ```
 
 > **Concepts:** `export`
@@ -1645,7 +1659,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ export I=1765,$I
 The royal tombs contain stone statues — one of which can receive the crown we took from the monster.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ cd ../royal-tombs
+📍 lower-quadrant [exploring] ⚔️cd ../royal-tombs
 ```
 
 > **Concepts:** `cd`
@@ -1655,7 +1669,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/lower-quadrant$ cd ../royal-tombs
 Weathered marble, cracked tombs, stone angels and lions — the royal tombs are the resting place of ancient kings.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ cat scroll
+📍 royal-tombs [exploring] ⚔️cat scroll
 # As you enter the plot of royal graves, a sense of faded grandeur
 # fills the air. The once imposing gravestones, crafted from marble
 # and adorned with royal crests, now show signs of neglect, their
@@ -1677,7 +1691,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ cat scroll
 The statues encounter checks our inventory for the crown. We need to choose the correct statue (number 5 — the king). Placing the crown reveals the third code: **7432**. The script also teaches ``sed`` for removing items from inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ ./statues
+📍 royal-tombs [exploring] ⚔️./statues
 # (input) y
 # (input) 5
 Standing in front of the statues, you are thinking about the symbols
@@ -1715,7 +1729,7 @@ export I=7432,$I
 We store the third and final padlock code.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ export I=7432,$I
+📍 royal-tombs [exploring] ⚔️export I=7432,$I
 ```
 
 > **Concepts:** `export`
@@ -1727,7 +1741,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ export I=7432,$I
 The crown was placed on the statue, so we remove it from our inventory using ``sed``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ export I=$(echo $I | sed 's/crown//;s/,,/,/')
+📍 royal-tombs [exploring] ⚔️export I=$(echo $I | sed 's/crown//;s/,,/,/')
 ```
 
 > **Concepts:** `sed`, `command substitution`
@@ -1739,7 +1753,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ export I=$(echo $I | s
 We return to the graveyard entrance.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ cd ..
+📍 royal-tombs [exploring] ⚔️cd ..
 ```
 
 > **Concepts:** `cd ..`
@@ -1749,7 +1763,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/royal-tombs$ cd ..
 The padlock checks our inventory for the three codes: 2712, 1765, and 7432. With all three present, the padlock opens and the mausoleum directory is revealed (renamed from ``.mausoleum`` to ``mausoleum``).
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard$ ./padlock
+🪦 graveyard [resting place] ⚔️./padlock
 # (input) y
 The old padlock features three dials, each adorned with a distinct
 symbol:
@@ -1779,7 +1793,7 @@ revealing a dimly lit interior cloaked in dust and cobwebs.
 The newly unlocked mausoleum contains loot, a room description file, and a spell scroll.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard$ cd mausoleum
+🪦 graveyard [resting place] ⚔️cd mausoleum
 ```
 
 > **Concepts:** `cd`
@@ -1789,7 +1803,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard$ cd mausoleum
 The mausoleum scroll teaches ``cat`` on specific files and hints at using ``./loot`` after solving the room's puzzle.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cat scroll
+📍 mausoleum [exploring] ⚔️cat scroll
 # Inside the decayed mausoleum, you catch glimpses of
 # tarnished silver urns, rusted candlesticks, and ornate chests
 # scattered among the debris. The grand chamber is filled with
@@ -1813,7 +1827,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cat scroll
 The ``room`` file contains descriptions of items with numbers — we need to find the right combination to answer the loot script's question.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cat room
+📍 mausoleum [exploring] ⚔️cat room
 This is not the spell you are looking for 0123456789
 This is not the debris you are looking for 0123456789
 This is not the urn you are looking for 0123456789
@@ -1879,7 +1893,7 @@ This is the spell you are looking for
 This spell teaches piping: ``sort room | uniq``. The pipe (``|``) sends the output of one command as input to another. ``uniq`` removes consecutive duplicate lines. Together, they help decode the room's puzzle.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cat spell
+📍 mausoleum [exploring] ⚔️cat spell
 # As you hastily scan the room, your gaze falls upon a tattered,
 # ancient scroll partially protruding from beneath a crumbled
 # chest. Ignoring the other trinkets, you pull it free, revealing
@@ -1904,7 +1918,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cat spell
 We pipe ``sort`` output through ``uniq`` to eliminate duplicates and reveal the true contents. The answer code is **27121981**.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ sort room | uniq
+📍 mausoleum [exploring] ⚔️sort room | uniq
 This is not the candlesticks you are looking for 0123456789
 This is not the chest you are looking for 0123456789
 This is not the debris you are looking for 0123456789
@@ -1921,7 +1935,7 @@ This is the spell you are looking for
 We enter the code **27121981**. If correct, we receive gold coins, a bracelet, and silver keys. Wrong answers cause the mausoleum to collapse, re-hiding it and triggering a game over.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ ./loot
+📍 mausoleum [exploring] ⚔️./loot
 # (input) 27121981
 As your hand hovers over the array of chests, you feel an eerie
 pull toward one in particular.
@@ -1944,7 +1958,7 @@ export I=goldcoins,bracelet,silverkeys,$I,
 We collect all three items from the mausoleum.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ export I=goldcoins,bracelet,silverkeys,$I,
+📍 mausoleum [exploring] ⚔️export I=goldcoins,bracelet,silverkeys,$I,
 ```
 
 > **Concepts:** `export`
@@ -1956,7 +1970,7 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ export I=goldcoins,brace
 We navigate back to the entrance level.
 
 ```bash
-bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cd ../../..
+📍 mausoleum [exploring] ⚔️cd ../../..
 ```
 
 > **Concepts:** `cd`, `..`
@@ -1967,8 +1981,6 @@ bamr87@bashcrawl:~/entrance/chapel/graveyard/mausoleum$ cd ../../..
 | Property | Value |
 |----------|-------|
 | **Location** | `entrance` |
-| **Inventory** | goldcoins, bracelet, silverkeys, 7432, 1765, 2712, crystal, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
 
 </details>
 
@@ -1984,7 +1996,7 @@ The vault holds the key to the final area. You enchant your sword with an ice cr
 The vault is the second hidden area. It contains glass shards, a stronghold with the goblet puzzle, and deeper within, a nursery and a ghost.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd vault
+🚪 entrance [starting hall] ⚔️cd vault
 ```
 
 > **Concepts:** `cd`
@@ -1994,7 +2006,7 @@ bamr87@bashcrawl:~/entrance$ cd vault
 The vault scroll describes an eerie scene — glass shards that seem to watch you, and a painting of two goblets.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault$ cat scroll
+📍 vault [exploring] ⚔️cat scroll
 
 # You have entered an asymmetric room with shards of glass
 # arranged along the floor in haphazard patterns.
@@ -2014,10 +2026,13 @@ bamr87@bashcrawl:~/entrance/vault$ cat scroll
 The vault contains ``glass`` (executable — for the ice crystal), ``scroll``, and ``stronghold/`` (directory leading deeper).
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault$ ls -F
+📍 vault [exploring] ⚔️ls -F
 glass*
 scroll
 stronghold/
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ glass - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -2027,7 +2042,7 @@ stronghold/
 The glass encounter checks if we have the ice crystal from the aviary. If so, we can place it among the glass shards to enchant our sword with blizzard power. This gives +2 bonus in the ghost fight. The script uses ``grep`` to check inventory and ``sed`` to remove the crystal.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault$ ./glass
+📍 vault [exploring] ⚔️./glass
 # (input) y
 Do you have an ice crystal? y/n  You place the ice crystal among the shards of glass.  The
 sword in your hands becomes cold.  You feel the power of
@@ -2046,7 +2061,7 @@ export I=$(sed 's/crystal,//' <<< $I)
 The crystal was used to enchant our sword, so we remove it from inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault$ export I=$(echo $I | sed 's/crystal//;s/,,/,/')
+📍 vault [exploring] ⚔️export I=$(echo $I | sed 's/crystal//;s/,,/,/')
 ```
 
 > **Concepts:** `sed`, `command substitution`
@@ -2058,7 +2073,7 @@ bamr87@bashcrawl:~/entrance/vault$ export I=$(echo $I | sed 's/crystal//;s/,,/,/
 The stronghold is a fortified inner chamber containing the goblet puzzle — the key to unlocking the rift.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault$ cd stronghold
+📍 vault [exploring] ⚔️cd stronghold
 ```
 
 > **Concepts:** `cd`
@@ -2068,7 +2083,7 @@ bamr87@bashcrawl:~/entrance/vault$ cd stronghold
 The scroll describes a goblet at the center of a runic triangle, flanked by ``orb1`` and empty spaces for ``orb2`` and ``orb3``. The hint? Copy ``orb1`` to create the missing orbs.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ cat scroll
+🏰 stronghold [vault heart] ⚔️cat scroll
 
 # There is a fine gold goblet at the center of a
 # runic triangle on the floor.
@@ -2096,11 +2111,16 @@ bamr87@bashcrawl:~/entrance/vault/stronghold$ cat scroll
 We see ``goblet`` (executable), ``orb1`` (a file to copy), ``scroll``, and ``nursery/`` deeper within.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ ls -F
+🏰 stronghold [vault heart] ⚔️ls -F
 goblet*
 nursery/
 orb1
 scroll
+
+💰 Vault path: Master variables, collect the goblet to unlock the Rift!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ goblet - Interactive element
 ```
 
 > **Concepts:** `ls`
@@ -2110,7 +2130,7 @@ scroll
 ``cp`` copies files. We duplicate ``orb1`` to create ``orb2``. This is a fundamental filesystem operation — creating copies of files is essential for backups, templates, and more.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ cp orb1 orb2
+🏰 stronghold [vault heart] ⚔️cp orb1 orb2
 ```
 
 > **Concepts:** `cp`, `file duplication`
@@ -2120,7 +2140,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold$ cp orb1 orb2
 We create the third orb to complete the set.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ cp orb1 orb3
+🏰 stronghold [vault heart] ⚔️cp orb1 orb3
 ```
 
 > **Concepts:** `cp`
@@ -2130,7 +2150,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold$ cp orb1 orb3
 With all three orbs present (``orb1``, ``orb2``, ``orb3``), the goblet activates and announces that the rift has opened. The script uses file-existence checks (``-f orb2`` and ``-f orb3``) and then runs ``mv ../../.rift ../../rift`` to unlock the rift directory at the entrance level.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ ./goblet
+🏰 stronghold [vault heart] ⚔️./goblet
 You have freed the goblet's material form.  Add 'goblet' to
 your inventory.
 
@@ -2148,7 +2168,7 @@ passage to the RIFT has opened...
 We add the goblet to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ export I=goblet,$I
+🏰 stronghold [vault heart] ⚔️export I=goblet,$I
 ```
 
 > **Concepts:** `export`
@@ -2160,7 +2180,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold$ export I=goblet,$I
 The nursery of the still dead lies below the stronghold.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold$ cd nursery
+🏰 stronghold [vault heart] ⚔️cd nursery
 ```
 
 > **Concepts:** `cd`
@@ -2170,7 +2190,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold$ cd nursery
 A brief atmospheric text — the nursery of the still dead.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold/nursery$ cat scroll
+🌱 nursery [vault garden] ⚔️cat scroll
 
 # Once a thriving nursery filled with vibrant plants,
 # this is now the Nursery of the Still Dead (it says so,
@@ -2184,7 +2204,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold/nursery$ cat scroll
 The laboratory — an abandoned wizard's workspace where a ghost awaits.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold/nursery$ cd lab
+🌱 nursery [vault garden] ⚔️cd lab
 ```
 
 > **Concepts:** `cd`
@@ -2194,7 +2214,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold/nursery$ cd lab
 The lab scroll describes the eerie abandoned laboratory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ cat scroll
+🧪 lab [alchemy room] ⚔️cat scroll
 
 # An abandoned laboratory of a wizard long dead.
 #
@@ -2214,7 +2234,7 @@ bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ cat scroll
 The ghost of an evil wizard manifests. This is another random combat encounter using the same dice-roll system as the monster. Having the enchanted sword (via the ice crystal and glass encounter) gives +2 bonus. On victory, the ghost drops an emerald and platinum coins.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ ./ghost
+🧪 lab [alchemy room] ⚔️./ghost
 # (input) y
 # (input) 3
 The room shakes, a gust of wind blasts you from nowhere.
@@ -2225,8 +2245,8 @@ ghostly entity!
 If you have a sword, you can attack.  Otherwise, you should
 run.
 
-Do you want to attack? y/n  Enter a number:  The monster rolled  17
-You rolled  28
+Do you want to attack? y/n  Enter a number:  The monster rolled  29
+You rolled  51
 +2 bonus from a mysterious wintry patron!
 A hit! A palpable hit!  You have slain the spirit of the
 evil wizard.
@@ -2239,7 +2259,7 @@ evil wizard.
 We navigate back to the entrance level.
 
 ```bash
-bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ cd ../../../..
+🧪 lab [alchemy room] ⚔️cd ../../../..
 ```
 
 > **Concepts:** `cd`, `..`
@@ -2250,8 +2270,6 @@ bamr87@bashcrawl:~/entrance/vault/stronghold/nursery/lab$ cd ../../../..
 | Property | Value |
 |----------|-------|
 | **Location** | `entrance` |
-| **Inventory** | goblet, goldcoins, bracelet, silverkeys, 7432, 1765, 2712, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
 
 </details>
 
@@ -2267,7 +2285,7 @@ The scrap yard provides a focused lesson on symbolic links (``ln -s``) — short
 The scrap yard is the third hidden area. Despite its unassuming name, it teaches one of Linux's most powerful features: symbolic links.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd scrap
+🚪 entrance [starting hall] ⚔️cd scrap
 ```
 
 > **Concepts:** `cd`
@@ -2277,7 +2295,7 @@ bamr87@bashcrawl:~/entrance$ cd scrap
 This scroll provides an in-depth lesson on ``ln -s`` (creating symlinks), ``ls -l`` (viewing where links point), and ``rm linkname`` (removing symlinks). Symlinks are shortcuts — references to files or directories located elsewhere. They're used everywhere in Linux: ``/usr/bin/python`` is often a symlink, libraries use them for versioning, and they simplify complex directory structures.
 
 ```bash
-bamr87@bashcrawl:~/entrance/scrap$ cat scroll
+📍 scrap [exploring] ⚔️cat scroll
 
 ================================================================================
                           THE SCRAP HEAP
@@ -2346,7 +2364,7 @@ REMOVE A PORTAL:
 We return to the entrance for the final challenge.
 
 ```bash
-bamr87@bashcrawl:~/entrance/scrap$ cd ..
+📍 scrap [exploring] ⚔️cd ..
 ```
 
 > **Concepts:** `cd ..`
@@ -2357,8 +2375,6 @@ bamr87@bashcrawl:~/entrance/scrap$ cd ..
 | Property | Value |
 |----------|-------|
 | **Location** | `entrance` |
-| **Inventory** | goblet, goldcoins, bracelet, silverkeys, 7432, 1765, 2712, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
 
 </details>
 
@@ -2374,7 +2390,7 @@ The rift is the endgame dimension. You use ``$USER`` to solve a POSIX puzzle, ``
 The rift is the endgame area — a dimension of red skies and flame trees. It was unlocked by the goblet in the vault's stronghold. The final boss, Nyarlathotep, awaits in the arena pit.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd rift
+🚪 entrance [starting hall] ⚔️cd rift
 ```
 
 > **Concepts:** `cd`, `endgame`
@@ -2384,7 +2400,7 @@ bamr87@bashcrawl:~/entrance$ cd rift
 The rift scroll is atmospheric — red sky, mountains floating in the sky, and flame trees. You have entered another dimension.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift$ cat scroll
+📍 rift [exploring] ⚔️cat scroll
 
 # You find yourself on a world not of this reality.
 #
@@ -2403,11 +2419,14 @@ bamr87@bashcrawl:~/entrance/rift$ cat scroll
 The rift contains ``box`` (a POSIX login puzzle), ``arena/`` (where the final boss waits), and ``spire/`` (a mysterious tower with an elevator).
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift$ ls -F
+📍 rift [exploring] ⚔️ls -F
 arena/
 box*
 scroll
 spire/
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ box - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -2417,7 +2436,7 @@ spire/
 The illuminated metal box presents a POSIX login screen. It asks for your username — the ``$USER`` environment variable. Entering your actual system username unlocks armour and a combat bonus. This teaches the ``$USER`` variable, which is preset by the operating system.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift$ ./box
+📍 rift [exploring] ⚔️./box
 # (input) y
 # (input) ${USER}
 A metal box sits upon the ground.  It appears to be
@@ -2429,7 +2448,6 @@ Do you want to read the writing? y/n
 |       Welcome to POSIX         |
 |   Enter your username:         |
 '--------------------------------'
-You feel magic in the air.
 ```
 
 > **Concepts:** `$USER`, `environment variables`, `POSIX`
@@ -2439,7 +2457,7 @@ You feel magic in the air.
 The Chamber of Nyarlathotep — an ancient arena built for blood sport. A gaping pit lies at its center.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift$ cd arena
+📍 rift [exploring] ⚔️cd arena
 ```
 
 > **Concepts:** `cd`
@@ -2449,7 +2467,7 @@ bamr87@bashcrawl:~/entrance/rift$ cd arena
 The arena scroll describes the scene and suggests preparing for the final battle. Summoning a potion first would be wise.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena$ cat scroll
+⚔️ arena [combat pit] ⚔️cat scroll
 
  .:|  T H E C H A M B E R O F  |:.
 .:||  N Y A R L A T H O T E P  ||:.
@@ -2486,7 +2504,7 @@ bamr87@bashcrawl:~/entrance/rift/arena$ cat scroll
 We descend into the pit where Nyarlathotep, the crawling chaos, has been waiting.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena$ cd pit
+⚔️ arena [combat pit] ⚔️cd pit
 ```
 
 > **Concepts:** `cd`
@@ -2496,7 +2514,7 @@ bamr87@bashcrawl:~/entrance/rift/arena$ cd pit
 Nyarlathotep has been waiting.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ cat scroll
+🕳️ pit [boss lair] ⚔️cat scroll
 
 # You have entered the chamber of
 # Nyarlathotep, the crawling chaos.
@@ -2512,12 +2530,19 @@ bamr87@bashcrawl:~/entrance/rift/arena/pit$ cat scroll
 The pit contains ``drummer`` (to weaken Nyarlathotep), ``nyarlathotep`` (the final boss), ``wizard-light`` (summon an ally), plus the ``drum`` text file and ``scroll``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ ls -F
+🕳️ pit [boss lair] ⚔️ls -F
 drum
 drummer*
 nyarlathotep*
 scroll
 wizard-light*
+
+🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ drummer - Interactive element
+   ⚡ nyarlathotep - Interactive element
+   ⚡ wizard-light - Interactive element
 ```
 
 > **Concepts:** `ls`
@@ -2527,7 +2552,7 @@ wizard-light*
 The drummer script reveals that war drums give Nyarlathotep extra strength (+2 to his roll). The hint is to use ``mv`` to rename or remove the ``drum`` file. Once the drum is gone, Nyarlathotep loses the bonus.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ ./drummer
+🕳️ pit [boss lair] ⚔️./drummer
 War drums pound in the distance, giving Nyarlathotep
 strength.
 
@@ -2543,7 +2568,7 @@ command, learn the "mv" command now.
 We use ``mv`` to rename ``drum`` to ``drum.silenced``, effectively removing the drummer's power source. ``mv`` can both move files to new locations and rename them. This strategic use of filesystem manipulation is the final lesson of the game.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ mv drum drum.silenced
+🕳️ pit [boss lair] ⚔️mv drum drum.silenced
 ```
 
 > **Concepts:** `mv`, `rename files`
@@ -2553,7 +2578,7 @@ bamr87@bashcrawl:~/entrance/rift/arena/pit$ mv drum drum.silenced
 Nyarlathotep — the crawling chaos — is the final boss. The combat uses the same dice system but with higher stakes: the base monster roll is +3, silencing the drum gives -2 (net +1), and the POSIX box blessing gives an additional +2 bonus to the player. On victory, Nyarlathotep is defeated and drops legendary loot. On loss, 10 HP damage. This is the culmination of every command learned throughout the game.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ ./nyarlathotep
+🕳️ pit [boss lair] ⚔️./nyarlathotep
 # (input) y
 # (input) 7
 In the blink of an eye, Nyarlathotep is standing before you.
@@ -2561,8 +2586,8 @@ From its hands emanate black necrotic rays, and your mind
 screams.
 
 Are you armed? y/n  Enter a number.
-The monster rolled  23
-You rolled  57
+The monster rolled  46
+You rolled  97
 A hit! A palpable hit!  You have vanquished the elder god of
 chaos!
 ```
@@ -2574,7 +2599,7 @@ chaos!
 After defeating Nyarlathotep, new files appear: ``treasure`` (hair of a god), ``platinum`` (bracelet of chaotic necromancy), and ``end`` (the victory message).
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ ls -F
+🕳️ pit [boss lair] ⚔️ls -F
 drum.silenced
 drummer*
 end
@@ -2583,6 +2608,13 @@ platinum*
 scroll
 treasure*
 wizard-light*
+
+🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   ⚡ drummer - Interactive element
+   ⚡ nyarlathotep - Interactive element
+   ⚡ platinum - Interactive element
 ```
 
 > **Concepts:** `ls`
@@ -2592,7 +2624,7 @@ wizard-light*
 The ``end`` file contains the game's victory message. You have reached the end of Bashcrawl. You now know enough Bash to use it for everyday activities — navigating directories, viewing files, managing permissions, writing scripts, using pipes and filters, and understanding symlinks, environment variables, and arithmetic.
 
 ```bash
-bamr87@bashcrawl:~/entrance/rift/arena/pit$ cat end
+🕳️ pit [boss lair] ⚔️cat end
 You have reached the end of the game.  You know enough Bash
 now to use it for every day activities.  Practice makes
 perfect, so be sure to use it often.  For continued Bash
@@ -2609,9 +2641,7 @@ dungeon rooms to Bashcrawl!
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/rift/arena/pit` |
-| **Inventory** | goblet, goldcoins, bracelet, silverkeys, 7432, 1765, 2712, rags, coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -2676,7 +2706,6 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | `paths` | paths |
 | `read` | Read user input from stdin |
 | `interactive scripts` | interactive scripts |
-| `stdin` | stdin |
 
 ### Variables & Arithmetic
 
@@ -2687,7 +2716,6 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | `inventory` | inventory |
 | `variable expansion` | variable expansion |
 | `string concatenation` | string concatenation |
-| `numeric variables` | numeric variables |
 | `let` | Perform integer arithmetic in bash |
 | `unset` | Remove an environment variable |
 | `variables` | variables |
@@ -2727,6 +2755,8 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 |-------------------|-------------|
 | `game progression` | game progression |
 | `game items` | game items |
+| `conditional logic` | conditional logic |
+| `variable checks` | variable checks |
 | `variable inspection` | variable inspection |
 | `HP tracking` | HP tracking |
 | `game combat` | game combat |
@@ -2763,11 +2793,11 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 
 | Metric | Value |
 |--------|-------|
-| **Total Steps** | 119 |
-| **Duration** | 0.5 seconds |
+| **Total Steps** | 118 |
+| **Duration** | 7.5 seconds |
 | **Rooms Visited** | 23 |
 | **Items Collected** | 15 |
-| **Encounters** | 20 |
+| **Encounters** | 21 |
 | **Success** | ✅ Yes |
 
 ### Rooms Visited
@@ -2780,7 +2810,7 @@ amulet, sword, diamonds, coins, rags, fish, crystal, crown, 2712, 1765, 7432, go
 
 ### Encounters
 
-treasure, treasure, potion, statue, treasure, spell, rags, penguin, crystal, monster, open, statues, padlock, loot, glass, goblet, ghost, box, drummer, nyarlathotep
+treasure, treasure, potion, statue, treasure, spell, rags, penguin, crystal, monster, treasure, open, statues, padlock, loot, glass, goblet, ghost, box, drummer, nyarlathotep
 
 ---
 

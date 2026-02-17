@@ -1,8 +1,8 @@
 # Bashcrawl: Complete Game Walkthrough
 
-> **Auto-generated** from a test demo run on 2026-02-16 20:43
+> **Auto-generated** from a test demo run on 2026-02-16 22:23
 >
-> Duration: 0.1s | Steps: 29 | Rooms: 4 | Errors: 0
+> Duration: 2.2s | Steps: 28 | Rooms: 4 | Errors: 0
 
 ---
 
@@ -15,6 +15,11 @@ potions, monsters, and spells.
 This walkthrough demonstrates a complete playthrough — every command
 a player would type, the terminal output they would see, and an
 explanation of what each command teaches.
+
+The output is captured from ``main.sh``'s interactive terminal
+emulator running in batch mode, so prompts, area context, quest
+completions, and game-script output appear exactly as a real player
+would see them.
 
 
 ## Table of Contents
@@ -45,7 +50,10 @@ cd bashcrawl
 # Make game files executable
 bash setup.sh
 
-# Start playing!
+# Start playing (interactive terminal emulator)
+bash main.sh --interactive
+
+# Or play natively
 cd entrance
 cat scroll
 ```
@@ -62,7 +70,7 @@ The adventure begins at the dungeon entrance. Here you learn the three most fund
 Every adventure begins with a single step. In the terminal, ``cd`` (change directory) moves you into a new directory — think of it as walking through a door. We step into the ``entrance/`` directory to begin the game.
 
 ```bash
-bamr87@bashcrawl:~$ cd entrance
+📍 game [exploring] ⚔️cd entrance
 ```
 
 > **Concepts:** `cd`, `directory navigation`
@@ -72,8 +80,14 @@ bamr87@bashcrawl:~$ cd entrance
 The ``pwd`` command (print working directory) shows your current location in the filesystem. In the game, this is like checking a map — it tells you which room you're standing in.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ pwd
+🚪 entrance [starting hall] ⚔️pwd
 ~/entrance
+✨ Quest complete: Awakening: Know Thy Place!
+   Reward: Navigation Novice ribbon (+50 XP)
+🎯 QUEST TRACKER:
+   Quest 2/7: Eyes to See
+   Objective: Use 'ls' to reveal what surrounds you.
+   Reward: Glimmering lens (+50 XP)
 ```
 
 > **Concepts:** `pwd`, `working directory`
@@ -83,11 +97,20 @@ bamr87@bashcrawl:~/entrance$ pwd
 The ``ls`` command lists the contents of the current directory. In the dungeon, this is like looking around the room to see what's here — files, directories, scrolls, and treasures.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ ls
+🚪 entrance [starting hall] ⚔️ls
 README.md
-cellar
+cellar/
 scroll
-workshop
+workshop/
+
+🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.
+📜 There is a scroll here. Read it with: cat scroll
+✨ Quest complete: Eyes to See!
+   Reward: Glimmering lens (+50 XP)
+🎯 QUEST TRACKER:
+   Quest 3/7: First Steps
+   Objective: Travel to the entrance with 'cd entrance'.
+   Reward: Pathwalker's charm (+100 XP)
 ```
 
 > **Concepts:** `ls`, `listing files`
@@ -97,7 +120,7 @@ workshop
 The ``cat`` command displays the contents of a file. Scrolls are the game's tutorial texts — they teach you new terminal commands as you progress deeper into the dungeon. This first scroll introduces the basic commands you'll need to navigate: ``ls``, ``cd``, and ``cat``.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cat scroll
+🚪 entrance [starting hall] ⚔️cat scroll
 
 ================================================================================
                            ANCIENT SCROLL OF SIGHT
@@ -167,9 +190,7 @@ May your terminal skills grow strong, brave adventurer!
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance` |
-| **Inventory** | (empty) |
-| **HP** | 0 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -185,7 +206,7 @@ The cellar lies beneath the entrance and introduces enhanced file listing with `
 We descend deeper into the dungeon. The cellar is the second room and teaches more advanced listing techniques. Notice how each directory is a room, and navigating between them with ``cd`` is like walking through doorways.
 
 ```bash
-bamr87@bashcrawl:~/entrance$ cd cellar
+🚪 entrance [starting hall] ⚔️cd cellar
 ```
 
 > **Concepts:** `cd`, `nested directories`
@@ -195,7 +216,7 @@ bamr87@bashcrawl:~/entrance$ cd cellar
 This scroll teaches ``ls -F``, which adds special symbols after filenames to show their type: ``/`` for directories, ``*`` for executable files, and ``@`` for symbolic links. It's like having enchanted vision that reveals the nature of objects in the room.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ cat scroll
+🏰 cellar [underground] ⚔️cat scroll
 
 ################################################################################
 #                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #
@@ -246,7 +267,7 @@ When you cast `ls -F`, the mystical energies reveal secrets through their symbol
 └─────────────────┴────────────────────────────┴──────────────────────────────┘
 
 ################################################################################
-... (187 more lines) ...
+... (182 more lines) ...
 *"In the depths of the cellar, sight becomes insight, and knowledge becomes power."*
 *~ Ancient Terminal Wisdom*
 
@@ -261,11 +282,16 @@ When you cast `ls -F`, the mystical energies reveal secrets through their symbol
 With ``ls -F``, we can now distinguish between regular files, directories (marked with ``/``), and executables (marked with ``*``). The ``treasure`` file shows up with an asterisk — it's a program we can run!
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ ls -F
+🏰 cellar [underground] ⚔️ls -F
 README.md
 armoury/
 scroll
 treasure*
+
+🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
 ```
 
 > **Concepts:** `ls -F`, `executable indicator *`
@@ -275,7 +301,7 @@ treasure*
 The ``./`` prefix tells the shell to execute the file in the current directory. Running ``./treasure`` triggers the treasure script, which reveals an emerald amulet. The script also secretly unlocks three hidden areas accessible from the entrance level: the chapel, vault, and scrap yard.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ ./treasure
+🏰 cellar [underground] ⚔️./treasure
 You have found an emerald **amulet**!
 
 To collect treasure, you must have a variable to hold your inventory.
@@ -296,7 +322,7 @@ echo $I
 The ``export`` command sets an environment variable. Here we add ``amulet`` to our inventory variable ``$I``. The ``$I`` at the end preserves anything already in inventory. In real-world Linux, ``export`` makes variables available to child processes.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ export I=amulet,$I
+🏰 cellar [underground] ⚔️export I=amulet,$I
 ```
 
 > **Concepts:** `export`, `environment variables`, `inventory`
@@ -308,7 +334,7 @@ bamr87@bashcrawl:~/entrance/cellar$ export I=amulet,$I
 ``echo`` prints text to the terminal. When combined with ``$I``, it expands the variable and shows our current inventory. This is how you check what treasures you've collected throughout the game.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ echo $I
+🏰 cellar [underground] ⚔️echo $I
 amulet,
 ```
 
@@ -319,9 +345,7 @@ amulet,
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar` |
-| **Inventory** | amulet |
-| **HP** | 0 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -337,7 +361,7 @@ The armoury is stocked with weapons, potions, and knowledge about file execution
 The armoury is the third room on the main path. Here we learn about file permissions, executing scripts, and encounter our first interactive game elements — a treasure, a potion, and more.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar$ cd armoury
+🏰 cellar [underground] ⚔️cd armoury
 ```
 
 > **Concepts:** `cd`, `game progression`
@@ -347,7 +371,7 @@ bamr87@bashcrawl:~/entrance/cellar$ cd armoury
 This scroll teaches about executing files with ``./``, the difference between relative and absolute paths, and the ``chmod`` command for managing file permissions. In Linux, a file must have execute permission to be run as a program.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ cat scroll
+🗡️ armoury [weapons hall] ⚔️cat scroll
 
 ################################################################################
 #                  🗡️  THE GRAND ARMOURY                                      #
@@ -413,12 +437,18 @@ ABSOLUTE PATHS (from the root of the world):
 Listing with ``-F`` reveals the armoury's contents. Executables (marked ``*``) include ``treasure``, ``potion``, and deeper in, the ``chamber/`` directory awaits.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ls -F
+🗡️ armoury [weapons hall] ⚔️ls -F
 README.md
 chamber/
 potion*
 scroll
 treasure*
+
+🗡️ You have entered the armoury. Master chmod and ./script for combat!
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+   🧪 potion - Restore health
 ```
 
 > **Concepts:** `ls -F`
@@ -428,7 +458,7 @@ treasure*
 The armoury's treasure reveals a gleaming silver sword. The sword is essential for combat encounters later in the game — without it, you cannot defeat the statue, monster, or ghost. Always collect every treasure you find!
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ./treasure
+🗡️ armoury [weapons hall] ⚔️./treasure
 You have found a gleaming silver **sword**!  You marvel at
 its craftsmanship, and you recall tales from your childhood
 of the great mystic king Rannismir who bore such a sword to
@@ -450,7 +480,7 @@ echo $I
 We add the sword to our comma-separated inventory variable. Notice the pattern: ``export I=newitem,$I`` — this prepends the new item while keeping everything already collected. Our inventory now contains both the sword and the amulet.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ export I=sword,$I
+🗡️ armoury [weapons hall] ⚔️export I=sword,$I
 ```
 
 > **Concepts:** `export`, `string concatenation`
@@ -459,49 +489,21 @@ bamr87@bashcrawl:~/entrance/cellar/armoury$ export I=sword,$I
 
 ### Drinking the Potion
 
-The potion script uses ``read`` to ask for your input — a y/n prompt. By answering 'y', the potion grants you 15 health points (HP). Potions use a variable called ``$HP`` to track your health, which you'll need for combat.
+The potion script checks your ``$HP`` variable. In ``main.sh``'s interactive mode, HP starts at 100, so the potion sees you're already healthy and skips the offer. In native mode (where HP starts at 0), it would ask y/n and grant 15 HP. This shows how scripts use variable checks (``if [ "${HP:-0}" -gt 0 ]``) to branch.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ ./potion
-# (input) y
-You have found a potion bottle of swirling
-green liquid. Do you want to drink it?  y/n
-
-The taste of a rustic green plant fills your mouth.  It
-warms and strengthens you.
-
-Create a variable for your health points (HP).  You have
-15HP:
-
-export HP=15
-
-You can check your health at any time:
-
-echo $HP
+🗡️ armoury [weapons hall] ⚔️./potion
+You checked that bottle already.
 ```
 
-> **Concepts:** `read`, `interactive scripts`, `stdin`
-
-### Setting Health Points
-
-As instructed by the potion, we set our HP to 15. In bash, variables don't have types — ``HP`` is stored as a string but can be used in arithmetic with the ``let`` command.
-
-```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ export HP=15
-```
-
-> **Concepts:** `export`, `numeric variables`
-
-> 🎮 **Player Action:** Run this command to update your game state.
+> **Concepts:** `read`, `conditional logic`, `variable checks`
 
 <details>
 <summary>📊 <strong>State after this chapter</strong></summary>
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar/armoury` |
-| **Inventory** | sword, amulet |
-| **HP** | 15 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -517,7 +519,7 @@ The Chamber of Spirits is the climax of the main quest. You face the living stat
 The chamber is the deepest room on the main quest path. It contains three encounters: a living statue (combat), a treasure chest (loot), and a spell inscription (magic). This is where you'll learn about environment variables, arithmetic, and symbolic links.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury$ cd chamber
+🗡️ armoury [weapons hall] ⚔️cd chamber
 ```
 
 > **Concepts:** `cd`, `deep navigation`
@@ -527,7 +529,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury$ cd chamber
 The chamber's scroll teaches ``export``, ``echo``, ``let``, and ``unset`` — the core commands for managing environment variables. These concepts apply directly to real shell scripting: variables store data, ``let`` performs math, and ``export`` shares values with child processes.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ cat scroll
+💎 chamber [treasure room] ⚔️cat scroll
 
 ################################################################################
 #                    🏰 THE CHAMBER OF SPIRITS                                #
@@ -593,11 +595,18 @@ Try:  ls -la ../../..
 The chamber contains three executable encounters (marked with ``*``): the ``statue``, ``treasure``, and ``spell``. We need to fight the statue first — it guards the way forward.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ls -F
+💎 chamber [treasure room] ⚔️ls -F
 scroll
 spell*
 statue*
 treasure*
+
+💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.
+📜 There is a scroll here. Read it with: cat scroll
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+   💰 treasure - Collect treasures
+   ⚡ statue - Interactive element
 ```
 
 > **Concepts:** `ls -F`
@@ -607,7 +616,7 @@ treasure*
 Before engaging the statue, we verify our inventory with ``echo $I``. The sword is required to win the fight. This is a good habit — always check your gear before a battle.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $I
+💎 chamber [treasure room] ⚔️echo $I
 sword,amulet,
 ```
 
@@ -615,11 +624,11 @@ sword,amulet,
 
 ### Pre-Combat Health Check
 
-We also check our HP. The statue deals 5 damage during the encounter, so we need at least 6 HP to survive. With 15 HP from the potion, we're well prepared.
+We also check our HP. The statue deals 5 damage during the encounter, so we need at least 6 HP to survive. With 100 HP from the interactive emulator's default, we're well prepared.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $HP
-15
+💎 chamber [treasure room] ⚔️echo $HP
+100
 ```
 
 > **Concepts:** `echo`, `HP tracking`
@@ -629,7 +638,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ echo $HP
 The statue encounter is the main quest's combat challenge. It springs to life and attacks, dealing 5 damage. When asked if we approach and if we have a sword, we answer 'y' to both. With the sword in our inventory (verified by ``grep``), we shatter the statue and claim the diamonds within. The script uses ``let`` for HP arithmetic and ``grep`` to check inventory — two real shell techniques.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./statue
+💎 chamber [treasure room] ⚔️./statue
 # (input) y
 # (input) y
 A rugged statue stands in the corner of the room.
@@ -663,7 +672,7 @@ let "HP=HP-5"
 We add the diamonds to our growing inventory. The comma-separated format makes it easy to add items with ``export I=newitem,$I``.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=diamonds,$I
+💎 chamber [treasure room] ⚔️export I=diamonds,$I
 ```
 
 > **Concepts:** `export`, `inventory management`
@@ -672,10 +681,10 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=diamonds,$I
 
 ### Accounting for Damage
 
-The ``let`` command performs integer arithmetic in bash. The statue hit us for 5 damage, so we subtract it from our HP. After this, HP drops from 15 to 10. In real scripting, ``let`` is used for counters, calculations, and loop conditions.
+The ``let`` command performs integer arithmetic in bash. The statue hit us for 5 damage, so we subtract it from our HP. After this, HP drops from 100 to 95. In real scripting, ``let`` is used for counters, calculations, and loop conditions.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ let "HP=HP-5"
+💎 chamber [treasure room] ⚔️let "HP=HP-5"
 ```
 
 > **Concepts:** `let`, `bash arithmetic`
@@ -687,7 +696,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ let "HP=HP-5"
 With the statue defeated, we claim the treasure — a stash of coins. Every treasure script follows the same pattern: check if the item is already in inventory, display it if not, and instruct the player to ``export`` it.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./treasure
+💎 chamber [treasure room] ⚔️./treasure
 
 You have found a stash of **coins**!  They are old and worn
 with age,  but they still gleam in the magickal light
@@ -709,7 +718,7 @@ echo $I
 We add the coins to our inventory.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=coins,$I
+💎 chamber [treasure room] ⚔️export I=coins,$I
 ```
 
 > **Concepts:** `export`
@@ -721,7 +730,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ export I=coins,$I
 The spell inscription on the wall teaches one of the most powerful concepts in Linux: symbolic links (symlinks). A symlink is a shortcut that points to another file or directory. The runes instruct us to create a portal — a symlink — connecting this chamber to a distant part of the dungeon.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ./spell
+💎 chamber [treasure room] ⚔️./spell
 # (input) y
 Runes, the language of the ancient mystics that once ruled
 this land, are inscribed upon the western wall.
@@ -747,7 +756,7 @@ ln -fs ../../../chapel/courtyard/aviary/hall portal
 The ``ln -s`` command creates a symbolic link. Here, ``portal`` becomes a shortcut to the distant aviary hall deep inside the chapel. The ``-f`` flag forces creation even if a link already exists. Symlinks are one of the most useful features in Linux — they let you create shortcuts to files and directories anywhere in the system.
 
 ```bash
-bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ln -fs ../../../chapel/courtyard/aviary/hall portal
+💎 chamber [treasure room] ⚔️ln -fs ../../../chapel/courtyard/aviary/hall portal
 ```
 
 > **Concepts:** `ln -s`, `ln -f`, `relative paths`, `symlinks`
@@ -757,9 +766,7 @@ bamr87@bashcrawl:~/entrance/cellar/armoury/chamber$ ln -fs ../../../chapel/court
 
 | Property | Value |
 |----------|-------|
-| **Location** | `entrance/cellar/armoury/chamber` |
-| **Inventory** | coins, diamonds, sword, amulet |
-| **HP** | 10 |
+| **Location** | `unknown` |
 
 </details>
 
@@ -805,8 +812,6 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | `permissions` | permissions |
 | `paths` | paths |
 | `read` | Read user input from stdin |
-| `interactive scripts` | interactive scripts |
-| `stdin` | stdin |
 
 ### Variables & Arithmetic
 
@@ -817,7 +822,6 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 | `inventory` | inventory |
 | `variable expansion` | variable expansion |
 | `string concatenation` | string concatenation |
-| `numeric variables` | numeric variables |
 | `let` | Perform integer arithmetic in bash |
 | `unset` | Remove an environment variable |
 | `variables` | variables |
@@ -844,6 +848,8 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 |-------------------|-------------|
 | `game progression` | game progression |
 | `game items` | game items |
+| `conditional logic` | conditional logic |
+| `variable checks` | variable checks |
 | `variable inspection` | variable inspection |
 | `HP tracking` | HP tracking |
 | `game combat` | game combat |
@@ -857,8 +863,8 @@ All terminal commands demonstrated in this walkthrough, organized by category.
 
 | Metric | Value |
 |--------|-------|
-| **Total Steps** | 29 |
-| **Duration** | 0.1 seconds |
+| **Total Steps** | 28 |
+| **Duration** | 2.2 seconds |
 | **Rooms Visited** | 4 |
 | **Items Collected** | 4 |
 | **Encounters** | 6 |

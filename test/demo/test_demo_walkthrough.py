@@ -1,11 +1,16 @@
-"""Demo walkthrough pytest tests.
+"""Demo walkthrough pytest tests — main.sh batch-mode integration.
 
 Run with::
 
     pytest -m demo -v --timeout=120
 
-Generates ``docs/demo-walkthrough.md`` — a comprehensive Markdown document
-demonstrating the complete Bashcrawl game.
+Pipes all game commands through ``bash main.sh`` in batch mode so the
+generated walkthroughs contain the real interactive prompts, area context,
+and quest notifications exactly as a player would see them.
+
+Generates:
+- ``docs/demo-critical-path.md`` — entrance → chamber main quest
+- ``docs/demo-walkthrough.md`` — full 13-chapter game playthrough
 """
 
 from __future__ import annotations
@@ -103,21 +108,26 @@ class TestFullGameDemo:
     def test_full_game_generates_markdown(self, demo_sandbox: Path) -> None:
         """Run all chapters and produce docs/demo-walkthrough.md.
 
-        Note: combat encounters use ``$RANDOM`` so the monster/ghost
-        fights may not always succeed on the first attempt.  The demo
-        script sends a single number — if the combat fails, the
-        snapshot will still record the attempt and the walkthrough will
-        note the outcome.  The test does NOT assert on combat victory
-        because it depends on randomness.
+        Because every command runs inside a single ``main.sh`` batch
+        process, individual exit codes are not available.  Instead we
+        measure success as the fraction of steps that produced any
+        stdout — setup commands (``cd``, ``export``) are allowed to
+        have empty output.
+
+        Combat encounters use ``$RANDOM`` so outcomes vary; the test
+        does NOT assert on combat victory.
         """
         runner = DemoRunner(demo_sandbox)
         result = runner.run_full_demo(FULL_GAME_SCRIPT)
 
-        # We don't require zero errors because hidden rooms depend
-        # on precise unlock ordering and combat is random.
-        # Instead we check that most steps produced output.
+        # Count steps that produced output OR are setup (cd/export/let)
+        setup_prefixes = ("cd ", "export ", "let ", "source ")
         successful = sum(
-            1 for s in result.snapshots if s.exit_code == 0
+            1
+            for i, s in enumerate(result.snapshots)
+            if s.stdout.strip()
+            or FULL_GAME_SCRIPT[i].command.strip().startswith(setup_prefixes)
+            or FULL_GAME_SCRIPT[i].is_setup
         )
         total = len(result.snapshots)
         success_rate = successful / total if total > 0 else 0
@@ -163,4 +173,7 @@ class TestFullGameDemo:
         print(f"\n✅ Walkthrough generated: {output_path}")
         print(f"   {len(md)} characters, {code_blocks} code blocks")
         print(f"   {len(result.rooms_visited)} rooms, "
-              f"{len(result.items_collected)} items")
+              f"{len(result.items_collected)} items, "
+              f"{len(result.errors)} content-match errors")
+        print(f"   {successful}/{total} steps produced output "
+              f"({success_rate:.0%})")

@@ -87,6 +87,11 @@ This walkthrough demonstrates a complete playthrough — every command
 a player would type, the terminal output they would see, and an
 explanation of what each command teaches.
 
+The output is captured from ``main.sh``'s interactive terminal
+emulator running in batch mode, so prompts, area context, quest
+completions, and game-script output appear exactly as a real player
+would see them.
+
 """
 
     def _render_toc(self) -> str:
@@ -129,7 +134,10 @@ cd bashcrawl
 # Make game files executable
 bash setup.sh
 
-# Start playing!
+# Start playing (interactive terminal emulator)
+bash main.sh --interactive
+
+# Or play natively
 cd entrance
 cat scroll
 ```
@@ -200,7 +208,7 @@ cat scroll
         lines: list[str] = ["```bash"]
 
         # Show prompt + command
-        prompt = snap.prompt or "player@bashcrawl:~$ "
+        prompt = snap.prompt or "📍 bashcrawl [unknown] ⚔️ "
         lines.append(f"{prompt}{step.command}")
 
         # Show stdin input if any (as a comment)
@@ -225,11 +233,7 @@ cat scroll
 
     def _render_state_box(self, snap: TerminalSnapshot) -> str:
         """Render a state summary box."""
-        inventory = snap.inventory or "(empty)"
-        # Clean up display
-        inv_display = ", ".join(
-            item for item in inventory.split(",") if item.strip()
-        ) or "(empty)"
+        location = snap.cwd_after or "unknown"
 
         return f"""\
 <details>
@@ -237,9 +241,7 @@ cat scroll
 
 | Property | Value |
 |----------|-------|
-| **Location** | `{snap.cwd_after}` |
-| **Inventory** | {inv_display} |
-| **HP** | {snap.hp} |
+| **Location** | `{location}` |
 
 </details>
 
