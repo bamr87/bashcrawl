@@ -21,3 +21,4 @@ logs/setup.log
 .game_*
 
 __pycache__
+.setup_complete
