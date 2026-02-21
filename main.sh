@@ -2046,17 +2046,77 @@ run_batch() {
 # GAME MODE IMPLEMENTATIONS
 # ============================================================================
 
-launch_interactive_mode() {
-    log_event "INFO" "Starting Interactive Terminal Emulator..." "interactive"
+# ----------------------------------------------------------------------------
+# Textual TUI helpers
+# ----------------------------------------------------------------------------
 
-    echo -e "${COLOR_PRIMARY}🎮 INTERACTIVE TERMINAL EMULATOR${COLOR_RESET}"
+# Returns 0 if Python 3 and the textual package are both available.
+_check_tui_available() {
+    command -v python3 >/dev/null 2>&1 || return 1
+    python3 -c "import textual" >/dev/null 2>&1 || return 1
+    local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+    [[ -d "$ti_dir" ]] || return 1
+    return 0
+}
+
+# Launch the Textual TUI (Python). Falls back to classic mode if unavailable.
+launch_tui_mode() {
+    log_event "INFO" "Starting Textual TUI..." "tui"
+
+    if ! _check_tui_available; then
+        echo -e "${COLOR_WARNING}⚠️  Textual TUI unavailable (Python 3 + textual package required).${COLOR_RESET}"
+        echo ""
+        echo -e "${COLOR_INFO}To install:  pip3 install textual${COLOR_RESET}"
+        echo -e "${COLOR_INFO}Or:          pip3 install --break-system-packages textual${COLOR_RESET}"
+        echo ""
+        echo -e "${COLOR_INFO}Falling back to classic interactive mode...${COLOR_RESET}"
+        echo ""
+        sleep 2
+        launch_classic_mode
+        return
+    fi
+
+    export BASHCRAWL_MODE="textual_tui"
+
+    if [[ -f "$GAME_STATE_FILE" ]]; then
+        sed -i.bak "s/GAME_STARTED=.*/GAME_STARTED=\"true\"/" "$GAME_STATE_FILE"
+        local current_count
+        current_count=$(grep "SESSION_COUNT=" "$GAME_STATE_FILE" | cut -d= -f2 || echo "0")
+        sed -i.bak "s/SESSION_COUNT=.*/SESSION_COUNT=$((current_count + 1))/" "$GAME_STATE_FILE"
+        rm -f "${GAME_STATE_FILE}.bak"
+    fi
+
+    local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+    log_event "INFO" "Launching Textual TUI from $ti_dir" "tui"
+
+    PYTHONPATH="$ti_dir" python3 -m ti --game-root "$BASHCRAWL_ROOT"
+
+    log_event "INFO" "Textual TUI session ended" "tui"
+}
+
+# ----------------------------------------------------------------------------
+# Interactive mode — now delegates to the Textual TUI (with classic fallback).
+# ----------------------------------------------------------------------------
+
+launch_interactive_mode() {
+    launch_tui_mode
+}
+
+# ----------------------------------------------------------------------------
+# Classic bash-emulator interactive mode (legacy / fallback).
+# ----------------------------------------------------------------------------
+
+launch_classic_mode() {
+    log_event "INFO" "Starting Classic Terminal Emulator..." "interactive"
+
+    echo -e "${COLOR_PRIMARY}🎮 CLASSIC TERMINAL EMULATOR${COLOR_RESET}"
     echo "─────────────────────────────────────────────────────────────────────"
     echo -e "${COLOR_SUCCESS}✅ Safe, contained environment${COLOR_RESET}"
     echo -e "${COLOR_SUCCESS}✅ Built-in help and tutorials${COLOR_RESET}"
     echo -e "${COLOR_SUCCESS}✅ Perfect for learning without fear${COLOR_RESET}"
     echo -e "${COLOR_SUCCESS}✅ All real terminal commands work within game bounds${COLOR_RESET}"
     echo ""
-    echo -e "${COLOR_INFO}Launching terminal emulator...${COLOR_RESET}"
+    echo -e "${COLOR_INFO}Launching classic terminal emulator...${COLOR_RESET}"
     echo ""
 
     export BASHCRAWL_MODE="terminal_emulator"
@@ -2310,52 +2370,58 @@ show_main_menu() {
 
         echo -e "${COLOR_PRIMARY}🎮 CHOOSE YOUR PATH:${COLOR_RESET}"
         echo ""
-        echo -e "  ${COLOR_SUCCESS}1)${COLOR_RESET} ${COLOR_BOLD}Interactive Mode${COLOR_RESET}  ${COLOR_DIM}(recommended)${COLOR_RESET}"
-        echo "     Safe sandbox with built-in help — perfect for beginners"
+        echo -e "  ${COLOR_SUCCESS}1)${COLOR_RESET} ${COLOR_BOLD}Interactive TUI${COLOR_RESET}  ${COLOR_DIM}(recommended — Textual visual interface)${COLOR_RESET}"
+        echo "     Beautiful panel layout, quest tracker, tab completion, command history"
         echo ""
-        echo -e "  ${COLOR_WARNING}2)${COLOR_RESET} ${COLOR_BOLD}Native Terminal${COLOR_RESET}"
+        echo -e "  ${COLOR_INFO}2)${COLOR_RESET} ${COLOR_BOLD}Classic Interactive${COLOR_RESET}  ${COLOR_DIM}(bash emulator — no Python required)${COLOR_RESET}"
+        echo "     Safe sandbox with built-in help — plain terminal experience"
+        echo ""
+        echo -e "  ${COLOR_WARNING}3)${COLOR_RESET} ${COLOR_BOLD}Native Terminal${COLOR_RESET}"
         echo "     Use your real shell — for experienced adventurers"
         echo ""
-        echo -e "  ${COLOR_INFO}3)${COLOR_RESET} Tutorial          Learn the basics step by step"
-        echo -e "  ${COLOR_INFO}4)${COLOR_RESET} Demo              See example gameplay"
-        echo -e "  ${COLOR_INFO}5)${COLOR_RESET} Game Status       View progress and statistics"
-        echo -e "  ${COLOR_INFO}6)${COLOR_RESET} Reset             Start fresh"
-        echo -e "  ${COLOR_DIM}7)${COLOR_RESET} Exit"
+        echo -e "  ${COLOR_INFO}4)${COLOR_RESET} Tutorial          Learn the basics step by step"
+        echo -e "  ${COLOR_INFO}5)${COLOR_RESET} Demo              See example gameplay"
+        echo -e "  ${COLOR_INFO}6)${COLOR_RESET} Game Status       View progress and statistics"
+        echo -e "  ${COLOR_INFO}7)${COLOR_RESET} Reset             Start fresh"
+        echo -e "  ${COLOR_DIM}8)${COLOR_RESET} Exit"
         echo ""
-        echo -n "Choose an option (1-7): "
+        echo -n "Choose an option (1-8): "
 
         read -r choice
         echo ""
 
         case "$choice" in
             1)
-                launch_interactive_mode
+                launch_tui_mode
                 ;;
             2)
+                launch_classic_mode
+                ;;
+            3)
                 launch_native_mode
                 return 0
                 ;;
-            3)
+            4)
                 launch_tutorial
                 ;;
-            4)
+            5)
                 launch_demo
                 ;;
-            5)
+            6)
                 show_launcher_status
                 echo -n "Press Enter to continue..."
                 read -r
                 ;;
-            6)
+            7)
                 reset_game_state
                 ;;
-            7)
+            8)
                 echo -e "${COLOR_SUCCESS}Goodbye, brave adventurer! May your terminal skills serve you well!${COLOR_RESET}"
                 log_event "INFO" "User exited launcher normally" "exit"
                 exit 0
                 ;;
             *)
-                echo -e "${COLOR_ERROR}Invalid choice. Please select 1-7.${COLOR_RESET}"
+                echo -e "${COLOR_ERROR}Invalid choice. Please select 1-8.${COLOR_RESET}"
                 sleep 2
                 ;;
         esac
@@ -2374,7 +2440,10 @@ ${COLOR_PRIMARY}USAGE:${COLOR_RESET}
     $SCRIPT_NAME [OPTION]
 
 ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
-    -i, --interactive      Start interactive terminal emulator (safe mode)
+    -i, --interactive      Start Textual TUI (recommended, requires Python 3 + textual)
+        --tui              Alias for --interactive
+        --classic          Start classic bash terminal emulator (no Python required)
+        --interactive-classic  Alias for --classic
     -n, --native          Start native terminal experience (advanced mode)
     -t, --tutorial        Launch tutorial and learning guide
     -d, --demo            Run demonstration mode
@@ -2388,7 +2457,9 @@ ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
 
 ${COLOR_PRIMARY}EXAMPLES:${COLOR_RESET}
     $SCRIPT_NAME                        # Launch interactive menu
-    $SCRIPT_NAME --interactive          # Start safe terminal emulator
+    $SCRIPT_NAME --interactive          # Start Textual TUI (recommended)
+    $SCRIPT_NAME --tui                  # Same as --interactive
+    $SCRIPT_NAME --classic              # Start classic bash emulator
     $SCRIPT_NAME --native              # Start traditional experience
     $SCRIPT_NAME --tutorial            # Learn how to play
     $SCRIPT_NAME --status              # Check progress
@@ -2397,7 +2468,8 @@ ${COLOR_PRIMARY}EXAMPLES:${COLOR_RESET}
     echo -e "pwd\nls" | $SCRIPT_NAME --batch  # Batch mode
 
 ${COLOR_PRIMARY}GAME MODES:${COLOR_RESET}
-    ${COLOR_SUCCESS}Interactive Mode:${COLOR_RESET} Safe, contained environment perfect for beginners
+    ${COLOR_SUCCESS}Textual TUI:${COLOR_RESET}      Visual panels, quest tracker, tab completion (Python 3 + textual)
+    ${COLOR_INFO}Classic Mode:${COLOR_RESET}    Safe bash emulator — no Python required
     ${COLOR_WARNING}Native Mode:${COLOR_RESET}     Uses your actual terminal (requires experience)
 
 ${COLOR_PRIMARY}LEARNING PATH:${COLOR_RESET}
@@ -2440,8 +2512,12 @@ show_version() {
 process_arguments() {
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -i|--interactive)
-                export BASHCRAWL_AUTO_MODE="interactive"
+            -i|--interactive|--tui)
+                export BASHCRAWL_AUTO_MODE="tui"
+                shift
+                ;;
+            --classic|--interactive-classic)
+                export BASHCRAWL_AUTO_MODE="classic"
                 shift
                 ;;
             -n|--native)
@@ -2514,7 +2590,9 @@ main() {
 
     if [[ -n "${BASHCRAWL_AUTO_MODE:-}" ]]; then
         case "$BASHCRAWL_AUTO_MODE" in
-            "interactive")   launch_interactive_mode ;;
+            "tui")           launch_tui_mode ;;
+            "interactive")   launch_tui_mode ;;
+            "classic")       launch_classic_mode ;;
             "native")        launch_native_mode ;;
             "tutorial")      launch_tutorial; exit 0 ;;
             "demo")          launch_demo; exit 0 ;;

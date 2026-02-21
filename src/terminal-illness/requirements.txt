@@ -1,3 +1,4 @@
+textual>=0.65.0
 rich>=13.7.1
 prompt_toolkit>=3.0.47
 pyyaml>=6.0
