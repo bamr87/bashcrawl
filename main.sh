@@ -513,29 +513,23 @@ manual_load() {
 show_welcome_banner() {
     clear
     cat << 'EOF'
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                    ⚔️  BASHCRAWL TERMINAL EMULATOR ⚔️                      ║
-║                                                                           ║
-║        Welcome to the contained terminal environment for learning!       ║
-║                                                                           ║
-║  This is a safe, game-focused terminal that teaches you real commands    ║
-║  while protecting your system. All commands work exactly like in a       ║
-║  real terminal, but within the boundaries of this adventure game.        ║
-║                                                                           ║
-║  Type 'help' for assistance, 'tutorial' for guidance, or 'exit' to quit  ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-
-🎯 QUICK START:
-   • Type 'start' to begin your adventure
-   • Type 'ls' to see what's available
-   • Type 'cd entrance' to enter the catacombs
-   • Type 'help' for context-aware assistance
-
-🔐 SAFETY NOTICE:
-   This terminal is contained within the game directory.
-   You cannot access or modify files outside the game.
-
+╔═══════════════════════════════════════════════════════════════╗
+║                ⚔️  BASHCRAWL TERMINAL EMULATOR ⚔️              ║
+║                                                               ║
+║   Learn real terminal commands by exploring ancient catacombs ║
+║   Safe environment — you cannot break anything outside game   ║
+╚═══════════════════════════════════════════════════════════════╝
 EOF
+
+    echo ""
+    echo -e "${COLOR_PRIMARY}QUICK START:${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD}start${COLOR_RESET}          Begin your adventure"
+    echo -e "   ${COLOR_BOLD}ls${COLOR_RESET}             Look around"
+    echo -e "   ${COLOR_BOLD}cd entrance${COLOR_RESET}    Enter the catacombs"
+    echo -e "   ${COLOR_BOLD}help${COLOR_RESET}           Context-aware assistance"
+    echo -e "   ${COLOR_BOLD}quest${COLOR_RESET}          See current objective"
+    echo -e "   ${COLOR_BOLD}exit${COLOR_RESET}           Leave the game"
+    echo ""
 }
 
 # Generate the command prompt
@@ -1307,29 +1301,66 @@ safe_grep() {
 show_inventory() {
     echo -e "${SUCCESS_COLOR}🎒 INVENTORY:${RESET_COLOR}"
     if [[ -n "$I" ]]; then
-        echo "   Items: $I"
-        local item_count
-        item_count=$(echo "$I" | tr ',' '\n' | wc -l | tr -d ' ')
-        echo "   Total Items: $item_count"
+        local item
+        IFS=',' read -ra items <<< "$I"
+        local count=0
+        for item in "${items[@]}"; do
+            [[ -z "$item" ]] && continue
+            local icon
+            case "$item" in
+                sword)    icon="🗡️" ;;
+                amulet)   icon="📿" ;;
+                coins)    icon="🪙" ;;
+                diamonds) icon="💎" ;;
+                goblet)   icon="🏆" ;;
+                *)        icon="✦" ;;
+            esac
+            echo "   $icon $item"
+            ((count++))
+        done
+        echo "   ─────────────"
+        echo "   Total: $count item(s)"
     else
-        echo "   Your inventory is empty. Find treasures to collect items!"
+        echo "   (empty) — Find treasures to collect items!"
     fi
 }
 
 show_health() {
     echo -e "${SUCCESS_COLOR}❤️  HEALTH STATUS:${RESET_COLOR}"
     if [[ -n "$HP" ]]; then
-        echo "   Health Points: $HP"
+        local bar_width=20
+        local filled=$(( HP * bar_width / 100 ))
+        (( filled > bar_width )) && filled=$bar_width
+        (( filled < 0 )) && filled=0
+        local empty=$(( bar_width - filled ))
+
+        local bar_color
+        if [[ $HP -gt 60 ]]; then
+            bar_color="${COLOR_SUCCESS}"
+        elif [[ $HP -gt 30 ]]; then
+            bar_color="${COLOR_WARNING}"
+        else
+            bar_color="${COLOR_ERROR}"
+        fi
+
+        local bar="${bar_color}"
+        local i
+        for (( i=0; i<filled; i++ )); do bar+="█"; done
+        for (( i=0; i<empty; i++ )); do bar+="░"; done
+        bar+="${RESET_COLOR}"
+
+        echo -e "   HP: ${bar} ${HP}/100"
+
         if [[ $HP -gt 80 ]]; then
             echo "   Status: Excellent condition!"
         elif [[ $HP -gt 60 ]]; then
             echo "   Status: Good condition"
         elif [[ $HP -gt 40 ]]; then
-            echo "   Status: Wounded"
+            echo "   Status: Wounded — seek potions"
         elif [[ $HP -gt 20 ]]; then
-            echo "   Status: Badly wounded"
+            echo -e "   Status: ${COLOR_WARNING}Badly wounded — danger!${RESET_COLOR}"
         else
-            echo "   Status: Critical condition!"
+            echo -e "   Status: ${COLOR_ERROR}Critical — find healing immediately!${RESET_COLOR}"
         fi
     else
         echo "   Health not initialized"
@@ -1337,41 +1368,79 @@ show_health() {
 }
 
 show_game_status() {
-    echo -e "${SUCCESS_COLOR}📊 ADVENTURE STATUS:${RESET_COLOR}"
-    echo "   Location: $(pwd)"
-    echo "   Area: $CURRENT_AREA"
-    echo "   Level: $GAME_LEVEL"
-    echo "   XP: $GAME_XP"
+    echo -e "${SUCCESS_COLOR}📊 ADVENTURE STATUS${RESET_COLOR}"
+    echo "─────────────────────────────────────────"
+    echo -e "   ${COLOR_INFO}Location:${RESET_COLOR} $(relative_path "$(pwd)")"
+    echo -e "   ${COLOR_INFO}Area:${RESET_COLOR}     $CURRENT_AREA"
+    echo -e "   ${COLOR_INFO}Level:${RESET_COLOR}    $GAME_LEVEL"
+    echo -e "   ${COLOR_INFO}XP:${RESET_COLOR}       $GAME_XP"
+    if [[ -n "$LEARNED_COMMANDS" ]]; then
+        echo -e "   ${COLOR_INFO}Skills:${RESET_COLOR}   $LEARNED_COMMANDS"
+    fi
+    if [[ -n "$SCROLLS_READ" ]]; then
+        echo -e "   ${COLOR_INFO}Scrolls:${RESET_COLOR}  $SCROLLS_READ"
+    fi
     echo ""
     show_inventory
     echo ""
     show_health
     echo ""
     render_quest_status
+    echo "─────────────────────────────────────────"
 }
 
 show_map() {
-    echo -e "${SUCCESS_COLOR}🗺️  CATACOMBS MAP:${RESET_COLOR}"
-    cat << EOF
+    local loc
+    loc=$(relative_path "$(pwd)")
+    local here="${COLOR_BOLD}${COLOR_SUCCESS}"
+    local r="${RESET_COLOR}"
 
-    🏠 bashcrawl (lobby)
-        └── 🚪 entrance (starting hall)
-                ├── 🏰 cellar → armoury → 💎 chamber (main path)
-                ├── 🔧 workshop (creation tutorial)
-                ├── ⛪ .chapel (hidden) → courtyard → aviary → hall → 📚 library
-                │       └── 🪦 graveyard → columbarium, royal-tombs, .mausoleum
-                ├── 💰 .vault (hidden) → stronghold → nursery → lab
-                ├── 🔗 .scrap (hidden, symlinks)
-                └── 🌀 .rift (unlock via goblet) → arena → pit | spire → mezzanine
+    echo -e "${SUCCESS_COLOR}🗺️  CATACOMBS MAP${RESET_COLOR}"
+    echo "─────────────────────────────────────────────────────────────────"
+    echo ""
 
-Legend:
-  🏠 = Lobby    🚪 = Entrance    🔧 = Workshop    🏰 = Cellar
-  🗡️ = Armoury  💎 = Chamber     ⛪ = Chapel      📚 = Library
-  💰 = Vault    🔗 = Scrap       🌀 = Rift        🪦 = Graveyard
-  
-Current location: $(relative_path "$(pwd)")
+    local lob="" ent="" cel="" arm="" chm="" wks=""
+    local chp="" crt="" avi="" hal="" lib="" gvy=""
+    local vlt="" str="" nur="" lab="" scp="" rft=""
+    local are="" pit="" spi="" mez=""
 
-EOF
+    case "$loc" in
+        bashcrawl)                lob="${here}" ;;
+        entrance)                 ent="${here}" ;;
+        entrance/cellar)          cel="${here}" ;;
+        entrance/cellar/armoury)  arm="${here}" ;;
+        entrance/cellar/armoury/chamber) chm="${here}" ;;
+        entrance/workshop)        wks="${here}" ;;
+        entrance/chapel)          chp="${here}" ;;
+        entrance/chapel/courtyard) crt="${here}" ;;
+        entrance/chapel/courtyard/aviary) avi="${here}" ;;
+        entrance/chapel/courtyard/aviary/hall) hal="${here}" ;;
+        entrance/chapel/courtyard/aviary/hall/library) lib="${here}" ;;
+        entrance/chapel/graveyard) gvy="${here}" ;;
+        entrance/vault)           vlt="${here}" ;;
+        entrance/vault/stronghold) str="${here}" ;;
+        entrance/vault/stronghold/nursery) nur="${here}" ;;
+        entrance/vault/stronghold/nursery/lab) lab="${here}" ;;
+        entrance/scrap)           scp="${here}" ;;
+        entrance/.rift)           rft="${here}" ;;
+        entrance/.rift/arena)     are="${here}" ;;
+        entrance/.rift/arena/pit) pit="${here}" ;;
+        entrance/.rift/spire)     spi="${here}" ;;
+        entrance/.rift/spire/mezzanine) mez="${here}" ;;
+    esac
+
+    echo -e "    ${lob}🏠 bashcrawl${r} (lobby)"
+    echo -e "        └── ${ent}🚪 entrance${r}"
+    echo -e "                ├── ${cel}🏰 cellar${r} → ${arm}armoury${r} → ${chm}💎 chamber${r}"
+    echo -e "                ├── ${wks}🔧 workshop${r}"
+    echo -e "                ├── ${chp}⛪ chapel${r} → ${crt}courtyard${r} → ${avi}aviary${r} → ${hal}hall${r} → ${lib}📚 library${r}"
+    echo -e "                │       └── ${gvy}🪦 graveyard${r} → columbarium, royal-tombs"
+    echo -e "                ├── ${vlt}💰 vault${r} → ${str}stronghold${r} → ${nur}nursery${r} → ${lab}lab${r}"
+    echo -e "                ├── ${scp}🔗 scrap${r} (symlinks)"
+    echo -e "                └── ${rft}🌀 rift${r} → ${are}arena${r} → ${pit}pit${r} | ${spi}spire${r} → ${mez}mezzanine${r}"
+    echo ""
+    echo -e "You are here: ${COLOR_BOLD}${loc}${RESET_COLOR}"
+    echo ""
 }
 
 add_area_context() {
@@ -1558,54 +1627,54 @@ show_contextual_help() {
 }
 show_available_commands() {
     echo -e "${SUCCESS_COLOR}🎯 AVAILABLE COMMANDS:${RESET_COLOR}"
-     cat << 'EOF'
+    cat << 'EOF'
 
 NAVIGATION:
-   cd <dir>     Change directory (move between rooms)
-   ls           List contents of current room
-   pwd          Show current location
+   cd <dir>      Change directory (move between rooms)
+   ls             List contents of current room
+   pwd            Show current location
 
 FILE VIEWING:
-   cat <file>   Display entire file content
-   less <file>  View file with pagination
-   head <file>  Show first 10 lines
-   tail <file>  Show last 10 lines
-   wc <file>    Count lines, words, characters
-    grep <p> <f> Search for words in scrolls
+   cat <file>     Display entire file content
+   less <file>    View file with pagination
+   head <file>    Show first 10 lines
+   tail <file>    Show last 10 lines
+   wc <file>      Count lines, words, characters
+   grep <p> <f>   Search for words in scrolls
 
 FILE OPERATIONS:
-    touch <file> Create or update a file
-    mkdir <dir>  Create a new directory
+   touch <file>   Create or update a file
+   mkdir <dir>    Create a new directory
 
 GAME COMMANDS:
-   inventory    Show your collected items (alias: i)
-   health       Show your health status (alias: hp)
-   status       Show complete game status
-   map          Display catacombs map
-   start        Begin the adventure
-   look         Examine current area
-    explore      Detailed area exploration
-    quest        Show current quest progress
-    merlin       Receive a contextual hint
-    save         Save your progress
-    load         Load your saved progress
+   inventory      Show your collected items (alias: i)
+   health         Show your health status (alias: hp)
+   status         Show complete game status
+   map            Display catacombs map
+   quest          Show current quest progress
+   merlin         Receive a contextual hint
+   save           Save your progress
+   load           Load your saved progress
+   start          Begin the adventure
+   look           Examine current area
+   explore        Detailed area exploration
 
 HELP & LEARNING:
-   help         Context-aware help system
-   tutorial     Interactive tutorial
-   commands     Show this command list
+   help           Context-aware help system
+   tutorial       Interactive tutorial
+   commands       Show this command list
 
 SYSTEM:
-   clear        Clear the terminal screen
-   history      Show command history
-   reset        Reset game state
-   exit         Leave the terminal emulator
+   clear          Clear the terminal screen
+   history        Show command history
+   reset          Reset game state
+   exit           Leave the terminal emulator
 
 GAME INTERACTIONS:
-   ./treasure   Interact with treasure chests
-   ./potion     Use healing potions
-   ./spell      Cast magical spells
-   ./monster    Engage in combat
+   ./treasure     Interact with treasure chests
+   ./potion       Use healing potions
+   ./spell        Cast magical spells
+   ./monster      Engage in combat
 
 EOF
 }
@@ -1634,15 +1703,15 @@ STEP 6: Getting Help
    Type 'help' for context-specific assistance anywhere in the game.
 
 STEP 7: Track Your Quest
-    Use 'quest' to see your current objective or 'merlin' for a hint.
+   Use 'quest' to see your current objective or 'merlin' for a hint.
 
 PRACTICE SEQUENCE:
    1. Type: pwd
    2. Type: ls
    3. Type: cd entrance
    4. Type: cat scroll
-    5. Type: status
-    6. Type: quest
+   5. Type: status
+   6. Type: quest
 
 Ready to begin? Type 'start' to enter the adventure!
 
@@ -1858,15 +1927,46 @@ reset_terminal_state() {
 }
 
 exit_terminal() {
-    echo -e "${SUCCESS_COLOR}👋 Thanks for playing Bashcrawl!${RESET_COLOR}"
+    save_game_state
+
     echo ""
-    echo "You learned these commands during your adventure:"
-    if [[ -f "$HISTORY_FILE" ]]; then
-        awk '{print $4}' "$HISTORY_FILE" | sort | uniq -c | sort -nr | head -10
+    echo -e "${SUCCESS_COLOR}╔═══════════════════════════════════════════════════════════╗${RESET_COLOR}"
+    echo -e "${SUCCESS_COLOR}║              👋 Thanks for playing Bashcrawl!            ║${RESET_COLOR}"
+    echo -e "${SUCCESS_COLOR}╚═══════════════════════════════════════════════════════════╝${RESET_COLOR}"
+    echo ""
+
+    echo -e "${COLOR_INFO}SESSION SUMMARY:${RESET_COLOR}"
+    echo "─────────────────────────────────────────"
+    echo -e "   Area reached:    ${CURRENT_AREA:-unknown}"
+    echo -e "   XP earned:       ${GAME_XP:-0}"
+    local quest_done=0
+    if [[ -n "$QUEST_COMPLETED" ]]; then
+        quest_done=$(echo "$QUEST_COMPLETED" | tr ',' '\n' | grep -c '[0-9]' || true)
+    fi
+    echo -e "   Quests done:     ${quest_done}/${QUEST_TOTAL}"
+    if [[ -n "$I" ]]; then
+        echo -e "   Inventory:       $I"
+    else
+        echo -e "   Inventory:       (empty)"
     fi
     echo ""
+
+    if [[ -f "$HISTORY_FILE" ]]; then
+        local cmd_count
+        cmd_count=$(wc -l < "$HISTORY_FILE" | tr -d ' ')
+        echo -e "${COLOR_INFO}COMMANDS USED (${cmd_count} total):${RESET_COLOR}"
+        awk '{print $4}' "$HISTORY_FILE" | sort | uniq -c | sort -nr | head -10
+        echo ""
+    fi
+
+    if [[ -n "$LEARNED_COMMANDS" ]]; then
+        echo -e "${COLOR_INFO}SKILLS LEARNED:${RESET_COLOR}"
+        echo "   $LEARNED_COMMANDS"
+        echo ""
+    fi
+
     echo "Remember: These skills work in real terminals too!"
-    echo "Continue your journey at: https://github.com/bamr87/bashcrawl"
+    echo -e "Continue your journey: ${COLOR_PRIMARY}https://github.com/bamr87/bashcrawl${RESET_COLOR}"
     echo ""
     exit 0
 }
@@ -2207,46 +2307,26 @@ show_launcher_status() {
 show_main_menu() {
     while true; do
         show_banner
-        
-        echo -e "${COLOR_PRIMARY}🎮 GAME MODES:${COLOR_RESET}"
+
+        echo -e "${COLOR_PRIMARY}🎮 CHOOSE YOUR PATH:${COLOR_RESET}"
         echo ""
-        echo "  1) Interactive Terminal Emulator (Recommended for beginners)"
-        echo "     • Safe, contained environment within the game"
-        echo "     • Guided experience with built-in help"
-        echo "     • Perfect for learning without fear of breaking anything"
+        echo -e "  ${COLOR_SUCCESS}1)${COLOR_RESET} ${COLOR_BOLD}Interactive Mode${COLOR_RESET}  ${COLOR_DIM}(recommended)${COLOR_RESET}"
+        echo "     Safe sandbox with built-in help — perfect for beginners"
         echo ""
-        echo "  2) Native Terminal Experience (For experienced users)"
-        echo "     • Uses your actual terminal environment"
-        echo "     • Full access to your system commands"
-        echo "     • Traditional bashcrawl experience"
+        echo -e "  ${COLOR_WARNING}2)${COLOR_RESET} ${COLOR_BOLD}Native Terminal${COLOR_RESET}"
+        echo "     Use your real shell — for experienced adventurers"
         echo ""
-        echo "  3) Tutorial & Help"
-        echo "     • Learn about bashcrawl commands"
-        echo "     • View game documentation"
-        echo "     • Get started guide"
-        echo ""
-        echo "  4) Demo & Examples"
-        echo "     • See the terminal emulator in action"
-        echo "     • View example gameplay"
-        echo "     • Understand game features"
-        echo ""
-        echo "  5) Game Status"
-        echo "     • View current progress"
-        echo "     • Check player statistics"
-        echo "     • See session history"
-        echo ""
-        echo "  6) Reset Game State"
-        echo "     • Start completely fresh"
-        echo "     • Clear all progress"
-        echo "     • Reinitialize game data"
-        echo ""
-        echo "  7) Exit"
+        echo -e "  ${COLOR_INFO}3)${COLOR_RESET} Tutorial          Learn the basics step by step"
+        echo -e "  ${COLOR_INFO}4)${COLOR_RESET} Demo              See example gameplay"
+        echo -e "  ${COLOR_INFO}5)${COLOR_RESET} Game Status       View progress and statistics"
+        echo -e "  ${COLOR_INFO}6)${COLOR_RESET} Reset             Start fresh"
+        echo -e "  ${COLOR_DIM}7)${COLOR_RESET} Exit"
         echo ""
         echo -n "Choose an option (1-7): "
-        
+
         read -r choice
         echo ""
-        
+
         case "$choice" in
             1)
                 launch_interactive_mode
@@ -2270,7 +2350,7 @@ show_main_menu() {
                 reset_game_state
                 ;;
             7)
-                echo -e "${COLOR_SUCCESS}Goodbye, brave adventurer! May your terminal skills serve you well! ⚔️${COLOR_RESET}"
+                echo -e "${COLOR_SUCCESS}Goodbye, brave adventurer! May your terminal skills serve you well!${COLOR_RESET}"
                 log_event "INFO" "User exited launcher normally" "exit"
                 exit 0
                 ;;

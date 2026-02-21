@@ -1,6 +1,6 @@
 
 ================================================================================
-                    THE RIFT
+                    🌀 THE RIFT
 ================================================================================
 
 You find yourself on a world not of this reality.
@@ -19,9 +19,7 @@ The rift is the domain of masters.  Everything you have
 learned — navigation, file viewing, variables, permissions,
 symlinks — will be tested here.
 
-================================================================================
                    COMMAND CHAINING: Pipes & Logic
-================================================================================
 
 COMMAND                          PURPOSE
 --------                         --------
@@ -35,9 +33,7 @@ EXAMPLES:
     ls -la && echo "Success"     List files, then print success
     ls | wc -l                   Count items in a room
 
-================================================================================
                    RIFT CHALLENGES
-================================================================================
 
 CHALLENGE 1: Count the items in this room
     ls | wc -l
@@ -50,6 +46,14 @@ CHALLENGE 3: Search for hidden rooms
 
 CHALLENGE 4: Check your readiness in one command
     echo "Inventory: $I" && echo "Health: $HP"
+COMMAND CHAINING:
+    cmd1 | cmd2          Pipe output of one command into another
+    cmd1 && cmd2         Run cmd2 only if cmd1 succeeds
+    cmd1 ; cmd2          Run both commands in sequence
+
+EXAMPLE:
+    cat scroll | grep "rift"
+    ls -la && echo "Success"
 
 ================================================================================
                    PATHS IN THE RIFT
