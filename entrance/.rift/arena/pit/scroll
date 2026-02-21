@@ -1,7 +1,35 @@
 
-# You have entered the chamber of
-# Nyarlathotep, the crawling chaos.
-#
-# Nyarlathotep, older than the old
-# gods themselves, has been waiting for you.
+================================================================================
+                    THE PIT OF NYARLATHOTEP
+================================================================================
 
+You have entered the chamber of Nyarlathotep, the
+crawling chaos.
+
+Nyarlathotep, older than the old gods themselves,
+has been waiting for you.
+
+================================================================================
+                   PREPARE FOR BATTLE
+================================================================================
+
+Check your readiness before engaging:
+
+    echo $I          Your inventory
+    echo $HP         Your health points
+
+The encounters here are the most dangerous in the
+catacombs.  Make sure you have a sword and plenty
+of health points.
+
+    ./nyarlathotep   Face the crawling chaos
+    ./drummer        Battle the drummer
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Retreat to the arena
+    cd ../..         Return to the rift
+
+================================================================================

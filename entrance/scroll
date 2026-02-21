@@ -4,11 +4,18 @@
 ================================================================================
 
 It is pitch black in these catacombs.
-You have a magickal spell that lists all items in a room.
+You have magickal spells that reveal the world around you.
 
-BASIC MOVEMENT INCANTATIONS:
-    To see in the dark:       ls
-    To move around:           cd directory
+================================================================================
+                      BASIC MOVEMENT INCANTATIONS
+================================================================================
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+ls                 See room contents            List all items in current room
+cd directory       Move to a room               Enter a directory (room)
+cd ..              Go back                      Return to the previous room
+pwd                Where am I?                  Print your current location
 
 ================================================================================
                          MAGICKAL VIEWING SPELLS
@@ -16,7 +23,6 @@ BASIC MOVEMENT INCANTATIONS:
 
 COMMAND            PURPOSE                      DESCRIPTION
 --------           --------                     -----------
-ls                 See room contents            List all items in current room
 cat filename       View scrolls fully           Display entire scroll content
 less filename      Read long scrolls            Page through text (q to quit)
 head filename      Peek at scroll start         See first 10 lines only
@@ -29,13 +35,15 @@ Try looking around this room, then move into one of the next rooms.
                           EXAMPLE INCANTATIONS
 ================================================================================
 
-    $ ls
-    $ cat scroll
-    $ less scroll
-    $ head scroll
-    $ tail scroll
-    $ wc scroll
-    $ cd cellar
+    $ pwd                    # Where am I?
+    $ ls                     # What is in this room?
+    $ cat scroll             # Read a scroll (you are doing this now!)
+    $ less scroll            # Page through a long scroll (press q to quit)
+    $ head scroll            # See just the beginning
+    $ tail scroll            # See just the ending
+    $ wc scroll              # How long is this scroll?
+    $ cd cellar              # Move into the cellar
+    $ cd ..                  # Come back to where you were
 
 Remember to cast these spells when you discover new scrolls and treasures!
 
@@ -47,13 +55,22 @@ Before you venture deeper into the catacombs, you must prove your mastery
 of the viewing spells. Practice reading this very scroll with different
 commands to understand their power.
 
+SIDE PATH — THE WORKSHOP:
+If you are new to the terminal, visit the workshop first. It teaches
+you how to create files and directories:
+
+    cd workshop
+
 NEXT DESTINATION:
-When you are ready, seek the CELLAR - a chamber that lies beneath this
+When you are ready, seek the CELLAR — a chamber that lies beneath this
 entrance. The cellar holds ancient secrets about seeing through illusions
 and distinguishing between doorways and objects.
 
-NAVIGATION SPELL:
     cd cellar
+
+LOST? Remember these two spells:
+    pwd                      Shows exactly where you are
+    cd ..                    Takes you back one room
 
 May your terminal skills grow strong, brave adventurer!
 

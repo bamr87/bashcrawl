@@ -3,12 +3,34 @@
                         THE WORKSHOP
 ================================================================================
 
+              *** THIS SCROLL IS LONG! ***
+
+   If it scrolled past too fast, try reading it with:
+
+       less scroll
+
+   In 'less', use SPACE to page down, 'b' to page up,
+   and 'q' to quit when you are done reading.
+
+================================================================================
+                    A DUSTY WORKSPACE
+================================================================================
+
 You enter a cluttered workspace filled with half-finished
 projects and dusty tools.  A workbench sits in the center,
 covered with plans for building and organizing.
 
 This is a place of creation and destruction — where you
 learn to shape the dungeon itself.
+
+Dust motes float in the dim light.  On the far wall,
+ancient diagrams show the art of constructing rooms
+and forging objects from nothing.
+
+A sign above the workbench reads:
+
+    "To master the terminal, you must learn
+     to CREATE before you DESTROY."
 
 ================================================================================
                     CREATION SPELLS
@@ -19,6 +41,7 @@ COMMAND            PURPOSE                      DESCRIPTION
 mkdir NAME         Create a room                Make a new directory
 touch NAME         Create an object             Make a new empty file
 cp SRC DEST        Duplicate an object          Copy a file
+echo "text" > file Write words into a file      Redirect text to a file
 
 ================================================================================
                     DESTRUCTION SPELLS
@@ -33,9 +56,16 @@ rm -r NAME         Obliterate a room            Delete directory and contents
        *** WARNING: rm CANNOT BE UNDONE! ***
        *** There is no "undo" in the terminal! ***
 
+Always use 'ls' to check what is in a room BEFORE deleting.
+In the real world, accidentally removing the wrong file
+can cause serious problems.
+
 ================================================================================
                     WORKSHOP CHALLENGES
 ================================================================================
+
+Complete these five challenges in order.  Verify your
+work at each step by running: ls -F
 
 CHALLENGE 1: Build a storage room
     mkdir storage
@@ -52,9 +82,6 @@ CHALLENGE 4: Read your note
 CHALLENGE 5: Clean up when done
     rm storage/note.txt
     rmdir storage
-
-VERIFY your work at each step with:
-    ls -F
 
 ================================================================================
                     ADVANCED: REDIRECTION
@@ -73,6 +100,37 @@ The >> symbol APPENDS to a file (does not overwrite):
 You can view the result:
     cat log.txt
 
+TRY THIS EXERCISE:
+
+    echo "I was here" > journal.txt
+    echo "The workshop taught me mkdir" >> journal.txt
+    echo "and also touch and rm" >> journal.txt
+    cat journal.txt
+
+When you are done experimenting, clean up:
+    rm journal.txt
+
+================================================================================
+                    VIEWING LONG FILES
+================================================================================
+
+You may have noticed that 'cat scroll' causes this long
+text to rush past your eyes.  For long files, use:
+
+COMMAND            PURPOSE
+--------           --------
+less scroll        Page through text slowly
+                   SPACE = next page
+                   b     = previous page
+                   q     = quit
+
+head scroll        Show only the first 10 lines
+tail scroll        Show only the last 10 lines
+wc scroll          Count lines, words, and characters
+
+These are essential tools for reading long files,
+configuration files, and log files in the real world.
+
 ================================================================================
                     NAVIGATION
 ================================================================================
@@ -81,5 +139,9 @@ This workshop is a side room off the main path.
 Return to the entrance when you're ready:
 
     cd ..
+
+Then proceed to the cellar to continue your adventure:
+
+    cd cellar
 
 ================================================================================

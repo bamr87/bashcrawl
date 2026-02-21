@@ -8,7 +8,7 @@ ANCIENT WISDOM: The Art of Execution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The metallic clang of weapons echoes through the chamber
-as you enter the armoury.  Ancient weapons, magical potions,
+as you enter the armoury.  Ancient weapons, magickal potions,
 and mystical treasures await those brave enough to master
 the art of EXECUTABLE COMBAT.
 
@@ -22,7 +22,7 @@ encounters — programs and scripts you can activate.
 To activate an executable, use the dot-slash incantation:
 
     ./treasure        Activate the treasure chest
-    ./potion          Consume a magical potion
+    ./potion          Consume a magickal potion
 
 THE DOT-SLASH EXPLAINED:
     .   = "right here" (current directory)
@@ -73,6 +73,24 @@ READING PERMISSIONS:
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ################################################################################
+#                    🔍 SEARCHING FILES: grep                                 #
+################################################################################
+
+The grep spell searches for a word inside a file:
+
+    grep WORD FILENAME
+
+Try searching this very scroll for the word "treasure":
+
+    grep treasure scroll
+
+grep only shows lines that MATCH your search term.
+This is invaluable when dealing with long files.
+
+    grep "executable" scroll     Find lines about executables
+    grep -i "COMBAT" scroll      Case-insensitive search
+
+################################################################################
 #                        🏆 ARMOURY CHALLENGES                                #
 ################################################################################
 
@@ -85,15 +103,16 @@ BASIC TRAINING:
 
 INTERMEDIATE:
 
-    5. Enter the chamber:      cd chamber
-    6. Read the scroll there:  cat scroll
-    7. Come back:              cd ..
+    5. Search this scroll:     grep "potion" scroll
+    6. Enter the chamber:      cd chamber
+    7. Read the scroll there:  cat scroll
+    8. Come back:              cd ..
 
 ADVANCED:
 
-    8. Check your inventory:   echo $I
-    9. Check your health:      echo $HP
-   10. If a file won't run, fix it:  chmod +x filename
+    9. Check your inventory:   echo $I
+   10. Check your health:      echo $HP
+   11. If a file won't run, fix it:  chmod +x filename
 
 ################################################################################
 #                       ⚠️  COMBAT SAFETY                                    #

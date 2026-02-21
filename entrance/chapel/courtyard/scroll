@@ -1,4 +1,8 @@
 
+================================================================================
+                         THE COURTYARD
+================================================================================
+
 There is a great fountain in the center of this courtyard.
 The waters are bright and clear in the magickal light
 emanating from your eyes.
@@ -11,3 +15,33 @@ of water, and even the occasional splash.
 
 Perhaps there are fish that yet live in the fountain?
 
+================================================================================
+                    IDENTIFYING OBJECTS: file
+================================================================================
+
+This courtyard is full of unusual objects.  How do you know
+what something IS before you touch it?
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+file item          Identify an object           Shows what type of file it is
+ls -l              Inspect in detail            Permissions, size, and date
+
+Try examining the objects here:
+
+    $ file fountain
+    $ file rags
+    $ ls -l
+
+The 'file' command reveals the true nature of things — whether
+an object is a script, text, data, or something else entirely.
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd aviary        Enter the frost-bitten aviary ahead
+    cd ..            Return to the chapel
+    pwd              Confirm your location
+
+================================================================================

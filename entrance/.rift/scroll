@@ -1,10 +1,77 @@
 
-# You find yourself on a world not of this reality.
-#
-# The sky is red, mountains hang in the sky and
-# trees are flames that form from smoke
-# decending from the heavens.
-#
-# You have entered the rift.
-#
+================================================================================
+                    THE RIFT
+================================================================================
 
+You find yourself on a world not of this reality.
+
+The sky is red, mountains hang in the sky and
+trees are flames that form from smoke
+descending from the heavens.
+
+You have entered the rift.
+
+================================================================================
+                  ADVANCED CHALLENGES
+================================================================================
+
+The rift is the domain of masters.  Everything you have
+learned — navigation, file viewing, variables, permissions,
+symlinks — will be tested here.
+
+================================================================================
+                   COMMAND CHAINING: Pipes & Logic
+================================================================================
+
+COMMAND                          PURPOSE
+--------                         --------
+cmd1 | cmd2                      Pipe: output of cmd1 feeds into cmd2
+cmd1 && cmd2                     Run cmd2 only if cmd1 succeeds
+cmd1 ; cmd2                      Run both commands in sequence
+cmd1 || cmd2                     Run cmd2 only if cmd1 FAILS
+
+EXAMPLES:
+    cat scroll | grep "rift"     Search this scroll for "rift"
+    ls -la && echo "Success"     List files, then print success
+    ls | wc -l                   Count items in a room
+
+================================================================================
+                   RIFT CHALLENGES
+================================================================================
+
+CHALLENGE 1: Count the items in this room
+    ls | wc -l
+
+CHALLENGE 2: Find all scrolls below the rift
+    find . -name "scroll" | cat
+
+CHALLENGE 3: Search for hidden rooms
+    ls -laR | grep "^\."
+
+CHALLENGE 4: Check your readiness in one command
+    echo "Inventory: $I" && echo "Health: $HP"
+
+================================================================================
+                   PATHS IN THE RIFT
+================================================================================
+
+Two paths diverge in this alien landscape:
+
+    arena/       The combat arena — boss encounters await
+                 Deep within lies the PIT and its guardians:
+                 Nyarlathotep and the Drummer
+
+    spire/       A towering structure reaching into the red sky
+                 Climb to the mezzanine for a hidden elevator
+                 leading to a secret satellite station
+
+Hidden rooms may lurk here as well.  Use ls -a to search.
+
+NAVIGATION:
+    cd arena        Enter the combat arena
+    cd spire        Ascend the tower
+    cd ..           Return through the rift
+
+================================================================================
+*"Reality bends for those who command the terminal."*
+================================================================================

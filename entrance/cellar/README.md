@@ -28,7 +28,7 @@ alias ls='ls -F'
 
 ## 💎 The Amulet Forging Challenge
 
-You have discovered an ancient `treasure` artifact. It is not a chest to be opened, but a magical item that reveals a powerful **amulet-forging recipe** when activated.
+You have discovered an ancient `treasure` artifact. It is not a chest to be opened, but a magickal item that reveals a powerful **amulet-forging recipe** when activated.
 
 **The Challenge:**
 
