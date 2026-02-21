@@ -456,10 +456,11 @@ class BashcrawlApp(App):
         # Tab is handled in on_key so it doesn't bubble to focus-next
     ]
 
-    def __init__(self, state: "GameState", fs: "GameFileSystem") -> None:
+    def __init__(self, state: "GameState", fs: "GameFileSystem", agent_mode: bool = False) -> None:
         super().__init__()
         self.game_state = state
         self.fs = fs
+        self.agent_mode = agent_mode
         self._engine: Optional[object] = None  # TerminalEngine, set in on_mount
         self._cmd_history: List[str] = []
         self._history_idx: int = -1
@@ -511,6 +512,12 @@ class BashcrawlApp(App):
         self.query_one("#command-input", Input).focus()
 
         # Startup screens are pushed AFTER mount so the main UI is ready underneath.
+        # In agent mode, skip modal screens entirely.
+        if self.agent_mode:
+            self._update_subtitle()
+            self._refresh_sidebar()
+            return
+
         saved = self.game_state
         has_save = bool(
             saved.player_name

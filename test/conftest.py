@@ -104,6 +104,8 @@ def engine(game_state, game_fs):
     eng.fs = game_fs
     eng._cwd = game_state.current_location or "/entrance"
     eng._registry = {}
+    eng._output_callback = None
+    eng._on_quest_complete = None
     eng._register_commands = TerminalEngine._register_commands.__get__(eng)
     eng._register = TerminalEngine._register.__get__(eng)
     eng._register_commands()

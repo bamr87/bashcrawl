@@ -11,19 +11,19 @@ Bashcrawl is an educational text-based adventure game that teaches terminal/shel
 - Hidden directories (`.chapel`, `.vault`, `.scrap`, `.rift`) at `entrance/` level unlock after treasure collection
 - `.scrap` is a **directory** (not a file) containing a scroll that teaches symlinks (`ln -s`)
 - Deep hidden areas: `.chapel/courtyard/aviary/hall/`, `.vault/stronghold/`, `.rift/arena/`, `.rift/spire/`
-- `entrance/workshop/` is a tutorial room teaching `mkdir`, `touch`, `rm`, `cp`, `echo >`
+- `entrance/workshop/` is a player-created tutorial room (does not exist on disk until player runs `mkdir`)
 - Each room teaches 1-3 related terminal concepts with progressive difficulty
 
 ### Key Components
 | Component | Purpose |
 |-----------|---------|
-| `main.sh` | Launcher with interactive menu, CLI args, and integrated terminal emulator with quest system (pwd→ls→cd→mkdir→touch→cat→grep). Sources `lib/colors.sh` and `lib/log.sh`. Supports `-c`, `--batch`, `--interactive` modes |
+| `main.sh` | Launcher with interactive menu, CLI args, and integrated terminal emulator with quest system (pwd→ls→cd→mkdir→touch→cat→grep). Sources `lib/colors.sh` and `lib/log.sh`. Supports `-c`, `--batch`, `--interactive`, `--agent`, `--agent-bash` modes |
 | `setup.sh` | Permissions setup, system checks, makes game files executable. Sources `lib/colors.sh` |
 | `help.sh` | Root-level help shim that delegates to `src/help.sh`. Sources `src/help/bashcrawl_help.sh` and `lib/colors.sh` |
 | `src/help/` | Context-aware help system: `bashcrawl_help.sh` detects player location, `ai_engine.sh` tracks progress patterns, `command_suggester.sh` analyzes directory contents, `init_help.sh` defines `help()` shell function. Shared YAML data in `src/help/data/` |
 | `lib/` | Shared libraries: `colors.sh` (color constants), `log.sh` (JSONL session logging), `reset.sh` (game reset), `analyze.sh`/`report.sh` (session analysis) |
 | `entrance/.functions` | Defines `gameover()` — combat death handler, `help()` — delegates to `$BASHCRAWL_ROOT/help.sh` |
-| `src/terminal-illness/` | Python wrapper using `prompt_toolkit`/`rich` — intended to wrap real bash game directories (refactor in progress) |
+| `src/terminal-illness/` | Python Textual TUI with `BashcrawlApp`, `TerminalEngine` (has `execute()`, `get_completions()` API), and `ti/agent.py` for headless agent mode with SVG screenshots. See `docs/agent-protocol.md` |
 
 ### Game Content Files
 - **`scroll`** — Plain-text educational content (NOT a directory). Format varies by room depth; see `.github/instructions/scrolls.instructions.md` for the target standard
@@ -135,4 +135,5 @@ bash lib/reset.sh                # Execute reset
 - **GitHub CI** (`.github/workflows/`) — `ci.yml` (shellcheck, yamllint, markdownlint), `code-quality.yml` (CodeQL Python), `game-tests.yml` (scroll/shebang/unlock validation), `release.yml`, `dependency-update.yml`
 - **Game state** — `.game_state` file at root (created by `main.sh`), `~/.bashcrawl_progress` (created by help system)
 - **Logging** — JSONL session logs in `logs/sessions/` (created by `lib/log.sh`), feedback in `logs/feedback/`
-- **Terminal Illness** (`src/terminal-illness/`) — Python 3.10+, `pip install -r requirements.txt`, being refactored from in-memory VFS to real-filesystem wrapper around bash game directories
+- **Terminal Illness** (`src/terminal-illness/`) — Python 3.10+, `pip install -r requirements.txt`, Textual TUI wrapping real bash game directories
+- **Agent Mode** — `main.sh --agent` launches headless Textual TUI via `ti/agent.py` with `READY>` protocol and SVG screenshots; `--agent-bash` for bash-only REPL. See `docs/agent-protocol.md`

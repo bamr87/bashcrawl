@@ -2147,6 +2147,84 @@ launch_classic_mode() {
         echo
     done
 }
+# ----------------------------------------------------------------------------
+# Agent mode — launches the Textual TUI headlessly with screenshot support.
+# Falls back to the bash REPL agent if Python/textual are unavailable.
+#   bash main.sh --agent                          # Textual TUI agent (preferred)
+#   bash main.sh --agent --screenshot-dir ./shots  # custom screenshot dir
+#   bash main.sh --agent-bash                      # bash-only agent REPL
+# Protocol:
+#   After startup and after every command, the line  READY>  is printed.
+#   Send one command per line.  Meta: SCREENSHOT, STATUS, EXIT.
+# ----------------------------------------------------------------------------
+
+launch_agent_mode() {
+    local screenshot_dir="${1:-./screenshots}"
+    log_event "INFO" "Starting Agent mode (Textual TUI)..." "agent"
+
+    if _check_tui_available; then
+        local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+        export BASHCRAWL_MODE="agent_textual"
+
+        PYTHONPATH="$ti_dir" python3 -m ti.agent \
+            --game-root "$BASHCRAWL_ROOT" \
+            --screenshot-dir "$screenshot_dir"
+        return $?
+    else
+        echo -e "${COLOR_WARNING}⚠️  Textual unavailable, falling back to bash agent REPL.${COLOR_RESET}" >&2
+        echo "Install with: pip3 install textual" >&2
+        launch_agent_bash_mode
+        return $?
+    fi
+}
+
+# ----------------------------------------------------------------------------
+# Bash-only agent REPL (no TUI, no screenshots, line-buffered I/O).
+# Designed for programmatic interaction when Python is not available.
+#   bash main.sh --agent-bash           # read from stdin, write to stdout
+# Protocol:
+#   After startup and after every command, the line  READY>  is printed.
+#   Send one command per line.  Send "exit" to quit.
+# ----------------------------------------------------------------------------
+
+launch_agent_bash_mode() {
+    log_event "INFO" "Starting Bash Agent REPL mode..." "agent"
+
+    export BASHCRAWL_MODE="agent_repl"
+
+    cd "$BASHCRAWL_ROOT"
+    touch "$HISTORY_FILE"
+    load_game_state
+    restore_saved_location
+
+    # Minimal banner (no clear, no color escapes so output is easy to parse)
+    echo "BASHCRAWL AGENT REPL v${VERSION}"
+    echo "Location: $(pwd)"
+    echo "Inventory: ${I:-<empty>}"
+    echo "HP: ${HP:-100}"
+    echo "Send commands one per line. Type 'exit' to quit."
+    echo "READY>"
+
+    while IFS= read -r input || [[ -n "$input" ]]; do
+        # Skip blank lines
+        [[ -z "$input" ]] && { echo "READY>"; continue; }
+
+        # Exit sentinel
+        if [[ "$input" == "exit" || "$input" == "quit" || "$input" == "q" ]]; then
+            save_game_state
+            echo "SESSION ENDED"
+            echo "READY>"
+            break
+        fi
+
+        # Execute command and capture output
+        echo "CMD> $input"
+        _dispatch_input "$input" || true
+        echo ""
+        echo "READY>"
+    done
+}
+
 launch_native_mode() {
     log_event "INFO" "Starting Native Terminal Experience..." "native"
     
@@ -2451,6 +2529,9 @@ ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
     -r, --reset           Reset game state (with confirmation)
     -c, --command "CMD"   Execute a single emulator command, then exit
         --batch           Read commands from stdin (one per line)
+        --agent           Agent mode: Textual TUI with screenshots (recommended)
+        --agent-bash      Agent mode: bash-only REPL (no screenshots, no Python)
+        --screenshot-dir PATH  Screenshot output directory (default: ./screenshots)
     -h, --help            Show this help message
     -v, --version         Show version information
     --debug               Enable debug logging
@@ -2466,11 +2547,15 @@ ${COLOR_PRIMARY}EXAMPLES:${COLOR_RESET}
     $SCRIPT_NAME -c "cd entrance"      # Run one command
     $SCRIPT_NAME -c "cat scroll"       # Run another (state persists)
     echo -e "pwd\nls" | $SCRIPT_NAME --batch  # Batch mode
+    $SCRIPT_NAME --agent                       # Agent mode with Textual + screenshots
+    $SCRIPT_NAME --agent-bash                  # Bash-only agent REPL (no Python)
 
 ${COLOR_PRIMARY}GAME MODES:${COLOR_RESET}
     ${COLOR_SUCCESS}Textual TUI:${COLOR_RESET}      Visual panels, quest tracker, tab completion (Python 3 + textual)
     ${COLOR_INFO}Classic Mode:${COLOR_RESET}    Safe bash emulator — no Python required
     ${COLOR_WARNING}Native Mode:${COLOR_RESET}     Uses your actual terminal (requires experience)
+    ${COLOR_INFO}Agent Mode:${COLOR_RESET}      Headless Textual TUI with screenshots for AI agents
+    ${COLOR_INFO}Agent Bash:${COLOR_RESET}      Line-buffered bash REPL for agents (no Python needed)
 
 ${COLOR_PRIMARY}LEARNING PATH:${COLOR_RESET}
     Entrance → Cellar → Armoury → Chamber → Advanced Areas
@@ -2550,6 +2635,19 @@ process_arguments() {
                 export BASHCRAWL_AUTO_MODE="batch"
                 shift
                 ;;
+            --agent)
+                export BASHCRAWL_AUTO_MODE="agent"
+                shift
+                ;;
+            --agent-bash)
+                export BASHCRAWL_AUTO_MODE="agent_bash"
+                shift
+                ;;
+            --screenshot-dir)
+                shift
+                export BASHCRAWL_SCREENSHOT_DIR="$1"
+                shift
+                ;;
             -h|--help)
                 show_help
                 exit 0
@@ -2600,6 +2698,8 @@ main() {
             "reset")         reset_game_state; exit 0 ;;
             "single_command") run_single_command "$BASHCRAWL_SINGLE_CMD"; exit $? ;;
             "batch")         run_batch; exit $? ;;
+            "agent")         launch_agent_mode "${BASHCRAWL_SCREENSHOT_DIR:-./screenshots}"; exit $? ;;
+            "agent_bash")    launch_agent_bash_mode; exit $? ;;
         esac
     else
         if [[ ! -t 0 ]]; then

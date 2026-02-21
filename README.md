@@ -95,6 +95,18 @@ Use your actual terminal environment:
 - **Demo Mode**: See examples of gameplay and features
 - **Help Documentation**: Comprehensive guides and references
 
+#### 🤖 Agent Mode (For AI Assistants)
+
+Headless mode for programmatic interaction — lets AI coding assistants play the game
+and capture SVG screenshots:
+
+- **Textual TUI Agent**: Full visual rendering with automatic screenshots
+- **Bash Agent REPL**: Lightweight fallback (no Python required)
+- **`READY>` Protocol**: Line-buffered I/O with synchronization sentinels
+- **SVG Screenshots**: Visual snapshots via Textual's `save_screenshot()`
+
+See [docs/agent-protocol.md](docs/agent-protocol.md) for the full specification.
+
 ### 🚀 Quick Commands Reference
 
 Once you're set up, use these commands:
@@ -105,6 +117,9 @@ Once you're set up, use these commands:
 ./main.sh --native           # Start native terminal experience
 ./main.sh --tutorial         # Launch tutorial mode
 ./main.sh --demo             # Run demonstration mode
+./main.sh --agent            # Agent mode (Textual TUI + screenshots)
+./main.sh --agent-bash       # Agent mode (bash-only REPL, no Python)
+./main.sh --screenshot-dir X # Set screenshot output directory
 ./main.sh --status           # Show current game status
 ./main.sh --reset            # Reset game state
 ./main.sh --version          # Show version info
