@@ -1,10 +1,54 @@
 
-# You find yourself on a world not of this reality.
-#
-# The sky is red, mountains hang in the sky and
-# trees are flames that form from smoke
-# decending from the heavens.
-#
-# You have entered the rift.
-#
+================================================================================
+                    🌀 THE RIFT
+================================================================================
 
+You find yourself on a world not of this reality.
+
+The sky is red, mountains hang in the sky and
+trees are flames that form from smoke
+descending from the heavens.
+
+You have entered the rift.
+
+================================================================================
+                  ADVANCED CHALLENGES
+================================================================================
+
+The rift is the domain of masters.  Everything you have
+learned — navigation, file viewing, variables, permissions,
+symlinks — will be tested here.
+
+COMMAND CHAINING:
+    cmd1 | cmd2          Pipe output of one command into another
+    cmd1 && cmd2         Run cmd2 only if cmd1 succeeds
+    cmd1 ; cmd2          Run both commands in sequence
+
+EXAMPLE:
+    cat scroll | grep "rift"
+    ls -la && echo "Success"
+
+================================================================================
+                   PATHS IN THE RIFT
+================================================================================
+
+Two paths diverge in this alien landscape:
+
+    arena/       The combat arena — boss encounters await
+                 Deep within lies the PIT and its guardians:
+                 Nyarlathotep and the Drummer
+
+    spire/       A towering structure reaching into the red sky
+                 Climb to the mezzanine for a hidden elevator
+                 leading to a secret satellite station
+
+Hidden rooms may lurk here as well.  Use ls -a to search.
+
+NAVIGATION:
+    cd arena        Enter the combat arena
+    cd spire        Ascend the tower
+    cd ..           Return through the rift
+
+================================================================================
+*"Reality bends for those who command the terminal."*
+================================================================================
