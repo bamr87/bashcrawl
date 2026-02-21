@@ -6,10 +6,14 @@ Provides a reusable ``ScreenshotCapture`` class that:
    externally-generated screenshots.
 2. Logs each capture as a ``screenshot`` event via ``TestLogCapture``.
 3. Maintains a sequential counter for auto-naming.
+4. Writes a JSON manifest summarising all captures for review.
+
+Screenshots are stored under ``logs/screenshots/<session>/`` so they
+persist after tests complete and are available for analysis.
 
 Usage::
 
-    cap = ScreenshotCapture(screenshot_dir=Path("/tmp/shots"), log_capture=lc)
+    cap = ScreenshotCapture(screenshot_dir=logs / "screenshots" / session, log_capture=lc)
 
     # From a Textual App (headless via run_test):
     path = cap.take(app, name="after_ls", command="ls", room="entrance")
@@ -19,10 +23,15 @@ Usage::
 
     # Convenience: auto-named
     path = cap.take(app)  # → 001_screenshot.svg
+
+    # After session — write a manifest for review
+    cap.write_manifest()
 """
 
 from __future__ import annotations
 
+import json
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -39,9 +48,11 @@ class ScreenshotCapture:
         log_capture: "TestLogCapture | None" = None,
     ) -> None:
         self.screenshot_dir = screenshot_dir
+        self.screenshot_dir.mkdir(parents=True, exist_ok=True)
         self.log_capture = log_capture
         self._counter: int = 0
         self._paths: list[Path] = []
+        self._metadata: list[dict[str, Any]] = []
 
     @property
     def screenshots(self) -> list[Path]:
@@ -84,6 +95,18 @@ class ScreenshotCapture:
         app.save_screenshot(str(path))
         self._paths.append(path)
 
+        meta = {
+            "path": str(path),
+            "name": name,
+            "trigger": trigger,
+            "command": command,
+            "room": room,
+            "ts": datetime.now().isoformat(),
+        }
+        if path.is_file():
+            meta["size_bytes"] = path.stat().st_size
+        self._metadata.append(meta)
+
         if self.log_capture:
             self.log_capture.log_screenshot(
                 path=path,
@@ -114,6 +137,18 @@ class ScreenshotCapture:
         """
         p = Path(path)
         self._paths.append(p)
+
+        meta = {
+            "path": str(p),
+            "name": p.name,
+            "trigger": trigger,
+            "command": command,
+            "room": room,
+            "ts": datetime.now().isoformat(),
+        }
+        if p.is_file():
+            meta["size_bytes"] = p.stat().st_size
+        self._metadata.append(meta)
 
         if self.log_capture:
             self.log_capture.log_screenshot(
@@ -158,3 +193,36 @@ class ScreenshotCapture:
                 self.record(p, trigger="agent_auto", command=command)
                 paths.append(p)
         return paths
+
+    # -- manifest & metadata -----------------------------------------------
+
+    @property
+    def metadata(self) -> list[dict[str, Any]]:
+        """All screenshot metadata collected so far."""
+        return list(self._metadata)
+
+    def write_manifest(self) -> Path | None:
+        """Write a JSON manifest of all screenshots to the screenshot dir.
+
+        The manifest enables post-test review tools to enumerate captures
+        without scanning the filesystem.  It is written even if no
+        screenshots were captured (records an empty list).
+
+        Returns:
+            Path to the manifest file, or ``None`` if no screenshot dir.
+        """
+        if not self.screenshot_dir.exists():
+            return None
+
+        manifest = {
+            "generated_at": datetime.now().isoformat(),
+            "screenshot_dir": str(self.screenshot_dir),
+            "total_screenshots": self.count,
+            "total_size_bytes": sum(
+                m.get("size_bytes", 0) for m in self._metadata
+            ),
+            "screenshots": self._metadata,
+        }
+        manifest_path = self.screenshot_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+        return manifest_path

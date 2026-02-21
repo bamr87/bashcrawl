@@ -245,13 +245,16 @@ class TestScreenshotFixtures:
     def test_screenshot_dir_exists(self, screenshot_dir):
         assert screenshot_dir.exists()
         assert screenshot_dir.is_dir()
+        # Should be under logs/screenshots/
+        assert "logs" in str(screenshot_dir)
+        assert "screenshots" in str(screenshot_dir)
 
     def test_screenshot_capture_fixture(self, screenshot_capture):
         assert screenshot_capture is not None
         assert screenshot_capture.count == 0
 
-    def test_screenshot_capture_records_to_log(self, screenshot_capture, log_capture, tmp_path):
-        svg = tmp_path / "test.svg"
+    def test_screenshot_capture_records_to_log(self, screenshot_capture, log_capture, screenshot_dir):
+        svg = screenshot_dir / "test.svg"
         svg.write_text("<svg>fixture test</svg>")
         screenshot_capture.record(svg, trigger="fixture_test", command="test")
         assert screenshot_capture.count == 1
@@ -259,6 +262,27 @@ class TestScreenshotFixtures:
         screenshots = log_capture.get_screenshots()
         assert len(screenshots) == 1
         assert screenshots[0]["trigger"] == "fixture_test"
+
+    def test_manifest_written_on_teardown(self, tmp_path):
+        """write_manifest creates a JSON manifest of all captures."""
+        from fixtures.screenshot_capture import ScreenshotCapture
+
+        d = tmp_path / "shots"
+        d.mkdir()
+        cap = ScreenshotCapture(screenshot_dir=d)
+        svg = d / "test.svg"
+        svg.write_text("<svg>manifest test</svg>")
+        cap.record(svg, trigger="test", command="pwd", room="entrance")
+
+        manifest_path = cap.write_manifest()
+        assert manifest_path is not None
+        assert manifest_path.exists()
+
+        import json
+        manifest = json.loads(manifest_path.read_text())
+        assert manifest["total_screenshots"] == 1
+        assert len(manifest["screenshots"]) == 1
+        assert manifest["screenshots"][0]["command"] == "pwd"
 
 
 # ---------------------------------------------------------------------------

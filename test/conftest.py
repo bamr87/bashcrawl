@@ -6,13 +6,18 @@ Provides:
 - game_fs: GameFileSystem pointing at sandbox
 - game_state: Fresh GameState for testing
 - log_capture: TestLogCapture for JSONL event tracking
+- screenshot_dir: Session-specific screenshot directory under ``logs/screenshots/``
+- screenshot_capture: ScreenshotCapture wired to log_capture
 - ai_agent: TestAgent (only for @pytest.mark.ai tests)
 """
 
 from __future__ import annotations
 
 import os
+import shutil
 import sys
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import Generator
 
@@ -74,8 +79,12 @@ def game_state() -> "GameState":
 
 @pytest.fixture
 def log_capture(sandbox: Path, request: pytest.FixtureRequest) -> TestLogCapture:
-    """TestLogCapture that writes to sandbox's logs directory."""
-    log_dir = sandbox / "logs" / "sessions"
+    """TestLogCapture that writes to the repo's ``logs/sessions/`` directory.
+
+    Session JSONL files are persisted in the real ``logs/`` tree so they
+    remain available for post-test review and analysis.
+    """
+    log_dir = REPO_ROOT / "logs" / "sessions"
     log_dir.mkdir(parents=True, exist_ok=True)
     test_name = request.node.name
     capture = TestLogCapture(
@@ -87,43 +96,49 @@ def log_capture(sandbox: Path, request: pytest.FixtureRequest) -> TestLogCapture
     yield capture
     capture.end()
 
-    # Copy to reports directory if it exists
+    # Copy to reports directory for quick access
     reports_dir = TEST_DIR / "reports" / "ai_sessions"
     reports_dir.mkdir(parents=True, exist_ok=True)
-    import shutil
     if capture.file_path.exists():
         shutil.copy2(capture.file_path, reports_dir / capture.file_path.name)
 
 
 @pytest.fixture
-def screenshot_dir(tmp_path: Path) -> Path:
-    """Temporary directory for SVG screenshots during tests."""
-    d = tmp_path / "screenshots"
-    d.mkdir()
+def screenshot_dir(request: pytest.FixtureRequest) -> Path:
+    """Session-specific screenshot directory under ``logs/screenshots/``.
+
+    Structure:  ``logs/screenshots/<date>_<test_name>/``
+
+    Screenshots persist after tests for review and analysis.
+    """
+    datestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    test_name = request.node.name.replace("[", "_").replace("]", "")
+    d = REPO_ROOT / "logs" / "screenshots" / f"{datestamp}_{test_name}"
+    d.mkdir(parents=True, exist_ok=True)
     return d
 
 
 @pytest.fixture
-def screenshot_capture(sandbox: Path, screenshot_dir: Path, log_capture: TestLogCapture):
-    """Screenshot helper that integrates with TestLogCapture.
+def screenshot_capture(screenshot_dir: Path, log_capture: TestLogCapture):
+    """Screenshot helper wired to TestLogCapture and the ``logs/`` tree.
 
-    Provides a callable ``take(app_or_path, name, trigger, command)`` that:
-    1. Saves an SVG screenshot (if given a Textual App) or records an
-       existing screenshot path.
-    2. Logs a ``screenshot`` event via TestLogCapture.
+    Saves SVG screenshots to ``logs/screenshots/<session>/`` and logs each
+    capture as a JSONL event.  After the test, writes a summary manifest.
 
     Usage in tests::
 
         def test_foo(screenshot_capture, ...):
-            path = screenshot_capture.take_from_path(svg_path, "initial")
-            # or, with a Textual app:
+            screenshot_capture.record(svg_path, trigger="initial")
             path = screenshot_capture.take(app, "after_cmd", command="ls")
     """
     from fixtures.screenshot_capture import ScreenshotCapture
-    return ScreenshotCapture(
+    cap = ScreenshotCapture(
         screenshot_dir=screenshot_dir,
         log_capture=log_capture,
     )
+    yield cap
+    # Write a manifest after the test completes
+    cap.write_manifest()
 
 
 @pytest.fixture
