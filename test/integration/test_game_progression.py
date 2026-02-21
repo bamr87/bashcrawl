@@ -126,20 +126,17 @@ class TestHiddenRoomUnlocking:
 
 
 class TestWorkshopPath:
-    """Tests for the workshop tutorial room."""
+    """Tests for the workshop tutorial room.
 
-    def test_workshop_accessible(self, sandbox):
+    The workshop directory does not exist on disk — players create it
+    themselves with ``mkdir workshop`` (Quest 4).  Tests must therefore
+    create the directory before attempting to enter it.
+    """
+
+    def test_workshop_can_be_created_and_entered(self, sandbox):
         from ai.session_runner import NonInteractiveEngine
         engine = NonInteractiveEngine(sandbox)
+        r = engine.execute_command("mkdir workshop")
+        assert r.kind == "success", f"mkdir workshop failed: {r.output}"
         r = engine.execute_command("cd workshop")
-        assert r.kind == "success"
-
-    def test_workshop_scroll_teaches_commands(self, sandbox):
-        from ai.session_runner import NonInteractiveEngine
-        engine = NonInteractiveEngine(sandbox)
-        engine.execute_command("cd workshop")
-        r = engine.execute_command("cat scroll")
-        stdout = r.output.lower()
-        # Workshop should teach mkdir, touch, rm, cp, echo
-        assert any(cmd in stdout for cmd in ["mkdir", "touch", "rm", "cp", "echo"]), \
-            f"Workshop scroll should teach filesystem commands, got: {r.output[:200]}"
+        assert r.kind == "success", f"cd workshop failed: {r.output}"
