@@ -2,7 +2,45 @@
 # Items listed here are ignored by Git.
 .backups
 
+# ============================================================
+# Runtime game-state files (created during play, never committed)
+# ============================================================
+
+# Python TUI save file (written by GameState.save())
+.ti_save.json
+
+# Bash TUI state files
+.game_state
+.game_history
+.game_data/
+
+# ============================================================
+# Player-unlocked entrance areas
+# These directories start as hidden (e.g. entrance/.chapel/)
+# and get renamed to their visible form when a player unlocks
+# them. The visible form is transient game state, not source.
+# ============================================================
+entrance/chapel/
+entrance/vault/
+entrance/scrap/
+entrance/rift/
+
+# Tutorial / player-created directories
+entrance/workshop/
+
+# ============================================================
+# Generated combat / loot artifacts inside entrance/
+# ============================================================
+entrance/**/corpse.*
+entrance/**/.corpse.*.looted
+entrance/**/.statue_defeated
+entrance/**/treasure
+entrance/**/platinum
+entrance/**/orb[2-9]
+
+# ============================================================
 # Bashcrawl Player Logs (Personal Journey Data)
+# ============================================================
 logs/player-progress.log
 logs/command-history.log
 logs/room-visits.log

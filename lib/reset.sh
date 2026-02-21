@@ -122,13 +122,38 @@ if [[ -f "$chamber_treasure" ]] && grep -q 'diamonds' "$chamber_treasure" 2>/dev
     fi
 fi
 
-# 8. Remove game-state file
-if [[ -f "$GAME_ROOT/.game_state" ]]; then
-    log "Removing .game_state"
-    $DRY_RUN || rm -f "$GAME_ROOT/.game_state"
+# 8. Remove bash TUI game-state files
+for state_file in "$GAME_ROOT/.game_state" "$GAME_ROOT/.game_history"; do
+    if [[ -f "$state_file" ]]; then
+        log "Removing $(basename "$state_file")"
+        $DRY_RUN || rm -f "$state_file"
+    fi
+done
+
+# 9. Remove Python TUI save file (.ti_save.json written by GameState.save())
+ti_save="$GAME_ROOT/.ti_save.json"
+if [[ -f "$ti_save" ]]; then
+    log "Removing .ti_save.json (Python TUI save)"
+    $DRY_RUN || rm -f "$ti_save"
 fi
 
-# 9. Unset game environment variables
+# Also clean any .ti_save.json left behind in a sub-directory if the user ran
+# the TUI from somewhere other than the game root.
+while IFS= read -r -d '' f; do
+    log "Removing stray TUI save: ${f#$GAME_ROOT/}"
+    $DRY_RUN || rm -f "$f"
+done < <(find "$GAME_ROOT" -maxdepth 3 -name '.ti_save.json' -not -path "$ti_save" -print0 2>/dev/null)
+
+# 10. Remove player-created tutorial directories in entrance/
+for player_dir in workshop; do
+    target="$ENTRANCE/$player_dir"
+    if [[ -d "$target" ]]; then
+        log "Removing player-created directory: entrance/$player_dir"
+        $DRY_RUN || rm -rf "$target"
+    fi
+done
+
+# 11. Unset game environment variables
 log "Unsetting game env vars (I, HP)"
 if ! $DRY_RUN; then
     unset I 2>/dev/null || true
