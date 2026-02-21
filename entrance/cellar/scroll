@@ -41,7 +41,7 @@ When you cast `ls -F`, the mystical energies reveal secrets through their symbol
 ├─────────────────┼────────────────────────────┼──────────────────────────────┤
 │ /               │ Directory (Chamber)        │ Rooms you can enter          │
 │ *               │ Executable (Encounter)     │ Interactive adventures       │
-│ @               │ Symbolic Link (Portal)     │ Magical doorways             │
+│ @               │ Symbolic Link (Portal)     │ Magickal doorways            │
 │ |               │ Named Pipe (Channel)       │ Communication pathways       │
 │ =               │ Socket (Connection)        │ Network junction points      │
 │ (none)          │ Regular File (Scroll)      │ Documents and knowledge      │

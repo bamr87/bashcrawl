@@ -8,7 +8,7 @@ Items that end with `*` are **executable encounters**. You can activate them usi
 
 ```bash
 ./treasure      # Activate the treasure artifact in this room
-./potion        # Consume the magical potion
+./potion        # Consume the magickal potion
 ```
 
 The `./` prefix is crucial. It tells the shell to look for the program in the current directory (`.`).
@@ -26,7 +26,7 @@ chmod +x your_script_name.sh
 
 ## 🏆 Armoury Forging Challenges
 
-The artifacts in this room are not simple items; they are magical forges that reveal powerful recipes when activated. Your challenge is to capture these recipes and turn them into usable scripts.
+The artifacts in this room are not simple items; they are magickal forges that reveal powerful recipes when activated. Your challenge is to capture these recipes and turn them into usable scripts.
 
 ### Challenge 1: Forge the Sword
 

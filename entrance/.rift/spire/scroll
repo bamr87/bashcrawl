@@ -1,4 +1,33 @@
+
+================================================================================
+                       THE SPIRE
+================================================================================
+
 The stairway rises up beyond sight.
 The red glow of the rift fades behind you,
 and there is nothing but darkness as you
 ascend upward into silence.
+
+================================================================================
+                   EXPLORING HIDDEN DEPTHS
+================================================================================
+
+The spire rewards those who look carefully.
+Remember your hidden-sight spells:
+
+    ls -a            Reveal hidden rooms
+    ls -la           Detailed view of everything
+
+Some doors here are hidden even from 'ls'.
+You may need to combine commands:
+
+    ls -la | grep "^\."     Find hidden entries
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd mezzanine     Continue ascending
+    cd ..            Descend back to the rift
+
+================================================================================

@@ -21,26 +21,13 @@ gameover () {
     CORPSE="$(mktemp corpse.XXX)"
     cat << EOF2 > "$CORPSE"
 #!/bin/bash
-#
-# If you are reading this, you have wandered out of bounds
-# and are reading the code that drives the game.
-#
-#                    Congratulations!
-#
-# Learning Linux is all about curiosity, so read this code and see
-# if you can figure out what it does.
-#
-# When you're ready to continue playing the game, though, stick to
-# the scrolls. If you're stuck, go to Gitlab and create an issue.
-# We're happy to provide hints.
-# 
 CORPSE=\$(basename \$0)
 
 echo
 if [ ! -e .\$CORPSE.looted ]; then
     cat << EOF
 You see the corpse of a slain adventurer on the floor of the
-dungeon.  You find the following items on the corpse:  
+dungeon.  You find the following items on the corpse:
 
 ${I}
 
@@ -51,33 +38,41 @@ else
     echo "This corpse has already been looted."
     echo
 fi
-EOF2
 
-    for i in {0..327}; do
-        echo >>$CORPSE
-    done
-
-    cat << EOF2 >> $CORPSE
-# Hmm, that didn't work.
-# Remember, when files end in a * 
-# it means they are applications.
-# Try this:
-#
-# ./$CORPSE
-
-
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# To USE this item, run it with:  ./$CORPSE
+# ========================================================================
 EOF2
     chmod +x "$CORPSE"
 
+    cat << EOF
+
+================================================================================
+                         YOU HAVE PERISHED
+================================================================================
+
+Your adventure has come to an end.  A corpse bearing your
+belongings now lies on the dungeon floor.
+
+TO START OVER:
+    1. Navigate to the entrance:  cd entrance
+       (or just keep pressing:    cd ..    until you get there)
+    2. Reset your variables:      unset I HP
+    3. Read the scroll again:     cat scroll
+
+Your corpse ($CORPSE) can be looted by running:  ./$CORPSE
+
+================================================================================
+EOF
+
     curr="$(basename "$PWD")"
     while [ "$curr" != "entrance" ]; do
-        pushd .. &> /dev/null
-        dirs -c
+        cd .. 2>/dev/null || break
         curr="$(basename "$PWD")"
     done
     unset I
     unset HP
-    $SHELL
 }
 
 # Intelligent Help System Function

@@ -1,4 +1,8 @@
 
+================================================================================
+                       THE FROST-BITTEN AVIARY
+================================================================================
+
 You enter a room that has been magickally frost-bitten.
 
 Snow and frost covers the ground, an icy pond leading perhaps
@@ -7,14 +11,32 @@ to an underground lake or to the outside, is in the far corner.
 A few small black and white birds waddle around the room,
 taking no notice of you.
 
-Tip:
-You can make your shell autocomplete the names of files and
-directories by pressing the Tab key after typing the first
-few letters.
+================================================================================
+                   TAB COMPLETION: A Powerful Shortcut
+================================================================================
 
-When you move to the next room, try typing
+A wise adventurer does not type every letter of every word.
 
-cd h
+Press the TAB key after typing the first few letters of a
+file or directory name, and the terminal will complete it
+for you.
 
-and then press TAB.
+TRY IT NOW:
+    Type:  cd h
+    Then press TAB.
 
+The terminal should complete it to:  cd hall
+
+This works everywhere in the terminal — for file names,
+directory names, and even some commands.  If there are
+multiple matches, press TAB twice to see all options.
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd hall          Enter the darkened hall ahead
+    cd ..            Return to the courtyard
+    pwd              Confirm your location
+
+================================================================================

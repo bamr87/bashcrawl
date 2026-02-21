@@ -46,8 +46,10 @@ set -euo pipefail
 # GLOBAL CONFIGURATION AND INITIALIZATION
 # ============================================================================
 
-readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly SCRIPT_NAME
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 readonly BASHCRAWL_ROOT="$SCRIPT_DIR"
 readonly VERSION="3.0.0"
 readonly BUILD_DATE="2025-08-06"
@@ -286,6 +288,9 @@ EOF
     if [[ -f "$GAME_STATE_FILE" ]]; then
         # Temporarily disable strict mode for sourcing
         set +u
+        # shellcheck source=/dev/null
+
+        # shellcheck source=/dev/null
         source "$GAME_STATE_FILE"
         set -u
     fi
@@ -311,7 +316,7 @@ relative_path() {
     fi
     case "$abs" in
         "$root"/*)
-            echo "${abs#${root}/}"
+            echo "${abs#"${root}"/}"
             ;;
         *)
             echo "$abs"
@@ -361,7 +366,7 @@ render_quest_status() {
 complete_current_quest() {
     local qid="$1"
     QUEST_COMPLETED="$(csv_add "$QUEST_COMPLETED" "$qid")"
-    GAME_XP=$((GAME_XP + QUEST_REWARD_XP[$qid]))
+    GAME_XP=$((GAME_XP + QUEST_REWARD_XP[qid]))
     echo -e "${SUCCESS_COLOR}✨ Quest complete: ${QUEST_TITLES[$qid]}!${RESET_COLOR}"
     echo "   Reward: ${QUEST_REWARDS[$qid]} (+${QUEST_REWARD_XP[$qid]} XP)"
     CURRENT_QUEST_ID=$((qid + 1))
@@ -618,7 +623,8 @@ execute_command() {
         original_args=("$@")
     fi
     local args="${original_args[*]:-}"
-    local pre_command_dir="$(pwd)"
+    local pre_command_dir
+    pre_command_dir="$(pwd)"
 
     # Log command to history
     if [[ -n "$args" ]]; then
@@ -814,7 +820,6 @@ execute_command() {
         "whoami")
             handled=true
             echo "bashcrawl_adventurer"
-            status=$?
             ;;
         "date")
             handled=true
@@ -825,7 +830,6 @@ execute_command() {
             handled=true
             # Safe echo: expand $VAR references without eval
             local expanded_args="$args"
-            # Expand known game variables safely
             expanded_args="${expanded_args//\$I/$I}"
             expanded_args="${expanded_args//\$HP/$HP}"
             expanded_args="${expanded_args//\$GAME_LEVEL/$GAME_LEVEL}"
@@ -834,7 +838,6 @@ execute_command() {
             expanded_args="${expanded_args//\$HOME/$HOME}"
             expanded_args="${expanded_args//\$PWD/$PWD}"
             echo "$expanded_args"
-            status=$?
             ;;
 
         # Terminal control
@@ -867,7 +870,6 @@ execute_command() {
         # Exit commands
         "exit"|"quit"|"q")
             exit_terminal
-            return
             ;;
 
         # Shell builtins: export, let, alias
@@ -878,6 +880,14 @@ execute_command() {
                 if [[ "$args" =~ ^[A-Za-z_][A-Za-z_0-9]*= ]]; then
                     eval "export $args" 2>/dev/null
                     status=$?
+                    if [[ $status -eq 0 ]]; then
+                        # Provide feedback for inventory and HP changes
+                        if [[ "$args" == I=* ]]; then
+                            echo -e "${SUCCESS_COLOR}🎒 Inventory updated: $I${RESET_COLOR}"
+                        elif [[ "$args" == HP=* ]]; then
+                            echo -e "${SUCCESS_COLOR}❤️  Health set to: $HP${RESET_COLOR}"
+                        fi
+                    fi
                 else
                     echo -e "${ERROR_COLOR}Invalid export syntax. Use: export VAR=value${RESET_COLOR}"
                     status=1
@@ -1033,6 +1043,9 @@ safe_cd() {
         ""|"~")
             cd "$BASHCRAWL_ROOT" || status=$?
             update_current_area
+            if [[ "$target" == "~" ]]; then
+                echo -e "${COLOR_INFO}In the game, ~ takes you to the bashcrawl lobby.${RESET_COLOR}"
+            fi
             ;;
         "..")
             # Only allow going up within the game directory
@@ -1835,6 +1848,9 @@ load_game_state() {
         # main.sh (PLAYER_* vars) or from a previous terminal-emulator
         # session (INVENTORY, HEALTH, etc.).  Accept either format.
         set +u
+        # shellcheck source=/dev/null
+
+        # shellcheck source=/dev/null
         source "$GAME_STATE_FILE"
 
         # Map main.sh variable names to terminal-emulator names
@@ -2258,6 +2274,9 @@ show_launcher_status() {
     if [[ -f "$GAME_STATE_FILE" ]]; then
         # Temporarily disable strict mode for sourcing
         set +u
+        # shellcheck source=/dev/null
+
+        # shellcheck source=/dev/null
         source "$GAME_STATE_FILE"
         set -u
         
@@ -2407,6 +2426,9 @@ show_version() {
     echo -e "${COLOR_PRIMARY}Install Path:${COLOR_RESET} $BASHCRAWL_ROOT"
     
     if [[ -f "$GAME_STATE_FILE" ]]; then
+        # shellcheck source=/dev/null
+
+        # shellcheck source=/dev/null
         source "$GAME_STATE_FILE"
         echo -e "${COLOR_PRIMARY}Game Status:${COLOR_RESET} Initialized (Level: $PLAYER_LEVEL)"
         echo -e "${COLOR_PRIMARY}Sessions:${COLOR_RESET} $SESSION_COUNT"

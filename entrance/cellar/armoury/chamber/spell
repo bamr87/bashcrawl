@@ -27,15 +27,30 @@ EOF
 You recall the lessons of Caitlyn the Green, who taught you
 these ancient letters.
 
-The runes are instructions on how to summon a portal that
-will allow you to walk through an invisible door contained
-in the wall.
+The runes are instructions on how to summon a PORTAL — a
+magickal shortcut to a distant room.
 
-In Bash, a symbolic link (symlink) is a *shortcut* to
-another file or directory.  Create one from this room to the
-adjacent one:
+In the terminal, this is called a SYMBOLIC LINK (symlink).
+A symlink is a special file that points to another location,
+like a portal that teleports you somewhere else.
 
-ln -fs ../../../chapel/courtyard/aviary/hall portal
+The command to create one is:
+
+    ln -s TARGET LINKNAME
+
+  TARGET   = where the portal LEADS (the destination)
+  LINKNAME = what you call the portal here
+
+To create a portal from this chamber to the hall:
+
+    ln -fs ../../../chapel/courtyard/aviary/hall portal
+
+Once created, walk through it like any other door:
+
+    cd portal
+
+To learn more about symlinks, visit the SCRAP room
+(accessible from the entrance).
 
 EOF
     else
@@ -59,321 +74,12 @@ fi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Hmm, that didn't work.
-# Remember, when files end in a *
-# it means they are applications.
-# Try this:
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
 #
-# ./spell
-
+#     ./spell
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================

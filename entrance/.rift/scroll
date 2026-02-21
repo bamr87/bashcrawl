@@ -19,6 +19,33 @@ The rift is the domain of masters.  Everything you have
 learned — navigation, file viewing, variables, permissions,
 symlinks — will be tested here.
 
+                   COMMAND CHAINING: Pipes & Logic
+
+COMMAND                          PURPOSE
+--------                         --------
+cmd1 | cmd2                      Pipe: output of cmd1 feeds into cmd2
+cmd1 && cmd2                     Run cmd2 only if cmd1 succeeds
+cmd1 ; cmd2                      Run both commands in sequence
+cmd1 || cmd2                     Run cmd2 only if cmd1 FAILS
+
+EXAMPLES:
+    cat scroll | grep "rift"     Search this scroll for "rift"
+    ls -la && echo "Success"     List files, then print success
+    ls | wc -l                   Count items in a room
+
+                   RIFT CHALLENGES
+
+CHALLENGE 1: Count the items in this room
+    ls | wc -l
+
+CHALLENGE 2: Find all scrolls below the rift
+    find . -name "scroll" | cat
+
+CHALLENGE 3: Search for hidden rooms
+    ls -laR | grep "^\."
+
+CHALLENGE 4: Check your readiness in one command
+    echo "Inventory: $I" && echo "Health: $HP"
 COMMAND CHAINING:
     cmd1 | cmd2          Pipe output of one command into another
     cmd1 && cmd2         Run cmd2 only if cmd1 succeeds

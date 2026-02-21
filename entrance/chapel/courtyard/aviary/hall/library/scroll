@@ -1,8 +1,54 @@
-#
-# You are in a small library.  There are
-# shelves on all sides of the room,
-# containing many books and knicknacks.
-# Before you, there is a small table
-# with a very large book open on it.
-#
 
+================================================================================
+                      THE ANCIENT LIBRARY
+================================================================================
+
+You are in a small library.  There are shelves on all
+sides of the room, containing many books and knick-knacks.
+
+Before you, there is a small table with a very large
+book open on it.
+
+================================================================================
+                   THE ART OF SELF-LEARNING: man
+================================================================================
+
+The greatest skill a terminal mage can learn is how to
+learn MORE on their own.  The 'man' command opens the
+manual page for any command:
+
+COMMAND            PURPOSE
+--------           --------
+man ls             Read the manual for 'ls'
+man grep           Read the manual for 'grep'
+man chmod          Read the manual for 'chmod'
+
+Inside a man page, use the same controls as 'less':
+    SPACE = next page
+    b     = previous page
+    /word = search for 'word'
+    q     = quit
+
+You can also use --help for a quick summary:
+
+    ls --help
+    grep --help
+
+================================================================================
+                    THE ANCIENT TOME
+================================================================================
+
+The great book on the table appears to be an ancient tome
+of terminal wisdom.  To read it:
+
+    ./tome
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the hall
+    cd ../..         Return to the aviary
+    cd ../../..      Return to the courtyard
+
+================================================================================
