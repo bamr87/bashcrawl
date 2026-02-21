@@ -27,7 +27,10 @@ import subprocess
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from fixtures.screenshot_capture import ScreenshotCapture
 
 
 # ---------------------------------------------------------------------------
@@ -68,6 +71,7 @@ class DemoResult:
     success: bool = True
     errors: list[str] = field(default_factory=list)
     raw_output: str = ""
+    screenshot_paths: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -128,8 +132,13 @@ class DemoRunner:
         ``entrance/``, ``main.sh``, etc.).
     """
 
-    def __init__(self, game_root: Path) -> None:
+    def __init__(
+        self,
+        game_root: Path,
+        screenshot_capture: "ScreenshotCapture | None" = None,
+    ) -> None:
         self.game_root = game_root.resolve()
+        self._screenshot_capture = screenshot_capture
 
     # -- public API --------------------------------------------------------
 
@@ -190,6 +199,13 @@ class DemoRunner:
         # Derive metrics from snapshots
         result = self._build_result(snapshots, steps, clean, duration)
         result.raw_output = clean
+
+        # Parse SCREENSHOT: lines from output (if agent mode was used)
+        if self._screenshot_capture:
+            self._screenshot_capture.take_from_agent_output(raw)
+            result.screenshot_paths = [
+                str(p) for p in self._screenshot_capture.screenshots
+            ]
 
         return result
 

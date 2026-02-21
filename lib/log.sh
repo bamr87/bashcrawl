@@ -46,6 +46,7 @@ _BC_ROOMS_VISITED=0
 _BC_ENCOUNTER_COUNT=0
 _BC_DEATH_COUNT=0
 _BC_HELP_COUNT=0
+_BC_SCREENSHOT_COUNT=0
 
 # ---------------------------------------------------------------------------
 # bc_log <event_type> [key=value ...]
@@ -112,6 +113,7 @@ bc_log() {
         encounter)  _BC_ENCOUNTER_COUNT=$((_BC_ENCOUNTER_COUNT + 1)) ;;
         death)      _BC_DEATH_COUNT=$((_BC_DEATH_COUNT + 1)) ;;
         help_request) _BC_HELP_COUNT=$((_BC_HELP_COUNT + 1)) ;;
+        screenshot) _BC_SCREENSHOT_COUNT=$((_BC_SCREENSHOT_COUNT + 1)) ;;
     esac
 }
 
@@ -143,6 +145,7 @@ bc_session_start() {
     _BC_ENCOUNTER_COUNT=0
     _BC_DEATH_COUNT=0
     _BC_HELP_COUNT=0
+    _BC_SCREENSHOT_COUNT=0
 
     local ts
     ts="$(date '+%Y-%m-%dT%H:%M:%S' 2>/dev/null || date '+%Y-%m-%d %H:%M:%S')"
@@ -176,7 +179,7 @@ bc_session_end() {
         duration=$(( now - _BC_SESSION_START ))
     fi
 
-    echo "{\"ts\":\"${ts}\",\"sid\":\"${_BC_SESSION_ID}\",\"event\":\"session_end\",\"duration_sec\":${duration},\"rooms_visited\":${_BC_ROOMS_VISITED},\"encounters\":${_BC_ENCOUNTER_COUNT},\"deaths\":${_BC_DEATH_COUNT},\"help_requests\":${_BC_HELP_COUNT}}" \
+    echo "{\"ts\":\"${ts}\",\"sid\":\"${_BC_SESSION_ID}\",\"event\":\"session_end\",\"duration_sec\":${duration},\"rooms_visited\":${_BC_ROOMS_VISITED},\"encounters\":${_BC_ENCOUNTER_COUNT},\"deaths\":${_BC_DEATH_COUNT},\"help_requests\":${_BC_HELP_COUNT},\"screenshots_captured\":${_BC_SCREENSHOT_COUNT}}" \
         >> "$_BC_SESSION_FILE" 2>/dev/null
 
     _BC_SESSION_ID=""
@@ -185,6 +188,37 @@ bc_session_end() {
 # Internal exit handler
 _bc_on_exit() {
     bc_session_end
+}
+
+# ---------------------------------------------------------------------------
+# bc_log_screenshot <path> [trigger=auto] [command=...]
+#
+# Logs a screenshot event with the file path, trigger type, and optional
+# command context.  Also records file size if the file exists.
+# ---------------------------------------------------------------------------
+bc_log_screenshot() {
+    [[ "${BASHCRAWL_LOG:-}" == "off" ]] && return 0
+
+    local path="${1:?bc_log_screenshot requires a path}"
+    local trigger="${2:-auto}"
+    local command="${3:-}"
+
+    local extra_args=("screenshot_path=${path}" "trigger=${trigger}")
+    [[ -n "$command" ]] && extra_args+=("command=${command}")
+
+    # Record file size if the file exists
+    if [[ -f "$path" ]]; then
+        local size
+        # macOS stat vs GNU stat
+        if stat -f%z "$path" >/dev/null 2>&1; then
+            size="$(stat -f%z "$path")"
+        else
+            size="$(stat --printf='%s' "$path" 2>/dev/null || echo 0)"
+        fi
+        extra_args+=("size_bytes=${size}")
+    fi
+
+    bc_log screenshot "${extra_args[@]}"
 }
 
 # ---------------------------------------------------------------------------
@@ -238,9 +272,9 @@ _bc_check_room_change() {
 # ---------------------------------------------------------------------------
 # Export functions so subshells and game executables can use them
 # ---------------------------------------------------------------------------
-export -f bc_log bc_session_start bc_session_end bc_install_hooks _bc_check_room_change _bc_on_exit 2>/dev/null
+export -f bc_log bc_log_screenshot bc_session_start bc_session_end bc_install_hooks _bc_check_room_change _bc_on_exit 2>/dev/null
 
 # Export state variables
 export _BC_LOG_DIR _BC_SESSION_ID _BC_SESSION_FILE _BC_SESSION_START
-export _BC_LAST_DIR _BC_ROOMS_VISITED _BC_ENCOUNTER_COUNT _BC_DEATH_COUNT _BC_HELP_COUNT
+export _BC_LAST_DIR _BC_ROOMS_VISITED _BC_ENCOUNTER_COUNT _BC_DEATH_COUNT _BC_HELP_COUNT _BC_SCREENSHOT_COUNT
 export BASHCRAWL_ROOT

@@ -225,3 +225,82 @@ class TestAgentBashMode:
             timeout=15,
         )
         assert "CMD> pwd" in result.stdout
+
+
+@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+class TestAgentScreenshotLogging:
+    """Tests that screenshots are logged via ScreenshotCapture and TestLogCapture."""
+
+    def test_screenshot_capture_records_agent_output(self, tmp_path):
+        """ScreenshotCapture.take_from_agent_output parses SCREENSHOT: lines."""
+        from fixtures.screenshot_capture import ScreenshotCapture
+        from fixtures.log_capture import TestLogCapture
+
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+        lc = TestLogCapture(log_dir, scenario="integration")
+        lc.start()
+
+        shot_dir = tmp_path / "shots"
+        cap = ScreenshotCapture(screenshot_dir=shot_dir, log_capture=lc)
+
+        # Run agent and capture output
+        output = _run_agent(["pwd", "EXIT"], shot_dir)
+
+        # Use ScreenshotCapture to parse the output
+        paths = cap.take_from_agent_output(output)
+        lc.end()
+
+        # Should find at least the initial screenshot
+        assert len(paths) >= 1
+        assert cap.count >= 1
+
+        # Verify log events were written
+        screenshots = lc.get_screenshots()
+        assert len(screenshots) >= 1
+        assert screenshots[0]["trigger"] == "agent_auto"
+
+    def test_session_end_counts_screenshots(self, tmp_path):
+        """session_end event includes screenshots_captured from agent run."""
+        from fixtures.screenshot_capture import ScreenshotCapture
+        from fixtures.log_capture import TestLogCapture
+
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+        lc = TestLogCapture(log_dir, scenario="integration")
+        lc.start()
+
+        shot_dir = tmp_path / "shots"
+        cap = ScreenshotCapture(screenshot_dir=shot_dir, log_capture=lc)
+
+        output = _run_agent(["pwd", "ls", "EXIT"], shot_dir)
+        cap.take_from_agent_output(output)
+        lc.end()
+
+        end_event = lc.events[-1]
+        assert end_event.event == "session_end"
+        assert end_event.extra["screenshots_captured"] >= 1
+
+    def test_screenshot_events_in_jsonl_file(self, tmp_path):
+        """Screenshot events persist to the JSONL log file."""
+        from fixtures.screenshot_capture import ScreenshotCapture
+        from fixtures.log_capture import TestLogCapture
+
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+        lc = TestLogCapture(log_dir, scenario="integration")
+        lc.start()
+
+        shot_dir = tmp_path / "shots"
+        cap = ScreenshotCapture(screenshot_dir=shot_dir, log_capture=lc)
+
+        output = _run_agent(["pwd", "EXIT"], shot_dir)
+        cap.take_from_agent_output(output)
+        lc.end()
+
+        # Read JSONL file and verify screenshot events
+        content = lc.file_path.read_text()
+        events = [json.loads(l) for l in content.strip().splitlines() if l.strip()]
+        screenshot_events = [e for e in events if e.get("event") == "screenshot"]
+        assert len(screenshot_events) >= 1
+        assert "screenshot_path" in screenshot_events[0]

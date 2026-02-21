@@ -22,6 +22,11 @@ try:
 except ImportError:
     TestLogCapture = None  # type: ignore[misc,assignment]
 
+try:
+    from fixtures.screenshot_capture import ScreenshotCapture
+except ImportError:
+    ScreenshotCapture = None  # type: ignore[misc,assignment]
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +56,7 @@ class SessionResult:
     rooms_visited: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     exit_reason: str = ""
+    screenshot_paths: list[str] = field(default_factory=list)
 
     @property
     def success(self) -> bool:
@@ -75,12 +81,14 @@ class NonInteractiveEngine:
         state: GameState | None = None,
         initial_env: dict[str, str] | None = None,
         log_capture: "TestLogCapture | None" = None,
+        screenshot_capture: "ScreenshotCapture | None" = None,
     ) -> None:
         self.fs = GameFileSystem(game_root)
         self.state = state or GameState()
         self._cwd = self.state.current_location or "/entrance"
         self._rooms_visited: list[str] = []
         self._log_capture = log_capture
+        self._screenshot_capture = screenshot_capture
 
         # Apply initial environment
         if initial_env:
@@ -274,6 +282,12 @@ class NonInteractiveEngine:
         session.final_inventory = self.state.inventory
         session.final_hp = self.state.hp
         session.rooms_visited = list(self._rooms_visited)
+
+        # Collect screenshot paths if capture was active
+        if self._screenshot_capture:
+            session.screenshot_paths = [
+                str(p) for p in self._screenshot_capture.screenshots
+            ]
 
         return session
 

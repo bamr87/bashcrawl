@@ -96,6 +96,37 @@ def log_capture(sandbox: Path, request: pytest.FixtureRequest) -> TestLogCapture
 
 
 @pytest.fixture
+def screenshot_dir(tmp_path: Path) -> Path:
+    """Temporary directory for SVG screenshots during tests."""
+    d = tmp_path / "screenshots"
+    d.mkdir()
+    return d
+
+
+@pytest.fixture
+def screenshot_capture(sandbox: Path, screenshot_dir: Path, log_capture: TestLogCapture):
+    """Screenshot helper that integrates with TestLogCapture.
+
+    Provides a callable ``take(app_or_path, name, trigger, command)`` that:
+    1. Saves an SVG screenshot (if given a Textual App) or records an
+       existing screenshot path.
+    2. Logs a ``screenshot`` event via TestLogCapture.
+
+    Usage in tests::
+
+        def test_foo(screenshot_capture, ...):
+            path = screenshot_capture.take_from_path(svg_path, "initial")
+            # or, with a Textual app:
+            path = screenshot_capture.take(app, "after_cmd", command="ls")
+    """
+    from fixtures.screenshot_capture import ScreenshotCapture
+    return ScreenshotCapture(
+        screenshot_dir=screenshot_dir,
+        log_capture=log_capture,
+    )
+
+
+@pytest.fixture
 def engine(game_state, game_fs):
     """TerminalEngine in non-interactive mode for testing."""
     from ti.terminal_engine import TerminalEngine

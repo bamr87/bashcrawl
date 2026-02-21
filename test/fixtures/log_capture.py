@@ -33,6 +33,7 @@ VALID_EVENTS = {
     "help_action",
     "command",
     "output",
+    "screenshot",
     "test",
     "launcher_info",
     "launcher_success",
@@ -166,6 +167,7 @@ class TestLogCapture:
         deaths = sum(1 for e in self.events if e.event == "death")
         help_reqs = sum(1 for e in self.events if e.event == "help_request")
         commands = sum(1 for e in self.events if e.event == "command")
+        screenshots = sum(1 for e in self.events if e.event == "screenshot")
         self.log_event(
             "session_end",
             duration_sec=duration,
@@ -174,6 +176,7 @@ class TestLogCapture:
             deaths=deaths,
             help_requests=help_reqs,
             total_commands=commands,
+            screenshots_captured=screenshots,
             **extra,
         )
 
@@ -195,6 +198,36 @@ class TestLogCapture:
             extra["room"] = room
         self.log_event("command", **extra)
 
+    def log_screenshot(
+        self,
+        path: str | Path,
+        trigger: str = "auto",
+        command: str = "",
+        room: str = "",
+    ) -> None:
+        """Log a screenshot capture event.
+
+        Args:
+            path: Filesystem path to the saved SVG screenshot.
+            trigger: What caused the screenshot — ``"auto"`` (after command),
+                ``"explicit"`` (SCREENSHOT meta-command), or ``"initial"``.
+            command: The command that triggered the screenshot (if any).
+            room: Current game room.
+        """
+        extra: dict[str, Any] = {
+            "screenshot_path": str(path),
+            "trigger": trigger,
+        }
+        if command:
+            extra["command"] = command
+        if room:
+            extra["room"] = room
+        # Record file size if it exists
+        p = Path(path)
+        if p.is_file():
+            extra["size_bytes"] = p.stat().st_size
+        self.log_event("screenshot", **extra)
+
     def get_events_by_type(self, event_type: str) -> list[LogEvent]:
         return [e for e in self.events if e.event == event_type]
 
@@ -206,4 +239,18 @@ class TestLogCapture:
             e.extra.get("item", "")
             for e in self.events
             if e.event == "encounter" and e.extra.get("outcome") == "collected"
+        ]
+
+    def get_screenshots(self) -> list[dict[str, Any]]:
+        """Return all screenshot events with path and metadata."""
+        return [
+            {
+                "path": e.extra.get("screenshot_path", ""),
+                "trigger": e.extra.get("trigger", ""),
+                "command": e.extra.get("command", ""),
+                "room": e.extra.get("room", ""),
+                "size_bytes": e.extra.get("size_bytes", 0),
+            }
+            for e in self.events
+            if e.event == "screenshot"
         ]
