@@ -168,14 +168,26 @@ def engine(game_state, game_fs):
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
-def ai_agent():
+def ai_agent(request):
     """TestAgent using Anthropic Claude (requires ANTHROPIC_API_KEY)."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         pytest.skip("ANTHROPIC_API_KEY not set — skipping AI test")
 
     from ai.agent import TestAgent
-    return TestAgent(api_key=api_key)
+    from ai import live_logger as _live
+
+    # Tag the engine with a test name for live stream display
+    test_name = request.node.name
+    agent = TestAgent(api_key=api_key)
+    # Store test_name on the agent so session_runner can read it
+    object.__setattr__(agent, "_test_name", test_name) if hasattr(agent, "__dataclass_fields__") else setattr(agent, "_test_name", test_name)
+    # Announce the fixture creation to the live log (session_start fires later via run_session)
+    try:
+        _live._write({"type": "agent_ready", "test": test_name})
+    except Exception:
+        pass
+    return agent
 
 
 # ---------------------------------------------------------------------------

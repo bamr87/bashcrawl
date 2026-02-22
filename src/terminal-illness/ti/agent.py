@@ -56,6 +56,7 @@ async def _run_agent(
     from .filesystem import GameFileSystem
     from .game_state import GameState
     from .app import BashcrawlApp
+    from datetime import datetime
 
     fs = GameFileSystem(game_root)
     state = GameState.load(save_path=game_root / ".ti_save.json")
@@ -65,12 +66,44 @@ async def _run_agent(
 
     app = BashcrawlApp(state=state, fs=fs, agent_mode=True)
 
-    screenshot_dir.mkdir(parents=True, exist_ok=True)
+    # Create a timestamped session subdirectory so the viewer can discover it
+    session_ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    session_subdir = screenshot_dir / f"{session_ts}_agent_session"
+    session_subdir.mkdir(parents=True, exist_ok=True)
+
     cmd_counter = 0
+    manifest_entries: list[dict] = []
+    session_start = datetime.now().isoformat(timespec="seconds")
+
+    def _record_screenshot(path: Path, trigger: str, command: str = "", room: str = "") -> None:
+        """Record a screenshot entry for the manifest."""
+        size = path.stat().st_size if path.exists() else 0
+        manifest_entries.append({
+            "name": path.name,
+            "path": str(path),
+            "trigger": trigger,
+            "command": command,
+            "room": room,
+            "ts": datetime.now().isoformat(timespec="seconds"),
+            "size_bytes": size,
+        })
+
+    def _write_manifest() -> None:
+        """Write the manifest.json for this session."""
+        total_size = sum(e["size_bytes"] for e in manifest_entries)
+        manifest = {
+            "generated_at": datetime.now().isoformat(timespec="seconds"),
+            "screenshot_dir": str(session_subdir),
+            "total_screenshots": len(manifest_entries),
+            "total_size_bytes": total_size,
+            "screenshots": manifest_entries,
+        }
+        manifest_path = session_subdir / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2))
 
     print(f"BASHCRAWL AGENT TUI v1.0", flush=True)
     print(f"Game root: {game_root}", flush=True)
-    print(f"Screenshots: {screenshot_dir}", flush=True)
+    print(f"Screenshots: {session_subdir}", flush=True)
     print(f"Send commands one per line. Meta: SCREENSHOT, STATUS, EXIT", flush=True)
 
     async with app.run_test(size=(120, 40)) as pilot:
@@ -81,8 +114,9 @@ async def _run_agent(
 
         # Take initial screenshot
         if auto_screenshot:
-            path = screenshot_dir / "000_initial.svg"
+            path = session_subdir / "000_initial.svg"
             app.save_screenshot(str(path))
+            _record_screenshot(path, "agent_auto", command="(startup)")
             print(f"SCREENSHOT: {path}", flush=True)
 
         print("READY>", flush=True)
@@ -111,6 +145,7 @@ async def _run_agent(
 
             # Meta-commands
             if upper == "EXIT" or upper == "QUIT":
+                _write_manifest()
                 state.save(save_path=game_root / ".ti_save.json")
                 print("SESSION ENDED", flush=True)
                 print("READY>", flush=True)
@@ -124,8 +159,9 @@ async def _run_agent(
                     filename = f"{cmd_counter:03d}_screenshot.svg"
                 if not filename.endswith(".svg"):
                     filename += ".svg"
-                path = screenshot_dir / filename
+                path = session_subdir / filename
                 app.save_screenshot(str(path))
+                _record_screenshot(path, "explicit", command=line)
                 print(f"SCREENSHOT: {path}", flush=True)
                 print("READY>", flush=True)
                 continue
@@ -164,13 +200,15 @@ async def _run_agent(
 
             # Auto-screenshot after each command
             if auto_screenshot:
-                path = screenshot_dir / f"{cmd_counter:03d}_{_sanitize(line)}.svg"
+                path = session_subdir / f"{cmd_counter:03d}_{_sanitize(line)}.svg"
                 app.save_screenshot(str(path))
+                _record_screenshot(path, "agent_auto", command=line, room=state.current_location)
                 print(f"SCREENSHOT: {path}", flush=True)
 
             print("READY>", flush=True)
 
         # Final save
+        _write_manifest()
         state.save(save_path=game_root / ".ti_save.json")
 
 
@@ -182,7 +220,7 @@ def _sanitize(s: str) -> str:
 def main() -> None:
     """CLI entry point."""
     game_root: Optional[Path] = None
-    screenshot_dir = Path("./screenshots")
+    screenshot_dir = Path("./logs/screenshots")
     auto_screenshot = True
 
     args = sys.argv[1:]

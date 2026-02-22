@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Bashcrawl Observatory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Analytics Dashboard</h1>
+    <p class="subtitle">Cross-session statistics and trends</p>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.total_sessions }}</div>
+        <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.total_events }}</div>
+        <div class="stat-label">Events</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ (summary.total_play_time_sec / 60) | round(1) }}m</div>
+        <div class="stat-label">Total Play Time</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.duration_avg | round(1) }}s</div>
+        <div class="stat-label">Avg Duration</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.avg_rooms_per_session | round(1) }}</div>
+        <div class="stat-label">Avg Rooms/Session</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.total_deaths }}</div>
+        <div class="stat-label">Total Deaths</div>
+    </div>
+</div>
+
+<div class="analytics-grid">
+    <div class="chart-panel">
+        <h3>📅 Sessions by Date</h3>
+        <canvas id="chart-timeline"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>🏷️ Sessions by Mode</h3>
+        <canvas id="chart-modes"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>🏰 Top Rooms</h3>
+        <canvas id="chart-rooms"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>⏱️ Duration Distribution</h3>
+        <canvas id="chart-duration"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>⚔️ Encounter Outcomes</h3>
+        <canvas id="chart-encounters"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>💀 Death Causes</h3>
+        <canvas id="chart-deaths"></canvas>
+    </div>
+    <div class="chart-panel wide">
+        <h3>🏆 Completion Funnel</h3>
+        <canvas id="chart-funnel"></canvas>
+    </div>
+    <div class="chart-panel">
+        <h3>💰 Items Collected</h3>
+        <div class="items-grid">
+            {% for item, count in summary.items_collected.items() %}
+            <div class="item-stat">
+                <span class="item-name">{{ item }}</span>
+                <span class="item-count">{{ count }}</span>
+            </div>
+            {% endfor %}
+            {% if not summary.items_collected %}
+            <p class="muted">No items collected yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+    const analyticsData = {{ summary.to_dict() | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

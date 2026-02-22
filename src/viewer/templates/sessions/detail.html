@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Session {{ session.sid }} — Bashcrawl Observatory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{{ url_for('pages.sessions_list') }}" class="back-link">← Back to Sessions</a>
+    <h1>Session {{ session.sid }}</h1>
+    <div class="session-meta">
+        <span class="badge badge-{{ session.mode or 'unknown' }}">{{ session.mode or 'unknown' }}</span>
+        <span>📅 {{ session.file_date }}</span>
+        {% if session.start_time %}<span>🕐 {{ session.start_time }}</span>{% endif %}
+        {% if session.duration_sec is not none %}<span>⏱️ {{ session.duration_sec }}s</span>{% endif %}
+        {% if session.shell %}<span>🐚 {{ session.shell }}</span>{% endif %}
+        {% if session.os_name %}<span>💻 {{ session.os_name }}</span>{% endif %}
+        {% if session.is_test %}<span class="badge badge-test">Test Session</span>{% endif %}
+    </div>
+</div>
+
+<div class="detail-stats">
+    <div class="stat-card">
+        <div class="stat-value">{{ session.rooms_count }}</div>
+        <div class="stat-label">Rooms</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ session.encounters_count }}</div>
+        <div class="stat-label">Encounters</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ session.deaths_count }}</div>
+        <div class="stat-label">Deaths</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ session.screenshots_count }}</div>
+        <div class="stat-label">Screenshots</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ session.event_count }}</div>
+        <div class="stat-label">Events</div>
+    </div>
+</div>
+
+{% if session.rooms_visited %}
+<div class="detail-section">
+    <h2>🗺️ Room Path</h2>
+    <div class="room-breadcrumb">
+        {% for room in session.rooms_visited %}
+        <span class="room-step">{{ room }}</span>
+        {% if not loop.last %}<span class="room-arrow">→</span>{% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if session.items_collected %}
+<div class="detail-section">
+    <h2>💰 Items Collected</h2>
+    <div class="item-badges">
+        {% for item in session.items_collected %}
+        <span class="badge badge-item">{{ item }}</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if linked_screenshots %}
+<div class="detail-section">
+    <h2>📸 Linked Screenshots</h2>
+    <div class="linked-screenshots">
+        {% for sc in linked_screenshots %}
+        <a href="{{ url_for('pages.screenshot_gallery', dir_name=sc.dir_name) }}" class="screenshot-link-card">
+            <span class="screenshot-link-name">{{ sc.test_name }}</span>
+            <span class="screenshot-link-count">{{ sc.total_screenshots }} screenshots</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if feedback %}
+<div class="detail-section">
+    <h2>📋 Feedback Report</h2>
+    <a href="{{ url_for('pages.feedback_detail', sid=feedback.session_sid) }}" class="btn btn-secondary">
+        View Feedback Report →
+    </a>
+</div>
+{% endif %}
+
+<div class="detail-section">
+    <h2>📝 Event Timeline</h2>
+    <div class="timeline">
+        {% for ev in session.events %}
+        <div class="timeline-event event-{{ ev.event }}">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="event-badge event-{{ ev.event }}">{{ ev.event }}</span>
+                    <span class="event-time">{{ ev.ts }}</span>
+                </div>
+                <div class="timeline-body">
+                    {% if ev.event == 'room_enter' %}
+                        <span>Entered <strong>{{ ev.extra.get('room', '?') }}</strong></span>
+                    {% elif ev.event == 'encounter' %}
+                        <span>{{ ev.extra.get('type', '?') }} → {{ ev.extra.get('outcome', '?') }}
+                        {% if ev.extra.get('item') %} ({{ ev.extra.item }}){% endif %}</span>
+                    {% elif ev.event == 'death' %}
+                        <span class="danger">Killed by {{ ev.extra.get('type', '?') }} ({{ ev.extra.get('cause', '?') }})</span>
+                    {% elif ev.event == 'unlock' %}
+                        <span class="success">Unlocked <strong>{{ ev.extra.get('room', '?') }}</strong></span>
+                    {% elif ev.event == 'screenshot' %}
+                        <span>📸 {{ ev.extra.get('command', '') }} ({{ ev.extra.get('trigger', '') }})</span>
+                    {% elif ev.event == 'session_start' %}
+                        <span>Session started ({{ ev.extra.get('mode', '') }})</span>
+                    {% elif ev.event == 'session_end' %}
+                        <span>Session ended — {{ ev.extra.get('duration_sec', '?') }}s</span>
+                    {% else %}
+                        <span>{{ ev.extra | tojson }}</span>
+                    {% endif %}
+                    {% if ev.extra.get('hp') is not none %}
+                        <span class="hp-badge">❤️ {{ ev.extra.hp }}</span>
+                    {% endif %}
+                    {% if ev.extra.get('inventory') %}
+                        <span class="inv-badge">🎒 {{ ev.extra.inventory }}</span>
+                    {% endif %}
+                </div>
+                <details class="event-raw">
+                    <summary>Raw JSON</summary>
+                    <pre><code>{{ ev.to_dict() | tojson(indent=2) }}</code></pre>
+                </details>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

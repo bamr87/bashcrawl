@@ -279,7 +279,7 @@ setup_executable_permissions() {
     done
     
     # Game interaction files
-    local game_executables=("treasure" "potion" "spell" "monster" "ghost" "statue")
+    local game_executables=("treasure" "potion" "spell" "monster" "ghost" "statue" "tome" "grimoire" "goblet")
     
     for executable in "${game_executables[@]}"; do
         # Find and make executable all files with these names

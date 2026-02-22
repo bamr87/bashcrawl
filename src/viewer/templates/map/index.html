@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dungeon Map — Bashcrawl Observatory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🗺️ Dungeon Map</h1>
+    <p class="subtitle">Interactive room topology with visit heatmap</p>
+</div>
+
+<div class="map-controls">
+    <label>
+        <input type="checkbox" id="show-heatmap" checked onchange="toggleHeatmap()">
+        Show visit heatmap
+    </label>
+    <label>
+        <input type="checkbox" id="show-hidden" checked onchange="toggleHidden()">
+        Show hidden rooms
+    </label>
+</div>
+
+<div class="map-container" id="dungeon-map">
+    <svg viewBox="0 0 900 750" class="dungeon-svg" id="map-svg">
+        <!-- Edges -->
+        <g class="map-edges" id="map-edges"></g>
+        <!-- Room nodes -->
+        <g class="map-nodes" id="map-nodes"></g>
+    </svg>
+</div>
+
+<div class="map-legend">
+    <div class="legend-item"><span class="legend-dot visible"></span> Visible Room</div>
+    <div class="legend-item"><span class="legend-dot hidden"></span> Hidden Room</div>
+    <div class="legend-item"><span class="legend-dot hot"></span> High Traffic</div>
+    <div class="legend-item"><span class="legend-dot cold"></span> Low Traffic</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const roomVisitCounts = {{ summary.room_visit_counts | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

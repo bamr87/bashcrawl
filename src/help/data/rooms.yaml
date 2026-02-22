@@ -116,6 +116,51 @@ rooms:
       - command: "rm artifact"
         description: "Remove a file"
 
+  library:
+    emoji: "📚"
+    title: "THE ANCIENT LIBRARY"
+    description: "Deep within the chapel — learn self-teaching commands"
+    teaches:
+      - "Reading manuals with man"
+      - "Using --help for quick reference"
+      - "The tome teaches random advanced tips"
+    key_files:
+      - name: scroll
+        description: "man command tutorial"
+      - name: tome
+        description: "random spell book (executable)"
+    next_steps: "Read the tome with ./tome — if you carry the right items, a secret may reveal itself"
+    essential_commands:
+      - command: "man ls"
+        description: "Read the manual for ls"
+      - command: "./tome"
+        description: "Consult the ancient tome"
+      - command: "ls --help"
+        description: "Quick help for ls"
+
+  study:
+    emoji: "📜"
+    title: "THE HIDDEN STUDY"
+    description: "Secret room behind the library bookshelf — learn shell functions"
+    teaches:
+      - "Creating shell functions"
+      - "Difference between alias and function"
+      - "Building the 'bc' bashcrawl command"
+      - "Discovering the help system source"
+    key_files:
+      - name: scroll
+        description: "shell function tutorial"
+      - name: grimoire
+        description: "opens portal to help source (executable)"
+    next_steps: "Run ./grimoire to open the portal, then cd portal to reach the Scriptorium"
+    essential_commands:
+      - command: "./grimoire"
+        description: "Open portal to the Scriptorium"
+      - command: "cd portal"
+        description: "Step through the portal"
+      - command: "source init_help.sh"
+        description: "Activate the help system"
+
   unknown:
     emoji: "🗺️"
     title: "UNKNOWN TERRITORY"

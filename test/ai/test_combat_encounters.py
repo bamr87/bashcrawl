@@ -7,7 +7,7 @@ statue, monster, ghost encounters with death and retry.
 import logging
 import pytest
 
-from ai.agent import TestAgent, AgentExhausted
+from ai.agent import TestAgent, AgentExhausted, AgentTimeout
 from ai.session_runner import NonInteractiveEngine
 from ai.scenarios import SCENARIO_COMBAT_STRESS
 from fixtures.log_capture import TestLogCapture
@@ -56,9 +56,11 @@ class TestCombatEncounters:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=30,
+                max_elapsed_seconds=120,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None
@@ -104,9 +106,11 @@ class TestCombatEncounters:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=scenario.max_turns,
+                max_elapsed_seconds=180,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None

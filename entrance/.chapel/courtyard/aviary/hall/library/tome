@@ -336,6 +336,39 @@ EOF
     done
 fi
 
+# --- Hidden Study Unlock ---
+# If the player has progressed far enough (amulet from cellar + coins from
+# chamber), reading the tome causes a bookshelf to shift, revealing the
+# hidden study behind it.
+_has_amulet=false
+_has_coins=false
+grep --quiet amulet <<< "$I" 2>/dev/null && _has_amulet=true
+grep --quiet coins  <<< "$I" 2>/dev/null && _has_coins=true
+
+if $_has_amulet && $_has_coins; then
+    if [ -d .study ]; then
+        # Unlock the hidden study
+        mv .study study 2>/dev/null
+        cat << EOF
+
+As you close the tome, you hear stone grinding behind you.
+One of the bookshelves has shifted, revealing a narrow
+passage into a hidden study!
+
+    ls
+    cd study
+
+EOF
+    elif [ -d study ]; then
+        cat << EOF
+
+The passage to the hidden study remains open behind the
+bookshelf.
+
+EOF
+    fi
+fi
+
 
 
 # ========================================================================

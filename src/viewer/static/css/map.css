@@ -1,0 +1,203 @@
+/* Bashcrawl Observatory — Dungeon Map Styles */
+
+/* Map Container */
+.map-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+}
+
+.map-svg-wrap {
+    width: 100%;
+    height: 600px;
+    overflow: auto;
+    cursor: grab;
+}
+
+.map-svg-wrap:active { cursor: grabbing; }
+
+.map-svg-wrap svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Map Controls */
+.map-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.map-controls label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.map-controls input[type="checkbox"] {
+    accent-color: var(--accent-gold);
+}
+
+/* Room Nodes */
+.room-node {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.room-node:hover { opacity: 0.85; }
+
+.room-node rect {
+    fill: var(--bg-card);
+    stroke: var(--accent-gold);
+    stroke-width: 1.5;
+    rx: 6;
+    ry: 6;
+    transition: fill 0.3s, stroke 0.3s;
+}
+
+.room-node.hidden-room rect {
+    stroke: var(--accent-purple);
+    stroke-dasharray: 4 2;
+}
+
+.room-node.visited rect {
+    fill: rgba(212,165,116,0.15);
+}
+
+.room-node text {
+    fill: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+}
+
+.room-node .room-label {
+    font-size: 11px;
+    fill: var(--text-primary);
+}
+
+.room-node .room-visits {
+    font-size: 9px;
+    fill: var(--text-muted);
+}
+
+/* Heatmap coloring */
+.room-node.heat-0 rect { fill: var(--bg-card); }
+.room-node.heat-1 rect { fill: rgba(74,222,128,0.15); }
+.room-node.heat-2 rect { fill: rgba(251,191,36,0.2); }
+.room-node.heat-3 rect { fill: rgba(251,191,36,0.35); }
+.room-node.heat-4 rect { fill: rgba(248,113,113,0.3); }
+.room-node.heat-5 rect { fill: rgba(248,113,113,0.5); }
+
+/* Edges */
+.map-edge {
+    stroke: var(--border-color);
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.map-edge.hidden-edge {
+    stroke: var(--accent-purple);
+    stroke-dasharray: 4 2;
+    opacity: 0.5;
+}
+
+/* Legend */
+.map-legend {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.map-legend h3 {
+    font-size: 0.9rem;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+}
+
+.legend-items {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-swatch {
+    width: 18px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+}
+
+.legend-swatch.normal { background: var(--bg-card); border-color: var(--accent-gold); }
+.legend-swatch.hidden { background: var(--bg-card); border-color: var(--accent-purple); border-style: dashed; }
+.legend-swatch.heat-cold { background: rgba(74,222,128,0.15); }
+.legend-swatch.heat-warm { background: rgba(251,191,36,0.3); }
+.legend-swatch.heat-hot { background: rgba(248,113,113,0.4); }
+
+/* Room Tooltip */
+.map-tooltip {
+    position: absolute;
+    background: var(--bg-card);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+    display: none;
+}
+
+.map-tooltip.visible { display: block; }
+
+.tooltip-name {
+    font-family: var(--font-mono);
+    font-weight: bold;
+    color: var(--accent-gold);
+    margin-bottom: 0.2rem;
+}
+
+.tooltip-path {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.tooltip-stats {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .map-svg-wrap {
+        height: 400px;
+    }
+
+    .legend-items {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

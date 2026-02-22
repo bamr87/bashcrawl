@@ -7,7 +7,7 @@ wrong commands, missing items, navigation errors.
 import logging
 import pytest
 
-from ai.agent import TestAgent, AgentExhausted
+from ai.agent import TestAgent, AgentExhausted, AgentTimeout
 from ai.session_runner import NonInteractiveEngine
 from fixtures.log_capture import TestLogCapture
 
@@ -46,9 +46,11 @@ class TestErrorRecovery:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=20,
+                max_elapsed_seconds=90,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None
@@ -77,9 +79,11 @@ class TestErrorRecovery:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=15,
+                max_elapsed_seconds=90,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ session.test_name }} — Screenshots — Bashcrawl Observatory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+{% endblock %}
+
+{% block content %}
+{# --- Header bar: back link, title, meta, and playback controls --- #}
+<div class="gallery-header">
+    <a href="{{ url_for('pages.screenshots_index') }}" class="back-link">← Back</a>
+    <h1 class="gallery-title">📸 {{ session.test_name }}</h1>
+    <div class="gallery-header-meta">
+        <span>{{ session.total_screenshots }} frames</span>
+        <span>{{ (session.total_size_bytes / 1024) | round | int }}KB</span>
+        {% for sid in session.linked_session_sids %}
+        <a href="{{ url_for('pages.session_detail', sid=sid) }}" class="badge badge-link">🔗 {{ sid[:8] }}</a>
+        {% endfor %}
+    </div>
+    <div class="gallery-controls" id="gallery-controls">
+        <button class="ctrl-btn" onclick="galleryPrev()" title="Previous (←)">◀</button>
+        <span class="ctrl-counter"><span id="gallery-index">1</span><span class="ctrl-sep">/</span>{{ session.total_screenshots }}</span>
+        <button class="ctrl-btn" onclick="galleryNext()" title="Next (→)">▶</button>
+        <button class="ctrl-btn" id="slideshow-btn" onclick="toggleSlideshow()" title="Play slideshow (Space)">⏵</button>
+    </div>
+</div>
+
+{# --- Full-width image viewer --- #}
+<div class="gallery-stage" id="gallery" data-dir="{{ session.dir_name }}">
+    {% if session.screenshots %}
+    <img id="gallery-img" class="gallery-img"
+         src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + session.screenshots[0].name) }}"
+         alt="{{ session.screenshots[0].name }}">
+    {% else %}
+    <div class="gallery-empty">No screenshots available</div>
+    {% endif %}
+    <button class="stage-arrow stage-prev" onclick="galleryPrev()" title="Previous (←)">‹</button>
+    <button class="stage-arrow stage-next" onclick="galleryNext()" title="Next (→)">›</button>
+</div>
+
+{# --- Info strip + horizontal filmstrip below image --- #}
+<div class="gallery-bottom">
+    <div class="gallery-info-strip" id="gallery-info-strip">
+        <span class="info-name" id="gallery-name">{{ session.screenshots[0].name if session.screenshots else '' }}</span>
+        <span class="info-tag" id="gallery-trigger">{{ session.screenshots[0].trigger if session.screenshots else '' }}</span>
+        <span class="info-tag" id="gallery-command">{{ session.screenshots[0].command if session.screenshots else '' }}</span>
+        <span class="info-tag" id="gallery-size">{{ ((session.screenshots[0].size_bytes / 1024) | round | int ~ 'KB') if session.screenshots else '' }}</span>
+    </div>
+    <div class="filmstrip" id="filmstrip">
+        {% for sc in session.screenshots %}
+        <div class="filmstrip-item {% if loop.first %}active{% endif %}"
+             data-index="{{ loop.index0 }}"
+             data-name="{{ sc.name }}"
+             data-trigger="{{ sc.trigger }}"
+             data-command="{{ sc.command }}"
+             data-size="{{ sc.size_bytes }}"
+             data-src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + sc.name) }}"
+             onclick="galleryGoTo({{ loop.index0 }})">
+            <img src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + sc.name) }}"
+                 alt="{{ sc.name }}" loading="lazy">
+            <span class="filmstrip-num">{{ loop.index }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+{% endblock %}

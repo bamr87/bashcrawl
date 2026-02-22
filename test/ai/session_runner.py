@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -15,6 +16,11 @@ from typing import Any, Callable, Optional
 from ti.filesystem import GameFileSystem
 from ti.game_state import GameState
 from ti.quests import check_quest_completion, quest_list
+
+try:
+    from ai import live_logger as _live
+except ImportError:
+    _live = None  # type: ignore[assignment]
 
 # Import log capture if available (optional dependency)
 try:
@@ -57,10 +63,11 @@ class SessionResult:
     errors: list[str] = field(default_factory=list)
     exit_reason: str = ""
     screenshot_paths: list[str] = field(default_factory=list)
+    feedback: dict = field(default_factory=dict)  # AI-provided end-of-session review
 
     @property
     def success(self) -> bool:
-        return self.exit_reason in ("exit", "max_commands", "source_exhausted")
+        return self.exit_reason in ("exit", "max_commands", "source_exhausted", "timeout")
 
 
 class NonInteractiveEngine:
@@ -232,7 +239,9 @@ class NonInteractiveEngine:
         self,
         command_source: Callable[[str], str],
         max_commands: int = 100,
+        max_elapsed_seconds: float | None = None,
         on_command: Callable[[CommandResult], None] | None = None,
+        feedback_agent: Any | None = None,
     ) -> SessionResult:
         """Run a complete session with a command source.
 
@@ -240,20 +249,53 @@ class NonInteractiveEngine:
             command_source: Callable that receives previous output and returns
                 the next command. This is typically ``agent.next_command``.
             max_commands: Maximum number of commands to execute.
+            max_elapsed_seconds: Optional hard wall-clock limit in seconds.
+                When exceeded the session stops cleanly with exit_reason
+                ``'timeout'``. Defaults to no limit.
             on_command: Optional callback invoked after each command.
+            feedback_agent: Optional agent instance whose ``request_feedback()``
+                method is called at session end to gather improvement notes.
 
         Returns:
             SessionResult with full session data.
         """
         session = SessionResult()
         last_output = self._get_initial_output()
+        session_start = time.monotonic()
+
+        # Emit live session_start event
+        if _live and feedback_agent is not None:
+            goal = getattr(feedback_agent, "goal", "")
+            max_t = getattr(feedback_agent, "max_turns", max_commands)
+            max_e = getattr(feedback_agent, "max_elapsed_seconds", max_elapsed_seconds or 0)
+            test_name = getattr(feedback_agent, "_test_name", "unknown")
+            _live.session_start(
+                test_name=test_name,
+                goal=goal,
+                max_turns=max_t,
+                max_elapsed=max_e,
+            )
 
         for i in range(max_commands):
+            # Wall-clock guard (separate from agent-internal timeout)
+            if max_elapsed_seconds is not None:
+                elapsed = time.monotonic() - session_start
+                if elapsed >= max_elapsed_seconds:
+                    logger.warning(
+                        "run_session: wall-clock limit hit (%.1fs >= %.1fs)",
+                        elapsed, max_elapsed_seconds,
+                    )
+                    session.exit_reason = "timeout"
+                    break
+
             try:
                 cmd = command_source(last_output)
             except Exception as e:
-                session.exit_reason = f"source_error: {e}"
+                # AgentTimeout / AgentExhausted both land here
+                err_kind = type(e).__name__
+                session.exit_reason = f"source_error:{err_kind}: {e}"
                 session.errors.append(str(e))
+                logger.info("Session ended by source: %s", e)
                 break
 
             if not cmd or cmd.lower() in ("exit", "quit"):
@@ -263,6 +305,17 @@ class NonInteractiveEngine:
             result = self.execute_command(cmd)
             session.commands.append(result)
             session.total_turns = i + 1
+
+            # Emit live command event
+            if _live:
+                _live.command(
+                    turn=i,
+                    cmd=cmd,
+                    output=result.output,
+                    location=result.location,
+                    inventory=result.inventory,
+                    hp=result.hp,
+                )
 
             if result.quest_completed:
                 session.quests_completed.append(result.quest_completed)
@@ -283,11 +336,40 @@ class NonInteractiveEngine:
         session.final_hp = self.state.hp
         session.rooms_visited = list(self._rooms_visited)
 
+        # Emit live session_end event
+        if _live:
+            elapsed_total = time.monotonic() - session_start
+            _live.session_end(
+                exit_reason=session.exit_reason,
+                total_turns=session.total_turns,
+                rooms_visited=session.rooms_visited,
+                final_location=session.final_location,
+                final_inventory=session.final_inventory,
+                final_hp=session.final_hp,
+                elapsed=elapsed_total,
+)
+
         # Collect screenshot paths if capture was active
         if self._screenshot_capture:
             session.screenshot_paths = [
                 str(p) for p in self._screenshot_capture.screenshots
             ]
+
+        # Request AI feedback at session end
+        if feedback_agent is not None and hasattr(feedback_agent, "request_feedback"):
+            try:
+                feedback = feedback_agent.request_feedback(
+                    rooms_visited=session.rooms_visited,
+                    commands_used=getattr(feedback_agent, "commands_used", None),
+                )
+                session.feedback = feedback
+                logger.info(
+                    "Session feedback collected: rating=%s",
+                    feedback.get("rating", "?"),
+                )
+            except Exception as exc:
+                logger.warning("Could not collect agent feedback: %s", exc)
+                session.feedback = {"raw": f"(error: {exc})"}
 
         return session
 

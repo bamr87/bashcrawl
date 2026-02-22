@@ -2159,7 +2159,7 @@ launch_classic_mode() {
 # ----------------------------------------------------------------------------
 
 launch_agent_mode() {
-    local screenshot_dir="${1:-./screenshots}"
+    local screenshot_dir="${1:-./logs/screenshots}"
     log_event "INFO" "Starting Agent mode (Textual TUI)..." "agent"
 
     if _check_tui_available; then
@@ -2531,7 +2531,7 @@ ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
         --batch           Read commands from stdin (one per line)
         --agent           Agent mode: Textual TUI with screenshots (recommended)
         --agent-bash      Agent mode: bash-only REPL (no screenshots, no Python)
-        --screenshot-dir PATH  Screenshot output directory (default: ./screenshots)
+        --screenshot-dir PATH  Screenshot output directory (default: ./logs/screenshots)
     -h, --help            Show this help message
     -v, --version         Show version information
     --debug               Enable debug logging
@@ -2698,7 +2698,7 @@ main() {
             "reset")         reset_game_state; exit 0 ;;
             "single_command") run_single_command "$BASHCRAWL_SINGLE_CMD"; exit $? ;;
             "batch")         run_batch; exit $? ;;
-            "agent")         launch_agent_mode "${BASHCRAWL_SCREENSHOT_DIR:-./screenshots}"; exit $? ;;
+            "agent")         launch_agent_mode "${BASHCRAWL_SCREENSHOT_DIR:-./logs/screenshots}"; exit $? ;;
             "agent_bash")    launch_agent_bash_mode; exit $? ;;
         esac
     else

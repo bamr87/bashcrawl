@@ -58,6 +58,25 @@ if [[ -L "$portal" ]]; then
     $DRY_RUN || rm -f "$portal"
 fi
 
+# Re-hide the study in the library (unlocked by tome)
+study_visible="$ENTRANCE/.chapel/courtyard/aviary/hall/library/study"
+study_hidden="$ENTRANCE/.chapel/courtyard/aviary/hall/library/.study"
+# Remove portal symlinks in either location
+for _sp in "$study_visible/portal" "$study_hidden/portal"; do
+    if [[ -L "$_sp" ]]; then
+        log "Removing study portal symlink"
+        $DRY_RUN || rm -f "$_sp"
+    fi
+done
+if [[ -d "$study_visible" && ! -d "$study_hidden" ]]; then
+    log "Re-hiding: library/study → library/.study"
+    $DRY_RUN || mv "$study_visible" "$study_hidden"
+elif [[ -d "$study_visible" && -d "$study_hidden" ]]; then
+    # Both exist (dev artifact) — remove the unlocked copy
+    log "Removing duplicate visible study (hidden copy exists)"
+    $DRY_RUN || rm -rf "$study_visible"
+fi
+
 # 3. Restore statue (remove .statue_defeated flag)
 statue_flag="$ENTRANCE/cellar/armoury/chamber/.statue_defeated"
 if [[ -f "$statue_flag" ]]; then

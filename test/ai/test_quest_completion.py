@@ -6,7 +6,7 @@ Tests that the AI agent can complete each quest in the quest system.
 import logging
 import pytest
 
-from ai.agent import TestAgent, AgentExhausted
+from ai.agent import TestAgent, AgentExhausted, AgentTimeout
 from ai.session_runner import NonInteractiveEngine
 from ai.scenarios import SCENARIO_NEW_PLAYER
 from fixtures.log_capture import TestLogCapture
@@ -46,9 +46,11 @@ class TestQuestCompletion:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=scenario.max_turns,
+                max_elapsed_seconds=90,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None
@@ -85,9 +87,11 @@ class TestQuestCompletion:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=15,
+                max_elapsed_seconds=90,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             pass
 
         assert len(scroll_reads) >= 1, \

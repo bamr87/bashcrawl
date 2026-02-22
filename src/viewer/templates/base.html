@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bashcrawl Observatory{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{{ url_for('pages.index') }}">⚔️ Bashcrawl Observatory</a>
+        </div>
+        <div class="navbar-links">
+            <a href="{{ url_for('pages.sessions_list') }}" class="{% if request.path.startswith('/sessions') %}active{% endif %}">
+                📜 Sessions
+            </a>
+            <a href="{{ url_for('pages.screenshots_index') }}" class="{% if request.path.startswith('/screenshots') %}active{% endif %}">
+                📸 Screenshots
+            </a>
+            <a href="{{ url_for('pages.analytics_dashboard') }}" class="{% if request.path == '/analytics' %}active{% endif %}">
+                📊 Analytics
+            </a>
+            <a href="{{ url_for('pages.feedback_list') }}" class="{% if request.path.startswith('/feedback') %}active{% endif %}">
+                📋 Feedback
+            </a>
+            <a href="{{ url_for('pages.dungeon_map') }}" class="{% if request.path == '/map' %}active{% endif %}">
+                🗺️ Map
+            </a>
+            <a href="{{ url_for('pages.live_monitor') }}" class="{% if request.path == '/live' %}active{% endif %}">
+                🔴 Live
+            </a>
+            <a href="{{ url_for('pages.live_agent') }}" class="{% if request.path == '/live/agent' %}active{% endif %}">
+                🤖 Agent
+            </a>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <span>Bashcrawl Observatory — {{ session_count }} sessions, {{ screenshot_session_count }} screenshot sets</span>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

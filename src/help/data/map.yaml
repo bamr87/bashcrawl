@@ -22,6 +22,10 @@ map_display: |
   │
   ├── [chapel/]           ← Hidden! Unlocked by treasures
   │   └── courtyard/aviary/hall/
+  │       └── library/
+  │           ├── tome*    ← Random spells + unlocks study
+  │           └── [study/] ← Hidden! Shell functions & bc command
+  │               └── grimoire* → portal to Scriptorium
   │
   ├── [vault/]            ← Hidden! Learn file copying
   │   └── stronghold/nursery/lab/

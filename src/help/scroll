@@ -1,0 +1,77 @@
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    📜 THE SCRIPTORIUM 📜                                    │
+│                  Source of the Help System                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+You step through the shimmering portal and find yourself
+in a vast, luminous chamber.  This is the SCRIPTORIUM —
+the very place where the help system's spells are forged.
+
+Around you, glowing scrolls and data tablets line the walls.
+Each one contains structured knowledge that powers the
+Bashcrawl help system.
+
+────────────────────────────────────────────────────────────────────────────────
+⚡ EXPLORING THE SCRIPTORIUM
+────────────────────────────────────────────────────────────────────────────────
+
+Use 'ls' to see the contents of this chamber:
+
+    ls
+
+You will find shell scripts (.sh) and a data/ directory
+containing YAML knowledge tablets.
+
+To read the structured data:
+
+    cat data/commands.yaml      Command reference data
+    cat data/map.yaml           The dungeon map data
+    cat data/quests.yaml        Quest definitions
+    cat data/rooms.yaml         Room descriptions
+
+To read the help engine itself:
+
+    cat bashcrawl_help.sh       The main help engine
+    cat command_suggester.sh    Context-aware suggestions
+    cat ai_engine.sh            Player pattern analysis
+
+────────────────────────────────────────────────────────────────────────────────
+⚡ ACTIVATING THE HELP SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+To permanently activate the help system in your current
+terminal session, source the initialization script using
+the full path (since you arrived here through a portal):
+
+    source $BASHCRAWL_ROOT/src/help/init_help.sh
+
+If BASHCRAWL_ROOT is not set, find your game root first:
+
+    BASHCRAWL_ROOT=$(cd -P "$(dirname "$(readlink portal)")"/../.. && pwd)
+    source $BASHCRAWL_ROOT/src/help/init_help.sh
+
+This will:
+  - Define the 'help' command as a shell function
+  - Export BASHCRAWL_ROOT so spells know where home is
+  - Enable context-aware help from any room
+
+After sourcing, try these from any room in the dungeon:
+
+    help                     Location-aware guidance
+    help commands            Full command reference
+    help map                 The dungeon map
+
+────────────────────────────────────────────────────────────────────────────────
+                           NAVIGATION
+────────────────────────────────────────────────────────────────────────────────
+
+This chamber exists outside the dungeon's physical layout.
+To return to the study, go back through the portal:
+
+    cd -
+
+Or navigate directly:
+
+    cd $BASHCRAWL_ROOT/entrance
+

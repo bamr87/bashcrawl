@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Feedback Reports — Bashcrawl Observatory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📋 Feedback Reports</h1>
+    <p class="subtitle">{{ reports | length }} reports</p>
+</div>
+
+<div class="session-list">
+    {% for r in reports %}
+    <a href="{{ url_for('pages.feedback_detail', sid=r.session_sid) }}" class="session-card">
+        <div class="session-card-header">
+            <span class="sid">{{ r.session_sid }}</span>
+            <span class="badge badge-{{ r.mode or 'unknown' }}">{{ r.mode or 'unknown' }}</span>
+            <span class="date">{{ r.file_date }}</span>
+            {% if r.duration %}<span class="duration">⏱️ {{ r.duration }}</span>{% endif %}
+        </div>
+        <div class="session-card-stats">
+            {% for label, value in r.metrics.items() %}
+            <span>{{ label }}: {{ value }}</span>
+            {% endfor %}
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <p>No feedback reports found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

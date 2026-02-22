@@ -15,6 +15,8 @@ capture after every command.
 # With a custom screenshot directory
 ./main.sh --agent --screenshot-dir /tmp/shots
 
+# Screenshots default to logs/screenshots/<timestamp>_agent_session/
+
 # Bash-only agent REPL (no Python required, no screenshots)
 ./main.sh --agent-bash
 ```
@@ -24,7 +26,7 @@ Or invoke the Python module directly:
 ```bash
 PYTHONPATH=src/terminal-illness python3 -m ti.agent \
     --game-root /path/to/bashcrawl \
-    --screenshot-dir ./screenshots
+    --screenshot-dir ./logs/screenshots
 ```
 
 ---
@@ -110,14 +112,14 @@ CMD> <original_input>
 |------|-------------|
 | `--agent` | Launch Textual TUI agent mode (falls back to bash REPL if Python/Textual unavailable) |
 | `--agent-bash` | Launch bash-only agent REPL (no Python, no screenshots) |
-| `--screenshot-dir PATH` | Directory for SVG screenshot output (default: `./screenshots`) |
+| `--screenshot-dir PATH` | Base directory for SVG screenshot output (default: `./logs/screenshots`) |
 
 ### `python3 -m ti.agent` Flags
 
 | Flag | Description |
 |------|-------------|
 | `--game-root PATH` | Path to the bashcrawl repository root |
-| `--screenshot-dir PATH` | Directory for SVG screenshot output (default: `./screenshots`) |
+| `--screenshot-dir PATH` | Base directory for SVG screenshot output (default: `./logs/screenshots`) |
 | `--no-auto-screenshot` | Disable automatic screenshots after each command |
 
 ---
@@ -127,6 +129,49 @@ CMD> <original_input>
 Screenshots are saved as SVG files using Textual's `App.save_screenshot()` method.
 Each SVG is a complete rendering of the TUI at that moment, including the sidebar
 (quests, inventory, room info) and the main terminal output area.
+
+### Session Directory Structure
+
+Each agent session creates a timestamped subdirectory under the screenshot dir:
+
+```text
+logs/screenshots/
+└── 2026-02-21_155703_agent_session/
+    ├── 000_initial.svg
+    ├── 001_pwd.svg
+    ├── 002_ls.svg
+    ├── 003_cd_entrance.svg
+    ├── entrance_scroll.svg          # explicit SCREENSHOT
+    ├── ...
+    └── manifest.json                # structured index
+```
+
+This format is compatible with the Bashcrawl Observatory viewer
+(`python3 -m src.viewer`), which discovers screenshot sessions by scanning
+subdirectories under `logs/screenshots/`.
+
+### Manifest
+
+A `manifest.json` is generated at the end of each session:
+
+```json
+{
+  "generated_at": "2026-02-21T15:57:06",
+  "screenshot_dir": "logs/screenshots/2026-02-21_155703_agent_session",
+  "total_screenshots": 26,
+  "total_size_bytes": 1922923,
+  "screenshots": [
+    {
+      "name": "001_pwd.svg",
+      "trigger": "agent_auto",
+      "command": "pwd",
+      "room": "/entrance",
+      "ts": "2026-02-21T15:57:03",
+      "size_bytes": 71751
+    }
+  ]
+}
+```
 
 ### Auto-Screenshots
 
@@ -191,7 +236,7 @@ printf '%s\n' \
   'export HP=15'            \
   'STATUS'                  \
   'EXIT'                    \
-| ./main.sh --agent --screenshot-dir ./playthrough_screenshots 2>/dev/null
+| ./main.sh --agent --screenshot-dir ./logs/screenshots 2>/dev/null
 ```
 
 ---

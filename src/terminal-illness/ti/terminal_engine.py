@@ -424,13 +424,13 @@ class TerminalEngine:
         if "=" not in assignment:
             raise ValueError("Usage: export VAR=value")
         key, value = assignment.split("=", 1)
-        self.state.set_env(key.strip(), value.strip())
-        return "success", "export", f"Exported {key.strip()}={value.strip()}"
+        # Expand known shell variables in the value
+        value = self._expand_vars(value.strip())
+        self.state.set_env(key.strip(), value)
+        return "success", "export", f"Exported {key.strip()}={value}"
 
-    def _cmd_echo(self, args: List[str]) -> Tuple[str, str, str]:
-        """Echo text, expanding $VAR references."""
-        text = " ".join(args)
-        # Expand known variables
+    def _expand_vars(self, text: str) -> str:
+        """Expand $VAR references in *text* using game state."""
         replacements = {
             "$I": self.state.inventory,
             "$HP": str(self.state.hp),
@@ -441,6 +441,12 @@ class TerminalEngine:
         # Expand custom env vars
         for key, val in self.state.env_vars.items():
             text = text.replace(f"${key}", val)
+        return text
+
+    def _cmd_echo(self, args: List[str]) -> Tuple[str, str, str]:
+        """Echo text, expanding $VAR references."""
+        text = " ".join(args)
+        text = self._expand_vars(text)
         return "output", "echo", text
 
     def _cmd_save(self, args: List[str]) -> Tuple[str, str, str]:

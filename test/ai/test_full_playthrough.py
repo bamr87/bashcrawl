@@ -8,7 +8,7 @@ import logging
 import pytest
 from pathlib import Path
 
-from ai.agent import TestAgent, AgentExhausted
+from ai.agent import TestAgent, AgentExhausted, AgentTimeout
 from ai.session_runner import NonInteractiveEngine
 from ai.scenarios import SCENARIO_FULL_PLAYTHROUGH, SCENARIO_CRITICAL_PATH
 from fixtures.log_capture import TestLogCapture
@@ -55,9 +55,11 @@ class TestFullPlaythrough:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=scenario.max_turns,
+                max_elapsed_seconds=240,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         # Assertions
@@ -104,9 +106,11 @@ class TestCriticalPath:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=scenario.max_turns,
+                max_elapsed_seconds=150,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None

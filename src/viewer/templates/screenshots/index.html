@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Screenshots — Bashcrawl Observatory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📸 Screenshot Gallery</h1>
+    <p class="subtitle">{{ total }} screenshot sessions</p>
+</div>
+
+<div class="filter-bar">
+    <form method="get" action="{{ url_for('pages.screenshots_index') }}" class="filter-form">
+        <div class="filter-group">
+            <label for="test_name">Search</label>
+            <input type="text" name="test_name" id="test_name" value="{{ search }}"
+                   placeholder="Filter by test name..." onchange="this.form.submit()">
+        </div>
+        <div class="filter-group">
+            <label for="sort">Sort By</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="date" {% if request.args.get('sort', 'date') == 'date' %}selected{% endif %}>Date</option>
+                <option value="count" {% if request.args.get('sort') == 'count' %}selected{% endif %}>Screenshots</option>
+                <option value="size" {% if request.args.get('sort') == 'size' %}selected{% endif %}>Size</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="screenshot-grid">
+    {% for s in sessions %}
+    <a href="{{ url_for('pages.screenshot_gallery', dir_name=s.dir_name) }}" class="screenshot-card">
+        <div class="screenshot-card-preview">
+            {% if s.screenshots %}
+            <img src="{{ url_for('serve_screenshot', filepath=s.dir_name + '/' + s.screenshots[0].name) }}"
+                 alt="{{ s.screenshots[0].name }}" loading="lazy">
+            {% else %}
+            <div class="no-preview">No Preview</div>
+            {% endif %}
+        </div>
+        <div class="screenshot-card-info">
+            <div class="screenshot-card-name">{{ s.test_name }}</div>
+            <div class="screenshot-card-meta">
+                <span>📸 {{ s.total_screenshots }}</span>
+                <span>💾 {{ (s.total_size_bytes / 1024) | round | int }}KB</span>
+                <span>📅 {{ s.timestamp[:10] if s.timestamp else '' }}</span>
+            </div>
+            {% if s.linked_session_sids %}
+            <div class="screenshot-card-links">
+                🔗 {{ s.linked_session_sids | length }} linked session(s)
+            </div>
+            {% endif %}
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <p>No screenshot sessions found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="?page={{ page - 1 }}&test_name={{ search }}&sort={{ request.args.get('sort', 'date') }}" class="btn btn-secondary">◀ Prev</a>
+    {% endif %}
+    <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="?page={{ page + 1 }}&test_name={{ search }}&sort={{ request.args.get('sort', 'date') }}" class="btn btn-secondary">Next ▶</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

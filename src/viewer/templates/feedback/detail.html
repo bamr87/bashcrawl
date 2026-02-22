@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Feedback {{ report.session_sid }} — Bashcrawl Observatory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{{ url_for('pages.feedback_list') }}" class="back-link">← Back to Feedback</a>
+    <h1>📋 Feedback Report</h1>
+    <div class="session-meta">
+        <span class="sid">{{ report.session_sid }}</span>
+        <span>📅 {{ report.file_date }}</span>
+        {% if report.mode %}<span class="badge badge-{{ report.mode }}">{{ report.mode }}</span>{% endif %}
+        {% if report.duration %}<span>⏱️ {{ report.duration }}</span>{% endif %}
+        <a href="{{ url_for('pages.session_detail', sid=report.session_sid) }}" class="btn btn-secondary btn-sm">
+            View Session →
+        </a>
+    </div>
+</div>
+
+{% if report.metrics %}
+<div class="detail-stats">
+    {% for label, value in report.metrics.items() %}
+    <div class="stat-card">
+        <div class="stat-value">{{ value }}</div>
+        <div class="stat-label">{{ label }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="detail-section">
+    <h2>📝 Full Report</h2>
+    <div class="markdown-body">
+        <pre class="report-content">{{ report.content_md }}</pre>
+    </div>
+</div>
+{% endblock %}

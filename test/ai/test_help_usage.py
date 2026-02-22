@@ -7,7 +7,7 @@ context-appropriate responses.
 import logging
 import pytest
 
-from ai.agent import TestAgent, AgentExhausted
+from ai.agent import TestAgent, AgentExhausted, AgentTimeout
 from ai.session_runner import NonInteractiveEngine
 from ai.scenarios import SCENARIO_STUCK_PLAYER
 from fixtures.log_capture import TestLogCapture
@@ -46,9 +46,11 @@ class TestHelpUsage:
             session = engine.run_session(
                 ai_agent.next_command,
                 max_commands=scenario.max_turns,
+                max_elapsed_seconds=90,
                 on_command=on_command,
+                feedback_agent=ai_agent,
             )
-        except AgentExhausted:
+        except (AgentExhausted, AgentTimeout):
             session = None
 
         assert session is not None
@@ -72,7 +74,9 @@ class TestHelpUsage:
         session = engine.run_session(
             ai_agent.next_command,
             max_commands=5,
+            max_elapsed_seconds=60,
             on_command=on_command,
+            feedback_agent=ai_agent,
         )
 
         # Find the help command result

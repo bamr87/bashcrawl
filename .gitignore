@@ -66,3 +66,4 @@ __pycache__
 test/reports/
 test/.pytest_cache/
 .pytest_cache/
+.env

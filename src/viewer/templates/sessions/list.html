@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Sessions — Bashcrawl Observatory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📜 Session Log Browser</h1>
+    <p class="subtitle">{{ total }} sessions found</p>
+</div>
+
+<div class="filter-bar">
+    <form method="get" action="{{ url_for('pages.sessions_list') }}" class="filter-form">
+        <div class="filter-group">
+            <label for="mode">Mode</label>
+            <select name="mode" id="mode" onchange="this.form.submit()">
+                <option value="">All Modes</option>
+                {% for m in modes %}
+                <option value="{{ m }}" {% if current_mode == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="sort">Sort By</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Date</option>
+                <option value="events" {% if sort_by == 'events' %}selected{% endif %}>Events</option>
+                <option value="duration" {% if sort_by == 'duration' %}selected{% endif %}>Duration</option>
+                <option value="rooms" {% if sort_by == 'rooms' %}selected{% endif %}>Rooms</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="order">Order</label>
+            <select name="order" id="order" onchange="this.form.submit()">
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Newest</option>
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Oldest</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>
+                <input type="checkbox" name="has_screenshots" value="true"
+                       {% if request.args.get('has_screenshots') == 'true' %}checked{% endif %}
+                       onchange="this.form.submit()">
+                Has Screenshots
+            </label>
+        </div>
+    </form>
+</div>
+
+<div class="session-list">
+    {% for s in sessions %}
+    <a href="{{ url_for('pages.session_detail', sid=s.sid) }}" class="session-card">
+        <div class="session-card-header">
+            <span class="sid {% if s.is_test %}test-sid{% endif %}">{{ s.sid }}</span>
+            <span class="badge badge-{{ s.mode or 'unknown' }}">{{ s.mode or 'unknown' }}</span>
+            <span class="date">{{ s.file_date }} {{ s.start_time[11:19] if s.start_time|length > 11 else '' }}</span>
+            {% if s.duration_sec is not none %}
+            <span class="duration">⏱️ {{ s.duration_sec }}s</span>
+            {% endif %}
+        </div>
+        <div class="session-card-stats">
+            <span title="Rooms visited">🏰 {{ s.rooms_count }} rooms</span>
+            <span title="Encounters">⚔️ {{ s.encounters_count }} encounters</span>
+            <span title="Deaths" {% if s.deaths_count > 0 %}class="danger"{% endif %}>💀 {{ s.deaths_count }} deaths</span>
+            <span title="Screenshots">📸 {{ s.screenshots_count }}</span>
+            <span title="Events">📝 {{ s.event_count }} events</span>
+        </div>
+        {% if s.items_collected %}
+        <div class="session-card-items">
+            💰 {% for item in s.items_collected %}<span class="badge badge-item">{{ item }}</span>{% endfor %}
+        </div>
+        {% endif %}
+        {% if s.rooms_visited %}
+        <div class="session-card-rooms">
+            🗺️ {{ s.rooms_visited | join(' → ') }}
+        </div>
+        {% endif %}
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <p>No sessions match your filters.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="?page={{ page - 1 }}&mode={{ current_mode or '' }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-secondary">◀ Prev</a>
+    {% endif %}
+    <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="?page={{ page + 1 }}&mode={{ current_mode or '' }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-secondary">Next ▶</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

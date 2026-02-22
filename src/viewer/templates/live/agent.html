@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}AI Agent Live — Bashcrawl Observatory{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+<style>
+  .agent-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .agent-grid { grid-template-columns: 1fr; } }
+
+  /* Terminal pane */
+  .terminal-pane {
+    background: #0d0d0d;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .terminal-dots span {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+  }
+  .terminal-dots .dot-red    { background: #ff5f57; }
+  .terminal-dots .dot-yellow { background: #febc2e; }
+  .terminal-dots .dot-green  { background: #28c840; }
+  .terminal-title { flex: 1; text-align: center; }
+  .terminal-body {
+    height: 540px;
+    overflow-y: auto;
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    scroll-behavior: smooth;
+  }
+  .terminal-body::-webkit-scrollbar { width: 5px; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+  /* Terminal rows */
+  .t-row { margin-bottom: 0.35rem; }
+  .t-prompt { color: #4ec9b0; }         /* teal — location */
+  .t-cmd    { color: #dcdcaa; }         /* yellow — command */
+  .t-output { color: #9cdcfe; white-space: pre-wrap; padding-left: 1.25rem; }
+  .t-meta   { color: #6a9955; font-style: italic; }   /* green — meta events */
+  .t-api    { color: #c586c0; }         /* purple — API calls */
+  .t-rl     { color: #ce9178; }         /* orange — rate limit */
+  .t-end    { color: #f44747; font-weight: bold; }
+  .t-fb     { color: #9cdcfe; border-left: 3px solid #c586c0; padding-left: 0.5rem; margin-left: 0.25rem; }
+  .t-cursor { display: inline-block; width: 8px; height: 14px; background: #dcdcaa; animation: blink 1s step-end infinite; vertical-align: middle; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Side panel */
+  .side-panel { display: flex; flex-direction: column; gap: 1rem; }
+
+  .info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+  .info-card h3 {
+    font-size: 0.85rem;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+  }
+  .info-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; }
+  .info-label { color: var(--text-muted); }
+  .info-value { font-family: var(--font-mono); color: var(--text-primary); }
+  .info-value.active { color: #28c840; }
+  .info-value.idle   { color: var(--text-muted); }
+
+  /* HP bar */
+  .hp-bar-track { flex: 1; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .hp-bar-fill  { height: 100%; background: #f44747; border-radius: 4px; transition: width 0.3s; }
+
+  /* Room list */
+  .room-list { max-height: 160px; overflow-y: auto; font-size: 0.8rem; }
+  .room-pill {
+    display: inline-block;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    margin: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .room-pill.current { border-color: var(--accent-gold); color: var(--accent-gold); }
+
+  /* Token counter */
+  .token-row { display: flex; gap: 1rem; font-size: 0.8rem; }
+  .token-stat { text-align: center; flex: 1; }
+  .token-stat .val { font-family: var(--font-mono); font-size: 1rem; color: #c586c0; }
+  .token-stat .lbl { color: var(--text-muted); font-size: 0.72rem; margin-top: 2px; }
+
+  /* Status bar */
+  .agent-status-bar {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+  .status-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .status-indicator.active   { background: #28c840; box-shadow: 0 0 6px #28c84088; animation: pulse 2s ease-in-out infinite; }
+  .status-indicator.idle     { background: #555; }
+  .status-indicator.waiting  { background: #febc2e; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Feedback card */
+  .feedback-card {
+    background: var(--bg-card);
+    border: 1px solid #c586c033;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: none;
+  }
+  .feedback-card.visible { display: block; }
+  .feedback-card h3 { color: #c586c0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+  .feedback-section { margin-bottom: 0.6rem; font-size: 0.82rem; }
+  .feedback-section strong { color: var(--text-secondary); display: block; margin-bottom: 0.2rem; }
+  .rating-badge {
+    display: inline-block;
+    background: #c586c0;
+    color: #000;
+    font-weight: bold;
+    border-radius: var(--radius-sm);
+    padding: 0.1rem 0.5rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>🤖 AI Agent Live View</h1>
+  <p class="subtitle">Real-time terminal stream from the running test agent</p>
+</div>
+
+<!-- Status bar -->
+<div class="agent-status-bar">
+  <span class="status-indicator idle" id="agent-indicator"></span>
+  <span id="agent-status-text">Connecting…</span>
+  <span style="flex:1"></span>
+  <span class="badge" id="turn-badge">Turn 0</span>
+  <button class="btn btn-sm" onclick="scrollToBottom()">↓ Bottom</button>
+  <button class="btn btn-sm" id="auto-scroll-btn" onclick="toggleAutoScroll()">Auto-scroll: ON</button>
+</div>
+
+<div class="agent-grid">
+  <!-- Terminal pane -->
+  <div>
+    <div class="terminal-pane">
+      <div class="terminal-header">
+        <span class="terminal-dots">
+          <span class="dot-red"></span>
+          <span class="dot-yellow"></span>
+          <span class="dot-green"></span>
+        </span>
+        <span class="terminal-title" id="terminal-title">bash — AI Agent Session</span>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+        <div class="t-row t-meta">Waiting for agent session… start a pytest -m ai run to see live output here.</div>
+        <div class="t-row"><span class="t-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div class="side-panel">
+
+    <!-- Session info -->
+    <div class="info-card">
+      <h3>⚙️ Session</h3>
+      <div class="info-row"><span class="info-label">Status</span><span class="info-value idle" id="s-active">Idle</span></div>
+      <div class="info-row"><span class="info-label">Test</span><span class="info-value" id="s-test">—</span></div>
+      <div class="info-row"><span class="info-label">Turn</span><span class="info-value" id="s-turn">0 / —</span></div>
+      <div class="info-row"><span class="info-label">Elapsed</span><span class="info-value" id="s-elapsed">0s</span></div>
+      <div class="info-row"><span class="info-label">Exit</span><span class="info-value" id="s-exit">—</span></div>
+    </div>
+
+    <!-- Game state -->
+    <div class="info-card">
+      <h3>🎮 Game State</h3>
+      <div class="info-row"><span class="info-label">Location</span><span class="info-value" id="g-location">—</span></div>
+      <div class="info-row"><span class="info-label">Inventory</span><span class="info-value" id="g-inventory">empty</span></div>
+      <div class="info-row">
+        <span class="info-label">HP</span>
+        <span class="info-value" id="g-hp">—</span>
+      </div>
+      <div class="hp-bar-track"><div class="hp-bar-fill" id="g-hp-bar" style="width:0%"></div></div>
+    </div>
+
+    <!-- Rooms visited -->
+    <div class="info-card">
+      <h3>🏰 Rooms Visited</h3>
+      <div class="room-list" id="g-rooms"><span class="info-label" style="font-size:0.8rem">None yet</span></div>
+    </div>
+
+    <!-- API usage -->
+    <div class="info-card">
+      <h3>💜 API Usage</h3>
+      <div class="token-row">
+        <div class="token-stat"><div class="val" id="tok-calls">0</div><div class="lbl">API Calls</div></div>
+        <div class="token-stat"><div class="val" id="tok-in">0</div><div class="lbl">Tokens In</div></div>
+        <div class="token-stat"><div class="val" id="tok-out">0</div><div class="lbl">Tokens Out</div></div>
+      </div>
+    </div>
+
+    <!-- Feedback card (hidden until session ends) -->
+    <div class="feedback-card" id="feedback-card">
+      <h3>📋 Agent Feedback</h3>
+      <div class="feedback-section">
+        <strong>Rating</strong>
+        <span class="rating-badge" id="fb-rating">—/10</span>
+      </div>
+      <div class="feedback-section">
+        <strong>Issues</strong>
+        <div id="fb-issues" style="color:var(--text-secondary)">—</div>
+      </div>
+      <div class="feedback-section">
+        <strong>Suggestions</strong>
+        <div id="fb-suggestions" style="color:var(--text-secondary)">—</div>
+      </div>
+    </div>
+
+  </div><!-- /side-panel -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/agent_live.js') }}"></script>
+{% endblock %}

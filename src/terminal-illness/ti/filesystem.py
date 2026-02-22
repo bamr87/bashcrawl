@@ -49,8 +49,13 @@ class GameFileSystem:
         return resolved
 
     def relpath(self, abspath: Path | str) -> str:
-        """Return a game-relative path string like ``entrance/cellar``."""
-        return str(Path(abspath).relative_to(self.root))
+        """Return a game-relative path string like ``entrance/cellar``.
+
+        Returns an empty string for the root directory itself rather than
+        ``'.'`` so that callers can compose ``'/' + relpath`` consistently.
+        """
+        rel = str(Path(abspath).relative_to(self.root))
+        return "" if rel == "." else rel
 
     def abspath(self, cwd: str, path: str = "") -> str:
         """Return the absolute game-relative path."""
