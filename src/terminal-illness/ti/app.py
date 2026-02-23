@@ -33,12 +33,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from textual import on
+from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Rule, Static
+
+from .chat_panel import CHAT_PANEL_CSS, ChatPanel
+from .ai_chat import AIChatService
+from .chat_context import GameContextBuilder
 
 if TYPE_CHECKING:
     from .game_state import GameState
@@ -228,6 +232,9 @@ LoadScreen {
     text-align: center;
 }
 """
+
+# Append chat panel CSS
+_CSS = _CSS.rstrip() + "\n" + CHAT_PANEL_CSS
 
 
 # ---------------------------------------------------------------------------
@@ -452,6 +459,7 @@ class BashcrawlApp(App):
         Binding("ctrl+s", "save_game", "Save", show=True),
         Binding("f1", "show_help", "Help", show=True),
         Binding("f2", "show_map", "Map", show=True),
+        Binding("f3", "toggle_chat", "AI Chat", show=True),
         Binding("ctrl+l", "clear_log", "Clear", show=True),
         # Tab is handled in on_key so it doesn't bubble to focus-next
     ]
@@ -464,6 +472,9 @@ class BashcrawlApp(App):
         self._engine: Optional[object] = None  # TerminalEngine, set in on_mount
         self._cmd_history: List[str] = []
         self._history_idx: int = -1
+        self._chat_svc = AIChatService()
+        self._context_builder = GameContextBuilder()
+        self._prev_cwd: str = ""  # for room-change detection
 
     # ------------------------------------------------------------------
     # Compose
@@ -485,12 +496,13 @@ class BashcrawlApp(App):
                     markup=True,
                     wrap=True,
                 )
+            yield ChatPanel(id="chat-panel")
         with Horizontal(id="input-row"):
             yield Label(
                 f"[bold cyan]{self.game_state.current_location or '/entrance'}[/bold cyan] $",
                 id="prompt-label",
             )
-            yield Input(placeholder="Enter command…  (Tab=complete  ↑↓=history)", id="command-input")
+            yield Input(placeholder="Enter command…  (Tab=complete  ↑↓=history  F3=AI Chat)", id="command-input")
         yield Footer()
 
     # ------------------------------------------------------------------
@@ -574,7 +586,7 @@ class BashcrawlApp(App):
         log.write("[cyan]  ▸ [bold]ls[/bold]           — look around you[/cyan]")
         log.write("[cyan]  ▸ [bold]help[/bold]         — show all commands[/cyan]")
         log.write("[cyan]  ▸ [bold]merlin[/bold]       — ask Merlin for a hint[/cyan]")
-        log.write("[dim]  ▸ Tab=complete  ↑↓=history  F1=Help  F2=Map  Ctrl+S=Save[/dim]")
+        log.write("[dim]  ▸ Tab=complete  ↑↓=history  F1=Help  F2=Map  F3=AI Chat  Ctrl+S=Save[/dim]")
         log.write("")
 
     # ------------------------------------------------------------------
@@ -608,9 +620,48 @@ class BashcrawlApp(App):
         self._refresh_sidebar()
         self._update_subtitle()
 
+        # Proactive AI: check for stuck pattern after each command
+        if GameContextBuilder.detect_stuck(self._cmd_history):
+            nudge = self._chat_svc.nudge("stuck")
+            if nudge:
+                try:
+                    self.query_one("#chat-panel", ChatPanel).append_nudge(nudge)
+                except Exception:
+                    pass
+
+        # Intercept 'merlin' as a shorthand to open chat
+        if cmd.lower().startswith("merlin"):
+            question = cmd[6:].strip()
+            self.action_toggle_chat(open_only=True)
+            if question:
+                self._send_to_merlin(question)
+
+    @on(Input.Submitted, "#chat-input")
+    def _on_chat_submitted(self, event: Input.Submitted) -> None:
+        question = event.value.strip()
+        chat_input = self.query_one("#chat-input", Input)
+        chat_input.clear()
+        if not question:
+            return
+        self._send_to_merlin(question)
+        # Return focus to game input after sending
+        self.set_timer(0.05, lambda: self.query_one("#command-input", Input).focus())
+
     def on_key(self, event) -> None:
         """Handle Tab (completion) and Up/Down (history) on the command input."""
         inp = self.query_one("#command-input", Input)
+
+        # Allow Escape in chat input to return focus to game
+        if event.key == "escape":
+            try:
+                chat_inp = self.query_one("#chat-input", Input)
+                if chat_inp.has_focus:
+                    event.prevent_default()
+                    self.query_one("#command-input", Input).focus()
+                    return
+            except Exception:
+                pass
+
         if not inp.has_focus:
             return
 
@@ -736,6 +787,25 @@ class BashcrawlApp(App):
             f"[bold cyan]{cwd}[/bold cyan] $"
         )
 
+        # Proactive AI: nudge on room change
+        if cwd != self._prev_cwd:
+            self._prev_cwd = cwd
+            nudge = self._chat_svc.nudge("new_room")
+            if nudge:
+                try:
+                    self.query_one("#chat-panel", ChatPanel).append_nudge(nudge)
+                except Exception:
+                    pass
+
+        # Proactive AI: nudge on low health
+        if self.game_state.hp > 0 and self.game_state.hp < 20:
+            nudge = self._chat_svc.nudge("low_health")
+            if nudge:
+                try:
+                    self.query_one("#chat-panel", ChatPanel).append_nudge(nudge)
+                except Exception:
+                    pass
+
     def _update_subtitle(self) -> None:
         name = self.game_state.player_name or "Anonymous"
         hp = self.game_state.hp
@@ -753,10 +823,90 @@ class BashcrawlApp(App):
             severity="information",
             timeout=5,
         )
+        nudge = self._chat_svc.nudge("quest_complete")
+        if nudge:
+            try:
+                self.query_one("#chat-panel", ChatPanel).append_nudge(nudge)
+            except Exception:
+                pass
 
     # ------------------------------------------------------------------
     # Bound actions
     # ------------------------------------------------------------------
+
+    def action_toggle_chat(self, open_only: bool = False) -> None:
+        """Toggle the AI chat panel (F3).  If open_only=True, only opens it."""
+        try:
+            panel = self.query_one("#chat-panel", ChatPanel)
+            currently_visible = panel.display
+            if open_only and currently_visible:
+                panel.focus_input()
+                return
+            if open_only or not currently_visible:
+                panel.display = True
+                panel.focus_input()
+            else:
+                panel.display = False
+                self.query_one("#command-input", Input).focus()
+        except Exception:
+            pass
+
+    @work(thread=True, exit_on_error=False)
+    def _send_to_merlin(self, question: str) -> None:
+        """Worker: stream a player question to Merlin and display the response.
+
+        exit_on_error=False ensures that any exception in this worker is
+        silently absorbed (and shown in the chat panel) rather than closing
+        the entire Textual application.
+        """
+        import asyncio
+        import traceback
+
+        try:
+            context = self._context_builder.build(
+                self.game_state, self.fs, self._cmd_history
+            )
+        except Exception as exc:
+            self.log.error(f"[Merlin] Context build failed: {exc}")
+            return
+
+        try:
+            panel = self.query_one("#chat-panel", ChatPanel)
+        except Exception:
+            return
+
+        try:
+            self.call_from_thread(panel.append_user, question)
+            self.call_from_thread(panel.begin_ai_stream)
+
+            if not self._chat_svc.is_available():
+                # Synchronous fallback (no streaming)
+                response = self._chat_svc._fallback_response(question, context)
+                self.call_from_thread(panel.end_ai_stream)
+                self.call_from_thread(panel.append_ai, response)
+                return
+
+            # Streaming via async — run in a fresh event loop on this thread
+            async def _stream() -> None:
+                async for token in self._chat_svc.ask_streaming(question, context):
+                    self.call_from_thread(panel.stream_token, token)
+
+            asyncio.run(_stream())
+            self.call_from_thread(panel.end_ai_stream)
+
+        except Exception as exc:
+            # Show the error in the chat panel instead of crashing
+            tb = traceback.format_exc(limit=3)
+            self.log.error(f"[Merlin] Worker error:\n{tb}")
+            try:
+                self.call_from_thread(panel.end_ai_stream)
+                self.call_from_thread(
+                    panel.append_ai,
+                    f"[red]Merlin's spell misfired: {exc}[/red]\n"
+                    "[dim]Check ANTHROPIC_API_KEY or try again.[/dim]",
+                )
+            except Exception:
+                pass
 
     def action_quit_game(self) -> None:
         self.game_state.save()

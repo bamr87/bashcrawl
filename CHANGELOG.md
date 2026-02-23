@@ -8,6 +8,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Merlin AI Chat Guide** (`src/terminal-illness/ti/`)
+  - `ai_chat.py`: `AIChatService` — wraps Anthropic Claude (`claude-sonnet-4-20250514`)
+    with async streaming, rolling 20-turn conversation history, proactive nudge
+    strings, and static fallback when `ANTHROPIC_API_KEY` is absent
+  - `chat_context.py`: `GameContextBuilder` — assembles game context snapshots
+    (room, inventory, HP, quest, recent commands, scroll excerpt) for prompt
+    injection; `detect_stuck()` identifies repetitive command patterns (threshold: 3)
+  - `chat_panel.py`: Textual `ChatPanel` widget — toggleable right-side panel
+    with streaming token display, proactive nudges, and styled user/Merlin bubbles
+  - `chat_cli.py`: CLI bridge — lets `bash help.sh merlin` invoke Claude as a
+    standalone Python process
+  - `data/merlin_prompt.txt`: Merlin wizard persona, Socratic teaching rules,
+    and context placeholder template (7 injected fields)
+
+- **F3 Key Binding** in Textual TUI (`src/terminal-illness/ti/app.py`)
+  - Toggles Merlin chat panel open/closed without leaving the game terminal
+  - `merlin <question>` command opens panel and submits question in one step
+  - Proactive nudges fired on: room change, HP < 20, quest complete, stuck detection
+  - `@work(thread=True, exit_on_error=False)` — API errors display in chat panel
+    instead of closing the session; full `try/except` with `self.log.error()` fallback
+
+- **`help merlin` / `help ask` subcommands** (`src/help/bashcrawl_help.sh`, `src/help.sh`)
+  - `bash help.sh merlin "<question>"` calls the Python AI bridge for terminal-only players
+  - Falls back to existing `ai_engine.sh` static hints when Python or API key unavailable
+
+- **VS Code Debug Configurations** (`.vscode/launch.json`)
+  - `🧙 Debug TUI — Merlin Chat`: Full Textual game with `TEXTUAL_LOG=/tmp/textual_debug.log`
+  - `🧙 Debug Merlin CLI`: Single-turn CLI bridge for step-through debugging
+  - `🧙 Debug AI Chat Tests`: pytest runner for `test/unit/test_ai_chat.py`
+  - `🧙 Debug TUI — Break on Exception`: `justMyCode: false` for worker-thread crashes
+  - `🧪 Debug All Unit Tests`: Full unit suite runner
+
+- **Unit Tests** (`test/unit/test_ai_chat.py`) — 28 tests covering:
+  - `GameContextBuilder.build()` and `detect_stuck()` (6 cases)
+  - `GameContext.as_dict()` placeholder formatting
+  - `AIChatService` API availability detection, fallback responses, nudge strings,
+    history trimming, system prompt rendering, Claude mock integration
+
+### Added
+
 - **Log Viewer Flask Web App** (`src/viewer/`)
   - Full Flask web application for browsing JSONL session logs and analytics
   - Routes: session list/detail, feedback list/detail, screenshots gallery, dungeon map, analytics dashboard, live agent view

@@ -1,6 +1,6 @@
 ### Terminal Illness — Bashcrawl Python Wrapper
 
-A rich Python terminal interface that wraps the real bashcrawl game directories, adding quest tracking, styled output, tab completion, and save/load on top of the actual dungeon rooms.
+A rich Python terminal interface that wraps the real bashcrawl game directories, adding quest tracking, styled output, tab completion, AI-powered Merlin chat, and save/load on top of the actual dungeon rooms.
 
 ### Quickstart
 
@@ -38,8 +38,50 @@ The Python wrapper operates on the **real bashcrawl filesystem** — the same `e
 | `ti/terminal_engine.py` | Command parsing, tab completion, Rich UI rendering |
 | `ti/game_state.py` | Persistent progress: quests, inventory (`$I`), HP, env vars |
 | `ti/quests.py` | Quest definitions mapped to bashcrawl rooms |
-| `ti/ai_agents.py` | Stubs for future AI-generated quest/world expansion |
+| `ti/ai_agents.py` | Stubs for AI-generated quest/world expansion |
+| `ti/ai_chat.py` | **Merlin AI chat service** — streams Claude responses |
+| `ti/chat_context.py` | Game context builder for AI prompt injection |
+| `ti/chat_panel.py` | Textual widget for the toggleable Merlin chat panel |
+| `ti/chat_cli.py` | CLI bridge — lets `help.sh` call Merlin from bash |
+| `ti/data/merlin_prompt.txt` | Merlin wizard persona + teaching rules system prompt |
 | `seed_prompt.instructions.md` | LLM prompt template for AI agent integration |
+
+### Merlin AI Chat Guide
+
+Press **F3** to open the Merlin chat panel — a side panel where an AI wizard
+guides you through the dungeon using Socratic hints and dungeon metaphors.
+
+```
+merlin how do I open the scroll?   # Open panel + ask in one command
+```
+
+Merlin is powered by **Claude** (`anthropic` SDK) and requires
+`ANTHROPIC_API_KEY` in your environment. Without a key, Merlin falls back
+to static contextual hints.
+
+**Proactive nudges** — Merlin automatically offers guidance when:
+- You enter a new room
+- Your HP drops below 20
+- You appear stuck (same command repeated 3+ times)
+- You complete a quest
+
+**Terminal-only AI bridge:**
+```bash
+bash help.sh merlin "how do I find hidden files?"
+```
+
+### Key Bindings (TUI)
+
+| Key | Action |
+|---|---|
+| `F1` | Show help |
+| `F2` | Show dungeon map |
+| `F3` | **Toggle Merlin AI chat panel** |
+| `Ctrl+S` | Save progress |
+| `Ctrl+Q` | Quit |
+| `Ctrl+L` | Clear output log |
+| `Tab` | Command completion |
+| `↑↓` | Command history |
 
 ### Quest Flow
 
@@ -66,10 +108,6 @@ Scripts run via `subprocess` with the current game environment (`$I`, `$HP`).
 ### Commands
 
 `pwd`, `ls`, `cd`, `mkdir`, `touch`, `cat`, `grep`, `rm`, `cp`, `mv`, `export`, `echo`, `save`, `load`, `merlin`, `exit`, plus `./script` execution.
-
-### Dynamic Mode (Preview)
-
-Stubs for AI-generated quests/worlds live in `ti/ai_agents.py`. To wire up an LLM, implement providers there and gate calls on env config (e.g., `OPENAI_API_KEY`).
 
 ### Resetting Progress
 

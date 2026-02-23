@@ -213,6 +213,12 @@ case "${1:-}" in
     reset)
         show_reset_info
         ;;
+    merlin|ask)
+        # Pass straight through to bashcrawl_help.sh (Merlin AI bridge)
+        if declare -f main &>/dev/null; then
+            main "$@"
+        fi
+        ;;
     *)
         show_contextual_help
         ;;

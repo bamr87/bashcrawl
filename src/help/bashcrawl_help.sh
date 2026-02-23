@@ -567,6 +567,35 @@ main() {
             show_advanced_help "ai"
             return
             ;;
+        merlin|ask)
+            # Bridge to the Python AI chat CLI
+            shift  # remove 'merlin'/'ask' from args
+            local question="${*:-}"
+            local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+            local python_bin
+            python_bin="$(command -v python3 2>/dev/null || command -v python 2>/dev/null || echo "")"
+
+            if [[ -z "$question" ]]; then
+                echo "Usage: help merlin <question>"
+                echo "       help ask <question>"
+                echo "Example: help merlin \"how do I find hidden files?\""
+                return 0
+            fi
+
+            if [[ -n "$python_bin" ]] && [[ -d "$ti_dir" ]]; then
+                # Run the Python chat CLI bridge
+                (cd "$ti_dir" && PYTHONPATH="$ti_dir" "$python_bin" -m ti.chat_cli "$question") \
+                    || echo "🧙 Merlin: (Set ANTHROPIC_API_KEY for full AI guidance)"
+            else
+                # Fallback: use existing bash AI engine
+                echo "🧙 Merlin says: Try 'ls -F' to survey your surroundings, then 'cat scroll' to read the wisdom within."
+                if [[ "$AI_ENGINE_AVAILABLE" = true ]]; then
+                    local location="${PWD##*/}"
+                    get_ai_recommendations "$location" "new_area"
+                fi
+            fi
+            return
+            ;;
         suggest)
             show_advanced_help "suggest" "$help_subtopic" "${3:-}"
             return
