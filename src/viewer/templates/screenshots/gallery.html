@@ -29,8 +29,9 @@
 <div class="gallery-stage" id="gallery" data-dir="{{ session.dir_name }}">
     {% if session.screenshots %}
     <img id="gallery-img" class="gallery-img"
-         src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + session.screenshots[0].name) }}"
-         alt="{{ session.screenshots[0].name }}">
+         src="{{ url_for('serve_screenshot', filepath=session.screenshots[0].path) }}"
+         alt="{{ session.screenshots[0].name }}"
+         onerror="this.src='/static/img/no-screenshot.svg';this.onerror=null;">
     {% else %}
     <div class="gallery-empty">No screenshots available</div>
     {% endif %}
@@ -54,10 +55,11 @@
              data-trigger="{{ sc.trigger }}"
              data-command="{{ sc.command }}"
              data-size="{{ sc.size_bytes }}"
-             data-src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + sc.name) }}"
+             data-src="{{ url_for('serve_screenshot', filepath=sc.path) }}"
              onclick="galleryGoTo({{ loop.index0 }})">
-            <img src="{{ url_for('serve_screenshot', filepath=session.dir_name + '/' + sc.name) }}"
-                 alt="{{ sc.name }}" loading="lazy">
+            <img src="{{ url_for('serve_screenshot', filepath=sc.path) }}"
+                 alt="{{ sc.name }}" loading="lazy"
+                 onerror="this.src='/static/img/no-screenshot.svg';this.onerror=null;">
             <span class="filmstrip-num">{{ loop.index }}</span>
         </div>
         {% endfor %}

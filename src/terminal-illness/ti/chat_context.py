@@ -72,9 +72,9 @@ class GameContextBuilder:
         """Assemble a full context snapshot."""
         cwd = state.current_location or "/entrance"
 
-        # Directory listing
+        # Directory listing (show hidden files so Merlin can guide players to discover them)
         try:
-            room_contents = fs.ls(cwd, "")
+            room_contents = fs.ls(cwd, "", show_hidden=True)
         except Exception:
             room_contents = []
 

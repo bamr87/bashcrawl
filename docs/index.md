@@ -7,8 +7,9 @@ are scrolls, and executables are encounters.
 
 - [Getting Started](getting-started.md) — Installation, setup, and your first game
 - [Gameplay Guide](gameplay.md) — Mechanics, rooms, inventory, combat, and progression
-- [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, scroll standards
+- [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, scroll standards, and AI agent tests
 - [Contributing](contributing.md) — How to add rooms, write scrolls, and submit changes
+- [Observatory Viewer](viewer.md) — Web UI for browsing session logs, screenshots, and analytics
 - [Improvement Plan](improvement-plan.md) — Known issues and planned enhancements
 - [Logging Framework](logging-framework-plan.md) — Architecture for gameplay analytics
 

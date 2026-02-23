@@ -62,8 +62,54 @@ class ScreenshotSession:
         return d
 
 
-def _parse_screenshot_dir(dir_path: Path) -> ScreenshotSession | None:
-    """Parse a screenshot directory, preferring manifest.json if available."""
+def _abs_to_rel(abs_path: str, screenshots_dir: Path) -> str:
+    """Convert an absolute filesystem path to a URL-relative path under screenshots_dir."""
+    # Resolve to absolute so relative Path objects work against absolute manifest paths
+    resolved_dir = screenshots_dir.resolve()
+    resolved_path = Path(abs_path).resolve() if abs_path else Path()
+    try:
+        return str(resolved_path.relative_to(resolved_dir))
+    except ValueError:
+        # Fallback: strip the screenshots_dir prefix as a string
+        prefix = str(resolved_dir).rstrip("/") + "/"
+        abs_str = str(resolved_path)
+        if abs_str.startswith(prefix):
+            return abs_str[len(prefix):]
+        return abs_path
+
+
+def _load_manifest(manifest_path: Path, screenshots_dir: Path) -> list[Screenshot]:
+    """Load screenshots from a manifest.json file, converting paths to URL-relative."""
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    result = []
+    for s in manifest.get("screenshots", []):
+        abs_path = s.get("path", "")
+        rel_path = _abs_to_rel(abs_path, screenshots_dir) if abs_path else ""
+        result.append(Screenshot(
+            name=s.get("name", ""),
+            path=rel_path,
+            trigger=s.get("trigger", ""),
+            command=s.get("command", ""),
+            room=s.get("room", ""),
+            ts=s.get("ts", ""),
+            size_bytes=s.get("size_bytes", 0),
+        ))
+    return result
+
+
+def _parse_screenshot_dir(dir_path: Path, screenshots_dir: Path) -> ScreenshotSession | None:
+    """Parse a screenshot directory, preferring manifest.json if available.
+
+    Handles three layouts:
+      a) SVGs + manifest.json directly in dir_path (flat layout)
+      b) SVGs + manifest.json in a single subdirectory (nested layout used by TUI agent)
+      c) SVGs scattered in subdirectories, no manifest (legacy fallback)
+    """
     dir_name = dir_path.name
     # Parse name: "2026-02-21_095855_full_critical_path"
     parts = dir_name.split("_", 2)
@@ -83,44 +129,50 @@ def _parse_screenshot_dir(dir_path: Path) -> ScreenshotSession | None:
         timestamp=timestamp,
     )
 
-    manifest_path = dir_path / "manifest.json"
-    if manifest_path.is_file():
+    # --- Strategy 1: manifest.json at top level ---
+    top_manifest = dir_path / "manifest.json"
+    if top_manifest.is_file():
         session.has_manifest = True
-        try:
-            with open(manifest_path, "r") as f:
-                manifest = json.load(f)
-            session.total_screenshots = manifest.get("total_screenshots", 0)
-            session.total_size_bytes = manifest.get("total_size_bytes", 0)
-            for s in manifest.get("screenshots", []):
-                ss = Screenshot(
-                    name=s.get("name", ""),
-                    path=s.get("path", ""),
-                    trigger=s.get("trigger", ""),
-                    command=s.get("command", ""),
-                    room=s.get("room", ""),
-                    ts=s.get("ts", ""),
-                    size_bytes=s.get("size_bytes", 0),
-                )
-                session.screenshots.append(ss)
-        except (json.JSONDecodeError, OSError):
-            pass
+        session.screenshots = _load_manifest(top_manifest, screenshots_dir)
 
-    # If no manifest or empty, scan directory for SVGs
+    # --- Strategy 2: manifest.json inside a single subdirectory ---
     if not session.screenshots:
-        svg_files = sorted(dir_path.glob("*.svg"))
+        for subdir in sorted(dir_path.iterdir()):
+            if subdir.is_dir() and not subdir.name.startswith("."):
+                sub_manifest = subdir / "manifest.json"
+                if sub_manifest.is_file():
+                    session.has_manifest = True
+                    session.screenshots = _load_manifest(sub_manifest, screenshots_dir)
+                    if session.screenshots:
+                        break
+
+    # --- Strategy 3: recursive glob for SVGs (no manifest at all) ---
+    if not session.screenshots:
         total_size = 0
-        for svg in svg_files:
+        for svg in sorted(dir_path.rglob("*.svg")):
             size = svg.stat().st_size
             total_size += size
+            rel = _abs_to_rel(str(svg), screenshots_dir)
             session.screenshots.append(Screenshot(
                 name=svg.name,
-                path=str(svg),
+                path=rel,
                 size_bytes=size,
             ))
-        session.total_screenshots = len(session.screenshots)
         session.total_size_bytes = total_size
 
-    return session if session.screenshots else None
+    if not session.screenshots:
+        return None
+
+    # Drop individual stub screenshots (test fixtures are typically < 200 bytes)
+    _MIN_SVG_BYTES = 200
+    real = [s for s in session.screenshots if s.size_bytes >= _MIN_SVG_BYTES]
+    if not real:
+        return None  # session contains only stubs — skip it entirely
+    session.screenshots = real
+
+    session.total_screenshots = len(session.screenshots)
+    session.total_size_bytes = sum(s.size_bytes for s in session.screenshots)
+    return session
 
 
 class ScreenshotStore:
@@ -136,7 +188,7 @@ class ScreenshotStore:
             return
         for child in sorted(self.screenshots_dir.iterdir()):
             if child.is_dir() and not child.name.startswith("."):
-                ss = _parse_screenshot_dir(child)
+                ss = _parse_screenshot_dir(child, self.screenshots_dir)
                 if ss:
                     self.sessions[ss.dir_name] = ss
 

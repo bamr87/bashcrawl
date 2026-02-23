@@ -66,14 +66,20 @@ class GameFileSystem:
     # Directory operations
     # ------------------------------------------------------------------
 
-    def ls(self, cwd: str, path: str = "") -> list[str]:
-        """List directory contents, annotated with ``/`` for dirs."""
+    def ls(self, cwd: str, path: str = "", show_hidden: bool = False) -> list[str]:
+        """List directory contents, annotated with ``/`` for dirs and ``*`` for executables.
+
+        Hidden entries (names starting with ``.``) are omitted unless
+        *show_hidden* is True (i.e. the player used ``ls -a``).
+        """
         target = self._resolve(cwd, path or ".")
         if not target.is_dir():
             raise NotADirectoryError(f"Not a directory: {path or cwd}")
         entries: list[str] = []
         for child in sorted(target.iterdir()):
             name = child.name
+            if not show_hidden and name.startswith("."):
+                continue
             if child.is_dir():
                 name += "/"
             elif child.is_file() and os.access(child, os.X_OK):

@@ -69,12 +69,12 @@ def _parse_feedback_file(file_path: Path) -> FeedbackReport | None:
     if duration_match:
         report.duration = duration_match.group(1).strip()
 
-    # Parse metrics table
+    # Parse metrics table — match only within single-line cells (no | or newline crossings)
     metrics = {}
-    table_pattern = re.findall(r"\|\s*(.+?)\s*\|\s*(\d+)\s*\|", content)
+    table_pattern = re.findall(r"\|\s*([^|\n]+?)\s*\|\s*(\d+)\s*\|", content)
     for label, value in table_pattern:
         label = label.strip()
-        if label and label != "Metric" and label != "---":
+        if label and label.lstrip("-") and label != "Metric":
             metrics[label] = int(value)
     report.metrics = metrics
 
@@ -96,6 +96,12 @@ class FeedbackStore:
             report = _parse_feedback_file(md_file)
             if report:
                 self.reports[report.session_sid] = report
+
+    def refresh(self) -> int:
+        """Reload all feedback files; return count of newly found reports."""
+        before = set(self.reports.keys())
+        self.load_all()
+        return len(set(self.reports.keys()) - before)
 
     def get(self, sid: str) -> FeedbackReport | None:
         return self.reports.get(sid)

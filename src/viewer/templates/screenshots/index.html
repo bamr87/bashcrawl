@@ -30,8 +30,9 @@
     <a href="{{ url_for('pages.screenshot_gallery', dir_name=s.dir_name) }}" class="screenshot-card">
         <div class="screenshot-card-preview">
             {% if s.screenshots %}
-            <img src="{{ url_for('serve_screenshot', filepath=s.dir_name + '/' + s.screenshots[0].name) }}"
-                 alt="{{ s.screenshots[0].name }}" loading="lazy">
+            <img src="{{ url_for('serve_screenshot', filepath=s.screenshots[0].path) }}"
+                 alt="{{ s.screenshots[0].name }}" loading="lazy"
+                 onerror="this.src='/static/img/no-screenshot.svg';this.onerror=null;">
             {% else %}
             <div class="no-preview">No Preview</div>
             {% endif %}

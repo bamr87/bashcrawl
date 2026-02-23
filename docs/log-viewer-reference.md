@@ -1,13 +1,13 @@
-# Log & Screenshot Viewer — Design Plan
+# Log & Screenshot Viewer — Design Reference
 
-> **Goal:** A comprehensive, user-friendly web portal for browsing session logs,
-> screenshots, analytics, feedback reports, dungeon maps, and live sessions.
+> **Status:** Implemented. This document is the original design plan and serves
+> as an architectural reference.
+>
+> **User guide:** [docs/viewer.md](viewer.md)  
+> **Source code:** [`src/viewer/`](../src/viewer/)  
+> **Launch:** `python3 -m src.viewer` (see [viewer.md](viewer.md) for all options)
 >
 > **Stack:** Python 3.10+ / Flask / Jinja2 / vanilla JS + CSS (no build toolchain)
->
-> **Location:** `src/viewer/` — self-contained Flask application
->
-> **Launch:** `python3 -m src.viewer` or `bash main.sh --viewer`
 
 ---
 

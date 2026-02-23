@@ -149,7 +149,11 @@ def _parse_session_file(file_path: Path) -> Session | None:
             session.duration_sec = ev.extra.get("duration_sec")
         elif ev.event == "room_enter":
             room = ev.extra.get("room", "")
-            if room:
+            if room and room not in rooms:
+                rooms.append(room)
+        elif ev.event == "command":
+            room = ev.extra.get("room", "")
+            if room and room not in rooms:
                 rooms.append(room)
         elif ev.event == "encounter":
             enc = {

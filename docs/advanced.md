@@ -136,3 +136,123 @@ cd src/terminal-illness
 pip install -r requirements.txt
 python -m ti
 ```
+
+
+## AI Agent Tests
+
+The test suite ships an **AI-driven agent** (powered by Claude via the
+Anthropic API) that plays through the game autonomously. It validates
+progression, combat mechanics, error recovery, and help system usage without
+human input.
+
+### Prerequisites
+
+```bash
+# Install test dependencies
+cd test && pip install -r requirements.txt
+
+# Anthropic API key — required for all ai-marked tests
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+### Running the tests
+
+AI tests are skipped by default (`pytest.ini` excludes the `ai` marker).
+Pass `-m ai` to opt in:
+
+```bash
+cd test
+
+# All AI tests (may take several minutes)
+pytest -m ai --timeout=120
+
+# Individual test files
+pytest -m ai test/ai/test_quest_completion.py     # Quest progression
+pytest -m ai test/ai/test_full_playthrough.py     # Full + critical path
+pytest -m ai test/ai/test_combat_encounters.py    # Combat with death/retry
+pytest -m ai test/ai/test_error_recovery.py       # Navigation mistakes
+pytest -m ai test/ai/test_help_usage.py           # Help system usage
+
+# Verbose — see live commands printed to terminal
+pytest -m ai -s -v test/ai/test_full_playthrough.py
+```
+
+### Available scenarios
+
+Each test class uses a predefined **scenario** from `test/ai/scenarios.py`:
+
+| Scenario | Max turns | Tags | Description |
+|----------|-----------|------|-------------|
+| `new_player` | 30 | quick, beginner | Learns `pwd`, `ls`, `cd`, `cat` in entrance and cellar |
+| `critical_path` | 60 | medium, progression | Full main path: entrance → cellar → armoury → chamber |
+| `full_playthrough` | 150 | slow, full | All rooms including hidden areas and endgame |
+| `stuck_player` | 50 | medium, help | Stress-tests the help system with a confused agent |
+| `combat_stress` | 80 | medium, combat | Combat encounters with death, retry, and recovery |
+| `speed_run` | 40 | quick, speed | Minimum-command critical path, no detours |
+
+**Cost guidance** — one agent turn makes one Anthropic API call. A
+`new_player` or `speed_run` scenario (≤40 turns) is inexpensive. A
+`full_playthrough` at 150 turns costs proportionally more. Check
+[Anthropic pricing](https://www.anthropic.com/pricing) for current rates.
+
+### Watching a test live in the Observatory Viewer
+
+The agent writes every event to `logs/live_agent.jsonl` in real time. The
+Observatory Viewer tails this file and streams it to the browser via SSE.
+
+Open two terminals before starting a test run:
+
+```bash
+# Terminal A — start the viewer
+python3 -m src.viewer
+
+# Terminal B — run the AI tests
+cd test && pytest -m ai -s
+```
+
+Then open **http://127.0.0.1:5000/live/agent** in your browser. The page
+connects via SSE and displays each agent command, its output, the agent's
+current room, inventory, and HP as the test progresses — no manual refresh.
+
+The `/live/agent` page shows:
+
+- Session header (test name, goal, max turns)
+- Color-coded event feed (commands, API calls, rate-limit pauses, session end)
+- Current room, inventory, and HP — updated after every command
+- Session end summary (exit reason, rooms visited, total turns, elapsed time)
+
+See [docs/viewer.md](viewer.md) for the full element reference and all live
+API endpoints (`/api/live/agent/stream`, `/api/live/agent/status`,
+`/api/live/agent/events`).
+
+### Viewing completed test results
+
+Closed sessions are retained in the JSONL log files and appear immediately in
+the viewer:
+
+| Page | URL | What to look for |
+|------|-----|------------------|
+| Session list | `/sessions` | Filter by mode `ai_test` |
+| Session detail | `/sessions/<sid>` | Full event timeline, room path, HP graph |
+| Screenshots | `/screenshots` | SVG captures linked to the session |
+| Feedback | `/feedback` | AI self-evaluation reports |
+| Analytics | `/analytics` | AI sessions included in all aggregate charts |
+
+### Test artifacts
+
+| Artifact | Location | Description |
+|----------|----------|-------------|
+| Live event log | `logs/live_agent.jsonl` | Truncated at session start; not persisted across runs |
+| Session JSONL | `logs/sessions/<sid>.jsonl` | Persistent record written by `lib/log.sh` |
+| Screenshots | `logs/screenshots/<dir>/` | SVG captures (if agent takes screenshots) |
+| Feedback reports | `logs/feedback/<sid>.md` | AI self-evaluation Markdown |
+
+### Agent internals (`test/ai/agent.py`)
+
+- Uses the **Anthropic Messages API** with rolling conversation history.
+- Default model: `claude-sonnet-4-20250514` — change `DEFAULT_MODEL` to swap.
+- Hard limits per session: `DEFAULT_MAX_TURNS = 30` turns and
+  `DEFAULT_MAX_ELAPSED_SECONDS = 90` seconds (overridable per scenario).
+- Rate-limited to `DEFAULT_REQUESTS_PER_MINUTE = 20` to avoid throttling.
+- Raises `AgentExhausted` (turn budget spent) or `AgentTimeout` (wall-clock
+  exceeded) — both are caught in test assertions and treated as graceful stops.

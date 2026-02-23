@@ -134,6 +134,20 @@ def analytics_funnel():
     return jsonify({"completion_funnel": summary.completion_funnel})
 
 
+@api_bp.route("/analytics/refresh", methods=["POST"])
+def analytics_refresh():
+    store = current_app.config["SESSION_STORE"]
+    engine = current_app.config["ANALYTICS_ENGINE"]
+    new_count = store.refresh()
+    engine.invalidate_cache()
+    summary = engine.compute()
+    return jsonify({
+        "ok": True,
+        "new_sessions": new_count,
+        "total_sessions": summary.total_sessions,
+    })
+
+
 @api_bp.route("/feedback")
 def list_feedback():
     store = current_app.config["FEEDBACK_STORE"]
@@ -142,6 +156,13 @@ def list_feedback():
         "reports": [r.to_summary() for r in reports],
         "total": len(reports),
     })
+
+
+@api_bp.route("/feedback/refresh", methods=["POST"])
+def feedback_refresh():
+    store = current_app.config["FEEDBACK_STORE"]
+    new_count = store.refresh()
+    return jsonify({"ok": True, "new_reports": new_count, "total": len(store.reports)})
 
 
 @api_bp.route("/feedback/<sid>")

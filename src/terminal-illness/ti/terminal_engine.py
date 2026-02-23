@@ -359,8 +359,17 @@ class TerminalEngine:
         return "output", "pwd", self._cwd
 
     def _cmd_ls(self, args: List[str]) -> Tuple[str, str, str]:
-        path = args[0] if args else ""
-        items = self.fs.ls(self._cwd, path)
+        # Separate flags (e.g. -F, -la, -a) from the optional path argument
+        flags: set[str] = set()
+        path = ""
+        for arg in args:
+            if arg.startswith("-"):
+                flags.update(arg.lstrip("-"))  # collect individual flag chars
+            else:
+                path = arg  # first non-flag arg is the target path
+
+        show_hidden = "a" in flags  # -a / -la / -A shows dotfiles
+        items = self.fs.ls(self._cwd, path, show_hidden=show_hidden)
         return "output", "ls", "  ".join(items) if items else "(empty)"
 
     def _cmd_cd(self, args: List[str]) -> Tuple[str, str, str]:

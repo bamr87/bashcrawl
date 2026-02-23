@@ -101,6 +101,81 @@ bash lib/reset.sh          # Smart reset — re-hides rooms, clears state
 bash lib/reset.sh --dry    # Preview what would be reset
 ```
 
+## Observatory Viewer
+
+The **Bashcrawl Observatory** is a web portal for browsing session logs,
+screenshots, and analytics collected while playing.
+
+```bash
+# Install viewer dependencies (once)
+pip install -r src/viewer/requirements.txt
+
+# Launch
+python3 -m src.viewer
+# Opens at http://127.0.0.1:5000/
+```
+
+See [docs/viewer.md](viewer.md) for the full user guide.
+
+## AI Agent Tests
+
+The test suite includes an **AI agent** (powered by Claude) that plays through
+the game autonomously, checking progression, combat, error recovery, and help
+usage. You need an [Anthropic API key](https://console.anthropic.com/) to run
+these tests.
+
+### Setup
+
+```bash
+# Install test dependencies (once)
+cd test && pip install -r requirements.txt && cd ..
+
+# Set your API key
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+### Run AI tests
+
+```bash
+cd test
+
+# Quick new-player scenario (~30 turns, ~30s)
+pytest -m ai test/ai/test_quest_completion.py
+
+# Main critical path (entrance → cellar → armoury → chamber)
+pytest -m ai test/ai/test_full_playthrough.py::TestCriticalPath
+
+# Full playthrough including hidden rooms (~150 turns, up to 5 min)
+pytest -m ai test/ai/test_full_playthrough.py --timeout=300
+
+# All AI tests
+pytest -m ai --timeout=120
+```
+
+### Watch progress live
+
+While AI tests run, open the Observatory Viewer in a second terminal to watch
+the agent play in real time:
+
+```bash
+# Terminal 1 — start the viewer
+python3 -m src.viewer
+
+# Terminal 2 — run the AI tests
+cd test && pytest -m ai -s
+```
+
+Then open **http://127.0.0.1:5000/live/agent** in your browser. The page
+tails `logs/live_agent.jsonl` via SSE and displays each command, its output,
+the agent's current room, inventory, and HP as the test progresses.
+
+After the tests finish, completed sessions appear in
+**http://127.0.0.1:5000/sessions** (filter by mode `ai_test`) and any
+captured screenshots are in **http://127.0.0.1:5000/screenshots**.
+
+See [Advanced Topics](advanced.md#ai-agent-tests) for the full list of
+scenarios, cost estimates, and tips.
+
 ## Next Steps
 
 Read the [Gameplay Guide](gameplay.md) for mechanics, or just `cat scroll` and follow
