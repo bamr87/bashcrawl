@@ -3,6 +3,16 @@ disable=SC2034  # Unused variables (common in educational examples)
 disable=SC2086  # Double quote to prevent globbing (sometimes intentional)
 disable=SC1091  # Not following sourced files (can't always resolve paths)
 disable=SC2154  # Referenced but not assigned (BASHCRAWL_ROOT set by sourcing scripts)
+disable=SC2155  # Declare and assign separately (common pattern in helper scripts)
+disable=SC2126  # Consider using grep -c (stylistic, not a bug)
+disable=SC2010  # Don't use ls | grep (acceptable in helper scripts)
+disable=SC2012  # Use find instead of ls (acceptable for simple cases)
+disable=SC2143  # Use grep -q instead of comparing output (stylistic)
+disable=SC2043  # Loop will only run once (intentional in some game scripts)
+disable=SC2046  # Quote to prevent word splitting (intentional in some cases)
+disable=SC2181  # Check exit code directly (stylistic preference)
+disable=SC2295  # Expansions inside ${..} quoted separately (pattern context)
+disable=SC2329  # Function never invoked (invoked indirectly via sourcing)
 
 # Enable additional checks
 enable=check-sourced

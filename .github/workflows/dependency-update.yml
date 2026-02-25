@@ -13,7 +13,7 @@ jobs:
   update-dependencies:
     name: Update Python Dependencies
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -21,21 +21,41 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-        
+        python-version: '3.12'
+
     - name: Update Python dependencies
       run: |
         pip install --upgrade pip
+
+        # Install current deps from both requirement files
         pip install -r src/terminal-illness/requirements.txt
-        pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U || true
-        pip freeze | grep -E '^(rich|prompt-toolkit)' > src/terminal-illness/requirements.txt.new
-        # Only update if versions changed
-        if ! diff -q src/terminal-illness/requirements.txt src/terminal-illness/requirements.txt.new >/dev/null 2>&1; then
+        pip install -r test/requirements.txt
+
+        # Attempt to upgrade all installed packages
+        pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 \
+          | xargs -n1 pip install -U || true
+
+        # Regenerate pinned requirements for terminal-illness
+        pip freeze | grep -iE '^(textual|rich|prompt.toolkit|pyyaml|anthropic)' \
+          > src/terminal-illness/requirements.txt.new
+
+        if ! diff -q src/terminal-illness/requirements.txt \
+                     src/terminal-illness/requirements.txt.new >/dev/null 2>&1; then
           mv src/terminal-illness/requirements.txt.new src/terminal-illness/requirements.txt
         else
           rm src/terminal-illness/requirements.txt.new
         fi
-        
+
+        # Regenerate pinned requirements for test
+        pip freeze | grep -iE '^(anthropic|pytest|jsonschema|textual|rich|prompt.toolkit|pyyaml)' \
+          > test/requirements.txt.new
+
+        if ! diff -q test/requirements.txt test/requirements.txt.new >/dev/null 2>&1; then
+          mv test/requirements.txt.new test/requirements.txt
+        else
+          rm test/requirements.txt.new
+        fi
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
@@ -44,14 +64,15 @@ jobs:
         title: 'Automated Python dependency updates'
         body: |
           ## Dependency Updates
-          
-          Updated Python dependencies in `src/terminal-illness/requirements.txt`.
-        branch: deps/python-updates
-          - Please review the changes carefully
-          - Run tests to ensure compatibility
-          - Check for any breaking changes in updated packages
-          
+
+          Updated Python dependencies in:
+          - `src/terminal-illness/requirements.txt`
+          - `test/requirements.txt`
+
+          Please review the changes carefully, run tests to ensure
+          compatibility, and check for any breaking changes.
+
           ---
-          *This PR was created automatically by the dependency update workflow*
+          *This PR was created automatically by the dependency update workflow.*
         branch: dependency-updates
         delete-branch: true

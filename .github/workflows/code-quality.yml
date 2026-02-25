@@ -2,9 +2,9 @@ name: Code Quality & Security
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
   schedule:
     - cron: '0 4 * * 2'  # Weekly on Tuesday at 4 AM
 
@@ -15,81 +15,51 @@ permissions:
 
 jobs:
   security-scan:
-    name: Security Analysis
+    name: Security Analysis (CodeQL)
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: python
-        
+
     - name: Autobuild
       uses: github/codeql-action/autobuild@v3
-      
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
-        
-  lint-and-format:
-    name: Lint & Format
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Lint Markdown
-      uses: articulate/actions-markdownlint@v1
-      with:
-        config: .markdownlint.json
-        files: '**/*.md'
-        ignore: node_modules
-        
-    - name: Lint YAML
-      uses: ibiqlik/action-yamllint@v3
-      with:
-        file_or_dir: .
-        config_file: .yamllint.yml
-        
-    - name: Lint Shell scripts
-      run: |
-        find . -name "*.sh" -exec shellcheck {} +
-        
+
   quality-metrics:
     name: Quality Metrics
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
     - name: Calculate metrics
       run: |
         echo "## Code Quality Metrics" > quality-report.md
         echo "" >> quality-report.md
-        
-        # File statistics
+
         total_files=$(find . -type f -not -path './.git/*' | wc -l)
         shell_files=$(find . -name "*.sh" | wc -l)
         python_files=$(find . -name "*.py" | wc -l)
         doc_files=$(find . -name "*.md" | wc -l)
         game_executables=$(find entrance/ -type f -executable 2>/dev/null | wc -l)
         scroll_files=$(find entrance/ -name "scroll" 2>/dev/null | wc -l)
-        
+
         echo "- **Total Files**: $total_files" >> quality-report.md
         echo "- **Shell Scripts**: $shell_files" >> quality-report.md
         echo "- **Python Files**: $python_files" >> quality-report.md
         echo "- **Documentation**: $doc_files" >> quality-report.md
         echo "- **Game Executables**: $game_executables" >> quality-report.md
         echo "- **Scroll Files**: $scroll_files" >> quality-report.md
-        
+
         cat quality-report.md
-        
+
     - name: Upload quality report
       uses: actions/upload-artifact@v4
       with:

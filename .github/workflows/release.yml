@@ -24,17 +24,17 @@ jobs:
   create-release:
     name: 📦 Create Release
     runs-on: ubuntu-latest
-    
+
     outputs:
       version: ${{ steps.version.outputs.version }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
-    
+
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
     - name: 🔢 Calculate version
       id: version
       run: |
@@ -43,7 +43,7 @@ jobs:
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           version_parts=(${latest_tag//v/})
           IFS='.' read -ra VERSION_ARRAY <<< "${version_parts[0]}"
-          
+
           case "${{ github.event.inputs.release_type }}" in
             "major")
               new_version="v$((VERSION_ARRAY[0] + 1)).0.0"
@@ -59,12 +59,12 @@ jobs:
         else
           echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         fi
-        
+
     - name: 📝 Generate changelog
       run: |
         echo "# Changelog for ${{ steps.version.outputs.version }}" > changelog.md
         echo "" >> changelog.md
-        
+
         # Get commits since last tag
         last_tag=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
         if [[ -n "$last_tag" ]]; then
@@ -72,7 +72,7 @@ jobs:
         else
           git log --pretty=format:"- %s (%h)" >> changelog.md
         fi
-        
+
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2

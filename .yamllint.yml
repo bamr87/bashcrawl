@@ -8,3 +8,9 @@ rules:
   comments-indentation: disable
   comments:
     min-spaces-from-content: 1
+  truthy:
+    allowed-values: ['true', 'false']
+    check-keys: false
+  indentation:
+    spaces: 2
+    indent-sequences: whatever

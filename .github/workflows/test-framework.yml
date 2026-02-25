@@ -59,7 +59,9 @@ jobs:
           pip install -r src/terminal-illness/requirements.txt
 
       - name: Make game files executable
-        run: bash setup.sh
+        run: bash setup.sh --quick
+        env:
+          TERM: dumb
 
       - name: Run unit tests
         run: |
@@ -107,7 +109,9 @@ jobs:
           pip install -r src/terminal-illness/requirements.txt
 
       - name: Make game files executable
-        run: bash setup.sh
+        run: bash setup.sh --quick
+        env:
+          TERM: dumb
 
       - name: Run AI playthrough tests
         run: |

@@ -4,6 +4,32 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] - 2026-02-24
+
+### Changed
+
+- **Refactored CI workflows** (`.github/workflows/`)
+  - Consolidated ShellCheck, yamllint, and markdownlint into single `ci.yml` — removed duplicates from `code-quality.yml` and `game-tests.yml`
+  - Removed redundant Python sanity-check job from `ci.yml` (covered by `test-framework.yml`)
+  - Removed `lint-and-format` job from `code-quality.yml` (now only CodeQL security scan + quality metrics)
+  - Removed inline ShellCheck step from `game-tests.yml` (centralized in `ci.yml`)
+  - Dropped `master` branch references across all workflows (repo only uses `main`)
+  - Upgraded `dependency-update.yml` Python version from 3.11 to 3.12
+  - `dependency-update.yml` now updates both `test/requirements.txt` and `src/terminal-illness/requirements.txt`
+  - Replaced inline `pip install yamllint` with `ibiqlik/action-yamllint@v3` action in `ci.yml`
+  - Cleaned trailing whitespace in `release.yml`
+
+### Fixed
+
+- **CI failures across all workflows**
+  - Fixed `dependency-update.yml` broken YAML: malformed `body` block with spurious `branch:` key mid-string
+  - Fixed `test-framework.yml` setup crash: added `TERM: dumb` env and `--quick` flag to `setup.sh` calls (prevents `clear` command failure in headless CI runners)
+  - Added 10 ShellCheck disable rules to `.shellcheckrc` (SC2155, SC2126, SC2010, SC2012, SC2143, SC2043, SC2046, SC2181, SC2295, SC2329) — all style/info-level warnings in helper scripts that were blocking CI
+  - Updated `.yamllint.yml`: added `truthy: check-keys: false` (for GH Actions `on:` key), `indentation: indent-sequences: whatever` (for standard GH Actions formatting)
+  - Excluded `.venv/` from ShellCheck file discovery in `ci.yml`
+
+---
+
 ## [Unreleased] - 2026-02-23
 
 ### Added

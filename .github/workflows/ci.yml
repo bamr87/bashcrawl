@@ -2,25 +2,27 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
 
 jobs:
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Lint shell scripts
+    - uses: actions/checkout@v4
+
+    - name: Lint shell scripts (.sh files)
       run: |
-        echo "Checking all .sh files and game executables..."
-        find . -name "*.sh" -exec shellcheck {} +
-        
-        # Also check game executables that have bash shebangs
+        echo "=== ShellCheck: .sh files ==="
+        # .shellcheckrc is auto-detected from repo root
+        find . -name "*.sh" -not -path "./.git/*" -not -path "./.venv/*" \
+          -exec shellcheck {} +
+
+    - name: Lint game executables
+      run: |
+        echo "=== ShellCheck: game executables ==="
         for f in $(find entrance/ -type f -executable 2>/dev/null); do
           if head -1 "$f" | grep -q 'bash'; then
             shellcheck "$f"
@@ -30,34 +32,24 @@ jobs:
   yamllint:
     name: YAML Lint
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Lint YAML files
-      run: |
-        pip install yamllint
-        yamllint -c .yamllint.yml .
+    - uses: actions/checkout@v4
 
-  python:
-    name: Python Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v5
+    - name: Lint YAML files
+      uses: ibiqlik/action-yamllint@v3
       with:
-        python-version: '3.11'
-        
-    - name: Install dependencies
-      run: |
-        pip install -r src/terminal-illness/requirements.txt
-        
-    - name: Verify Python module loads
-      run: |
-        cd src/terminal-illness
-        python -c "import ti; print('Module loads OK')"
+        file_or_dir: .
+        config_file: .yamllint.yml
+
+  markdownlint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Lint Markdown files
+      uses: articulate/actions-markdownlint@v1
+      with:
+        config: .markdownlint.json
+        files: '**/*.md'
+        ignore: node_modules
