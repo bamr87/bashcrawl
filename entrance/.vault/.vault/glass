@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+# 
+
+ITEM=crystal
+
+if ! [ -f .bless ] ; then
+    printf "Do you have an ice crystal? y/n  "
+    read RESP
+
+    if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+        if grep  --quiet --only-matching "$ITEM" <<< "$I" ; then
+            cat << EOF
+You place the ice crystal among the shards of glass.  The
+sword in your hands becomes cold.  You feel the power of
+1000 blizzards coursing through it.
+
+Don't forget to remove the crystal from your inventory.  Try
+the following command:
+
+export I=\$(sed 's/$ITEM,//' <<< \$I)
+EOF
+            touch .bless
+            exit 0
+        else
+            cat << EOF
+You search in your inventory but find nothing that seems like
+a crystal
+
+EOF
+        fi
+    fi
+    cat << EOF
+You sense that the glass shards are searching for something.
+Whatever it is, you cannot provide it now.
+
+Walk with care.
+
+EOF
+else
+    cat << EOF
+You already placed the ice crystal among the shards of glass
+
+EOF
+fi
+
+
+
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
+#
+#     ./glass
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================
