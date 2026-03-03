@@ -8,6 +8,7 @@ to prevent players from navigating outside the game.
 from __future__ import annotations
 
 import os
+import re
 import stat
 import subprocess
 from pathlib import Path
@@ -234,6 +235,7 @@ class GameFileSystem:
 
         result = subprocess.run(
             ["bash", str(script_path)],
+            input="y\n",
             capture_output=True,
             text=True,
             cwd=str(self._resolve(cwd, ".")),
@@ -245,4 +247,36 @@ class GameFileSystem:
         if result.stderr:
             output += result.stderr
 
-        return output, result.returncode, {}
+        env_updates = self._parse_export_instructions(output, env_vars or {})
+
+        return output, result.returncode, env_updates
+
+    @staticmethod
+    def _parse_export_instructions(
+        output: str, current_env: dict[str, str]
+    ) -> dict[str, str]:
+        """Extract ``export VAR=value`` instructions from script output.
+
+        Game scripts like ``treasure`` and ``potion`` print lines such as::
+
+            export I=amulet,$I
+            export HP=15
+
+        This method parses those lines, expands simple ``$VAR`` references
+        using *current_env*, and returns a dict of variable assignments.
+        """
+        updates: dict[str, str] = {}
+        for m in re.finditer(r"export\s+([A-Za-z_]\w*)=(.*)", output):
+            key = m.group(1)
+            raw_value = m.group(2).strip()
+            # Expand $VAR and ${VAR} references using current env
+            def _expand(match: re.Match) -> str:
+                var = match.group(1) or match.group(2)
+                return current_env.get(var, "")
+
+            value = re.sub(r"\$\{(\w+)\}|\$(\w+)", _expand, raw_value)
+            # Strip surrounding quotes if present
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                value = value[1:-1]
+            updates[key] = value
+        return updates
