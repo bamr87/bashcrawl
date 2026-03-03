@@ -184,12 +184,12 @@ class TestScriptExecution:
         assert "amulet" in env_updates["I"]
 
     def test_run_potion_returns_hp_update(self, game_fs):
-        """Potion script should yield export HP=15 (when answering y)."""
+        """Potion script should yield export HP=15 (default stdin answers y)."""
         output, exit_code, env_updates = game_fs.run_script(
             "/entrance/cellar/armoury", "potion"
         )
         assert "HP" in env_updates, f"Expected 'HP' in env_updates, got: {env_updates}"
-        assert env_updates["HP"] in ("15", "10")  # 15 for yes, 10 for no
+        assert env_updates["HP"] == "15"
 
     def test_run_nonexistent_script_raises(self, game_fs):
         with pytest.raises(FileNotFoundError):

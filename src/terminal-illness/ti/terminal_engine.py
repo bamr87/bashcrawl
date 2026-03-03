@@ -289,9 +289,10 @@ class TerminalEngine:
             self.state.set_env(key, value)
             if key == "I" and value != old_value:
                 # Show which items were added
+                old_items = {item.strip() for item in old_value.split(",") if item.strip()}
                 new_items = [
                     i.strip() for i in value.split(",")
-                    if i.strip() and i.strip() not in old_value
+                    if i.strip() and i.strip() not in old_items
                 ]
                 if new_items:
                     feedback_parts.append(

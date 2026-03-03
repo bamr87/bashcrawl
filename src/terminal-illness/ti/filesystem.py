@@ -271,10 +271,10 @@ class GameFileSystem:
             raw_value = m.group(2).strip()
             # Expand $VAR and ${VAR} references using current env
             def _expand(match: re.Match) -> str:
-                var = match.group(1) or match.group(2)
+                var = match.group("braced") or match.group("unbraced")
                 return current_env.get(var, "")
 
-            value = re.sub(r"\$\{(\w+)\}|\$(\w+)", _expand, raw_value)
+            value = re.sub(r"\$\{(?P<braced>\w+)\}|\$(?P<unbraced>\w+)", _expand, raw_value)
             # Strip surrounding quotes if present
             if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
                 value = value[1:-1]
