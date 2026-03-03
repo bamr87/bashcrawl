@@ -20,9 +20,9 @@ class TestGameStateInit:
         assert state.current_quest_id == 0
         assert state.completed_quest_ids == []
         assert state.learned_commands == []
-        assert state.current_location == "/entrance"
+        assert state.current_location == "entrance"
         assert state.inventory == ""
-        assert state.hp == 0
+        assert state.hp == 100
         assert state.env_vars == {}
         assert state.experience_points == 0
 
@@ -51,7 +51,7 @@ class TestEnvironmentVariables:
         from ti.game_state import GameState
         state = GameState()
         state.set_env("HP", "not_a_number")
-        assert state.hp == 0  # Should not crash, keep default
+        assert state.hp == 100  # Should not crash, keep default
 
     def test_set_custom_var(self):
         from ti.game_state import GameState
@@ -71,6 +71,8 @@ class TestEnvironmentVariables:
     def test_game_env_empty_inventory_excluded(self):
         from ti.game_state import GameState
         state = GameState()
+        state.hp = 0  # set to 0 explicitly to test exclusion
+        state.inventory = ""  # ensure empty
         env = state.game_env
         assert "I" not in env
         assert "HP" not in env  # hp=0, so excluded
@@ -93,7 +95,7 @@ class TestSaveLoad:
             player_name="TestHero",
             inventory="amulet,sword,",
             hp=15,
-            current_location="/entrance/cellar",
+            current_location="entrance/cellar",
             current_quest_id=3,
             completed_quest_ids=[0, 1, 2],
             learned_commands=["pwd", "ls", "cd"],
@@ -104,7 +106,7 @@ class TestSaveLoad:
         assert loaded.player_name == "TestHero"
         assert loaded.inventory == "amulet,sword,"
         assert loaded.hp == 15
-        assert loaded.current_location == "/entrance/cellar"
+        assert loaded.current_location == "entrance/cellar"
         assert loaded.current_quest_id == 3
         assert loaded.completed_quest_ids == [0, 1, 2]
         assert loaded.experience_points == 200

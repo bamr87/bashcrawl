@@ -16,7 +16,7 @@ class TestNonInteractiveEngineInit:
     def test_engine_creates_with_sandbox(self, sandbox):
         from ai.session_runner import NonInteractiveEngine
         engine = NonInteractiveEngine(sandbox)
-        assert engine.cwd == "/entrance"
+        assert engine.cwd == "entrance"
 
     def test_engine_with_initial_env(self, sandbox):
         from ai.session_runner import NonInteractiveEngine
@@ -36,7 +36,7 @@ class TestBasicCommands:
         engine = NonInteractiveEngine(sandbox)
         result = engine.execute_command("pwd")
         assert result.kind == "output"
-        assert "/entrance" in result.output
+        assert "entrance" in result.output
 
     def test_ls(self, sandbox):
         from ai.session_runner import NonInteractiveEngine

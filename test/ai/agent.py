@@ -30,7 +30,7 @@ DEFAULT_MODEL = "claude-sonnet-4-20250514"
 # Cost guards
 DEFAULT_MAX_TURNS = 30
 DEFAULT_MAX_TOKENS_PER_TURN = 150
-DEFAULT_MAX_ELAPSED_SECONDS = 90   # hard wall-clock limit per session
+DEFAULT_MAX_ELAPSED_SECONDS = 180   # hard wall-clock limit per session (includes API rate-limit waits)
 DEFAULT_REQUESTS_PER_MINUTE = 20  # max Anthropic API calls per 60 s
 
 SYSTEM_PROMPT_TEMPLATE = """\
@@ -42,8 +42,15 @@ GAME CONTEXT:
 - Files named `scroll` contain educational content. Read with `cat scroll`.
 - Executable files (marked with *) are interactive encounters. Run with `./filename`.
 - Hidden files/directories start with `.` — find them with `ls -a`.
-- Your inventory is in $I. Your health is $HP.
-- When a script tells you to run `export VAR=value`, do it exactly.
+- Your inventory is stored in $I (comma-separated). Your health is $HP.
+- When a script tells you to run `export VAR=value`, do it exactly as shown.
+- The `$I` in `export I=item,$I` is variable expansion — it appends to your inventory.
+
+GAME PROGRESSION:
+- The main path is: entrance → cellar → armoury → chamber
+- Each room has a `scroll` (read it to learn commands) and encounters to run
+- After running scripts like `./treasure` or `./potion`, follow their export instructions
+- Scripts marked with * in `ls -F` output are executable encounters
 
 YOUR GOAL:
 {goal}
@@ -56,6 +63,13 @@ RULES:
 5. Use `ls` when entering a new room to see what's there.
 6. Read scrolls (`cat scroll`) to learn about the room.
 7. If you get stuck, try `help` or `ls -a` to find hidden paths.
+8. Stay focused on your stated goal — don't wander into optional side areas unless your goal requires it.
+9. When a scroll suggests a NEXT DESTINATION, prioritize going there.
+
+AVAILABLE COMMANDS:
+pwd, ls, cd, cat, grep, sort, head, tail, wc, find, echo, export, \
+mkdir, touch, cp, mv, rm, ln, alias, history, help, save, exit
+Run game scripts with: ./treasure, ./potion, ./statue, ./spell, etc.
 
 CURRENT STATE:
 - Location: {location}

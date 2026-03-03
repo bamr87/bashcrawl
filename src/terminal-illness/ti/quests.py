@@ -112,6 +112,16 @@ def _hardcoded_quests() -> List[Quest]:
             xp=150,
             location_check="armoury|cellar",
         ),
+        Quest(
+            id=7,
+            title="The Bashcrawl Grimoire",
+            description="Deep in the chapel library, a tome of forgotten spells guards a secret.",
+            objective="Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.",
+            required_commands=["source"],
+            reward="200 XP and the Scriptorium Key (permanent help system access)",
+            xp=200,
+            location_check="study|help",
+        ),
     ]
 
 

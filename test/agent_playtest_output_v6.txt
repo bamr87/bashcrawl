@@ -1,0 +1,4123 @@
+[0;34mℹ️  Bashcrawl launcher started (v3.0.0)[0m
+[0;34mℹ️  Validating Bashcrawl environment...[0m
+[0;32m✅ Environment validation completed[0m
+[0;34mℹ️  Initializing game state...[0m
+[0;32m✅ Game state initialized[0m
+[0;34mℹ️  Starting Bash Agent REPL mode...[0m
+BASHCRAWL AGENT REPL v3.0.0
+Location: /Users/bamr87/github/bashcrawl
+Inventory: <empty>
+HP: 100
+Send commands one per line. Type 'exit' to quit.
+READY>
+CMD> # ============================================================
+
+READY>
+CMD> # BASHCRAWL COMPREHENSIVE AGENT-BASH PLAYTEST v5 (FINAL)
+
+READY>
+CMD> # Precise stdin handling, verified navigation paths,
+
+READY>
+CMD> # and correct directory names after unlock scripts run.
+
+READY>
+CMD> # ============================================================
+
+READY>
+READY>
+CMD> # === PHASE 1: ENTRANCE ===
+
+READY>
+CMD> cd entrance
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance
+[0;32m✨ Quest complete: Awakening: Know Thy Place![0m
+   Reward: Navigation Novice ribbon (+50 XP)
+[0;32m🎯 QUEST TRACKER:[0m
+   Quest 2/7: Eyes to See
+   Objective: Use 'ls' to reveal what surrounds you.
+   Reward: Glimmering lens (+50 XP)
+
+READY>
+CMD> ls
+README.md
+cellar/
+scroll
+
+[0;32m🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+[0;32m✨ Quest complete: Eyes to See![0m
+   Reward: Glimmering lens (+50 XP)
+[0;32m🎯 QUEST TRACKER:[0m
+   Quest 3/7: First Steps
+   Objective: Travel to the entrance with 'cd entrance'.
+   Reward: Pathwalker's charm (+100 XP)
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                           ANCIENT SCROLL OF SIGHT
+================================================================================
+
+It is pitch black in these catacombs.
+You have magickal spells that reveal the world around you.
+
+================================================================================
+                      BASIC MOVEMENT INCANTATIONS
+================================================================================
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+ls                 See room contents            List all items in current room
+cd directory       Move to a room               Enter a directory (room)
+cd ..              Go back                      Return to the previous room
+pwd                Where am I?                  Print your current location
+
+================================================================================
+                         MAGICKAL VIEWING SPELLS
+================================================================================
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+cat filename       View scrolls fully           Display entire scroll content
+less filename      Read long scrolls            Page through text (q to quit)
+head filename      Peek at scroll start         See first 10 lines only
+tail filename      Check scroll ending          See last 10 lines only
+wc filename        Count scroll contents        Count lines, words, characters
+
+Try looking around this room, then move into one of the next rooms.
+
+================================================================================
+                          EXAMPLE INCANTATIONS
+================================================================================
+
+    $ pwd                    # Where am I?
+    $ ls                     # What is in this room?
+    $ cat scroll             # Read a scroll (you are doing this now!)
+    $ less scroll            # Page through a long scroll (press q to quit)
+    $ head scroll            # See just the beginning
+    $ tail scroll            # See just the ending
+    $ wc scroll              # How long is this scroll?
+    $ cd cellar              # Move into the cellar
+    $ cd ..                  # Come back to where you were
+
+Remember to cast these spells when you discover new scrolls and treasures!
+
+================================================================================
+                           THE FIRST CHALLENGE
+================================================================================
+
+Before you venture deeper into the catacombs, you must prove your mastery
+of the viewing spells. Practice reading this very scroll with different
+commands to understand their power.
+
+SIDE PATH — THE WORKSHOP:
+If you are new to the terminal, visit the workshop first. It teaches
+you how to create files and directories:
+
+    cd workshop
+
+NEXT DESTINATION:
+When you are ready, seek the CELLAR — a chamber that lies beneath this
+entrance. The cellar holds ancient secrets about seeing through illusions
+and distinguishing between doorways and objects.
+
+    cd cellar
+
+LOST? Remember these two spells:
+    pwd                      Shows exactly where you are
+    cd ..                    Takes you back one room
+
+May your terminal skills grow strong, brave adventurer!
+
+================================================================================
+
+READY>
+CMD> head scroll
+
+================================================================================
+                           ANCIENT SCROLL OF SIGHT
+================================================================================
+
+It is pitch black in these catacombs.
+You have magickal spells that reveal the world around you.
+
+================================================================================
+                      BASIC MOVEMENT INCANTATIONS
+
+READY>
+CMD> tail scroll
+
+    cd cellar
+
+LOST? Remember these two spells:
+    pwd                      Shows exactly where you are
+    cd ..                    Takes you back one room
+
+May your terminal skills grow strong, brave adventurer!
+
+================================================================================
+
+READY>
+CMD> wc scroll
+      77     364    3594 scroll
+
+READY>
+CMD> ls -a
+./
+../
+.chapel/
+.functions
+.rift/
+.scrap/
+.vault/
+README.md
+cellar/
+scroll
+
+[0;32m🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+READY>
+CMD> # === PHASE 2: CELLAR ===
+
+READY>
+CMD> cd cellar
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/cellar
+
+READY>
+CMD> ls
+README.md
+armoury/
+scroll
+treasure*
+
+[0;32m🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+
+READY>
+CMD> ls -F
+README.md
+armoury/
+scroll
+treasure*
+
+[0;32m🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+
+READY>
+CMD> cat scroll
+
+################################################################################
+#                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #
+################################################################################
+
+🔮 ANCIENT WISDOM: Seeing Beyond the Veil
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*The air grows thick with mystical energy as you descend into the cellar...*
+*Here, ancient magic teaches adventurers to distinguish reality from illusion.*
+
+**Illusions are strong here.** It is difficult to tell what is a doorway and what is an object.
+The untrained eye sees only a simple list of names, but the wise terminal mage learns to
+perceive the **true nature** of all things in the catacombs.
+
+--------------------------------------------------------------------------------
+⚡ THE ENHANCED SIGHT SPELL: ls -F
+--------------------------------------------------------------------------------
+
+The magic spell you use to look can be **augmented** with powerful enchantments.
+
+*Master this incantation to pierce through the veils of confusion...*
+
+┌─ ENHANCED SIGHT INCANTATION ───────────────────────────────────────────────┐
+│                                                                             │
+│ $ ls -F                           # Cast enhanced sight spell              │
+│                                                                             │
+│ Expected Manifestation:                                                     │
+│ scroll  treasure*  armoury/  README.md                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🎯 What the Mystical Symbols Reveal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When you cast `ls -F`, the mystical energies reveal secrets through their symbols:
+
+┌─────────────────┬────────────────────────────┬──────────────────────────────┐
+│ SYMBOL          │ TYPE                       │ DESCRIPTION                  │
+├─────────────────┼────────────────────────────┼──────────────────────────────┤
+│ /               │ Directory (Chamber)        │ Rooms you can enter          │
+│ *               │ Executable (Encounter)     │ Interactive adventures       │
+│ @               │ Symbolic Link (Portal)     │ Magickal doorways            │
+│ |               │ Named Pipe (Channel)       │ Communication pathways       │
+│ =               │ Socket (Connection)        │ Network junction points      │
+│ (none)          │ Regular File (Scroll)      │ Documents and knowledge      │
+└─────────────────┴────────────────────────────┴──────────────────────────────┘
+
+################################################################################
+#              🪄 THE ALIAS ENCHANTMENT: Permanent Spell Enhancement          #
+################################################################################
+
+You can avoid having to type `ls -F` every time by weaving a **command alias** -
+a permanent enchantment that enhances your basic spells:
+
+╭─ PERMANENT ENHANCEMENT SPELL ──────────────────────────────────────────────╮
+│                                                                             │
+│ $ alias ls='ls -F'                # Weave the permanent enchantment        │
+│                                                                             │
+│ Effect: Your basic 'ls' spell now carries enhanced sight                   │
+│                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────╯
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+🎓 Understanding Shell Aliases
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is known as a **shell alias** or **command alias**. With this alias active:
+
+• Typing simply `ls` by itself will automatically run `ls -F`
+• Your spell becomes permanently enhanced for this terminal session  
+• The magic persists until you close your terminal or create a new alias
+
+--------------------------------------------------------------------------------
+🔄 Try It Out! - Interactive Learning Path
+--------------------------------------------------------------------------------
+
+PRACTICE PATH: Discovery → Understanding → Mastery
+
+    1. FIRST STEP: Cast the enhanced spell manually
+       $ ls -F
+
+    2. SECOND STEP: Create the permanent enchantment  
+       $ alias ls='ls -F'
+
+    3. THIRD STEP: Test your enhanced spell
+       $ ls
+
+    4. FOURTH STEP: Verify the magic worked
+       $ alias ls
+       (This reveals your current alias definition)
+
+################################################################################
+#                  🏆 ADVANCED SIGHT TECHNIQUES: Master's Methods             #
+################################################################################
+
+⚡ COLOR-ENHANCED VISION: Advanced Sight Magic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For terminals that support color magic, enhance your sight even further:
+
+╭─ CHROMATIC ENHANCEMENT SPELL ──────────────────────────────────────────────╮
+│                                                                             │
+│ $ alias ls='ls -F --color=auto'   # Weave color into your sight            │
+│                                                                             │
+│ Color Manifestations:                                                       │
+│ • Blue: Directories (chambers)                                             │
+│ • Green: Executables (encounters)                                          │
+│ • Cyan: Symbolic links (portals)                                           │
+│ • White: Regular files (scrolls)                                           │
+│                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────╯
+
+⚡ DETAILED INSPECTION: The Master's Eye
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When you need to examine items more thoroughly:
+
+╭─ COMPREHENSIVE SIGHT SPELL ────────────────────────────────────────────────╮
+│                                                                             │
+│ $ ls -laF                         # Master-level inspection spell          │
+│                                                                             │
+│ This reveals hidden knowledge:                                              │
+│ • -l: Long format (permissions, size, modification time)                   │
+│ • -a: Hidden files (starting with '.')                                     │
+│ • -F: Your familiar file type indicators                                   │
+│                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────╯
+
+################################################################################
+#          🎯 CELLAR CHALLENGE: Master the Enhanced Sight Spells              #
+################################################################################
+
+Before you may claim the **emerald amulet** that awaits in this chamber,
+prove your mastery of the ancient sight arts:
+
+REQUIRED TASKS:
+~~~~~~~~~~~~~~~
+✅ Cast Enhanced Sight: Use ls -F to see the true nature of this cellar
+✅ Create Permanent Enhancement: Set up the alias ls='ls -F' enchantment  
+✅ Test Your Magic: Verify that plain ls now shows file type indicators
+✅ Explore Thoroughly: Use enhanced sight to identify all chambers and encounters
+✅ Find the Treasure: Locate and examine the treasure file in this room
+
+EXPECTED DISCOVERIES:
+~~~~~~~~~~~~~~~~~~~~
+In this cellar, your enhanced sight should reveal:
+
+┌─ CHAMBER CONTENTS ──────────────────────────────────────────────────────────┐
+│                                                                             │
+│ 🏰 Directories ending with / (chambers you can enter)                      │
+│ 🗡️ Executables ending with * (encounters you can experience)               │
+│ 📜 Regular files with no suffix (scrolls to read)                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+################################################################################
+#               💡 PATH TO MASTERY: Building Terminal Intuition               #
+################################################################################
+
+🧠 WHY THIS KNOWLEDGE MATTERS:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Understanding file types is **fundamental** to terminal mastery:
+
+• **Safety**: Know if something is executable before running it
+• **Navigation**: Quickly identify which items are directories
+• **Efficiency**: Understand your environment at a glance
+• **Problem-solving**: Debug issues by understanding file types
+
+🚀 REAL-WORLD APPLICATIONS:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+╭─ PROFESSIONAL CONTEXTS ────────────────────────────────────────────────────╮
+│                                                                             │
+│ • System Administration: Quickly assess directory contents                 │
+│ • Development: Identify scripts, configs, and executables                  │
+│ • Debugging: Understand file permissions and types                         │
+│ • Automation: Write scripts that handle different file types               │
+│                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────╯
+
+💰 TREASURE VAULT: The Emerald Amulet Awaits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once you've mastered the enhanced sight spell and understand the true nature
+of files in the terminal realm, seek out the **treasure** in this chamber.
+
+The emerald amulet you'll find here is more than decoration - it unlocks
+**new pathways** deeper into the catacombs, revealing hidden chambers that
+were previously concealed from untrained eyes.
+
+################################################################################
+#                        🗺️ NEXT STEPS IN YOUR JOURNEY                       #
+################################################################################
+
+With mastery of enhanced sight spells, new mystical pathways reveal themselves:
+
+AVAILABLE PATHS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🗡️ The Armoury: Weapon Mastery Training                                    │
+│    Access: cd armoury                                                       │
+│    Focus: Combat skills and file manipulation                              │
+│    Rewards: Executable permissions and advanced file operations            │
+│                                                                             │
+│ ⛪ Hidden Chapel: Sacred Knowledge Vault                                    │
+│    Access: [unlock condition - collect 3 treasures]                        │
+│    Focus: Secret commands and advanced techniques                           │
+│    Skills: Hidden file manipulation and system secrets                     │
+│                                                                             │
+│ 💰 The Vault: Master's Inventory Domain                                     │
+│    Access: [requires emerald amulet from this chamber]                     │
+│    Focus: Environment variables and inventory management                    │
+│    Rewards: Variable manipulation and state management                      │
+│                                                                             │
+│ 🔧 The Scrap: System Information Sanctum                                   │
+│    Access: [requires completion of armoury trials]                         │
+│    Focus: System information and debugging techniques                       │
+│    Skills: Process monitoring and system analysis                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+VISUAL PATHWAY MAP:
+    Entrance → Cellar → Armoury → Chamber → Hidden Realms
+       ⭐        ⚡        🗡️        🏆         🎖️
+
+Each path teaches **different aspects** of terminal mastery. Choose based on
+your interests and learning goals, or explore them all to become a true
+command-line champion!
+
+================================================================================
+*"In the depths of the cellar, sight becomes insight, and knowledge becomes power."*
+*~ Ancient Terminal Wisdom*
+
+**The magic grows stronger within you, brave adventurer. Press onward!**
+================================================================================
+
+READY>
+CMD> ls -la
+total 48
+drwxr-xr-x@  6 bamr87  staff    192 Feb 20 21:57 ./
+drwxr-xr-x@ 10 bamr87  staff    320 Mar  1 20:33 ../
+-rw-r--r--@  1 bamr87  staff   2553 Feb 20 21:57 README.md
+drwxr-xr-x@  8 bamr87  staff    256 Mar  1 13:29 armoury/
+-rw-r--r--@  1 bamr87  staff  15975 Feb 20 21:57 scroll
+-rwxr-xr-x@  1 bamr87  staff   1685 Feb 20 21:57 treasure*
+
+[0;32m🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+
+READY>
+CMD> ls -laF
+total 48
+drwxr-xr-x@  6 bamr87  staff    192 Feb 20 21:57 ./
+drwxr-xr-x@ 10 bamr87  staff    320 Mar  1 20:33 ../
+-rw-r--r--@  1 bamr87  staff   2553 Feb 20 21:57 README.md
+drwxr-xr-x@  8 bamr87  staff    256 Mar  1 13:29 armoury/
+-rw-r--r--@  1 bamr87  staff  15975 Feb 20 21:57 scroll
+-rwxr-xr-x@  1 bamr87  staff   1685 Feb 20 21:57 treasure*
+
+[0;32m🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+
+READY>
+CMD> ./treasure
+You have found an emerald **amulet**!
+
+To collect treasure, you must have a variable to hold your inventory.
+
+Create a variable and add your treasure to it like this:
+
+export I=amulet,$I
+
+You can always check your wealth with this command:
+
+echo $I
+
+
+You hear stone grinding in the distance...
+New passages have opened in the entrance above!
+Return to the entrance and look around with: ls
+
+
+READY>
+CMD> export I=amulet,$I
+[0;32m🎒 Inventory updated: amulet,[0m
+
+READY>
+READY>
+CMD> # === PHASE 3: ARMOURY ===
+
+READY>
+CMD> cd armoury
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/cellar/armoury
+
+READY>
+CMD> ls
+README.md
+chamber/
+potion*
+scroll
+treasure*
+workshop/
+
+[0;32m🗡️ You have entered the armoury. Master chmod and ./script for combat![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+   🧪 potion - Restore health
+
+READY>
+CMD> ls -F
+README.md
+chamber/
+potion*
+scroll
+treasure*
+workshop/
+
+[0;32m🗡️ You have entered the armoury. Master chmod and ./script for combat![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+   🧪 potion - Restore health
+
+READY>
+CMD> cat scroll
+
+################################################################################
+#                  🗡️  THE GRAND ARMOURY                                      #
+#             Mastering Execution and Permissions                              #
+################################################################################
+
+ANCIENT WISDOM: The Art of Execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The metallic clang of weapons echoes through the chamber
+as you enter the armoury.  Ancient weapons, magickal potions,
+and mystical treasures await those brave enough to master
+the art of EXECUTABLE COMBAT.
+
+Items that end with * when you run  ls -F  are executable
+encounters — programs and scripts you can activate.
+
+################################################################################
+#                     ⚡ RUNNING EXECUTABLES                                  #
+################################################################################
+
+To activate an executable, use the dot-slash incantation:
+
+    ./treasure        Activate the treasure chest
+    ./potion          Consume a magickal potion
+
+THE DOT-SLASH EXPLAINED:
+    .   = "right here" (current directory)
+    /   = path separator
+    ./  = "run the thing HERE, not some other command"
+
+Without the dot-slash, the shell looks for system commands
+instead of local files.  Always use  ./  for local scripts.
+
+--------------------------------------------------------------------------------
+⚡ RELATIVE vs ABSOLUTE PATHS
+--------------------------------------------------------------------------------
+
+RELATIVE PATHS (from where you stand):
+
+    ./treasure           Item in THIS room
+    ../treasure          Item in the room ABOVE
+    chamber/spell        Item in the chamber below
+
+ABSOLUTE PATHS (from the root of the world):
+
+    /usr/bin/ls          System command at exact location
+    ~/documents/file     File in your home territory
+
+--------------------------------------------------------------------------------
+⚡ PERMISSIONS: chmod
+--------------------------------------------------------------------------------
+
+Some items need permission before you can wield them.
+The chmod spell grants execution power:
+
+    chmod +x item        Make an item executable
+    ls -l item           Inspect an item's permissions
+
+READING PERMISSIONS:
+    -rwxr-xr-x   The 'x' means executable
+    -rw-r--r--   No 'x' means NOT executable
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PERMISSION REFERENCE                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMMAND              │ PURPOSE                                             │
+│ ls -l                │ Show detailed permissions for all files             │
+│ ls -F                │ Show type indicators (* = executable)               │
+│ chmod +x FILE        │ Grant execution permission                         │
+│ cat FILE             │ Read a script before running it                     │
+│ file FILE            │ Identify what type of file something is             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+################################################################################
+#                    🔍 SEARCHING FILES: grep                                 #
+################################################################################
+
+The grep spell searches for a word inside a file:
+
+    grep WORD FILENAME
+
+Try searching this very scroll for the word "treasure":
+
+    grep treasure scroll
+
+grep only shows lines that MATCH your search term.
+This is invaluable when dealing with long files.
+
+    grep "executable" scroll     Find lines about executables
+    grep -i "COMBAT" scroll      Case-insensitive search
+
+################################################################################
+#                        🏆 ARMOURY CHALLENGES                                #
+################################################################################
+
+BASIC TRAINING:
+
+    1. See your arsenal:       ls -F
+    2. Inspect permissions:    ls -l
+    3. Claim the treasure:     ./treasure
+    4. Drink the potion:       ./potion
+
+INTERMEDIATE:
+
+    5. Search this scroll:     grep "potion" scroll
+    6. Enter the chamber:      cd chamber
+    7. Read the scroll there:  cat scroll
+    8. Come back:              cd ..
+
+ADVANCED:
+
+    9. Check your inventory:   echo $I
+   10. Check your health:      echo $HP
+   11. If a file won't run, fix it:  chmod +x filename
+
+################################################################################
+#                       ⚠️  COMBAT SAFETY                                    #
+################################################################################
+
+ALWAYS inspect before executing:
+
+    cat item            Read the script before running it
+    file item           Check what type of file it is
+    ls -l item          Verify permissions
+
+NEVER run a script you haven't read first!
+In the real world, unknown scripts can be dangerous.
+
+################################################################################
+#                       🗺️  NAVIGATION                                       #
+################################################################################
+
+YOUR ARSENAL IN THIS ROOM:
+    🗡️  treasure*    — Collect a weapon for your inventory
+    🧪  potion*      — Gain health points for combat
+    📜  scroll       — You're reading it!
+    🏰  chamber/     — The deepest room (boss fight!)
+
+MOVEMENT:
+    cd chamber      Advance to the inner chamber
+    cd ..           Retreat to the cellar
+    pwd             Confirm your location
+
+################################################################################
+
+READY>
+CMD> ls -l
+total 40
+-rw-r--r--@ 1 bamr87  staff  2372 Feb 20 21:57 README.md
+drwxr-xr-x@ 6 bamr87  staff   192 Mar  1 20:32 chamber/
+-rwxr-xr-x@ 1 bamr87  staff  2023 Feb 20 21:57 potion*
+-rw-r--r--@ 1 bamr87  staff  6373 Feb 20 21:57 scroll
+-rwxr-xr-x@ 1 bamr87  staff  1776 Feb 20 21:57 treasure*
+drwxr-xr-x@ 3 bamr87  staff    96 Mar  1 20:01 workshop/
+
+[0;32m🗡️ You have entered the armoury. Master chmod and ./script for combat![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   💰 treasure - Collect treasures
+   🧪 potion - Restore health
+
+READY>
+CMD> grep commands scroll
+Without the dot-slash, the shell looks for system commands
+
+READY>
+CMD> grep -i commands scroll
+Without the dot-slash, the shell looks for system commands
+
+READY>
+CMD> file treasure
+treasure: Bourne-Again shell script text executable, ASCII text
+
+READY>
+CMD> file potion
+potion: Bourne-Again shell script text executable, ASCII text
+
+READY>
+CMD> file scroll
+scroll: Unicode text, UTF-8 text
+
+READY>
+CMD> ./treasure
+You have found a gleaming silver **sword**!  You marvel at
+its craftsmanship, and you recall tales from your childhood
+of the great mystic king Rannismir who bore such a sword to
+protect the kingdom from the undead.
+
+Add this item to your inventory:
+
+export I=sword,$I
+
+Remember, you can check your inventory:
+
+echo $I
+
+
+READY>
+CMD> export I=sword,$I
+[0;32m🎒 Inventory updated: sword,amulet,[0m
+
+READY>
+CMD> ./potion
+You checked that bottle already. 
+
+READY>
+CMD> export HP=15
+[0;32m❤️  Health set to: 15[0m
+
+READY>
+CMD> echo $HP
+15
+
+READY>
+READY>
+CMD> # === PHASE 4: CHAMBER ===
+
+READY>
+CMD> cd chamber
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/cellar/armoury/chamber
+
+READY>
+CMD> ls
+scroll
+spell*
+statue*
+treasure*
+
+[0;32m💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+   💰 treasure - Collect treasures
+   ⚡ statue - Interactive element
+
+READY>
+CMD> ls -F
+scroll
+spell*
+statue*
+treasure*
+
+[0;32m💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+   💰 treasure - Collect treasures
+   ⚡ statue - Interactive element
+
+READY>
+CMD> cat scroll
+
+################################################################################
+#                    🏰 THE CHAMBER OF SPIRITS                                #
+################################################################################
+
+ANCIENT WISDOM: The Power of Memory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You stand in a vast underground chamber lit by flickering
+blue torchlight.  Runes carved into the walls pulse with
+an otherworldly energy.  This is where adventurers learn
+the art of MEMORY — the ability to store and recall
+knowledge using the power of variables.
+
+################################################################################
+#                     📜 ENVIRONMENT VARIABLES                                #
+################################################################################
+
+In these catacombs, your memories are stored as VARIABLES.
+A variable is a named container that holds a value.
+
+--------------------------------------------------------------------------------
+⚡ CREATING VARIABLES: export
+--------------------------------------------------------------------------------
+
+The export spell binds a value to a name, making it
+available throughout your adventure:
+
+    export HP=15
+
+This creates a variable called HP with the value 15.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ VARIABLE REFERENCE                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMMAND               │ PURPOSE              │ EXAMPLE                     │
+│ export VAR=value      │ Create a variable    │ export HP=15                │
+│ echo $VAR             │ Read a variable      │ echo $HP                    │
+│ export I=item,$I      │ Append to variable   │ export I=sword,$I           │
+│ let "VAR=VAR-5"       │ Do arithmetic        │ let "HP=HP-5"               │
+│ unset VAR             │ Forget a variable    │ unset HP                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+--------------------------------------------------------------------------------
+⚡ READING VARIABLES: echo
+--------------------------------------------------------------------------------
+
+The echo spell speaks aloud whatever you tell it.
+When you prefix a variable name with $, echo reveals
+its contents:
+
+    echo $HP
+    echo $I
+
+Try it now:
+
+    echo $HP
+
+If nothing appears, you haven't set your HP yet!
+Go back to the armoury and drink the potion first.
+
+--------------------------------------------------------------------------------
+⚡ YOUR INVENTORY: $I
+--------------------------------------------------------------------------------
+
+Your inventory is stored in the variable I (for Inventory).
+Each treasure you collect gets added with a comma:
+
+    export I=coins,$I
+
+To check what you're carrying:
+
+    echo $I
+
+You should see items like:  sword,amulet,
+
+If your inventory is empty, you may have missed treasures
+in earlier rooms.  Use cd .. to retrace your steps.
+
+--------------------------------------------------------------------------------
+⚡ ARITHMETIC: let
+--------------------------------------------------------------------------------
+
+The let spell performs calculations on your variables:
+
+    let "HP=HP-5"       Subtract 5 from HP
+    let "HP=HP+10"      Add 10 to HP
+    let "HP=HP*2"       Double your HP
+
+After arithmetic, check the result:
+
+    echo $HP
+
+################################################################################
+#                        ⚔️  CHALLENGE                                        #
+################################################################################
+
+This chamber holds three encounters:
+
+    🗡️  statue*    — A guardian that tests your combat skills
+    💰  treasure*  — Riches guarded by the statue
+    🔮  spell*     — A portal-creating incantation
+
+RECOMMENDED ORDER:
+    1. Make sure you have a sword:  echo $I
+    2. Check your health:           echo $HP
+    3. Face the statue:             ./statue
+    4. Claim the treasure:          ./treasure
+    5. Learn the spell:             ./spell
+
+WARNING: The statue hits hard!  If your HP reaches 0,
+you will perish.  Make sure you drank the potion first.
+
+################################################################################
+#                        🗺️  NAVIGATION                                      #
+################################################################################
+
+You have reached the deepest room on the main path.
+
+    cd ..              Go back to the armoury
+    cd ../..           Go back to the cellar
+    cd ../../..        Return to the entrance
+    pwd                Show your current location
+
+Once you've completed this chamber, explore the entrance
+for hidden rooms that your treasures may have unlocked.
+Try:  ls -la ../../..
+
+################################################################################
+
+
+READY>
+CMD> export WEAPON=sword
+
+READY>
+CMD> echo $WEAPON
+$WEAPON
+
+READY>
+CMD> let x=2+3
+
+READY>
+CMD> echo $x
+$x
+
+READY>
+CMD> echo $I
+sword,amulet,
+
+READY>
+CMD> ./statue
+A rugged statue stands in the corner of the room.
+
+Do you approach it? y/n  The statue springs to life, rumbling:
+
+WHO DARES INTRUDE UPON THE CHAMBER OF SPIRITS?
+
+It thrusts a fist at you, hitting you for 5 damage.
+
+The statue's eyes glow with ancient power.
+Behind it, you glimpse a stash of diamonds!
+
+Do you have a sword? y/n  You strike the statue and it breaks to pieces!
+The diamonds spill onto the floor before you.
+
+Add the diamonds to your inventory:
+
+export I=diamonds,$I
+
+However, you have taken damage.
+Deduct 5 from your HP variable:
+
+let "HP=HP-5"
+
+
+READY>
+CMD> let HP=HP-5
+
+READY>
+CMD> echo $HP
+10
+
+READY>
+CMD> ./treasure
+
+You have found a stash of **coins**!  They are old and worn
+with age,  but they still gleam in the magickal light
+emanating from your eyes.
+
+Prefix this item to your inventory:
+
+export I=coins,$I
+
+Remember, you can check your inventory:
+
+echo $I
+
+
+READY>
+CMD> export I=coins,$I
+[0;32m🎒 Inventory updated: coins,sword,amulet,[0m
+
+READY>
+CMD> ./spell
+Runes, the language of the ancient mystics that once ruled
+this land, are inscribed upon the western wall.
+
+Do you want to read them? y/n  You recall the lessons of Caitlyn the Green, who taught you
+these ancient letters.
+
+The runes are instructions on how to summon a PORTAL — a
+magickal shortcut to a distant room.
+
+In the terminal, this is called a SYMBOLIC LINK (symlink).
+A symlink is a special file that points to another location,
+like a portal that teleports you somewhere else.
+
+The command to create one is:
+
+    ln -s TARGET LINKNAME
+
+  TARGET   = where the portal LEADS (the destination)
+  LINKNAME = what you call the portal here
+
+To create a portal from this chamber to the hall:
+
+    ln -fs ../../../chapel/courtyard/aviary/hall portal
+
+Once created, walk through it like any other door:
+
+    cd portal
+
+To learn more about symlinks, visit the SCRAP room
+(accessible from the entrance).
+
+
+READY>
+READY>
+CMD> # === PHASE 5: CHAPEL ===
+
+READY>
+CMD> # From chamber -> armoury -> cellar -> entrance
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+[0;32m✨ Quest complete: First Steps![0m
+   Reward: Pathwalker's charm (+100 XP)
+[0;32m🎯 QUEST TRACKER:[0m
+   Quest 4/7: Shape the World
+   Objective: Create a new space by running 'mkdir workshop' while in the entrance.
+   Reward: Builder's sigil (+100 XP)
+
+READY>
+CMD> ls -a
+./
+../
+.functions
+.rift/
+README.md
+cellar/
+chapel/
+scrap/
+scroll
+vault/
+
+[0;32m🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cd chapel
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel
+
+READY>
+CMD> ls
+altar*
+courtyard/
+graveyard/
+scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ altar - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                     ⛪ THE HIDDEN CHAPEL
+================================================================================
+
+There is writing upon the wall.
+
+It is written in the common language of the land.
+
+It appears to be inscribed in blood:
+
+           T U R N    B A C K
+
+You can feel the chill of ancient spirits lingering here.
+But brave adventurers press on, for the chapel holds secrets
+that cannot be found on the main path.
+
+================================================================================
+                   HIDDEN ROOMS & ls -a
+================================================================================
+
+Not all chambers are visible to the untrained eye.
+Some rooms begin with a dot (.) making them HIDDEN.
+
+COMMAND            PURPOSE
+--------           --------
+ls -a              Reveal ALL files, including hidden ones
+ls -la             Detailed view of all files (hidden + visible)
+
+Try it now:
+
+    $ ls -a
+
+You may discover doorways you never knew existed.
+
+================================================================================
+                   HISTORY RECALL
+================================================================================
+
+Speaking of turning back:
+
+You can re-use previous commands by pressing the
+UP and DOWN arrow to scroll through your history.
+Try it!
+
+================================================================================
+                  PATHS FROM THE CHAPEL
+================================================================================
+
+The chapel connects to mysterious areas:
+
+    courtyard/     An open area with a fountain and strange rags
+    graveyard/     A solemn resting place with hidden tombs
+
+Each path teaches different skills. The graveyard holds
+secrets visible only with ls -a (look for the mausoleum).
+
+NAVIGATION:
+    cd courtyard    Explore the chapel grounds
+    cd graveyard    Visit the resting place of the fallen
+    cd ..           Return to the entrance
+
+================================================================================
+
+READY>
+CMD> ls -a
+./
+../
+.chapel/
+altar*
+courtyard/
+graveyard/
+scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ altar - Interactive element
+
+READY>
+CMD> ls -la
+total 16
+drwxr-xr-x@  7 bamr87  staff   224 Mar  1 20:32 ./
+drwxr-xr-x@ 10 bamr87  staff   320 Mar  1 20:33 ../
+drwxr-xr-x@  6 bamr87  staff   192 Feb 23 13:44 .chapel/
+-rwxr-xr-x@  1 bamr87  staff  3068 Feb 20 21:57 altar*
+drwxr-xr-x@  6 bamr87  staff   192 Feb 20 21:57 courtyard/
+drwxr-xr-x@  8 bamr87  staff   256 Feb 20 21:57 graveyard/
+-rw-r--r--@  1 bamr87  staff  2143 Feb 20 21:57 scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ altar - Interactive element
+
+READY>
+CMD> ./altar
+In the corner is a decaying old altar of some forgotten god.
+There is a small trinket on the ground.  It looks religious
+in nature.
+
+Do you want to put the trinket back on the altar? y/n  
+Do you want to take the trinket for yourself? y/n  
+You leave the trinket where it lies.  There is a great
+sadness here.  You feel compelled to move on.
+
+
+READY>
+READY>
+CMD> # === PHASE 6: GRAVEYARD ===
+
+READY>
+CMD> cd graveyard
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/graveyard
+
+READY>
+CMD> ls
+columbarium/
+lower-quadrant/
+padlock*
+royal-tombs/
+scroll
+
+[0;32m🪦 The graveyard holds secrets. Use ls -a to find the hidden mausoleum.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ padlock - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                        THE GRAVEYARD
+================================================================================
+
+The graveyard is a haunting place, shrouded in mist and silence.
+
+Rusted iron gates creak in the cold wind, leading to a field of
+weathered tombstones, some cracked and others half-hidden by ivy.
+
+Twisted, barren trees loom over the field, with branches like
+skeletal fingers reaching toward a perpetually overcast sky.
+The air is thick with the scent of damp earth and decay.
+Every footstep on the gravel path seems to echo in
+the oppressive stillness.
+
+A dark and crumbling mausoleum stands ominously in the
+centre, its door secured with an old rusty padlock.
+
+================================================================================
+                   HIDDEN FILES: ls -a
+================================================================================
+
+Not everything in the graveyard is visible.  Some things
+are hidden — their names begin with a dot (.)
+
+To see ALL items, including hidden ones:
+
+    $ ls -a
+
+Try it now.  Can you find the hidden mausoleum?
+
+Hidden files and directories are common in the terminal:
+    .bashrc        Your shell configuration
+    .ssh/          Secure shell keys
+    .git/          Version control data
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd columbarium       Enter the wall of niches
+    cd lower-quadrant    Visit the modest graves
+    cd royal-tombs       Explore the royal burial ground
+    cd .mausoleum        Enter the hidden mausoleum (use ls -a to find it!)
+    cd ..                Return to the chapel
+
+================================================================================
+
+READY>
+CMD> ls -a
+./
+../
+.mausoleum/
+columbarium/
+lower-quadrant/
+padlock*
+royal-tombs/
+scroll
+
+[0;32m🪦 The graveyard holds secrets. Use ls -a to find the hidden mausoleum.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ padlock - Interactive element
+
+READY>
+CMD> ./padlock
+The old padlock features three dials, each adorned with a distinct
+symbol:
+  an amulet
+  a crown
+  a tombstone with the initials F.K. 
+
+The dials are worn and scratched, their numbers barely visible beneath
+layers of rust and grime. The intricate symbols, though faded, hint at
+the lock's connection to ancient, enigmatic lore.
+
+have you found the numbers? y/n  Continue your search for the numbers on the graveyard.
+
+
+READY>
+READY>
+CMD> # === PHASE 7: MAUSOLEUM ===
+
+READY>
+CMD> cd .mausoleum
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/graveyard/.mausoleum
+
+READY>
+CMD> ls
+loot*
+room
+scroll
+spell*
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+   ⚡ loot - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    THE HIDDEN MAUSOLEUM
+================================================================================
+
+Inside the decayed mausoleum, you catch glimpses of
+tarnished silver urns, rusted candlesticks, and ornate
+chests scattered among the debris.
+
+The grand chamber is filled with relics of a bygone era,
+half-buried and cloaked in dust.
+
+It would be unwise to sift through the loot, for there
+are often traps protecting the belongings of the dead.
+
+================================================================================
+                   CHALLENGE
+================================================================================
+
+Check the contents of the room with:
+
+    cat room
+
+Once you have found the number of the correct item,
+pick it up by running the "loot" script:
+
+    ./loot
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the graveyard
+
+================================================================================
+
+READY>
+CMD> cat room
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is the chest you are looking for note: 27121981
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is the spell you are looking for
+READY>
+CMD> sort room
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is the chest you are looking for note: 27121981
+This is the spell you are looking for
+
+READY>
+CMD> sort room | uniq
+This is not the candlesticks you are looking for 0123456789
+This is not the chest you are looking for 0123456789
+This is not the debris you are looking for 0123456789
+This is not the spell you are looking for 0123456789
+This is not the urn you are looking for 0123456789
+This is the chest you are looking for note: 27121981
+This is the spell you are looking for
+
+READY>
+CMD> ./loot
+As your hand hovers over the array of chests, you feel an eerie
+pull toward one in particular.
+
+What is the number of your choice?  As you pry it open, a soft creak reveals its contents. You find a
+trove of ancient **gold coins**, a jewel-encrusted **bracelet**
+with a large emerald, and a set of **silver keys** engraved with 
+mysterious runes. The treasures glimmer with a hint of long-
+forgotten wealth and secrets.
+
+Add the Items to your inventory with:
+
+export I=goldcoins,bracelet,silverkeys,$I,
+
+
+READY>
+CMD> export I=goldcoins,bracelet,silverkeys,$I
+[0;32m🎒 Inventory updated: goldcoins,bracelet,silverkeys,coins,sword,amulet,[0m
+
+READY>
+CMD> ./spell
+As you hastily scan the room, your gaze falls upon a tattered,
+ancient scroll partially protruding from beneath a crumbled
+chest. Ignoring the other trinkets, you pull it free, revealing
+faded runes scratched onto the fragile parchment. Unfurling the
+scroll, you recognize it as a spell of aid:
+
+In decayed rooms where shadows stay,
+'uniq' will charm the clones away.
+
+You can combine spells (commands) with a pipe (|) character.
+The "uniq" command omits repeated lines.
+Sort the room, and then pipe its output
+to "uniq" for a short list. Try the incantation:
+
+sort room | uniq
+
+READY>
+READY>
+CMD> # === PHASE 8: COLUMBARIUM ===
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd columbarium
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/graveyard/columbarium
+
+READY>
+CMD> ls
+niches
+open*
+scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ open - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                      THE COLUMBARIUM
+================================================================================
+
+Before you is the columbarium, a weathered stone structure
+adorned with carvings of angels and vines.  Rows of niches
+line its walls, some with long burnt-out candles, others
+with worn inscriptions and small tokens of remembrance.
+
+Many have distinctive symbols on their front.  Maybe you
+can find one that is helpful.
+
+================================================================================
+                   CHALLENGE: touch & grep
+================================================================================
+
+If you think you have found the right niche, you can touch
+it with the following command:
+
+    touch <number of niche>
+
+This creates an empty file in the current room (directory).
+After you have created the file, try to "open" the niche:
+
+    ./open
+
+If you know a spell that helps you search, you can make it
+easier for yourself.  Try:
+
+    cat niches
+    grep <pattern> niches
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the graveyard
+
+================================================================================
+
+READY>
+CMD> cat niches
+23 Eagle
+05 Dove
+12 Lotus flower
+19 Sword wreathed in flame
+27 Mountain
+04 Book
+16 Tree branch
+09 Sun
+01 Musical notes
+22 Pine tree
+10 An elder god
+15 Amulet
+29 Sea monster
+07 Crescent moon
+25 Butterfly
+18 Cross
+14 A familiar constellation
+30 Flame and candle
+20 Goblet
+08 Winged warrior
+11 Water droplet
+17 Castle
+03 Ibis
+24 Rose
+28 Hammer
+21 Full moon
+02 Anchor  
+26 Wheat sheaf  
+13 Crest of an ancient noble family
+06 Heart
+
+READY>
+CMD> touch 15
+
+READY>
+CMD> ./open
+You open the niche, revealing a hidden plaque with a number etched 
+into its surface. The quiet of the graveyard thickens as the number 
+**2712** emerges from the shadows.
+
+Remember the number by adding it to your inventory:
+
+export I=2712,$I
+
+
+READY>
+CMD> export I=2712,$I
+[0;32m🎒 Inventory updated: 2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,[0m
+
+READY>
+READY>
+CMD> # === PHASE 9: LOWER-QUADRANT ===
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd lower-quadrant
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/graveyard/lower-quadrant
+
+READY>
+CMD> ls
+gravestones
+scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                   THE LOWER QUADRANT
+================================================================================
+
+In the lower quadrant of the graveyard, the land dips
+slightly, and fog clings to the uneven ground.  The
+gravestones here are modest and small, many leaning
+with age, with inscriptions barely legible beneath
+creeping ivy.
+
+The air is damp and heavy, carrying the scent of wet
+earth and decay.  The faint sound of trickling water
+from an unseen stream accentuates the stillness.
+
+================================================================================
+                   SORTING DATA: sort
+================================================================================
+
+As you try to make sense of the gravestones, a spell
+comes to your mind that could be helpful.
+
+You can sort the gravestones by date with:
+
+    sort gravestones
+
+Once you do this, look for a familiar name and take
+note of the year of death.  Add the year to your
+inventory:
+
+    export I=<year of death>,$I
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the graveyard
+
+================================================================================
+
+READY>
+CMD> sort gravestones
+1765,1702,Frederick Kingsley
+1781,1724,Henry Abernathy
+1787,1736,Agnes Merriweather
+1798,1743,Ezekiel Carrington
+1800,1758,Jonathan Hale
+1802,1749,Harriet Fenwick
+1812,1760,Philip Tremont
+1820,1768,Matthias Blackwood
+1824,1771,Vivian Radcliffe
+1831,1777,Oswald Sinclair
+1832,1785,Samuel Garrison
+1843,1790,Gregor Wilhelm
+1846,1783,Nicholas Barlow
+1851,1797,Louisa Cartwright
+1853,1805,Cornelius Drummond
+1854,1799,Isabel Montrose
+1863,1809,Lydia Redgrave
+1864,1811,Catherine Delacroix
+1867,1820,Josephine Clarke
+1869,1822,Victor Hartwell
+1870,1816,Alexander Grimshaw
+1872,1828,Evelyn Winters
+1875,1832,Eleanor Hawthorne
+1880,1835,Martha Holloway
+1887,1839,Beatrice Lovelace
+1889,1840,Edgar Ravenscroft
+1893,1847,Sarah Whitmore
+1901,1852,Barnabas Drake
+1908,1867,Annabelle Lancaster
+1910,1859,Margaret Westfield
+1914,1863,Alice Kensington
+1917,1871,Thomas Yates
+1926,1883,Eliza Mayfield
+1932,1885,Rupert Ashton
+1935,1889,Simon Blackwell
+1937,1895,Isabella Thorne
+1945,1901,Lucille Gray
+1950,1903,Harold Griffiths
+1954,1910,Diana Albright
+1960,1915,Clara Montague
+Year of Death,Birth Year,Name
+
+READY>
+READY>
+CMD> # === PHASE 10: ROYAL-TOMBS ===
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd royal-tombs
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/graveyard/royal-tombs
+
+READY>
+CMD> ls
+royals
+scroll
+sign
+statues*
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ statues - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    THE ROYAL TOMBS
+================================================================================
+
+As you enter the plot of royal graves, a sense of faded
+grandeur fills the air.  The once imposing gravestones,
+crafted from marble and adorned with royal crests, now
+show signs of neglect, their surfaces weathered and
+chipped.
+
+Moss creeps up the bases of the monuments, and the
+intricate carvings of crowns and heraldry are worn by
+time.
+
+A few of the grandest tombs have cracked open, iron
+gates rusted and askew.  The stone angels and lions,
+meant to stand as vigilant guardians, are more forlorn
+than proud.
+
+It is quiet here, save for an occasional rustle of dry
+leaves and the distant call of a crow echoing through
+the stillness.
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the graveyard
+
+================================================================================
+
+READY>
+CMD> grep King royals
+5. **King Alistair Ravenscroft**  
+
+READY>
+CMD> ./statues
+Standing in front of the statues, you are thinking about the symbols
+on the padlock. Do you have an item in your inventory that looks familiar?
+
+Do you have the item? y/n  You step back from the statues, continuing your search for the Item.
+
+READY>
+READY>
+CMD> # === PHASE 11: COURTYARD ===
+
+READY>
+CMD> # From royal-tombs -> graveyard -> chapel -> courtyard
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd courtyard
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/courtyard
+
+READY>
+CMD> ls
+aviary/
+fountain*
+rags*
+scroll
+
+[0;32m⛪ Chapel path: Discover hidden commands and the ancient library tome.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ fountain - Interactive element
+   ⚡ rags - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                         THE COURTYARD
+================================================================================
+
+There is a great fountain in the center of this courtyard.
+The waters are bright and clear in the magickal light
+emanating from your eyes.
+
+There were once plants growing here, but they are all
+dead and gnarled now.
+
+If you stand still here, you can hear the soft rippling
+of water, and even the occasional splash.
+
+Perhaps there are fish that yet live in the fountain?
+
+================================================================================
+                    IDENTIFYING OBJECTS: file
+================================================================================
+
+This courtyard is full of unusual objects.  How do you know
+what something IS before you touch it?
+
+COMMAND            PURPOSE                      DESCRIPTION
+--------           --------                     -----------
+file item          Identify an object           Shows what type of file it is
+ls -l              Inspect in detail            Permissions, size, and date
+
+Try examining the objects here:
+
+    $ file fountain
+    $ file rags
+    $ ls -l
+
+The 'file' command reveals the true nature of things — whether
+an object is a script, text, data, or something else entirely.
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd aviary        Enter the frost-bitten aviary ahead
+    cd ..            Return to the chapel
+    pwd              Confirm your location
+
+================================================================================
+
+READY>
+CMD> ./fountain
+Do you want to approach the fountain? y/n  The waters sparkle in the light of your gaze.  You feel
+drawn to it.
+
+You try to resist, but you cannot.  You dip your hand into
+the fountain,  and you feel your skin burning.  The pain
+snaps you out of your trance and you only suffer -2 HP.
+
+Remember to deduct 2 points from your HP variable:
+
+let "HP=HP-2"
+
+
+READY>
+CMD> ./rags
+There's a pile of old **rags**.  They are old and worn with
+age, and probably fell off of some poor adventurer.
+
+Do you want to take the rags? y/n  As you take the rags from the floor, you find a salted fish,
+probably from the rations of the former owner of these rags.
+Prefix these items to your inventory:
+
+export I=rags,fish,$I
+
+Remember, you can check your inventory
+
+echo $I
+
+
+READY>
+CMD> export I=rags,fish,$I
+[0;32m🎒 Inventory updated: rags,fish,2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,[0m
+
+READY>
+READY>
+CMD> # === PHASE 12: AVIARY ===
+
+READY>
+CMD> cd aviary
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/courtyard/aviary
+
+READY>
+CMD> ls
+crystal*
+hall/
+penguin*
+scroll
+
+[0;32m⛪ Chapel path: Discover hidden commands and the ancient library tome.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ penguin - Interactive element
+   ⚡ crystal - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                       THE FROST-BITTEN AVIARY
+================================================================================
+
+You enter a room that has been magickally frost-bitten.
+
+Snow and frost covers the ground, an icy pond leading perhaps
+to an underground lake or to the outside, is in the far corner.
+
+A few small black and white birds waddle around the room,
+taking no notice of you.
+
+================================================================================
+                   TAB COMPLETION: A Powerful Shortcut
+================================================================================
+
+A wise adventurer does not type every letter of every word.
+
+Press the TAB key after typing the first few letters of a
+file or directory name, and the terminal will complete it
+for you.
+
+TRY IT NOW:
+    Type:  cd h
+    Then press TAB.
+
+The terminal should complete it to:  cd hall
+
+This works everywhere in the terminal — for file names,
+directory names, and even some commands.  If there are
+multiple matches, press TAB twice to see all options.
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd hall          Enter the darkened hall ahead
+    cd ..            Return to the courtyard
+    pwd              Confirm your location
+
+================================================================================
+
+READY>
+CMD> ./penguin
+One of the birds finally notices your presence.  It turns
+its head sideways, seemingly beckoning for you to come
+closer.
+
+Do you get closer? y/n  You take a step forward, and the bird rushes toward you, its
+mouth open wide.
+
+Do you happen to have a fish? y/n  
+You toss the fish at the penguin,  which catches the fish
+mid-air and gobbles it down.
+
+Don't forget to remove the fish from your inventory.  Try
+the following command:
+
+export I=$(sed "s/fish//; s/,,/,/" <<< $I)
+
+
+READY>
+CMD> ./crystal
+A white crystal, forged by the Queen of Winter, on the
+frosty ground.
+
+You can prefix this item to your inventory:
+
+I=crystal,$I
+
+Remember, you can check your inventory:
+
+echo $I
+
+
+READY>
+CMD> export I=crystal,$I
+[0;32m🎒 Inventory updated: crystal,rags,fish,2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,[0m
+
+READY>
+READY>
+CMD> # === PHASE 13: HALL ===
+
+READY>
+CMD> cd hall
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/courtyard/aviary/hall
+
+READY>
+CMD> ls
+library/
+monster*
+scroll
+
+[0;32m⛪ Chapel path: Discover hidden commands and the ancient library tome.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   👹 monster - Combat encounter
+
+READY>
+CMD> cat scroll
+
+################################################################################
+#                      🏚️  THE DARKENED HALL                                  #
+################################################################################
+
+ANCIENT WISDOM: Know Your Enemy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The air grows thick and foul.  Claw marks gouge the stone
+walls, and the remnants of shattered weapons litter the
+floor.  Something dangerous lurks ahead.
+
+Before you proceed, prepare yourself.
+
+--------------------------------------------------------------------------------
+⚡ CHECK YOUR READINESS
+--------------------------------------------------------------------------------
+
+A wise adventurer checks their supplies before battle:
+
+    echo $I           Check your inventory
+    echo $HP          Check your health
+
+If you have a SWORD, your attacks will be stronger.
+If you don't, consider retreating to find one.
+
+    If your inventory shows:  sword,amulet,
+    you are ready to fight.
+
+    If not:  cd ..  to go back and explore.
+
+--------------------------------------------------------------------------------
+⚡ VARIABLE TESTING: grep
+--------------------------------------------------------------------------------
+
+The grep spell searches for a pattern within text.
+It can check if you carry a specific item:
+
+    grep sword <<< "$I"
+
+If 'sword' is in your inventory, grep will print it.
+If not, grep prints nothing and returns an error code.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ GREP REFERENCE                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMMAND                      │ PURPOSE                                     │
+│ grep WORD FILE               │ Search for WORD in a file                   │
+│ grep WORD <<< "$VAR"         │ Search for WORD in a variable               │
+│ grep --quiet WORD <<< "$I"   │ Silent check (for scripts)                  │
+│ grep -r WORD .               │ Search all files recursively                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+--------------------------------------------------------------------------------
+⚡ WHAT LIES AHEAD
+--------------------------------------------------------------------------------
+
+A fearsome beast guards this hall.  To fight it:
+
+    ./monster
+
+The combat system will ask you to enter numbers.
+The beast and you each "roll" — higher roll wins.
+Having a sword gives you a significant advantage.
+
+If you defeat the monster, a treasure will appear.
+
+If your HP reaches 0, the game is over.
+Remember:  you can deduct damage manually:
+
+    let "HP=HP-5"
+
+GOOD LUCK, ADVENTURER.
+
+################################################################################
+
+READY>
+CMD> ./monster
+A hulking three-legged beast, with a mouth full of fangs and
+a barbed tail and 8 arms, lumbers toward you.
+
+If you have a sword, you can attack.  Otherwise, you should
+run.
+
+Do you want to attack? y/n  You wisely turn and flee.  Quickly cd to the previous
+directory.
+
+
+READY>
+CMD> echo $I
+crystal,rags,fish,2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,
+
+READY>
+READY>
+CMD> # === PHASE 14: LIBRARY ===
+
+READY>
+CMD> cd library
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/chapel/courtyard/aviary/hall/library
+
+READY>
+CMD> ls
+portal@
+scroll
+tome*
+
+[0;32m⛪ Chapel path: Discover hidden commands and the ancient library tome.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ tome - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                      THE ANCIENT LIBRARY
+================================================================================
+
+You are in a small library.  There are shelves on all
+sides of the room, containing many books and knick-knacks.
+Some of these shelves look like they haven't been moved
+in centuries...
+
+Before you, there is a small table with a very large
+book open on it.
+
+================================================================================
+                   THE ART OF SELF-LEARNING: man
+================================================================================
+
+The greatest skill a terminal mage can learn is how to
+learn MORE on their own.  The 'man' command opens the
+manual page for any command:
+
+COMMAND            PURPOSE
+--------           --------
+man ls             Read the manual for 'ls'
+man grep           Read the manual for 'grep'
+man chmod          Read the manual for 'chmod'
+
+Inside a man page, use the same controls as 'less':
+    SPACE = next page
+    b     = previous page
+    /word = search for 'word'
+    q     = quit
+
+You can also use --help for a quick summary:
+
+    ls --help
+    grep --help
+
+================================================================================
+                    THE ANCIENT TOME
+================================================================================
+
+The great book on the table appears to be an ancient tome
+of terminal wisdom.  To read it:
+
+    ./tome
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Return to the hall
+    cd ../..         Return to the aviary
+    cd ../../..      Return to the courtyard
+
+================================================================================
+
+READY>
+CMD> ./tome
+
+You see a large tome on the table, open
+to a page in the middle of the book.
+
+Do you read it? y/n  
+The tome appears to be a book of spells.  Here is the
+first spell:
+
+
+Use the tmux terminal multiplexer!
+
+tmux is a terminal multiplexer, which allows the user to
+manage sessions, windows, and panes within the terminal.
+The biggest reason to use a terminal multiplexer is that it
+keeps the shells in each of its panes persistent, meaning
+you can detach and reattach to tmux panes, windows, and
+sessions (possibly from another computer altogether),
+without losing your work, or where you were.  You can even
+use tmux to share the terminal with another user (who is
+using a different computer from the one you are using), just
+have them connect to the same session!
+
+tmux is a separate package, and may not be installed by
+default.  Consult your operating system package manager
+manual for details on installing tmux.
+
+You can launch tmux using the following command:
+
+tmux new-session -s <session_name>
+
+Where <session_name> can be replaced by the arbitrary name
+you want to give the session.  If you don't want to name the
+session, you can leave off "-s <session_name>".
+
+By default, tmux will create the new session with one
+window, and that window will have but one pane.  Each pane
+created by tmux is a pseudo terminal, running its own
+independent shell.  There will be a status bar at the bottom
+of the tmux pane, with the session name (if any) and
+numbered windows.
+
+To interact with tmux inside of a tmux pane, you pass the
+prefix key, which is Ctrl-b by default.  You can then hit
+another key to have tmux do something useful.  One such
+useful thing is to split the tmux pane vertically, with a
+horizontal line separating your old pane and the freshly
+launched new pane on the bottom.  To do this, type the
+following:
+
+Ctrl-b, then %
+
+Instead of %, you can type " to split the pane horizontally,
+with a vertical line separating the two panes.  You can type
+:, to enter the tmux shell, and issue arbitrary tmux
+commands that way.  See the tmux manual for details:
+
+man tmux
+
+To detach from the tmux session, you can issue the following
+keystrokes:
+
+Ctrl-b, then d
+
+...for "Detach".  Then, later on, possibly from a different computer
+altogether (connecting to the computer running tmux over SSH
+or some other remote shell program), you can attach to the
+tmux session with the following command:
+
+tmux attach -t <session_name>
+
+tmux has a complete configuration language, which is by
+default stored in ~/.tmux.conf.  You can set up arbitrary
+keystrokes in the configuration file, to make tmux behave
+however you want.  The limit is your imagination!
+
+Do you want to read another spell? y/n  
+As you close the tome, you hear stone grinding behind you.
+One of the bookshelves has shifted, revealing a narrow
+passage into a hidden study!
+
+    ls
+    cd study
+
+
+READY>
+CMD> ls -a
+./
+../
+portal@
+scroll
+study/
+tome*
+
+[0;32m⛪ Chapel path: Discover hidden commands and the ancient library tome.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ tome - Interactive element
+
+READY>
+CMD> cd study
+
+READY>
+CMD> cat scroll
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      📜 THE HIDDEN STUDY 📜                                 │
+│                    Shell Functions & Custom Commands                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+You step through the opening behind the bookshelf and find
+yourself in a small, dusty study.  Stacks of parchment cover
+every surface.  The walls are lined with strange diagrams —
+flowcharts, loops, and branching paths drawn in faded ink.
+
+On the desk, a leather-bound grimoire glows faintly.
+
+────────────────────────────────────────────────────────────────────────────────
+⚡ THE ART OF CRAFTING SPELLS: Shell Functions
+────────────────────────────────────────────────────────────────────────────────
+
+In the terminal, you can CREATE your own commands using
+shell functions.  A function is a named block of commands
+that you can call by name, just like a built-in spell.
+
+The syntax is:
+
+    function_name () {
+        command1
+        command2
+    }
+
+For example, to create a command called 'inventory' that
+shows your items:
+
+    inventory () { echo $I; }
+
+After defining it, just type:
+
+    inventory
+
+And your inventory is displayed!
+
+────────────────────────────────────────────────────────────────────────────────
+⚡ CREATING THE BASHCRAWL COMMAND: bc
+────────────────────────────────────────────────────────────────────────────────
+
+The diagrams on the wall describe a powerful meta-spell — a
+command called 'bc' that summons the Bashcrawl help system
+from anywhere in the dungeon.
+
+To create it, speak these words:
+
+    bc () { bash $BASHCRAWL_ROOT/help.sh "$@"; }
+    export -f bc
+
+Now you can use it from any room:
+
+    bc              Show contextual help for your location
+    bc commands     Show the full command reference
+    bc map          Show the dungeon map
+
+But wait — this spell will fade when you close the terminal.
+To make it permanent, inscribe it into your personal scroll
+of incantations:
+
+    echo 'bc () { bash $BASHCRAWL_ROOT/help.sh "$@"; }' >> ~/.bashrc
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCTION vs ALIAS                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  alias    │ Simple text substitution  │ alias ll='ls -la'                  │
+│  function │ Full logic + arguments    │ greet () { echo "Hello $1"; }      │
+│           │                           │                                     │
+│  Use aliases for shortcuts.  Use functions when you need                    │
+│  arguments ($1, $2, ...) or complex logic (if/then/loops).                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────
+🗡️ THE GRIMOIRE
+────────────────────────────────────────────────────────────────────────────────
+
+The grimoire on the desk contains an even deeper secret.
+Run it to unlock a portal to the very SOURCE of the help
+system — where the spells are written:
+
+    ./grimoire
+
+────────────────────────────────────────────────────────────────────────────────
+                           NAVIGATION
+────────────────────────────────────────────────────────────────────────────────
+
+    cd ..            Return to the library
+    cd ../..         Return to the hall
+
+
+READY>
+CMD> ./grimoire
+
+You open the grimoire.  Ancient diagrams spring to life on
+the pages — shell functions, argument passing, command
+composition.  The knowledge flows into your mind.
+
+As you read the final page, the air in the study shimmers.
+A glowing PORTAL appears against the far wall, revealing a
+vast chamber beyond — the SCRIPTORIUM, where the very source
+of the help system is written.
+
+A ripple of energy passes through the room as the portal
+stabilizes.
+
+To step through the portal:
+
+    cd portal
+
+To add the grimoire to your inventory:
+
+    export I=grimoire,$I
+
+To activate the Bashcrawl 'bc' command:
+
+    bc () { bash /Users/bamr87/github/bashcrawl/help.sh "$@"; }
+    export -f bc
+
+Or, to permanently activate the full help system:
+
+    source /Users/bamr87/github/bashcrawl/src/help/init_help.sh
+
+
+READY>
+CMD> cd ..
+
+READY>
+READY>
+CMD> # === PHASE 15: VAULT ===
+
+READY>
+CMD> # From library -> hall -> aviary -> courtyard -> chapel -> entrance (5 levels)
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd vault
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/vault
+
+READY>
+CMD> ls
+glass*
+scroll
+stronghold/
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ glass - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    💰 THE VAULT OF MEMORY
+================================================================================
+
+You have entered an asymmetric room with shards of glass
+arranged along the floor in haphazard patterns.
+
+As you move past them, they each appear to turn slightly,
+as if watching you go.
+
+On the wall is a picture of two goblets:
+one glows brightly,
+the other shines darkly.
+
+================================================================================
+                  ENVIRONMENT VARIABLES
+================================================================================
+
+The vault teaches the art of MEMORY — storing knowledge
+in variables that persist throughout your adventure.
+
+COMMAND                  PURPOSE
+--------                 --------
+export VAR=value         Store a value in memory
+echo $VAR                Recall a stored value
+export I=item,$I         Add an item to your inventory
+echo $I                  Check your inventory
+let "HP=HP-5"            Perform arithmetic on variables
+unset VAR                Forget a variable
+
+================================================================================
+                   THE GLASS GUARDIAN
+================================================================================
+
+The shards of glass on the floor are not mere decoration.
+They form a guardian — an interactive encounter.
+
+    ./glass              Face the glass guardian
+
+Be prepared: you may need items from earlier rooms.
+
+================================================================================
+                    DEEPER PATHS
+================================================================================
+
+Beyond the glass lies the stronghold, where the legendary
+goblet awaits. The goblet is said to unlock passages to
+realms beyond mortal comprehension.
+
+    stronghold/     The heart of the vault (contains the goblet)
+
+The stronghold branches further:
+    nursery/        A garden of growing knowledge
+    lab/            An alchemy room (beware the ghost!)
+
+NAVIGATION:
+    cd stronghold   Venture deeper into the vault
+    cd ..           Return to the entrance
+
+================================================================================
+
+READY>
+CMD> ./glass
+Do you have an ice crystal? y/n  You place the ice crystal among the shards of glass.  The
+sword in your hands becomes cold.  You feel the power of
+1000 blizzards coursing through it.
+
+Don't forget to remove the crystal from your inventory.  Try
+the following command:
+
+export I=$(sed 's/crystal,//' <<< $I)
+
+READY>
+READY>
+CMD> # === PHASE 16: STRONGHOLD ===
+
+READY>
+CMD> cd stronghold
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/vault/stronghold
+
+READY>
+CMD> ls
+goblet*
+nursery/
+orb1
+scroll
+
+[0;32m💰 Vault path: Master variables, collect the goblet to unlock the Rift![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ goblet - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    THE STRONGHOLD
+================================================================================
+
+There is a fine gold goblet at the center of a
+runic triangle on the floor.
+
+You try to take the goblet, but your hand
+passes through it as if it were illusory.
+
+You notice a glowing orb, labeled orb1, in one
+corner of the triangle.  The other points of the
+triangle are labeled orb2 and orb3, but the orbs
+have long since been stolen by tomb raiders.
+
+Perhaps adding more orbs would free the goblet's
+material form.
+
+================================================================================
+                   COPYING OBJECTS: cp
+================================================================================
+
+You remember a spell your magick teacher,
+Caitlin the Green, taught you long ago:
+a spell to COPY and name objects.
+
+The 'cp' command duplicates a file:
+
+    cp SOURCE DESTINATION
+
+To create the missing orbs, copy the existing one:
+
+    cp orb1 orb2
+    cp orb1 orb3
+
+Verify your work:
+
+    ls -F
+
+Once all three orbs are in place, try the goblet:
+
+    ./goblet
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd nursery       Enter the nursery beyond
+    cd ..            Return to the vault
+
+================================================================================
+
+READY>
+CMD> cp orb1 orb2
+
+READY>
+CMD> cp orb1 orb3
+
+READY>
+CMD> ./goblet
+You have freed the goblet's material form.  Add 'goblet' to
+your inventory.
+
+export I=goblet,$I
+
+A strange energy pulses through the dungeon walls.
+Somewhere far above, in the entrance hall, a hidden
+passage to the RIFT has opened...
+
+
+READY>
+CMD> export I=goblet,$I
+[0;32m🎒 Inventory updated: goblet,crystal,rags,fish,2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,[0m
+
+READY>
+READY>
+CMD> # === PHASE 17: NURSERY ===
+
+READY>
+CMD> cd nursery
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/vault/stronghold/nursery
+
+READY>
+CMD> ls
+lab/
+scroll
+spell*
+
+[0;32m💰 Vault path: Master variables, collect the goblet to unlock the Rift![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   📜 spell - Cast magic spells
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                     THE NURSERY OF THE STILL DEAD
+================================================================================
+
+Once a thriving nursery filled with vibrant plants,
+this is now the Nursery of the Still Dead (it says so,
+in writing on the wall).
+
+Withered roots snake across the floor, and the air
+carries the faint scent of dried herbs and old earth.
+
+================================================================================
+                   SEARCHING IN DEPTH: find
+================================================================================
+
+The 'find' command searches through directories recursively,
+revealing items hidden in rooms within rooms within rooms.
+
+COMMAND                      PURPOSE
+--------                     --------
+find . -name "scroll"        Find all scrolls below this room
+find . -type d               Find all rooms (directories) below
+find . -type f               Find all objects (files) below
+
+Try it now to discover what lies beneath the nursery:
+
+    $ find . -type f
+
+You may discover the laboratory hidden below...
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd lab           Descend into the abandoned laboratory
+    cd ..            Return to the stronghold
+    pwd              Confirm your location
+
+================================================================================
+
+READY>
+CMD> find . -name "scroll"
+
+READY>
+CMD> ./spell
+A page from a druid's tome of incantations lies on the
+ground.  It reveals to you how to summon a healing potion:
+
+# To find a file on your system, use the find command.  For
+# example, to search this room:
+
+find . -name "potion"
+
+# Once you've found a potion, copy it to this directory and
+# run this spell script again.
+
+There are no potions in this room.  But try searching
+starting at the entrance.
+
+Hint: use pwd to determine how many rooms (folders) are
+between you and the entrance.
+
+
+READY>
+READY>
+CMD> # === PHASE 18: LAB ===
+
+READY>
+CMD> # Lab is INSIDE nursery (not a sibling)
+
+READY>
+CMD> cd lab
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/vault/stronghold/nursery/lab
+
+READY>
+CMD> ls
+ghost*
+scroll
+
+[0;32m💰 Vault path: Master variables, collect the goblet to unlock the Rift![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ ghost - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                   THE ABANDONED LABORATORY
+================================================================================
+
+An abandoned laboratory of a wizard long dead.
+
+A lone magickal torch ignites as you enter, shedding
+light on the workshop, and casts haunting shadows
+on every surface.
+
+The flames lick the walls, burning off the moss that had
+gathered there. The burning moss sizzles in the silence
+of the catacombs, like angelic wailing or singing.
+
+================================================================================
+                    CHAINING SPELLS: Pipes
+================================================================================
+
+In the laboratory, the wizard's notes describe how to
+CHAIN commands together, feeding the output of one spell
+into another:
+
+COMMAND                          PURPOSE
+--------                         --------
+cmd1 | cmd2                      Pipe: output of cmd1 feeds into cmd2
+cat scroll | grep "wizard"       Find lines containing "wizard"
+ls | wc -l                       Count how many items are in a room
+
+These "pipes" are one of the most powerful tools in the
+terminal. They let you combine simple commands into
+complex operations.
+
+Try examining the ghost before you face it:
+
+    $ file ghost
+    $ cat ghost | head -20
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    ./ghost          Face the ghost (if you dare!)
+    cd ..            Retreat to the nursery
+    cd ../..         Return to the stronghold
+
+================================================================================
+
+READY>
+CMD> ./ghost
+The room shakes, a gust of wind blasts you from nowhere.
+You sense that a presence has entered the room.  The pain
+you suddenly feel assures you that you are under attack by a
+ghostly entity!
+
+If you have a sword, you can attack.  Otherwise, you should
+run.
+
+Do you want to attack? y/n  You wisely turn and flee.  Quickly cd to the previous
+directory.
+
+
+READY>
+READY>
+CMD> # === PHASE 19: SCRAP ===
+
+READY>
+CMD> # From lab -> nursery -> stronghold -> vault -> entrance (4 levels)
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd scrap
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/scrap
+
+READY>
+CMD> ls
+scroll
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                          THE SCRAP HEAP
+================================================================================
+
+You enter a dusty alcove littered with discarded parchments
+and broken tools.  Among the debris, you find an ancient
+note scratched into the stone wall:
+
+"Descend, bold traveller, into the dungeons of POSIX
+ which the shadow of Scartaris touches, and you will
+ learn the magickal incantations of the Wildebeest."
+
+--------------------------------------------------------------------------------
+                     SYMLINK SPELL: ln -s
+--------------------------------------------------------------------------------
+
+A symlink is a magickal portal — a shortcut that points
+to another location without moving the original.
+
+CREATING A PORTAL:
+
+    ln -s TARGET LINK_NAME
+
+EXAMPLE — Create a portal to a hidden rift:
+
+    From the entrance:
+        ln -s .rift portal
+
+    From the chamber:
+        ln -s ../../../../.rift portal
+
+Once created, you can walk through the portal:
+
+    cd portal
+
+NOTE: The portal points to where something IS, not where
+you want it to BE.  If the target path is wrong, the portal
+leads nowhere.
+
+CHECK IF SOMETHING IS A PORTAL:
+
+    ls -l
+
+    Symlinks appear as:  portal -> .rift
+
+REMOVE A PORTAL:
+
+    rm portal
+
+    This removes the link, NOT the destination!
+
+--------------------------------------------------------------------------------
+              "I have done this, in the place of the
+               singing flame."
+                     — Arnnisen the Gray
+--------------------------------------------------------------------------------
+
+================================================================================
+
+READY>
+READY>
+CMD> # === PHASE 20: RIFT ===
+
+READY>
+CMD> # From scrap -> entrance (1 level). Rift renamed from .rift by goblet.
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> ls -a
+./
+../
+.functions
+README.md
+cellar/
+chapel/
+rift/
+scrap/
+scroll
+vault/
+
+[0;32m🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.[0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cd rift
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/rift
+
+READY>
+CMD> ls
+arena/
+box*
+scroll
+spire/
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ box - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    🌀 THE RIFT
+================================================================================
+
+You find yourself on a world not of this reality.
+
+The sky is red, mountains hang in the sky and
+trees are flames that form from smoke
+descending from the heavens.
+
+You have entered the rift.
+
+================================================================================
+                  ADVANCED CHALLENGES
+================================================================================
+
+The rift is the domain of masters.  Everything you have
+learned — navigation, file viewing, variables, permissions,
+symlinks — will be tested here.
+
+                   COMMAND CHAINING: Pipes & Logic
+
+COMMAND                          PURPOSE
+--------                         --------
+cmd1 | cmd2                      Pipe: output of cmd1 feeds into cmd2
+cmd1 && cmd2                     Run cmd2 only if cmd1 succeeds
+cmd1 ; cmd2                      Run both commands in sequence
+cmd1 || cmd2                     Run cmd2 only if cmd1 FAILS
+
+EXAMPLES:
+    cat scroll | grep "rift"     Search this scroll for "rift"
+    ls -la && echo "Success"     List files, then print success
+    ls | wc -l                   Count items in a room
+
+                   RIFT CHALLENGES
+
+CHALLENGE 1: Count the items in this room
+    ls | wc -l
+
+CHALLENGE 2: Find all scrolls below the rift
+    find . -name "scroll" | cat
+
+CHALLENGE 3: Search for hidden rooms
+    ls -laR | grep "^\."
+
+CHALLENGE 4: Check your readiness in one command
+    echo "Inventory: $I" && echo "Health: $HP"
+COMMAND CHAINING:
+    cmd1 | cmd2          Pipe output of one command into another
+    cmd1 && cmd2         Run cmd2 only if cmd1 succeeds
+    cmd1 ; cmd2          Run both commands in sequence
+
+EXAMPLE:
+    cat scroll | grep "rift"
+    ls -la && echo "Success"
+
+================================================================================
+                   PATHS IN THE RIFT
+================================================================================
+
+Two paths diverge in this alien landscape:
+
+    arena/       The combat arena — boss encounters await
+                 Deep within lies the PIT and its guardians:
+                 Nyarlathotep and the Drummer
+
+    spire/       A towering structure reaching into the red sky
+                 Climb to the mezzanine for a hidden elevator
+                 leading to a secret satellite station
+
+Hidden rooms may lurk here as well.  Use ls -a to search.
+
+NAVIGATION:
+    cd arena        Enter the combat arena
+    cd spire        Ascend the tower
+    cd ..           Return through the rift
+
+================================================================================
+*"Reality bends for those who command the terminal."*
+================================================================================
+
+READY>
+CMD> ./box
+A metal box sits upon the ground.  It appears to be
+illuminated from within.  There is a window in the box. The
+window is black, but there is luminescent writing.
+
+Do you want to read the writing? y/n  
+.--------------------------------,
+|       Welcome to POSIX         |
+|   Enter your username:         |
+'--------------------------------'
+You feel magic in the air.
+
+READY>
+READY>
+CMD> # === PHASE 21: ARENA/PIT ===
+
+READY>
+CMD> cd arena
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/rift/arena
+
+READY>
+CMD> ls
+pit/
+scroll
+
+[0;32m🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cat scroll
+
+ .:|  T H E C H A M B E R O F  |:.
+.:||  N Y A R L A T H O T E P  ||:.
+-----------------------------------
+| /                             \ |
+| |                             | |
+|||                             |||
+|||                             |||
+|||                             |||
+|||                             |||
+|||                             |||
+|||                             |||
+||| __________________________  |||
+|||/''''                   ''''\|||
+-----------------------------------
+
+# You have entered an ancient arena,
+# probably used for worship.
+#
+# And "worship", in this dangerous realm,
+# usually means blood sport.
+#
+# There is a gaping pit in the center
+# of the arena.
+#
+# If you remember how to summon a potion,
+# this might be a good time to do it.
+
+
+READY>
+CMD> cd pit
+
+READY>
+CMD> ls
+drum
+drummer*
+end
+nyarlathotep*
+platinum*
+scroll
+treasure*
+wizard-light*
+
+[0;32m🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+⚡ Interactive elements found:
+   ⚡ drummer - Interactive element
+   ⚡ nyarlathotep - Interactive element
+   ⚡ platinum - Interactive element
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                    THE PIT OF NYARLATHOTEP
+================================================================================
+
+You have entered the chamber of Nyarlathotep, the
+crawling chaos.
+
+Nyarlathotep, older than the old gods themselves,
+has been waiting for you.
+
+================================================================================
+                   PREPARE FOR BATTLE
+================================================================================
+
+Check your readiness before engaging:
+
+    echo $I          Your inventory
+    echo $HP         Your health points
+
+The encounters here are the most dangerous in the
+catacombs.  Make sure you have a sword and plenty
+of health points.
+
+    ./nyarlathotep   Face the crawling chaos
+    ./drummer        Battle the drummer
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd ..            Retreat to the arena
+    cd ../..         Return to the rift
+
+================================================================================
+
+READY>
+CMD> ./drummer
+War drums pound in the distance, giving Nyarlathotep
+strength.
+
+If you know a spell to un-summon the drums, Nyarlathotep
+would probably weaken! If you know how to look up a new
+command, learn the "mv" command now.
+
+
+READY>
+CMD> ./nyarlathotep
+In the blink of an eye, Nyarlathotep is standing before you.
+From its hands emanate black necrotic rays, and your mind
+screams.
+
+Are you armed? y/n  You turn to flee but find that you cannot.  You spend 1000
+years as a mindless servant to the crawling chaos.  When you
+awaken, you may attempt to fight for your liberation.
+
+
+READY>
+CMD> ./wizard-light
+You feel a presence.  It's probably just your imagination.
+
+
+READY>
+CMD> ./treasure
+You have found a lock of the **hair** of a god!  Add it to your inventory.
+
+
+READY>
+CMD> ./platinum
+This treasure has already been taken.
+
+READY>
+CMD> cat drum
+
+#
+# You can hear drumming in the distance.
+#
+
+
+READY>
+CMD> cat end
+You have reached the end of the game.  You know enough Bash
+now to use it for every day activities.  Practice makes
+perfect, so be sure to use it often.  For continued Bash
+tips, visit opensource.com often.
+
+And eventually, we hope to see you contribute your own
+dungeon rooms to Bashcrawl!
+
+
+READY>
+READY>
+CMD> # === PHASE 22: SPIRE/MEZZANINE ===
+
+READY>
+CMD> # From pit -> arena -> rift -> spire
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd spire
+
+READY>
+CMD> pwd
+/Users/bamr87/github/bashcrawl/entrance/rift/spire
+
+READY>
+CMD> ls
+mezzanine/
+scroll
+
+[0;32m🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire![0m
+📜 There is a scroll here. Read it with: [0;36mcat scroll[0m
+
+READY>
+CMD> cat scroll
+
+================================================================================
+                       THE SPIRE
+================================================================================
+
+The stairway rises up beyond sight.
+The red glow of the rift fades behind you,
+and there is nothing but darkness as you
+ascend upward into silence.
+
+================================================================================
+                   EXPLORING HIDDEN DEPTHS
+================================================================================
+
+The spire rewards those who look carefully.
+Remember your hidden-sight spells:
+
+    ls -a            Reveal hidden rooms
+    ls -la           Detailed view of everything
+
+Some doors here are hidden even from 'ls'.
+You may need to combine commands:
+
+    ls -la | grep "^\."     Find hidden entries
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd mezzanine     Continue ascending
+    cd ..            Descend back to the rift
+
+================================================================================
+
+READY>
+CMD> cd mezzanine
+
+READY>
+CMD> ls
+button*
+window
+
+[0;32m🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire![0m
+⚡ Interactive elements found:
+   ⚡ button - Interactive element
+
+READY>
+CMD> # Mezzanine has no scroll file
+
+READY>
+CMD> ./button
+You see a glowing red button with what appears to be an
+arrow pointing up inscribed on its face.
+
+Are you tempted to press the button?  y/n  The doors slide open, revealing a small chamber.
+
+
+READY>
+READY>
+CMD> # === TEST PIPED COMMANDS ===
+
+READY>
+CMD> # From mezzanine -> spire -> rift -> entrance (3 levels)
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cd ..
+
+READY>
+CMD> cat scroll | head -5
+
+================================================================================
+                           ANCIENT SCROLL OF SIGHT
+================================================================================
+
+
+READY>
+CMD> ls -la | grep scroll
+-rw-r--r--@  1 bamr87  staff  3594 Feb 20 21:57 scroll
+
+READY>
+CMD> echo "pipe test done"
+"pipe test done"
+
+READY>
+READY>
+CMD> # === FINAL STATUS ===
+
+READY>
+CMD> echo $I
+goblet,crystal,rags,fish,2712,goldcoins,bracelet,silverkeys,coins,sword,amulet,
+
+READY>
+CMD> echo $HP
+10
+
+READY>
+CMD> inventory
+[0;32m🎒 INVENTORY:[0m
+   🏆 goblet
+   ✦ crystal
+   ✦ rags
+   ✦ fish
+   ✦ 2712
+   ✦ goldcoins
+   ✦ bracelet
+   ✦ silverkeys
+   🪙 coins
+   🗡️ sword
+   📿 amulet
+   ─────────────
+   Total: 11 item(s)
+
+READY>
+CMD> health
+[0;32m❤️  HEALTH STATUS:[0m
+   HP: [0;31m██░░░░░░░░░░░░░░░░░░[0m 10/100
+   Status: [0;31mCritical — find healing immediately![0m
+
+READY>
+SESSION ENDED
+READY>
+[0;34mℹ️  Bashcrawl launcher shutting down gracefully[0m
+The doors slide closed.

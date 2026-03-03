@@ -6,7 +6,11 @@ from typing import Dict, List, Optional, TypedDict
 import json
 
 
-SAVE_FILE_NAME = ".ti_save.json"
+# Unified save file shared with the Bash emulator (lib/state.sh)
+SAVE_FILE_NAME = ".bashcrawl_save.json"
+
+# Legacy file name for backwards compatibility / migration
+_LEGACY_SAVE_NAME = ".ti_save.json"
 
 
 class OutputEntry(TypedDict):
@@ -19,15 +23,21 @@ class GameState:
     current_quest_id: int = 0
     completed_quest_ids: List[int] = field(default_factory=list)
     learned_commands: List[str] = field(default_factory=list)
-    current_location: str = "/entrance"
+    current_location: str = "entrance"
     player_name: Optional[str] = None
     experience_points: int = 0
     session_history: List[OutputEntry] = field(default_factory=list)
     mode: str = "classic"  # classic | dynamic
     # Game variables mirroring bash env vars
     inventory: str = ""  # comma-separated items (mirrors $I)
-    hp: int = 0  # health points (mirrors $HP)
+    hp: int = 100  # health points (mirrors $HP) — default 100
     env_vars: Dict[str, str] = field(default_factory=dict)
+    # Bash-side fields preserved for round-trip compatibility
+    game_level: str = "novice"
+    game_started: str = "false"
+    session_count: int = 0
+    last_session: str = ""
+    scrolls_read: str = ""
 
     @property
     def game_env(self) -> Dict[str, str]:
@@ -54,28 +64,81 @@ class GameState:
     def save(self, save_path: Optional[Path] = None) -> None:
         target = save_path or Path.cwd() / SAVE_FILE_NAME
         data = asdict(self)
+        # Normalise location: strip leading "/" for bash compatibility
+        loc = data.get("current_location", "entrance")
+        if loc.startswith("/"):
+            loc = loc.lstrip("/") or "entrance"
+        data["current_location"] = loc
+        # Serialise list fields as comma-separated strings for bash interop
+        if isinstance(data.get("completed_quest_ids"), list):
+            data["completed_quest_ids"] = ",".join(
+                str(x) for x in data["completed_quest_ids"]
+            )
+        if isinstance(data.get("learned_commands"), list):
+            data["learned_commands"] = ",".join(data["learned_commands"])
+        # Merge any extra keys that were in the file but not in our dataclass
+        if hasattr(self, "_extra_keys"):
+            data.update(self._extra_keys)
         target.write_text(json.dumps(data, indent=2))
 
     @classmethod
     def load(cls, save_path: Optional[Path] = None) -> GameState:
         target = save_path or Path.cwd() / SAVE_FILE_NAME
+
+        # Migration: try legacy .ti_save.json if the unified file is missing
         if not target.exists():
-            return cls()
+            legacy = target.parent / _LEGACY_SAVE_NAME
+            if legacy.exists():
+                target = legacy
+            else:
+                return cls()
+
         try:
             data = json.loads(target.read_text())
-            return cls(
-                current_quest_id=data.get("current_quest_id", 0),
-                completed_quest_ids=list(data.get("completed_quest_ids", [])),
-                learned_commands=list(data.get("learned_commands", [])),
-                current_location=data.get("current_location", "/entrance"),
-                player_name=data.get("player_name"),
+
+            # Normalise location: strip leading "/"
+            loc = data.get("current_location", "entrance")
+            if isinstance(loc, str) and loc.startswith("/"):
+                loc = loc.lstrip("/") or "entrance"
+
+            # Handle completed_quest_ids: may be comma-string (bash) or list (python)
+            raw_completed = data.get("completed_quest_ids", [])
+            if isinstance(raw_completed, str):
+                completed = [int(x) for x in raw_completed.split(",") if x.strip()]
+            else:
+                completed = list(raw_completed)
+
+            # Handle learned_commands: may be comma-string (bash) or list (python)
+            raw_learned = data.get("learned_commands", [])
+            if isinstance(raw_learned, str):
+                learned = [x.strip() for x in raw_learned.split(",") if x.strip()]
+            else:
+                learned = list(raw_learned)
+
+            gs = cls(
+                current_quest_id=int(data.get("current_quest_id", 0)),
+                completed_quest_ids=completed,
+                learned_commands=learned,
+                current_location=loc,
+                player_name=data.get("player_name") or None,
                 experience_points=int(data.get("experience_points", 0)),
                 session_history=list(data.get("session_history", [])),
                 mode=data.get("mode", "classic"),
                 inventory=data.get("inventory", ""),
-                hp=int(data.get("hp", 0)),
+                hp=int(data.get("hp", 100)),
                 env_vars=dict(data.get("env_vars", {})),
+                game_level=data.get("game_level", "novice"),
+                game_started=str(data.get("game_started", "false")),
+                session_count=int(data.get("session_count", 0)),
+                last_session=data.get("last_session", ""),
+                scrolls_read=data.get("scrolls_read", ""),
             )
+
+            # Preserve unknown keys for round-trip with bash
+            known = {f.name for f in cls.__dataclass_fields__.values()}
+            gs._extra_keys = {k: v for k, v in data.items() if k not in known}
+
+            return gs
         except Exception:
             return cls()
 

@@ -85,10 +85,16 @@ export BASHCRAWL_MODE="main_launcher"
 export BASHCRAWL_ROOT
 export BASHCRAWL_VERSION="$VERSION"
 
-export I=""          # Inventory
-export HP=100        # Health Points
-export GAME_LEVEL="novice"
-export CURRENT_AREA="pre-entrance"
+# Source unified state management (sets I, HP, GAME_LEVEL, CURRENT_AREA)
+if [[ -f "${BASHCRAWL_ROOT}/lib/state.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/state.sh"
+fi
+
+# Provide sensible defaults if state.sh was not loaded
+export I="${I:-}"
+export HP="${HP:-100}"
+export GAME_LEVEL="${GAME_LEVEL:-novice}"
+export CURRENT_AREA="${CURRENT_AREA:-entrance}"
 
 RESTRICTED_MODE=true
 
@@ -116,59 +122,68 @@ declare -a QUEST_TARGET_CONTEXT
 declare -a QUEST_REWARDS
 declare -a QUEST_REWARD_XP
 
+# Quest data aligned with src/help/data/quests.yaml (single source of truth).
+# To add/change quests, edit quests.yaml — the Python TUI reads from there too.
+
 QUEST_TITLES=(
     "Awakening: Know Thy Place"
     "Eyes to See"
     "First Steps"
+    "Ancient Knowledge"
     "Shape the World"
     "Spark of Creation"
-    "Read the Signs"
     "Seek the Whisper"
+    "The Bashcrawl Grimoire"
 )
 
 QUEST_OBJECTIVES=(
-    "Cast the 'pwd' spell to learn where you stand."
-    "Use 'ls' to reveal what surrounds you."
-    "Travel to the entrance with 'cd entrance'."
-    "Create a new space by running 'mkdir workshop' while in the entrance."
-    "Enter the workshop and conjure 'notes.txt' with 'touch notes.txt'."
-    "Read your freshly created notes with 'cat notes.txt'."
-    "Within the entrance, seek the word 'catacombs' in the scroll using 'grep'."
+    "Cast the 'pwd' spell to reveal your place in the dungeon."
+    "Use 'ls' to reveal nearby rooms and scrolls."
+    "Use 'cd cellar' to descend into the cellar."
+    "Use 'cat scroll' to read the ancient knowledge."
+    "Navigate to the workshop and use 'mkdir' to create a directory."
+    "Use 'touch' to create a new file."
+    "Use 'grep' to search for a word within a scroll."
+    "Find the hidden study, run the grimoire, and define the 'bc' command."
 )
 
-QUEST_REQUIRED_COMMAND=(pwd ls cd mkdir touch cat grep)
+QUEST_REQUIRED_COMMAND=(pwd ls cd cat mkdir touch grep source)
 
 QUEST_HINTS=(
     "Type 'pwd' and press Enter to see your current chamber."
     "Try 'ls' to survey the room's contents."
-    "Use 'cd entrance' to step into the dungeon proper."
-    "While standing in the entrance, run 'mkdir workshop' to shape a new workspace."
-    "Move into the workshop with 'cd workshop' and create notes via 'touch notes.txt'."
-    "Inside the workshop, read what you've made: 'cat notes.txt'."
-    "Back in the entrance, run 'grep catacombs scroll' to uncover the hidden clue."
+    "Use 'cd cellar' to descend into the cellar."
+    "Try 'cat scroll' to read the ancient knowledge on the pedestal."
+    "Use 'mkdir' to shape a new workspace."
+    "Use 'touch notes.txt' to conjure a new file."
+    "Run 'grep catacombs scroll' to uncover the hidden clue."
+    "Find the library, read the tome, then source the grimoire."
 )
 
+# location_check — pipe-separated room names (empty = any location)
 QUEST_TARGET_CONTEXT=(
-    "bashcrawl"
-    "bashcrawl"
-    "entrance"
-    "entrance"
-    "entrance/workshop"
-    "entrance/workshop"
-    "entrance"
+    ""
+    ""
+    "cellar"
+    ""
+    ""
+    ""
+    "armoury|cellar"
+    "study|help"
 )
 
 QUEST_REWARDS=(
     "Navigation Novice ribbon"
     "Glimmering lens"
     "Pathwalker's charm"
+    "Reader's sigil"
     "Builder's sigil"
     "Scribe's quill"
-    "Reader's sigil"
     "Whisperer's token"
+    "Scriptorium Key"
 )
 
-QUEST_REWARD_XP=(50 50 100 100 100 100 150)
+QUEST_REWARD_XP=(50 50 100 100 100 100 150 200)
 
 readonly QUEST_TOTAL=${#QUEST_TITLES[@]}
 
@@ -249,51 +264,16 @@ validate_environment() {
 # Path: Game State Management with Persistence
 initialize_game_state() {
     log_event "INFO" "Initializing game state..." "state"
-    
-    # Create default game state if it doesn't exist
-    if [[ ! -f "$GAME_STATE_FILE" ]]; then
-        cat > "$GAME_STATE_FILE" << EOF
-# Bashcrawl Initial Game State
-PLAYER_INVENTORY=""
-PLAYER_HEALTH=100
-PLAYER_LEVEL="novice"
-CURRENT_AREA="pre-entrance"
-GAME_STARTED="false"
-TUTORIAL_COMPLETED="false"
-AREAS_VISITED=""
-TREASURES_FOUND=""
-LAST_SESSION="$(date -Iseconds)"
-SESSION_COUNT=0
-TOTAL_PLAYTIME=0
-# Terminal-emulator state (populated on first interactive session)
-INVENTORY=""
-HEALTH=100
-GAME_LEVEL="novice"
-CURRENT_QUEST_ID=0
-QUEST_COMPLETED=""
-LEARNED_COMMANDS=""
-GAME_XP=0
-SCROLLS_READ=""
-CURRENT_PATH="bashcrawl"
-EOF
-        log_event "SUCCESS" "Game state initialized" "state"
-    else
-        log_event "INFO" "Loading existing game state" "state"
-        # Update last session time
-        sed -i.bak "s/LAST_SESSION=.*/LAST_SESSION=\"$(date -Iseconds)\"/" "$GAME_STATE_FILE"
-        rm -f "${GAME_STATE_FILE}.bak"
-    fi
-    
-    # Source the game state with error handling
-    if [[ -f "$GAME_STATE_FILE" ]]; then
-        # Temporarily disable strict mode for sourcing
-        set +u
-        # shellcheck source=/dev/null
-
-        # shellcheck source=/dev/null
-        source "$GAME_STATE_FILE"
-        set -u
-    fi
+    state_init   # creates .bashcrawl_save.json if missing (with migration)
+    state_load || true   # load into memory + export I, HP, etc.
+    # Map state fields to main.sh variables used by the quest system
+    CURRENT_QUEST_ID="$(state_get current_quest_id)"
+    QUEST_COMPLETED="$(state_get completed_quest_ids)"
+    LEARNED_COMMANDS="$(state_get learned_commands)"
+    GAME_XP="$(state_get experience_points)"
+    SCROLLS_READ="$(state_get scrolls_read)"
+    CURRENT_PATH="$(state_get current_location)"
+    log_event "SUCCESS" "Game state loaded" "state"
 }
 
 
@@ -801,7 +781,7 @@ execute_command() {
             ;;
 
         # Executable files (game content)
-        "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost"|"./statue"|"./altar"|"./rags"|"./fountain"|"./penguin"|"./crystal"|"./goblet"|"./glass"|"./padlock"|"./statues"|"./open"|"./nyarlathotep"|"./drummer"|"./wizard-light"|"./button"|"./loot"|"./box"|"./tome"|"./pieces"|"./armour"|"./platinum"|"./display"|"./robot"|"./end"|"./carcass"|"./king"|"./window")
+        "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost"|"./statue"|"./altar"|"./rags"|"./fountain"|"./penguin"|"./crystal"|"./goblet"|"./glass"|"./padlock"|"./statues"|"./open"|"./nyarlathotep"|"./drummer"|"./wizard-light"|"./button"|"./loot"|"./box"|"./tome"|"./grimoire"|"./pieces"|"./armour"|"./platinum"|"./display"|"./robot"|"./end"|"./carcass"|"./king"|"./window")
             if [[ -x "$cmd" ]]; then
                 handled=true
                 if (( ${#original_args[@]} )); then
@@ -837,6 +817,8 @@ execute_command() {
             expanded_args="${expanded_args//\$USER/$USER}"
             expanded_args="${expanded_args//\$HOME/$HOME}"
             expanded_args="${expanded_args//\$PWD/$PWD}"
+            expanded_args="${expanded_args//\$BASHCRAWL_ROOT/$BASHCRAWL_ROOT}"
+            expanded_args="${expanded_args//\$OLDPWD/${OLDPWD:-}}"
             echo "$expanded_args"
             ;;
 
@@ -872,12 +854,25 @@ execute_command() {
             exit_terminal
             ;;
 
-        # Shell builtins: export, let, alias
+        # Shell builtins: export, let, alias, unset, source
         "export")
             handled=true
             if [[ -n "$args" ]]; then
+                # Handle export -f (export shell function)
+                if [[ "$args" == -f\ * ]]; then
+                    local func_name="${args#-f }"
+                    if declare -f "$func_name" &>/dev/null; then
+                        export -f "$func_name" 2>/dev/null
+                        status=$?
+                        if [[ $status -eq 0 ]]; then
+                            echo -e "${SUCCESS_COLOR}Function '$func_name' exported.${RESET_COLOR}"
+                        fi
+                    else
+                        echo -e "${ERROR_COLOR}Function not found: $func_name${RESET_COLOR}"
+                        status=1
+                    fi
                 # Validate: only allow safe variable assignments (NAME=VALUE)
-                if [[ "$args" =~ ^[A-Za-z_][A-Za-z_0-9]*= ]]; then
+                elif [[ "$args" =~ ^[A-Za-z_][A-Za-z_0-9]*= ]]; then
                     eval "export $args" 2>/dev/null
                     status=$?
                     if [[ $status -eq 0 ]]; then
@@ -987,6 +982,131 @@ execute_command() {
             fi
             status=$?
             ;;
+        "file")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                file "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: file <filename>${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "uniq")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                uniq "${original_args[@]}" 2>&1
+            else
+                echo -e "${ERROR_COLOR}Usage: uniq <filename>${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "man")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                # Show a brief help instead of launching the pager
+                local man_cmd="${original_args[0]}"
+                echo "Manual page for: $man_cmd"
+                echo "─────────────────────────────"
+                "$man_cmd" --help 2>&1 | head -30 || echo "(no help available for $man_cmd)"
+            else
+                echo -e "${ERROR_COLOR}Usage: man <command>${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "unalias")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                unalias "${original_args[@]}" 2>/dev/null || echo "No such alias: ${original_args[0]}"
+            else
+                echo -e "${ERROR_COLOR}Usage: unalias <name>${RESET_COLOR}"
+            fi
+            status=$?
+            ;;
+        "unset")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                local var_name="${original_args[0]}"
+                # Only allow unsetting game-related variables
+                if [[ "$var_name" =~ ^[A-Za-z_][A-Za-z_0-9]*$ ]]; then
+                    unset "$var_name" 2>/dev/null
+                    status=$?
+                    echo -e "${SUCCESS_COLOR}Variable '$var_name' unset.${RESET_COLOR}"
+                else
+                    echo -e "${ERROR_COLOR}Invalid variable name: $var_name${RESET_COLOR}"
+                    status=1
+                fi
+            else
+                echo -e "${ERROR_COLOR}Usage: unset <variable>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "source"|".")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                local src_file="${original_args[0]}"
+                if [[ -f "$src_file" ]]; then
+                    # shellcheck disable=SC1090
+                    source "$src_file" 2>&1
+                    status=$?
+                else
+                    echo -e "${ERROR_COLOR}File not found: $src_file${RESET_COLOR}"
+                    status=1
+                fi
+            else
+                echo -e "${ERROR_COLOR}Usage: source <filename>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "readlink")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                readlink "${original_args[@]}" 2>&1
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: readlink <symlink>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "dirname")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                dirname "${original_args[@]}" 2>&1
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: dirname <path>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "basename")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                basename "${original_args[@]}" 2>&1
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: basename <path>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "type")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                type "${original_args[@]}" 2>&1
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: type <command>${RESET_COLOR}"
+                status=1
+            fi
+            ;;
+        "declare")
+            handled=true
+            if (( ${#original_args[@]} )); then
+                declare "${original_args[@]}" 2>&1
+                status=$?
+            else
+                echo -e "${ERROR_COLOR}Usage: declare [-f] [name]${RESET_COLOR}"
+                status=1
+            fi
+            ;;
         "sed")
             handled=true
             if (( ${#original_args[@]} )); then
@@ -999,12 +1119,15 @@ execute_command() {
 
         # Catch-all for unknown commands
         *)
-            if [[ -x "./$cmd" ]]; then
+            # Handle both bare names (cmd) and dot-slash prefixed (./cmd)
+            local exec_path="$cmd"
+            [[ "$cmd" != ./* ]] && exec_path="./$cmd"
+            if [[ -x "$exec_path" ]]; then
                 handled=true
                 if (( ${#original_args[@]} )); then
-                    "./$cmd" "${original_args[@]}"
+                    "$exec_path" "${original_args[@]}"
                 else
-                    "./$cmd"
+                    "$exec_path"
                 fi
                 status=$?
             else
@@ -1047,6 +1170,24 @@ safe_cd() {
                 echo -e "${COLOR_INFO}In the game, ~ takes you to the bashcrawl lobby.${RESET_COLOR}"
             fi
             ;;
+        "-")
+            # cd - : go to previous directory (OLDPWD)
+            if [[ -n "${OLDPWD:-}" ]]; then
+                local prev="$OLDPWD"
+                # Ensure previous dir is within game boundary
+                if [[ "$prev" == "$BASHCRAWL_ROOT"* ]]; then
+                    cd "$prev" || status=$?
+                    pwd
+                    update_current_area
+                else
+                    echo -e "${ERROR_COLOR}Previous directory is outside the game realm.${RESET_COLOR}"
+                    status=1
+                fi
+            else
+                echo -e "${ERROR_COLOR}No previous directory.${RESET_COLOR}"
+                status=1
+            fi
+            ;;
         "..")
             # Only allow going up within the game directory
             if [[ "$(pwd)" != "$BASHCRAWL_ROOT" ]]; then
@@ -1060,6 +1201,18 @@ safe_cd() {
         "/"*)
             echo -e "${ERROR_COLOR}Absolute paths are not allowed in the game environment.${RESET_COLOR}"
             status=1
+            ;;
+        "$"*)
+            # Handle variable paths like $BASHCRAWL_ROOT/entrance
+            local expanded
+            eval "expanded=$target" 2>/dev/null || expanded=""
+            if [[ -n "$expanded" && -d "$expanded" ]]; then
+                cd "$expanded" || status=$?
+                update_current_area
+            else
+                echo -e "${ERROR_COLOR}Directory not found: $target${RESET_COLOR}"
+                status=1
+            fi
             ;;
         *)
             if [[ -d "$target" ]]; then
@@ -1269,25 +1422,42 @@ safe_mkdir() {
 
 safe_grep() {
     if [[ $# -lt 2 ]]; then
-        echo -e "${ERROR_COLOR}Usage: grep <pattern> <file>${RESET_COLOR}"
+        echo -e "${ERROR_COLOR}Usage: grep [options] <pattern> <file>${RESET_COLOR}"
         return 1
     fi
-    local pattern="$1"
-    shift
-    local file="$1"
+
+    # Separate flags from positional args (pattern + file)
+    local -a flags=()
+    local -a positional=()
+    for arg in "$@"; do
+        if [[ "$arg" == -* ]]; then
+            flags+=("$arg")
+        else
+            positional+=("$arg")
+        fi
+    done
+
+    if [[ ${#positional[@]} -lt 2 ]]; then
+        echo -e "${ERROR_COLOR}Usage: grep [options] <pattern> <file>${RESET_COLOR}"
+        return 1
+    fi
+
+    local pattern="${positional[0]}"
+    local file="${positional[1]}"
+
     if [[ -z "$pattern" ]]; then
         echo -e "${ERROR_COLOR}Pattern cannot be empty.${RESET_COLOR}"
-        return 1
-    fi
-    if [[ -z "$file" ]]; then
-        echo -e "${ERROR_COLOR}Specify a file to search.${RESET_COLOR}"
         return 1
     fi
     if [[ ! -f "$file" ]]; then
         echo -e "${ERROR_COLOR}File not found: $file${RESET_COLOR}"
         return 1
     fi
-    grep --color=auto "$pattern" "$file"
+    if [[ ${#flags[@]} -gt 0 ]]; then
+        grep --color=auto "${flags[@]}" "$pattern" "$file"
+    else
+        grep --color=auto "$pattern" "$file"
+    fi
     return $?
 }
 
@@ -1819,56 +1989,32 @@ mark_scroll_read() {
 }
 
 save_game_state() {
-    cat > "$GAME_STATE_FILE" << EOF
-# Bashcrawl Game State (terminal-emulator format)
-CURRENT_AREA="$CURRENT_AREA"
-INVENTORY="$I"
-HEALTH="$HP"
-GAME_LEVEL="$GAME_LEVEL"
-LAST_UPDATED="$(date)"
-CURRENT_QUEST_ID="$CURRENT_QUEST_ID"
-QUEST_COMPLETED="$QUEST_COMPLETED"
-LEARNED_COMMANDS="$LEARNED_COMMANDS"
-GAME_XP="$GAME_XP"
-SCROLLS_READ="$SCROLLS_READ"
-CURRENT_PATH="$CURRENT_PATH"
-# Aliases for main.sh compatibility
-PLAYER_INVENTORY="$I"
-PLAYER_HEALTH="$HP"
-PLAYER_LEVEL="$GAME_LEVEL"
-GAME_STARTED="true"
-SESSION_COUNT="${SESSION_COUNT:-0}"
-LAST_SESSION="$(date -Iseconds 2>/dev/null || date '+%Y-%m-%dT%H:%M:%S')"
-EOF
+    # Sync main.sh quest variables into the unified state before saving
+    state_set current_location "$CURRENT_PATH"
+    state_set inventory "$I"
+    state_set hp "$HP"
+    state_set game_level "$GAME_LEVEL"
+    state_set current_quest_id "$CURRENT_QUEST_ID"
+    state_set completed_quest_ids "$QUEST_COMPLETED"
+    state_set learned_commands "$LEARNED_COMMANDS"
+    state_set experience_points "$GAME_XP"
+    state_set scrolls_read "$SCROLLS_READ"
+    state_set game_started "true"
+    local sc
+    sc="$(state_get session_count)"
+    state_set session_count "${sc:-0}"
+    state_save
 }
 
 load_game_state() {
-    if [[ -f "$GAME_STATE_FILE" ]]; then
-        # Temporarily disable strict mode — the state file may come from
-        # main.sh (PLAYER_* vars) or from a previous terminal-emulator
-        # session (INVENTORY, HEALTH, etc.).  Accept either format.
-        set +u
-        # shellcheck source=/dev/null
-
-        # shellcheck source=/dev/null
-        source "$GAME_STATE_FILE"
-
-        # Map main.sh variable names to terminal-emulator names
-        INVENTORY="${INVENTORY:-${PLAYER_INVENTORY:-}}"
-        HEALTH="${HEALTH:-${PLAYER_HEALTH:-100}}"
-        GAME_LEVEL="${GAME_LEVEL:-${PLAYER_LEVEL:-novice}}"
-
-        export I="${INVENTORY:-}"
-        export HP="${HEALTH:-100}"
-        export CURRENT_AREA="${CURRENT_AREA:-pre-entrance}"
-        export GAME_LEVEL="${GAME_LEVEL:-novice}"
-        CURRENT_QUEST_ID="${CURRENT_QUEST_ID:-0}"
-        QUEST_COMPLETED="${QUEST_COMPLETED:-}"
-        LEARNED_COMMANDS="${LEARNED_COMMANDS:-}"
-        GAME_XP="${GAME_XP:-0}"
-        SCROLLS_READ="${SCROLLS_READ:-}"
-        CURRENT_PATH="${CURRENT_PATH:-bashcrawl}"
-        set -u
+    if state_load; then
+        # Map state fields to main.sh quest variables
+        CURRENT_QUEST_ID="$(state_get current_quest_id)"
+        QUEST_COMPLETED="$(state_get completed_quest_ids)"
+        LEARNED_COMMANDS="$(state_get learned_commands)"
+        GAME_XP="$(state_get experience_points)"
+        SCROLLS_READ="$(state_get scrolls_read)"
+        CURRENT_PATH="$(state_get current_location)"
     fi
 }
 
@@ -1898,12 +2044,11 @@ show_command_history() {
 reset_terminal_state() {
     echo -e "${SUCCESS_COLOR}🔄 RESETTING GAME STATE...${RESET_COLOR}"
     
-    # Reset variables
-    export I=""
-    export HP=100
-    export GAME_LEVEL="novice"
-    export CURRENT_AREA="pre-entrance"
-    CURRENT_PATH="bashcrawl"
+    # Reset all state to defaults
+    state_reset   # sets I, HP, GAME_LEVEL, CURRENT_AREA + writes file
+
+    # Sync reset values back to main.sh quest variables
+    CURRENT_PATH="$(state_get current_location)"
     CURRENT_QUEST_ID=0
     QUEST_COMPLETED=""
     LEARNED_COMMANDS=""
@@ -1915,13 +2060,11 @@ reset_terminal_state() {
     LAST_RESULT_DIR=""
     LAST_COMMAND_EXIT_CODE=0
     
-    # Clear state files
-    rm -f "$GAME_STATE_FILE"
+    # Clear history
     rm -f "$HISTORY_FILE"
     
     # Return to root
     cd "$BASHCRAWL_ROOT"
-    save_game_state
     
     echo "Game state has been reset. Type 'start' to begin a new adventure."
 }
@@ -1980,8 +2123,13 @@ _dispatch_input() {
     [[ -z "$input" ]] && return 0
     [[ "$input" == \#* ]] && return 0  # skip comments
 
-    # Handle piped / redirected commands via eval
-    if [[ "$input" == *"|"* ]] || [[ "$input" == *">"* ]]; then
+    # Handle piped / redirected / compound commands via eval
+    # Covers: pipes (|), redirects (> < >>>), logical operators (&& ||),
+    # semicolons (;), here-strings (<<<), and function definitions
+    if [[ "$input" == *"|"* ]] || [[ "$input" == *">"* ]] \
+       || [[ "$input" == *"&&"* ]] || [[ "$input" == *"||"* ]] \
+       || [[ "$input" == *";"* ]] || [[ "$input" == *"<<<"* ]] \
+       || [[ "$input" == *" () {"* ]] || [[ "$input" == *"function "* ]]; then
         local status=0
         set +e
         eval "$input" 2>&1
@@ -1991,9 +2139,24 @@ _dispatch_input() {
         return $status
     fi
 
-    # Parse command and arguments
+    # Alias expansion: check if the first word has an alias and expand it
     local -a cmd_array
     read -ra cmd_array <<< "$input"
+    local first_word="${cmd_array[0]}"
+    local alias_def
+    alias_def=$(alias "$first_word" 2>/dev/null) || true
+    if [[ -n "$alias_def" && "$alias_def" == *"='"* ]]; then
+        # Extract the alias value between single quotes: alias name='value'
+        local alias_value
+        alias_value="${alias_def#*=\'}"
+        alias_value="${alias_value%\'}"
+        # Replace the first word with the expanded alias
+        local rest="${input#"$first_word"}"
+        input="${alias_value}${rest}"
+        # Re-parse after expansion
+        read -ra cmd_array <<< "$input"
+    fi
+
     local command="${cmd_array[0]}"
     local -a cmd_args=()
     if (( ${#cmd_array[@]} > 1 )); then
@@ -2078,13 +2241,12 @@ launch_tui_mode() {
 
     export BASHCRAWL_MODE="textual_tui"
 
-    if [[ -f "$GAME_STATE_FILE" ]]; then
-        sed -i.bak "s/GAME_STARTED=.*/GAME_STARTED=\"true\"/" "$GAME_STATE_FILE"
-        local current_count
-        current_count=$(grep "SESSION_COUNT=" "$GAME_STATE_FILE" | cut -d= -f2 || echo "0")
-        sed -i.bak "s/SESSION_COUNT=.*/SESSION_COUNT=$((current_count + 1))/" "$GAME_STATE_FILE"
-        rm -f "${GAME_STATE_FILE}.bak"
-    fi
+    # Increment session count via unified state
+    local sc
+    sc="$(state_get session_count)"
+    state_set session_count "$((sc + 1))"
+    state_set game_started "true"
+    state_save
 
     local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
     log_event "INFO" "Launching Textual TUI from $ti_dir" "tui"
@@ -2121,13 +2283,12 @@ launch_classic_mode() {
 
     export BASHCRAWL_MODE="terminal_emulator"
 
-    if [[ -f "$GAME_STATE_FILE" ]]; then
-        sed -i.bak "s/GAME_STARTED=.*/GAME_STARTED=\"true\"/" "$GAME_STATE_FILE"
-        local current_count
-        current_count=$(grep "SESSION_COUNT=" "$GAME_STATE_FILE" | cut -d= -f2 || echo "0")
-        sed -i.bak "s/SESSION_COUNT=.*/SESSION_COUNT=$((current_count + 1))/" "$GAME_STATE_FILE"
-        rm -f "${GAME_STATE_FILE}.bak"
-    fi
+    # Increment session count via unified state
+    local sc
+    sc="$(state_get session_count)"
+    state_set session_count "$((sc + 1))"
+    state_set game_started "true"
+    state_save
 
     cd "$BASHCRAWL_ROOT"
     load_game_state
@@ -2348,9 +2509,8 @@ reset_game_state() {
     echo ""
     echo -e "${COLOR_WARNING}⚠️  This will permanently delete your current game progress:${COLOR_RESET}"
     echo "   • Player inventory and health"
-    echo "   • Areas visited and treasures found"
+    echo "   • Quest progress and XP"
     echo "   • Session history and statistics"
-    echo "   • Tutorial completion status"
     echo "   • Unlocked hidden rooms (re-hidden)"
     echo "   • Combat artifacts (corpses, statue pieces)"
     echo ""
@@ -2358,18 +2518,17 @@ reset_game_state() {
     read -r confirmation
     
     if [[ "$confirmation" =~ ^[Yy]$ ]]; then
-        # Use lib/reset.sh for comprehensive game state reset
+        # Use lib/reset.sh for comprehensive filesystem + state reset
         if [[ -f "${BASHCRAWL_ROOT}/lib/reset.sh" ]]; then
             bash "${BASHCRAWL_ROOT}/lib/reset.sh"
             log_event "SUCCESS" "Game state has been reset via lib/reset.sh" "reset"
         else
-            # Fallback: basic reset
+            # Fallback: basic reset via state library
             log_event "WARNING" "lib/reset.sh not found, performing basic reset" "reset"
-            rm -f "$GAME_STATE_FILE"
-            rm -rf "$GAME_DATA_DIR"
+            state_reset
         fi
         
-        # Reinitialize
+        # Reinitialize from the freshly-reset (or newly-created) state file
         initialize_game_state
         
         echo -e "${COLOR_SUCCESS}✅ Game state reset complete! You can start fresh.${COLOR_RESET}"

@@ -334,23 +334,11 @@ SETUP_MODE=$SETUP_MODE
 QUICK_SETUP=$QUICK_SETUP
 EOF
 
-    # Initial game state
-    local initial_state="${BASHCRAWL_ROOT}/.game_state"
-    if [[ ! -f "$initial_state" ]]; then
-        cat > "$initial_state" << 'EOF'
-# Bashcrawl Initial Game State
-PLAYER_INVENTORY=""
-PLAYER_HEALTH=100
-PLAYER_LEVEL="novice"
-CURRENT_AREA="pre-entrance"
-GAME_STARTED="false"
-TUTORIAL_COMPLETED="false"
-AREAS_VISITED=""
-TREASURES_FOUND=""
-LAST_SESSION=""
-SESSION_COUNT=0
-TOTAL_PLAYTIME=0
-EOF
+    # Initial game state — delegate to lib/state.sh (unified JSON format)
+    if [[ -f "${BASHCRAWL_ROOT}/lib/state.sh" ]]; then
+        # shellcheck source=lib/state.sh
+        source "${BASHCRAWL_ROOT}/lib/state.sh"
+        state_init   # creates .bashcrawl_save.json if missing (with migration)
     fi
     
     log_setup "SUCCESS" "Configuration files created" "config"

@@ -1,0 +1,338 @@
+# ============================================================
+# BASHCRAWL COMPREHENSIVE AGENT-BASH PLAYTEST v6
+# Tests ALL scroll-taught commands including:
+# - alias expansion, cd -, &&/||/;, unset, source,
+#   readlink, dirname, export -f, function definitions
+# ============================================================
+
+# === PHASE 1: ENTRANCE ===
+cd entrance
+pwd
+ls
+cat scroll
+head scroll
+tail scroll
+wc scroll
+ls -a
+
+# === PHASE 2: CELLAR (alias commands) ===
+cd cellar
+pwd
+ls
+ls -F
+cat scroll
+ls -la
+ls -laF
+# Test alias: set alias and verify it takes effect
+alias ls='ls -F'
+alias ls
+ls
+unalias ls
+./treasure
+export I=amulet,$I
+
+# === PHASE 3: ARMOURY (grep flags, file, chmod) ===
+cd armoury
+pwd
+ls
+ls -F
+cat scroll
+ls -l
+grep commands scroll
+grep -i commands scroll
+file treasure
+file potion
+file scroll
+chmod +x treasure
+./treasure
+export I=sword,$I
+./potion
+export HP=15
+echo $HP
+
+# === PHASE 4: CHAMBER (export, let, unset) ===
+cd chamber
+pwd
+ls
+ls -F
+cat scroll
+export WEAPON=sword
+echo $WEAPON
+let x=2+3
+echo $x
+echo $I
+./statue
+y
+y
+let HP=HP-5
+echo $HP
+unset WEAPON
+./treasure
+export I=coins,$I
+./spell
+y
+
+# === PHASE 5: CHAPEL ===
+# From chamber -> armoury -> cellar -> entrance
+cd ..
+cd ..
+cd ..
+ls -a
+cd chapel
+pwd
+ls
+cat scroll
+ls -a
+ls -la
+./altar
+n
+n
+
+# === PHASE 6: GRAVEYARD ===
+cd graveyard
+pwd
+ls
+cat scroll
+ls -a
+./padlock
+n
+
+# === PHASE 7: MAUSOLEUM ===
+cd .mausoleum
+pwd
+ls
+cat scroll
+cat room
+sort room
+sort room | uniq
+./loot
+27121981
+export I=goldcoins,bracelet,silverkeys,$I
+./spell
+
+# === PHASE 8: COLUMBARIUM ===
+cd ..
+cd columbarium
+pwd
+ls
+cat scroll
+cat niches
+touch 15
+./open
+export I=2712,$I
+
+# === PHASE 9: LOWER-QUADRANT ===
+cd ..
+cd lower-quadrant
+pwd
+ls
+cat scroll
+sort gravestones
+
+# === PHASE 10: ROYAL-TOMBS ===
+cd ..
+cd royal-tombs
+pwd
+ls
+cat scroll
+grep King royals
+./statues
+n
+
+# === PHASE 11: COURTYARD ===
+# From royal-tombs -> graveyard -> chapel -> courtyard
+cd ..
+cd ..
+cd courtyard
+pwd
+ls
+cat scroll
+./fountain
+y
+./rags
+y
+export I=rags,fish,$I
+
+# === PHASE 12: AVIARY ===
+cd aviary
+pwd
+ls
+cat scroll
+./penguin
+y
+y
+./crystal
+export I=crystal,$I
+
+# === PHASE 13: HALL ===
+cd hall
+pwd
+ls
+cat scroll
+./monster
+n
+echo $I
+
+# === PHASE 14: LIBRARY (man, --help, functions, cd -, source) ===
+cd library
+pwd
+ls
+cat scroll
+man ls
+./tome
+y
+n
+ls -a
+cd study
+cat scroll
+./grimoire
+# Test cd - : go back to library
+cd ..
+
+# === PHASE 14b: PORTAL (readlink, dirname, source, cd $VAR) ===
+# Portal is a symlink from library to src/help
+ls -a
+# Note: portal may or may not exist depending on tome/spell
+cd ..
+
+# === PHASE 15: VAULT ===
+# From library -> hall -> aviary -> courtyard -> chapel -> entrance (5 levels)
+cd ..
+cd ..
+cd ..
+cd ..
+cd vault
+pwd
+ls
+cat scroll
+# Test cd - : should go back to chapel
+cd -
+# Go back to vault
+cd vault
+./glass
+y
+
+# === PHASE 16: STRONGHOLD ===
+cd stronghold
+pwd
+ls
+cat scroll
+cp orb1 orb2
+cp orb1 orb3
+./goblet
+export I=goblet,$I
+
+# === PHASE 17: NURSERY ===
+cd nursery
+pwd
+ls
+cat scroll
+find . -name "scroll"
+find . -type d
+find . -type f
+./spell
+
+# === PHASE 18: LAB (pipes) ===
+# Lab is INSIDE nursery (not a sibling)
+cd lab
+pwd
+ls
+cat scroll
+file ghost
+cat scroll | grep wizard
+ls | wc -l
+./ghost
+n
+
+# === PHASE 19: SCRAP (ln -s) ===
+# From lab -> nursery -> stronghold -> vault -> entrance (4 levels)
+cd ..
+cd ..
+cd ..
+cd ..
+cd scrap
+pwd
+ls
+cat scroll
+
+# === PHASE 20: RIFT (compound operators: &&, ||, ;) ===
+# From scrap -> entrance (1 level). Rift renamed from .rift by goblet.
+cd ..
+ls -a
+cd rift
+pwd
+ls
+cat scroll
+# Test compound operators taught in rift scroll
+echo "test1" && echo "test2"
+echo "compound" ; echo "operators"
+ls -la && echo "Success"
+echo "Inventory: $I" && echo "Health: $HP"
+./box
+y
+bamr87
+
+# === PHASE 21: ARENA/PIT ===
+cd arena
+pwd
+ls
+cat scroll
+cd pit
+ls
+cat scroll
+./drummer
+./nyarlathotep
+n
+./wizard-light
+./treasure
+./platinum
+cat drum
+cat end
+
+# === PHASE 22: SPIRE/MEZZANINE ===
+# From pit -> arena -> rift -> spire
+cd ..
+cd ..
+cd spire
+pwd
+ls
+cat scroll
+cd mezzanine
+ls
+# Mezzanine has no scroll file
+./button
+y
+
+# === TEST ADVANCED COMMANDS ===
+# From mezzanine -> spire -> rift -> entrance (3 levels)
+cd ..
+cd ..
+cd ..
+
+# Test piped commands (taught in lab/rift scrolls)
+cat scroll | head -5
+ls -la | grep scroll
+ls | wc -l
+
+# Test alias round-trip
+alias ll='ls -la'
+ll
+unalias ll
+
+# Test dirname and basename
+dirname /usr/local/bin/file
+basename /usr/local/bin/file
+
+# Test type
+type ls
+type cd
+
+# Test echo with multiple variables
+echo $BASHCRAWL_ROOT
+
+# === FINAL STATUS ===
+echo $I
+echo $HP
+inventory
+health
+exit

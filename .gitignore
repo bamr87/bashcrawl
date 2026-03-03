@@ -6,10 +6,11 @@
 # Runtime game-state files (created during play, never committed)
 # ============================================================
 
-# Python TUI save file (written by GameState.save())
-.ti_save.json
+# Unified save file (shared by Bash emulator and Python TUI)
+.bashcrawl_save.json
 
-# Bash TUI state files
+# Legacy save files (kept for migration; superseded by .bashcrawl_save.json)
+.ti_save.json
 .game_state
 .game_history
 .game_data/

@@ -48,10 +48,10 @@ class TestQuestList:
 class TestHardcodedFallback:
     """Tests for _hardcoded_quests() fallback."""
 
-    def test_fallback_returns_7_quests(self):
+    def test_fallback_returns_8_quests(self):
         from ti.quests import _hardcoded_quests
         quests = _hardcoded_quests()
-        assert len(quests) == 7
+        assert len(quests) == 8
 
     def test_fallback_quests_have_xp(self):
         from ti.quests import _hardcoded_quests

@@ -35,6 +35,28 @@ for dir in chapel vault scrap rift; do
     if [[ -d "$visible" && ! -d "$hidden" ]]; then
         log "Re-hiding: $dir → .$dir"
         $DRY_RUN || mv "$visible" "$hidden"
+    elif [[ -d "$visible" && -d "$hidden" ]]; then
+        # Both exist (dev artifact) — remove the unlocked copy
+        log "Removing duplicate visible $dir (hidden copy exists)"
+        $DRY_RUN || rm -rf "$visible"
+    fi
+done
+
+# 1a. Remove nested hidden duplicates created by double-unlock
+# When a treasure script does mv .chapel chapel, the unlocked dir
+# may contain a nested .chapel/ duplicate. After re-hiding above,
+# this becomes .chapel/.chapel/ — remove these nested copies.
+# Also check the pre-move path (visible/hidden) for dry-run reporting.
+for dir in chapel vault scrap rift; do
+    nested="$ENTRANCE/.$dir/.$dir"
+    nested_pre_move="$ENTRANCE/$dir/.$dir"
+    if [[ -d "$nested" ]]; then
+        log "Removing nested duplicate: .$dir/.$dir"
+        $DRY_RUN || rm -rf "$nested"
+    elif [[ -d "$nested_pre_move" ]]; then
+        # Pre-move state: visible dir still has nested hidden copy
+        log "Removing nested duplicate: $dir/.$dir (will be .$dir/.$dir after re-hide)"
+        $DRY_RUN || rm -rf "$nested_pre_move"
     fi
 done
 
@@ -120,7 +142,27 @@ if [[ -f "$lab_platinum" ]]; then
     $DRY_RUN || rm -f "$lab_platinum"
 fi
 
-# 6. Restore orbs in stronghold (remove copies)
+# 6. Remove .bless, .curse, and .armour game state files
+while IFS= read -r -d '' f; do
+    log "Removing game state file: ${f#$GAME_ROOT/}"
+    $DRY_RUN || rm -f "$f"
+done < <(find "$ENTRANCE" \( -name '.bless' -o -name '.curse' -o -name '.armour' \) -type f -print0 2>/dev/null)
+
+# 6a. Remove touch-created '15' files (columbarium puzzle artifact)
+while IFS= read -r -d '' f; do
+    log "Removing touch artifact: ${f#$GAME_ROOT/}"
+    $DRY_RUN || rm -f "$f"
+done < <(find "$ENTRANCE" -name '15' -type f -empty -print0 2>/dev/null)
+
+# 6b. Remove armour file created by rift ./box script
+for _armour in "$ENTRANCE/.rift/armour" "$ENTRANCE/rift/armour"; do
+    if [[ -f "$_armour" ]]; then
+        log "Removing generated armour: ${_armour#$GAME_ROOT/}"
+        $DRY_RUN || rm -f "$_armour"
+    fi
+done
+
+# 7. Restore orbs in stronghold (remove copies)
 for orb in "$ENTRANCE/.vault/stronghold/orb2" "$ENTRANCE/.vault/stronghold/orb3"; do
     if [[ -f "$orb" ]]; then
         log "Removing copied orb: $(basename "$orb")"
@@ -128,7 +170,7 @@ for orb in "$ENTRANCE/.vault/stronghold/orb2" "$ENTRANCE/.vault/stronghold/orb3"
     fi
 done
 
-# 7. Undo coin→diamond replacement in chamber/treasure
+# 8. Undo coin→diamond replacement in chamber/treasure
 chamber_treasure="$ENTRANCE/cellar/armoury/chamber/treasure"
 if [[ -f "$chamber_treasure" ]] && grep -q 'diamonds' "$chamber_treasure" 2>/dev/null; then
     log "Restoring coins (undoing diamond replacement)"
@@ -141,29 +183,35 @@ if [[ -f "$chamber_treasure" ]] && grep -q 'diamonds' "$chamber_treasure" 2>/dev
     fi
 fi
 
-# 8. Remove bash TUI game-state files
+# 9. Remove unified state file (.bashcrawl_save.json)
+unified_save="$GAME_ROOT/.bashcrawl_save.json"
+if [[ -f "$unified_save" ]]; then
+    log "Removing .bashcrawl_save.json (unified save)"
+    $DRY_RUN || rm -f "$unified_save"
+fi
+
+# 9a. Remove legacy bash TUI game-state files
 for state_file in "$GAME_ROOT/.game_state" "$GAME_ROOT/.game_history"; do
     if [[ -f "$state_file" ]]; then
-        log "Removing $(basename "$state_file")"
+        log "Removing legacy $(basename "$state_file")"
         $DRY_RUN || rm -f "$state_file"
     fi
 done
 
-# 9. Remove Python TUI save file (.ti_save.json written by GameState.save())
+# 10. Remove legacy Python TUI save file (.ti_save.json)
 ti_save="$GAME_ROOT/.ti_save.json"
 if [[ -f "$ti_save" ]]; then
-    log "Removing .ti_save.json (Python TUI save)"
+    log "Removing legacy .ti_save.json"
     $DRY_RUN || rm -f "$ti_save"
 fi
 
-# Also clean any .ti_save.json left behind in a sub-directory if the user ran
-# the TUI from somewhere other than the game root.
+# Also clean any .ti_save.json or .bashcrawl_save.json left in sub-directories
 while IFS= read -r -d '' f; do
-    log "Removing stray TUI save: ${f#$GAME_ROOT/}"
+    log "Removing stray save: ${f#$GAME_ROOT/}"
     $DRY_RUN || rm -f "$f"
-done < <(find "$GAME_ROOT" -maxdepth 3 -name '.ti_save.json' -not -path "$ti_save" -print0 2>/dev/null)
+done < <(find "$GAME_ROOT" -maxdepth 3 \( -name '.ti_save.json' -o -name '.bashcrawl_save.json' \) -not -path "$ti_save" -not -path "$unified_save" -print0 2>/dev/null)
 
-# 10. Remove player-created tutorial directories in entrance/
+# 11. Remove player-created tutorial directories in entrance/
 for player_dir in workshop; do
     target="$ENTRANCE/$player_dir"
     if [[ -d "$target" ]]; then
@@ -172,11 +220,13 @@ for player_dir in workshop; do
     fi
 done
 
-# 11. Unset game environment variables
-log "Unsetting game env vars (I, HP)"
+# 12. Unset game environment variables
+log "Unsetting game env vars (I, HP, GAME_LEVEL, CURRENT_AREA)"
 if ! $DRY_RUN; then
     unset I 2>/dev/null || true
     unset HP 2>/dev/null || true
+    unset GAME_LEVEL 2>/dev/null || true
+    unset CURRENT_AREA 2>/dev/null || true
 fi
 
 echo
