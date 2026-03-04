@@ -54,6 +54,7 @@ logs/learning-notes.txt
 logs/temp/
 logs/bashcrawl.log
 logs/setup.log
+logs/live_agent.jsonl
 
 # Temporary files
 *.tmp

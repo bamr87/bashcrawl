@@ -4,6 +4,41 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] - 2026-03-03
+
+### Added
+
+- **Offline TUI screenshot test** (`test/ai/test_offline_screenshots.py`)
+  - Integration test (`@pytest.mark.integration`) that replays a scripted command sequence through the real Textual TUI agent
+  - Generates SVG screenshots and JSONL session logs without requiring `ANTHROPIC_API_KEY`
+  - Accessible through the Flask viewer for visual regression review
+
+- **AI-driven TUI screenshot test** (`test/ai/test_agent_screenshots.py`)
+  - Two-phase approach: Claude (`TestAgent`) + `NonInteractiveEngine` generates a command sequence, then replays through `ti.agent` subprocess to capture real SVG screenshots
+  - Marked `@pytest.mark.ai` (requires `ANTHROPIC_API_KEY`); skipped in default CI run
+
+- **Lightweight SVG renderer fixture** (`test/fixtures/svg_renderer.py`)
+  - Renders game state (command, output, location, inventory, HP) as dark-terminal SVGs
+  - Used by offline screenshot tests as a lightweight alternative to the full Textual TUI
+
+- **`.env.example`** — template documenting `ANTHROPIC_API_KEY` and other required environment variables
+
+### Changed
+
+- **`test/conftest.py`**: Automatically loads `.env` from repo root via `python-dotenv`; `ANTHROPIC_API_KEY` is now picked up without manual `export`
+
+- **`test/requirements.txt`**: Added `python-dotenv>=1.0` dependency
+
+### Fixed
+
+- **`test/ai/session_runner.py`**: `_cmd_let` result now correctly wrapped in a `CommandResult` object; previously the raw tuple was returned, causing downstream attribute errors
+
+- **`main.sh` line 865**: Added `# shellcheck disable=SC2163` — `export -f "$func_name"` intentionally exports the function named by the variable, not the variable itself
+
+- **`lib/native_state.sh`**: Added `# shellcheck disable=SC2317` — `exit 1` after `return 1 2>/dev/null` is reachable when the file is executed outside a function context
+
+---
+
 ## [Unreleased] - 2026-02-24
 
 ### Changed

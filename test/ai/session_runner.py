@@ -193,7 +193,15 @@ class NonInteractiveEngine:
 
         # Handle let (arithmetic)
         if base_cmd == "let":
-            return self._cmd_let(args)
+            kind, output = self._cmd_let(args)
+            return CommandResult(
+                command=cmd,
+                output=output,
+                kind=kind,
+                location=self._cwd,
+                inventory=self.state.inventory,
+                hp=self.state.hp,
+            )
 
         handler = self._handlers.get(base_cmd)
         if not handler:

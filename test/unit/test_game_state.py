@@ -63,7 +63,7 @@ class TestEnvironmentVariables:
         from ti.game_state import GameState
         state = GameState()
         state.inventory = "amulet,"
-        state.hp = 15
+        state.set_env("HP", "15")
         env = state.game_env
         assert env["I"] == "amulet,"
         assert env["HP"] == "15"

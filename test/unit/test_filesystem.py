@@ -173,9 +173,23 @@ class TestScriptExecution:
     def test_run_treasure_script(self, game_fs):
         # The treasure script exits 1 when $I is unset (instructs player to
         # export I=amulet,$I).  We only verify it runs and produces output.
-        output, exit_code, _ = game_fs.run_script("/entrance/cellar", "treasure")
+        output, exit_code, env_updates = game_fs.run_script("/entrance/cellar", "treasure")
         assert len(output) > 0, "Treasure script should produce output"
         assert "amulet" in output.lower(), "Treasure script should mention the amulet"
+
+    def test_run_treasure_returns_env_updates(self, game_fs):
+        """Treasure script output should yield export I=amulet,$I parsed."""
+        output, exit_code, env_updates = game_fs.run_script("/entrance/cellar", "treasure")
+        assert "I" in env_updates, f"Expected 'I' in env_updates, got: {env_updates}"
+        assert "amulet" in env_updates["I"]
+
+    def test_run_potion_returns_hp_update(self, game_fs):
+        """Potion script should yield export HP=15 (default stdin answers y)."""
+        output, exit_code, env_updates = game_fs.run_script(
+            "/entrance/cellar/armoury", "potion"
+        )
+        assert "HP" in env_updates, f"Expected 'HP' in env_updates, got: {env_updates}"
+        assert env_updates["HP"] == "15"
 
     def test_run_nonexistent_script_raises(self, game_fs):
         with pytest.raises(FileNotFoundError):
@@ -184,3 +198,51 @@ class TestScriptExecution:
     def test_run_non_executable_raises(self, game_fs):
         with pytest.raises(PermissionError):
             game_fs.run_script("/entrance", "scroll")
+
+
+class TestParseExportInstructions:
+    """Tests for _parse_export_instructions."""
+
+    def test_simple_export(self):
+        from ti.filesystem import GameFileSystem
+        result = GameFileSystem._parse_export_instructions(
+            "export HP=15", {}
+        )
+        assert result == {"HP": "15"}
+
+    def test_export_with_variable_expansion(self):
+        from ti.filesystem import GameFileSystem
+        result = GameFileSystem._parse_export_instructions(
+            "export I=amulet,$I", {"I": "sword,"}
+        )
+        assert result == {"I": "amulet,sword,"}
+
+    def test_export_with_empty_variable(self):
+        from ti.filesystem import GameFileSystem
+        result = GameFileSystem._parse_export_instructions(
+            "export I=amulet,$I", {}
+        )
+        assert result == {"I": "amulet,"}
+
+    def test_multiple_exports(self):
+        from ti.filesystem import GameFileSystem
+        output = "export I=amulet,$I\nexport HP=15"
+        result = GameFileSystem._parse_export_instructions(
+            output, {"I": "sword,"}
+        )
+        assert result == {"I": "amulet,sword,", "HP": "15"}
+
+    def test_no_exports(self):
+        from ti.filesystem import GameFileSystem
+        result = GameFileSystem._parse_export_instructions(
+            "No exports here", {}
+        )
+        assert result == {}
+
+    def test_export_embedded_in_text(self):
+        from ti.filesystem import GameFileSystem
+        output = "To add to your inventory:\n\nexport I=sword,$I\n\nCheck with echo $I"
+        result = GameFileSystem._parse_export_instructions(
+            output, {"I": "amulet,"}
+        )
+        assert result == {"I": "sword,amulet,"}

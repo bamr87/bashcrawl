@@ -22,10 +22,14 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+from dotenv import load_dotenv
 
 # Add test/ and src/terminal-illness/ to Python path
 TEST_DIR = Path(__file__).resolve().parent
 REPO_ROOT = TEST_DIR.parent
+
+# Load .env from repo root (contains ANTHROPIC_API_KEY, etc.)
+load_dotenv(REPO_ROOT / ".env")
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
 
 sys.path.insert(0, str(TEST_DIR))

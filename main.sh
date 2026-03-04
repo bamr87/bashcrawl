@@ -862,6 +862,7 @@ execute_command() {
                 if [[ "$args" == -f\ * ]]; then
                     local func_name="${args#-f }"
                     if declare -f "$func_name" &>/dev/null; then
+                        # shellcheck disable=SC2163  # Intentional: exporting function named by variable
                         export -f "$func_name" 2>/dev/null
                         status=$?
                         if [[ $status -eq 0 ]]; then

@@ -39,6 +39,7 @@ export BASHCRAWL_ROOT
 # Load the state library
 if [[ ! -f "${BASHCRAWL_ROOT}/lib/state.sh" ]]; then
     echo "[native_state] ERROR: Cannot find lib/state.sh in $BASHCRAWL_ROOT" >&2
+    # shellcheck disable=SC2317  # exit 1 is reachable when not sourced inside a function
     return 1 2>/dev/null || exit 1
 fi
 # shellcheck source=lib/state.sh

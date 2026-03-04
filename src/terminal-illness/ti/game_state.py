@@ -31,6 +31,7 @@ class GameState:
     # Game variables mirroring bash env vars
     inventory: str = ""  # comma-separated items (mirrors $I)
     hp: int = 100  # health points (mirrors $HP) — default 100
+    hp_set: bool = False  # True once HP is explicitly set via gameplay
     env_vars: Dict[str, str] = field(default_factory=dict)
     # Bash-side fields preserved for round-trip compatibility
     game_level: str = "novice"
@@ -41,11 +42,17 @@ class GameState:
 
     @property
     def game_env(self) -> Dict[str, str]:
-        """Return env vars dict suitable for subprocess calls."""
+        """Return env vars dict suitable for subprocess calls.
+
+        HP is only passed to subprocesses when it has been explicitly set
+        during gameplay (e.g. via a potion).  This matches the bash game
+        where ``$HP`` starts unset, and scripts like ``./potion`` check
+        ``${HP:-0} -gt 0`` to detect first use.
+        """
         env: Dict[str, str] = dict(self.env_vars)
         if self.inventory:
             env["I"] = self.inventory
-        if self.hp > 0:
+        if self.hp_set and self.hp > 0:
             env["HP"] = str(self.hp)
         return env
 
@@ -56,6 +63,7 @@ class GameState:
         elif key == "HP":
             try:
                 self.hp = int(value)
+                self.hp_set = True
             except ValueError:
                 pass
         else:
@@ -126,6 +134,7 @@ class GameState:
                 mode=data.get("mode", "classic"),
                 inventory=data.get("inventory", ""),
                 hp=int(data.get("hp", 100)),
+                hp_set=bool(data.get("hp_set", False)),
                 env_vars=dict(data.get("env_vars", {})),
                 game_level=data.get("game_level", "novice"),
                 game_started=str(data.get("game_started", "false")),

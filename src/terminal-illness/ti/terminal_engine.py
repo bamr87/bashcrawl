@@ -271,11 +271,41 @@ class TerminalEngine:
     # ------------------------------------------------------------------
 
     def _run_game_script(self, script: str, args: List[str]) -> Tuple[str, str, str]:
-        """Execute a bash game script (treasure, potion, statue, etc.)."""
-        output, exit_code, _ = self.fs.run_script(
+        """Execute a bash game script (treasure, potion, statue, etc.).
+
+        After running the script, any ``export VAR=value`` instructions in
+        the output are detected and applied to the game state so the TUI
+        sidebar (inventory, HP) stays in sync without the player needing
+        to manually re-type the export commands.
+        """
+        output, exit_code, env_updates = self.fs.run_script(
             self._cwd, script, env_vars=self.state.game_env
         )
-        return "output", script, output.rstrip() if output else "(no output)"
+
+        # Apply env updates parsed from script output
+        feedback_parts: List[str] = []
+        for key, value in env_updates.items():
+            old_value = self.state.game_env.get(key, "")
+            self.state.set_env(key, value)
+            if key == "I" and value != old_value:
+                # Show which items were added
+                old_items = {item.strip() for item in old_value.split(",") if item.strip()}
+                new_items = [
+                    i.strip() for i in value.split(",")
+                    if i.strip() and i.strip() not in old_items
+                ]
+                if new_items:
+                    feedback_parts.append(
+                        f"✨ Inventory updated: {', '.join(new_items)} added!"
+                    )
+            elif key == "HP" and value != old_value:
+                feedback_parts.append(f"💚 HP set to {value}")
+
+        text = output.rstrip() if output else "(no output)"
+        if feedback_parts:
+            text += "\n\n" + "\n".join(feedback_parts)
+
+        return "output", script, text
 
     # ------------------------------------------------------------------
     # Command implementations
