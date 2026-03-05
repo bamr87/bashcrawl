@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+
+# GitHub metadata (not needed in containers)
+.github
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Game runtime state (regenerated during play)
+.bashcrawl_save.json
+.ti_save.json
+.game_state
+.game_history
+.game_data/
+.setup_complete
+
+# Player-unlocked areas (transient game state)
+entrance/chapel/
+entrance/vault/
+entrance/scrap/
+entrance/rift/
+entrance/workshop/
+
+# Combat artifacts
+entrance/**/corpse.*
+entrance/**/.corpse.*.looted
+entrance/**/.statue_defeated
+
+# Logs (mounted as volume at runtime)
+logs/
+
+# Test reports and caches
+test/reports/
+test/.pytest_cache/
+.pytest_cache/
+__pycache__
+
+# Environment secrets
+.env
+
+# Screenshots
+screenshots/
+
+# Backups
+.backups
+
+# Documentation build artifacts
+docs/_build/
+
+# Temporary files
+*.tmp

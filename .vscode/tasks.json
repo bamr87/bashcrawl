@@ -1,0 +1,125 @@
+{
+    // VS Code Tasks for Bashcrawl Docker-first development
+    "version": "2.0.0",
+    "tasks": [
+        // ── Docker Build ─────────────────────────────────────────────────
+        {
+            "label": "🐳 Docker: Build All Images",
+            "type": "shell",
+            "command": "make docker-build",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "🐳 Docker: Build Game",
+            "type": "shell",
+            "command": "docker compose build game",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "🐳 Docker: Build Test",
+            "type": "shell",
+            "command": "docker compose build test",
+            "group": "build",
+            "problemMatcher": []
+        },
+
+        // ── Docker Run ───────────────────────────────────────────────────
+        {
+            "label": "🐳 Docker: Play Game",
+            "type": "shell",
+            "command": "make docker-game",
+            "group": "none",
+            "isBackground": false,
+            "problemMatcher": []
+        },
+        {
+            "label": "🐳 Docker: Start Viewer",
+            "type": "shell",
+            "command": "make docker-viewer",
+            "group": "none",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+
+        // ── Docker Test ──────────────────────────────────────────────────
+        {
+            "label": "🐳 Docker: Run All Tests",
+            "type": "shell",
+            "command": "make docker-test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🐳 Docker: Run Unit Tests",
+            "type": "shell",
+            "command": "make docker-test-unit",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "🐳 Docker: Run Integration Tests",
+            "type": "shell",
+            "command": "make docker-test-integration",
+            "group": "test",
+            "problemMatcher": []
+        },
+
+        // ── Docker Lint ──────────────────────────────────────────────────
+        {
+            "label": "🐳 Docker: Lint All",
+            "type": "shell",
+            "command": "make docker-lint",
+            "group": "test",
+            "problemMatcher": [
+                "$shellcheck"
+            ]
+        },
+
+        // ── Docker Cleanup ───────────────────────────────────────────────
+        {
+            "label": "🐳 Docker: Clean Up",
+            "type": "shell",
+            "command": "make docker-clean",
+            "group": "none",
+            "problemMatcher": []
+        },
+
+        // ── Local development ────────────────────────────────────────────
+        {
+            "label": "🎮 Local: Play Game",
+            "type": "shell",
+            "command": "bash main.sh --interactive",
+            "group": "none",
+            "problemMatcher": []
+        },
+        {
+            "label": "🧪 Local: Run Tests",
+            "type": "shell",
+            "command": "cd test && pytest -m 'not ai and not demo' --timeout=30 -v",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "🔍 Local: Lint",
+            "type": "shell",
+            "command": "make lint",
+            "group": "test",
+            "problemMatcher": [
+                "$shellcheck"
+            ]
+        },
+        {
+            "label": "🌐 Local: Start Viewer",
+            "type": "shell",
+            "command": "python3 -m viewer --port 5000 --game-root .",
+            "group": "none",
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}

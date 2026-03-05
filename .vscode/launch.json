@@ -124,6 +124,59 @@
             "console": "integratedTerminal"
         },
 
+        // ── Docker: debug tests inside container ─────────────────────────
+        // Attach to a pytest session running in the test container with
+        // debugpy listening on port 5678.
+        //
+        // HOW TO USE:
+        //   1. Start the test container with debugpy:
+        //      docker compose run --rm -p 5678:5678 test \
+        //        python -m debugpy --listen 0.0.0.0:5678 --wait-for-client \
+        //        -m pytest -m unit -v -s
+        //   2. Select this config and press F5 to attach
+        {
+            "type": "debugpy",
+            "request": "attach",
+            "name": "🐳 Docker: Attach to Tests",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/opt/bashcrawl"
+                }
+            ],
+            "justMyCode": false
+        },
+
+        // ── Docker: debug TUI inside container ──────────────────────────
+        // Attach to the Textual TUI running with debugpy in a container.
+        //
+        // HOW TO USE:
+        //   1. Start TUI container with debugpy:
+        //      docker compose run --rm -p 5678:5678 tui \
+        //        python -m debugpy --listen 0.0.0.0:5678 --wait-for-client \
+        //        -m ti --game-root /opt/bashcrawl
+        //   2. Select this config and press F5 to attach
+        {
+            "type": "debugpy",
+            "request": "attach",
+            "name": "🐳 Docker: Attach to TUI",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/opt/bashcrawl"
+                }
+            ],
+            "justMyCode": false
+        },
+
         // ── (Legacy) Node launch ────────────────────────────────────────────
         {
             "type": "node",
