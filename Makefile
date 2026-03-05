@@ -60,7 +60,7 @@ lint: ## Run all linters locally
 	yamllint -c .yamllint.yml .github/workflows/*.yml
 	markdownlint '**/*.md' --config .markdownlint.json
 
-viewer: ## Start the log viewer locally on :5000
+viewer: ## Start the log viewer locally on :5000 (localhost only for security)
 	python3 -m viewer --host 127.0.0.1 --port 5000 --game-root .
 
 # ============================================================================

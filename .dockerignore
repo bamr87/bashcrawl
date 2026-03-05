@@ -2,8 +2,13 @@
 .git
 .gitignore
 
-# GitHub metadata (not needed in containers)
-.github
+# GitHub metadata (except workflows needed for lint stage)
+.github/ISSUE_TEMPLATE
+.github/prompts
+.github/instructions
+.github/agents
+.github/copilot-instructions.md
+.github/dependabot.yml
 
 # IDE / editor
 .vscode

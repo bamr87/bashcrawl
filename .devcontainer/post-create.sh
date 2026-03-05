@@ -24,16 +24,16 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
 # Python dependencies
 # --------------------------------------------------------------------------
 echo "📦 Installing Python dependencies..."
-pip install --upgrade pip
+pip install --no-cache-dir --upgrade pip
 
 # Terminal-illness TUI
-pip install -r src/terminal-illness/requirements.txt
+pip install --no-cache-dir -r src/terminal-illness/requirements.txt
 
 # Flask viewer
-pip install -r src/viewer/requirements.txt
+pip install --no-cache-dir -r src/viewer/requirements.txt
 
 # Test framework
-pip install -r test/requirements.txt
+pip install --no-cache-dir -r test/requirements.txt
 
 # --------------------------------------------------------------------------
 # Node.js tools

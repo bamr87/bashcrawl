@@ -91,6 +91,8 @@ services:
       target: test
     image: bashcrawl-test
     command: ["-m", "unit", "-v", "--timeout=30"]
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
     env_file:
       - path: .env
         required: false
