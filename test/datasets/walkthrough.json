@@ -1,0 +1,1121 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Bashcrawl complete solutions manual — single source of truth for all game content, test steps, and expected state transitions",
+    "last_updated": "2026-03-04",
+    "total_rooms": 26,
+    "total_scripts": 18,
+    "total_quests": 8,
+    "total_scrolls": 25
+  },
+
+  "quests": [
+    {"id": 0, "title": "Awakening: Know Thy Place", "command": "pwd", "target": null, "xp": 50, "prerequisite": null},
+    {"id": 1, "title": "Eyes to See", "command": "ls", "target": null, "xp": 50, "prerequisite": 0},
+    {"id": 2, "title": "First Steps", "command": "cd", "target": "cellar", "xp": 100, "prerequisite": 1},
+    {"id": 3, "title": "Shape the World", "command": "mkdir", "target": "workshop", "xp": 100, "prerequisite": 2},
+    {"id": 4, "title": "Spark of Creation", "command": "touch", "target": "notes.txt", "xp": 100, "prerequisite": 3},
+    {"id": 5, "title": "Read the Signs", "command": "cat", "target": "notes.txt", "xp": 100, "prerequisite": 4},
+    {"id": 6, "title": "Seek the Whisper", "command": "grep", "target": null, "xp": 150, "prerequisite": 5},
+    {"id": 7, "title": "The Bashcrawl Grimoire", "command": "source", "target": null, "xp": 200, "prerequisite": 6}
+  ],
+
+  "rooms": {
+    "entrance": {
+      "path": "entrance",
+      "children": ["cellar", "workshop", ".chapel", ".vault", ".scrap", ".rift"],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": ["ls", "cd", "pwd", "cat", "wc", "head", "tail", "less"],
+      "hidden": false,
+      "depth": 0,
+      "unlock_prerequisite": null
+    },
+    "entrance/cellar": {
+      "path": "entrance/cellar",
+      "children": ["armoury"],
+      "scripts": ["treasure"],
+      "scroll": true,
+      "scroll_teaches": ["ls -F", "alias"],
+      "hidden": false,
+      "depth": 1,
+      "unlock_prerequisite": null
+    },
+    "entrance/cellar/armoury": {
+      "path": "entrance/cellar/armoury",
+      "children": ["chamber", "workshop"],
+      "scripts": ["treasure", "potion"],
+      "scroll": true,
+      "scroll_teaches": ["chmod +x", "ls -l", "permissions", "grep", "./"],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/cellar/armoury/chamber": {
+      "path": "entrance/cellar/armoury/chamber",
+      "children": [],
+      "scripts": ["treasure", "statue", "spell"],
+      "scroll": true,
+      "scroll_teaches": ["export", "echo $VAR", "let", "arithmetic"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/cellar/armoury/workshop": {
+      "path": "entrance/cellar/armoury/workshop",
+      "children": [],
+      "scripts": [],
+      "scroll": false,
+      "scroll_teaches": [],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null,
+      "note": "Pre-exists in armoury; different from entrance/workshop which player creates"
+    },
+    "entrance/chapel": {
+      "path": "entrance/chapel",
+      "children": ["courtyard", "graveyard"],
+      "scripts": ["altar"],
+      "scroll": true,
+      "scroll_teaches": ["ls -a", "hidden files", "history"],
+      "hidden": true,
+      "depth": 1,
+      "unlock_prerequisite": "entrance/cellar/treasure"
+    },
+    "entrance/chapel/courtyard": {
+      "path": "entrance/chapel/courtyard",
+      "children": ["aviary"],
+      "scripts": ["fountain", "rags"],
+      "scroll": true,
+      "scroll_teaches": ["file", "ls -l"],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/courtyard/aviary": {
+      "path": "entrance/chapel/courtyard/aviary",
+      "children": ["hall"],
+      "scripts": ["crystal", "penguin"],
+      "scroll": true,
+      "scroll_teaches": ["tab completion"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/courtyard/aviary/hall": {
+      "path": "entrance/chapel/courtyard/aviary/hall",
+      "children": ["library"],
+      "scripts": ["monster"],
+      "scroll": true,
+      "scroll_teaches": ["grep for variables", "combat readiness"],
+      "hidden": false,
+      "depth": 4,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/courtyard/aviary/hall/library": {
+      "path": "entrance/chapel/courtyard/aviary/hall/library",
+      "children": [".study"],
+      "scripts": ["tome"],
+      "scroll": true,
+      "scroll_teaches": ["man", "--help"],
+      "hidden": false,
+      "depth": 5,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/courtyard/aviary/hall/library/.study": {
+      "path": "entrance/chapel/courtyard/aviary/hall/library/.study",
+      "children": [],
+      "scripts": ["grimoire"],
+      "scroll": true,
+      "scroll_teaches": ["shell functions"],
+      "hidden": true,
+      "depth": 6,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/graveyard": {
+      "path": "entrance/chapel/graveyard",
+      "children": [".mausoleum", "columbarium", "lower-quadrant", "royal-tombs"],
+      "scripts": ["padlock"],
+      "scroll": true,
+      "scroll_teaches": ["ls -a"],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/graveyard/.mausoleum": {
+      "path": "entrance/chapel/graveyard/.mausoleum",
+      "children": [],
+      "scripts": ["spell", "loot"],
+      "scroll": true,
+      "scroll_teaches": ["sort | uniq"],
+      "hidden": true,
+      "depth": 3,
+      "unlock_prerequisite": "entrance/chapel/graveyard/padlock"
+    },
+    "entrance/chapel/graveyard/columbarium": {
+      "path": "entrance/chapel/graveyard/columbarium",
+      "children": [],
+      "scripts": ["open"],
+      "scroll": true,
+      "scroll_teaches": ["touch", "grep"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/graveyard/lower-quadrant": {
+      "path": "entrance/chapel/graveyard/lower-quadrant",
+      "children": [],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": ["sort"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/chapel/graveyard/royal-tombs": {
+      "path": "entrance/chapel/graveyard/royal-tombs",
+      "children": [],
+      "scripts": ["statues"],
+      "scroll": true,
+      "scroll_teaches": ["grep"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/vault": {
+      "path": "entrance/vault",
+      "children": ["stronghold"],
+      "scripts": ["glass"],
+      "scroll": true,
+      "scroll_teaches": ["environment variables"],
+      "hidden": true,
+      "depth": 1,
+      "unlock_prerequisite": "entrance/cellar/treasure"
+    },
+    "entrance/vault/stronghold": {
+      "path": "entrance/vault/stronghold",
+      "children": ["nursery"],
+      "scripts": ["goblet"],
+      "scroll": true,
+      "scroll_teaches": ["cp"],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/vault/stronghold/nursery": {
+      "path": "entrance/vault/stronghold/nursery",
+      "children": ["lab"],
+      "scripts": ["spell"],
+      "scroll": true,
+      "scroll_teaches": ["find"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/vault/stronghold/nursery/lab": {
+      "path": "entrance/vault/stronghold/nursery/lab",
+      "children": [],
+      "scripts": ["ghost"],
+      "scroll": true,
+      "scroll_teaches": ["pipes"],
+      "hidden": false,
+      "depth": 4,
+      "unlock_prerequisite": null
+    },
+    "entrance/scrap": {
+      "path": "entrance/scrap",
+      "children": [],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": ["ln -s", "symlinks"],
+      "hidden": true,
+      "depth": 1,
+      "unlock_prerequisite": "entrance/cellar/treasure"
+    },
+    "entrance/.rift": {
+      "path": "entrance/.rift",
+      "children": ["arena", "spire"],
+      "scripts": ["box"],
+      "scroll": true,
+      "scroll_teaches": ["command chaining", "|", "&&", ";", "||"],
+      "hidden": true,
+      "depth": 1,
+      "unlock_prerequisite": "entrance/vault/stronghold/goblet"
+    },
+    "entrance/.rift/arena": {
+      "path": "entrance/.rift/arena",
+      "children": ["pit"],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": [],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/.rift/arena/pit": {
+      "path": "entrance/.rift/arena/pit",
+      "children": [],
+      "scripts": ["nyarlathotep", "drummer", "wizard-light"],
+      "scroll": true,
+      "scroll_teaches": ["health readiness"],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/.rift/spire": {
+      "path": "entrance/.rift/spire",
+      "children": ["mezzanine"],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": ["ls -a | grep"],
+      "hidden": false,
+      "depth": 2,
+      "unlock_prerequisite": null
+    },
+    "entrance/.rift/spire/mezzanine": {
+      "path": "entrance/.rift/spire/mezzanine",
+      "children": [".elevator"],
+      "scripts": ["button", "window"],
+      "scroll": false,
+      "scroll_teaches": [],
+      "hidden": false,
+      "depth": 3,
+      "unlock_prerequisite": null
+    },
+    "entrance/.rift/spire/mezzanine/.elevator": {
+      "path": "entrance/.rift/spire/mezzanine/.elevator",
+      "children": [".satellite"],
+      "scripts": ["display"],
+      "scroll": false,
+      "scroll_teaches": [],
+      "hidden": true,
+      "depth": 4,
+      "unlock_prerequisite": null
+    },
+    "entrance/.rift/spire/mezzanine/.elevator/.satellite": {
+      "path": "entrance/.rift/spire/mezzanine/.elevator/.satellite",
+      "children": [],
+      "scripts": [],
+      "scroll": false,
+      "scroll_teaches": ["base64", "sha256sum", "cat concatenation"],
+      "hidden": true,
+      "depth": 5,
+      "unlock_prerequisite": null,
+      "note": "Data files: alpha, beta, gamma, delta (base64 robot parts), notebook (instructions), sha256sums (verification)"
+    }
+  },
+
+  "encounters": {
+    "entrance/cellar/treasure": {
+      "type": "treasure",
+      "script_path": "entrance/cellar/treasure",
+      "checks": {"inventory_not_contains": "amulet"},
+      "item_given": "amulet",
+      "export_command": "export I=amulet,$I",
+      "unlocks": [".chapel", ".vault", ".scrap"],
+      "unlock_mechanism": "mv ../../.chapel ../../chapel",
+      "output_contains": ["amulet", "export"],
+      "output_not_contains": ["Error"],
+      "stdin": null
+    },
+    "entrance/cellar/armoury/treasure": {
+      "type": "treasure",
+      "script_path": "entrance/cellar/armoury/treasure",
+      "checks": {"inventory_not_contains": "sword"},
+      "item_given": "sword",
+      "export_command": "export I=sword,$I",
+      "unlocks": [".chapel", ".vault", ".scrap"],
+      "unlock_mechanism": "mv ../../.chapel ../../chapel",
+      "output_contains": ["sword", "export"],
+      "output_not_contains": ["Error"],
+      "stdin": null
+    },
+    "entrance/cellar/armoury/potion": {
+      "type": "potion",
+      "script_path": "entrance/cellar/armoury/potion",
+      "checks": {"hp_check": "${HP:-0} -gt 0"},
+      "variants": {
+        "accept": {
+          "stdin": "y",
+          "export_command": "export HP=15",
+          "output_contains": ["HP", "export"],
+          "state_after": {"hp": 15}
+        },
+        "decline": {
+          "stdin": "n",
+          "export_command": "export HP=10",
+          "output_contains": ["leave"],
+          "state_after": {"hp": 10}
+        }
+      },
+      "stdin": "y"
+    },
+    "entrance/cellar/armoury/chamber/treasure": {
+      "type": "treasure",
+      "script_path": "entrance/cellar/armoury/chamber/treasure",
+      "checks": {"inventory_not_contains": "coins"},
+      "item_given": "coins",
+      "export_command": "export I=coins,$I",
+      "output_contains": ["export"],
+      "output_not_contains": ["Error"],
+      "stdin": null
+    },
+    "entrance/cellar/armoury/chamber/statue": {
+      "type": "combat",
+      "script_path": "entrance/cellar/armoury/chamber/statue",
+      "checks": {"flag_not_exists": ".statue_defeated", "requires_hp": true},
+      "damage": 5,
+      "bonus_with_sword": true,
+      "flag_created": ".statue_defeated",
+      "item_given": "diamonds",
+      "export_command": "export I=diamonds,$I",
+      "output_contains": ["statue"],
+      "variants": {
+        "with_sword": {
+          "env": {"I": "amulet,sword,", "HP": "15"},
+          "output_contains": ["statue"]
+        },
+        "without_sword": {
+          "env": {"I": "amulet,", "HP": "15"},
+          "output_contains": ["statue"]
+        }
+      },
+      "stdin": null
+    },
+    "entrance/cellar/armoury/chamber/spell": {
+      "type": "spell",
+      "script_path": "entrance/cellar/armoury/chamber/spell",
+      "teaches": "ln -s",
+      "variants": {
+        "accept": {
+          "stdin": "y",
+          "output_contains": ["ln"]
+        },
+        "decline": {
+          "stdin": "n",
+          "output_not_contains": ["Error"]
+        }
+      },
+      "stdin": "y"
+    },
+    "entrance/chapel/altar": {
+      "type": "puzzle",
+      "script_path": "entrance/chapel/altar",
+      "checks": {"uses_flags": [".bless", ".curse"]},
+      "item_given": "trinket",
+      "stdin": null
+    },
+    "entrance/chapel/courtyard/fountain": {
+      "type": "hazard",
+      "script_path": "entrance/chapel/courtyard/fountain",
+      "checks": {"curse_flag": ".curse"},
+      "damage_if_cursed": 2,
+      "stdin": null
+    },
+    "entrance/chapel/courtyard/rags": {
+      "type": "treasure",
+      "script_path": "entrance/chapel/courtyard/rags",
+      "item_given": ["rags", "fish"],
+      "export_command": "export I=rags,fish,$I",
+      "stdin": "y"
+    },
+    "entrance/chapel/courtyard/aviary/hall/monster": {
+      "type": "combat",
+      "script_path": "entrance/chapel/courtyard/aviary/hall/monster",
+      "checks": {"requires_sword": true, "requires_hp": true},
+      "damage": 5,
+      "item_given": "crown",
+      "creates_scripts": ["treasure", "carcass"],
+      "nondeterministic": true,
+      "stdin": null
+    },
+    "entrance/chapel/graveyard/padlock": {
+      "type": "puzzle",
+      "script_path": "entrance/chapel/graveyard/padlock",
+      "checks": {"inventory_contains_all": ["2712", "1765", "7432"]},
+      "unlocks": [".mausoleum"],
+      "unlock_mechanism": "mv .mausoleum mausoleum",
+      "stdin": "y"
+    },
+    "entrance/chapel/graveyard/columbarium/open": {
+      "type": "puzzle",
+      "script_path": "entrance/chapel/graveyard/columbarium/open",
+      "checks": {"file_exists": "15"},
+      "reveals_number": "2712",
+      "stdin": null
+    },
+    "entrance/chapel/graveyard/royal-tombs/statues": {
+      "type": "puzzle",
+      "script_path": "entrance/chapel/graveyard/royal-tombs/statues",
+      "checks": {"inventory_contains": "crown"},
+      "reveals_number": "7432",
+      "correct_input": "5",
+      "damage_on_wrong": 5,
+      "stdin": "5"
+    },
+    "entrance/chapel/graveyard/.mausoleum/loot": {
+      "type": "puzzle",
+      "script_path": "entrance/chapel/graveyard/.mausoleum/loot",
+      "correct_answer": "27121981",
+      "item_given": ["goldcoins", "bracelet", "silverkeys"],
+      "gameover_on_wrong": true,
+      "stdin": "27121981"
+    },
+    "entrance/vault/glass": {
+      "type": "puzzle",
+      "script_path": "entrance/vault/glass",
+      "checks": {"requires_crystal": true, "bless_flag": ".bless"},
+      "stdin": "y"
+    },
+    "entrance/vault/stronghold/goblet": {
+      "type": "gate",
+      "script_path": "entrance/vault/stronghold/goblet",
+      "checks": {"files_exist": ["orb1", "orb2", "orb3"]},
+      "setup_commands": ["cp orb1 orb2", "cp orb1 orb3"],
+      "item_given": "goblet",
+      "export_command": "export I=goblet,$I",
+      "unlocks": [".rift"],
+      "unlock_mechanism": "mv ../../.rift ../../rift",
+      "stdin": null
+    },
+    "entrance/vault/stronghold/nursery/lab/ghost": {
+      "type": "combat",
+      "script_path": "entrance/vault/stronghold/nursery/lab/ghost",
+      "checks": {"requires_hp": true},
+      "nondeterministic": true,
+      "stdin": null
+    },
+    "entrance/.rift/arena/pit/nyarlathotep": {
+      "type": "boss_combat",
+      "script_path": "entrance/.rift/arena/pit/nyarlathotep",
+      "checks": {"requires_hp": true, "requires_sword": true},
+      "damage": 5,
+      "boss_modifiers": {
+        "base_bonus": 3,
+        "drum_penalty": -2,
+        "wizards_bonus": 2,
+        "bless_bonus": 2
+      },
+      "item_given": ["hair", "bracelet"],
+      "creates_scripts": ["treasure", "platinum"],
+      "nondeterministic": true,
+      "stdin": null
+    }
+  },
+
+  "critical_path": [
+    {
+      "step_id": "cp_01",
+      "room": "entrance",
+      "command": "pwd",
+      "screenshot_name": "001_entrance_pwd",
+      "teaches": "Current directory",
+      "expected_output_contains": ["entrance"],
+      "quest_completed": {"id": 0, "title": "Awakening: Know Thy Place", "xp": 50},
+      "game_state_after": {"learned_commands": ["pwd"], "xp": 50}
+    },
+    {
+      "step_id": "cp_02",
+      "room": "entrance",
+      "command": "ls",
+      "screenshot_name": "002_entrance_ls",
+      "teaches": "List directory contents",
+      "expected_output_contains": ["cellar", "scroll"],
+      "quest_completed": {"id": 1, "title": "Eyes to See", "xp": 50},
+      "game_state_after": {"learned_commands": ["pwd", "ls"], "xp": 100}
+    },
+    {
+      "step_id": "cp_03",
+      "room": "entrance",
+      "command": "cat scroll",
+      "screenshot_name": "003_entrance_scroll",
+      "teaches": "Reading files",
+      "expected_output_contains": ["ls", "cd"]
+    },
+    {
+      "step_id": "cp_04",
+      "room": "entrance",
+      "command": "cd cellar",
+      "screenshot_name": "004_cd_cellar",
+      "teaches": "Change directory",
+      "quest_completed": {"id": 2, "title": "First Steps", "xp": 100},
+      "game_state_after": {"current_location": "entrance/cellar", "learned_commands": ["pwd", "ls", "cd"], "xp": 200}
+    },
+    {
+      "step_id": "cp_05",
+      "room": "entrance/cellar",
+      "command": "cat scroll",
+      "screenshot_name": "005_cellar_scroll",
+      "teaches": "ls -F flags"
+    },
+    {
+      "step_id": "cp_06",
+      "room": "entrance/cellar",
+      "command": "ls -F",
+      "screenshot_name": "006_cellar_ls_f",
+      "teaches": "File type indicators",
+      "expected_output_contains": ["treasure", "armoury/", "scroll"]
+    },
+    {
+      "step_id": "cp_07",
+      "room": "entrance/cellar",
+      "command": "./treasure",
+      "screenshot_name": "007_cellar_treasure",
+      "teaches": "Running executables",
+      "expected_output_contains": ["amulet", "export"],
+      "encounter": "entrance/cellar/treasure",
+      "unlocks": ["chapel", "vault", "scrap"]
+    },
+    {
+      "step_id": "cp_08",
+      "room": "entrance/cellar",
+      "command": "export I=amulet,$I",
+      "screenshot_name": "008_cellar_export",
+      "teaches": "Environment variables",
+      "game_state_after": {"inventory": "amulet,"}
+    },
+    {
+      "step_id": "cp_09",
+      "room": "entrance/cellar",
+      "command": "cd armoury",
+      "screenshot_name": "009_cd_armoury",
+      "game_state_after": {"current_location": "entrance/cellar/armoury"}
+    },
+    {
+      "step_id": "cp_10",
+      "room": "entrance/cellar/armoury",
+      "command": "cat scroll",
+      "screenshot_name": "010_armoury_scroll",
+      "teaches": "chmod, permissions, grep"
+    },
+    {
+      "step_id": "cp_11",
+      "room": "entrance/cellar/armoury",
+      "command": "ls -F",
+      "screenshot_name": "011_armoury_ls_f",
+      "expected_output_contains": ["potion", "treasure", "chamber/", "scroll"]
+    },
+    {
+      "step_id": "cp_12",
+      "room": "entrance/cellar/armoury",
+      "command": "./treasure",
+      "screenshot_name": "012_armoury_treasure",
+      "expected_output_contains": ["sword", "export"],
+      "encounter": "entrance/cellar/armoury/treasure"
+    },
+    {
+      "step_id": "cp_13",
+      "room": "entrance/cellar/armoury",
+      "command": "export I=sword,$I",
+      "screenshot_name": "013_armoury_sword",
+      "game_state_after": {"inventory": "amulet,sword,"}
+    },
+    {
+      "step_id": "cp_14",
+      "room": "entrance/cellar/armoury",
+      "command": "./potion",
+      "screenshot_name": "014_armoury_potion",
+      "teaches": "Interactive prompts (read)",
+      "encounter": "entrance/cellar/armoury/potion",
+      "stdin": "y",
+      "expected_output_contains": ["HP", "export"]
+    },
+    {
+      "step_id": "cp_15",
+      "room": "entrance/cellar/armoury",
+      "command": "export HP=15",
+      "screenshot_name": "015_armoury_hp",
+      "game_state_after": {"hp": 15}
+    },
+    {
+      "step_id": "cp_16",
+      "room": "entrance/cellar/armoury",
+      "command": "cd chamber",
+      "screenshot_name": "016_cd_chamber",
+      "game_state_after": {"current_location": "entrance/cellar/armoury/chamber"}
+    },
+    {
+      "step_id": "cp_17",
+      "room": "entrance/cellar/armoury/chamber",
+      "command": "cat scroll",
+      "screenshot_name": "017_chamber_scroll",
+      "teaches": "export, let, arithmetic, combat"
+    },
+    {
+      "step_id": "cp_18",
+      "room": "entrance/cellar/armoury/chamber",
+      "command": "./statue",
+      "screenshot_name": "018_chamber_statue",
+      "teaches": "Arithmetic with let, combat flags",
+      "encounter": "entrance/cellar/armoury/chamber/statue",
+      "expected_output_contains": ["statue"]
+    },
+    {
+      "step_id": "cp_19",
+      "room": "entrance/cellar/armoury/chamber",
+      "command": "./treasure",
+      "screenshot_name": "019_chamber_treasure",
+      "encounter": "entrance/cellar/armoury/chamber/treasure",
+      "expected_output_contains": ["export"]
+    },
+    {
+      "step_id": "cp_20",
+      "room": "entrance/cellar/armoury/chamber",
+      "command": "export I=coins,$I",
+      "screenshot_name": "020_chamber_coins",
+      "game_state_after": {"inventory": "amulet,sword,coins,"}
+    },
+    {
+      "step_id": "cp_21",
+      "room": "entrance",
+      "command": "cd ../../../",
+      "screenshot_name": "021_back_to_entrance",
+      "note": "Return to entrance for workshop quest",
+      "game_state_after": {"current_location": "entrance"}
+    },
+    {
+      "step_id": "cp_22",
+      "room": "entrance",
+      "command": "mkdir workshop",
+      "screenshot_name": "022_mkdir_workshop",
+      "teaches": "Creating directories",
+      "quest_completed": {"id": 3, "title": "Shape the World", "xp": 100}
+    },
+    {
+      "step_id": "cp_23",
+      "room": "entrance",
+      "command": "cd workshop",
+      "screenshot_name": "023_cd_workshop",
+      "game_state_after": {"current_location": "entrance/workshop"}
+    },
+    {
+      "step_id": "cp_24",
+      "room": "entrance/workshop",
+      "command": "touch notes.txt",
+      "screenshot_name": "024_touch_notes",
+      "teaches": "Creating files",
+      "quest_completed": {"id": 4, "title": "Spark of Creation", "xp": 100}
+    },
+    {
+      "step_id": "cp_25",
+      "room": "entrance/workshop",
+      "command": "cat notes.txt",
+      "screenshot_name": "025_cat_notes",
+      "teaches": "Reading files (empty file)",
+      "quest_completed": {"id": 5, "title": "Read the Signs", "xp": 100}
+    }
+  ],
+
+  "hidden_paths": {
+    "chapel": {
+      "depends_on": "cp_07",
+      "unlock_step": "Cellar treasure unlocks .chapel → chapel",
+      "steps": [
+        {
+          "step_id": "chapel_01",
+          "room": "entrance",
+          "command": "cd chapel",
+          "screenshot_name": "100_cd_chapel",
+          "game_state_after": {"current_location": "entrance/chapel"}
+        },
+        {
+          "step_id": "chapel_02",
+          "room": "entrance/chapel",
+          "command": "cat scroll",
+          "screenshot_name": "101_chapel_scroll",
+          "teaches": "ls -a, hidden files"
+        },
+        {
+          "step_id": "chapel_03",
+          "room": "entrance/chapel",
+          "command": "ls -a",
+          "screenshot_name": "102_chapel_ls_a",
+          "expected_output_contains": ["courtyard", "graveyard", "altar", "scroll"]
+        },
+        {
+          "step_id": "chapel_04",
+          "room": "entrance/chapel",
+          "command": "cd courtyard",
+          "screenshot_name": "103_cd_courtyard"
+        },
+        {
+          "step_id": "chapel_05",
+          "room": "entrance/chapel/courtyard",
+          "command": "cat scroll",
+          "screenshot_name": "104_courtyard_scroll",
+          "teaches": "file command, ls -l"
+        },
+        {
+          "step_id": "chapel_06",
+          "room": "entrance/chapel/courtyard",
+          "command": "cd aviary",
+          "screenshot_name": "105_cd_aviary"
+        },
+        {
+          "step_id": "chapel_07",
+          "room": "entrance/chapel/courtyard/aviary",
+          "command": "cat scroll",
+          "screenshot_name": "106_aviary_scroll",
+          "teaches": "Tab completion"
+        },
+        {
+          "step_id": "chapel_08",
+          "room": "entrance/chapel/courtyard/aviary",
+          "command": "cd hall",
+          "screenshot_name": "107_cd_hall"
+        },
+        {
+          "step_id": "chapel_09",
+          "room": "entrance/chapel/courtyard/aviary/hall",
+          "command": "cat scroll",
+          "screenshot_name": "108_hall_scroll",
+          "teaches": "grep for variables"
+        },
+        {
+          "step_id": "chapel_10",
+          "room": "entrance/chapel/courtyard/aviary/hall",
+          "command": "cd library",
+          "screenshot_name": "109_cd_library"
+        },
+        {
+          "step_id": "chapel_11",
+          "room": "entrance/chapel/courtyard/aviary/hall/library",
+          "command": "cat scroll",
+          "screenshot_name": "110_library_scroll",
+          "teaches": "man command, --help"
+        }
+      ]
+    },
+    "graveyard": {
+      "depends_on": "chapel_01",
+      "unlock_step": "Chapel provides access to graveyard",
+      "steps": [
+        {
+          "step_id": "grave_01",
+          "room": "entrance/chapel",
+          "command": "cd graveyard",
+          "screenshot_name": "120_cd_graveyard"
+        },
+        {
+          "step_id": "grave_02",
+          "room": "entrance/chapel/graveyard",
+          "command": "cat scroll",
+          "screenshot_name": "121_graveyard_scroll",
+          "teaches": "ls -a"
+        },
+        {
+          "step_id": "grave_03",
+          "room": "entrance/chapel/graveyard",
+          "command": "cd columbarium",
+          "screenshot_name": "122_cd_columbarium"
+        },
+        {
+          "step_id": "grave_04",
+          "room": "entrance/chapel/graveyard/columbarium",
+          "command": "cat scroll",
+          "screenshot_name": "123_columbarium_scroll",
+          "teaches": "touch, grep"
+        },
+        {
+          "step_id": "grave_05",
+          "room": "entrance/chapel/graveyard/columbarium",
+          "command": "touch 15",
+          "screenshot_name": "124_touch_15",
+          "teaches": "Creating files to solve puzzles"
+        },
+        {
+          "step_id": "grave_06",
+          "room": "entrance/chapel/graveyard/columbarium",
+          "command": "./open",
+          "screenshot_name": "125_open_niche",
+          "encounter": "entrance/chapel/graveyard/columbarium/open",
+          "expected_output_contains": ["2712"],
+          "note": "Reveals number 2712"
+        },
+        {
+          "step_id": "grave_07",
+          "room": "entrance/chapel/graveyard/columbarium",
+          "command": "export I=2712,$I",
+          "screenshot_name": "126_add_2712"
+        },
+        {
+          "step_id": "grave_08",
+          "room": "entrance/chapel/graveyard",
+          "command": "cd ../lower-quadrant",
+          "screenshot_name": "127_cd_lower_quadrant"
+        },
+        {
+          "step_id": "grave_09",
+          "room": "entrance/chapel/graveyard/lower-quadrant",
+          "command": "cat scroll",
+          "screenshot_name": "128_lower_quadrant_scroll",
+          "teaches": "sort"
+        },
+        {
+          "step_id": "grave_10",
+          "room": "entrance/chapel/graveyard/lower-quadrant",
+          "command": "sort gravestones",
+          "screenshot_name": "129_sort_gravestones",
+          "teaches": "Sorting file contents",
+          "note": "Find Frederick Kingsley → death year 1765"
+        },
+        {
+          "step_id": "grave_11",
+          "room": "entrance/chapel/graveyard/lower-quadrant",
+          "command": "export I=1765,$I",
+          "screenshot_name": "130_add_1765"
+        },
+        {
+          "step_id": "grave_12",
+          "room": "entrance/chapel/graveyard",
+          "command": "cd ../royal-tombs",
+          "screenshot_name": "131_cd_royal_tombs"
+        },
+        {
+          "step_id": "grave_13",
+          "room": "entrance/chapel/graveyard/royal-tombs",
+          "command": "cat scroll",
+          "screenshot_name": "132_royal_tombs_scroll"
+        },
+        {
+          "step_id": "grave_14",
+          "room": "entrance/chapel/graveyard/royal-tombs",
+          "command": "grep King royals",
+          "screenshot_name": "133_grep_king",
+          "teaches": "grep for search"
+        },
+        {
+          "step_id": "grave_15",
+          "room": "entrance/chapel/graveyard/royal-tombs",
+          "command": "./statues",
+          "screenshot_name": "134_statues",
+          "encounter": "entrance/chapel/graveyard/royal-tombs/statues",
+          "stdin": "5",
+          "note": "Place crown on statue 5 → reveals 7432"
+        },
+        {
+          "step_id": "grave_16",
+          "room": "entrance/chapel/graveyard/royal-tombs",
+          "command": "export I=7432,$I",
+          "screenshot_name": "135_add_7432"
+        },
+        {
+          "step_id": "grave_17",
+          "room": "entrance/chapel/graveyard",
+          "command": "cd ..",
+          "screenshot_name": "136_back_to_graveyard"
+        },
+        {
+          "step_id": "grave_18",
+          "room": "entrance/chapel/graveyard",
+          "command": "./padlock",
+          "screenshot_name": "137_padlock",
+          "encounter": "entrance/chapel/graveyard/padlock",
+          "stdin": "y",
+          "unlocks": [".mausoleum"],
+          "note": "Requires 2712, 1765, 7432 in inventory"
+        },
+        {
+          "step_id": "grave_19",
+          "room": "entrance/chapel/graveyard",
+          "command": "cd mausoleum",
+          "screenshot_name": "138_cd_mausoleum"
+        },
+        {
+          "step_id": "grave_20",
+          "room": "entrance/chapel/graveyard/.mausoleum",
+          "command": "cat scroll",
+          "screenshot_name": "139_mausoleum_scroll",
+          "teaches": "sort | uniq"
+        },
+        {
+          "step_id": "grave_21",
+          "room": "entrance/chapel/graveyard/.mausoleum",
+          "command": "sort room | uniq",
+          "screenshot_name": "140_sort_uniq_room",
+          "teaches": "Pipes and deduplication",
+          "note": "Reveals unique line: 27121981"
+        }
+      ]
+    },
+    "vault": {
+      "depends_on": "cp_07",
+      "unlock_step": "Cellar treasure unlocks .vault → vault",
+      "steps": [
+        {
+          "step_id": "vault_01",
+          "room": "entrance",
+          "command": "cd vault",
+          "screenshot_name": "200_cd_vault"
+        },
+        {
+          "step_id": "vault_02",
+          "room": "entrance/vault",
+          "command": "cat scroll",
+          "screenshot_name": "201_vault_scroll",
+          "teaches": "Environment variables"
+        },
+        {
+          "step_id": "vault_03",
+          "room": "entrance/vault",
+          "command": "cd stronghold",
+          "screenshot_name": "202_cd_stronghold"
+        },
+        {
+          "step_id": "vault_04",
+          "room": "entrance/vault/stronghold",
+          "command": "cat scroll",
+          "screenshot_name": "203_stronghold_scroll",
+          "teaches": "cp command"
+        },
+        {
+          "step_id": "vault_05",
+          "room": "entrance/vault/stronghold",
+          "command": "cp orb1 orb2",
+          "screenshot_name": "204_cp_orb2",
+          "teaches": "Copying files"
+        },
+        {
+          "step_id": "vault_06",
+          "room": "entrance/vault/stronghold",
+          "command": "cp orb1 orb3",
+          "screenshot_name": "205_cp_orb3"
+        },
+        {
+          "step_id": "vault_07",
+          "room": "entrance/vault/stronghold",
+          "command": "./goblet",
+          "screenshot_name": "206_goblet",
+          "encounter": "entrance/vault/stronghold/goblet",
+          "unlocks": [".rift"],
+          "note": "Checks for orb1, orb2, orb3 files → unlocks .rift"
+        },
+        {
+          "step_id": "vault_08",
+          "room": "entrance/vault/stronghold",
+          "command": "export I=goblet,$I",
+          "screenshot_name": "207_goblet_inventory"
+        },
+        {
+          "step_id": "vault_09",
+          "room": "entrance/vault/stronghold",
+          "command": "cd nursery",
+          "screenshot_name": "208_cd_nursery"
+        },
+        {
+          "step_id": "vault_10",
+          "room": "entrance/vault/stronghold/nursery",
+          "command": "cat scroll",
+          "screenshot_name": "209_nursery_scroll",
+          "teaches": "find command"
+        },
+        {
+          "step_id": "vault_11",
+          "room": "entrance/vault/stronghold/nursery",
+          "command": "cd lab",
+          "screenshot_name": "210_cd_lab"
+        },
+        {
+          "step_id": "vault_12",
+          "room": "entrance/vault/stronghold/nursery/lab",
+          "command": "cat scroll",
+          "screenshot_name": "211_lab_scroll",
+          "teaches": "Pipes"
+        }
+      ]
+    },
+    "scrap": {
+      "depends_on": "cp_07",
+      "unlock_step": "Cellar treasure unlocks .scrap → scrap",
+      "steps": [
+        {
+          "step_id": "scrap_01",
+          "room": "entrance",
+          "command": "cd scrap",
+          "screenshot_name": "300_cd_scrap"
+        },
+        {
+          "step_id": "scrap_02",
+          "room": "entrance/scrap",
+          "command": "cat scroll",
+          "screenshot_name": "301_scrap_scroll",
+          "teaches": "ln -s, symlinks"
+        }
+      ]
+    },
+    "rift": {
+      "depends_on": "vault_07",
+      "unlock_step": "Goblet unlocks .rift → rift (requires 3 orbs)",
+      "steps": [
+        {
+          "step_id": "rift_01",
+          "room": "entrance",
+          "command": "cd rift",
+          "screenshot_name": "400_cd_rift",
+          "note": "After goblet unlocking, .rift renamed to rift"
+        },
+        {
+          "step_id": "rift_02",
+          "room": "entrance/.rift",
+          "command": "cat scroll",
+          "screenshot_name": "401_rift_scroll",
+          "teaches": "Command chaining: |, &&, ;, ||"
+        },
+        {
+          "step_id": "rift_03",
+          "room": "entrance/.rift",
+          "command": "cd arena",
+          "screenshot_name": "402_cd_arena"
+        },
+        {
+          "step_id": "rift_04",
+          "room": "entrance/.rift/arena",
+          "command": "cat scroll",
+          "screenshot_name": "403_arena_scroll"
+        },
+        {
+          "step_id": "rift_05",
+          "room": "entrance/.rift/arena",
+          "command": "cd pit",
+          "screenshot_name": "404_cd_pit"
+        },
+        {
+          "step_id": "rift_06",
+          "room": "entrance/.rift/arena/pit",
+          "command": "cat scroll",
+          "screenshot_name": "405_pit_scroll",
+          "teaches": "Health readiness checks"
+        },
+        {
+          "step_id": "rift_07",
+          "room": "entrance/.rift/arena/pit",
+          "command": "cat end",
+          "screenshot_name": "406_pit_end",
+          "note": "Game ending message"
+        },
+        {
+          "step_id": "rift_08",
+          "room": "entrance/.rift",
+          "command": "cd ../spire",
+          "screenshot_name": "407_cd_spire"
+        },
+        {
+          "step_id": "rift_09",
+          "room": "entrance/.rift/spire",
+          "command": "cat scroll",
+          "screenshot_name": "408_spire_scroll",
+          "teaches": "ls -a | grep"
+        }
+      ]
+    }
+  },
+
+  "full_walkthrough_order": [
+    "critical_path",
+    "chapel",
+    "graveyard",
+    "vault",
+    "scrap",
+    "rift"
+  ]
+}

@@ -77,14 +77,41 @@ detect_location() {
     local parent_dir=$(basename "$(dirname "$PWD")")
     
     case "$current_dir" in
+        # Main path
         entrance) echo "entrance" ;;
         cellar) echo "cellar" ;;
         armoury) echo "armoury" ;;
         chamber) echo "chamber" ;;
+        # Hidden chapel path
+        chapel) echo "chapel" ;;
+        graveyard) echo "graveyard" ;;
+        courtyard) echo "courtyard" ;;
+        aviary) echo "aviary" ;;
+        hall) echo "hall" ;;
+        library) echo "library" ;;
+        study) echo "study" ;;
+        # Hidden vault path
+        vault) echo "vault" ;;
+        stronghold) echo "stronghold" ;;
+        nursery) echo "nursery" ;;
+        lab) echo "lab" ;;
+        # Hidden scrap
+        scrap) echo "scrap" ;;
+        # Hidden rift path
+        rift) echo "rift" ;;
+        arena) echo "arena" ;;
+        pit) echo "pit" ;;
+        spire) echo "spire" ;;
+        mezzanine) echo "mezzanine" ;;
+        # Player-created rooms
+        workshop) echo "workshop" ;;
         *) 
             # Check if we're in a subdirectory of a known area
             case "$parent_dir" in
                 entrance|cellar|armoury|chamber) echo "$parent_dir" ;;
+                chapel|courtyard|aviary|hall|library|study) echo "$parent_dir" ;;
+                vault|stronghold|nursery|lab) echo "$parent_dir" ;;
+                rift|arena|pit|spire|mezzanine) echo "$parent_dir" ;;
                 *) echo "unknown" ;;
             esac
             ;;
@@ -221,11 +248,233 @@ EOF
             cat << EOF
    ${HELP_YELLOW}💎 THE CHAMBER${HELP_NC}
    • Advanced challenges and complex interactions
-   • Multiple paths and hidden secrets
+   • Key executables: ${HELP_GREEN}statue${HELP_NC} (combat), ${HELP_GREEN}spell${HELP_NC} (symlinks), ${HELP_GREEN}treasure${HELP_NC}
+   • Teaches: shell variables, arithmetic (let), symlink portals (ln -s)
    • Essential commands:
-     - ${HELP_GREEN}find . -type f${HELP_NC}     # Find all files
-     - ${HELP_GREEN}grep -r pattern${HELP_NC}    # Search for patterns
-     - ${HELP_GREEN}history${HELP_NC}            # Review your commands
+     - ${HELP_GREEN}./statue${HELP_NC}           # Face the statue boss fight
+     - ${HELP_GREEN}./spell${HELP_NC}            # Create a portal (symlink)
+     - ${HELP_GREEN}let "HP=HP-5"${HELP_NC}      # Arithmetic with variables
+
+EOF
+            ;;
+        chapel)
+            cat << EOF
+   ${HELP_YELLOW}⛪ THE CHAPEL${HELP_NC}
+   • A hidden sanctuary unlocked by collecting treasures
+   • Teaches: ${HELP_GREEN}grep${HELP_NC} for searching text within files
+   • Key files: ${HELP_GREEN}scroll${HELP_NC} (grep tutorial), ${HELP_GREEN}ghost${HELP_NC} (encounter)
+   • Essential commands:
+     - ${HELP_GREEN}grep pattern file${HELP_NC}  # Search for text in a file
+     - ${HELP_GREEN}grep -i pattern *${HELP_NC}  # Case-insensitive search
+     - ${HELP_GREEN}ls -la${HELP_NC}             # Look for hidden paths forward
+
+EOF
+            ;;
+        graveyard)
+            cat << EOF
+   ${HELP_YELLOW}🪦 THE GRAVEYARD${HELP_NC}
+   • A misty place beyond the chapel
+   • Teaches: ${HELP_GREEN}find${HELP_NC} for locating files across directories
+   • Essential commands:
+     - ${HELP_GREEN}find . -name "scroll"${HELP_NC}    # Find all scrolls
+     - ${HELP_GREEN}find . -type d${HELP_NC}            # Find directories
+     - ${HELP_GREEN}find . -executable${HELP_NC}        # Find runnable files
+
+EOF
+            ;;
+        courtyard)
+            cat << EOF
+   ${HELP_YELLOW}🏛️ THE COURTYARD${HELP_NC}
+   • An open area leading deeper into the castle
+   • Teaches: combining commands with pipes
+   • Essential commands:
+     - ${HELP_GREEN}ls | grep pattern${HELP_NC}     # Pipe output to grep
+     - ${HELP_GREEN}cat scroll | wc -l${HELP_NC}    # Count lines
+     - ${HELP_GREEN}cd aviary${HELP_NC}              # Continue deeper
+
+EOF
+            ;;
+        aviary)
+            cat << EOF
+   ${HELP_YELLOW}🦅 THE AVIARY${HELP_NC}
+   • A towering room filled with caged birds
+   • Teaches: output redirection and file creation
+   • Essential commands:
+     - ${HELP_GREEN}echo "text" > file${HELP_NC}    # Write to a file
+     - ${HELP_GREEN}echo "more" >> file${HELP_NC}   # Append to a file
+     - ${HELP_GREEN}cat file${HELP_NC}              # Verify file contents
+
+EOF
+            ;;
+        hall)
+            cat << EOF
+   ${HELP_YELLOW}🏰 THE GREAT HALL${HELP_NC}
+   • A grand hall connecting to the library
+   • Teaches: sorting and filtering output
+   • Essential commands:
+     - ${HELP_GREEN}sort file${HELP_NC}             # Sort file contents
+     - ${HELP_GREEN}ls | sort -r${HELP_NC}          # Reverse sort listing
+     - ${HELP_GREEN}uniq file${HELP_NC}             # Remove duplicates
+
+EOF
+            ;;
+        library)
+            cat << EOF
+   ${HELP_YELLOW}📚 THE ANCIENT LIBRARY${HELP_NC}
+   • Deep within the chapel — learn self-teaching commands
+   • Key files: ${HELP_GREEN}scroll${HELP_NC} (man tutorial), ${HELP_GREEN}tome${HELP_NC} (executable)
+   • Teaches: reading manuals with ${HELP_GREEN}man${HELP_NC} and ${HELP_GREEN}--help${HELP_NC}
+   • Essential commands:
+     - ${HELP_GREEN}man ls${HELP_NC}               # Read the manual for ls
+     - ${HELP_GREEN}./tome${HELP_NC}               # Consult the ancient tome
+     - ${HELP_GREEN}ls --help${HELP_NC}            # Quick help for ls
+
+EOF
+            ;;
+        study)
+            cat << EOF
+   ${HELP_YELLOW}📜 THE HIDDEN STUDY${HELP_NC}
+   • Secret room behind the library bookshelf
+   • Teaches: creating shell functions, alias vs function
+   • Key files: ${HELP_GREEN}scroll${HELP_NC} (functions tutorial), ${HELP_GREEN}grimoire${HELP_NC} (executable)
+   • Essential commands:
+     - ${HELP_GREEN}./grimoire${HELP_NC}           # Open portal to the Scriptorium
+     - ${HELP_GREEN}cd portal${HELP_NC}            # Step through the portal
+     - ${HELP_GREEN}source init_help.sh${HELP_NC}  # Activate the help system
+
+EOF
+            ;;
+        vault)
+            cat << EOF
+   ${HELP_YELLOW}🔒 THE VAULT${HELP_NC}
+   • A hidden vault unlocked deep in the dungeon
+   • Teaches: shell variables and environment
+   • Essential commands:
+     - ${HELP_GREEN}echo \$VARIABLE${HELP_NC}      # Print variable value
+     - ${HELP_GREEN}export VAR=value${HELP_NC}     # Set environment variable
+     - ${HELP_GREEN}env | grep VAR${HELP_NC}       # Search environment
+
+EOF
+            ;;
+        stronghold)
+            cat << EOF
+   ${HELP_YELLOW}🏯 THE STRONGHOLD${HELP_NC}
+   • Fortified area within the vault
+   • Teaches: advanced variable manipulation, ${HELP_GREEN}goblet${HELP_NC} challenge
+   • Key files: ${HELP_GREEN}goblet${HELP_NC} (checks for orb1, unlocks .rift)
+   • Essential commands:
+     - ${HELP_GREEN}./goblet${HELP_NC}             # Attempt the goblet challenge
+     - ${HELP_GREEN}echo \$I${HELP_NC}             # Check inventory for orb1
+     - ${HELP_GREEN}set | grep HP${HELP_NC}        # Inspect shell variables
+
+EOF
+            ;;
+        nursery)
+            cat << EOF
+   ${HELP_YELLOW}🍼 THE NURSERY${HELP_NC}
+   • A quiet room within the vault complex
+   • Teaches: process management and job control
+   • Essential commands:
+     - ${HELP_GREEN}ps${HELP_NC}                   # List running processes
+     - ${HELP_GREEN}jobs${HELP_NC}                 # List background jobs
+     - ${HELP_GREEN}bg / fg${HELP_NC}              # Background/foreground jobs
+
+EOF
+            ;;
+        lab)
+            cat << EOF
+   ${HELP_YELLOW}🧪 THE LABORATORY${HELP_NC}
+   • An alchemist's lab within the vault
+   • Teaches: process substitution and advanced piping
+   • Essential commands:
+     - ${HELP_GREEN}diff <(cmd1) <(cmd2)${HELP_NC}   # Process substitution
+     - ${HELP_GREEN}tee file${HELP_NC}                # Duplicate output
+     - ${HELP_GREEN}command | xargs${HELP_NC}         # Build commands from input
+
+EOF
+            ;;
+        scrap)
+            cat << EOF
+   ${HELP_YELLOW}🔗 THE SCRAP HEAP${HELP_NC}
+   • A hidden directory teaching symbolic links
+   • Teaches: ${HELP_GREEN}ln -s${HELP_NC} for creating symbolic links
+   • Essential commands:
+     - ${HELP_GREEN}ln -s target linkname${HELP_NC}  # Create symbolic link
+     - ${HELP_GREEN}ls -l${HELP_NC}                  # See link targets (->)
+     - ${HELP_GREEN}readlink linkname${HELP_NC}      # Show link destination
+
+EOF
+            ;;
+        rift)
+            cat << EOF
+   ${HELP_YELLOW}🌀 THE RIFT${HELP_NC}
+   • A dimensional tear — advanced scripting territory
+   • Unlocked by the goblet in the stronghold
+   • Teaches: advanced bash scripting and checksums
+   • Essential commands:
+     - ${HELP_GREEN}sha256sum file${HELP_NC}       # Compute file checksum
+     - ${HELP_GREEN}md5sum file${HELP_NC}          # Alternative checksum
+     - ${HELP_GREEN}diff file1 file2${HELP_NC}     # Compare files
+
+EOF
+            ;;
+        arena)
+            cat << EOF
+   ${HELP_YELLOW}⚔️ THE ARENA${HELP_NC}
+   • A battle zone within the rift
+   • Teaches: advanced combat scripting and loops
+   • Essential commands:
+     - ${HELP_GREEN}for f in *; do echo \$f; done${HELP_NC}  # Loop over files
+     - ${HELP_GREEN}while read line; do ...${HELP_NC}         # Read loop
+     - ${HELP_GREEN}test -f file && echo yes${HELP_NC}        # Conditional test
+
+EOF
+            ;;
+        pit)
+            cat << EOF
+   ${HELP_YELLOW}🕳️ THE PIT${HELP_NC}
+   • The deepest point of the arena
+   • Teaches: error handling and exit codes
+   • Essential commands:
+     - ${HELP_GREEN}echo \$?${HELP_NC}             # Check last exit code
+     - ${HELP_GREEN}command || echo fail${HELP_NC}  # Handle errors
+     - ${HELP_GREEN}trap 'cleanup' EXIT${HELP_NC}   # Set exit trap
+
+EOF
+            ;;
+        spire)
+            cat << EOF
+   ${HELP_YELLOW}🗼 THE SPIRE${HELP_NC}
+   • A tower rising from the rift
+   • Teaches: advanced text processing
+   • Essential commands:
+     - ${HELP_GREEN}awk '{print \$1}' file${HELP_NC}    # Extract columns
+     - ${HELP_GREEN}sed 's/old/new/' file${HELP_NC}     # Text substitution
+     - ${HELP_GREEN}cut -d',' -f1 file${HELP_NC}        # Cut fields
+
+EOF
+            ;;
+        mezzanine)
+            cat << EOF
+   ${HELP_YELLOW}🎭 THE MEZZANINE${HELP_NC}
+   • An elevated platform within the spire
+   • Teaches: advanced regex and pattern matching
+   • Essential commands:
+     - ${HELP_GREEN}grep -E 'regex' file${HELP_NC}     # Extended regex
+     - ${HELP_GREEN}[[ \$var =~ pattern ]]${HELP_NC}   # Bash regex match
+     - ${HELP_GREEN}grep -P '\\d+' file${HELP_NC}      # Perl regex
+
+EOF
+            ;;
+        workshop)
+            cat << EOF
+   ${HELP_YELLOW}🔨 THE WORKSHOP${HELP_NC}
+   • A player-created room for practicing file operations
+   • Teaches: mkdir, touch, rm, cp, echo >
+   • Essential commands:
+     - ${HELP_GREEN}mkdir new_room${HELP_NC}        # Create a new directory
+     - ${HELP_GREEN}touch artifact${HELP_NC}        # Create a new file
+     - ${HELP_GREEN}rm artifact${HELP_NC}           # Remove a file
 
 EOF
             ;;

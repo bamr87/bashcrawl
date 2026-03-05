@@ -55,6 +55,8 @@ logs/temp/
 logs/bashcrawl.log
 logs/setup.log
 logs/live_agent.jsonl
+logs/.last_run_meta.json
+logs/.last_passing_run.json
 
 # Temporary files
 *.tmp

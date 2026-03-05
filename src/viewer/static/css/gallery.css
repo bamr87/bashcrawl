@@ -5,6 +5,177 @@
    The filmstrip scrolls horizontally below.
    ========================================= */
 
+
+/* ================================================
+   CATEGORY PILLS (index page filter row)
+   ================================================ */
+.category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-family: var(--font-body);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.category-pill:hover {
+    border-color: var(--accent-gold-dim);
+    color: var(--text-primary);
+}
+.category-pill.active {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    color: var(--bg-primary);
+    font-weight: 600;
+}
+.pill-count {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    opacity: 0.7;
+}
+.category-pill.active .pill-count {
+    opacity: 1;
+}
+
+
+/* ================================================
+   SCREENSHOT CARD IMPROVEMENTS (index page)
+   ================================================ */
+
+/* Frame count overlay badge on card preview */
+.screenshot-card-preview {
+    position: relative;
+}
+.frame-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.75);
+    color: var(--accent-gold);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    z-index: 2;
+}
+
+/* Multi-frame card highlight */
+.screenshot-card.multi-frame {
+    border-color: var(--accent-gold-dim);
+}
+.screenshot-card.multi-frame:hover {
+    border-color: var(--accent-gold);
+}
+
+/* Card tags row */
+.screenshot-card-tags {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+}
+
+.badge-category {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.badge-multi {
+    background: var(--accent-gold-dim);
+    color: var(--accent-gold);
+    border: 1px solid var(--accent-gold-dim);
+    font-size: 0.68rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+
+/* ================================================
+   GALLERY NAV BAR — breadcrumb + prev/next session
+   ================================================ */
+.gallery-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.gallery-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.gallery-breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+.gallery-breadcrumb a:hover {
+    color: var(--accent-gold);
+}
+.breadcrumb-sep {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+.breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.gallery-session-nav {
+    display: flex;
+    gap: 0.4rem;
+}
+.session-nav-btn {
+    font-size: 0.78rem;
+    font-family: var(--font-body);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.session-nav-btn:hover:not(.disabled) {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+}
+.session-nav-btn.disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+
+
 /* --- Gallery header: title + controls in one row --- */
 .gallery-header {
     display: flex;
@@ -278,4 +449,22 @@
     .gallery-img {
         max-height: 60vh;
     }
+
+    .gallery-nav-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .category-pills {
+        gap: 0.3rem;
+    }
+    .category-pill {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.5rem;
+    }
+}
+
+/* Single-frame gallery — expand image, no filmstrip */
+.gallery-stage.single-frame .gallery-img {
+    max-height: 85vh;
 }

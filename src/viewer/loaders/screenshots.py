@@ -8,6 +8,36 @@ from pathlib import Path
 from typing import Any
 
 
+# ---------------------------------------------------------------------------
+# Category inference — maps test names to human-friendly groups.
+# The first matching prefix/keyword wins; order matters.
+# ---------------------------------------------------------------------------
+_CATEGORY_RULES: list[tuple[str, list[str]]] = [
+    ("Agent Protocol", ["agent", "ready_sentinel", "sentinel", "bash_agent"]),
+    ("TUI", ["tui", "terminal_engine", "walkthrough", "banner"]),
+    ("Screenshot System", ["screenshot", "take_", "capture", "svg_renderer"]),
+    ("Help System", ["help"]),
+    ("Game Content", ["scroll", "shebang", "room", "filesystem", "entrance", "cellar", "armoury", "chamber", "chapel", "vault", "rift"]),
+    ("Game Mechanics", ["unlock", "treasure", "combat", "potion", "spell", "statue", "ghost", "monster", "goblet", "sword", "hp", "inventory"]),
+    ("Game State", ["game_state", "quest", "reset", "progression", "critical_path", "workshop"]),
+    ("Logging", ["log", "session", "event", "jsonl"]),
+    ("AI / Chat", ["ai_chat", "chat", "offline"]),
+    ("Data Validation", ["yaml", "data_file"]),
+]
+
+_FALLBACK_CATEGORY = "Other"
+
+
+def _infer_category(test_name: str) -> str:
+    """Return a human-friendly category label for a test name."""
+    lower = test_name.lower()
+    for label, keywords in _CATEGORY_RULES:
+        for kw in keywords:
+            if kw in lower:
+                return label
+    return _FALLBACK_CATEGORY
+
+
 @dataclass
 class Screenshot:
     """A single screenshot SVG file."""
@@ -43,6 +73,11 @@ class ScreenshotSession:
     screenshots: list[Screenshot] = field(default_factory=list)
     has_manifest: bool = False
     linked_session_sids: list[str] = field(default_factory=list)
+    category: str = _FALLBACK_CATEGORY
+
+    @property
+    def is_multi_frame(self) -> bool:
+        return self.total_screenshots > 1
 
     def to_summary(self) -> dict:
         return {
@@ -54,6 +89,7 @@ class ScreenshotSession:
             "has_manifest": self.has_manifest,
             "linked_session_sids": self.linked_session_sids,
             "first_screenshot": self.screenshots[0].name if self.screenshots else None,
+            "category": self.category,
         }
 
     def to_detail(self) -> dict:
@@ -127,6 +163,7 @@ def _parse_screenshot_dir(dir_path: Path, screenshots_dir: Path) -> ScreenshotSe
         dir_path=dir_path,
         test_name=test_name,
         timestamp=timestamp,
+        category=_infer_category(test_name),
     )
 
     # --- Strategy 1: manifest.json at top level ---
@@ -210,6 +247,7 @@ class ScreenshotStore:
     def list_sessions(
         self,
         test_name: str | None = None,
+        category: str | None = None,
         sort_by: str = "date",
         order: str = "desc",
         page: int = 1,
@@ -221,6 +259,9 @@ class ScreenshotStore:
         if test_name:
             q = test_name.lower()
             results = [s for s in results if q in s.test_name.lower()]
+
+        if category:
+            results = [s for s in results if s.category == category]
 
         total = len(results)
 
@@ -235,6 +276,25 @@ class ScreenshotStore:
         start = (page - 1) * per_page
         end = start + per_page
         return results[start:end], total
+
+    def get_categories(self) -> list[tuple[str, int]]:
+        """Return sorted list of (category_label, count) pairs."""
+        from collections import Counter
+        counts: Counter[str] = Counter()
+        for s in self.sessions.values():
+            counts[s.category] += 1
+        return sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+
+    def get_adjacent_sessions(self, dir_name: str) -> tuple[ScreenshotSession | None, ScreenshotSession | None]:
+        """Return (previous, next) sessions relative to dir_name (date-sorted desc)."""
+        keys = sorted(self.sessions.keys(), reverse=True)
+        try:
+            idx = keys.index(dir_name)
+        except ValueError:
+            return None, None
+        prev_session = self.sessions[keys[idx - 1]] if idx > 0 else None
+        next_session = self.sessions[keys[idx + 1]] if idx < len(keys) - 1 else None
+        return prev_session, next_session
 
     def find_by_session_sid(self, sid: str) -> list[ScreenshotSession]:
         """Find screenshot sessions linked to a JSONL session SID."""

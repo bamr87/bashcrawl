@@ -15,6 +15,8 @@ api_bp = Blueprint("api", __name__)
 def list_sessions():
     store = current_app.config["SESSION_STORE"]
     mode = request.args.get("mode")
+    test_outcome = request.args.get("test_outcome")
+    run_id = request.args.get("run_id")
     sort_by = request.args.get("sort", "date")
     order = request.args.get("order", "desc")
     page = int(request.args.get("page", 1))
@@ -34,6 +36,8 @@ def list_sessions():
 
     sessions, total = store.list_sessions(
         mode=mode,
+        test_outcome=test_outcome,
+        run_id=run_id,
         has_screenshots=has_screenshots,
         min_events=min_events,
         sort_by=sort_by,
@@ -75,12 +79,14 @@ def get_session(sid):
 def list_screenshots():
     store = current_app.config["SCREENSHOT_STORE"]
     test_name = request.args.get("test_name")
+    category = request.args.get("category")
     sort_by = request.args.get("sort", "date")
     page = int(request.args.get("page", 1))
     per_page = int(request.args.get("per_page", 25))
 
     sessions, total = store.list_sessions(
         test_name=test_name,
+        category=category,
         sort_by=sort_by,
         page=page,
         per_page=per_page,
@@ -91,6 +97,7 @@ def list_screenshots():
         "total": total,
         "page": page,
         "total_pages": (total + per_page - 1) // per_page,
+        "categories": store.get_categories(),
     })
 
 
@@ -341,3 +348,123 @@ def live_agent_stream():
             "Connection": "keep-alive",
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Walkthrough (Solutions Manual)
+# ---------------------------------------------------------------------------
+
+def _load_walkthrough_json() -> dict | None:
+    """Load walkthrough.json from the test/datasets directory."""
+    config = current_app.config["OBSERVATORY_CONFIG"]
+    wt_path = config.game_root / "test" / "datasets" / "walkthrough.json"
+    if not wt_path.exists():
+        return None
+    try:
+        with open(wt_path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+@api_bp.route("/walkthrough")
+def walkthrough():
+    """Return walkthrough.json data cross-referenced with latest test results."""
+    data = _load_walkthrough_json()
+    if data is None:
+        return jsonify({"error": "walkthrough.json not found"}), 404
+
+    # Cross-reference with last passing run metadata
+    config = current_app.config["OBSERVATORY_CONFIG"]
+    passing_meta_path = config.logs_dir / ".last_passing_run.json"
+
+    test_status = {"last_passing_run": None, "screenshot_dirs": []}
+    if passing_meta_path.exists():
+        try:
+            meta = json.loads(passing_meta_path.read_text())
+            test_status["last_passing_run"] = {
+                "run_id": meta.get("run_id"),
+                "timestamp": meta.get("timestamp"),
+                "outcome": meta.get("outcome"),
+            }
+            test_status["screenshot_dirs"] = meta.get("walkthrough_screenshot_dirs", [])
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    data["test_status"] = test_status
+    return jsonify(data)
+
+
+@api_bp.route("/walkthrough/steps")
+def walkthrough_steps():
+    """Return flattened walkthrough steps with pass/fail status."""
+    data = _load_walkthrough_json()
+    if data is None:
+        return jsonify({"error": "walkthrough.json not found"}), 404
+
+    steps = list(data.get("critical_path", []))
+    for area_name, area_data in data.get("hidden_paths", {}).items():
+        for step in area_data.get("steps", []):
+            step["area"] = area_name
+        steps.extend(area_data.get("steps", []))
+
+    return jsonify({"steps": steps, "total": len(steps)})
+
+
+# ---------------------------------------------------------------------------
+# Test Dashboard
+# ---------------------------------------------------------------------------
+
+@api_bp.route("/test-dashboard")
+def test_dashboard_api():
+    """Test results grouped by interface (TUI/Classic/Native)."""
+    store = current_app.config["SESSION_STORE"]
+
+    results: dict[str, list] = {"tui": [], "classic": [], "native": [], "other": []}
+
+    for session in store.sessions.values():
+        test_event = None
+        test_result_event = None
+
+        for ev in session.events:
+            if ev.get("type") == "test":
+                test_event = ev
+            if ev.get("type") == "test_result":
+                test_result_event = ev
+
+        if not test_event:
+            continue
+
+        module = test_event.get("test_module", "")
+        entry = {
+            "test_name": session.test_name or "",
+            "module": module,
+            "mode": test_event.get("mode", "test"),
+            "markers": test_event.get("markers", []),
+            "outcome": test_result_event.get("outcome", "unknown") if test_result_event else "unknown",
+            "duration": test_result_event.get("duration_sec", 0) if test_result_event else 0,
+            "session_id": session.sid,
+            "run_id": session.run_id or "",
+            "timestamp": session.start_time.isoformat() if session.start_time else "",
+        }
+
+        if "tui_walkthrough" in module:
+            results["tui"].append(entry)
+        elif "classic_walkthrough" in module:
+            results["classic"].append(entry)
+        elif "native_walkthrough" in module:
+            results["native"].append(entry)
+        else:
+            results["other"].append(entry)
+
+    summary = {
+        interface: {
+            "total": len(tests),
+            "passed": sum(1 for t in tests if t["outcome"] == "passed"),
+            "failed": sum(1 for t in tests if t["outcome"] == "failed"),
+            "skipped": sum(1 for t in tests if t["outcome"] == "skipped"),
+        }
+        for interface, tests in results.items()
+    }
+
+    return jsonify({"results": results, "summary": summary})

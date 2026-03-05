@@ -36,6 +36,12 @@
             <a href="{{ url_for('pages.live_agent') }}" class="{% if request.path == '/live/agent' %}active{% endif %}">
                 🤖 Agent
             </a>
+            <a href="{{ url_for('pages.walkthrough_page') }}" class="{% if request.path == '/walkthrough' %}active{% endif %}">
+                🗺️ Walkthrough
+            </a>
+            <a href="{{ url_for('pages.tests_dashboard') }}" class="{% if request.path == '/tests' %}active{% endif %}">
+                🧪 Tests
+            </a>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
         </div>
     </nav>

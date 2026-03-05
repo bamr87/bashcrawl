@@ -45,6 +45,7 @@ class Session:
     file_path: Path
     file_date: date
     mode: str = ""
+    run_id: str = ""
     events: list[LogEvent] = field(default_factory=list)
     start_time: str = ""
     end_time: str = ""
@@ -54,14 +55,19 @@ class Session:
     deaths: list[dict] = field(default_factory=list)
     items_collected: list[str] = field(default_factory=list)
     screenshots: list[dict] = field(default_factory=list)
+    help_requests: list[dict] = field(default_factory=list)
+    test_results: list[dict] = field(default_factory=list)
     is_test: bool = False
     shell: str = ""
     os_name: str = ""
+    test_name: str = ""
+    test_outcome: str = ""
     event_count: int = 0
     rooms_count: int = 0
     encounters_count: int = 0
     deaths_count: int = 0
     screenshots_count: int = 0
+    help_requests_count: int = 0
 
     def to_summary(self) -> dict:
         """Return a summary dict for list views."""
@@ -69,6 +75,7 @@ class Session:
             "sid": self.sid,
             "date": self.file_date.isoformat(),
             "mode": self.mode,
+            "run_id": self.run_id,
             "start_time": self.start_time,
             "duration_sec": self.duration_sec,
             "event_count": self.event_count,
@@ -76,8 +83,11 @@ class Session:
             "encounters_count": self.encounters_count,
             "deaths_count": self.deaths_count,
             "screenshots_count": self.screenshots_count,
+            "help_requests_count": self.help_requests_count,
             "items": self.items_collected,
             "is_test": self.is_test,
+            "test_name": self.test_name,
+            "test_outcome": self.test_outcome,
             "rooms": self.rooms_visited,
         }
 
@@ -90,6 +100,8 @@ class Session:
         d["encounters"] = self.encounters
         d["deaths"] = self.deaths
         d["screenshots"] = self.screenshots
+        d["help_requests"] = self.help_requests
+        d["test_results"] = self.test_results
         d["events"] = [e.to_dict() for e in self.events]
         return d
 
@@ -137,6 +149,8 @@ def _parse_session_file(file_path: Path) -> Session | None:
     deaths = []
     items = []
     screenshots = []
+    help_requests = []
+    test_results = []
 
     for ev in events:
         if ev.event == "session_start":
@@ -144,6 +158,8 @@ def _parse_session_file(file_path: Path) -> Session | None:
             session.shell = ev.extra.get("shell", "")
             session.os_name = ev.extra.get("os", "")
             session.start_time = ev.ts
+            session.test_name = ev.extra.get("test_name", "")
+            session.run_id = ev.extra.get("run_id", "")
         elif ev.event == "session_end":
             session.end_time = ev.ts
             session.duration_sec = ev.extra.get("duration_sec")
@@ -151,6 +167,10 @@ def _parse_session_file(file_path: Path) -> Session | None:
             room = ev.extra.get("room", "")
             if room and room not in rooms:
                 rooms.append(room)
+        elif ev.event == "test":
+            # Fallback: capture run_id from enrichment event
+            if not session.run_id:
+                session.run_id = ev.extra.get("run_id", "")
         elif ev.event == "command":
             room = ev.extra.get("room", "")
             if room and room not in rooms:
@@ -179,6 +199,30 @@ def _parse_session_file(file_path: Path) -> Session | None:
                 "size_bytes": ev.extra.get("size_bytes", 0),
                 "ts": ev.ts,
             })
+        elif ev.event == "help_request":
+            help_requests.append({
+                "subcommand": ev.extra.get("subcommand", ""),
+                "output_preview": ev.extra.get("output_preview", ""),
+                "room": ev.extra.get("room", ""),
+                "ts": ev.ts,
+            })
+        elif ev.event == "help_action":
+            help_requests.append({
+                "subcommand": ev.extra.get("action", ""),
+                "output_preview": ev.extra.get("output_preview", ""),
+                "room": ev.extra.get("room", ""),
+                "ts": ev.ts,
+            })
+        elif ev.event == "test_result":
+            outcome = ev.extra.get("outcome", "")
+            test_results.append({
+                "outcome": outcome,
+                "duration_sec": ev.extra.get("duration_sec", 0),
+                "markers": ev.extra.get("markers", []),
+                "longrepr": ev.extra.get("longrepr", ""),
+                "ts": ev.ts,
+            })
+            session.test_outcome = outcome
 
     if not session.start_time and events:
         session.start_time = events[0].ts
@@ -192,6 +236,9 @@ def _parse_session_file(file_path: Path) -> Session | None:
     session.items_collected = items
     session.screenshots = screenshots
     session.screenshots_count = len(screenshots)
+    session.help_requests = help_requests
+    session.help_requests_count = len(help_requests)
+    session.test_results = test_results
 
     return session
 
@@ -221,6 +268,8 @@ class SessionStore:
         date_from: date | None = None,
         date_to: date | None = None,
         mode: str | None = None,
+        run_id: str | None = None,
+        test_outcome: str | None = None,
         has_screenshots: bool | None = None,
         min_events: int | None = None,
         sort_by: str = "date",
@@ -238,6 +287,10 @@ class SessionStore:
             results = [s for s in results if s.file_date <= date_to]
         if mode:
             results = [s for s in results if s.mode == mode]
+        if run_id:
+            results = [s for s in results if s.run_id == run_id]
+        if test_outcome:
+            results = [s for s in results if s.test_outcome == test_outcome]
         if has_screenshots is True:
             results = [s for s in results if s.screenshots_count > 0]
         elif has_screenshots is False:
@@ -270,6 +323,22 @@ class SessionStore:
             if s.mode:
                 modes.add(s.mode)
         return sorted(modes)
+
+    def get_outcomes(self) -> list[str]:
+        """Return unique test outcomes across all sessions."""
+        outcomes = set()
+        for s in self.sessions.values():
+            if s.test_outcome:
+                outcomes.add(s.test_outcome)
+        return sorted(outcomes)
+
+    def get_run_ids(self) -> list[str]:
+        """Return unique run IDs across all sessions, most-recent first."""
+        run_ids = set()
+        for s in self.sessions.values():
+            if s.run_id:
+                run_ids.add(s.run_id)
+        return sorted(run_ids, reverse=True)
 
     def get_all_sessions(self) -> list[Session]:
         """Return all sessions sorted by date desc."""

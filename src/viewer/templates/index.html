@@ -39,6 +39,9 @@
                 <div class="session-card-header">
                     <span class="sid">{{ s.sid }}</span>
                     <span class="badge badge-{{ s.mode or 'unknown' }}">{{ s.mode or 'unknown' }}</span>
+                    {% if s.test_outcome %}
+                    <span class="badge badge-{{ s.test_outcome }}">{{ s.test_outcome }}</span>
+                    {% endif %}
                     <span class="date">{{ s.file_date }}</span>
                 </div>
                 <div class="session-card-stats">
@@ -95,6 +98,36 @@
                         <div class="stat-bar-fill funnel" style="width: {{ step.pct }}%"></div>
                     </div>
                     <span class="stat-bar-value">{{ step.pct }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if summary.test_outcomes %}
+            <h3>Test Outcomes</h3>
+            <div class="stat-bars">
+                {% for outcome, count in summary.test_outcomes.items() %}
+                <div class="stat-bar-row">
+                    <span class="stat-bar-label badge badge-{{ outcome }}">{{ outcome }}</span>
+                    <div class="stat-bar-track">
+                        <div class="stat-bar-fill" style="width: {{ (count / summary.total_tests * 100) | round }}%"></div>
+                    </div>
+                    <span class="stat-bar-value">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if summary.total_help_requests > 0 %}
+            <h3>Help Requests</h3>
+            <div class="stat-bars">
+                {% for subcmd, count in summary.help_subcommands.items() %}
+                <div class="stat-bar-row">
+                    <span class="stat-bar-label">{{ subcmd }}</span>
+                    <div class="stat-bar-track">
+                        <div class="stat-bar-fill" style="width: {{ (count / summary.total_help_requests * 100) | round }}%"></div>
+                    </div>
+                    <span class="stat-bar-value">{{ count }}</span>
                 </div>
                 {% endfor %}
             </div>

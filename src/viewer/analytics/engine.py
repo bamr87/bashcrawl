@@ -16,6 +16,7 @@ class AnalyticsSummary:
     total_play_time_sec: int = 0
     sessions_by_mode: dict[str, int] = field(default_factory=dict)
     sessions_by_date: dict[str, int] = field(default_factory=dict)
+    sessions_by_run_id: dict[str, int] = field(default_factory=dict)
 
     # Rooms
     top_rooms: list[tuple[str, int]] = field(default_factory=list)
@@ -39,6 +40,14 @@ class AnalyticsSummary:
     completion_funnel: list[dict] = field(default_factory=list)
     avg_rooms_per_session: float = 0.0
 
+    # Test outcomes
+    test_outcomes: dict[str, int] = field(default_factory=dict)
+    total_tests: int = 0
+
+    # Help requests
+    help_subcommands: dict[str, int] = field(default_factory=dict)
+    total_help_requests: int = 0
+
     def to_dict(self) -> dict:
         return {
             "total_sessions": self.total_sessions,
@@ -47,6 +56,7 @@ class AnalyticsSummary:
             "total_play_time_min": round(self.total_play_time_sec / 60, 1),
             "sessions_by_mode": self.sessions_by_mode,
             "sessions_by_date": self.sessions_by_date,
+            "sessions_by_run_id": self.sessions_by_run_id,
             "top_rooms": [{"room": r, "count": c} for r, c in self.top_rooms],
             "room_visit_counts": self.room_visit_counts,
             "encounter_outcomes": self.encounter_outcomes,
@@ -59,6 +69,10 @@ class AnalyticsSummary:
             "duration_histogram": self.duration_histogram,
             "completion_funnel": self.completion_funnel,
             "avg_rooms_per_session": round(self.avg_rooms_per_session, 1),
+            "test_outcomes": self.test_outcomes,
+            "total_tests": self.total_tests,
+            "help_subcommands": self.help_subcommands,
+            "total_help_requests": self.total_help_requests,
         }
 
 
@@ -87,6 +101,9 @@ class AnalyticsEngine:
         death_counter: Counter = Counter()
         durations: list[int] = []
         total_rooms = 0
+        run_id_counter: Counter = Counter()
+        test_outcome_counter: Counter = Counter()
+        help_subcmd_counter: Counter = Counter()
 
         # Funnel rooms (main path)
         funnel_rooms = ["entrance", "cellar", "armoury", "chamber", "hall"]
@@ -132,13 +149,36 @@ class AnalyticsEngine:
                 if funnel_room in visited_names:
                     funnel_reached[funnel_room] += 1
 
+            # Run ID tracking
+            if s.run_id:
+                run_id_counter[s.run_id] += 1
+
+            # Test outcomes
+            for tr in getattr(s, "test_results", []):
+                outcome = tr.get("outcome", "unknown")
+                test_outcome_counter[outcome] += 1
+
+            # Help requests
+            for hr in getattr(s, "help_requests", []):
+                subcmd = hr.get("subcommand", "default")
+                help_subcmd_counter[subcmd] += 1
+
         summary.sessions_by_mode = dict(mode_counter.most_common())
         summary.sessions_by_date = dict(sorted(date_counter.items()))
+        summary.sessions_by_run_id = dict(run_id_counter.most_common())
         summary.top_rooms = room_counter.most_common(15)
         summary.room_visit_counts = dict(room_counter)
         summary.encounter_outcomes = {k: dict(v) for k, v in encounter_map.items()}
         summary.items_collected = dict(item_counter.most_common())
         summary.death_causes = dict(death_counter.most_common())
+
+        # Test outcomes
+        summary.test_outcomes = dict(test_outcome_counter.most_common())
+        summary.total_tests = sum(test_outcome_counter.values())
+
+        # Help requests
+        summary.help_subcommands = dict(help_subcmd_counter.most_common())
+        summary.total_help_requests = sum(help_subcmd_counter.values())
 
         if durations:
             summary.duration_min = min(durations)

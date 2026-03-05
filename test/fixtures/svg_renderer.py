@@ -150,3 +150,148 @@ def save_command_svg(
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(svg, encoding="utf-8")
     return path
+
+
+# ---------------------------------------------------------------------------
+# Test-summary SVG (for non-TUI tests that have no Textual screenshots)
+# ---------------------------------------------------------------------------
+
+_OUTCOME_COLORS = {
+    "passed": "#a6e3a1",   # green
+    "failed": "#f38ba8",   # red
+    "error": "#fab387",    # peach
+    "skipped": "#f9e2af",  # yellow
+}
+
+_OUTCOME_ICONS = {
+    "passed": "✅",
+    "failed": "❌",
+    "error": "⚠️",
+    "skipped": "⏭️",
+}
+
+
+def render_test_summary(
+    test_name: str,
+    outcome: str = "passed",
+    duration_sec: float = 0.0,
+    markers: list[str] | None = None,
+    stdout_preview: str = "",
+    test_module: str = "",
+    test_class: str = "",
+) -> str:
+    """Render a summary SVG for a test that did not produce TUI screenshots.
+
+    This generates a minimal dark-themed SVG showing the test identity,
+    outcome, timing, markers, and an optional preview of captured stdout.
+    Used by the autouse ``screenshot_capture`` fixture when no screenshots
+    were taken during the test.
+
+    Returns:
+        Complete SVG markup as a string.
+    """
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    color = _OUTCOME_COLORS.get(outcome, "#cdd6f4")
+    icon = _OUTCOME_ICONS.get(outcome, "❓")
+
+    body_parts: list[str] = []
+    y = 56
+
+    # Outcome badge
+    body_parts.append(
+        f'  <text class="stat" x="16" y="{y}">'
+        f'{icon} Outcome: <tspan fill="{color}">{html.escape(outcome.upper())}</tspan>'
+        f'</text>'
+    )
+    y += 24
+
+    # Duration
+    dur_display = f"{duration_sec:.2f}s" if duration_sec else "—"
+    body_parts.append(
+        f'  <text class="dim" x="16" y="{y}">⏱  Duration: {dur_display}</text>'
+    )
+    y += 20
+
+    # Markers
+    if markers:
+        marker_text = ", ".join(markers)
+        body_parts.append(
+            f'  <text class="dim" x="16" y="{y}">🏷  Markers: {html.escape(marker_text)}</text>'
+        )
+        y += 20
+
+    # Module / class
+    if test_module or test_class:
+        loc = test_module or ""
+        if test_class:
+            loc += f"::{test_class}" if loc else test_class
+        body_parts.append(
+            f'  <text class="dim" x="16" y="{y}">📂 {html.escape(loc)}</text>'
+        )
+        y += 20
+
+    # Separator
+    y += 4
+    body_parts.append(
+        f'  <line x1="16" y1="{y}" x2="784" y2="{y}" stroke="#45475a" stroke-width="1"/>'
+    )
+    y += 16
+
+    # Stdout preview (if any)
+    if stdout_preview:
+        body_parts.append(
+            f'  <text class="prompt" x="16" y="{y}">Captured stdout:</text>'
+        )
+        y += 20
+        preview_lines = _wrap_lines(stdout_preview.strip(), max_width=90)
+        if len(preview_lines) > 20:
+            preview_lines = preview_lines[:18] + ["...", f"({len(preview_lines)} lines total)"]
+        for line in preview_lines:
+            body_parts.append(
+                f'  <text class="output" x="16" y="{y}">{html.escape(line)}</text>'
+            )
+            y += 18
+    else:
+        body_parts.append(
+            f'  <text class="dim" x="16" y="{y}">(no captured output)</text>'
+        )
+        y += 18
+
+    # Bottom padding
+    y += 16
+    height = max(y, 120)
+    height_inner = height - 2
+
+    title = f"Test: {test_name}"
+    return _SVG_TEMPLATE.format(
+        height=height,
+        height_inner=height_inner,
+        title=html.escape(title),
+        timestamp=timestamp,
+        body="\n".join(body_parts),
+    )
+
+
+def save_test_summary_svg(
+    path: Path,
+    test_name: str,
+    outcome: str = "passed",
+    duration_sec: float = 0.0,
+    markers: list[str] | None = None,
+    stdout_preview: str = "",
+    test_module: str = "",
+    test_class: str = "",
+) -> Path:
+    """Render and save a test-summary SVG. Returns the path."""
+    svg = render_test_summary(
+        test_name=test_name,
+        outcome=outcome,
+        duration_sec=duration_sec,
+        markers=markers,
+        stdout_preview=stdout_preview,
+        test_module=test_module,
+        test_class=test_class,
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(svg, encoding="utf-8")
+    return path

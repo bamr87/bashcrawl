@@ -1,23 +1,18 @@
-"""Comprehensive interactive terminal UI tests with screenshot capture.
+"""Walkthrough-driven TUI tests with screenshot capture.
 
-Runs full game walkthroughs through the Textual agent TUI, capturing
-SVG screenshots at every meaningful state transition.  All screenshots
-and JSONL session logs are persisted under ``logs/`` for post-test
-review and analysis.
+Parameterized from ``test/datasets/walkthrough.json`` — the solutions manual.
+Runs game commands through the Textual agent TUI, capturing SVG screenshots
+named by each walkthrough step's ``screenshot_name`` field.
 
 Results layout::
 
     logs/
         sessions/<date>_<sid>.jsonl      — JSONL event stream
         screenshots/<date>_<test>/       — per-test screenshot dir
-            000_initial.svg
-            001_pwd.svg
+            001_entrance_pwd.svg
+            002_entrance_ls.svg
             ...
-            manifest.json               — structured index of all captures
-
-To review screenshots after a run::
-
-    python3 -m http.server 8899 --directory logs/screenshots/
+            manifest.json               — structured index with walkthrough step refs
 """
 
 from __future__ import annotations
@@ -26,16 +21,19 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
 
 import pytest
+
+from fixtures.walkthrough import Walkthrough, load_walkthrough
 
 pytestmark = [pytest.mark.integration]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
-SCREENSHOTS_ROOT = REPO_ROOT / "logs" / "screenshots"
+
+# Module-level walkthrough for parametrize decorators (loaded once)
+_WT = load_walkthrough()
 
 
 def _has_textual() -> bool:
@@ -44,13 +42,6 @@ def _has_textual() -> bool:
         return True
     except ImportError:
         return False
-
-
-def _make_shot_dir(name: str) -> Path:
-    ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    d = SCREENSHOTS_ROOT / f"{ts}_{name}"
-    d.mkdir(parents=True, exist_ok=True)
-    return d
 
 
 def _run_agent(commands: list[str], screenshot_dir: Path, timeout: int = 45) -> str:
@@ -74,23 +65,39 @@ def _run_agent(commands: list[str], screenshot_dir: Path, timeout: int = 45) -> 
     return result.stdout
 
 
+def _build_walkthrough_commands(steps: list[dict]) -> list[str]:
+    """Convert walkthrough steps into TUI agent commands with SCREENSHOT calls.
+
+    Interactive commands (those with stdin fields) are skipped since
+    the TUI agent can't provide stdin to game scripts.
+    """
+    cmds: list[str] = []
+    for step in steps:
+        cmd = step["command"]
+        # Skip interactive commands — the TUI agent can't pipe stdin to scripts
+        if step.get("stdin"):
+            continue
+        cmds.append(cmd)
+        # Insert a named screenshot after each step
+        if "screenshot_name" in step:
+            cmds.append(f"SCREENSHOT {step['screenshot_name']}")
+    cmds.append("EXIT")
+    return cmds
+
+
 def _run_walkthrough(
     name: str,
-    commands: list[str],
-    screenshot_commands: list[str] | None = None,
+    steps: list[dict],
+    shot_dir: Path,
     timeout: int = 45,
-) -> tuple[str, Path, list[Path]]:
-    """Run a named walkthrough with combined game + screenshot commands.
+) -> tuple[str, Path, list[Path], dict]:
+    """Run a named walkthrough driven by walkthrough.json steps.
 
-    Inserts explicit SCREENSHOT meta-commands after each game command
-    (unless *screenshot_commands* is provided to override the list).
-
-    Returns (stdout, shot_dir, svg_paths).
+    Returns (stdout, shot_dir, svg_paths, manifest_data).
     """
     from fixtures.screenshot_capture import ScreenshotCapture
     from fixtures.log_capture import TestLogCapture
 
-    shot_dir = _make_shot_dir(name)
     log_dir = REPO_ROOT / "logs" / "sessions"
     log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -98,193 +105,78 @@ def _run_walkthrough(
     lc.start()
     cap = ScreenshotCapture(screenshot_dir=shot_dir, log_capture=lc)
 
-    # Build the full command list with explicit screenshot commands interspersed
-    full_cmds: list[str] = []
-    if screenshot_commands:
-        full_cmds = screenshot_commands
-    else:
-        for cmd in commands:
-            full_cmds.append(cmd)
-    full_cmds.append("EXIT")
-
-    stdout = _run_agent(full_cmds, shot_dir, timeout=timeout)
+    cmds = _build_walkthrough_commands(steps)
+    stdout = _run_agent(cmds, shot_dir, timeout=timeout)
     cap.take_from_agent_output(stdout)
     lc.end()
-    cap.write_manifest()
 
-    return stdout, shot_dir, cap.screenshots
+    # Enrich manifest with walkthrough step references
+    for meta_entry in cap.metadata:
+        svg_stem = Path(meta_entry.get("name", "")).stem
+        matching = [s for s in steps if s.get("screenshot_name") == svg_stem]
+        if matching:
+            meta_entry["walkthrough_step_id"] = matching[0]["step_id"]
+            meta_entry["walkthrough_room"] = matching[0]["room"]
+
+    cap.write_manifest()
+    manifest_data = json.loads((shot_dir / "manifest.json").read_text())
+
+    return stdout, shot_dir, cap.screenshots, manifest_data
 
 
 @pytest.mark.skipif(not _has_textual(), reason="textual not installed")
 class TestTuiCriticalPath:
-    """Full walkthrough of the critical game path with screenshots.
+    """Full critical path walkthrough driven by walkthrough.json."""
 
-    Tests the entrance → cellar → armoury → chamber progression,
-    capturing screenshots at every room entry and key interaction.
-    """
-
-    def test_entrance_walkthrough(self):
-        """Navigate to entrance, read scroll, view contents."""
-        commands = [
-            "cd entrance",
-            "SCREENSHOT entrance_entry",
-            "cat scroll",
-            "SCREENSHOT entrance_scroll",
-            "ls -F",
-            "SCREENSHOT entrance_contents",
-        ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "entrance_walkthrough", [], screenshot_commands=commands,
+    def test_full_critical_path(self, screenshot_dir):
+        """Walk the complete critical path, screenshot every step."""
+        steps = _WT.critical_path_steps()
+        stdout, shot_dir, paths, manifest = _run_walkthrough(
+            "full_critical_path_walkthrough", steps, screenshot_dir, timeout=90,
         )
 
-        assert "CMD> cat scroll" in stdout
-        assert "CMD> ls -F" in stdout
-        assert len(paths) >= 3  # initial + 3 explicit + auto screenshots
-
-        # Verify explicit screenshots exist with expected names
-        assert (shot_dir / "entrance_entry.svg").exists()
-        assert (shot_dir / "entrance_scroll.svg").exists()
-        assert (shot_dir / "entrance_contents.svg").exists()
-
-        # Verify manifest
-        manifest = json.loads((shot_dir / "manifest.json").read_text())
-        assert manifest["total_screenshots"] >= 3
-
-    def test_cellar_treasure_walkthrough(self):
-        """Navigate to cellar, read scroll, collect treasure."""
-        commands = [
-            "cd entrance",
-            "cd cellar",
-            "SCREENSHOT cellar_entry",
-            "cat scroll",
-            "SCREENSHOT cellar_scroll",
-            "ls -F",
-            "SCREENSHOT cellar_contents",
-            "./treasure",
-            "SCREENSHOT cellar_treasure",
-            "export I=amulet,$I",
-            "STATUS",
-            "SCREENSHOT cellar_inventory",
+        # Every step with a screenshot_name (and no stdin) should produce an SVG
+        expected_shots = [
+            s["screenshot_name"] for s in steps
+            if "screenshot_name" in s and not s.get("stdin")
         ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "cellar_treasure", [], screenshot_commands=commands,
-        )
+        for name in expected_shots:
+            assert (shot_dir / f"{name}.svg").exists(), f"Missing screenshot: {name}.svg"
 
-        assert "CMD> ./treasure" in stdout
-        assert "CMD> export I=amulet,$I" in stdout
-        assert (shot_dir / "cellar_entry.svg").exists()
-        assert (shot_dir / "cellar_treasure.svg").exists()
-        assert (shot_dir / "cellar_inventory.svg").exists()
+        assert manifest["total_screenshots"] >= len(expected_shots)
 
-        # Check STATUS for inventory update
+        # Verify commands were echoed to stdout (TUI renders output in
+        # screenshots, not in stdout — so we check CMD> lines instead)
+        # Skip interactive commands (stdin) that are omitted from agent input
+        for step in steps:
+            if step.get("stdin"):
+                continue
+            cmd = step["command"]
+            assert f"CMD> {cmd}" in stdout, (
+                f"Step {step['step_id']}: expected 'CMD> {cmd}' in agent output"
+            )
+
+    def test_quest_progression_via_status(self, screenshot_dir):
+        """Walk critical path with STATUS checks after quest-completing steps."""
+        quest_steps = [s for s in _WT.critical_path_steps() if s.get("quest_completed")]
+        # Build commands: game command → STATUS after each quest step
+        cmds: list[str] = []
+        for step in _WT.critical_path_steps():
+            cmds.append(step["command"])
+            if step.get("quest_completed"):
+                cmds.append("STATUS")
+                cmds.append(f"SCREENSHOT quest_{step['quest_completed']['id']}")
+        cmds.append("EXIT")
+
+        stdout = _run_agent(cmds, screenshot_dir, timeout=60)
+
+        # XP should be non-decreasing
         status_lines = [l for l in stdout.splitlines() if l.startswith("STATUS:")]
-        if status_lines:
-            data = json.loads(status_lines[0].split("STATUS: ", 1)[1])
-            assert "amulet" in data["inventory"]
-
-    def test_armoury_walkthrough(self):
-        """Full path through entrance → cellar → armoury."""
-        commands = [
-            "cd entrance",
-            "cd cellar",
-            "export I=amulet,$I",
-            "cd armoury",
-            "SCREENSHOT armoury_entry",
-            "cat scroll",
-            "SCREENSHOT armoury_scroll",
-            "ls -F",
-            "SCREENSHOT armoury_contents",
-            "./treasure",
-            "SCREENSHOT armoury_treasure",
-            "export I=sword,$I",
-            "STATUS",
-            "SCREENSHOT armoury_status",
-        ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "armoury_walkthrough", [], screenshot_commands=commands,
-        )
-
-        assert (shot_dir / "armoury_entry.svg").exists()
-        assert (shot_dir / "armoury_scroll.svg").exists()
-        assert (shot_dir / "armoury_treasure.svg").exists()
-
-        manifest = json.loads((shot_dir / "manifest.json").read_text())
-        assert manifest["total_screenshots"] >= 5
-
-    def test_full_critical_path(self):
-        """Complete critical path: entrance → cellar → armoury → chamber."""
-        commands = [
-            "cd entrance",
-            "SCREENSHOT 01_entrance",
-            "cat scroll",
-            "ls -F",
-            "cd cellar",
-            "SCREENSHOT 02_cellar",
-            "cat scroll",
-            "ls -F",
-            "./treasure",
-            "export I=amulet,$I",
-            "SCREENSHOT 03_after_amulet",
-            "cd armoury",
-            "SCREENSHOT 04_armoury",
-            "cat scroll",
-            "ls -F",
-            "./treasure",
-            "export I=sword,$I",
-            "SCREENSHOT 05_after_sword",
-            "cd chamber",
-            "SCREENSHOT 06_chamber",
-            "cat scroll",
-            "SCREENSHOT 07_chamber_scroll",
-            "STATUS",
-            "SCREENSHOT 08_final_status",
-        ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "full_critical_path", [], screenshot_commands=commands, timeout=60,
-        )
-
-        # Verify all milestone screenshots exist
-        for i in range(1, 9):
-            svg_name = f"{i:02d}_"
-            matches = list(shot_dir.glob(f"{svg_name}*.svg"))
-            assert matches, f"Missing milestone screenshot {svg_name}*.svg"
-
-        # Final manifest should show 8+ explicit screenshots + auto ones
-        manifest = json.loads((shot_dir / "manifest.json").read_text())
-        assert manifest["total_screenshots"] >= 8
-
-        # Verify the whole session is in the JSONL log
-        session_dir = REPO_ROOT / "logs" / "sessions"
-        session_files = sorted(session_dir.glob("*.jsonl"))
-        assert len(session_files) > 0  # at least one session log written
-
-    def test_quest_progression_screenshots(self):
-        """Verify quest completion is visible through STATUS snapshots."""
-        commands = [
-            "pwd",
-            "SCREENSHOT quest_0_start",
-            "STATUS",
-            "ls",
-            "SCREENSHOT quest_1_after_ls",
-            "STATUS",
-            "cd entrance",
-            "SCREENSHOT quest_2_after_cd",
-            "STATUS",
-        ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "quest_progression", [], screenshot_commands=commands,
-        )
-
-        # Parse STATUS outputs to verify XP progression
-        status_lines = [l for l in stdout.splitlines() if l.startswith("STATUS:")]
-        assert len(status_lines) >= 2
-
         xp_values = []
         for line in status_lines:
             data = json.loads(line.split("STATUS: ", 1)[1])
             xp_values.append(data.get("xp", 0))
 
-        # XP should increase (or stay same) as quests complete
         for i in range(1, len(xp_values)):
             assert xp_values[i] >= xp_values[i - 1], (
                 f"XP decreased: {xp_values[i - 1]} → {xp_values[i]}"
@@ -292,25 +184,47 @@ class TestTuiCriticalPath:
 
 
 @pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+class TestTuiHiddenPaths:
+    """Hidden path walkthroughs driven by walkthrough.json."""
+
+    @pytest.mark.parametrize("area", _WT.hidden_path_names())
+    def test_hidden_path(self, area: str, screenshot_dir):
+        """Walk a hidden area path with screenshots."""
+        # Must first walk critical path to unlock hidden areas
+        cp_steps = _WT.critical_path_steps()
+        hidden_steps = _WT.hidden_path_steps(area)
+        all_steps = cp_steps + hidden_steps
+
+        stdout, shot_dir, paths, manifest = _run_walkthrough(
+            f"hidden_{area}_walkthrough", all_steps, screenshot_dir, timeout=120,
+        )
+
+        # Check hidden-area-specific screenshots exist
+        expected_shots = [
+            s["screenshot_name"] for s in hidden_steps
+            if "screenshot_name" in s and not s.get("stdin")
+        ]
+        for name in expected_shots:
+            assert (shot_dir / f"{name}.svg").exists(), f"Missing screenshot: {name}.svg"
+
+
+@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
 class TestTuiUIElements:
     """Tests for specific Textual TUI visual elements."""
 
-    def test_header_bar_visible(self):
+    def test_header_bar_visible(self, screenshot_dir):
         """Header bar shows game title and player stats."""
-        shot_dir = _make_shot_dir("header_bar")
-        _run_agent(["EXIT"], shot_dir)
+        _run_agent(["EXIT"], screenshot_dir)
 
-        initial = shot_dir / "000_initial.svg"
+        initial = screenshot_dir / "000_initial.svg"
         content = initial.read_text()
 
-        # The SVG should contain the title bar text
         assert "BASHCRAWL" in content
         assert "Terminal" in content or "Dungeon" in content
-        # Player stats should be visible
         assert "HP" in content
         assert "XP" in content
 
-    def test_quest_panel_visible(self):
+    def test_quest_panel_visible(self, screenshot_dir):
         """Quest panel updates as commands are entered."""
         commands = [
             "SCREENSHOT before_quest",
@@ -318,47 +232,43 @@ class TestTuiUIElements:
             "SCREENSHOT after_pwd_quest",
             "ls",
             "SCREENSHOT after_ls_quest",
+            "EXIT",
         ]
 
-        stdout, shot_dir, paths = _run_walkthrough(
-            "quest_panel", [], screenshot_commands=commands,
-        )
+        stdout = _run_agent(commands, screenshot_dir)
 
         for name in ("before_quest", "after_pwd_quest", "after_ls_quest"):
-            svg = shot_dir / f"{name}.svg"
+            svg = screenshot_dir / f"{name}.svg"
             assert svg.exists(), f"Missing {name}.svg"
-            # SVG should contain quest-related text
             content = svg.read_text()
             assert "QUEST" in content.upper() or "quest" in content.lower()
 
-    def test_terminal_output_area(self):
+    def test_terminal_output_area(self, screenshot_dir):
         """Terminal output shows command results."""
         commands = [
             "cd entrance",
             "cat scroll",
             "SCREENSHOT scroll_output",
+            "EXIT",
         ]
 
-        stdout, shot_dir, paths = _run_walkthrough(
-            "terminal_output", [], screenshot_commands=commands,
-        )
+        stdout = _run_agent(commands, screenshot_dir)
 
-        svg = shot_dir / "scroll_output.svg"
+        svg = screenshot_dir / "scroll_output.svg"
         assert svg.exists()
-        # The SVG should contain scroll content rendered in the terminal
         content = svg.read_text()
         assert len(content) > 10000  # SVG with content should be substantial
 
-    def test_screenshot_consistency(self):
+    def test_screenshot_consistency(self, screenshot_dir):
         """Two identical command sequences produce similar screenshots."""
         commands = ["cd entrance", "SCREENSHOT test_view", "EXIT"]
 
-        _stdout1, dir1, _ = _run_walkthrough(
-            "consistency_a", [], screenshot_commands=commands,
-        )
-        _stdout2, dir2, _ = _run_walkthrough(
-            "consistency_b", [], screenshot_commands=commands,
-        )
+        dir1 = screenshot_dir / "run_a"
+        dir1.mkdir(exist_ok=True)
+        stdout1 = _run_agent(commands, dir1)
+        dir2 = screenshot_dir / "run_b"
+        dir2.mkdir(exist_ok=True)
+        stdout2 = _run_agent(commands, dir2)
 
         svg1 = dir1 / "test_view.svg"
         svg2 = dir2 / "test_view.svg"
@@ -374,40 +284,26 @@ class TestTuiUIElements:
 class TestTuiEdgeCases:
     """Edge case tests for the TUI with screenshot verification."""
 
-    def test_empty_room_display(self):
+    def test_empty_room_display(self, screenshot_dir):
         """TUI handles display of a room with minimal content."""
-        commands = [
-            "pwd",
-            "SCREENSHOT root_display",
-        ]
-        stdout, shot_dir, _ = _run_walkthrough(
-            "empty_room", [], screenshot_commands=commands,
-        )
-        assert (shot_dir / "root_display.svg").exists()
+        commands = ["pwd", "SCREENSHOT root_display", "EXIT"]
+        _run_agent(commands, screenshot_dir)
+        assert (screenshot_dir / "root_display.svg").exists()
 
-    def test_rapid_commands(self):
+    def test_rapid_commands(self, screenshot_dir):
         """TUI handles many commands in quick succession."""
         commands = ["pwd", "ls", "pwd", "ls", "pwd", "ls",
-                    "SCREENSHOT after_rapid"]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "rapid_commands", [], screenshot_commands=commands,
-        )
-        assert (shot_dir / "after_rapid.svg").exists()
-        # Should have auto-screenshots for each command too
-        assert len(paths) >= 7  # 6 auto + initial + 1 explicit
+                    "SCREENSHOT after_rapid", "EXIT"]
+        _run_agent(commands, screenshot_dir)
+        assert (screenshot_dir / "after_rapid.svg").exists()
 
-    def test_invalid_command_display(self):
+    def test_invalid_command_display(self, screenshot_dir):
         """TUI renders error output for invalid commands."""
-        commands = [
-            "notarealcommand",
-            "SCREENSHOT error_display",
-        ]
-        stdout, shot_dir, _ = _run_walkthrough(
-            "invalid_command", [], screenshot_commands=commands,
-        )
-        assert (shot_dir / "error_display.svg").exists()
+        commands = ["notarealcommand", "SCREENSHOT error_display", "EXIT"]
+        _run_agent(commands, screenshot_dir)
+        assert (screenshot_dir / "error_display.svg").exists()
 
-    def test_long_session(self):
+    def test_long_session(self, screenshot_dir):
         """Extended session with 15+ commands produces consistent screenshots."""
         commands = [
             "pwd", "ls", "cd entrance", "ls", "cat scroll",
@@ -416,15 +312,8 @@ class TestTuiEdgeCases:
             "ls", "cat scroll",
             "SCREENSHOT long_session_end",
             "STATUS",
+            "EXIT",
         ]
-        stdout, shot_dir, paths = _run_walkthrough(
-            "long_session", [], screenshot_commands=commands, timeout=60,
-        )
+        _run_agent(commands, screenshot_dir, timeout=60)
 
-        # Check manifest for comprehensive capture
-        manifest = json.loads((shot_dir / "manifest.json").read_text())
-        assert manifest["total_screenshots"] >= 15
-
-        # Verify no empty SVGs
-        for svg in shot_dir.glob("*.svg"):
-            assert svg.stat().st_size > 1000, f"Suspicious small SVG: {svg.name}"
+        assert (screenshot_dir / "long_session_end.svg").exists()

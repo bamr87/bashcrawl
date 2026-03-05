@@ -104,3 +104,70 @@ jobs:
       run: |
         echo "=== Testing reset script ==="
         bash lib/reset.sh --dry
+
+    - name: Validate walkthrough.json against filesystem
+      run: |
+        echo "=== Validating walkthrough.json ==="
+        errors=0
+
+        if [[ ! -f test/datasets/walkthrough.json ]]; then
+          echo "ERROR: walkthrough.json not found"
+          exit 1
+        fi
+
+        # Check every room in walkthrough.json exists as a directory
+        for room in $(python3 -c "
+import json, sys
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path in data['rooms']:
+    print(path)
+"); do
+          if [[ ! -d "$room" ]]; then
+            echo "ERROR: Room directory $room/ does not exist"
+            errors=$((errors + 1))
+          else
+            echo "OK: $room/"
+          fi
+        done
+
+        # Check rooms with scroll=true have a scroll file
+        for room in $(python3 -c "
+import json
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path, info in data['rooms'].items():
+    if info.get('scroll'):
+        print(path)
+"); do
+          if [[ ! -f "$room/scroll" ]]; then
+            echo "ERROR: $room/ marked scroll=true but no scroll file"
+            errors=$((errors + 1))
+          else
+            echo "OK: $room/scroll exists"
+          fi
+        done
+
+        # Check encounter scripts exist
+        for script in $(python3 -c "
+import json
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path in data['encounters']:
+    print(path)
+"); do
+          if [[ ! -f "$script" ]]; then
+            echo "ERROR: Encounter script $script does not exist"
+            errors=$((errors + 1))
+          else
+            echo "OK: $script"
+          fi
+        done
+
+        echo ""
+        if [[ $errors -eq 0 ]]; then
+          echo "walkthrough.json validation passed."
+        else
+          echo "walkthrough.json validation FAILED with $errors errors."
+          exit 1
+        fi

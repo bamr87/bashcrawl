@@ -35,6 +35,24 @@
             </select>
         </div>
         <div class="filter-group">
+            <label for="test_outcome">Outcome</label>
+            <select name="test_outcome" id="test_outcome" onchange="this.form.submit()">
+                <option value="">All Outcomes</option>
+                {% for o in outcomes %}
+                <option value="{{ o }}" {% if current_outcome == o %}selected{% endif %}>{{ o }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="run_id">Run</label>
+            <select name="run_id" id="run_id" onchange="this.form.submit()">
+                <option value="">All Runs</option>
+                {% for r in run_ids %}
+                <option value="{{ r }}" {% if current_run_id == r %}selected{% endif %}>{{ r[:12] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
             <label>
                 <input type="checkbox" name="has_screenshots" value="true"
                        {% if request.args.get('has_screenshots') == 'true' %}checked{% endif %}
@@ -51,6 +69,9 @@
         <div class="session-card-header">
             <span class="sid {% if s.is_test %}test-sid{% endif %}">{{ s.sid }}</span>
             <span class="badge badge-{{ s.mode or 'unknown' }}">{{ s.mode or 'unknown' }}</span>
+            {% if s.test_outcome %}
+            <span class="badge badge-{{ s.test_outcome }}">{{ s.test_outcome }}</span>
+            {% endif %}
             <span class="date">{{ s.file_date }} {{ s.start_time[11:19] if s.start_time|length > 11 else '' }}</span>
             {% if s.duration_sec is not none %}
             <span class="duration">⏱️ {{ s.duration_sec }}s</span>
@@ -61,6 +82,7 @@
             <span title="Encounters">⚔️ {{ s.encounters_count }} encounters</span>
             <span title="Deaths" {% if s.deaths_count > 0 %}class="danger"{% endif %}>💀 {{ s.deaths_count }} deaths</span>
             <span title="Screenshots">📸 {{ s.screenshots_count }}</span>
+            <span title="Help requests">❓ {{ s.help_requests_count }}</span>
             <span title="Events">📝 {{ s.event_count }} events</span>
         </div>
         {% if s.items_collected %}

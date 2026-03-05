@@ -215,6 +215,7 @@ class GameFileSystem:
         cwd: str,
         script: str,
         env_vars: dict[str, str] | None = None,
+        stdin_input: str | None = None,
     ) -> tuple[str, int, dict[str, str]]:
         """Execute a bash game script and return (output, exit_code, env_updates).
 
@@ -222,6 +223,11 @@ class GameFileSystem:
         variables. After execution, we parse any ``export VAR=VALUE``
         instructions from the output so the Python-side game state can
         be updated.
+
+        Args:
+            stdin_input: Text piped to the script's stdin. Defaults to
+                multiple ``y`` lines so scripts with several ``read``
+                prompts (e.g. statue) receive an answer for every prompt.
         """
         script_path = self._resolve(cwd, script)
         if not script_path.is_file():
@@ -233,9 +239,13 @@ class GameFileSystem:
         if env_vars:
             env.update(env_vars)
 
+        if stdin_input is None:
+            # Provide enough "y" answers for any game script's read prompts
+            stdin_input = "\n".join(["y"] * 5) + "\n"
+
         result = subprocess.run(
             ["bash", str(script_path)],
-            input="y\n",
+            input=stdin_input,
             capture_output=True,
             text=True,
             cwd=str(self._resolve(cwd, ".")),

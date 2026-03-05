@@ -1,4 +1,7 @@
 """HTML page routes for Bashcrawl Observatory."""
+import json
+from pathlib import Path
+
 from flask import Blueprint, render_template, current_app, request, abort
 
 pages_bp = Blueprint("pages", __name__)
@@ -26,6 +29,8 @@ def sessions_list():
     """Session log browser — list view."""
     store = current_app.config["SESSION_STORE"]
     mode = request.args.get("mode", None)
+    test_outcome = request.args.get("test_outcome", None)
+    run_id = request.args.get("run_id", None)
     sort_by = request.args.get("sort", "date")
     order = request.args.get("order", "desc")
     page = int(request.args.get("page", 1))
@@ -40,12 +45,16 @@ def sessions_list():
 
     sessions, total = store.list_sessions(
         mode=mode,
+        test_outcome=test_outcome,
+        run_id=run_id,
         has_screenshots=has_screenshots,
         sort_by=sort_by,
         order=order,
         page=page,
     )
     modes = store.get_modes()
+    outcomes = store.get_outcomes()
+    run_ids = store.get_run_ids()
     total_pages = (total + 24) // 25
 
     return render_template("sessions/list.html",
@@ -54,7 +63,11 @@ def sessions_list():
                            page=page,
                            total_pages=total_pages,
                            modes=modes,
+                           outcomes=outcomes,
+                           run_ids=run_ids,
                            current_mode=mode,
+                           current_outcome=test_outcome,
+                           current_run_id=run_id,
                            sort_by=sort_by,
                            order=order)
 
@@ -85,22 +98,27 @@ def screenshots_index():
     """Screenshot gallery — index of all screenshot sessions."""
     store = current_app.config["SCREENSHOT_STORE"]
     test_name = request.args.get("test_name")
+    category = request.args.get("category")
     sort_by = request.args.get("sort", "date")
     page = int(request.args.get("page", 1))
 
     sessions, total = store.list_sessions(
         test_name=test_name,
+        category=category,
         sort_by=sort_by,
         page=page,
     )
     total_pages = (total + 24) // 25
+    categories = store.get_categories()
 
     return render_template("screenshots/index.html",
                            sessions=sessions,
                            total=total,
                            page=page,
                            total_pages=total_pages,
-                           search=test_name or "")
+                           search=test_name or "",
+                           current_category=category or "",
+                           categories=categories)
 
 
 @pages_bp.route("/screenshots/<dir_name>")
@@ -110,7 +128,11 @@ def screenshot_gallery(dir_name):
     ss = store.get(dir_name)
     if not ss:
         abort(404)
-    return render_template("screenshots/gallery.html", session=ss)
+    prev_session, next_session = store.get_adjacent_sessions(dir_name)
+    return render_template("screenshots/gallery.html",
+                           session=ss,
+                           prev_session=prev_session,
+                           next_session=next_session)
 
 
 @pages_bp.route("/analytics")
@@ -157,3 +179,76 @@ def live_monitor():
 def live_agent():
     """AI agent live terminal view."""
     return render_template("live/agent.html")
+
+
+@pages_bp.route("/walkthrough")
+def walkthrough_page():
+    """Interactive walkthrough viewer — step-by-step game progression."""
+    config = current_app.config["OBSERVATORY_CONFIG"]
+    wt_path = config.game_root / "test" / "datasets" / "walkthrough.json"
+
+    data = {}
+    if wt_path.exists():
+        try:
+            with open(wt_path) as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Check for golden screenshots
+    golden_dir = config.game_root / "screenshots"
+    golden_shots = []
+    if golden_dir.is_dir():
+        golden_shots = sorted(p.name for p in golden_dir.glob("*.svg"))
+
+    # Get last passing run info
+    passing_meta = {}
+    passing_path = config.logs_dir / ".last_passing_run.json"
+    if passing_path.exists():
+        try:
+            passing_meta = json.loads(passing_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    return render_template("walkthrough/index.html",
+                           walkthrough=data,
+                           golden_shots=golden_shots,
+                           passing_meta=passing_meta)
+
+
+@pages_bp.route("/tests")
+def tests_dashboard():
+    """Test results dashboard — interface breakdown."""
+    store = current_app.config["SESSION_STORE"]
+
+    interface_counts = {"tui": 0, "classic": 0, "native": 0, "other": 0}
+    interface_passed = {"tui": 0, "classic": 0, "native": 0, "other": 0}
+
+    for session in store.sessions.values():
+        test_event = None
+        test_result = None
+        for ev in session.events:
+            if ev.get("type") == "test":
+                test_event = ev
+            if ev.get("type") == "test_result":
+                test_result = ev
+        if not test_event:
+            continue
+
+        module = test_event.get("test_module", "")
+        if "tui_walkthrough" in module:
+            iface = "tui"
+        elif "classic_walkthrough" in module:
+            iface = "classic"
+        elif "native_walkthrough" in module:
+            iface = "native"
+        else:
+            iface = "other"
+
+        interface_counts[iface] += 1
+        if test_result and test_result.get("outcome") == "passed":
+            interface_passed[iface] += 1
+
+    return render_template("tests/dashboard.html",
+                           interface_counts=interface_counts,
+                           interface_passed=interface_passed)

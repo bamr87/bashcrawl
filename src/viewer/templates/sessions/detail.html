@@ -11,12 +11,16 @@
     <h1>Session {{ session.sid }}</h1>
     <div class="session-meta">
         <span class="badge badge-{{ session.mode or 'unknown' }}">{{ session.mode or 'unknown' }}</span>
+        {% if session.test_outcome %}
+        <span class="badge badge-{{ session.test_outcome }}">{{ session.test_outcome }}</span>
+        {% endif %}
         <span>📅 {{ session.file_date }}</span>
         {% if session.start_time %}<span>🕐 {{ session.start_time }}</span>{% endif %}
         {% if session.duration_sec is not none %}<span>⏱️ {{ session.duration_sec }}s</span>{% endif %}
         {% if session.shell %}<span>🐚 {{ session.shell }}</span>{% endif %}
         {% if session.os_name %}<span>💻 {{ session.os_name }}</span>{% endif %}
         {% if session.is_test %}<span class="badge badge-test">Test Session</span>{% endif %}
+        {% if session.run_id %}<span class="badge badge-run" title="Run ID">{{ session.run_id[:12] }}</span>{% endif %}
     </div>
 </div>
 
@@ -36,6 +40,10 @@
     <div class="stat-card">
         <div class="stat-value">{{ session.screenshots_count }}</div>
         <div class="stat-label">Screenshots</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ session.help_requests_count }}</div>
+        <div class="stat-label">Help Requests</div>
     </div>
     <div class="stat-card">
         <div class="stat-value">{{ session.event_count }}</div>
@@ -61,6 +69,47 @@
     <div class="item-badges">
         {% for item in session.items_collected %}
         <span class="badge badge-item">{{ item }}</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if session.help_requests %}
+<div class="detail-section">
+    <h2>❓ Help Requests</h2>
+    <div class="help-requests-list">
+        {% for hr in session.help_requests %}
+        <div class="help-request-item">
+            <span class="badge badge-help">{{ hr.subcommand or 'default' }}</span>
+            {% if hr.room %}<span class="room-badge">🏰 {{ hr.room }}</span>{% endif %}
+            <span class="event-time">{{ hr.ts }}</span>
+            {% if hr.output_preview %}
+            <div class="help-preview">{{ hr.output_preview[:200] }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if session.test_results %}
+<div class="detail-section">
+    <h2>🧪 Test Results</h2>
+    <div class="test-results-list">
+        {% for tr in session.test_results %}
+        <div class="test-result-item">
+            <span class="badge badge-{{ tr.outcome }}">{{ tr.outcome }}</span>
+            {% if tr.duration_sec %}<span>⏱️ {{ tr.duration_sec }}s</span>{% endif %}
+            {% if tr.markers %}
+            <span class="test-markers">{% for m in tr.markers %}<span class="badge badge-marker">{{ m }}</span>{% endfor %}</span>
+            {% endif %}
+            {% if tr.longrepr %}
+            <details class="test-longrepr">
+                <summary>Failure Details</summary>
+                <pre><code>{{ tr.longrepr }}</code></pre>
+            </details>
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
 </div>
@@ -112,6 +161,14 @@
                         <span class="success">Unlocked <strong>{{ ev.extra.get('room', '?') }}</strong></span>
                     {% elif ev.event == 'screenshot' %}
                         <span>📸 {{ ev.extra.get('command', '') }} ({{ ev.extra.get('trigger', '') }})</span>
+                    {% elif ev.event == 'help_request' %}
+                        <span>❓ Help: <strong>{{ ev.extra.get('subcommand', 'default') }}</strong>
+                        {% if ev.extra.get('room') %} in {{ ev.extra.room }}{% endif %}</span>
+                    {% elif ev.event == 'help_action' %}
+                        <span>📚 Help action: <strong>{{ ev.extra.get('action', '') }}</strong></span>
+                    {% elif ev.event == 'test_result' %}
+                        <span class="badge badge-{{ ev.extra.get('outcome', 'unknown') }}">🧪 {{ ev.extra.get('outcome', '?') }}</span>
+                        {% if ev.extra.get('duration_sec') %}<span>⏱️ {{ ev.extra.duration_sec }}s</span>{% endif %}
                     {% elif ev.event == 'session_start' %}
                         <span>Session started ({{ ev.extra.get('mode', '') }})</span>
                     {% elif ev.event == 'session_end' %}

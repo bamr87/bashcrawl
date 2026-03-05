@@ -4,6 +4,40 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] - 2026-03-04
+
+### Added
+
+- **Walkthrough-driven test model** (`test/datasets/walkthrough.json`, `test/fixtures/walkthrough.py`)
+  - Introduced a single source of truth for rooms, encounters, and progression steps
+  - Added new integration suites for classic walkthrough coverage and encounter validation
+
+- **Viewer walkthrough/templates expansion** (`src/viewer/templates/walkthrough/`, `src/viewer/templates/tests/`)
+  - Added new test/walkthrough-facing template pages and related routing support
+
+### Changed
+
+- **Integration test structure refresh** (`test/integration/`)
+  - Replaced older `test_game_scripts.py`, `test_game_progression.py`, and `test_combat.py`
+    with consolidated walkthrough/encounter-focused suites
+  - Updated test fixtures and log/screenshot plumbing to align with walkthrough manifests
+
+- **Help and room metadata updates** (`src/help/bashcrawl_help.sh`, `src/help/data/rooms.yaml`)
+  - Expanded room/help data wiring to match the updated walkthrough-driven model
+
+- **Viewer analytics/session processing updates** (`src/viewer/`)
+  - Updated screenshot/session loaders, analytics engine routes, and gallery/dashboard templates
+
+### Fixed
+
+- **Interactive executable stdin handling in TUI engine** (`src/terminal-illness/ti/filesystem.py`)
+  - `run_script()` now accepts optional `stdin_input` and defaults to multiple responses,
+    preventing EOF on scripts with multiple `read` prompts (for example statue/monster/ghost)
+
+- **Encounter tests for multi-prompt scripts** (`test/integration/test_encounters.py`, `test/integration/test_native_walkthrough.py`)
+  - Updated scripted stdin payloads so y/n + follow-up prompts are consumed correctly
+  - Added assertions for expected statue reward output when sword path is taken
+
 ## [Unreleased] - 2026-03-03
 
 ### Added

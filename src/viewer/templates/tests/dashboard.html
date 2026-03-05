@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Test Dashboard — Bashcrawl Observatory{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-header { margin-bottom: 2rem; }
+  .dashboard-header h1 { margin-bottom: 0.5rem; }
+
+  .interface-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem; margin-bottom: 2rem;
+  }
+  .interface-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem; text-align: center;
+  }
+  .interface-card h2 { margin: 0 0 1rem; font-size: 1.2rem; }
+  .interface-card .stat-row {
+    display: flex; justify-content: space-around; margin-top: 0.75rem;
+  }
+  .stat { text-align: center; }
+  .stat .value { font-size: 1.8rem; font-weight: bold; }
+  .stat .label { font-size: 0.8rem; color: var(--text-muted); }
+  .stat.passed .value { color: #4caf50; }
+  .stat.failed .value { color: #f44336; }
+  .stat.skipped .value { color: #ff9800; }
+  .stat.total .value { color: var(--accent); }
+
+  .progress-bar {
+    height: 8px; border-radius: 4px; background: var(--bg);
+    margin-top: 1rem; overflow: hidden; display: flex;
+  }
+  .progress-bar .passed { background: #4caf50; }
+  .progress-bar .failed { background: #f44336; }
+  .progress-bar .skipped { background: #ff9800; }
+
+  .interface-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  .summary-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .summary-table th, .summary-table td {
+    padding: 0.75rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-table th { color: var(--text-muted); font-size: 0.85rem; }
+  .badge {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
+    font-size: 0.8rem; font-weight: bold;
+  }
+  .badge-passed { background: rgba(76,175,80,0.2); color: #4caf50; }
+  .badge-failed { background: rgba(244,67,54,0.2); color: #f44336; }
+  .badge-skipped { background: rgba(255,152,0,0.2); color: #ff9800; }
+  .badge-unknown { background: rgba(158,158,158,0.2); color: #9e9e9e; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>🧪 Test Dashboard</h1>
+  <p style="color: var(--text-muted);">Test results grouped by game interface</p>
+</div>
+
+<div class="interface-grid">
+  {% set interfaces = [
+    ('tui', '🖥️', 'TUI (Textual)'),
+    ('classic', '⌨️', 'Classic (Bash Emulator)'),
+    ('native', '🐚', 'Native Terminal'),
+    ('other', '📦', 'Other Tests')
+  ] %}
+  {% for key, icon, label in interfaces %}
+  {% set total = interface_counts.get(key, 0) %}
+  {% set passed = interface_passed.get(key, 0) %}
+  {% set failed = total - passed %}
+  <div class="interface-card">
+    <div class="interface-icon">{{ icon }}</div>
+    <h2>{{ label }}</h2>
+    <div class="stat-row">
+      <div class="stat total">
+        <div class="value">{{ total }}</div>
+        <div class="label">Total</div>
+      </div>
+      <div class="stat passed">
+        <div class="value">{{ passed }}</div>
+        <div class="label">Passed</div>
+      </div>
+      <div class="stat failed">
+        <div class="value">{{ failed }}</div>
+        <div class="label">Failed</div>
+      </div>
+    </div>
+    {% if total > 0 %}
+    <div class="progress-bar">
+      <div class="passed" style="width: {{ (passed / total * 100)|round }}%"></div>
+      <div class="failed" style="width: {{ (failed / total * 100)|round }}%"></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<h2>All Results</h2>
+<p style="color: var(--text-muted); margin-bottom: 1rem;">
+  Detailed test results are available via the
+  <a href="/api/test-dashboard">API endpoint</a>.
+  Session logs for individual tests can be found in the
+  <a href="{{ url_for('pages.sessions_list') }}">Sessions</a> view.
+</p>
+
+{% endblock %}

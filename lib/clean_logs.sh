@@ -13,6 +13,7 @@
 #   bash lib/clean_logs.sh --sessions   # clean only session JSONL files
 #   bash lib/clean_logs.sh --screenshots # clean only screenshot dirs
 #   bash lib/clean_logs.sh --keep 10    # keep the 10 most recent sessions
+#   bash lib/clean_logs.sh --retain-policy  # keep last-passing + current-run only
 # ============================================================================
 set -euo pipefail
 
@@ -31,6 +32,7 @@ CLEAN_FEEDBACK=true
 CLEAN_RUNTIME=true         # bashcrawl.log, setup.log, session-*.log, .DS_Store
 KEEP_RECENT=0              # 0 = remove all; N = keep N most recent sessions
 SELECTIVE=false            # true when user picks specific targets
+RETAIN_POLICY=false        # true = use .last_passing_run.json + .last_run_meta.json
 
 # --- Argument parsing --------------------------------------------------------
 while [[ $# -gt 0 ]]; do
@@ -45,6 +47,7 @@ while [[ $# -gt 0 ]]; do
         --runtime)   SELECTIVE=true; CLEAN_SESSIONS=false; CLEAN_SCREENSHOTS=false;
                      CLEAN_FEEDBACK=false; CLEAN_RUNTIME=true ;;
         --keep)      shift; KEEP_RECENT="${1:-0}" ;;
+        --retain-policy) RETAIN_POLICY=true ;;
         --help|-h)
             echo "Usage: bash lib/clean_logs.sh [OPTIONS]"
             echo ""
@@ -55,6 +58,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --feedback     Clean only feedback reports"
             echo "  --runtime      Clean only runtime logs (bashcrawl.log, setup.log, etc.)"
             echo "  --keep N       Keep the N most recent session files"
+            echo "  --retain-policy Keep only last-passing + current-run data (reads .last_passing_run.json)"
             echo "  -h, --help     Show this help message"
             exit 0
             ;;
@@ -117,6 +121,64 @@ fi
 echo "${COLOR_PRIMARY}=== Bashcrawl Log Cleanup ===${COLOR_RESET}"
 $DRY_RUN && echo "${COLOR_WARNING}(dry run — no files will be removed)${COLOR_RESET}"
 echo
+
+# --- Retain-policy mode ------------------------------------------------------
+# When --retain-policy is set, we read .last_passing_run.json and
+# .last_run_meta.json to figure out which session files and screenshot dirs
+# should be kept.  Everything else is removed.
+if $RETAIN_POLICY; then
+    echo "${COLOR_INFO}Retain-policy mode: keeping last-passing + current-run data${COLOR_RESET}"
+
+    # Collect paths to keep into a temp file (one per line)
+    keep_list=$(mktemp)
+    trap 'rm -f "$keep_list"' EXIT
+
+    for metafile in "$LOGS_DIR/.last_passing_run.json" "$LOGS_DIR/.last_run_meta.json"; do
+        if [[ -f "$metafile" ]]; then
+            python3 -c "
+import json, sys
+meta = json.load(open('$metafile'))
+for p in meta.get('session_files', []):
+    print(p)
+for p in meta.get('screenshot_dirs', []):
+    print(p)
+" >> "$keep_list" 2>/dev/null
+        fi
+    done
+
+    # Remove stale sessions
+    if [[ -d "$LOGS_DIR/sessions" ]]; then
+        while IFS= read -r -d '' f; do
+            if ! grep -qxF "$f" "$keep_list" 2>/dev/null; then
+                remove_file "$f"
+            fi
+        done < <(find "$LOGS_DIR/sessions" -maxdepth 1 -name '*.jsonl' -print0 2>/dev/null)
+    fi
+
+    # Remove stale screenshot dirs
+    if [[ -d "$LOGS_DIR/screenshots" ]]; then
+        while IFS= read -r -d '' d; do
+            if ! grep -qxF "$d" "$keep_list" 2>/dev/null; then
+                remove_dir "$d"
+            fi
+        done < <(find "$LOGS_DIR/screenshots" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    fi
+
+    # Summary and exit (retain-policy doesn't apply the normal sections)
+    echo
+    if (( total_removed == 0 )); then
+        echo "${COLOR_SUCCESS}Nothing to clean — only last-passing/current-run data present.${COLOR_RESET}"
+    else
+        freed="$(human_size $total_bytes)"
+        if $DRY_RUN; then
+            echo "${COLOR_WARNING}Would remove $total_removed items (~$freed)${COLOR_RESET}"
+            echo "Run without --dry to execute."
+        else
+            echo "${COLOR_SUCCESS}Removed $total_removed stale items (~$freed freed)${COLOR_RESET}"
+        fi
+    fi
+    exit 0
+fi
 
 # --- 1. Session JSONL files --------------------------------------------------
 if $CLEAN_SESSIONS && [[ -d "$LOGS_DIR/sessions" ]]; then

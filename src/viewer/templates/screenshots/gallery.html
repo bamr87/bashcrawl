@@ -6,27 +6,54 @@
 {% endblock %}
 
 {% block content %}
-{# --- Header bar: back link, title, meta, and playback controls --- #}
+{# --- Breadcrumb + session navigation --- #}
+<div class="gallery-nav-bar">
+    <div class="gallery-breadcrumb">
+        <a href="{{ url_for('pages.screenshots_index') }}">Screenshots</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="{{ url_for('pages.screenshots_index', category=session.category) }}">{{ session.category }}</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">{{ session.test_name }}</span>
+    </div>
+    <div class="gallery-session-nav">
+        {% if prev_session %}
+        <a href="{{ url_for('pages.screenshot_gallery', dir_name=prev_session.dir_name) }}"
+           class="session-nav-btn" title="{{ prev_session.test_name }}">◀ Prev Session</a>
+        {% else %}
+        <span class="session-nav-btn disabled">◀ Prev Session</span>
+        {% endif %}
+        {% if next_session %}
+        <a href="{{ url_for('pages.screenshot_gallery', dir_name=next_session.dir_name) }}"
+           class="session-nav-btn" title="{{ next_session.test_name }}">Next Session ▶</a>
+        {% else %}
+        <span class="session-nav-btn disabled">Next Session ▶</span>
+        {% endif %}
+    </div>
+</div>
+
+{# --- Header bar: title, meta, playback controls --- #}
 <div class="gallery-header">
-    <a href="{{ url_for('pages.screenshots_index') }}" class="back-link">← Back</a>
     <h1 class="gallery-title">📸 {{ session.test_name }}</h1>
     <div class="gallery-header-meta">
-        <span>{{ session.total_screenshots }} frames</span>
+        <span class="badge badge-category">{{ session.category }}</span>
+        <span>{{ session.total_screenshots }} frame{{ 's' if session.total_screenshots != 1 else '' }}</span>
         <span>{{ (session.total_size_bytes / 1024) | round | int }}KB</span>
         {% for sid in session.linked_session_sids %}
         <a href="{{ url_for('pages.session_detail', sid=sid) }}" class="badge badge-link">🔗 {{ sid[:8] }}</a>
         {% endfor %}
     </div>
+    {% if session.is_multi_frame %}
     <div class="gallery-controls" id="gallery-controls">
         <button class="ctrl-btn" onclick="galleryPrev()" title="Previous (←)">◀</button>
         <span class="ctrl-counter"><span id="gallery-index">1</span><span class="ctrl-sep">/</span>{{ session.total_screenshots }}</span>
         <button class="ctrl-btn" onclick="galleryNext()" title="Next (→)">▶</button>
         <button class="ctrl-btn" id="slideshow-btn" onclick="toggleSlideshow()" title="Play slideshow (Space)">⏵</button>
     </div>
+    {% endif %}
 </div>
 
 {# --- Full-width image viewer --- #}
-<div class="gallery-stage" id="gallery" data-dir="{{ session.dir_name }}">
+<div class="gallery-stage {% if not session.is_multi_frame %}single-frame{% endif %}" id="gallery" data-dir="{{ session.dir_name }}">
     {% if session.screenshots %}
     <img id="gallery-img" class="gallery-img"
          src="{{ url_for('serve_screenshot', filepath=session.screenshots[0].path) }}"
@@ -35,8 +62,10 @@
     {% else %}
     <div class="gallery-empty">No screenshots available</div>
     {% endif %}
+    {% if session.is_multi_frame %}
     <button class="stage-arrow stage-prev" onclick="galleryPrev()" title="Previous (←)">‹</button>
     <button class="stage-arrow stage-next" onclick="galleryNext()" title="Next (→)">›</button>
+    {% endif %}
 </div>
 
 {# --- Info strip + horizontal filmstrip below image --- #}
@@ -47,6 +76,7 @@
         <span class="info-tag" id="gallery-command">{{ session.screenshots[0].command if session.screenshots else '' }}</span>
         <span class="info-tag" id="gallery-size">{{ ((session.screenshots[0].size_bytes / 1024) | round | int ~ 'KB') if session.screenshots else '' }}</span>
     </div>
+    {% if session.is_multi_frame %}
     <div class="filmstrip" id="filmstrip">
         {% for sc in session.screenshots %}
         <div class="filmstrip-item {% if loop.first %}active{% endif %}"
@@ -64,6 +94,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 

@@ -32,6 +32,14 @@
         <div class="stat-value">{{ summary.total_deaths }}</div>
         <div class="stat-label">Total Deaths</div>
     </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.total_tests }}</div>
+        <div class="stat-label">Tests Logged</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ summary.total_help_requests }}</div>
+        <div class="stat-label">Help Requests</div>
+    </div>
 </div>
 
 <div class="analytics-grid">
@@ -77,6 +85,50 @@
             {% endif %}
         </div>
     </div>
+
+    <div class="chart-panel">
+        <h3>🧪 Test Outcomes</h3>
+        <div class="items-grid">
+            {% for outcome, count in summary.test_outcomes.items() %}
+            <div class="item-stat">
+                <span class="badge badge-{{ outcome }}">{{ outcome }}</span>
+                <span class="item-count">{{ count }}</span>
+            </div>
+            {% endfor %}
+            {% if not summary.test_outcomes %}
+            <p class="muted">No test results recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="chart-panel">
+        <h3>❓ Help Subcommands</h3>
+        <div class="items-grid">
+            {% for subcmd, count in summary.help_subcommands.items() %}
+            <div class="item-stat">
+                <span class="item-name">{{ subcmd }}</span>
+                <span class="item-count">{{ count }}</span>
+            </div>
+            {% endfor %}
+            {% if not summary.help_subcommands %}
+            <p class="muted">No help requests recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if summary.sessions_by_run_id %}
+    <div class="chart-panel wide">
+        <h3>🏃 Sessions by Run ID</h3>
+        <div class="items-grid">
+            {% for rid, count in summary.sessions_by_run_id.items() %}
+            <div class="item-stat">
+                <span class="item-name" title="{{ rid }}">{{ rid[:16] }}</span>
+                <span class="item-count">{{ count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 

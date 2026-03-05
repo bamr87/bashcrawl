@@ -35,6 +35,8 @@ VALID_EVENTS = {
     "output",
     "screenshot",
     "test",
+    "test_result",
+    "tutorial_start",
     "launcher_info",
     "launcher_success",
     "launcher_error",
@@ -131,10 +133,12 @@ class TestLogCapture:
         log_dir: Path,
         scenario: str = "test",
         test_name: str = "",
+        run_id: str = "",
     ) -> None:
         self.log_dir = log_dir
         self.scenario = scenario
         self.test_name = test_name
+        self.run_id = run_id
         self.session_id = f"T{int(time.time()) % 100000000:08d}"
         self.events: list[LogEvent] = []
         self._file_path: Path | None = None
@@ -156,6 +160,7 @@ class TestLogCapture:
             mode="ai_test",
             scenario=self.scenario,
             test_name=self.test_name,
+            run_id=self.run_id,
             source="test_framework",
         )
 
@@ -240,6 +245,51 @@ class TestLogCapture:
             for e in self.events
             if e.event == "encounter" and e.extra.get("outcome") == "collected"
         ]
+
+    def log_help_event(
+        self,
+        subcommand: str = "",
+        output_preview: str = "",
+        room: str = "",
+    ) -> None:
+        """Log a help system invocation (convenience wrapper).
+
+        Args:
+            subcommand: The help subcommand invoked (e.g. ``"commands"``,
+                ``"map"``, ``"tips"``).  Empty string for default help.
+            output_preview: First ~200 chars of help output.
+            room: Current game room.
+        """
+        extra: dict[str, Any] = {"subcommand": subcommand or "default"}
+        if output_preview:
+            extra["output_preview"] = output_preview[:200]
+        if room:
+            extra["room"] = room
+        self.log_event("help_request", **extra)
+
+    def log_test_result(
+        self,
+        outcome: str,
+        duration_sec: float = 0.0,
+        markers: list[str] | None = None,
+        longrepr: str = "",
+    ) -> None:
+        """Log the final test outcome (convenience wrapper).
+
+        Args:
+            outcome: ``"passed"``, ``"failed"``, ``"error"``, or ``"skipped"``.
+            duration_sec: Wall-clock duration of the test.
+            markers: List of pytest marker names (e.g. ``["unit"]``).
+            longrepr: Failure representation (truncated to 500 chars).
+        """
+        extra: dict[str, Any] = {"outcome": outcome}
+        if duration_sec:
+            extra["duration_sec"] = round(duration_sec, 3)
+        if markers:
+            extra["markers"] = markers
+        if longrepr:
+            extra["longrepr"] = longrepr[:500]
+        self.log_event("test_result", **extra)
 
     def get_screenshots(self) -> list[dict[str, Any]]:
         """Return all screenshot events with path and metadata."""

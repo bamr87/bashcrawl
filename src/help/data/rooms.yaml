@@ -161,6 +161,301 @@ rooms:
       - command: "source init_help.sh"
         description: "Activate the help system"
 
+  chapel:
+    emoji: "⛪"
+    title: "THE CHAPEL"
+    description: "A hidden sanctuary unlocked by collecting treasures — learn grep"
+    teaches:
+      - "Searching text with grep"
+      - "Case-insensitive searching"
+      - "Pattern matching basics"
+    key_files:
+      - name: scroll
+        description: "grep tutorial"
+      - name: ghost
+        description: "encounter (executable)"
+    next_steps: "Explore the graveyard or continue to the courtyard"
+    essential_commands:
+      - command: "grep pattern file"
+        description: "Search for text in a file"
+      - command: "grep -i pattern *"
+        description: "Case-insensitive search"
+      - command: "ls -la"
+        description: "Look for hidden paths forward"
+
+  graveyard:
+    emoji: "🪦"
+    title: "THE GRAVEYARD"
+    description: "A misty place beyond the chapel — learn find"
+    teaches:
+      - "Locating files with find"
+      - "Finding by name, type, and permissions"
+    key_files:
+      - name: scroll
+        description: "find tutorial"
+    next_steps: "Search for hidden files and paths"
+    essential_commands:
+      - command: "find . -name 'scroll'"
+        description: "Find all scrolls"
+      - command: "find . -type d"
+        description: "Find directories"
+      - command: "find . -executable"
+        description: "Find runnable files"
+
+  courtyard:
+    emoji: "🏛️"
+    title: "THE COURTYARD"
+    description: "An open area leading deeper into the castle — learn pipes"
+    teaches:
+      - "Combining commands with pipes"
+      - "Chaining output between programs"
+    key_files:
+      - name: scroll
+        description: "pipes tutorial"
+    next_steps: "Continue deeper into the aviary"
+    essential_commands:
+      - command: "ls | grep pattern"
+        description: "Pipe output to grep"
+      - command: "cat scroll | wc -l"
+        description: "Count lines"
+      - command: "cd aviary"
+        description: "Continue deeper"
+
+  aviary:
+    emoji: "🦅"
+    title: "THE AVIARY"
+    description: "A towering room filled with caged birds — learn output redirection"
+    teaches:
+      - "Output redirection with > and >>"
+      - "Creating and appending to files"
+    key_files:
+      - name: scroll
+        description: "redirection tutorial"
+    next_steps: "Continue to the great hall"
+    essential_commands:
+      - command: "echo 'text' > file"
+        description: "Write to a file"
+      - command: "echo 'more' >> file"
+        description: "Append to a file"
+      - command: "cat file"
+        description: "Verify file contents"
+
+  hall:
+    emoji: "🏰"
+    title: "THE GREAT HALL"
+    description: "A grand hall connecting to the library — learn sorting and filtering"
+    teaches:
+      - "Sorting output with sort"
+      - "Removing duplicates with uniq"
+    key_files:
+      - name: scroll
+        description: "sort/uniq tutorial"
+    next_steps: "Enter the ancient library"
+    essential_commands:
+      - command: "sort file"
+        description: "Sort file contents"
+      - command: "ls | sort -r"
+        description: "Reverse sort listing"
+      - command: "uniq file"
+        description: "Remove duplicates"
+
+  vault:
+    emoji: "🔒"
+    title: "THE VAULT"
+    description: "A hidden vault — learn shell variables and environment"
+    teaches:
+      - "Shell variables and environment"
+      - "Setting and reading variables"
+      - "Environment inspection with env"
+    key_files:
+      - name: scroll
+        description: "variables tutorial"
+    next_steps: "Explore the stronghold within"
+    essential_commands:
+      - command: "echo $VARIABLE"
+        description: "Print variable value"
+      - command: "export VAR=value"
+        description: "Set environment variable"
+      - command: "env | grep VAR"
+        description: "Search environment"
+
+  stronghold:
+    emoji: "🏯"
+    title: "THE STRONGHOLD"
+    description: "Fortified area within the vault — goblet challenge unlocks the rift"
+    teaches:
+      - "Advanced variable manipulation"
+      - "Inventory-gated challenges"
+    key_files:
+      - name: goblet
+        description: "checks for orb1, unlocks .rift (executable)"
+    next_steps: "Complete the goblet challenge to unlock the rift"
+    essential_commands:
+      - command: "./goblet"
+        description: "Attempt the goblet challenge"
+      - command: "echo $I"
+        description: "Check inventory for orb1"
+      - command: "set | grep HP"
+        description: "Inspect shell variables"
+
+  nursery:
+    emoji: "🍼"
+    title: "THE NURSERY"
+    description: "A quiet room within the vault complex — learn process management"
+    teaches:
+      - "Process management with ps"
+      - "Job control (bg, fg, jobs)"
+    key_files:
+      - name: scroll
+        description: "process tutorial"
+    next_steps: "Continue exploring the vault complex"
+    essential_commands:
+      - command: "ps"
+        description: "List running processes"
+      - command: "jobs"
+        description: "List background jobs"
+      - command: "bg / fg"
+        description: "Background/foreground jobs"
+
+  lab:
+    emoji: "🧪"
+    title: "THE LABORATORY"
+    description: "An alchemist's lab — learn process substitution and advanced piping"
+    teaches:
+      - "Process substitution with <()"
+      - "Output duplication with tee"
+      - "Building commands with xargs"
+    key_files:
+      - name: scroll
+        description: "process substitution tutorial"
+    next_steps: "Apply your knowledge across the dungeon"
+    essential_commands:
+      - command: "diff <(cmd1) <(cmd2)"
+        description: "Process substitution"
+      - command: "tee file"
+        description: "Duplicate output"
+      - command: "command | xargs"
+        description: "Build commands from input"
+
+  scrap:
+    emoji: "🔗"
+    title: "THE SCRAP HEAP"
+    description: "A hidden directory teaching symbolic links"
+    teaches:
+      - "Creating symbolic links with ln -s"
+      - "Reading link targets"
+    key_files:
+      - name: scroll
+        description: "symlink tutorial"
+    next_steps: "Practice creating and inspecting symlinks"
+    essential_commands:
+      - command: "ln -s target linkname"
+        description: "Create symbolic link"
+      - command: "ls -l"
+        description: "See link targets (->)"
+      - command: "readlink linkname"
+        description: "Show link destination"
+
+  rift:
+    emoji: "🌀"
+    title: "THE RIFT"
+    description: "A dimensional tear — advanced scripting and checksums"
+    teaches:
+      - "File checksums (sha256sum, md5sum)"
+      - "File comparison with diff"
+      - "Advanced bash scripting"
+    key_files:
+      - name: scroll
+        description: "checksums tutorial"
+    next_steps: "Explore the arena or ascend the spire"
+    essential_commands:
+      - command: "sha256sum file"
+        description: "Compute file checksum"
+      - command: "md5sum file"
+        description: "Alternative checksum"
+      - command: "diff file1 file2"
+        description: "Compare files"
+
+  arena:
+    emoji: "⚔️"
+    title: "THE ARENA"
+    description: "A battle zone within the rift — learn loops and iteration"
+    teaches:
+      - "For loops over files"
+      - "While read loops"
+      - "Conditional tests"
+    key_files:
+      - name: scroll
+        description: "loops tutorial"
+    next_steps: "Descend into the pit"
+    essential_commands:
+      - command: "for f in *; do echo $f; done"
+        description: "Loop over files"
+      - command: "while read line; do ..."
+        description: "Read loop"
+      - command: "test -f file && echo yes"
+        description: "Conditional test"
+
+  pit:
+    emoji: "🕳️"
+    title: "THE PIT"
+    description: "The deepest point of the arena — learn error handling"
+    teaches:
+      - "Exit codes and error checking"
+      - "Error handling with || and &&"
+      - "Traps for cleanup"
+    key_files:
+      - name: scroll
+        description: "error handling tutorial"
+    next_steps: "Emerge victorious with mastery of error handling"
+    essential_commands:
+      - command: "echo $?"
+        description: "Check last exit code"
+      - command: "command || echo fail"
+        description: "Handle errors"
+      - command: "trap 'cleanup' EXIT"
+        description: "Set exit trap"
+
+  spire:
+    emoji: "🗼"
+    title: "THE SPIRE"
+    description: "A tower rising from the rift — learn text processing"
+    teaches:
+      - "Text processing with awk"
+      - "Text substitution with sed"
+      - "Field extraction with cut"
+    key_files:
+      - name: scroll
+        description: "text processing tutorial"
+    next_steps: "Climb to the mezzanine"
+    essential_commands:
+      - command: "awk '{print $1}' file"
+        description: "Extract columns"
+      - command: "sed 's/old/new/' file"
+        description: "Text substitution"
+      - command: "cut -d',' -f1 file"
+        description: "Cut fields"
+
+  mezzanine:
+    emoji: "🎭"
+    title: "THE MEZZANINE"
+    description: "An elevated platform within the spire — learn advanced regex"
+    teaches:
+      - "Extended regular expressions"
+      - "Bash regex matching with [[ =~ ]]"
+      - "Perl-compatible regex"
+    key_files:
+      - name: scroll
+        description: "regex tutorial"
+    next_steps: "Master regex patterns to complete the dungeon"
+    essential_commands:
+      - command: "grep -E 'regex' file"
+        description: "Extended regex"
+      - command: "[[ $var =~ pattern ]]"
+        description: "Bash regex match"
+      - command: "grep -P '\\d+' file"
+        description: "Perl regex"
+
   unknown:
     emoji: "🗺️"
     title: "UNKNOWN TERRITORY"

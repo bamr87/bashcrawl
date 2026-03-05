@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 194" width="800" height="194">
+  <defs>
+    <style>
+      .bg { fill: #1e1e2e; }
+      .header { fill: #313244; }
+      .title { font: bold 14px monospace; fill: #cdd6f4; }
+      .prompt { font: bold 13px monospace; fill: #a6e3a1; }
+      .output { font: 13px monospace; fill: #cdd6f4; }
+      .dim { font: 12px monospace; fill: #6c7086; }
+      .stat { font: bold 12px monospace; fill: #f9e2af; }
+      .border { fill: none; stroke: #45475a; stroke-width: 2; rx: 8; }
+    </style>
+  </defs>
+  <rect class="bg" width="800" height="194" rx="8"/>
+  <rect class="border" x="1" y="1" width="798" height="192" rx="8"/>
+  <rect class="header" x="1" y="1" width="798" height="32" rx="8"/>
+  <rect class="header" x="1" y="25" width="798" height="8"/>
+  <text class="title" x="16" y="22">Test: test_script_is_executable[entrance/.rift/arena/pit/nyarlathotep]</text>
+  <text class="dim" x="640" y="22">22:34:20</text>
+  <text class="stat" x="16" y="56">✅ Outcome: <tspan fill="#a6e3a1">PASSED</tspan></text>
+  <text class="dim" x="16" y="80">⏱  Duration: 0.00s</text>
+  <text class="dim" x="16" y="100">🏷  Markers: parametrize, integration</text>
+  <text class="dim" x="16" y="120">📂 test.integration.test_native_walkthrough::TestNativeScriptExecutability</text>
+  <line x1="16" y1="144" x2="784" y2="144" stroke="#45475a" stroke-width="1"/>
+  <text class="dim" x="16" y="160">(no captured output)</text>
+</svg>

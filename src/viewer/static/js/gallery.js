@@ -15,6 +15,9 @@
     let current = 0;
     let slideshowTimer = null;
 
+    // Detect single-frame mode (no filmstrip items)
+    const isMultiFrame = items.length > 1;
+
     function updateGallery(index) {
         if (!items.length) return;
         index = Math.max(0, Math.min(index, items.length - 1));
@@ -53,14 +56,17 @@
     };
 
     window.galleryPrev = function() {
+        if (!isMultiFrame) return;
         updateGallery(current > 0 ? current - 1 : items.length - 1);
     };
 
     window.galleryNext = function() {
+        if (!isMultiFrame) return;
         updateGallery(current < items.length - 1 ? current + 1 : 0);
     };
 
     window.toggleSlideshow = function() {
+        if (!isMultiFrame) return;
         const btn = document.getElementById('slideshow-btn');
         if (slideshowTimer) {
             clearInterval(slideshowTimer);
@@ -73,6 +79,22 @@
             if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
         }
     };
+
+    // Session navigation helpers
+    function navigateSession(direction) {
+        var links = document.querySelectorAll('.session-nav-btn:not(.disabled)');
+        for (var i = 0; i < links.length; i++) {
+            var link = links[i];
+            if (direction === 'prev' && link.textContent.indexOf('Prev') !== -1) {
+                window.location.href = link.href;
+                return;
+            }
+            if (direction === 'next' && link.textContent.indexOf('Next') !== -1) {
+                window.location.href = link.href;
+                return;
+            }
+        }
+    }
 
     // Keyboard navigation
     document.addEventListener('keydown', function(e) {
@@ -97,6 +119,16 @@
             case ' ':
                 e.preventDefault();
                 toggleSlideshow();
+                break;
+            case 'j':
+            case 'J':
+                e.preventDefault();
+                navigateSession('prev');
+                break;
+            case 'k':
+            case 'K':
+                e.preventDefault();
+                navigateSession('next');
                 break;
         }
     });

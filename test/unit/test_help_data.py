@@ -8,6 +8,17 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+# All known game rooms (main + hidden)
+ALL_GAME_ROOMS = {
+    "entrance", "cellar", "armoury", "chamber",   # main path
+    "chapel", "graveyard", "courtyard", "aviary",  # chapel path
+    "hall", "library", "study",                     # chapel path cont.
+    "vault", "stronghold", "nursery", "lab",        # vault path
+    "scrap",                                        # symlink room
+    "rift", "arena", "pit", "spire", "mezzanine",  # rift path
+    "workshop",                                     # player-created
+}
+
 
 class TestLoadRooms:
     """Tests for load_rooms()."""
@@ -38,6 +49,69 @@ class TestLoadRooms:
         for name, room in rooms.items():
             assert room.title, f"Room {name} missing title"
             assert room.description, f"Room {name} missing description"
+
+    @pytest.mark.parametrize("room_name", sorted(ALL_GAME_ROOMS))
+    def test_all_rooms_in_yaml(self, room_name):
+        """Every known game room must have an entry in rooms.yaml."""
+        from ti.help_data import load_rooms
+        try:
+            rooms = load_rooms()
+        except FileNotFoundError:
+            pytest.skip("rooms.yaml not found")
+        assert room_name in rooms, \
+            f"Room '{room_name}' missing from rooms.yaml"
+
+    def test_rooms_have_teaches(self):
+        """Each room should teach at least one concept."""
+        from ti.help_data import load_rooms
+        try:
+            rooms = load_rooms()
+        except FileNotFoundError:
+            pytest.skip("rooms.yaml not found")
+        for name, room in rooms.items():
+            if name == "unknown":
+                continue  # wildcard entry doesn't need teaches
+            assert len(room.teaches) > 0, \
+                f"Room '{name}' should list at least one topic in 'teaches'"
+
+    def test_rooms_have_essential_commands(self):
+        """Each room should list essential commands."""
+        from ti.help_data import load_rooms
+        try:
+            rooms = load_rooms()
+        except FileNotFoundError:
+            pytest.skip("rooms.yaml not found")
+        for name, room in rooms.items():
+            if name == "unknown":
+                continue
+            assert len(room.essential_commands) > 0, \
+                f"Room '{name}' should list at least one essential command"
+
+    def test_rooms_have_next_steps(self):
+        """Each room should have next_steps guidance."""
+        from ti.help_data import load_rooms
+        try:
+            rooms = load_rooms()
+        except FileNotFoundError:
+            pytest.skip("rooms.yaml not found")
+        for name, room in rooms.items():
+            if name == "unknown":
+                continue
+            assert room.next_steps, \
+                f"Room '{name}' should have next_steps"
+
+    def test_no_extra_rooms_in_yaml(self):
+        """rooms.yaml should not have entries for non-existent rooms
+        (except 'unknown' as a catch-all)."""
+        from ti.help_data import load_rooms
+        try:
+            rooms = load_rooms()
+        except FileNotFoundError:
+            pytest.skip("rooms.yaml not found")
+        allowed = ALL_GAME_ROOMS | {"unknown"}
+        extra = set(rooms.keys()) - allowed
+        assert not extra, \
+            f"rooms.yaml has entries for non-game rooms: {extra}"
 
 
 class TestLoadCommands:

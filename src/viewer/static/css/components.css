@@ -184,6 +184,46 @@
 .badge-item { background: rgba(212,165,116,0.15); color: var(--accent-gold); border-color: rgba(212,165,116,0.3); }
 .badge-link { background: rgba(96,165,250,0.1); color: var(--accent-blue); border-color: rgba(96,165,250,0.2); }
 
+/* Test outcome badges */
+.badge-passed { background: rgba(74,222,128,0.15); color: var(--accent-green); border-color: rgba(74,222,128,0.3); }
+.badge-failed { background: rgba(248,113,113,0.15); color: var(--accent-red, #f87171); border-color: rgba(248,113,113,0.3); }
+.badge-skipped { background: rgba(251,191,36,0.15); color: var(--accent-yellow); border-color: rgba(251,191,36,0.3); }
+.badge-error { background: rgba(251,146,60,0.15); color: #fb923c; border-color: rgba(251,146,60,0.3); }
+.badge-run { background: rgba(96,165,250,0.1); color: var(--accent-blue); border-color: rgba(96,165,250,0.2); font-size: 0.7rem; }
+.badge-help { background: rgba(167,139,250,0.1); color: var(--accent-purple); border-color: rgba(167,139,250,0.2); }
+.badge-marker { background: rgba(148,163,184,0.1); color: var(--text-muted); border-color: rgba(148,163,184,0.2); font-size: 0.7rem; }
+
+/* Help request items */
+.help-requests-list,
+.test-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.help-request-item,
+.test-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+.help-preview {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    width: 100%;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border-color);
+}
+.test-longrepr pre {
+    font-size: 0.75rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
 /* Session List */
 .session-list {
     display: flex;
