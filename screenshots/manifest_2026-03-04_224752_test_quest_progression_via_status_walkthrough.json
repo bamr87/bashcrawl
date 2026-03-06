@@ -1,0 +1,296 @@
+{
+  "generated_at": "2026-03-04T22:47:56",
+  "screenshot_dir": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough",
+  "total_screenshots": 32,
+  "total_size_bytes": 2683232,
+  "screenshots": [
+    {
+      "name": "000_initial.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/000_initial.svg",
+      "trigger": "agent_auto",
+      "command": "(startup)",
+      "room": "",
+      "ts": "2026-03-04T22:47:52",
+      "size_bytes": 70492
+    },
+    {
+      "name": "001_pwd.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/001_pwd.svg",
+      "trigger": "agent_auto",
+      "command": "pwd",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 72510
+    },
+    {
+      "name": "quest_0.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_0.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_0",
+      "room": "",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 72510
+    },
+    {
+      "name": "002_ls.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/002_ls.svg",
+      "trigger": "agent_auto",
+      "command": "ls",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 74050
+    },
+    {
+      "name": "quest_1.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_1.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_1",
+      "room": "",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 74050
+    },
+    {
+      "name": "003_cat_scroll.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/003_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 75697
+    },
+    {
+      "name": "004_cd_cellar.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/004_cd_cellar.svg",
+      "trigger": "agent_auto",
+      "command": "cd cellar",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 77302
+    },
+    {
+      "name": "quest_2.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_2.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_2",
+      "room": "",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 77302
+    },
+    {
+      "name": "005_cat_scroll.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/005_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 78904
+    },
+    {
+      "name": "006_ls_-F.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/006_ls_-F.svg",
+      "trigger": "agent_auto",
+      "command": "ls -F",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 80179
+    },
+    {
+      "name": "007___treasure.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/007___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:53",
+      "size_bytes": 82236
+    },
+    {
+      "name": "008_export_I_amulet__I.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/008_export_I_amulet__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I=amulet,$I",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 86438
+    },
+    {
+      "name": "009_cd_armoury.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/009_cd_armoury.svg",
+      "trigger": "agent_auto",
+      "command": "cd armoury",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 87879
+    },
+    {
+      "name": "010_cat_scroll.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/010_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 88610
+    },
+    {
+      "name": "011_ls_-F.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/011_ls_-F.svg",
+      "trigger": "agent_auto",
+      "command": "ls -F",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 87180
+    },
+    {
+      "name": "012___treasure.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/012___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 84410
+    },
+    {
+      "name": "013_export_I_sword__I.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/013_export_I_sword__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I=sword,$I",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 86381
+    },
+    {
+      "name": "014___potion.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/014___potion.svg",
+      "trigger": "agent_auto",
+      "command": "./potion",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:54",
+      "size_bytes": 85540
+    },
+    {
+      "name": "015_export_HP_15.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/015_export_HP_15.svg",
+      "trigger": "agent_auto",
+      "command": "export HP=15",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88397
+    },
+    {
+      "name": "016_cd_chamber.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/016_cd_chamber.svg",
+      "trigger": "agent_auto",
+      "command": "cd chamber",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88667
+    },
+    {
+      "name": "017_cat_scroll.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/017_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88670
+    },
+    {
+      "name": "018___statue.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/018___statue.svg",
+      "trigger": "agent_auto",
+      "command": "./statue",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88699
+    },
+    {
+      "name": "019___treasure.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/019___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88246
+    },
+    {
+      "name": "020_export_I_coins__I.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/020_export_I_coins__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I=coins,$I",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:55",
+      "size_bytes": 88541
+    },
+    {
+      "name": "021_cd__________.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/021_cd__________.svg",
+      "trigger": "agent_auto",
+      "command": "cd ../../../",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 89357
+    },
+    {
+      "name": "022_mkdir_workshop.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/022_mkdir_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "mkdir workshop",
+      "room": "entrance/workshop",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 89334
+    },
+    {
+      "name": "quest_3.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_3.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_3",
+      "room": "",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 89334
+    },
+    {
+      "name": "023_cd_workshop.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/023_cd_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "cd workshop",
+      "room": "/entrance/workshop/workshop",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 89553
+    },
+    {
+      "name": "024_touch_notes_txt.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/024_touch_notes_txt.svg",
+      "trigger": "agent_auto",
+      "command": "touch notes.txt",
+      "room": "/entrance/workshop/workshop",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 88151
+    },
+    {
+      "name": "quest_4.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_4.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_4",
+      "room": "",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 88151
+    },
+    {
+      "name": "025_cat_notes_txt.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/025_cat_notes_txt.svg",
+      "trigger": "agent_auto",
+      "command": "cat notes.txt",
+      "room": "/entrance/workshop/workshop",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 88231
+    },
+    {
+      "name": "quest_5.svg",
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-03-04_224752_test_quest_progression_via_status_walkthrough/quest_5.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT quest_5",
+      "room": "",
+      "ts": "2026-03-04T22:47:56",
+      "size_bytes": 88231
+    }
+  ]
+}

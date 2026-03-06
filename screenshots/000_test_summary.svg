@@ -15,12 +15,12 @@
   <rect class="border" x="1" y="1" width="798" height="192" rx="8"/>
   <rect class="header" x="1" y="1" width="798" height="32" rx="8"/>
   <rect class="header" x="1" y="25" width="798" height="8"/>
-  <text class="title" x="16" y="22">Test: test_script_is_executable[entrance/.rift/arena/pit/nyarlathotep]</text>
-  <text class="dim" x="640" y="22">22:34:20</text>
+  <text class="title" x="16" y="22">Test: test_quest_progression_via_status</text>
+  <text class="dim" x="640" y="22">22:47:56</text>
   <text class="stat" x="16" y="56">✅ Outcome: <tspan fill="#a6e3a1">PASSED</tspan></text>
-  <text class="dim" x="16" y="80">⏱  Duration: 0.00s</text>
-  <text class="dim" x="16" y="100">🏷  Markers: parametrize, integration</text>
-  <text class="dim" x="16" y="120">📂 test.integration.test_native_walkthrough::TestNativeScriptExecutability</text>
+  <text class="dim" x="16" y="80">⏱  Duration: 4.26s</text>
+  <text class="dim" x="16" y="100">🏷  Markers: skipif, integration</text>
+  <text class="dim" x="16" y="120">📂 test.integration.test_tui_walkthrough::TestTuiCriticalPath</text>
   <line x1="16" y1="144" x2="784" y2="144" stroke="#45475a" stroke-width="1"/>
   <text class="dim" x="16" y="160">(no captured output)</text>
 </svg>
