@@ -9,4 +9,5 @@ __all__ = [
     "chat_context",
     "chat_panel",
     "chat_cli",
+    "audio",
 ]

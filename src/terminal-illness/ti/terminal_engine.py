@@ -13,6 +13,7 @@ from rich.table import Table
 from .game_state import GameState
 from .filesystem import GameFileSystem
 from .quests import check_quest_completion, quest_list
+from .audio import SoundManager, SoundEvent, MusicTrack, SCRIPT_SOUNDS, COMBAT_SCRIPTS
 
 
 class TerminalCompleter(Completer):
@@ -58,6 +59,7 @@ class TerminalEngine:
         fs: GameFileSystem,
         output_callback: Optional[Callable[[str, str], None]] = None,
         on_quest_complete: Optional[Callable[[], None]] = None,
+        audio: Optional[SoundManager] = None,
     ) -> None:
         self.state = state
         self.fs = fs
@@ -65,6 +67,7 @@ class TerminalEngine:
         self._cwd = state.current_location or "/entrance"
         self._output_callback = output_callback
         self._on_quest_complete = on_quest_complete
+        self._audio = audio
         self._history = InMemoryHistory()
         self._registry: Dict[str, CommandSpec] = {}
         self._register_commands()
@@ -166,6 +169,8 @@ class TerminalEngine:
         self._register("load", self._cmd_load, "Load your progress")
         self._register("merlin", self._cmd_merlin, "Ask Merlin for a hint")
         self._register("exit", self._cmd_exit, "Exit the game")
+        self._register("volume", self._cmd_volume, "Set audio volume (0-100)")
+        self._register("mute", self._cmd_mute, "Toggle audio mute")
 
     def run_loop(self) -> None:
         self._render_header()
@@ -278,6 +283,13 @@ class TerminalEngine:
         sidebar (inventory, HP) stays in sync without the player needing
         to manually re-type the export commands.
         """
+        # Play combat start SFX and switch to combat music for combat scripts
+        base_name = script.split("/")[-1]
+        is_combat = base_name in COMBAT_SCRIPTS
+        if is_combat and self._audio:
+            self._audio.play_sfx(SoundEvent.COMBAT_START)
+            self._audio.play_music(MusicTrack.COMBAT)
+
         output, exit_code, env_updates = self.fs.run_script(
             self._cwd, script, env_vars=self.state.game_env
         )
@@ -304,6 +316,21 @@ class TerminalEngine:
         text = output.rstrip() if output else "(no output)"
         if feedback_parts:
             text += "\n\n" + "\n".join(feedback_parts)
+
+        # SFX for non-combat scripts (treasure, potion, spell)
+        if self._audio:
+            sfx = SCRIPT_SOUNDS.get(base_name)
+            if sfx:
+                self._audio.play_sfx(sfx)
+            # Combat outcome: victory or death
+            if is_combat:
+                if self.state.hp <= 0:
+                    self._audio.play_sfx(SoundEvent.PLAYER_DEATH)
+                else:
+                    self._audio.play_sfx(SoundEvent.COMBAT_VICTORY)
+                # Restore area music after combat
+                from .audio import area_track_for
+                self._audio.play_music(area_track_for(self._cwd))
 
         return "output", script, text
 
@@ -408,6 +435,7 @@ class TerminalEngine:
         new_cwd = self.fs.cd(self._cwd, args[0])
         self._cwd = new_cwd
         self.state.current_location = new_cwd
+        # Room-enter SFX is handled in app.py _refresh_sidebar
         return "success", "cd", f"Moved to {new_cwd}"
 
     def _cmd_mkdir(self, args: List[str]) -> Tuple[str, str, str]:
@@ -427,6 +455,8 @@ class TerminalEngine:
             raise ValueError("cat requires a file path")
         content = self.fs.read_file(self._cwd, args[0])
         if content:
+            if args[0] == "scroll" and self._audio:
+                self._audio.play_sfx(SoundEvent.SCROLL_READ)
             return "output", "cat", content
         return "info", "cat", "(empty file)"
 
@@ -490,6 +520,8 @@ class TerminalEngine:
 
     def _cmd_save(self, args: List[str]) -> Tuple[str, str, str]:
         self.state.save()
+        if self._audio:
+            self._audio.play_sfx(SoundEvent.SAVE_GAME)
         return "success", "save", "Progress saved."
 
     def _cmd_load(self, args: List[str]) -> Tuple[str, str, str]:
@@ -526,4 +558,40 @@ class TerminalEngine:
 
     def _cmd_exit(self, args: List[str]) -> Tuple[str, str, str]:
         return "exit", "exit", "Farewell, adventurer. Your progress has been saved."
+
+    def _cmd_volume(self, args: List[str]) -> Tuple[str, str, str]:
+        """Set audio volume: volume [sfx|music] <0-100>"""
+        if not self._audio:
+            return "info", "volume", "Audio is disabled."
+        if not args:
+            sfx = int(self._audio.sfx_volume * 100)
+            music = int(self._audio.music_volume * 100)
+            return "info", "volume", f"Volume — SFX: {sfx}%  Music: {music}%\n[dim]Tip: Press F5 for audio settings[/dim]"
+        if len(args) == 1:
+            try:
+                level = max(0, min(100, int(args[0])))
+            except ValueError:
+                return "error", "volume", "Usage: volume [sfx|music] <0-100>"
+            self._audio.set_volume(level / 100.0)
+            return "success", "volume", f"Volume set to {level}%"
+        channel, level_str = args[0].lower(), args[1]
+        try:
+            level = max(0, min(100, int(level_str)))
+        except ValueError:
+            return "error", "volume", "Usage: volume [sfx|music] <0-100>"
+        if channel == "sfx":
+            self._audio.set_sfx_volume(level / 100.0)
+        elif channel == "music":
+            self._audio.set_music_volume(level / 100.0)
+        else:
+            return "error", "volume", "Usage: volume [sfx|music] <0-100>"
+        return "success", "volume", f"{channel.upper()} volume set to {level}%"
+
+    def _cmd_mute(self, args: List[str]) -> Tuple[str, str, str]:
+        """Toggle audio mute."""
+        if not self._audio:
+            return "info", "mute", "Audio is disabled."
+        muted = self._audio.mute_toggle()
+        icon = "\U0001f507" if muted else "\U0001f50a"
+        return "success", "mute", f"{icon} Audio {'muted' if muted else 'unmuted'}"
 
