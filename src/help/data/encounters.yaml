@@ -1,0 +1,428 @@
+# ============================================================================
+# Bashcrawl Encounter Registry — src/help/data/encounters.yaml
+#
+# Single source of truth for all executable game scripts. Consumed by:
+#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
+#   - Bash emulator (lib/emulator.sh for script dispatch)
+#   - Python terminal-illness wrapper (ti/help_data.py)
+#
+# Encounter types: loot, combat, puzzle, spell, npc, trap, merchant, riddle
+# Adding a new encounter: add an entry here and place the script in the room.
+# ============================================================================
+
+encounters:
+  # ── Cellar ────────────────────────────────────────────────────────────────
+  treasure_cellar:
+    script: "treasure"
+    room: "cellar"
+    type: "loot"
+    description: "Collect the emerald amulet"
+    icon: "💰"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["amulet"]
+    unlocks_rooms: ["chapel", "vault", "scrap"]
+    damage: 0
+
+  # ── Armoury ───────────────────────────────────────────────────────────────
+  treasure_armoury:
+    script: "treasure"
+    room: "armoury"
+    type: "loot"
+    description: "Claim the sword"
+    icon: "🗡️"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["sword"]
+    unlocks_rooms: []
+    damage: 0
+
+  potion:
+    script: "potion"
+    room: "armoury"
+    type: "loot"
+    description: "Restore health"
+    icon: "🧪"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+    heals: 15
+
+  # ── Chamber ───────────────────────────────────────────────────────────────
+  statue:
+    script: "statue"
+    room: "chamber"
+    type: "combat"
+    description: "Stone guardian"
+    icon: "🗿"
+    requires_items: []
+    recommended_items: ["sword"]
+    grants_items: ["diamonds"]
+    unlocks_rooms: []
+    damage: 5
+
+  treasure_chamber:
+    script: "treasure"
+    room: "chamber"
+    type: "loot"
+    description: "Collect coins or diamonds"
+    icon: "💎"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["coins"]
+    unlocks_rooms: []
+    damage: 0
+
+  spell_chamber:
+    script: "spell"
+    room: "chamber"
+    type: "spell"
+    description: "Create a symlink portal"
+    icon: "📜"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Chapel ────────────────────────────────────────────────────────────────
+  altar:
+    script: "altar"
+    room: "chapel"
+    type: "puzzle"
+    description: "Place a trinket on the altar"
+    icon: "⛪"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Courtyard ─────────────────────────────────────────────────────────────
+  fountain:
+    script: "fountain"
+    room: "courtyard"
+    type: "trap"
+    description: "A magical fountain — beware the curse"
+    icon: "⛲"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 5
+
+  rags:
+    script: "rags"
+    room: "courtyard"
+    type: "loot"
+    description: "Tattered rags with a fish inside"
+    icon: "🐟"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["fish"]
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Aviary ────────────────────────────────────────────────────────────────
+  penguin:
+    script: "penguin"
+    room: "aviary"
+    type: "npc"
+    description: "A friendly penguin — offer fish"
+    icon: "🐧"
+    requires_items: []
+    recommended_items: ["fish"]
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  crystal:
+    script: "crystal"
+    room: "aviary"
+    type: "loot"
+    description: "A glowing crystal"
+    icon: "🔮"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["crystal"]
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Hall ──────────────────────────────────────────────────────────────────
+  monster:
+    script: "monster"
+    room: "hall"
+    type: "combat"
+    description: "A fearsome monster guards the passage"
+    icon: "👹"
+    requires_items: []
+    recommended_items: ["sword"]
+    grants_items: []
+    unlocks_rooms: []
+    damage: 10
+
+  # ── Library ───────────────────────────────────────────────────────────────
+  tome:
+    script: "tome"
+    room: "library"
+    type: "spell"
+    description: "Ancient tome of random spells"
+    icon: "📖"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: ["study"]
+    damage: 0
+
+  # ── Study ─────────────────────────────────────────────────────────────────
+  grimoire:
+    script: "grimoire"
+    room: "study"
+    type: "spell"
+    description: "Opens a portal to the help source"
+    icon: "📕"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Graveyard ─────────────────────────────────────────────────────────────
+  padlock:
+    script: "padlock"
+    room: "graveyard"
+    type: "puzzle"
+    description: "Three-number combination lock"
+    icon: "🔒"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: ["mausoleum"]
+    damage: 0
+    solution_hint: "columbarium + lower-quadrant + royal-tombs"
+
+  statues_graveyard:
+    script: "statues"
+    room: "royal-tombs"
+    type: "puzzle"
+    description: "Place the crown on the correct statue"
+    icon: "👑"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  open_columbarium:
+    script: "open"
+    room: "columbarium"
+    type: "puzzle"
+    description: "Open a niche by touching the right number"
+    icon: "🏺"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Mausoleum ─────────────────────────────────────────────────────────────
+  spell_mausoleum:
+    script: "spell"
+    room: "mausoleum"
+    type: "spell"
+    description: "A hint about sort | uniq"
+    icon: "📜"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  loot:
+    script: "loot"
+    room: "mausoleum"
+    type: "puzzle"
+    description: "Open the chest with the right combination"
+    icon: "🧰"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Vault ─────────────────────────────────────────────────────────────────
+  glass:
+    script: "glass"
+    room: "vault"
+    type: "puzzle"
+    description: "Place the crystal in the glass case"
+    icon: "🪟"
+    requires_items: ["crystal"]
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Stronghold ────────────────────────────────────────────────────────────
+  goblet:
+    script: "goblet"
+    room: "stronghold"
+    type: "puzzle"
+    description: "Copy orbs to unlock the rift"
+    icon: "🏆"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["goblet"]
+    unlocks_rooms: ["rift"]
+    damage: 0
+
+  # ── Nursery ───────────────────────────────────────────────────────────────
+  spell_nursery:
+    script: "spell"
+    room: "nursery"
+    type: "spell"
+    description: "Find the potion with the find command"
+    icon: "📜"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Lab ───────────────────────────────────────────────────────────────────
+  ghost:
+    script: "ghost"
+    room: "lab"
+    type: "combat"
+    description: "A spectral guardian"
+    icon: "👻"
+    requires_items: []
+    recommended_items: ["crystal"]
+    grants_items: []
+    unlocks_rooms: []
+    damage: 8
+
+  # ── Rift ──────────────────────────────────────────────────────────────────
+  box:
+    script: "box"
+    room: "rift"
+    type: "puzzle"
+    description: "Enter your username to claim armour"
+    icon: "📦"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["armour"]
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Pit ───────────────────────────────────────────────────────────────────
+  nyarlathotep:
+    script: "nyarlathotep"
+    room: "pit"
+    type: "combat"
+    description: "The Crawling Chaos — final boss"
+    icon: "🐙"
+    requires_items: ["sword"]
+    recommended_items: ["armour"]
+    grants_items: []
+    unlocks_rooms: []
+    damage: 15
+
+  drummer:
+    script: "drummer"
+    room: "pit"
+    type: "npc"
+    description: "A drummer hints at weakening the boss"
+    icon: "🥁"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  treasure_pit:
+    script: "treasure"
+    room: "pit"
+    type: "loot"
+    description: "A lock of hair"
+    icon: "💰"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["hair"]
+    unlocks_rooms: []
+    damage: 0
+
+  platinum_pit:
+    script: "platinum"
+    room: "pit"
+    type: "loot"
+    description: "A platinum bracelet"
+    icon: "💍"
+    requires_items: []
+    recommended_items: []
+    grants_items: ["bracelet"]
+    unlocks_rooms: []
+    damage: 0
+
+  wizard_light:
+    script: "wizard-light"
+    room: "pit"
+    type: "npc"
+    description: "A wizard checks your credentials"
+    icon: "🧙"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  end_game:
+    script: "end"
+    room: "pit"
+    type: "spell"
+    description: "Victory — the game is won"
+    icon: "🏁"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  # ── Spire / Mezzanine ────────────────────────────────────────────────────
+  button_mezzanine:
+    script: "button"
+    room: "mezzanine"
+    type: "puzzle"
+    description: "Call the elevator"
+    icon: "🔘"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  display_elevator:
+    script: "display"
+    room: "mezzanine"
+    type: "puzzle"
+    description: "Elevator floor display"
+    icon: "🖥️"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0
+
+  window_mezzanine:
+    script: "window"
+    room: "mezzanine"
+    type: "npc"
+    description: "Look out the window"
+    icon: "🪟"
+    requires_items: []
+    recommended_items: []
+    grants_items: []
+    unlocks_rooms: []
+    damage: 0

@@ -14,75 +14,92 @@
 _BC_QUESTS_LOADED="$$"
 
 # ============================================================================
-# QUEST PROGRESSION DATA
+# QUEST PROGRESSION DATA (loaded from registry or hardcoded fallback)
 # ============================================================================
 
-declare -a QUEST_REQUIRED_COMMAND
-declare -a QUEST_HINTS
-declare -a QUEST_TARGET_CONTEXT
-declare -a QUEST_REWARDS
-declare -a QUEST_REWARD_XP
+declare -a QUEST_TITLES QUEST_OBJECTIVES QUEST_HINTS
+declare -a QUEST_REQUIRED_COMMAND QUEST_TARGET_CONTEXT
+declare -a QUEST_REWARDS QUEST_REWARD_XP
 
-QUEST_TITLES=(
-    "Awakening: Know Thy Place"
-    "Eyes to See"
-    "First Steps"
-    "Ancient Knowledge"
-    "Shape the World"
-    "Spark of Creation"
-    "Seek the Whisper"
-    "The Bashcrawl Grimoire"
-)
+_load_quest_arrays() {
+    # Prefer YAML-loaded registry data (from room_loader.sh)
+    # Uses _reg_get accessor (bash 3.2 compatible) instead of associative arrays
+    if [[ ${#QUEST_IDS[@]} -gt 0 ]] && type -t _reg_get &>/dev/null; then
+        local _test_title
+        _test_title=$(_reg_get "_REG_QUEST_0_title")
+        if [[ -n "$_test_title" ]]; then
+            local qid
+            QUEST_TITLES=()
+            QUEST_OBJECTIVES=()
+            QUEST_HINTS=()
+            QUEST_REQUIRED_COMMAND=()
+            QUEST_TARGET_CONTEXT=()
+            QUEST_REWARDS=()
+            QUEST_REWARD_XP=()
+            for qid in "${QUEST_IDS[@]}"; do
+                QUEST_TITLES+=("$(_reg_get "_REG_QUEST_${qid}_title")")
+                QUEST_OBJECTIVES+=("$(_reg_get "_REG_QUEST_${qid}_obj")")
+                QUEST_HINTS+=("$(_reg_get "_REG_QUEST_${qid}_hint")")
+                local cmd_csv
+                cmd_csv=$(_reg_get "_REG_QUEST_${qid}_cmds")
+                QUEST_REQUIRED_COMMAND+=("${cmd_csv%%,*}")
+                QUEST_TARGET_CONTEXT+=("$(_reg_get "_REG_QUEST_${qid}_comp_loc")")
+                QUEST_REWARDS+=("$(_reg_get "_REG_QUEST_${qid}_reward")")
+                QUEST_REWARD_XP+=("$(_reg_get "_REG_QUEST_${qid}_xp")")
+            done
+            return 0
+        fi
+    fi
 
-QUEST_OBJECTIVES=(
-    "Cast the 'pwd' spell to reveal your place in the dungeon."
-    "Use 'ls' to reveal nearby rooms and scrolls."
-    "Use 'cd cellar' to descend into the cellar."
-    "Use 'cat scroll' to read the ancient knowledge."
-    "Navigate to the workshop and use 'mkdir' to create a directory."
-    "Use 'touch' to create a new file."
-    "Use 'grep' to search for a word within a scroll."
-    "Find the hidden study, run the grimoire, and define the 'bc' command."
-)
+    # Hardcoded fallback if registry not loaded
+    QUEST_TITLES=(
+        "Awakening: Know Thy Place"
+        "Eyes to See"
+        "First Steps"
+        "Ancient Knowledge"
+        "Shape the World"
+        "Spark of Creation"
+        "Seek the Whisper"
+        "The Bashcrawl Grimoire"
+    )
+    QUEST_OBJECTIVES=(
+        "Cast the 'pwd' spell to reveal your place in the dungeon."
+        "Use 'ls' to reveal nearby rooms and scrolls."
+        "Use 'cd cellar' to descend into the cellar."
+        "Use 'cat scroll' to read the ancient knowledge."
+        "Navigate to the workshop and use 'mkdir' to create a directory."
+        "Use 'touch' to create a new file."
+        "Use 'grep' to search for a word within a scroll."
+        "Find the hidden study, run the grimoire, and define the 'bc' command."
+    )
+    QUEST_REQUIRED_COMMAND=(pwd ls cd cat mkdir touch grep source)
+    QUEST_HINTS=(
+        "Type 'pwd' and press Enter to see your current chamber."
+        "Try 'ls' to survey the room's contents."
+        "Use 'cd cellar' to descend into the cellar."
+        "Try 'cat scroll' to read the ancient knowledge on the pedestal."
+        "Use 'mkdir' to shape a new workspace."
+        "Use 'touch notes.txt' to conjure a new file."
+        "Run 'grep catacombs scroll' to uncover the hidden clue."
+        "Find the library, read the tome, then source the grimoire."
+    )
+    QUEST_TARGET_CONTEXT=("" "" "cellar" "" "" "" "armoury|cellar" "study|help")
+    QUEST_REWARDS=(
+        "Navigation Novice ribbon"
+        "Glimmering lens"
+        "Pathwalker's charm"
+        "Reader's sigil"
+        "Builder's sigil"
+        "Scribe's quill"
+        "Whisperer's token"
+        "Scriptorium Key"
+    )
+    QUEST_REWARD_XP=(50 50 100 100 100 100 150 200)
+}
 
-QUEST_REQUIRED_COMMAND=(pwd ls cd cat mkdir touch grep source)
+_load_quest_arrays
 
-QUEST_HINTS=(
-    "Type 'pwd' and press Enter to see your current chamber."
-    "Try 'ls' to survey the room's contents."
-    "Use 'cd cellar' to descend into the cellar."
-    "Try 'cat scroll' to read the ancient knowledge on the pedestal."
-    "Use 'mkdir' to shape a new workspace."
-    "Use 'touch notes.txt' to conjure a new file."
-    "Run 'grep catacombs scroll' to uncover the hidden clue."
-    "Find the library, read the tome, then source the grimoire."
-)
-
-QUEST_TARGET_CONTEXT=(
-    ""
-    ""
-    "cellar"
-    ""
-    ""
-    ""
-    "armoury|cellar"
-    "study|help"
-)
-
-QUEST_REWARDS=(
-    "Navigation Novice ribbon"
-    "Glimmering lens"
-    "Pathwalker's charm"
-    "Reader's sigil"
-    "Builder's sigil"
-    "Scribe's quill"
-    "Whisperer's token"
-    "Scriptorium Key"
-)
-
-QUEST_REWARD_XP=(50 50 100 100 100 100 150 200)
-
-readonly QUEST_TOTAL=${#QUEST_TITLES[@]}
+QUEST_TOTAL=${#QUEST_TITLES[@]}
 
 CURRENT_QUEST_ID=0
 QUEST_COMPLETED=""
@@ -167,74 +184,63 @@ check_quest_progress() {
         return
     fi
 
-    case "$qid" in
-        0)
-            [[ "$LAST_COMMAND" == "pwd" ]] || return
-            ;;
-        1)
-            [[ "$LAST_COMMAND" == "ls" ]] || return
-            ;;
-        2)
-            [[ "$LAST_COMMAND" == "cd" ]] || return
-            if [[ "$(relative_path "$LAST_RESULT_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
-                return
+    # ── Generic data-driven evaluator ──────────────────────────────────
+    # Uses quest_comp_* accessor functions from room_loader.sh when
+    # available, otherwise falls back to QUEST_TARGET_CONTEXT parallel array.
+
+    local comp_cmd="" comp_loc="" comp_args="" comp_item=""
+    if type -t quest_comp_cmd &>/dev/null; then
+        comp_cmd="$(quest_comp_cmd "$qid")"
+        comp_loc="$(quest_comp_loc "$qid")"
+        comp_args="$(quest_comp_args "$qid")"
+        comp_item="$(quest_comp_item "$qid")"
+    fi
+    # Fall back to parallel array for location if accessor returned empty
+    if [[ -z "$comp_loc" ]]; then
+        comp_loc="${QUEST_TARGET_CONTEXT[$qid]:-}"
+    fi
+
+    # 1. Command must match
+    if [[ -n "$comp_cmd" ]]; then
+        [[ "$LAST_COMMAND" == "$comp_cmd" ]] || return
+    fi
+
+    # 2. Location check (pipe-separated list — match any)
+    if [[ -n "$comp_loc" ]]; then
+        local current_rel
+        current_rel="$(relative_path "$LAST_RESULT_DIR")"
+        local loc_match=false
+        local _loc
+        IFS='|' read -ra _locs <<< "$comp_loc"
+        for _loc in "${_locs[@]}"; do
+            if [[ "$current_rel" == *"$_loc"* ]]; then
+                loc_match=true
+                break
             fi
-            ;;
-        3)
-            [[ "$LAST_COMMAND" == "mkdir" ]] || return
-            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
-                return
-            fi
-            local -a __last_args
-            read -ra __last_args <<< "$LAST_ARGS"
-            local dirname=""
-            if [[ "${__last_args[0]:-}" == "-p" ]]; then
-                dirname="${__last_args[1]:-}"
-            else
-                dirname="${__last_args[0]:-}"
-            fi
-            [[ "${dirname%%/*}" == "workshop" ]] || return
-            ;;
-        4)
-            [[ "$LAST_COMMAND" == "touch" ]] || return
-            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
-                return
-            fi
-            local -a __last_args
-            read -ra __last_args <<< "$LAST_ARGS"
-            if [[ "${__last_args[0]:-}" != "notes.txt" ]]; then
-                return
-            fi
-            ;;
-        5)
-            [[ "$LAST_COMMAND" == "cat" ]] || return
-            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
-                return
-            fi
-            local -a __last_args
-            read -ra __last_args <<< "$LAST_ARGS"
-            if [[ "${__last_args[0]:-}" != "notes.txt" ]]; then
-                return
-            fi
-            ;;
-        6)
-            [[ "$LAST_COMMAND" == "grep" ]] || return
-            (( LAST_COMMAND_EXIT_CODE == 0 )) || return
-            if [[ "$(relative_path "$LAST_COMMAND_DIR")" != "${QUEST_TARGET_CONTEXT[$qid]}" ]]; then
-                return
-            fi
-            local -a __last_args
-            read -ra __last_args <<< "$LAST_ARGS"
-            if [[ "${__last_args[0]:-}" != "catacombs" ]]; then
-                return
-            fi
-            local target="${__last_args[1]:-}"
-            case "$target" in
-                "scroll"|"./scroll"|"entrance/scroll") ;;
-                *) return ;;
-            esac
-            ;;
-    esac
+        done
+        [[ "$loc_match" == true ]] || return
+    fi
+
+    # 3. Args check (first positional argument must match)
+    if [[ -n "$comp_args" ]]; then
+        local -a __last_args
+        read -ra __last_args <<< "$LAST_ARGS"
+        local first_arg="${__last_args[0]:-}"
+        # Skip flags like -p
+        if [[ "$first_arg" == -* && ${#__last_args[@]} -gt 1 ]]; then
+            first_arg="${__last_args[1]:-}"
+        fi
+        [[ "$first_arg" == "$comp_args" ]] || return
+    fi
+
+    # 4. Item check (comma-separated items that must be in inventory)
+    if [[ -n "$comp_item" ]]; then
+        local _item
+        IFS=',' read -ra _items <<< "$comp_item"
+        for _item in "${_items[@]}"; do
+            csv_contains "$I" "$_item" || return
+        done
+    fi
 
     complete_current_quest "$qid"
 }

@@ -1,15 +1,51 @@
 # ============================================================================
-# Bashcrawl Room Help Data — src/help/data/rooms.yaml
+# Bashcrawl Room Registry — src/help/data/rooms.yaml
 #
-# Shared help content for each game room. Consumed by:
+# Single source of truth for all game rooms. Consumed by:
 #   - Bash help scripts (src/help/bashcrawl_help.sh)
+#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
 #   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+#
+# Adding a new room: add an entry here, create the directory under entrance/,
+# and both TUI and Classic modes will pick it up automatically.
 # ============================================================================
 
 rooms:
+  bashcrawl:
+    emoji: "🏠"
+    title: "THE LOBBY"
+    path: "bashcrawl"
+    prompt_label: "lobby"
+    context_hint: "You are in the main lobby. Type 'cd entrance' to begin your adventure."
+    hidden: false
+    unlocked_by: null
+    parent: null
+    children: [entrance]
+    on_enter: null
+    on_exit: null
+    description: "The main lobby — gateway to the catacombs"
+    teaches:
+      - "Starting the game"
+    key_files: []
+    next_steps: "Type 'cd entrance' to begin"
+    essential_commands:
+      - command: "cd entrance"
+        description: "Enter the catacombs"
+      - command: "ls"
+        description: "Look around"
+
   entrance:
     emoji: "🚪"
     title: "THE ENTRANCE HALL"
+    path: "entrance"
+    prompt_label: "starting hall"
+    context_hint: "You stand at the entrance to the catacombs. Read the 'scroll' for guidance."
+    hidden: false
+    unlocked_by: null
+    parent: bashcrawl
+    children: [cellar, workshop, chapel, vault, scrap, rift]
+    on_enter: null
+    on_exit: null
     description: "This is your starting point - learn basic navigation here"
     teaches:
       - "Basic navigation (cd, ls, pwd)"
@@ -31,6 +67,15 @@ rooms:
   cellar:
     emoji: "🏰"
     title: "THE CELLAR"
+    path: "entrance/cellar"
+    prompt_label: "underground"
+    context_hint: "You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!"
+    hidden: false
+    unlocked_by: null
+    parent: entrance
+    children: [armoury]
+    on_enter: null
+    on_exit: null
     description: "Learn file types and basic interaction here"
     teaches:
       - "File types and type indicators"
@@ -51,6 +96,15 @@ rooms:
   armoury:
     emoji: "🗡️"
     title: "THE ARMOURY"
+    path: "entrance/cellar/armoury"
+    prompt_label: "weapons hall"
+    context_hint: "You have entered the armoury. Master chmod and ./script for combat!"
+    hidden: false
+    unlocked_by: null
+    parent: cellar
+    children: [chamber]
+    on_enter: null
+    on_exit: null
     description: "Advanced area focusing on file permissions and combat"
     teaches:
       - "File permissions (chmod)"
@@ -73,6 +127,15 @@ rooms:
   chamber:
     emoji: "💎"
     title: "THE CHAMBER"
+    path: "entrance/cellar/armoury/chamber"
+    prompt_label: "treasure room"
+    context_hint: "The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards."
+    hidden: false
+    unlocked_by: null
+    parent: armoury
+    children: []
+    on_enter: null
+    on_exit: null
     description: "Advanced challenges and complex interactions"
     teaches:
       - "Shell variables and arithmetic (let)"
@@ -97,6 +160,15 @@ rooms:
   workshop:
     emoji: "🔨"
     title: "THE WORKSHOP"
+    path: "entrance/workshop"
+    prompt_label: "creation tutorial"
+    context_hint: "The workshop teaches creation: mkdir, touch, rm, echo >. Practice shaping the world!"
+    hidden: false
+    unlocked_by: null
+    parent: entrance
+    children: []
+    on_enter: null
+    on_exit: null
     description: "Tutorial room for file operations"
     teaches:
       - "Creating directories with mkdir"
@@ -116,9 +188,133 @@ rooms:
       - command: "rm artifact"
         description: "Remove a file"
 
+  chapel:
+    emoji: "⛪"
+    title: "THE CHAPEL"
+    path: "entrance/.chapel"
+    prompt_label: "hidden sanctuary"
+    context_hint: "Chapel path: Discover hidden commands and the ancient library tome."
+    hidden: true
+    unlocked_by: "amulet"
+    parent: entrance
+    children: [courtyard, graveyard]
+    on_enter: null
+    on_exit: null
+    description: "A hidden sanctuary unlocked by collecting treasures — learn grep"
+    teaches:
+      - "Searching text with grep"
+      - "Case-insensitive searching"
+      - "Pattern matching basics"
+    key_files:
+      - name: scroll
+        description: "grep tutorial"
+      - name: ghost
+        description: "encounter (executable)"
+    next_steps: "Explore the graveyard or continue to the courtyard"
+    essential_commands:
+      - command: "grep pattern file"
+        description: "Search for text in a file"
+      - command: "grep -i pattern *"
+        description: "Case-insensitive search"
+      - command: "ls -la"
+        description: "Look for hidden paths forward"
+
+  courtyard:
+    emoji: "🏛️"
+    title: "THE COURTYARD"
+    path: "entrance/.chapel/courtyard"
+    prompt_label: "chapel grounds"
+    context_hint: "Chapel path: Discover hidden commands and the ancient library tome."
+    hidden: false
+    unlocked_by: null
+    parent: chapel
+    children: [aviary]
+    on_enter: null
+    on_exit: null
+    description: "An open area leading deeper into the castle — learn pipes"
+    teaches:
+      - "Combining commands with pipes"
+      - "Chaining output between programs"
+    key_files:
+      - name: scroll
+        description: "pipes tutorial"
+    next_steps: "Continue deeper into the aviary"
+    essential_commands:
+      - command: "ls | grep pattern"
+        description: "Pipe output to grep"
+      - command: "cat scroll | wc -l"
+        description: "Count lines"
+      - command: "cd aviary"
+        description: "Continue deeper"
+
+  aviary:
+    emoji: "🦅"
+    title: "THE AVIARY"
+    path: "entrance/.chapel/courtyard/aviary"
+    prompt_label: "bird sanctuary"
+    context_hint: "Chapel path: Discover hidden commands and the ancient library tome."
+    hidden: false
+    unlocked_by: null
+    parent: courtyard
+    children: [hall]
+    on_enter: null
+    on_exit: null
+    description: "A towering room filled with caged birds — learn output redirection"
+    teaches:
+      - "Output redirection with > and >>"
+      - "Creating and appending to files"
+    key_files:
+      - name: scroll
+        description: "redirection tutorial"
+    next_steps: "Continue to the great hall"
+    essential_commands:
+      - command: "echo 'text' > file"
+        description: "Write to a file"
+      - command: "echo 'more' >> file"
+        description: "Append to a file"
+      - command: "cat file"
+        description: "Verify file contents"
+
+  hall:
+    emoji: "🏛️"
+    title: "THE GREAT HALL"
+    path: "entrance/.chapel/courtyard/aviary/hall"
+    prompt_label: "grand chamber"
+    context_hint: "Chapel path: Discover hidden commands and the ancient library tome."
+    hidden: false
+    unlocked_by: null
+    parent: aviary
+    children: [library]
+    on_enter: null
+    on_exit: null
+    description: "A grand hall connecting to the library — learn sorting and filtering"
+    teaches:
+      - "Sorting output with sort"
+      - "Removing duplicates with uniq"
+    key_files:
+      - name: scroll
+        description: "sort/uniq tutorial"
+    next_steps: "Enter the ancient library"
+    essential_commands:
+      - command: "sort file"
+        description: "Sort file contents"
+      - command: "ls | sort -r"
+        description: "Reverse sort listing"
+      - command: "uniq file"
+        description: "Remove duplicates"
+
   library:
     emoji: "📚"
     title: "THE ANCIENT LIBRARY"
+    path: "entrance/.chapel/courtyard/aviary/hall/library"
+    prompt_label: "ancient tomes"
+    context_hint: "Chapel path: Discover hidden commands and the ancient library tome."
+    hidden: false
+    unlocked_by: null
+    parent: hall
+    children: [study]
+    on_enter: null
+    on_exit: null
     description: "Deep within the chapel — learn self-teaching commands"
     teaches:
       - "Reading manuals with man"
@@ -141,6 +337,15 @@ rooms:
   study:
     emoji: "📜"
     title: "THE HIDDEN STUDY"
+    path: "entrance/.chapel/courtyard/aviary/hall/library/.study"
+    prompt_label: "secret study"
+    context_hint: "The study holds the grimoire. Run ./grimoire to open the portal."
+    hidden: true
+    unlocked_by: "amulet,coins"
+    parent: library
+    children: []
+    on_enter: null
+    on_exit: null
     description: "Secret room behind the library bookshelf — learn shell functions"
     teaches:
       - "Creating shell functions"
@@ -161,31 +366,18 @@ rooms:
       - command: "source init_help.sh"
         description: "Activate the help system"
 
-  chapel:
-    emoji: "⛪"
-    title: "THE CHAPEL"
-    description: "A hidden sanctuary unlocked by collecting treasures — learn grep"
-    teaches:
-      - "Searching text with grep"
-      - "Case-insensitive searching"
-      - "Pattern matching basics"
-    key_files:
-      - name: scroll
-        description: "grep tutorial"
-      - name: ghost
-        description: "encounter (executable)"
-    next_steps: "Explore the graveyard or continue to the courtyard"
-    essential_commands:
-      - command: "grep pattern file"
-        description: "Search for text in a file"
-      - command: "grep -i pattern *"
-        description: "Case-insensitive search"
-      - command: "ls -la"
-        description: "Look for hidden paths forward"
-
   graveyard:
     emoji: "🪦"
     title: "THE GRAVEYARD"
+    path: "entrance/.chapel/graveyard"
+    prompt_label: "resting place"
+    context_hint: "The graveyard holds secrets. Use ls -a to find the hidden mausoleum."
+    hidden: false
+    unlocked_by: null
+    parent: chapel
+    children: [columbarium, lower-quadrant, royal-tombs, mausoleum]
+    on_enter: "A cold wind howls through the tombstones..."
+    on_exit: null
     description: "A misty place beyond the chapel — learn find"
     teaches:
       - "Locating files with find"
@@ -202,66 +394,127 @@ rooms:
       - command: "find . -executable"
         description: "Find runnable files"
 
-  courtyard:
+  columbarium:
+    emoji: "🏺"
+    title: "THE COLUMBARIUM"
+    path: "entrance/.chapel/graveyard/columbarium"
+    prompt_label: "burial niches"
+    context_hint: "Study the niches carefully. Use grep and touch to solve the puzzle."
+    hidden: false
+    unlocked_by: null
+    parent: graveyard
+    children: []
+    on_enter: null
+    on_exit: null
+    description: "Rows of burial niches with inscribed symbols"
+    teaches:
+      - "Using touch to create files"
+      - "Using grep to search data"
+    key_files:
+      - name: scroll
+        description: "columbarium puzzle"
+      - name: niches
+        description: "symbol-to-number data"
+    next_steps: "Solve the niche puzzle to find a padlock number"
+    essential_commands:
+      - command: "grep pattern niches"
+        description: "Search the niches"
+      - command: "touch number"
+        description: "Enter a number"
+
+  lower-quadrant:
+    emoji: "🪦"
+    title: "THE LOWER QUADRANT"
+    path: "entrance/.chapel/graveyard/lower-quadrant"
+    prompt_label: "old graves"
+    context_hint: "Sort the gravestones to find the year of death."
+    hidden: false
+    unlocked_by: null
+    parent: graveyard
+    children: []
+    on_enter: null
+    on_exit: null
+    description: "Weathered gravestones with dates and names"
+    teaches:
+      - "Sorting data with sort"
+    key_files:
+      - name: scroll
+        description: "sorting puzzle"
+      - name: gravestones
+        description: "CSV gravestone data"
+    next_steps: "Sort the gravestones to find a padlock number"
+    essential_commands:
+      - command: "sort gravestones"
+        description: "Sort the gravestone records"
+
+  royal-tombs:
+    emoji: "👑"
+    title: "THE ROYAL TOMBS"
+    path: "entrance/.chapel/graveyard/royal-tombs"
+    prompt_label: "royal crypts"
+    context_hint: "Use grep to search the royals list for the crown placement."
+    hidden: false
+    unlocked_by: null
+    parent: graveyard
+    children: []
+    on_enter: null
+    on_exit: null
+    description: "Ornate tombs of ancient rulers"
+    teaches:
+      - "Using grep to search records"
+    key_files:
+      - name: scroll
+        description: "royal tombs puzzle"
+      - name: royals
+        description: "list of kings"
+      - name: sign
+        description: "grep hint"
+    next_steps: "Find the crown placement number for the padlock"
+    essential_commands:
+      - command: "grep King royals"
+        description: "Search for kings"
+
+  mausoleum:
     emoji: "🏛️"
-    title: "THE COURTYARD"
-    description: "An open area leading deeper into the castle — learn pipes"
+    title: "THE MAUSOLEUM"
+    path: "entrance/.chapel/graveyard/.mausoleum"
+    prompt_label: "hidden crypt"
+    context_hint: "Use sort and uniq to find the unique line in the room file."
+    hidden: true
+    unlocked_by: "padlock"
+    parent: graveyard
+    children: []
+    on_enter: "The heavy stone door grinds open..."
+    on_exit: null
+    description: "A hidden crypt behind the padlock"
     teaches:
-      - "Combining commands with pipes"
-      - "Chaining output between programs"
+      - "Piping commands with sort | uniq"
     key_files:
       - name: scroll
-        description: "pipes tutorial"
-    next_steps: "Continue deeper into the aviary"
+        description: "sort/uniq puzzle"
+      - name: room
+        description: "data file for sort|uniq"
+      - name: loot
+        description: "chest puzzle (executable)"
+    next_steps: "Use sort room | uniq to find the chest combination"
     essential_commands:
-      - command: "ls | grep pattern"
-        description: "Pipe output to grep"
-      - command: "cat scroll | wc -l"
-        description: "Count lines"
-      - command: "cd aviary"
-        description: "Continue deeper"
-
-  aviary:
-    emoji: "🦅"
-    title: "THE AVIARY"
-    description: "A towering room filled with caged birds — learn output redirection"
-    teaches:
-      - "Output redirection with > and >>"
-      - "Creating and appending to files"
-    key_files:
-      - name: scroll
-        description: "redirection tutorial"
-    next_steps: "Continue to the great hall"
-    essential_commands:
-      - command: "echo 'text' > file"
-        description: "Write to a file"
-      - command: "echo 'more' >> file"
-        description: "Append to a file"
-      - command: "cat file"
-        description: "Verify file contents"
-
-  hall:
-    emoji: "🏰"
-    title: "THE GREAT HALL"
-    description: "A grand hall connecting to the library — learn sorting and filtering"
-    teaches:
-      - "Sorting output with sort"
-      - "Removing duplicates with uniq"
-    key_files:
-      - name: scroll
-        description: "sort/uniq tutorial"
-    next_steps: "Enter the ancient library"
-    essential_commands:
-      - command: "sort file"
-        description: "Sort file contents"
-      - command: "ls | sort -r"
-        description: "Reverse sort listing"
-      - command: "uniq file"
-        description: "Remove duplicates"
+      - command: "sort room | uniq"
+        description: "Find the unique line"
+      - command: "./loot"
+        description: "Open the chest"
 
   vault:
     emoji: "🔒"
     title: "THE VAULT"
+    path: "entrance/.vault"
+    prompt_label: "treasure hold"
+    context_hint: "Vault path: Master variables, collect the goblet to unlock the Rift!"
+    hidden: true
+    unlocked_by: "amulet"
+    parent: entrance
+    children: [stronghold]
+    on_enter: null
+    on_exit: null
     description: "A hidden vault — learn shell variables and environment"
     teaches:
       - "Shell variables and environment"
@@ -282,6 +535,15 @@ rooms:
   stronghold:
     emoji: "🏯"
     title: "THE STRONGHOLD"
+    path: "entrance/.vault/stronghold"
+    prompt_label: "vault heart"
+    context_hint: "Vault path: Master variables, collect the goblet to unlock the Rift!"
+    hidden: false
+    unlocked_by: null
+    parent: vault
+    children: [nursery]
+    on_enter: null
+    on_exit: null
     description: "Fortified area within the vault — goblet challenge unlocks the rift"
     teaches:
       - "Advanced variable manipulation"
@@ -301,6 +563,15 @@ rooms:
   nursery:
     emoji: "🍼"
     title: "THE NURSERY"
+    path: "entrance/.vault/stronghold/nursery"
+    prompt_label: "vault garden"
+    context_hint: "Vault path: Master variables, collect the goblet to unlock the Rift!"
+    hidden: false
+    unlocked_by: null
+    parent: stronghold
+    children: [lab]
+    on_enter: null
+    on_exit: null
     description: "A quiet room within the vault complex — learn process management"
     teaches:
       - "Process management with ps"
@@ -320,6 +591,15 @@ rooms:
   lab:
     emoji: "🧪"
     title: "THE LABORATORY"
+    path: "entrance/.vault/stronghold/nursery/lab"
+    prompt_label: "alchemy room"
+    context_hint: "Vault path: Master variables, collect the goblet to unlock the Rift!"
+    hidden: false
+    unlocked_by: null
+    parent: nursery
+    children: []
+    on_enter: null
+    on_exit: null
     description: "An alchemist's lab — learn process substitution and advanced piping"
     teaches:
       - "Process substitution with <()"
@@ -340,6 +620,15 @@ rooms:
   scrap:
     emoji: "🔗"
     title: "THE SCRAP HEAP"
+    path: "entrance/.scrap"
+    prompt_label: "symlink portal"
+    context_hint: "The Scrap teaches symlinks: ln -s creates portals. Find the path to the Rift!"
+    hidden: true
+    unlocked_by: "amulet"
+    parent: entrance
+    children: []
+    on_enter: null
+    on_exit: null
     description: "A hidden directory teaching symbolic links"
     teaches:
       - "Creating symbolic links with ln -s"
@@ -359,6 +648,15 @@ rooms:
   rift:
     emoji: "🌀"
     title: "THE RIFT"
+    path: "entrance/.rift"
+    prompt_label: "advanced realm"
+    context_hint: "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!"
+    hidden: true
+    unlocked_by: "goblet"
+    parent: entrance
+    children: [arena, spire]
+    on_enter: "Reality shimmers and tears apart before you..."
+    on_exit: null
     description: "A dimensional tear — advanced scripting and checksums"
     teaches:
       - "File checksums (sha256sum, md5sum)"
@@ -379,6 +677,15 @@ rooms:
   arena:
     emoji: "⚔️"
     title: "THE ARENA"
+    path: "entrance/.rift/arena"
+    prompt_label: "combat pit"
+    context_hint: "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!"
+    hidden: false
+    unlocked_by: null
+    parent: rift
+    children: [pit]
+    on_enter: null
+    on_exit: null
     description: "A battle zone within the rift — learn loops and iteration"
     teaches:
       - "For loops over files"
@@ -399,6 +706,15 @@ rooms:
   pit:
     emoji: "🕳️"
     title: "THE PIT"
+    path: "entrance/.rift/arena/pit"
+    prompt_label: "boss lair"
+    context_hint: "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!"
+    hidden: false
+    unlocked_by: null
+    parent: arena
+    children: []
+    on_enter: "The ground gives way beneath your feet..."
+    on_exit: null
     description: "The deepest point of the arena — learn error handling"
     teaches:
       - "Exit codes and error checking"
@@ -419,6 +735,15 @@ rooms:
   spire:
     emoji: "🗼"
     title: "THE SPIRE"
+    path: "entrance/.rift/spire"
+    prompt_label: "tower ascent"
+    context_hint: "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!"
+    hidden: false
+    unlocked_by: null
+    parent: rift
+    children: [mezzanine]
+    on_enter: null
+    on_exit: null
     description: "A tower rising from the rift — learn text processing"
     teaches:
       - "Text processing with awk"
@@ -439,6 +764,15 @@ rooms:
   mezzanine:
     emoji: "🎭"
     title: "THE MEZZANINE"
+    path: "entrance/.rift/spire/mezzanine"
+    prompt_label: "elevator access"
+    context_hint: "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!"
+    hidden: false
+    unlocked_by: null
+    parent: spire
+    children: []
+    on_enter: null
+    on_exit: null
     description: "An elevated platform within the spire — learn advanced regex"
     teaches:
       - "Extended regular expressions"
@@ -459,6 +793,15 @@ rooms:
   unknown:
     emoji: "🗺️"
     title: "UNKNOWN TERRITORY"
+    path: ""
+    prompt_label: "exploring"
+    context_hint: "You're in an uncharted area! Use pwd to find your location."
+    hidden: false
+    unlocked_by: null
+    parent: null
+    children: []
+    on_enter: null
+    on_exit: null
     description: "You're in an uncharted area!"
     teaches:
       - "Use navigation commands to orient yourself"

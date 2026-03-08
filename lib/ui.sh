@@ -47,77 +47,16 @@ generate_prompt() {
     local current_dir
     current_dir=$(basename "$(pwd)")
 
-    case "$current_dir" in
-        "bashcrawl")
-            echo -e "${PROMPT_COLOR}🏠 bashcrawl${RESET_COLOR} ${DIRECTORY_COLOR}[lobby]${RESET_COLOR} ⚔️  "
-            ;;
-        "entrance")
-            echo -e "${PROMPT_COLOR}🚪 entrance${RESET_COLOR} ${DIRECTORY_COLOR}[starting hall]${RESET_COLOR} ⚔️  "
-            ;;
-        "workshop")
-            echo -e "${PROMPT_COLOR}🔧 workshop${RESET_COLOR} ${DIRECTORY_COLOR}[creation tutorial]${RESET_COLOR} ⚔️  "
-            ;;
-        "cellar")
-            echo -e "${PROMPT_COLOR}🏰 cellar${RESET_COLOR} ${DIRECTORY_COLOR}[underground]${RESET_COLOR} ⚔️  "
-            ;;
-        "armoury")
-            echo -e "${PROMPT_COLOR}🗡️ armoury${RESET_COLOR} ${DIRECTORY_COLOR}[weapons hall]${RESET_COLOR} ⚔️  "
-            ;;
-        "chamber")
-            echo -e "${PROMPT_COLOR}💎 chamber${RESET_COLOR} ${DIRECTORY_COLOR}[treasure room]${RESET_COLOR} ⚔️  "
-            ;;
-        ".chapel")
-            echo -e "${PROMPT_COLOR}⛪ chapel${RESET_COLOR} ${DIRECTORY_COLOR}[hidden sanctuary]${RESET_COLOR} ⚔️  "
-            ;;
-        "courtyard")
-            echo -e "${PROMPT_COLOR}🌿 courtyard${RESET_COLOR} ${DIRECTORY_COLOR}[chapel grounds]${RESET_COLOR} ⚔️  "
-            ;;
-        "aviary")
-            echo -e "${PROMPT_COLOR}🦅 aviary${RESET_COLOR} ${DIRECTORY_COLOR}[bird sanctuary]${RESET_COLOR} ⚔️  "
-            ;;
-        "hall")
-            echo -e "${PROMPT_COLOR}🏛️ hall${RESET_COLOR} ${DIRECTORY_COLOR}[grand chamber]${RESET_COLOR} ⚔️  "
-            ;;
-        "library")
-            echo -e "${PROMPT_COLOR}📚 library${RESET_COLOR} ${DIRECTORY_COLOR}[ancient tomes]${RESET_COLOR} ⚔️  "
-            ;;
-        "graveyard")
-            echo -e "${PROMPT_COLOR}🪦 graveyard${RESET_COLOR} ${DIRECTORY_COLOR}[resting place]${RESET_COLOR} ⚔️  "
-            ;;
-        ".vault")
-            echo -e "${PROMPT_COLOR}💰 vault${RESET_COLOR} ${DIRECTORY_COLOR}[treasure hold]${RESET_COLOR} ⚔️  "
-            ;;
-        "stronghold")
-            echo -e "${PROMPT_COLOR}🏰 stronghold${RESET_COLOR} ${DIRECTORY_COLOR}[vault heart]${RESET_COLOR} ⚔️  "
-            ;;
-        "nursery")
-            echo -e "${PROMPT_COLOR}🌱 nursery${RESET_COLOR} ${DIRECTORY_COLOR}[vault garden]${RESET_COLOR} ⚔️  "
-            ;;
-        "lab")
-            echo -e "${PROMPT_COLOR}🧪 lab${RESET_COLOR} ${DIRECTORY_COLOR}[alchemy room]${RESET_COLOR} ⚔️  "
-            ;;
-        ".scrap")
-            echo -e "${PROMPT_COLOR}🔗 scrap${RESET_COLOR} ${DIRECTORY_COLOR}[symlink portal]${RESET_COLOR} ⚔️  "
-            ;;
-        ".rift")
-            echo -e "${PROMPT_COLOR}🌀 rift${RESET_COLOR} ${DIRECTORY_COLOR}[advanced realm]${RESET_COLOR} ⚔️  "
-            ;;
-        "arena")
-            echo -e "${PROMPT_COLOR}⚔️ arena${RESET_COLOR} ${DIRECTORY_COLOR}[combat pit]${RESET_COLOR} ⚔️  "
-            ;;
-        "pit")
-            echo -e "${PROMPT_COLOR}🕳️ pit${RESET_COLOR} ${DIRECTORY_COLOR}[boss lair]${RESET_COLOR} ⚔️  "
-            ;;
-        "spire")
-            echo -e "${PROMPT_COLOR}🗼 spire${RESET_COLOR} ${DIRECTORY_COLOR}[tower ascent]${RESET_COLOR} ⚔️  "
-            ;;
-        "mezzanine")
-            echo -e "${PROMPT_COLOR}🪜 mezzanine${RESET_COLOR} ${DIRECTORY_COLOR}[elevator access]${RESET_COLOR} ⚔️  "
-            ;;
-        *)
-            echo -e "${PROMPT_COLOR}📍 $current_dir${RESET_COLOR} ${DIRECTORY_COLOR}[exploring]${RESET_COLOR} ⚔️  "
-            ;;
-    esac
+    # Strip leading dot for hidden room lookup (e.g. .chapel -> chapel)
+    local lookup_dir="$current_dir"
+    [[ "$lookup_dir" == .* ]] && lookup_dir="${lookup_dir#.}"
+
+    local emoji label display_name
+    emoji="$(room_emoji "$lookup_dir")"
+    label="$(room_label "$lookup_dir")"
+    display_name="${lookup_dir}"
+
+    echo -e "${PROMPT_COLOR}${emoji} ${display_name}${RESET_COLOR} ${DIRECTORY_COLOR}[${label}]${RESET_COLOR} ⚔️  "
 }
 
 # ============================================================================
@@ -133,14 +72,7 @@ show_inventory() {
         for item in "${items[@]}"; do
             [[ -z "$item" ]] && continue
             local icon
-            case "$item" in
-                sword)    icon="🗡️" ;;
-                amulet)   icon="📿" ;;
-                coins)    icon="🪙" ;;
-                diamonds) icon="💎" ;;
-                goblet)   icon="🏆" ;;
-                *)        icon="✦" ;;
-            esac
+            icon="$(item_icon "$item")"
             echo "   $icon $item"
             ((count++))
         done
@@ -225,48 +157,29 @@ show_map() {
     echo "─────────────────────────────────────────────────────────────────"
     echo ""
 
-    local lob="" ent="" cel="" arm="" chm="" wks=""
-    local chp="" crt="" avi="" hal="" lib="" gvy=""
-    local vlt="" str="" nur="" lab="" scp="" rft=""
-    local are="" pit="" spi="" mez=""
+    # Highlight helper: emits bold+green if the room's registry path matches current location
+    _h() {
+        local room_path
+        room_path="$(room_path "$1" 2>/dev/null)" || true
+        if [[ -n "$room_path" && "$room_path" == "$loc" ]]; then
+            echo -n "${here}"
+        fi
+    }
 
-    case "$loc" in
-        bashcrawl)                lob="${here}" ;;
-        entrance)                 ent="${here}" ;;
-        entrance/cellar)          cel="${here}" ;;
-        entrance/cellar/armoury)  arm="${here}" ;;
-        entrance/cellar/armoury/chamber) chm="${here}" ;;
-        entrance/workshop)        wks="${here}" ;;
-        entrance/chapel)          chp="${here}" ;;
-        entrance/chapel/courtyard) crt="${here}" ;;
-        entrance/chapel/courtyard/aviary) avi="${here}" ;;
-        entrance/chapel/courtyard/aviary/hall) hal="${here}" ;;
-        entrance/chapel/courtyard/aviary/hall/library) lib="${here}" ;;
-        entrance/chapel/graveyard) gvy="${here}" ;;
-        entrance/vault)           vlt="${here}" ;;
-        entrance/vault/stronghold) str="${here}" ;;
-        entrance/vault/stronghold/nursery) nur="${here}" ;;
-        entrance/vault/stronghold/nursery/lab) lab="${here}" ;;
-        entrance/scrap)           scp="${here}" ;;
-        entrance/.rift)           rft="${here}" ;;
-        entrance/.rift/arena)     are="${here}" ;;
-        entrance/.rift/arena/pit) pit="${here}" ;;
-        entrance/.rift/spire)     spi="${here}" ;;
-        entrance/.rift/spire/mezzanine) mez="${here}" ;;
-    esac
-
-    echo -e "    ${lob}🏠 bashcrawl${r} (lobby)"
-    echo -e "        └── ${ent}🚪 entrance${r}"
-    echo -e "                ├── ${cel}🏰 cellar${r} → ${arm}armoury${r} → ${chm}💎 chamber${r}"
-    echo -e "                ├── ${wks}🔧 workshop${r}"
-    echo -e "                ├── ${chp}⛪ chapel${r} → ${crt}courtyard${r} → ${avi}aviary${r} → ${hal}hall${r} → ${lib}📚 library${r}"
-    echo -e "                │       └── ${gvy}🪦 graveyard${r} → columbarium, royal-tombs"
-    echo -e "                ├── ${vlt}💰 vault${r} → ${str}stronghold${r} → ${nur}nursery${r} → ${lab}lab${r}"
-    echo -e "                ├── ${scp}🔗 scrap${r} (symlinks)"
-    echo -e "                └── ${rft}🌀 rift${r} → ${are}arena${r} → ${pit}pit${r} | ${spi}spire${r} → ${mez}mezzanine${r}"
+    echo -e "    $(_h bashcrawl)$(room_emoji bashcrawl) bashcrawl${r} (lobby)"
+    echo -e "        └── $(_h entrance)$(room_emoji entrance) entrance${r}"
+    echo -e "                ├── $(_h cellar)$(room_emoji cellar) cellar${r} → $(_h armoury)armoury${r} → $(_h chamber)$(room_emoji chamber) chamber${r}"
+    echo -e "                ├── $(_h workshop)$(room_emoji workshop) workshop${r}"
+    echo -e "                ├── $(_h chapel)$(room_emoji chapel) chapel${r} → $(_h courtyard)courtyard${r} → $(_h aviary)aviary${r} → $(_h hall)hall${r} → $(_h library)$(room_emoji library) library${r}"
+    echo -e "                │       └── $(_h graveyard)$(room_emoji graveyard) graveyard${r} → columbarium, royal-tombs"
+    echo -e "                ├── $(_h vault)$(room_emoji vault) vault${r} → $(_h stronghold)stronghold${r} → $(_h nursery)nursery${r} → $(_h lab)lab${r}"
+    echo -e "                ├── $(_h scrap)$(room_emoji scrap) scrap${r} (symlinks)"
+    echo -e "                └── $(_h rift)$(room_emoji rift) rift${r} → $(_h arena)arena${r} → $(_h pit)pit${r} | $(_h spire)spire${r} → $(_h mezzanine)mezzanine${r}"
     echo ""
     echo -e "You are here: ${COLOR_BOLD}${loc}${RESET_COLOR}"
     echo ""
+
+    unset -f _h
 }
 
 # ============================================================================
@@ -277,71 +190,48 @@ add_area_context() {
     local current_dir
     current_dir=$(basename "$(pwd)")
 
-    case "$current_dir" in
-        "bashcrawl")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🏠 You are in the main lobby. Type 'cd entrance' to begin your adventure.${RESET_COLOR}"
-            ;;
-        "entrance")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🚪 You stand at the entrance to the catacombs. Read the 'scroll' for guidance.${RESET_COLOR}"
-            ;;
-        "workshop")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🔧 The workshop teaches creation: mkdir, touch, rm, echo >. Practice shaping the world!${RESET_COLOR}"
-            ;;
-        "cellar")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🏰 You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!${RESET_COLOR}"
-            ;;
-        "armoury")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🗡️ You have entered the armoury. Master chmod and ./script for combat!${RESET_COLOR}"
-            ;;
-        "chamber")
-            echo ""
-            echo -e "${SUCCESS_COLOR}💎 The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.${RESET_COLOR}"
-            ;;
-        ".chapel"|"courtyard"|"aviary"|"hall"|"library")
-            echo ""
-            echo -e "${SUCCESS_COLOR}⛪ Chapel path: Discover hidden commands and the ancient library tome.${RESET_COLOR}"
-            ;;
-        "graveyard")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🪦 The graveyard holds secrets. Use ls -a to find the hidden mausoleum.${RESET_COLOR}"
-            ;;
-        ".vault"|"stronghold"|"nursery"|"lab")
-            echo ""
-            echo -e "${SUCCESS_COLOR}💰 Vault path: Master variables, collect the goblet to unlock the Rift!${RESET_COLOR}"
-            ;;
-        ".scrap")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🔗 The Scrap teaches symlinks: ln -s creates portals. Find the path to the Rift!${RESET_COLOR}"
-            ;;
-        ".rift"|"arena"|"pit"|"spire"|"mezzanine")
-            echo ""
-            echo -e "${SUCCESS_COLOR}🌀 The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!${RESET_COLOR}"
-            ;;
-    esac
+    # Strip leading dot for registry lookup
+    local lookup_dir="$current_dir"
+    [[ "$lookup_dir" == .* ]] && lookup_dir="${lookup_dir#.}"
+
+    local hint emoji
+    hint="$(room_hint "$lookup_dir")"
+    emoji="$(room_emoji "$lookup_dir")"
+
+    if [[ -n "$hint" ]]; then
+        echo ""
+        echo -e "${SUCCESS_COLOR}${emoji} ${hint}${RESET_COLOR}"
+    fi
+
+    # Show on_enter message if present
+    local enter_msg
+    enter_msg="$(room_on_enter "$lookup_dir")"
+    if [[ -n "$enter_msg" ]]; then
+        echo -e "${COLOR_INFO}${enter_msg}${RESET_COLOR}"
+    fi
 
     if [[ -f "scroll" ]]; then
         echo -e "📜 There is a scroll here. Read it with: ${PROMPT_COLOR}cat scroll${RESET_COLOR}"
     fi
 
     local executables
-    executables=$({ find . -maxdepth 1 -type f -perm -111 2>/dev/null | head -3; } || true)
+    executables=$({ find . -maxdepth 1 -type f -perm -111 2>/dev/null | head -5; } || true)
     if [[ -n "$executables" ]]; then
         echo -e "⚡ Interactive elements found:"
+        local room_name
+        room_name="$lookup_dir"
         echo "$executables" | while read -r exe; do
-            local name
+            local name enc_key icon desc
             name=$(basename "$exe")
-            case "$name" in
-                "treasure") echo -e "   💰 $name - Collect treasures" ;;
-                "potion") echo -e "   🧪 $name - Restore health" ;;
-                "spell") echo -e "   📜 $name - Cast magic spells" ;;
-                "monster") echo -e "   👹 $name - Combat encounter" ;;
-                *) echo -e "   ⚡ $name - Interactive element" ;;
-            esac
+            enc_key=$(enc_lookup_by_script "$name" "$room_name" 2>/dev/null) || enc_key=""
+            if [[ -n "$enc_key" ]]; then
+                icon="$(enc_icon "$enc_key")"
+                desc="$(enc_desc "$enc_key")"
+            else
+                icon="⚡"
+                desc="Interactive element"
+            fi
+            echo -e "   ${icon} ${name} - ${desc}"
         done
     fi
 }
@@ -427,28 +317,26 @@ show_contextual_help() {
         echo "Area: $CURRENT_AREA"
         echo ""
 
-        local current_dir
+        local current_dir lookup_dir
         current_dir=$(basename "$(pwd)")
-        case "$current_dir" in
-            "bashcrawl")
-                echo "🏠 LOBBY HELP:"
-                echo "   • Type 'start' to begin your adventure"
-                echo "   • Type 'cd entrance' to enter the catacombs"
-                echo "   • Type 'ls' to see available areas"
-                ;;
-            "entrance")
-                echo "🚪 ENTRANCE HELP:"
-                echo "   • Read the scroll: cat scroll"
-                echo "   • Look around: ls -F"
-                echo "   • Move deeper: cd cellar"
-                ;;
-            *)
-                echo "📍 GENERAL HELP:"
-                echo "   • Look around: ls"
-                echo "   • Read documentation: cat scroll"
-                echo "   • Check your status: status"
-                ;;
-        esac
+        lookup_dir="$current_dir"
+        [[ "$lookup_dir" == .* ]] && lookup_dir="${lookup_dir#.}"
+
+        local emoji hint
+        emoji="$(room_emoji "$lookup_dir")"
+        hint="$(room_hint "$lookup_dir")"
+
+        if [[ -n "$hint" ]]; then
+            local room_title
+            room_title=$(_reg_get "_REG_ROOM_${lookup_dir}_title" 2>/dev/null) || room_title=""
+            echo "${emoji} ${room_title:-AREA} HELP:"
+            echo "   • ${hint}"
+        else
+            echo "📍 GENERAL HELP:"
+            echo "   • Look around: ls"
+            echo "   • Read documentation: cat scroll"
+            echo "   • Check your status: status"
+        fi
 
         echo ""
         echo "Type 'help commands' for a full command list"

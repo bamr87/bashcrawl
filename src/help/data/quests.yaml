@@ -1,9 +1,23 @@
 # ============================================================================
 # Bashcrawl Quest Definitions — src/help/data/quests.yaml
 #
-# Shared quest data. Consumed by:
-#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+# Single source of truth for all quests. Consumed by:
+#   - Python terminal-illness wrapper (src/terminal-illness/ti/quests.py)
+#   - Bash quest engine (lib/quests.sh via lib/room_loader.sh)
 #   - Bash help system for quest-aware suggestions
+#
+# The `completion` block provides machine-readable criteria that both the
+# Bash and Python engines evaluate generically — no per-quest case logic.
+#
+# completion fields:
+#   command    — the command that must be run (required)
+#   location   — pipe-separated room names the player must be in after the
+#                command (null = any location)
+#   args       — first argument that must match (null = any args)
+#   args_file  — file argument that must match (null = any file)
+#   item_check — comma-separated items the player must carry (null = none)
+#
+# Adding a new quest: add an entry here; both engines pick it up.
 # ============================================================================
 
 quests:
@@ -11,74 +25,153 @@ quests:
     title: "Awakening: Know Thy Place"
     description: "You awaken in a strange dungeon. The air hums with arcane energy."
     objective: "Cast the 'pwd' spell to reveal your place in the dungeon."
+    hint: "Type 'pwd' and press Enter to see your current chamber."
     required_commands:
       - pwd
+    completion:
+      command: "pwd"
+      location: null
+      args: null
+      args_file: null
+      item_check: null
     reward: "50 XP and the 'Navigation Novice' ribbon"
+    reward_name: "Navigation Novice ribbon"
     xp: 50
+    prerequisites: null
+    next_quest: 1
 
   - id: 1
     title: "Eyes to See"
     description: "The walls whisper: see what lies around you."
     objective: "Use 'ls' to reveal nearby rooms and scrolls."
+    hint: "Try 'ls' to survey the room's contents."
     required_commands:
       - ls
+    completion:
+      command: "ls"
+      location: null
+      args: null
+      args_file: null
+      item_check: null
     reward: "50 XP and a glimmering lens"
+    reward_name: "Glimmering lens"
     xp: 50
+    prerequisites: null
+    next_quest: 2
 
   - id: 2
     title: "First Steps"
     description: "A dark passage leads deeper into the dungeon."
     objective: "Use 'cd cellar' to descend into the cellar."
+    hint: "Use 'cd cellar' to descend into the cellar."
     required_commands:
       - cd
+    completion:
+      command: "cd"
+      location: "cellar"
+      args: null
+      args_file: null
+      item_check: null
     reward: "100 XP and the Pathwalker's charm"
+    reward_name: "Pathwalker's charm"
     xp: 100
     location_check: "cellar"
+    prerequisites: null
+    next_quest: 3
 
   - id: 3
     title: "Ancient Knowledge"
     description: "A dusty scroll rests on a stone pedestal."
     objective: "Use 'cat scroll' to read the ancient knowledge."
+    hint: "Try 'cat scroll' to read the ancient knowledge on the pedestal."
     required_commands:
       - cat
+    completion:
+      command: "cat"
+      location: null
+      args: "scroll"
+      args_file: null
+      item_check: null
     reward: "100 XP and a reader's sigil"
+    reward_name: "Reader's sigil"
     xp: 100
+    prerequisites: null
+    next_quest: 4
 
   - id: 4
     title: "Shape the World"
     description: "The workshop calls — create something new."
     objective: "Navigate to the workshop and use 'mkdir' to create a directory."
+    hint: "Use 'mkdir' to shape a new workspace."
     required_commands:
       - mkdir
+    completion:
+      command: "mkdir"
+      location: null
+      args: null
+      args_file: null
+      item_check: null
     reward: "100 XP and a builder's sigil"
+    reward_name: "Builder's sigil"
     xp: 100
+    prerequisites: null
+    next_quest: 5
 
   - id: 5
     title: "Spark of Creation"
     description: "Your workspace yearns for a first artifact."
     objective: "Use 'touch' to create a new file."
+    hint: "Use 'touch notes.txt' to conjure a new file."
     required_commands:
       - touch
+    completion:
+      command: "touch"
+      location: null
+      args: null
+      args_file: null
+      item_check: null
     reward: "100 XP and a scribe's quill"
+    reward_name: "Scribe's quill"
     xp: 100
+    prerequisites: null
+    next_quest: 6
 
   - id: 6
     title: "Seek the Whisper"
     description: "Hidden phrases linger in old scrolls."
     objective: "Use 'grep' to search for a word within a scroll."
+    hint: "Run 'grep catacombs scroll' to uncover the hidden clue."
     required_commands:
       - grep
+    completion:
+      command: "grep"
+      location: "armoury|cellar"
+      args: null
+      args_file: null
+      item_check: null
     reward: "150 XP and the Whisperer's token"
+    reward_name: "Whisperer's token"
     xp: 150
     location_check: "armoury|cellar"
+    prerequisites: null
+    next_quest: 7
 
   - id: 7
     title: "The Bashcrawl Grimoire"
     description: "Deep in the chapel library, a tome of forgotten spells guards a secret."
     objective: "Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command."
+    hint: "Find the library, read the tome, then source the grimoire."
     required_commands:
       - source
+    completion:
+      command: "source"
+      location: "study|help"
+      args: null
+      args_file: null
+      item_check: "amulet,coins"
     reward: "200 XP and the Scriptorium Key (permanent help system access)"
+    reward_name: "Scriptorium Key"
     xp: 200
     location_check: "study|help"
     prerequisites: "amulet and coins in inventory, tome read in library"
+    next_quest: null

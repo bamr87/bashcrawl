@@ -1,0 +1,83 @@
+# ============================================================================
+# Bashcrawl Item Registry — src/help/data/items.yaml
+#
+# Single source of truth for all inventory items. Consumed by:
+#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
+#   - Python terminal-illness wrapper (ti/help_data.py)
+#
+# Item types: weapon, treasure, consumable, armor, quest, key
+# Adding a new item: add an entry here; both modes pick it up automatically.
+# ============================================================================
+
+items:
+  sword:
+    icon: "🗡️"
+    type: "weapon"
+    combat_bonus: 10
+    description: "A gleaming blade from the armoury"
+
+  amulet:
+    icon: "📿"
+    type: "treasure"
+    combat_bonus: 0
+    description: "An emerald amulet — unlocks hidden areas"
+
+  coins:
+    icon: "🪙"
+    type: "treasure"
+    combat_bonus: 0
+    description: "A pouch of gold coins"
+
+  diamonds:
+    icon: "💎"
+    type: "treasure"
+    combat_bonus: 0
+    description: "Sparkling diamonds from the chamber"
+
+  goblet:
+    icon: "🏆"
+    type: "key"
+    combat_bonus: 0
+    description: "A golden goblet — unlocks the Rift"
+
+  crystal:
+    icon: "🔮"
+    type: "weapon"
+    combat_bonus: 2
+    description: "A glowing crystal with faint power"
+
+  fish:
+    icon: "🐟"
+    type: "quest"
+    combat_bonus: 0
+    description: "A smelly fish — penguins love these"
+
+  armour:
+    icon: "🛡️"
+    type: "armor"
+    combat_bonus: 5
+    description: "Protective armour from the Rift box"
+
+  hair:
+    icon: "💇"
+    type: "treasure"
+    combat_bonus: 0
+    description: "A lock of hair from the pit"
+
+  bracelet:
+    icon: "💍"
+    type: "treasure"
+    combat_bonus: 0
+    description: "A platinum bracelet"
+
+  trinket:
+    icon: "🔑"
+    type: "quest"
+    combat_bonus: 0
+    description: "A small trinket — can be blessed or cursed"
+
+  potion:
+    icon: "🧪"
+    type: "consumable"
+    combat_bonus: 0
+    description: "A healing potion — restores HP"

@@ -28,10 +28,58 @@ class RoomHelp:
     emoji: str
     title: str
     description: str
+    path: str = ""
+    prompt_label: str = "exploring"
+    context_hint: str = ""
+    hidden: bool = False
+    unlocked_by: Optional[str] = None
+    parent: Optional[str] = None
+    children: List[str] = field(default_factory=list)
+    on_enter: Optional[str] = None
+    on_exit: Optional[str] = None
     teaches: List[str] = field(default_factory=list)
     key_files: List[Dict[str, str]] = field(default_factory=list)
     next_steps: str = ""
     essential_commands: List[Dict[str, str]] = field(default_factory=list)
+
+
+@dataclass
+class Encounter:
+    """An executable game script loaded from encounters.yaml."""
+
+    key: str
+    script: str
+    room: str
+    type: str  # loot, combat, puzzle, spell, npc, trap, merchant, riddle
+    description: str = ""
+    icon: str = "⚡"
+    requires_items: List[str] = field(default_factory=list)
+    recommended_items: List[str] = field(default_factory=list)
+    grants_items: List[str] = field(default_factory=list)
+    unlocks_rooms: List[str] = field(default_factory=list)
+    damage: int = 0
+
+
+@dataclass
+class Item:
+    """An inventory item loaded from items.yaml."""
+
+    name: str
+    icon: str = "✦"
+    type: str = ""  # weapon, treasure, consumable, armor, quest, key
+    combat_bonus: int = 0
+    description: str = ""
+
+
+@dataclass
+class QuestCompletion:
+    """Machine-readable quest completion criteria."""
+
+    command: str = ""
+    location: Optional[str] = None
+    args: Optional[str] = None
+    args_file: Optional[str] = None
+    item_check: Optional[str] = None
 
 
 @dataclass
@@ -63,6 +111,10 @@ class Quest:
     reward: str = ""
     xp: int = 0
     location_check: str = ""
+    hint: str = ""
+    completion: Optional[QuestCompletion] = None
+    prerequisites: Optional[str] = None
+    next_quest: Optional[int] = None
 
 
 @dataclass
@@ -149,11 +201,23 @@ def load_rooms(data_dir: Optional[Path] = None) -> Dict[str, RoomHelp]:
     raw = _load_yaml("rooms.yaml", data_dir)
     rooms: Dict[str, RoomHelp] = {}
     for name, info in raw.get("rooms", {}).items():
+        unlocked_by = info.get("unlocked_by")
+        if unlocked_by is not None:
+            unlocked_by = str(unlocked_by)
         rooms[name] = RoomHelp(
             name=name,
             emoji=info.get("emoji", ""),
             title=info.get("title", name),
             description=info.get("description", ""),
+            path=info.get("path", ""),
+            prompt_label=info.get("prompt_label", "exploring"),
+            context_hint=info.get("context_hint", ""),
+            hidden=bool(info.get("hidden", False)),
+            unlocked_by=unlocked_by,
+            parent=info.get("parent"),
+            children=info.get("children", []),
+            on_enter=info.get("on_enter"),
+            on_exit=info.get("on_exit"),
             teaches=info.get("teaches", []),
             key_files=info.get("key_files", []),
             next_steps=info.get("next_steps", ""),
@@ -202,6 +266,15 @@ def load_quests(data_dir: Optional[Path] = None) -> List[Quest]:
     raw = _load_yaml("quests.yaml", data_dir)
     quests: List[Quest] = []
     for q in raw.get("quests", []):
+        comp_data = q.get("completion") or {}
+        completion = QuestCompletion(
+            command=comp_data.get("command", ""),
+            location=comp_data.get("location"),
+            args=comp_data.get("args"),
+            args_file=comp_data.get("args_file"),
+            item_check=comp_data.get("item_check"),
+        ) if comp_data else None
+        next_q = q.get("next_quest")
         quests.append(
             Quest(
                 id=q["id"],
@@ -212,9 +285,55 @@ def load_quests(data_dir: Optional[Path] = None) -> List[Quest]:
                 reward=q.get("reward", ""),
                 xp=q.get("xp", 0),
                 location_check=q.get("location_check", ""),
+                hint=q.get("hint", ""),
+                completion=completion,
+                prerequisites=q.get("prerequisites"),
+                next_quest=int(next_q) if next_q is not None else None,
             )
         )
     return quests
+
+
+def load_encounters(data_dir: Optional[Path] = None) -> Dict[str, Encounter]:
+    """Load encounter definitions from ``encounters.yaml``.
+
+    Returns a dict mapping encounter key to :class:`Encounter`.
+    """
+    raw = _load_yaml("encounters.yaml", data_dir)
+    encounters: Dict[str, Encounter] = {}
+    for key, info in raw.get("encounters", {}).items():
+        encounters[key] = Encounter(
+            key=key,
+            script=info.get("script", ""),
+            room=info.get("room", ""),
+            type=info.get("type", ""),
+            description=info.get("description", ""),
+            icon=info.get("icon", "⚡"),
+            requires_items=info.get("requires_items", []),
+            recommended_items=info.get("recommended_items", []),
+            grants_items=info.get("grants_items", []),
+            unlocks_rooms=info.get("unlocks_rooms", []),
+            damage=info.get("damage", 0),
+        )
+    return encounters
+
+
+def load_items(data_dir: Optional[Path] = None) -> Dict[str, Item]:
+    """Load item definitions from ``items.yaml``.
+
+    Returns a dict mapping item name to :class:`Item`.
+    """
+    raw = _load_yaml("items.yaml", data_dir)
+    items: Dict[str, Item] = {}
+    for name, info in raw.get("items", {}).items():
+        items[name] = Item(
+            name=name,
+            icon=info.get("icon", "✦"),
+            type=info.get("type", ""),
+            combat_bonus=info.get("combat_bonus", 0),
+            description=info.get("description", ""),
+        )
+    return items
 
 
 def load_tutorials(data_dir: Optional[Path] = None) -> Dict[str, TutorialLesson]:

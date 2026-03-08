@@ -91,6 +91,12 @@ if [[ -f "${BASHCRAWL_ROOT}/lib/state.sh" ]]; then
     source "${BASHCRAWL_ROOT}/lib/state.sh"
 fi
 
+# Source room/encounter/item registry loader (must come before quests.sh)
+if [[ -f "${BASHCRAWL_ROOT}/lib/room_loader.sh" ]]; then
+    source "${BASHCRAWL_ROOT}/lib/room_loader.sh"
+    load_registries || true
+fi
+
 # Source quest system (quest data, helpers, persistence)
 if [[ -f "${BASHCRAWL_ROOT}/lib/quests.sh" ]]; then
     source "${BASHCRAWL_ROOT}/lib/quests.sh"

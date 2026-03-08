@@ -189,7 +189,7 @@ execute_command() {
             explore_area
             status=$?
             ;;
-        "./treasure"|"./potion"|"./spell"|"./monster"|"./ghost"|"./statue"|"./altar"|"./rags"|"./fountain"|"./penguin"|"./crystal"|"./goblet"|"./glass"|"./padlock"|"./statues"|"./open"|"./nyarlathotep"|"./drummer"|"./wizard-light"|"./button"|"./loot"|"./box"|"./tome"|"./grimoire"|"./pieces"|"./armour"|"./platinum"|"./display"|"./robot"|"./end"|"./carcass"|"./king"|"./window")
+        ./*) # Dynamic game script execution — no hardcoded list needed
             if [[ -x "$cmd" ]]; then
                 handled=true
                 if (( ${#original_args[@]} )); then
@@ -552,6 +552,11 @@ safe_cd() {
     local target="$1"
     local status=0
 
+    # Capture the room we're leaving for on_exit hook
+    local _prev_room
+    _prev_room=$(basename "$(pwd)")
+    [[ "$_prev_room" == .* ]] && _prev_room="${_prev_room#.}"
+
     case "$target" in
         ""|"~")
             cd "$BASHCRAWL_ROOT" || status=$?
@@ -610,6 +615,19 @@ safe_cd() {
             fi
             ;;
     esac
+
+    # Fire room event hooks on successful navigation
+    if [[ $status -eq 0 ]]; then
+        local _exit_msg _enter_msg _new_room
+        _exit_msg="$(room_on_exit "$_prev_room" 2>/dev/null)" || true
+        [[ -n "$_exit_msg" ]] && echo -e "${COLOR_INFO}${_exit_msg}${RESET_COLOR}"
+
+        _new_room=$(basename "$(pwd)")
+        [[ "$_new_room" == .* ]] && _new_room="${_new_room#.}"
+        _enter_msg="$(room_on_enter "$_new_room" 2>/dev/null)" || true
+        [[ -n "$_enter_msg" ]] && echo -e "${COLOR_INFO}${_enter_msg}${RESET_COLOR}"
+    fi
+
     return $status
 }
 
