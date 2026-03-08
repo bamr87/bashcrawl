@@ -42,11 +42,16 @@ set -euo pipefail
 # ============================================================================
 
 # Path: Environment Variable Setup
-readonly SETUP_VERSION="2.0.0"
 readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BASHCRAWL_ROOT="$SCRIPT_DIR"
-readonly LOG_FILE="${SCRIPT_DIR}/logs/setup.log"
+
+# Source shared configuration (paths, version)
+if [[ -f "${SCRIPT_DIR}/lib/config.sh" ]]; then
+    source "${SCRIPT_DIR}/lib/config.sh"
+fi
+readonly SETUP_VERSION="${BASHCRAWL_VERSION:-3.0.0}"
+readonly LOG_FILE="${SETUP_LOG_FILE:-${SCRIPT_DIR}/logs/setup.log}"
 
 # Path: Color Configuration for Enhanced UX
 # Source shared color constants
@@ -214,7 +219,7 @@ detect_existing_installation() {
         return 0
     fi
     
-    if [[ -f "${BASHCRAWL_ROOT}/.game_state" ]]; then
+    if [[ -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json" ]]; then
         log_setup "INFO" "Found existing game state" "detection"
         return 0
     fi
@@ -301,9 +306,9 @@ create_configuration_files() {
     
     # Game configuration
     local config_file="${BASHCRAWL_ROOT}/.game_data/config"
-    cat > "$config_file" << 'EOF'
+    cat > "$config_file" << EOF
 # Bashcrawl Configuration
-BASHCRAWL_VERSION=2.0.0
+BASHCRAWL_VERSION=$SETUP_VERSION
 BASHCRAWL_SETUP_DATE=$(date -Iseconds)
 BASHCRAWL_INSTALL_PATH=$BASHCRAWL_ROOT
 
@@ -395,12 +400,11 @@ verify_installation() {
         fi
     done
     
-    # Check game state file
-    if [[ -f "${BASHCRAWL_ROOT}/.game_state" ]]; then
+    # Check game state file (unified JSON format)
+    if [[ -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json" ]]; then
         log_setup "SUCCESS" "Game state file verified ✓" "verification"
     else
-        log_setup "ERROR" "Game state file missing" "verification"
-        verification_passed=false
+        log_setup "WARNING" "Game state file not yet created (will be created on first run)" "verification"
     fi
     
     # Terminal emulator is now integrated into main.sh (v3.0.0+)
@@ -455,16 +459,17 @@ run_health_check() {
         echo -e "   ${COLOR_ERROR}❌ Installation issues detected${COLOR_RESET}"
     fi
     
-    # Game state
+    # Game state (unified JSON format)
     echo -e "${COLOR_INFO}🎮 Game State:${COLOR_RESET}"
-    if [[ -f "${BASHCRAWL_ROOT}/.game_state" ]]; then
-        # Temporarily disable strict mode for sourcing game state
-        set +u
-        source "${BASHCRAWL_ROOT}/.game_state"
-        set -u
-        
-        echo -e "   ${COLOR_SUCCESS}✅ Game state: Level ${PLAYER_LEVEL:-novice}${COLOR_RESET}"
-        echo -e "   ${COLOR_SUCCESS}✅ Sessions: ${SESSION_COUNT:-0}${COLOR_RESET}"
+    if [[ -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json" ]]; then
+        if [[ -f "${BASHCRAWL_ROOT}/lib/state.sh" ]]; then
+            source "${BASHCRAWL_ROOT}/lib/state.sh"
+            state_load 2>/dev/null || true
+            echo -e "   ${COLOR_SUCCESS}✅ Game state: Level $(state_get game_level)${COLOR_RESET}"
+            echo -e "   ${COLOR_SUCCESS}✅ Sessions: $(state_get session_count)${COLOR_RESET}"
+        else
+            echo -e "   ${COLOR_SUCCESS}✅ Game state file exists${COLOR_RESET}"
+        fi
     else
         echo -e "   ${COLOR_WARNING}⚠️  No game state found${COLOR_RESET}"
     fi
@@ -490,8 +495,8 @@ repair_installation() {
     local backup_dir="${BASHCRAWL_ROOT}/.game_data/backups/repair_$(date +%s)"
     mkdir -p "$backup_dir"
     
-    if [[ -f "${BASHCRAWL_ROOT}/.game_state" ]]; then
-        cp "${BASHCRAWL_ROOT}/.game_state" "$backup_dir/"
+    if [[ -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json" ]]; then
+        cp "${BASHCRAWL_ROOT}/.bashcrawl_save.json" "$backup_dir/"
         log_setup "INFO" "Game state backed up" "repair"
     fi
     
@@ -548,8 +553,8 @@ uninstall_bashcrawl() {
     mkdir -p "$backup_dir"
     
     # Backup important files
-    if [[ -f "${BASHCRAWL_ROOT}/.game_state" ]]; then
-        cp "${BASHCRAWL_ROOT}/.game_state" "$backup_dir/"
+    if [[ -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json" ]]; then
+        cp "${BASHCRAWL_ROOT}/.bashcrawl_save.json" "$backup_dir/"
     fi
     
     if [[ -d "${BASHCRAWL_ROOT}/.game_data" ]]; then
@@ -561,9 +566,8 @@ uninstall_bashcrawl() {
     fi
     
     # Remove game data
-    rm -f "${BASHCRAWL_ROOT}/.game_state"
+    rm -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json"
     rm -f "${BASHCRAWL_ROOT}/.setup_complete"
-    rm -f "${BASHCRAWL_ROOT}/.game_history"
     rm -rf "${BASHCRAWL_ROOT}/.game_data"
     rm -rf "${BASHCRAWL_ROOT}/logs"
     
@@ -641,7 +645,7 @@ run_interactive_setup() {
             log_setup "INFO" "Preserving existing game data" "interactive"
         else
             if confirm_action "Remove existing data and start fresh?" "n"; then
-                rm -f "${BASHCRAWL_ROOT}/.game_state"
+                rm -f "${BASHCRAWL_ROOT}/.bashcrawl_save.json"
                 rm -rf "${BASHCRAWL_ROOT}/.game_data"
                 log_setup "INFO" "Existing data removed" "interactive"
             fi

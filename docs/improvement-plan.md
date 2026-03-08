@@ -51,28 +51,11 @@ sessions and show up in `git diff`.
 
 ---
 
-### 3. No Game Reset Script
+### 3. ~~No Game Reset Script~~ (RESOLVED)
 
-**Problem:** After playing, many git-tracked files are modified (statue→pieces,
-treasure text changes, orb copies, hidden directories renamed). The only reliable
-reset is `git checkout -- . && git clean -fd`.
-
-**Fix:** Create `reset.sh` at the project root:
-
-```bash
-#!/usr/bin/env bash
-# Reset bashcrawl to pristine state for a new playthrough
-set -euo pipefail
-cd "$(dirname "$0")"
-git checkout -- entrance/
-git clean -fd entrance/
-rm -f .setup_complete .game_state logs/bashcrawl.log
-echo "Game reset to starting state."
-```
-
-**Files to create:**
-
-- `reset.sh`
+**Status:** Resolved. `lib/reset.sh` provides game state reset, and
+`main.sh --reset` exposes it via the CLI. The `state_reset` function in
+`lib/state.sh` handles the JSON state file.
 
 ---
 

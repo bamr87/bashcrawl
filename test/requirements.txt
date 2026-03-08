@@ -1,5 +1,6 @@
 # Bashcrawl Testing Framework Dependencies
 # ==========================================
+# For the full project, use the root requirements.txt + requirements-dev.txt instead.
 
 # AI Agent (LLM provider)
 anthropic>=0.40.0

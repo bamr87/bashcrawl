@@ -1,0 +1,21 @@
+# Bashcrawl — Runtime Dependencies
+# ==================================
+# Install everything needed to play the game and run the viewer:
+#   pip install -r requirements.txt
+
+# Terminal-Illness (Python TUI)
+textual>=0.65.0
+rich>=13.7.1
+prompt_toolkit>=3.0.47
+pyyaml>=6.0
+
+# AI features (Merlin chat)
+anthropic>=0.40.0
+
+# Environment variable loading
+python-dotenv>=1.0
+
+# Observatory log viewer
+flask>=3.0
+markdown>=3.5
+watchdog>=4.0

@@ -1,0 +1,13 @@
+# Bashcrawl — Development & Testing Dependencies
+# =================================================
+# Install on top of runtime deps:
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+# Test runner
+pytest>=8.0
+pytest-cov>=5.0
+pytest-timeout>=2.3
+pytest-asyncio>=0.23.0
+
+# Schema validation (used in tests)
+jsonschema>=4.20

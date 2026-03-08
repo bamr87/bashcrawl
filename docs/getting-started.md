@@ -30,9 +30,9 @@ No installation required — opens in your browser.
 macOS's Archive Utility may strip execute permissions. Use the terminal instead:
 
 ```bash
-curl -L https://github.com/bamr87/bashcrawl/archive/master.zip -o bashcrawl.zip
+curl -L https://github.com/bamr87/bashcrawl/archive/main.zip -o bashcrawl.zip
 unzip bashcrawl.zip
-cd bashcrawl-master
+cd bashcrawl-main
 bash setup.sh
 cd entrance && cat scroll
 ```

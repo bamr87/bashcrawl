@@ -226,8 +226,8 @@ Launch immediately in your browser (no install required):
 
 | Source | Launch |
 |--------|--------|
+| GitHub (primary) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
 | GitLab (upstream) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/nthiery%2Fbashcrawl/HEAD) |
-| GitHub (fork) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
 
 ## 🛡️ Interactive Terminal Emulator
 
@@ -329,9 +329,9 @@ macOS's default Archive Utility may incorrectly set file permissions. For the be
 
 ```bash
 # Download and extract using terminal
-curl -L https://gitlab.com/slackermedia/bashcrawl/-/archive/master/bashcrawl-master.zip -o bashcrawl.zip
+curl -L https://github.com/bamr87/bashcrawl/archive/main.zip -o bashcrawl.zip
 unzip bashcrawl.zip
-cd bashcrawl-master/entrance
+cd bashcrawl-main/entrance
 cat scroll
 ```
 
@@ -635,7 +635,7 @@ git clone https://github.com/bamr87/bashcrawl.git
 
 ### 🤝 Join the Adventure
 
-- **Source Code**: [GitLab Repository](https://gitlab.com/slackermedia/bashcrawl)
+- **Source Code**: [GitHub Repository](https://github.com/bamr87/bashcrawl)
 - **Bug Reports**: Create issues for problems or suggestions
 - **Contributions**: Submit new rooms, puzzles, or features
 - **Community**: Share your achievements and learn from others

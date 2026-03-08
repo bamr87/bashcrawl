@@ -4,7 +4,7 @@ Self-contained Flask web application for browsing Bashcrawl session logs,
 screenshots, analytics, feedback reports, the dungeon map, and live sessions.
 
 > **User guide:** [docs/viewer.md](../../docs/viewer.md)  
-> **Design reference:** [docs/log-viewer-plan.md](../../docs/log-viewer-plan.md)
+> **Design reference:** [docs/viewer.md](../../docs/viewer.md)
 
 ---
 

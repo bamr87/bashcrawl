@@ -1,0 +1,97 @@
+# Bashcrawl — Project Task Runner
+# =================================
+# Usage:
+#   make setup          One-time game setup (quick mode)
+#   make install-deps   Install all Python dependencies
+#   make test           Run unit + integration tests
+#   make test-ai        Run AI playthrough tests (needs ANTHROPIC_API_KEY)
+#   make lint           Run shellcheck, yamllint, markdownlint
+#   make lint-shell     Run shellcheck only
+#   make clean          Reset game state to defaults
+#   make help           Show this help
+
+.DEFAULT_GOAL := help
+SHELL := /bin/bash
+
+GAME_ROOT := $(shell pwd)
+PYTHON := python3
+PIP := pip3
+PYTEST := $(PYTHON) -m pytest
+SHELLCHECK := shellcheck
+
+export PYTHONPATH := $(GAME_ROOT)/src/terminal-illness:$(GAME_ROOT)/test
+export BASHCRAWL_ROOT := $(GAME_ROOT)
+
+# ── Setup ──────────────────────────────────────────────────────────────
+
+.PHONY: setup
+setup: ## Run first-time game setup (quick mode)
+	@bash setup.sh --quick
+
+.PHONY: install-deps
+install-deps: ## Install all Python dependencies
+	$(PIP) install -r requirements.txt -r requirements-dev.txt
+
+# ── Testing ────────────────────────────────────────────────────────────
+
+.PHONY: test
+test: ## Run unit + integration tests
+	cd test && $(PYTEST) unit/ integration/ -v --tb=short --timeout=60
+
+.PHONY: test-unit
+test-unit: ## Run unit tests only
+	cd test && $(PYTEST) unit/ -v --tb=short
+
+.PHONY: test-integration
+test-integration: ## Run integration tests only
+	cd test && $(PYTEST) integration/ -v --tb=short --timeout=60
+
+.PHONY: test-ai
+test-ai: ## Run AI playthrough tests (needs ANTHROPIC_API_KEY)
+	cd test && $(PYTEST) -m ai -v --tb=short --timeout=120
+
+.PHONY: test-demo
+test-demo: ## Run demo walkthrough tests
+	cd test && $(PYTEST) -m demo -v --tb=short --timeout=60
+
+.PHONY: test-all
+test-all: ## Run all tests including AI and demo
+	cd test && $(PYTEST) -v --tb=short --timeout=120
+
+# ── Linting ────────────────────────────────────────────────────────────
+
+.PHONY: lint
+lint: lint-shell ## Run all linters
+
+.PHONY: lint-shell
+lint-shell: ## Run ShellCheck on all shell scripts
+	@echo "=== ShellCheck ==="
+	find . -name "*.sh" -not -path "./.git/*" -not -path "./.venv/*" \
+		-exec $(SHELLCHECK) {} +
+	@echo "=== ShellCheck: game executables ==="
+	@for f in $$(find entrance/ -type f -executable 2>/dev/null); do \
+		if head -1 "$$f" | grep -q 'bash'; then \
+			$(SHELLCHECK) "$$f"; \
+		fi; \
+	done
+
+# ── Maintenance ────────────────────────────────────────────────────────
+
+.PHONY: clean
+clean: ## Reset game state to defaults
+	@bash main.sh --reset 2>/dev/null || true
+	@rm -f .game_data/command_history
+	@echo "Game state reset."
+
+.PHONY: clean-all
+clean-all: clean ## Reset game state and remove generated files
+	@rm -rf logs/sessions/* logs/screenshots/*
+	@rm -f .bashcrawl_save.json .setup_complete
+	@echo "All generated files removed."
+
+# ── Help ───────────────────────────────────────────────────────────────
+
+.PHONY: help
+help: ## Show available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
