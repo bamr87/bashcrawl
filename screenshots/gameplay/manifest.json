@@ -1,0 +1,368 @@
+{
+  "generated_at": "2026-03-09T23:58:26",
+  "screenshot_dir": "screenshots/gameplay",
+  "total_screenshots": 40,
+  "total_size_bytes": 2990270,
+  "screenshots": [
+    {
+      "name": "000_initial.svg",
+      "path": "screenshots/gameplay/000_initial.svg",
+      "trigger": "agent_auto",
+      "command": "(startup)",
+      "room": "",
+      "ts": "2026-03-09T23:58:22",
+      "size_bytes": 68206
+    },
+    {
+      "name": "001_pwd.svg",
+      "path": "screenshots/gameplay/001_pwd.svg",
+      "trigger": "agent_auto",
+      "command": "pwd",
+      "room": "entrance",
+      "ts": "2026-03-09T23:58:22",
+      "size_bytes": 71414
+    },
+    {
+      "name": "01_entrance_pwd.svg",
+      "path": "screenshots/gameplay/01_entrance_pwd.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 01_entrance_pwd",
+      "room": "",
+      "ts": "2026-03-09T23:58:22",
+      "size_bytes": 71414
+    },
+    {
+      "name": "002_ls.svg",
+      "path": "screenshots/gameplay/002_ls.svg",
+      "trigger": "agent_auto",
+      "command": "ls",
+      "room": "entrance",
+      "ts": "2026-03-09T23:58:22",
+      "size_bytes": 74191
+    },
+    {
+      "name": "02_entrance_ls.svg",
+      "path": "screenshots/gameplay/02_entrance_ls.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 02_entrance_ls",
+      "room": "",
+      "ts": "2026-03-09T23:58:22",
+      "size_bytes": 74191
+    },
+    {
+      "name": "003_cat_scroll.svg",
+      "path": "screenshots/gameplay/003_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "entrance",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 68058
+    },
+    {
+      "name": "03_entrance_cat_scroll.svg",
+      "path": "screenshots/gameplay/03_entrance_cat_scroll.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 03_entrance_cat_scroll",
+      "room": "",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 68058
+    },
+    {
+      "name": "004_cd_cellar.svg",
+      "path": "screenshots/gameplay/004_cd_cellar.svg",
+      "trigger": "agent_auto",
+      "command": "cd cellar",
+      "room": "/entrance/cellar",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 70106
+    },
+    {
+      "name": "04_cd_cellar.svg",
+      "path": "screenshots/gameplay/04_cd_cellar.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 04_cd_cellar",
+      "room": "",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 70106
+    },
+    {
+      "name": "005_cat_scroll.svg",
+      "path": "screenshots/gameplay/005_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "/entrance/cellar",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 75396
+    },
+    {
+      "name": "05_cellar_scroll.svg",
+      "path": "screenshots/gameplay/05_cellar_scroll.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 05_cellar_scroll",
+      "room": "",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 75396
+    },
+    {
+      "name": "006_ls_-F.svg",
+      "path": "screenshots/gameplay/006_ls_-F.svg",
+      "trigger": "agent_auto",
+      "command": "ls -F",
+      "room": "/entrance/cellar",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 75986
+    },
+    {
+      "name": "06_cellar_ls_f.svg",
+      "path": "screenshots/gameplay/06_cellar_ls_f.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 06_cellar_ls_f",
+      "room": "",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 75986
+    },
+    {
+      "name": "007___treasure.svg",
+      "path": "screenshots/gameplay/007___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "/entrance/cellar",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 72984
+    },
+    {
+      "name": "07_cellar_treasure.svg",
+      "path": "screenshots/gameplay/07_cellar_treasure.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 07_cellar_treasure",
+      "room": "",
+      "ts": "2026-03-09T23:58:23",
+      "size_bytes": 72984
+    },
+    {
+      "name": "008_export_I_amulet__I.svg",
+      "path": "screenshots/gameplay/008_export_I_amulet__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I=amulet,$I",
+      "room": "/entrance/cellar",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 76289
+    },
+    {
+      "name": "08_export_amulet.svg",
+      "path": "screenshots/gameplay/08_export_amulet.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 08_export_amulet",
+      "room": "",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 76289
+    },
+    {
+      "name": "009_cd_armoury.svg",
+      "path": "screenshots/gameplay/009_cd_armoury.svg",
+      "trigger": "agent_auto",
+      "command": "cd armoury",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 77782
+    },
+    {
+      "name": "09_cd_armoury.svg",
+      "path": "screenshots/gameplay/09_cd_armoury.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 09_cd_armoury",
+      "room": "",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 77782
+    },
+    {
+      "name": "010_cat_scroll.svg",
+      "path": "screenshots/gameplay/010_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 72223
+    },
+    {
+      "name": "10_armoury_scroll.svg",
+      "path": "screenshots/gameplay/10_armoury_scroll.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 10_armoury_scroll",
+      "room": "",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 72223
+    },
+    {
+      "name": "011___treasure.svg",
+      "path": "screenshots/gameplay/011___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 73975
+    },
+    {
+      "name": "11_armoury_treasure.svg",
+      "path": "screenshots/gameplay/11_armoury_treasure.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 11_armoury_treasure",
+      "room": "",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 73975
+    },
+    {
+      "name": "012_export_I_sword__I.svg",
+      "path": "screenshots/gameplay/012_export_I_sword__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I=sword,$I",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 77653
+    },
+    {
+      "name": "12_export_sword.svg",
+      "path": "screenshots/gameplay/12_export_sword.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 12_export_sword",
+      "room": "",
+      "ts": "2026-03-09T23:58:24",
+      "size_bytes": 77653
+    },
+    {
+      "name": "013___potion.svg",
+      "path": "screenshots/gameplay/013___potion.svg",
+      "trigger": "agent_auto",
+      "command": "./potion",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 77115
+    },
+    {
+      "name": "13_armoury_potion.svg",
+      "path": "screenshots/gameplay/13_armoury_potion.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 13_armoury_potion",
+      "room": "",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 77115
+    },
+    {
+      "name": "014_export_HP_15.svg",
+      "path": "screenshots/gameplay/014_export_HP_15.svg",
+      "trigger": "agent_auto",
+      "command": "export HP=15",
+      "room": "/entrance/cellar/armoury",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 78995
+    },
+    {
+      "name": "14_export_hp.svg",
+      "path": "screenshots/gameplay/14_export_hp.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 14_export_hp",
+      "room": "",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 78995
+    },
+    {
+      "name": "015_cd_chamber.svg",
+      "path": "screenshots/gameplay/015_cd_chamber.svg",
+      "trigger": "agent_auto",
+      "command": "cd chamber",
+      "room": "/entrance/cellar/armoury/chamber",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 80076
+    },
+    {
+      "name": "15_cd_chamber.svg",
+      "path": "screenshots/gameplay/15_cd_chamber.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 15_cd_chamber",
+      "room": "",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 80076
+    },
+    {
+      "name": "016_cat_scroll.svg",
+      "path": "screenshots/gameplay/016_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "/entrance/cellar/armoury/chamber",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 75673
+    },
+    {
+      "name": "16_chamber_scroll.svg",
+      "path": "screenshots/gameplay/16_chamber_scroll.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 16_chamber_scroll",
+      "room": "",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 75673
+    },
+    {
+      "name": "017___statue.svg",
+      "path": "screenshots/gameplay/017___statue.svg",
+      "trigger": "agent_auto",
+      "command": "./statue",
+      "room": "/entrance/cellar/armoury/chamber",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 75397
+    },
+    {
+      "name": "17_chamber_statue.svg",
+      "path": "screenshots/gameplay/17_chamber_statue.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 17_chamber_statue",
+      "room": "",
+      "ts": "2026-03-09T23:58:25",
+      "size_bytes": 75397
+    },
+    {
+      "name": "018___treasure.svg",
+      "path": "screenshots/gameplay/018___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "./treasure",
+      "room": "/entrance/cellar/armoury/chamber",
+      "ts": "2026-03-09T23:58:26",
+      "size_bytes": 74748
+    },
+    {
+      "name": "18_chamber_treasure.svg",
+      "path": "screenshots/gameplay/18_chamber_treasure.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 18_chamber_treasure",
+      "room": "",
+      "ts": "2026-03-09T23:58:26",
+      "size_bytes": 74748
+    },
+    {
+      "name": "19_status.svg",
+      "path": "screenshots/gameplay/19_status.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 19_status",
+      "room": "",
+      "ts": "2026-03-09T23:58:26",
+      "size_bytes": 74748
+    },
+    {
+      "name": "019_quest.svg",
+      "path": "screenshots/gameplay/019_quest.svg",
+      "trigger": "agent_auto",
+      "command": "quest",
+      "room": "/entrance/cellar/armoury/chamber",
+      "ts": "2026-03-09T23:58:26",
+      "size_bytes": 75597
+    },
+    {
+      "name": "20_quest.svg",
+      "path": "screenshots/gameplay/20_quest.svg",
+      "trigger": "explicit",
+      "command": "SCREENSHOT 20_quest",
+      "room": "",
+      "ts": "2026-03-09T23:58:26",
+      "size_bytes": 75597
+    }
+  ]
+}
