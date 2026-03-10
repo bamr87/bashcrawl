@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v4
@@ -58,23 +58,33 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Make game files executable
+        if: runner.os != 'Windows'
         run: bash setup.sh --quick
         env:
           TERM: dumb
+
+      - name: Configure PYTHONPATH
+        shell: python
+        run: |
+          import os, pathlib
+          ws = pathlib.Path(os.environ["GITHUB_WORKSPACE"])
+          ti = str(ws / "src" / "terminal-illness")
+          tests = str(ws / "test")
+          pypath = ti + os.pathsep + tests
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"PYTHONPATH={pypath}\n")
 
       - name: Run unit tests
         run: |
           cd test
           python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
-        env:
-          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
 
       - name: Run integration tests
+        shell: bash
         run: |
           cd test
           python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml --timeout=60
         env:
-          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
           BASHCRAWL_ROOT: ${{ github.workspace }}
 
       - name: Upload test results
