@@ -75,6 +75,7 @@ jobs:
               f.write(f"PYTHONPATH={pypath}\n")
 
       - name: Run unit tests
+        shell: bash
         run: |
           cd test
           python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
