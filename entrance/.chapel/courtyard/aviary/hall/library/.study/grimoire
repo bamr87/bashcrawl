@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+# Compute the path back to the game root from the study directory.
+# The study is at: entrance/.chapel/courtyard/aviary/hall/library/.study/
+# That's 7 levels deep from the game root.
+GAME_ROOT="$(cd "$(dirname "$0")/../../../../../../../" 2>/dev/null && pwd)"
+
+echo
+if grep --quiet grimoire <<< "$I" 2>/dev/null; then
+    echo "You have already absorbed the grimoire's knowledge."
+    echo
+    if [ -L portal ]; then
+        cat << EOF
+The shimmering portal to the Scriptorium remains open.
+
+    cd portal
+
+EOF
+    fi
+    exit 0
+fi
+
+cat << EOF
+You open the grimoire.  Ancient diagrams spring to life on
+the pages — shell functions, argument passing, command
+composition.  The knowledge flows into your mind.
+
+As you read the final page, the air in the study shimmers.
+A glowing PORTAL appears against the far wall, revealing a
+vast chamber beyond — the SCRIPTORIUM, where the very source
+of the help system is written.
+
+EOF
+
+# Create the portal symlink to the help source directory
+if [ -L portal ]; then
+    echo "The portal is already open."
+else
+    ln -fs "$GAME_ROOT/src/help" portal 2>/dev/null
+    if [ -L portal ]; then
+        cat << EOF
+A ripple of energy passes through the room as the portal
+stabilizes.
+
+EOF
+    else
+        cat << EOF
+The portal flickers but fails to form.  Strange...
+
+(Could not create symlink.  You can visit the help source
+ directly at: $GAME_ROOT/src/help )
+
+EOF
+    fi
+fi
+
+cat << EOF
+To step through the portal:
+
+    cd portal
+
+To add the grimoire to your inventory:
+
+    export I=grimoire,\$I
+
+To activate the Bashcrawl 'bc' command:
+
+    bc () { bash $GAME_ROOT/help.sh "\$@"; }
+    export -f bc
+
+Or, to permanently activate the full help system:
+
+    source $GAME_ROOT/src/help/init_help.sh
+
+EOF
+
+
+
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
+#
+#     ./grimoire
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================

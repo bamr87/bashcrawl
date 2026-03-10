@@ -10,6 +10,8 @@ command-line champion by battling monsters, collecting treasures, and:
 - Achievement badges for completing different quest lines
 - Integration with external learning platforms
 
+![Bashcrawl — entrance gameplay](screenshots/gameplay/03_entrance_cat_scroll.svg)
+
 ## 🎮 New! Streamlined Experience
 
 **Get started with the new unified launcher:**
@@ -228,6 +230,72 @@ Launch immediately in your browser (no install required):
 |--------|--------|
 | GitHub (primary) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
 | GitLab (upstream) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/nthiery%2Fbashcrawl/HEAD) |
+
+## 🎬 Gameplay Screenshots
+
+The following screenshots were captured from a live end-to-end TUI session using the built-in
+agent mode (`./main.sh --agent`).  They show the core progression from the entrance all the way
+through the chamber.
+
+### 🚪 The Entrance — Know Thy Place (`pwd` & `ls`)
+
+Awaken in the dungeon entrance and learn your first two spells: `pwd` to reveal your location
+and `ls` to see what surrounds you.
+
+![Entrance — pwd](screenshots/gameplay/01_entrance_pwd.svg)
+
+![Entrance — ls](screenshots/gameplay/02_entrance_ls.svg)
+
+### 📜 Reading the Ancient Scroll (`cat scroll`)
+
+Every room contains a `scroll` file packed with lore and instructions.  `cat scroll` is your
+most-used spell throughout the adventure.
+
+![Entrance scroll](screenshots/gameplay/03_entrance_cat_scroll.svg)
+
+### 🏚️ Descending to the Cellar (`ls -F` & `./treasure`)
+
+Move deeper with `cd cellar`, use `ls -F` to distinguish directories from executables, then run
+`./treasure` to claim your first inventory item — the emerald amulet.
+
+![Cellar — ls -F](screenshots/gameplay/06_cellar_ls_f.svg)
+
+![Cellar — treasure encounter](screenshots/gameplay/07_cellar_treasure.svg)
+
+![Inventory — export amulet](screenshots/gameplay/08_export_amulet.svg)
+
+### 🗡️ The Armoury — Combat & Equipment
+
+The armoury teaches file permissions and executable scripts.  Collect the sword, drink the
+health potion, and prepare for battle.
+
+![Armoury scroll](screenshots/gameplay/10_armoury_scroll.svg)
+
+![Armoury — treasure (sword)](screenshots/gameplay/11_armoury_treasure.svg)
+
+![Armoury — potion (HP restore)](screenshots/gameplay/13_armoury_potion.svg)
+
+### 🏰 The Chamber — Boss Encounter
+
+Face the statue in the innermost chamber.  Victory requires the sword you claimed in the
+armoury and teaches arithmetic operators (`let`).
+
+![Chamber scroll](screenshots/gameplay/16_chamber_scroll.svg)
+
+![Chamber — statue battle](screenshots/gameplay/17_chamber_statue.svg)
+
+![Chamber — treasure claimed](screenshots/gameplay/18_chamber_treasure.svg)
+
+### 📊 Adventure Status & Quest Tracker
+
+Use the built-in `status` and `quest` commands to see your collected inventory, health, XP, and
+active objectives at any time.
+
+![Status screen](screenshots/gameplay/19_status.svg)
+
+![Quest tracker](screenshots/gameplay/20_quest.svg)
+
+---
 
 ## 🛡️ Interactive Terminal Emulator
 
