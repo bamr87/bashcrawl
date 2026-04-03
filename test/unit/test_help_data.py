@@ -10,13 +10,15 @@ pytestmark = pytest.mark.unit
 
 # All known game rooms (main + hidden)
 ALL_GAME_ROOMS = {
-    "entrance", "cellar", "armoury", "chamber",   # main path
-    "chapel", "graveyard", "courtyard", "aviary",  # chapel path
-    "hall", "library", "study",                     # chapel path cont.
-    "vault", "stronghold", "nursery", "lab",        # vault path
-    "scrap",                                        # symlink room
-    "rift", "arena", "pit", "spire", "mezzanine",  # rift path
-    "workshop",                                     # player-created
+    "entrance", "cellar", "armoury", "chamber",                # main path
+    "chapel", "graveyard", "courtyard", "aviary",              # chapel path
+    "hall", "library", "study",                                # chapel path cont.
+    "vault", "stronghold", "nursery", "lab",                   # vault path
+    "scrap",                                                   # symlink room
+    "rift", "arena", "pit", "spire", "mezzanine",             # rift path
+    "workshop",                                                # player-created
+    "columbarium", "lower-quadrant", "royal-tombs", "mausoleum",  # graveyard sub-rooms
+    "bashcrawl",                                               # virtual lobby root
 }
 
 

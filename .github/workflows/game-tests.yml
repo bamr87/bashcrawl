@@ -116,13 +116,7 @@ jobs:
         fi
 
         # Check every room in walkthrough.json exists as a directory
-        for room in $(python3 -c "
-import json, sys
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path in data['rooms']:
-    print(path)
-"); do
+        for room in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in data['rooms']]"); do
           if [[ ! -d "$room" ]]; then
             echo "ERROR: Room directory $room/ does not exist"
             errors=$((errors + 1))
@@ -132,14 +126,7 @@ for path in data['rooms']:
         done
 
         # Check rooms with scroll=true have a scroll file
-        for room in $(python3 -c "
-import json
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path, info in data['rooms'].items():
-    if info.get('scroll'):
-        print(path)
-"); do
+        for room in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p,i in data['rooms'].items() if i.get('scroll')]"); do
           if [[ ! -f "$room/scroll" ]]; then
             echo "ERROR: $room/ marked scroll=true but no scroll file"
             errors=$((errors + 1))
@@ -149,13 +136,7 @@ for path, info in data['rooms'].items():
         done
 
         # Check encounter scripts exist
-        for script in $(python3 -c "
-import json
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path in data['encounters']:
-    print(path)
-"); do
+        for script in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in data['encounters']]"); do
           if [[ ! -f "$script" ]]; then
             echo "ERROR: Encounter script $script does not exist"
             errors=$((errors + 1))

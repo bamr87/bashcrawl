@@ -24,7 +24,7 @@ Open `http://localhost:8080` in any browser to play.
 
 ## Architecture
 
-```
+```text
 Browser                          Server
   │                                │
   │  ── ws://host:port/ws ──────> │  WebSocket connection
@@ -163,12 +163,12 @@ All messages are JSON objects with a `type` field.
 ## REST Endpoints
 
 | Method | Path | Description |
-|--------|------|-------------|
-| `GET`  | `/` | Serve the frontend SPA |
-| `GET`  | `/api/health` | Server health check |
-| `GET`  | `/api/session/:id` | Get session metadata |
+| ------ | ---- | ----------- |
+| `GET` | `/` | Serve the frontend SPA |
+| `GET` | `/api/health` | Server health check |
+| `GET` | `/api/session/:id` | Get session metadata |
 | `POST` | `/api/session/new` | Create new session, returns session ID |
-| `WS`   | `/ws?session=:id` | WebSocket game connection |
+| `WS` | `/ws?session=:id` | WebSocket game connection |
 
 ---
 
@@ -176,7 +176,7 @@ All messages are JSON objects with a `type` field.
 
 Located at `src/web/`:
 
-```
+```text
 src/web/
   __init__.py
   __main__.py          # Entry point
@@ -196,6 +196,7 @@ src/web/
 ### Session Manager
 
 Each WebSocket connection creates a `Session` with:
+
 - Unique session ID (UUID4)
 - `TerminalEngine` instance
 - `GameState` with per-session save path
@@ -221,7 +222,7 @@ Sessions are cleaned up after 30 minutes of inactivity.
 
 Mirrors the Textual TUI layout:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  Header: BASHCRAWL  •  player  •  HP bar  •  XP            │
 ├────────────────┬────────────────────────────────────────────┤

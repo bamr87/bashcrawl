@@ -186,7 +186,7 @@ _reg_get() {
 room_emoji() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     local val
     val=$(_reg_get "_REG_ROOM_${key}_emoji")
     echo "${val:-$(_reg_get '_REG_ROOM_unknown_emoji')}"
@@ -195,7 +195,7 @@ room_emoji() {
 room_label() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     local val
     val=$(_reg_get "_REG_ROOM_${key}_label")
     echo "${val:-$(_reg_get '_REG_ROOM_unknown_label')}"
@@ -204,35 +204,35 @@ room_label() {
 room_hint() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     _reg_get "_REG_ROOM_${key}_hint"
 }
 
 room_on_enter() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     _reg_get "_REG_ROOM_${key}_on_enter"
 }
 
 room_on_exit() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     _reg_get "_REG_ROOM_${key}_on_exit"
 }
 
 room_path() {
     local dir="$1"
     local key
-    key=$(echo "$dir" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${dir//[^A-Za-z0-9_]/_}"
     _reg_get "_REG_ROOM_${key}_path"
 }
 
 item_icon() {
     local name="$1"
     local key
-    key=$(echo "$name" | sed 's/[^A-Za-z0-9_]/_/g')
+    key="${name//[^A-Za-z0-9_]/_}"
     local val
     val=$(_reg_get "_REG_ITEM_${key}_icon")
     echo "${val:-✦}"
