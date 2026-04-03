@@ -8,9 +8,10 @@ from .help_data import Quest, QuestCompletion, load_quests
 def _hardcoded_quests() -> List[Quest]:
     """Return the hardcoded fallback quest list (8 quests).
 
-    This is used when the YAML data file is unavailable or for testing
-    purposes.  The YAML file is the single source of truth; these values
-    mirror quests.yaml so the game still works offline.
+    Canonical source of truth: ``src/help/data/quests.yaml``.
+    This fallback is used only when the YAML file is unavailable (e.g., in
+    isolated unit tests or offline environments).  Keep values in sync with
+    quests.yaml whenever that file changes.
     """
     return [
         Quest(id=0, title="Awakening: Know Thy Place",
