@@ -31,6 +31,7 @@ Layout
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from textual import on, work
@@ -235,6 +236,26 @@ LoadScreen {
 
 # Append chat panel CSS
 _CSS = _CSS.rstrip() + "\n" + CHAT_PANEL_CSS
+
+# Stronger command-bar styling when BASHCRAWL_BROWSER_AUTOMATION=1 (browser / AI tools)
+_AUTOMATION_CSS = """
+/* BASHCRAWL_BROWSER_AUTOMATION=1 — visible command bar for browser automation */
+#command-input {
+    border: solid #7c3aed;
+    background: #1e1e3f;
+    padding: 0 1;
+}
+#command-input:focus {
+    border: solid #a78bfa;
+    background: #1e1e3f;
+}
+#input-row {
+    height: 4;
+}
+"""
+
+if os.environ.get("BASHCRAWL_BROWSER_AUTOMATION") == "1":
+    _CSS += _AUTOMATION_CSS
 
 
 # ---------------------------------------------------------------------------
@@ -469,7 +490,8 @@ class BashcrawlApp(App):
         self.game_state = state
         self.fs = fs
         self.agent_mode = agent_mode
-        self._engine: Optional[object] = None  # TerminalEngine, set in on_mount
+        self._session: Optional[object] = None  # GameSession, set in on_mount
+        self._engine: Optional[object] = None  # TerminalEngine alias, set in on_mount
         self._cmd_history: List[str] = []
         self._history_idx: int = -1
         self._chat_svc = AIChatService()
@@ -502,7 +524,11 @@ class BashcrawlApp(App):
                 f"[bold cyan]{self.game_state.current_location or '/entrance'}[/bold cyan] $",
                 id="prompt-label",
             )
-            yield Input(placeholder="Enter command…  (Tab=complete  ↑↓=history  F3=AI Chat)", id="command-input")
+            yield Input(
+                placeholder="Enter command…  (Tab=complete  ↑↓=history  F3=AI Chat)",
+                id="command-input",
+                classes="bashcrawl-command-input",
+            )
         yield Footer()
 
     # ------------------------------------------------------------------
@@ -510,22 +536,27 @@ class BashcrawlApp(App):
     # ------------------------------------------------------------------
 
     def on_mount(self) -> None:
-        from .terminal_engine import TerminalEngine
+        from .session import GameSession
 
-        self._engine = TerminalEngine(
-            state=self.game_state,
-            fs=self.fs,
+        self._session = GameSession(
+            self.game_state,
+            self.fs,
             output_callback=self._print_output,
             on_quest_complete=self._on_quest_complete,
         )
+        self._engine = self._session.engine
         self._update_subtitle()
         self._refresh_sidebar()
         self._print_welcome()
         self.query_one("#command-input", Input).focus()
 
         # Startup screens are pushed AFTER mount so the main UI is ready underneath.
-        # In agent mode, skip modal screens entirely.
-        if self.agent_mode:
+        # In agent mode, browser web mode, or browser automation, skip modal screens.
+        if (
+            self.agent_mode
+            or os.environ.get("BASHCRAWL_WEB_MODE") == "1"
+            or os.environ.get("BASHCRAWL_BROWSER_AUTOMATION") == "1"
+        ):
             self._update_subtitle()
             self._refresh_sidebar()
             return

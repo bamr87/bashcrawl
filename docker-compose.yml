@@ -1,0 +1,13 @@
+services:
+  bashcrawl:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - game-sessions:/app/.game_data/sessions
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    restart: unless-stopped
+
+volumes:
+  game-sessions:

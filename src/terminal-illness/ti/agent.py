@@ -28,10 +28,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Optional
+
+from .mcp_session import HeadlessSession
 
 
 def _find_game_root() -> Path:
@@ -47,46 +48,43 @@ def _find_game_root() -> Path:
     raise FileNotFoundError("Cannot find bashcrawl game root.")
 
 
+def _sanitize(s: str) -> str:
+    """Sanitize a string for use in a filename."""
+    return "".join(c if c.isalnum() or c in "-_" else "_" for c in s)[:40]
+
+
 async def _run_agent(
     game_root: Path,
     screenshot_dir: Path,
     auto_screenshot: bool = True,
 ) -> None:
-    """Main async loop: drive the Textual app via its Pilot API."""
-    from .filesystem import GameFileSystem
-    from .game_state import GameState
-    from .app import BashcrawlApp
+    """Main async loop: drive the Textual app via HeadlessSession (Pilot API)."""
     from datetime import datetime
 
-    fs = GameFileSystem(game_root)
-    state = GameState.load(save_path=game_root / ".ti_save.json")
+    save_path = game_root / ".ti_save.json"
+    hs = HeadlessSession(game_root, save_path=save_path)
+    await hs.start()
+    state = hs.app.game_state
 
-    # Set a player name so the app doesn't think it's a fresh game
-    state.player_name = state.player_name or "Agent"
-
-    app = BashcrawlApp(state=state, fs=fs, agent_mode=True)
-
-    # Ensure the screenshot directory exists
     screenshot_dir.mkdir(parents=True, exist_ok=True)
-
     cmd_counter = 0
     manifest_entries: list[dict] = []
 
     def _record_screenshot(path: Path, trigger: str, command: str = "", room: str = "") -> None:
-        """Record a screenshot entry for the manifest."""
         size = path.stat().st_size if path.exists() else 0
-        manifest_entries.append({
-            "name": path.name,
-            "path": str(path),
-            "trigger": trigger,
-            "command": command,
-            "room": room,
-            "ts": datetime.now().isoformat(timespec="seconds"),
-            "size_bytes": size,
-        })
+        manifest_entries.append(
+            {
+                "name": path.name,
+                "path": str(path),
+                "trigger": trigger,
+                "command": command,
+                "room": room,
+                "ts": datetime.now().isoformat(timespec="seconds"),
+                "size_bytes": size,
+            }
+        )
 
     def _write_manifest() -> None:
-        """Write the manifest.json for this session."""
         total_size = sum(e["size_bytes"] for e in manifest_entries)
         manifest = {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -98,27 +96,20 @@ async def _run_agent(
         manifest_path = screenshot_dir / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2))
 
-    print(f"BASHCRAWL AGENT TUI v1.0", flush=True)
+    print("BASHCRAWL AGENT TUI v1.0", flush=True)
     print(f"Game root: {game_root}", flush=True)
     print(f"Screenshots: {screenshot_dir}", flush=True)
-    print(f"Send commands one per line. Meta: SCREENSHOT, STATUS, EXIT", flush=True)
+    print("Send commands one per line. Meta: SCREENSHOT, STATUS, EXIT", flush=True)
 
-    async with app.run_test(size=(120, 40)) as pilot:
-        # Wait for mount to complete
-        await pilot.pause()
-        await asyncio.sleep(0.1)
-        await pilot.pause()
-
-        # Take initial screenshot
+    try:
         if auto_screenshot:
             path = screenshot_dir / "000_initial.svg"
-            app.save_screenshot(str(path))
+            hs.save_screenshot(path)
             _record_screenshot(path, "agent_auto", command="(startup)")
             print(f"SCREENSHOT: {path}", flush=True)
 
         print("READY>", flush=True)
 
-        # Read commands from stdin line by line
         loop = asyncio.get_event_loop()
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
@@ -140,10 +131,9 @@ async def _run_agent(
 
             upper = line.upper().strip()
 
-            # Meta-commands
             if upper == "EXIT" or upper == "QUIT":
                 _write_manifest()
-                state.save(save_path=game_root / ".ti_save.json")
+                state.save(save_path=save_path)
                 print("SESSION ENDED", flush=True)
                 print("READY>", flush=True)
                 break
@@ -157,7 +147,7 @@ async def _run_agent(
                 if not filename.endswith(".svg"):
                     filename += ".svg"
                 path = screenshot_dir / filename
-                app.save_screenshot(str(path))
+                hs.save_screenshot(str(path))
                 _record_screenshot(path, "explicit", command=line)
                 print(f"SCREENSHOT: {path}", flush=True)
                 print("READY>", flush=True)
@@ -179,39 +169,26 @@ async def _run_agent(
                 print("READY>", flush=True)
                 continue
 
-            # Regular game command — type it into the Input widget and submit
             cmd_counter += 1
             print(f"CMD> {line}", flush=True)
 
             try:
-                inp = app.query_one("#command-input")
-                inp.value = line
-                # In Textual 8+, action_submit is async
-                await inp.action_submit()
-                # Give the app time to process
-                await pilot.pause()
-                await asyncio.sleep(0.05)
-                await pilot.pause()
+                await hs.submit_command(line)
             except Exception as exc:
                 print(f"ERROR: {exc}", flush=True)
 
-            # Auto-screenshot after each command
             if auto_screenshot:
                 path = screenshot_dir / f"{cmd_counter:03d}_{_sanitize(line)}.svg"
-                app.save_screenshot(str(path))
+                hs.save_screenshot(str(path))
                 _record_screenshot(path, "agent_auto", command=line, room=state.current_location)
                 print(f"SCREENSHOT: {path}", flush=True)
 
             print("READY>", flush=True)
 
-        # Final save
         _write_manifest()
-        state.save(save_path=game_root / ".ti_save.json")
-
-
-def _sanitize(s: str) -> str:
-    """Sanitize a string for use in a filename."""
-    return "".join(c if c.isalnum() or c in "-_" else "_" for c in s)[:40]
+        state.save(save_path=save_path)
+    finally:
+        await hs.stop()
 
 
 def main() -> None:

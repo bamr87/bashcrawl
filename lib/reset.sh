@@ -291,6 +291,14 @@ for player_dir in workshop; do
     fi
 done
 
+# Some test/tool flows create workshop/ at the repo root; this is also
+# runtime player state and should be removed on reset.
+root_workshop="$GAME_ROOT/workshop"
+if [[ -d "$root_workshop" ]]; then
+    log "Removing player-created directory: workshop/"
+    $DRY_RUN || rm -rf "$root_workshop"
+fi
+
 # ---- § 17  Unset game environment variables --------------------------------
 log "Unsetting game env vars (I, HP, GAME_LEVEL, CURRENT_AREA)"
 if ! $DRY_RUN; then

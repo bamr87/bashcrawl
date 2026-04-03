@@ -71,3 +71,6 @@ test/reports/
 test/.pytest_cache/
 .pytest_cache/
 .env
+
+# Local virtualenv
+.venv/

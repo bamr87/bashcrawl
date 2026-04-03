@@ -70,7 +70,7 @@ class GameState:
             self.env_vars[key] = value
 
     def save(self, save_path: Optional[Path] = None) -> None:
-        target = save_path or Path.cwd() / SAVE_FILE_NAME
+        target = save_path or getattr(self, "_save_path", None) or Path.cwd() / SAVE_FILE_NAME
         data = asdict(self)
         # Normalise location: strip leading "/" for bash compatibility
         loc = data.get("current_location", "entrance")

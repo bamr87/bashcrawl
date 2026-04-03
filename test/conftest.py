@@ -8,6 +8,7 @@ Provides:
 - log_capture: (autouse) TestLogCapture for JSONL event tracking — every test
 - screenshot_dir: (autouse) Session-specific screenshot directory
 - screenshot_capture: (autouse) ScreenshotCapture wired to log_capture
+- mcp_session: GameSession on sandbox (engine API for MCP-related tests)
 - test_run_id: (session-scoped) Shared run ID grouping all tests in one invocation
 - ai_agent: TestAgent (only for @pytest.mark.ai tests)
 """
@@ -269,6 +270,14 @@ def screenshot_capture(
     manifest_path = screenshot_dir / "manifest.json"
     if not manifest_path.exists():
         cap.write_manifest()
+
+
+@pytest.fixture
+def mcp_session(sandbox: Path):
+    """``GameSession`` on an isolated sandbox (engine-only API, no Textual)."""
+    from ti.session import GameSession
+
+    return GameSession.load(sandbox, ensure_web_save_path=False)
 
 
 @pytest.fixture

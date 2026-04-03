@@ -4,6 +4,7 @@
 #   make setup          One-time game setup (quick mode)
 #   make install-deps   Install all Python dependencies
 #   make test           Run unit + integration tests
+#   make test-mcp       Run MCP integration tests in .venv
 #   make test-ai        Run AI playthrough tests (needs ANTHROPIC_API_KEY)
 #   make lint           Run shellcheck, yamllint, markdownlint
 #   make lint-shell     Run shellcheck only
@@ -49,6 +50,10 @@ test-integration: ## Run integration tests only
 .PHONY: test-ai
 test-ai: ## Run AI playthrough tests (needs ANTHROPIC_API_KEY)
 	cd test && $(PYTEST) -m ai -v --tb=short --timeout=120
+
+.PHONY: test-mcp
+test-mcp: ## Run MCP integration tests in local .venv
+	@bash scripts/test_mcp.sh
 
 .PHONY: test-demo
 test-demo: ## Run demo walkthrough tests

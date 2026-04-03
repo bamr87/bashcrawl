@@ -1,0 +1,681 @@
+{
+  "generated_at": "2026-04-03T15:33:46.200586",
+  "screenshot_dir": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough",
+  "total_screenshots": 67,
+  "total_size_bytes": 5953751,
+  "screenshots": [
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/000_initial.svg",
+      "name": "000_initial.svg",
+      "trigger": "agent_auto",
+      "command": "initial",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.195992",
+      "size_bytes": 74501
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/001_pwd.svg",
+      "name": "001_pwd.svg",
+      "trigger": "agent_auto",
+      "command": "pwd",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196570",
+      "size_bytes": 76560
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/001_entrance_pwd.svg",
+      "name": "001_entrance_pwd.svg",
+      "trigger": "agent_auto",
+      "command": "entrance pwd",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196696",
+      "size_bytes": 76560,
+      "walkthrough_step_id": "cp_01",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/002_ls.svg",
+      "name": "002_ls.svg",
+      "trigger": "agent_auto",
+      "command": "ls",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196774",
+      "size_bytes": 78105
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/002_entrance_ls.svg",
+      "name": "002_entrance_ls.svg",
+      "trigger": "agent_auto",
+      "command": "entrance ls",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196846",
+      "size_bytes": 78105,
+      "walkthrough_step_id": "cp_02",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/003_cat_scroll.svg",
+      "name": "003_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196916",
+      "size_bytes": 79757
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/003_entrance_scroll.svg",
+      "name": "003_entrance_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "entrance scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.196983",
+      "size_bytes": 79757,
+      "walkthrough_step_id": "cp_03",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/004_cd_cellar.svg",
+      "name": "004_cd_cellar.svg",
+      "trigger": "agent_auto",
+      "command": "cd cellar",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197041",
+      "size_bytes": 80898,
+      "walkthrough_step_id": "cp_04",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/004_cd_cellar.svg",
+      "name": "004_cd_cellar.svg",
+      "trigger": "agent_auto",
+      "command": "cd cellar",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197105",
+      "size_bytes": 80898,
+      "walkthrough_step_id": "cp_04",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/005_cat_scroll.svg",
+      "name": "005_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197183",
+      "size_bytes": 82978
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/005_cellar_scroll.svg",
+      "name": "005_cellar_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cellar scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197242",
+      "size_bytes": 82978,
+      "walkthrough_step_id": "cp_05",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/006_ls_-F.svg",
+      "name": "006_ls_-F.svg",
+      "trigger": "agent_auto",
+      "command": "ls -F",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197308",
+      "size_bytes": 84258
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/006_cellar_ls_f.svg",
+      "name": "006_cellar_ls_f.svg",
+      "trigger": "agent_auto",
+      "command": "cellar ls f",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197367",
+      "size_bytes": 84258,
+      "walkthrough_step_id": "cp_06",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/007___treasure.svg",
+      "name": "007___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "  treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197463",
+      "size_bytes": 86320
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/007_cellar_treasure.svg",
+      "name": "007_cellar_treasure.svg",
+      "trigger": "agent_auto",
+      "command": "cellar treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197531",
+      "size_bytes": 86320,
+      "walkthrough_step_id": "cp_07",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/008_export_I_amulet__I.svg",
+      "name": "008_export_I_amulet__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I amulet  I",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197598",
+      "size_bytes": 91322
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/008_cellar_export.svg",
+      "name": "008_cellar_export.svg",
+      "trigger": "agent_auto",
+      "command": "cellar export",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197663",
+      "size_bytes": 91322,
+      "walkthrough_step_id": "cp_08",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/009_cd_armoury.svg",
+      "name": "009_cd_armoury.svg",
+      "trigger": "agent_auto",
+      "command": "cd armoury",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197722",
+      "size_bytes": 92976,
+      "walkthrough_step_id": "cp_09",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/009_cd_armoury.svg",
+      "name": "009_cd_armoury.svg",
+      "trigger": "agent_auto",
+      "command": "cd armoury",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197782",
+      "size_bytes": 92976,
+      "walkthrough_step_id": "cp_09",
+      "walkthrough_room": "entrance/cellar"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/010_cat_scroll.svg",
+      "name": "010_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197835",
+      "size_bytes": 92232
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/010_armoury_scroll.svg",
+      "name": "010_armoury_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "armoury scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197894",
+      "size_bytes": 92232,
+      "walkthrough_step_id": "cp_10",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/011_ls_-F.svg",
+      "name": "011_ls_-F.svg",
+      "trigger": "agent_auto",
+      "command": "ls -F",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.197953",
+      "size_bytes": 87932
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/011_armoury_ls_f.svg",
+      "name": "011_armoury_ls_f.svg",
+      "trigger": "agent_auto",
+      "command": "armoury ls f",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198006",
+      "size_bytes": 87932,
+      "walkthrough_step_id": "cp_11",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/012___treasure.svg",
+      "name": "012___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "  treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198059",
+      "size_bytes": 88692
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/012_armoury_treasure.svg",
+      "name": "012_armoury_treasure.svg",
+      "trigger": "agent_auto",
+      "command": "armoury treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198112",
+      "size_bytes": 88692,
+      "walkthrough_step_id": "cp_12",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/013_export_I_sword__I.svg",
+      "name": "013_export_I_sword__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I sword  I",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198165",
+      "size_bytes": 91005
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/013_armoury_sword.svg",
+      "name": "013_armoury_sword.svg",
+      "trigger": "agent_auto",
+      "command": "armoury sword",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198221",
+      "size_bytes": 91005,
+      "walkthrough_step_id": "cp_13",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/014_export_HP_15.svg",
+      "name": "014_export_HP_15.svg",
+      "trigger": "agent_auto",
+      "command": "export HP 15",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198297",
+      "size_bytes": 92313
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/015_armoury_hp.svg",
+      "name": "015_armoury_hp.svg",
+      "trigger": "agent_auto",
+      "command": "armoury hp",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198355",
+      "size_bytes": 92313,
+      "walkthrough_step_id": "cp_15",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/015_cd_chamber.svg",
+      "name": "015_cd_chamber.svg",
+      "trigger": "agent_auto",
+      "command": "cd chamber",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198414",
+      "size_bytes": 91741
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/016_cd_chamber.svg",
+      "name": "016_cd_chamber.svg",
+      "trigger": "agent_auto",
+      "command": "cd chamber",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198480",
+      "size_bytes": 91741,
+      "walkthrough_step_id": "cp_16",
+      "walkthrough_room": "entrance/cellar/armoury"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/016_cat_scroll.svg",
+      "name": "016_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198538",
+      "size_bytes": 92556
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/017_chamber_scroll.svg",
+      "name": "017_chamber_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "chamber scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198592",
+      "size_bytes": 92556,
+      "walkthrough_step_id": "cp_17",
+      "walkthrough_room": "entrance/cellar/armoury/chamber"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/017___statue.svg",
+      "name": "017___statue.svg",
+      "trigger": "agent_auto",
+      "command": "  statue",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198653",
+      "size_bytes": 92615
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/018_chamber_statue.svg",
+      "name": "018_chamber_statue.svg",
+      "trigger": "agent_auto",
+      "command": "chamber statue",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198710",
+      "size_bytes": 92615,
+      "walkthrough_step_id": "cp_18",
+      "walkthrough_room": "entrance/cellar/armoury/chamber"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/018___treasure.svg",
+      "name": "018___treasure.svg",
+      "trigger": "agent_auto",
+      "command": "  treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198763",
+      "size_bytes": 92149
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/019_chamber_treasure.svg",
+      "name": "019_chamber_treasure.svg",
+      "trigger": "agent_auto",
+      "command": "chamber treasure",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198822",
+      "size_bytes": 92149,
+      "walkthrough_step_id": "cp_19",
+      "walkthrough_room": "entrance/cellar/armoury/chamber"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/019_export_I_coins__I.svg",
+      "name": "019_export_I_coins__I.svg",
+      "trigger": "agent_auto",
+      "command": "export I coins  I",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198874",
+      "size_bytes": 91920
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/020_chamber_coins.svg",
+      "name": "020_chamber_coins.svg",
+      "trigger": "agent_auto",
+      "command": "chamber coins",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198926",
+      "size_bytes": 91920,
+      "walkthrough_step_id": "cp_20",
+      "walkthrough_room": "entrance/cellar/armoury/chamber"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/020_cd__________.svg",
+      "name": "020_cd__________.svg",
+      "trigger": "agent_auto",
+      "command": "cd          ",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.198978",
+      "size_bytes": 92104
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/021_back_to_entrance.svg",
+      "name": "021_back_to_entrance.svg",
+      "trigger": "agent_auto",
+      "command": "back to entrance",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199031",
+      "size_bytes": 92104,
+      "walkthrough_step_id": "cp_21",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/021_mkdir_workshop.svg",
+      "name": "021_mkdir_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "mkdir workshop",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199105",
+      "size_bytes": 93082
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/022_mkdir_workshop.svg",
+      "name": "022_mkdir_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "mkdir workshop",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199154",
+      "size_bytes": 93082,
+      "walkthrough_step_id": "cp_22",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/022_cd_workshop.svg",
+      "name": "022_cd_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "cd workshop",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199205",
+      "size_bytes": 92847
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/023_cd_workshop.svg",
+      "name": "023_cd_workshop.svg",
+      "trigger": "agent_auto",
+      "command": "cd workshop",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199252",
+      "size_bytes": 92847,
+      "walkthrough_step_id": "cp_23",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/023_touch_notes_txt.svg",
+      "name": "023_touch_notes_txt.svg",
+      "trigger": "agent_auto",
+      "command": "touch notes txt",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199300",
+      "size_bytes": 91651
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/024_touch_notes.svg",
+      "name": "024_touch_notes.svg",
+      "trigger": "agent_auto",
+      "command": "touch notes",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199348",
+      "size_bytes": 91651,
+      "walkthrough_step_id": "cp_24",
+      "walkthrough_room": "entrance/workshop"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/024_cat_notes_txt.svg",
+      "name": "024_cat_notes_txt.svg",
+      "trigger": "agent_auto",
+      "command": "cat notes txt",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199396",
+      "size_bytes": 91674
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/025_cat_notes.svg",
+      "name": "025_cat_notes.svg",
+      "trigger": "agent_auto",
+      "command": "cat notes",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199443",
+      "size_bytes": 91674,
+      "walkthrough_step_id": "cp_25",
+      "walkthrough_room": "entrance/workshop"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/025_cd_rift.svg",
+      "name": "025_cd_rift.svg",
+      "trigger": "agent_auto",
+      "command": "cd rift",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199492",
+      "size_bytes": 91009
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/400_cd_rift.svg",
+      "name": "400_cd_rift.svg",
+      "trigger": "agent_auto",
+      "command": "cd rift",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199541",
+      "size_bytes": 91009,
+      "walkthrough_step_id": "rift_01",
+      "walkthrough_room": "entrance"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/026_cat_scroll.svg",
+      "name": "026_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199590",
+      "size_bytes": 91213
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/401_rift_scroll.svg",
+      "name": "401_rift_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "rift scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199638",
+      "size_bytes": 91213,
+      "walkthrough_step_id": "rift_02",
+      "walkthrough_room": "entrance/.rift"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/027_cd_arena.svg",
+      "name": "027_cd_arena.svg",
+      "trigger": "agent_auto",
+      "command": "cd arena",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199688",
+      "size_bytes": 90966
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/402_cd_arena.svg",
+      "name": "402_cd_arena.svg",
+      "trigger": "agent_auto",
+      "command": "cd arena",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199735",
+      "size_bytes": 90966,
+      "walkthrough_step_id": "rift_03",
+      "walkthrough_room": "entrance/.rift"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/028_cat_scroll.svg",
+      "name": "028_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199803",
+      "size_bytes": 90988
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/403_arena_scroll.svg",
+      "name": "403_arena_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "arena scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199848",
+      "size_bytes": 90988,
+      "walkthrough_step_id": "rift_04",
+      "walkthrough_room": "entrance/.rift/arena"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/029_cd_pit.svg",
+      "name": "029_cd_pit.svg",
+      "trigger": "agent_auto",
+      "command": "cd pit",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199893",
+      "size_bytes": 90213
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/404_cd_pit.svg",
+      "name": "404_cd_pit.svg",
+      "trigger": "agent_auto",
+      "command": "cd pit",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199939",
+      "size_bytes": 90213,
+      "walkthrough_step_id": "rift_05",
+      "walkthrough_room": "entrance/.rift/arena"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/030_cat_scroll.svg",
+      "name": "030_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.199984",
+      "size_bytes": 89337
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/405_pit_scroll.svg",
+      "name": "405_pit_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "pit scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200029",
+      "size_bytes": 89337,
+      "walkthrough_step_id": "rift_06",
+      "walkthrough_room": "entrance/.rift/arena/pit"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/031_cat_end.svg",
+      "name": "031_cat_end.svg",
+      "trigger": "agent_auto",
+      "command": "cat end",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200075",
+      "size_bytes": 89100
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/406_pit_end.svg",
+      "name": "406_pit_end.svg",
+      "trigger": "agent_auto",
+      "command": "pit end",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200119",
+      "size_bytes": 89100,
+      "walkthrough_step_id": "rift_07",
+      "walkthrough_room": "entrance/.rift/arena/pit"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/032_cd____spire.svg",
+      "name": "032_cd____spire.svg",
+      "trigger": "agent_auto",
+      "command": "cd    spire",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200165",
+      "size_bytes": 90031
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/407_cd_spire.svg",
+      "name": "407_cd_spire.svg",
+      "trigger": "agent_auto",
+      "command": "cd spire",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200209",
+      "size_bytes": 90031,
+      "walkthrough_step_id": "rift_08",
+      "walkthrough_room": "entrance/.rift"
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/033_cat_scroll.svg",
+      "name": "033_cat_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "cat scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200254",
+      "size_bytes": 89081
+    },
+    {
+      "path": "/Users/bamr87/github/bashcrawl/logs/screenshots/2026-04-03_153340_test_hidden_path_rift_walkthrough/408_spire_scroll.svg",
+      "name": "408_spire_scroll.svg",
+      "trigger": "agent_auto",
+      "command": "spire scroll",
+      "room": "",
+      "ts": "2026-04-03T15:33:46.200299",
+      "size_bytes": 89081,
+      "walkthrough_step_id": "rift_09",
+      "walkthrough_room": "entrance/.rift/spire"
+    }
+  ]
+}

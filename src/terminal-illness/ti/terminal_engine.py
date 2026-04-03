@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -51,6 +52,23 @@ class CommandSpec:
     help_text: str
 
 
+def _normalize_merged_cmd_line(cmd_line: str) -> str:
+    """Fix single-token commands where a space was lost (common in Textual web / browser automation).
+
+    Examples: ``cdcellar`` → ``cd cellar``, ``cd../x`` → ``cd ../x``
+    """
+    s = cmd_line.strip()
+    if not s or " " in s:
+        return s
+    # Only merge when the whole line is one shell token
+    m = re.fullmatch(r"cd([a-zA-Z0-9_.\/-]+)", s)
+    if m and len(s) > 2:
+        rest = m.group(1)
+        if rest:
+            return f"cd {rest}"
+    return s
+
+
 class TerminalEngine:
     def __init__(
         self,
@@ -90,6 +108,7 @@ class TerminalEngine:
         if not cmd_line.strip():
             return None
 
+        cmd_line = _normalize_merged_cmd_line(cmd_line)
         parts = cmd_line.strip().split()
         cmd, args = parts[0], parts[1:]
 

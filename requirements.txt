@@ -15,6 +15,12 @@ anthropic>=0.40.0
 # Environment variable loading
 python-dotenv>=1.0
 
+# Browser TUI (serve Textual app in a web browser)
+textual-serve>=1.1.0
+
+# MCP server for AI / IDE integration (bashcrawl_start, bashcrawl_command, …)
+mcp>=1.0.0
+
 # Observatory log viewer
 flask>=3.0
 markdown>=3.5
