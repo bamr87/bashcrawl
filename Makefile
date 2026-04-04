@@ -41,7 +41,7 @@ help: ## Show this help message
 # ============================================================================
 
 setup: ## Run game setup locally
-	bash setup.sh --quick
+	bash setup.sh
 
 play: ## Play the game locally (bash)
 	bash main.sh --interactive
@@ -61,7 +61,7 @@ lint: ## Run all linters locally
 	markdownlint '**/*.md' --config .markdownlint.json
 
 viewer: ## Start the log viewer locally on :5000 (localhost only for security)
-	python3 -m viewer --host 127.0.0.1 --port 5000 --game-root .
+	python3 -m src.viewer --host 127.0.0.1 --port 5000 --game-root .
 
 # ============================================================================
 # Docker targets

@@ -116,7 +116,7 @@
         {
             "label": "🌐 Local: Start Viewer",
             "type": "shell",
-            "command": "python3 -m viewer --host 127.0.0.1 --port 5000 --game-root .",
+            "command": "python3 -m src.viewer --host 127.0.0.1 --port 5000 --game-root .",
             "group": "none",
             "isBackground": true,
             "problemMatcher": []

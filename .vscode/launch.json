@@ -126,7 +126,8 @@
 
         // ── Docker: debug tests inside container ─────────────────────────
         // Attach to a pytest session running in the test container with
-        // debugpy listening on port 5678.
+        // debugpy listening on port 5678. debugpy is pre-installed in the
+        // python-base image.
         //
         // HOW TO USE:
         //   1. Start the test container with debugpy:
@@ -153,6 +154,7 @@
 
         // ── Docker: debug TUI inside container ──────────────────────────
         // Attach to the Textual TUI running with debugpy in a container.
+        // debugpy is pre-installed in the python-base image.
         //
         // HOW TO USE:
         //   1. Start TUI container with debugpy:

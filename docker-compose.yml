@@ -61,7 +61,7 @@ services:
     image: bashcrawl-viewer
     container_name: bashcrawl-viewer
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     volumes:
       - game-logs:/opt/bashcrawl/logs
     env_file:

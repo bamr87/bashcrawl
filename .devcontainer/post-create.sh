@@ -39,13 +39,13 @@ pip install --no-cache-dir -r test/requirements.txt
 # Node.js tools
 # --------------------------------------------------------------------------
 echo "📦 Installing markdownlint..."
-npm install -g markdownlint-cli
+npm install -g markdownlint-cli@0.44.0
 
 # --------------------------------------------------------------------------
 # Game setup
 # --------------------------------------------------------------------------
 echo "🎮 Running game setup..."
-bash setup.sh --quick 2>/dev/null || true
+bash setup.sh
 
 # --------------------------------------------------------------------------
 # Environment file

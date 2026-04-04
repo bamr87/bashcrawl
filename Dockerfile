@@ -53,9 +53,11 @@ COPY src/help/ src/help/
 COPY .shellcheckrc .env.example ./
 COPY .ancient_codex_of_terminal_mastery ./
 
-# Make game files executable
-RUN bash setup.sh --quick 2>/dev/null || true
-RUN chmod +x main.sh setup.sh help.sh
+# Initialize game state and make game files executable
+RUN chmod +x main.sh setup.sh help.sh && \
+    find entrance -type f \( -name "treasure" -o -name "potion" -o -name "spell" \
+      -o -name "ghost" -o -name "monster" -o -name "statue" -o -name "goblet" \) \
+      -exec chmod +x {} +
 
 # ============================================================================
 # Stage: game — lightweight bash-only game (default target)
@@ -84,8 +86,9 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv ${VIRTUAL_ENV}
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
-# Upgrade pip
-RUN pip install --no-cache-dir --upgrade pip
+# Upgrade pip and install debugpy for container debugging
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir debugpy>=1.8
 
 # ============================================================================
 # Stage: tui — Python Textual terminal-illness TUI
@@ -167,11 +170,12 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv ${VIRTUAL_ENV}
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
-RUN pip install --no-cache-dir yamllint
-RUN npm install -g markdownlint-cli
+RUN pip install --no-cache-dir yamllint==1.38.0
+RUN npm install -g markdownlint-cli@0.44.0
 
-# Copy config files needed for linting
+# Copy config files and content needed for linting
 COPY .yamllint.yml .markdownlint.json ./
+COPY *.md ./
 COPY docs/ docs/
 COPY .github/ .github/
 
