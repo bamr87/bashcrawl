@@ -5,11 +5,16 @@ to clean up without actually mutating the real game.
 """
 
 import subprocess
+import sys
+
 import pytest
 
 pytestmark = pytest.mark.unit
 
+_IS_WINDOWS = sys.platform == "win32"
 
+
+@pytest.mark.skipif(_IS_WINDOWS, reason="lib/reset.sh requires bash")
 class TestResetDryRun:
     """Tests for lib/reset.sh --dry mode."""
 
@@ -46,6 +51,7 @@ class TestResetDryRun:
         assert vault_hidden.exists() == vault_exists_before
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="lib/reset.sh requires bash")
 class TestResetInSandbox:
     """Tests for lib/reset.sh actual reset in a sandbox."""
 

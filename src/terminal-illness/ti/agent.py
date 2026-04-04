@@ -32,6 +32,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from .game_state import SAVE_FILE_NAME
 from .mcp_session import HeadlessSession
 
 
@@ -61,7 +62,9 @@ async def _run_agent(
     """Main async loop: drive the Textual app via HeadlessSession (Pilot API)."""
     from datetime import datetime
 
-    save_path = game_root / ".ti_save.json"
+    # Use unified save (same as HeadlessSession default) so legacy .ti_save.json
+    # cannot override .bashcrawl_save.json when both exist locally.
+    save_path = game_root / SAVE_FILE_NAME
     hs = HeadlessSession(game_root, save_path=save_path)
     await hs.start()
     state = hs.app.game_state

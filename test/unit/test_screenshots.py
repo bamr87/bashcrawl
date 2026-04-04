@@ -8,11 +8,14 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
 pytestmark = pytest.mark.unit
+
+_IS_WINDOWS = sys.platform == "win32"
 
 
 # ---------------------------------------------------------------------------
@@ -290,6 +293,7 @@ class TestScreenshotFixtures:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.skipif(_IS_WINDOWS, reason="lib/log.sh requires bash")
 class TestBashLogScreenshot:
     """Tests for lib/log.sh bc_log_screenshot function."""
 

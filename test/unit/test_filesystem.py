@@ -174,6 +174,10 @@ class TestQueryHelpers:
         assert any("cellar" in m for m in matches)
 
 
+@pytest.mark.skipif(
+    _IS_WINDOWS,
+    reason="run_script expects Unix bash script output/encoding; not asserted on Windows",
+)
 class TestScriptExecution:
     """Tests for run_script."""
 

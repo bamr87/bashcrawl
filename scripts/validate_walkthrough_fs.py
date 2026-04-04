@@ -13,37 +13,12 @@ import json
 import sys
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_TEST_ROOT = _REPO_ROOT / "test"
+if str(_TEST_ROOT) not in sys.path:
+    sys.path.insert(0, str(_TEST_ROOT))
 
-def resolve_logical_path(root: Path, rel: str) -> Path | None:
-    """Return a path that exists on disk, or None.
-
-    *rel* uses forward slashes relative to *root* (no leading slash).
-    """
-    parts = rel.replace("\\", "/").strip("/").split("/")
-    if not parts or parts == [""]:
-        return None
-    cur = root
-    for i, part in enumerate(parts):
-        is_last = i == len(parts) - 1
-        nxt = cur / part
-        if is_last:
-            if nxt.exists():
-                return nxt
-            if not part.startswith("."):
-                alt = cur / f".{part}"
-                if alt.exists():
-                    return alt
-            return None
-        if nxt.is_dir():
-            cur = nxt
-            continue
-        if not part.startswith("."):
-            alt = cur / f".{part}"
-            if alt.is_dir():
-                cur = alt
-                continue
-        return None
-    return cur
+from fixtures.logical_paths import resolve_logical_path  # noqa: E402
 
 
 def main() -> int:
