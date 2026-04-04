@@ -1,22 +1,77 @@
+# Git
 .git
-.github
+.gitignore
+
+# GitHub metadata (except workflows needed for lint stage)
+.github/ISSUE_TEMPLATE
+.github/prompts
+.github/instructions
+.github/agents
+.github/copilot-instructions.md
+.github/dependabot.yml
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Environment secrets
 .env
 .env.*
 !.env.example
+
+# Game runtime state (regenerated during play)
 .bashcrawl_save.json
 .ti_save.json
-.setup_complete
+.game_state
+.game_history
 .game_data/
+.setup_complete
+
+# Player-unlocked areas (transient game state)
+entrance/chapel/
+entrance/vault/
+entrance/scrap/
+entrance/rift/
+entrance/workshop/
+
+# Combat artifacts
+entrance/**/corpse.*
+entrance/**/.corpse.*.looted
+entrance/**/.statue_defeated
+
+# Logs (mounted as volume at runtime)
 logs/
-*.pyc
+
+# Test reports and caches
+test/reports/
+test/.pytest_cache/
+.pytest_cache/
 __pycache__
-.pytest_cache
+*.pyc
 .mypy_cache
 .ruff_cache
 node_modules
-.DS_Store
 *.egg-info
 dist
 build
 .venv
 venv
+
+# Screenshots
+screenshots/
+
+# Backups
+.backups
+
+# Documentation build artifacts
+docs/_build/
+
+# Temporary files
+*.tmp

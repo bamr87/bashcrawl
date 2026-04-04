@@ -9,6 +9,8 @@
 #   make lint           Run shellcheck, yamllint, markdownlint
 #   make lint-shell     Run shellcheck only
 #   make clean          Reset game state to defaults
+#   make docker-build   Build all Docker images (compose)
+#   make docker-web     Run web + MCP on :8080
 #   make help           Show this help
 
 .DEFAULT_GOAL := help
@@ -19,6 +21,7 @@ PYTHON := python3
 PIP := pip3
 PYTEST := $(PYTHON) -m pytest
 SHELLCHECK := shellcheck
+COMPOSE := docker compose
 
 export PYTHONPATH := $(GAME_ROOT)/src/terminal-illness:$(GAME_ROOT)/test
 export BASHCRAWL_ROOT := $(GAME_ROOT)
@@ -80,7 +83,42 @@ lint-shell: ## Run ShellCheck on all shell scripts
 		fi; \
 	done
 
-# ── Maintenance ────────────────────────────────────────────────────────
+# ── Docker (compose) ───────────────────────────────────────────────────
+
+.PHONY: docker-build docker-game docker-tui docker-viewer docker-web \
+        docker-test docker-test-unit docker-test-integration docker-lint docker-clean
+
+docker-build: ## Build all Docker images
+	$(COMPOSE) build
+
+docker-game: ## Play the game in Docker (interactive bash)
+	$(COMPOSE) run --rm game
+
+docker-tui: ## Launch the Textual TUI in Docker
+	$(COMPOSE) run --rm tui
+
+docker-viewer: ## Start the log viewer in Docker on :5000
+	$(COMPOSE) up viewer
+
+docker-web: ## Run web UI + MCP in Docker on :8080
+	$(COMPOSE) up web
+
+docker-test: ## Run full test suite in Docker
+	$(COMPOSE) run --rm test
+
+docker-test-unit: ## Run unit tests in Docker
+	$(COMPOSE) run --rm test-unit
+
+docker-test-integration: ## Run integration tests in Docker
+	$(COMPOSE) run --rm test-integration
+
+docker-lint: ## Run all linters in Docker
+	$(COMPOSE) run --rm lint
+
+docker-clean: ## Remove compose services, images, and volumes
+	$(COMPOSE) down --rmi all --volumes --remove-orphans 2>/dev/null || true
+
+# ── Maintenance ───────────────────────────────────────────────────────
 
 .PHONY: clean
 clean: ## Reset game state to defaults
@@ -99,4 +137,4 @@ clean-all: clean ## Reset game state and remove generated files
 .PHONY: help
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'

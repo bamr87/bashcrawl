@@ -1,6 +1,30 @@
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                  🐳  BASHCRAWL DOCKER COMPOSE  🐳                       ║
+# ║                                                                           ║
+# ║  Orchestrates game, TUI, viewer, web (MCP), test, and lint services       ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+#
+# Usage:
+#   docker compose up game           # Play the bash game
+#   docker compose up tui            # Launch Textual TUI
+#   docker compose up viewer         # Start log viewer on :5000
+#   docker compose up web            # Web UI + MCP on :8080
+#   docker compose run test          # Run pytest suite
+#   docker compose run lint          # Run all linters
+#   docker compose run test-unit     # Run unit tests only
+#   docker compose run test-integration  # Run integration tests only
+
 services:
-  bashcrawl:
-    build: .
+
+  # --------------------------------------------------------------------------
+  # web — Textual web UI + MCP (PR #19)
+  # --------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      target: web
+    image: bashcrawl-web
+    container_name: bashcrawl-web
     ports:
       - "8080:8080"
     volumes:
@@ -9,5 +33,114 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     restart: unless-stopped
 
+  # --------------------------------------------------------------------------
+  # game — interactive bash game
+  # --------------------------------------------------------------------------
+  game:
+    build:
+      context: .
+      target: game
+    image: bashcrawl-game
+    container_name: bashcrawl-game
+    stdin_open: true
+    tty: true
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+
+  # --------------------------------------------------------------------------
+  # tui — Python Textual terminal-illness TUI
+  # --------------------------------------------------------------------------
+  tui:
+    build:
+      context: .
+      target: tui
+    image: bashcrawl-tui
+    container_name: bashcrawl-tui
+    stdin_open: true
+    tty: true
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - TERM=xterm-256color
+
+  # --------------------------------------------------------------------------
+  # viewer — Flask log/screenshot viewer
+  # --------------------------------------------------------------------------
+  viewer:
+    build:
+      context: .
+      target: viewer
+    image: bashcrawl-viewer
+    container_name: bashcrawl-viewer
+    ports:
+      - "5000:5000"
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+
+  # --------------------------------------------------------------------------
+  # test — full pytest suite (unit + integration, excludes AI and demo)
+  # --------------------------------------------------------------------------
+  test:
+    build:
+      context: .
+      target: test
+    image: bashcrawl-test
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+
+  # --------------------------------------------------------------------------
+  # test-unit — unit tests only
+  # --------------------------------------------------------------------------
+  test-unit:
+    build:
+      context: .
+      target: test
+    image: bashcrawl-test
+    command: ["-m", "unit", "-v", "--timeout=30"]
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+
+  # --------------------------------------------------------------------------
+  # test-integration — integration tests only
+  # --------------------------------------------------------------------------
+  test-integration:
+    build:
+      context: .
+      target: test
+    image: bashcrawl-test
+    command: ["-m", "integration", "-v", "--timeout=60"]
+    volumes:
+      - game-logs:/opt/bashcrawl/logs
+    env_file:
+      - path: .env
+        required: false
+
+  # --------------------------------------------------------------------------
+  # lint — ShellCheck + yamllint + markdownlint
+  # --------------------------------------------------------------------------
+  lint:
+    build:
+      context: .
+      target: lint
+    image: bashcrawl-lint
+
 volumes:
+  game-logs:
+    driver: local
   game-sessions:
+    driver: local
