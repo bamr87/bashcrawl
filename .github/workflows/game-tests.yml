@@ -19,12 +19,21 @@ on:
 jobs:
   validate-game:
     name: Validate Game Content
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
     - name: Check scroll files exist in main-path rooms
+      shell: bash
       run: |
         echo "=== Checking required scroll files ==="
         errors=0
@@ -51,6 +60,7 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All required scrolls present." || exit 1
 
     - name: Check game executables have shebangs
+      shell: bash
       run: |
         echo "=== Checking game executable shebangs ==="
         errors=0
@@ -70,6 +80,7 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All shebangs correct." || exit 1
 
     - name: Check game executables have boilerplate
+      shell: bash
       run: |
         echo "=== Checking boilerplate comments ==="
 
@@ -84,6 +95,7 @@ jobs:
         done
 
     - name: Check hidden room unlock targets exist
+      shell: bash
       run: |
         echo "=== Checking unlock mechanism targets ==="
         errors=0
@@ -101,11 +113,13 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All unlock targets present." || exit 1
 
     - name: Run game reset dry-run
+      shell: bash
       run: |
         echo "=== Testing reset script ==="
         bash lib/reset.sh --dry
 
     - name: Validate walkthrough.json against filesystem
+      shell: bash
       run: |
         echo "=== Validating walkthrough.json ==="
         errors=0
@@ -116,7 +130,13 @@ jobs:
         fi
 
         # Check every room in walkthrough.json exists as a directory
-        for room in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in data['rooms']]"); do
+        for room in $(python -c "
+import json
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path in data['rooms']:
+    print(path)
+"); do
           if [[ ! -d "$room" ]]; then
             echo "ERROR: Room directory $room/ does not exist"
             errors=$((errors + 1))
@@ -126,7 +146,14 @@ jobs:
         done
 
         # Check rooms with scroll=true have a scroll file
-        for room in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p,i in data['rooms'].items() if i.get('scroll')]"); do
+        for room in $(python -c "
+import json
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path, info in data['rooms'].items():
+    if info.get('scroll'):
+        print(path)
+"); do
           if [[ ! -f "$room/scroll" ]]; then
             echo "ERROR: $room/ marked scroll=true but no scroll file"
             errors=$((errors + 1))
@@ -136,7 +163,13 @@ jobs:
         done
 
         # Check encounter scripts exist
-        for script in $(python3 -c "import json; data=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in data['encounters']]"); do
+        for script in $(python -c "
+import json
+with open('test/datasets/walkthrough.json') as f:
+    data = json.load(f)
+for path in data['encounters']:
+    print(path)
+"); do
           if [[ ! -f "$script" ]]; then
             echo "ERROR: Encounter script $script does not exist"
             errors=$((errors + 1))

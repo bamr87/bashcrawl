@@ -6,11 +6,14 @@ and script execution.
 """
 
 import os
+import sys
 import pytest
 from pathlib import Path
 
 
 pytestmark = pytest.mark.unit
+
+_IS_WINDOWS = sys.platform == "win32"
 
 
 class TestGameFileSystemInit:
@@ -83,6 +86,7 @@ class TestDirectoryOperations:
         dirs = [i for i in items if i.endswith("/")]
         assert len(dirs) > 0, "Should have at least one subdirectory"
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="Executable bit detection not available on Windows")
     def test_ls_shows_executables_with_star(self, game_fs):
         items = game_fs.ls("/entrance/cellar", "")
         executables = [i for i in items if i.endswith("*")]
@@ -133,6 +137,7 @@ class TestFileOperations:
 class TestSymlinks:
     """Tests for ln_s (symlink creation)."""
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="Symlinks require special privileges on Windows")
     def test_create_symlink(self, game_fs):
         game_fs.touch("/entrance", "target_file")
         game_fs.ln_s("/entrance", "target_file", "link_file")
@@ -152,9 +157,11 @@ class TestQueryHelpers:
     def test_exists_nonexistent(self, game_fs):
         assert not game_fs.exists("/entrance", "unicorn")
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
     def test_is_executable_treasure(self, game_fs):
         assert game_fs.is_executable("/entrance/cellar", "treasure")
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
     def test_is_not_executable_scroll(self, game_fs):
         assert not game_fs.is_executable("/entrance", "scroll")
 
@@ -195,6 +202,7 @@ class TestScriptExecution:
         with pytest.raises(FileNotFoundError):
             game_fs.run_script("/entrance", "nonexistent_script")
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
     def test_run_non_executable_raises(self, game_fs):
         with pytest.raises(PermissionError):
             game_fs.run_script("/entrance", "scroll")

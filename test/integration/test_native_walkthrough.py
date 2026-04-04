@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 import pytest
 from pathlib import Path
 
 from fixtures.walkthrough import load_walkthrough
 
 pytestmark = pytest.mark.integration
+
+_IS_WINDOWS = sys.platform == "win32"
 
 _WT = load_walkthrough()
 
@@ -115,6 +118,7 @@ class TestNativeScrollReadability:
 class TestNativeScriptExecutability:
     """All game scripts are executable in native bash."""
 
+    @pytest.mark.skipif(_IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
     @pytest.mark.parametrize("enc_path", list(_WT.encounters.keys()))
     def test_script_is_executable(self, game_root, enc_path):
         """Game scripts should have executable permission."""
