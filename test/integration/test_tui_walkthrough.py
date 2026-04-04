@@ -27,9 +27,20 @@ import pytest
 
 from fixtures.walkthrough import Walkthrough, load_walkthrough
 
+_IS_WINDOWS = sys.platform == "win32"
+
 # Walkthrough tests run ti.agent with long subprocess timeouts; CI passes
-# --timeout=60 on integration, which is too low for Windows. Allow 180s per test.
-pytestmark = [pytest.mark.integration, pytest.mark.timeout(180)]
+# --timeout=60 on integration, which is too low for some steps. Allow 180s per test.
+# Windows: skip entirely — many agent subprocesses × long timeouts makes the job
+# appear to hang; headless Textual on Windows is not a supported target.
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(
+        _IS_WINDOWS,
+        reason="TUI walkthrough skipped on Windows CI (slow/fragile); covered on Linux/macOS",
+    ),
+    pytest.mark.timeout(180),
+]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"

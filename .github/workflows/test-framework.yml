@@ -40,6 +40,8 @@ jobs:
   unit-and-integration:
     name: Unit & Integration Tests
     runs-on: ${{ matrix.os }}
+    # Cap total runtime (Windows Textual/agent tests can be slow; fail before GHub 6h default)
+    timeout-minutes: 45
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
