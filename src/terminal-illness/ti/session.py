@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from .filesystem import GameFileSystem
 from .game_state import GameState
 from .quests import quest_list
 from .terminal_engine import TerminalEngine
+
+if TYPE_CHECKING:
+    from .audio import SoundManager
 
 
 def snapshot_state(
@@ -71,6 +74,7 @@ class GameSession:
         *,
         output_callback: Optional[Callable[[str, str], None]] = None,
         on_quest_complete: Optional[Callable[[], None]] = None,
+        audio: Optional["SoundManager"] = None,
     ) -> None:
         self.state = state
         self.fs = fs
@@ -79,6 +83,7 @@ class GameSession:
             fs=fs,
             output_callback=output_callback,
             on_quest_complete=on_quest_complete,
+            audio=audio,
         )
 
     @property
@@ -98,6 +103,7 @@ class GameSession:
         output_callback: Optional[Callable[[str, str], None]] = None,
         on_quest_complete: Optional[Callable[[], None]] = None,
         ensure_web_save_path: bool = False,
+        audio: Optional["SoundManager"] = None,
     ) -> GameSession:
         """Load or create state; optionally apply web-mode save path."""
         fs = GameFileSystem(game_root)
@@ -112,6 +118,7 @@ class GameSession:
             fs,
             output_callback=output_callback,
             on_quest_complete=on_quest_complete,
+            audio=audio,
         )
 
     def snapshot(self) -> Dict[str, Any]:
@@ -162,7 +169,7 @@ def commands_help_text() -> str:
     """Short reference of built-in commands (for MCP resource)."""
     return (
         "Built-in commands: help, pwd, ls, cd, mkdir, touch, cat, grep, rm, cp, mv, "
-        "export, echo, save, load, merlin, exit. "
+        "export, echo, save, load, merlin, volume, mute, exit. "
         "Run game scripts with ./name (e.g. ./treasure). "
         "Use Tab in the TUI for completions."
     )

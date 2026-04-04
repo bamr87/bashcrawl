@@ -44,7 +44,7 @@ from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Rule,
 from .chat_panel import CHAT_PANEL_CSS, ChatPanel
 from .ai_chat import AIChatService
 from .chat_context import GameContextBuilder
-from .audio import SoundManager, SoundEvent, MusicTrack, area_track_for, SCRIPT_SOUNDS, COMBAT_SCRIPTS
+from .audio import SoundManager, SoundEvent, MusicTrack, area_track_for
 from .settings_panel import SETTINGS_CSS, AudioSettingsScreen
 
 if TYPE_CHECKING:

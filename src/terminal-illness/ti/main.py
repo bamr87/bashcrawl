@@ -21,6 +21,23 @@ import sys
 from pathlib import Path
 
 
+def _print_usage() -> None:
+    print(
+        "Usage: python -m ti [OPTIONS]\n"
+        "\n"
+        "Options:\n"
+        "  --game-root PATH   Bashcrawl repo root (directory containing entrance/)\n"
+        "  --web                Serve TUI in the browser (textual-serve)\n"
+        "  --host ADDR          Bind address for --web (default: 0.0.0.0)\n"
+        "  --port N             Port for --web (default: 8080)\n"
+        "  --debug              Debug logging for --web\n"
+        "  --automation         Browser-friendly command bar (with --web)\n"
+        "  --ai-stdio           JSON lines on stdin/stdout (no Textual UI)\n"
+        "  -h, --help           Show this message\n",
+        file=sys.stderr,
+    )
+
+
 def _find_game_root() -> Path:
     """Walk up from this file's location looking for ``entrance/``."""
     candidate = Path(__file__).resolve().parent
@@ -52,29 +69,39 @@ def _parse_args() -> dict:
 
     i = 0
     while i < len(args):
-        if args[i] == "--game-root" and i + 1 < len(args):
+        a = args[i]
+        if a in ("-h", "--help"):
+            _print_usage()
+            sys.exit(0)
+        if a == "--game-root" and i + 1 < len(args):
             opts["game_root"] = Path(args[i + 1])
             i += 2
-        elif args[i] == "--web":
+        elif a == "--web":
             opts["web"] = True
             i += 1
-        elif args[i] == "--host" and i + 1 < len(args):
+        elif a == "--host" and i + 1 < len(args):
             opts["host"] = args[i + 1]
             i += 2
-        elif args[i] == "--port" and i + 1 < len(args):
+        elif a == "--port" and i + 1 < len(args):
             opts["port"] = int(args[i + 1])
             i += 2
-        elif args[i] == "--debug":
+        elif a == "--debug":
             opts["debug"] = True
             i += 1
-        elif args[i] == "--automation":
+        elif a == "--automation":
             opts["automation"] = True
             i += 1
-        elif args[i] == "--ai-stdio":
+        elif a == "--ai-stdio":
             opts["ai_stdio"] = True
             i += 1
+        elif a.startswith("-"):
+            print(f"Error: unknown option: {a!r}", file=sys.stderr)
+            _print_usage()
+            sys.exit(2)
         else:
-            i += 1
+            print(f"Error: unexpected argument: {a!r}", file=sys.stderr)
+            _print_usage()
+            sys.exit(2)
 
     return opts
 

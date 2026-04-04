@@ -74,6 +74,7 @@ class SoundManager:
         self._sfx_volume = max(0.0, min(1.0, sfx_volume))
         self._music_volume = max(0.0, min(1.0, music_volume))
         self._current_track: Optional[MusicTrack] = None
+        self._resume_music_track: Optional[MusicTrack] = None
         self._lock = threading.Lock()
 
         # Active playback devices (managed per-sound / per-music)
@@ -101,6 +102,7 @@ class SoundManager:
             return
         if track == self._current_track:
             return  # already playing
+        self._resume_music_track = None  # explicit new track; discard mute-resume target
         self.stop_music()
         self._current_track = track
         path = _MUSIC_DIR / f"{track.value}.wav"
@@ -150,11 +152,12 @@ class SoundManager:
         """Toggle mute state. Returns the new muted state."""
         self._muted = not self._muted
         if self._muted:
+            # stop_music() clears _current_track; remember what to resume after unmute
+            self._resume_music_track = self._current_track
             self.stop_music()
-        elif self._current_track is not None:
-            # Re-start music when unmuting
-            track = self._current_track
-            self._current_track = None
+        elif self._resume_music_track is not None:
+            track = self._resume_music_track
+            self._resume_music_track = None
             self.play_music(track)
         return self._muted
 
