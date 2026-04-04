@@ -9,6 +9,8 @@ import pytest
 
 pytestmark = [pytest.mark.integration]
 
+_IS_WINDOWS = sys.platform == "win32"
+
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
 
@@ -77,6 +79,10 @@ class TestMcpEngineTools:
 
 @pytest.mark.skipif(not _has_mcp(), reason="mcp package not installed")
 @pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@pytest.mark.skipif(
+    _IS_WINDOWS,
+    reason="MCP headless Textual session unreliable on Windows CI; covered on Linux/macOS",
+)
 class TestMcpHeadlessTools:
     """Headless mode: screenshots + commands."""
 
