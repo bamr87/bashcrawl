@@ -184,7 +184,7 @@ def _load_yaml(filename: str, data_dir: Optional[Path] = None) -> Dict[str, Any]
     path = data_dir / filename
     if not path.exists():
         raise FileNotFoundError(f"YAML data file not found: {path}")
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 

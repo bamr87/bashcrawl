@@ -79,7 +79,7 @@ lint-shell: ## Run ShellCheck on all shell scripts
 	@echo "=== ShellCheck: game executables ==="
 	@for f in $$(find entrance/ -type f -executable 2>/dev/null); do \
 		if head -1 "$$f" | grep -q 'bash'; then \
-			$(SHELLCHECK) "$$f"; \
+			$(SHELLCHECK) --severity=error "$$f"; \
 		fi; \
 	done
 

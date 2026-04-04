@@ -7,6 +7,8 @@ on:
       - 'entrance/**'
       - 'src/help/**'
       - 'lib/**'
+      - 'scripts/**'
+      - 'test/datasets/**'
       - '*.sh'
   pull_request:
     branches: [main]
@@ -14,6 +16,8 @@ on:
       - 'entrance/**'
       - 'src/help/**'
       - 'lib/**'
+      - 'scripts/**'
+      - 'test/datasets/**'
       - '*.sh'
 
 jobs:
@@ -120,50 +124,4 @@ jobs:
 
     - name: Validate walkthrough.json against filesystem
       shell: bash
-      run: |
-        echo "=== Validating walkthrough.json ==="
-        errors=0
-
-        if [[ ! -f test/datasets/walkthrough.json ]]; then
-          echo "ERROR: walkthrough.json not found"
-          exit 1
-        fi
-
-        # Check every room in walkthrough.json exists as a directory
-        # (one-line python so the run: | block stays valid YAML — multiline scripts break indentation)
-        for room in $(python -c "import json; d=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in d['rooms']]"); do
-          if [[ ! -d "$room" ]]; then
-            echo "ERROR: Room directory $room/ does not exist"
-            errors=$((errors + 1))
-          else
-            echo "OK: $room/"
-          fi
-        done
-
-        # Check rooms with scroll=true have a scroll file
-        for room in $(python -c "import json; d=json.load(open('test/datasets/walkthrough.json')); [print(p) for p,i in d['rooms'].items() if i.get('scroll')]"); do
-          if [[ ! -f "$room/scroll" ]]; then
-            echo "ERROR: $room/ marked scroll=true but no scroll file"
-            errors=$((errors + 1))
-          else
-            echo "OK: $room/scroll exists"
-          fi
-        done
-
-        # Check encounter scripts exist
-        for script in $(python -c "import json; d=json.load(open('test/datasets/walkthrough.json')); [print(p) for p in d['encounters']]"); do
-          if [[ ! -f "$script" ]]; then
-            echo "ERROR: Encounter script $script does not exist"
-            errors=$((errors + 1))
-          else
-            echo "OK: $script"
-          fi
-        done
-
-        echo ""
-        if [[ $errors -eq 0 ]]; then
-          echo "walkthrough.json validation passed."
-        else
-          echo "walkthrough.json validation FAILED with $errors errors."
-          exit 1
-        fi
+      run: python3 scripts/validate_walkthrough_fs.py

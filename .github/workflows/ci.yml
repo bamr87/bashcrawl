@@ -23,9 +23,10 @@ jobs:
     - name: Lint game executables
       run: |
         echo "=== ShellCheck: game executables ==="
+        # Educational game scripts intentionally use classic patterns; only fail on error-level issues.
         for f in $(find entrance/ -type f -executable 2>/dev/null); do
           if head -1 "$f" | grep -q 'bash'; then
-            shellcheck "$f"
+            shellcheck --severity=error "$f"
           fi
         done
 

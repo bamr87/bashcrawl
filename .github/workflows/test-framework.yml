@@ -63,6 +63,12 @@ jobs:
         env:
           TERM: dumb
 
+      - name: Make game files executable (Windows)
+        if: runner.os == 'Windows'
+        run: bash setup.sh --quick
+        env:
+          TERM: dumb
+
       - name: Configure PYTHONPATH
         shell: python
         run: |
@@ -77,16 +83,23 @@ jobs:
       - name: Run unit tests
         shell: bash
         run: |
+          mkdir -p test/reports
           cd test
           python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
+        env:
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
 
       - name: Run integration tests
         shell: bash
         run: |
+          mkdir -p test/reports
           cd test
           python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml --timeout=60
         env:
           BASHCRAWL_ROOT: ${{ github.workspace }}
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
 
       - name: Upload test results
         if: always()
