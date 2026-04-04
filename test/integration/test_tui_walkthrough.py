@@ -27,7 +27,9 @@ import pytest
 
 from fixtures.walkthrough import Walkthrough, load_walkthrough
 
-pytestmark = [pytest.mark.integration]
+# Walkthrough tests run ti.agent with long subprocess timeouts; CI passes
+# --timeout=60 on integration, which is too low for Windows. Allow 180s per test.
+pytestmark = [pytest.mark.integration, pytest.mark.timeout(180)]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
