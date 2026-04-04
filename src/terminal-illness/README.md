@@ -1,6 +1,6 @@
 ### Terminal Illness — Bashcrawl Python Wrapper
 
-A rich Python terminal interface that wraps the real bashcrawl game directories, adding quest tracking, styled output, tab completion, AI-powered Merlin chat, and save/load on top of the actual dungeon rooms.
+A rich Python terminal interface that wraps the real bashcrawl game directories, adding quest tracking, styled output, tab completion, AI-powered Merlin chat, sound effects & music, and save/load on top of the actual dungeon rooms.
 
 ### Quickstart
 
@@ -43,6 +43,10 @@ The Python wrapper operates on the **real bashcrawl filesystem** — the same `e
 | `ti/chat_context.py` | Game context builder for AI prompt injection |
 | `ti/chat_panel.py` | Textual widget for the toggleable Merlin chat panel |
 | `ti/chat_cli.py` | CLI bridge — lets `help.sh` call Merlin from bash |
+| `ti/audio/` | **Sound system** — SFX + background music via miniaudio |
+| `ti/audio/manager.py` | SoundManager: non-blocking playback, volume, mute |
+| `ti/audio/events.py` | SoundEvent/MusicTrack enums, area→track mapping |
+| `ti/audio/assets/` | WAV/OGG sound effects and ambient music loops |
 | `ti/data/merlin_prompt.txt` | Merlin wizard persona + teaching rules system prompt |
 | `seed_prompt.instructions.md` | LLM prompt template for AI agent integration |
 
@@ -77,6 +81,7 @@ bash help.sh merlin "how do I find hidden files?"
 | `F1` | Show help |
 | `F2` | Show dungeon map |
 | `F3` | **Toggle Merlin AI chat panel** |
+| `F4` | **Toggle audio mute** |
 | `Ctrl+S` | Save progress |
 | `Ctrl+Q` | Quit |
 | `Ctrl+L` | Clear output log |
@@ -107,7 +112,7 @@ Scripts run via `subprocess` with the current game environment (`$I`, `$HP`).
 
 ### Commands
 
-`pwd`, `ls`, `cd`, `mkdir`, `touch`, `cat`, `grep`, `rm`, `cp`, `mv`, `export`, `echo`, `save`, `load`, `merlin`, `exit`, plus `./script` execution.
+`pwd`, `ls`, `cd`, `mkdir`, `touch`, `cat`, `grep`, `rm`, `cp`, `mv`, `export`, `echo`, `save`, `load`, `merlin`, `volume`, `mute`, `exit`, plus `./script` execution.
 
 ### Resetting Progress
 
@@ -120,4 +125,34 @@ rm -f .ti_save.json
 - The game operates on real files within the bashcrawl game root.
 - A sandbox guard prevents navigation outside the game directory.
 - Press Ctrl+C or use `exit` to quit; progress saves automatically.
+
+### Sound Effects & Music
+
+The TUI plays background music and sound effects powered by `miniaudio`.
+Audio is **fully optional** — if `miniaudio` is not installed or no audio
+device is available, the game runs silently with no errors.
+
+- **Background music** changes per dungeon area (entrance, cellar, armoury, etc.)
+- **Sound effects** fire on treasure pickup, combat, quests, potions, scrolls, etc.
+- **F4** toggles mute; `volume` and `mute` commands control levels from the prompt
+- Audio is automatically disabled in agent/headless mode
+- Volume and mute preferences persist across sessions
+
+**Audio commands:**
+```
+volume              # Show current volume levels
+volume 50           # Set all volume to 50%
+volume sfx 80       # Set SFX volume to 80%
+volume music 30     # Set music volume to 30%
+mute                # Toggle mute on/off
+```
+
+**Generating placeholder sounds** (for testing):
+```
+cd src/terminal-illness
+python -c "from ti.audio.generate_placeholders import main; main()"
+```
+
+Replace files in `ti/audio/assets/sfx/` and `ti/audio/assets/music/` with real
+assets. See `ti/audio/assets/README.md` for format details and AI generation guides.
 

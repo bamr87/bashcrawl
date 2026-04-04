@@ -28,6 +28,7 @@ entrance/rift/
 
 # Tutorial / player-created directories
 entrance/workshop/
+workshop/
 
 # ============================================================
 # Generated combat / loot artifacts inside entrance/

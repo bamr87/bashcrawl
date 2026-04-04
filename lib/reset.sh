@@ -283,10 +283,11 @@ while IFS= read -r -d '' f; do
 done < <(find "$GAME_ROOT" -maxdepth 3 \( -name '.ti_save.json' -o -name '.bashcrawl_save.json' \) -not -path "$ti_save" -not -path "$unified_save" -print0 2>/dev/null)
 
 # ---- § 16  Remove player-created tutorial directories ----------------------
-for player_dir in workshop; do
-    target="$ENTRANCE/$player_dir"
+# Primary location is entrance/workshop (in-game). Also clean a mistakenly
+# created top-level workshop/ directory if commands were run outside the game.
+for target in "$ENTRANCE/workshop" "$GAME_ROOT/workshop"; do
     if [[ -d "$target" ]]; then
-        log "Removing player-created directory: entrance/$player_dir"
+        log "Removing player-created directory: ${target#$GAME_ROOT/}"
         $DRY_RUN || rm -rf "$target"
     fi
 done
