@@ -22,7 +22,7 @@ on:
       run_ai_tests:
         description: 'Run AI playthrough tests'
         required: false
-        default: 'false'
+        default: false
         type: boolean
       scenario:
         description: 'AI scenario to run (all, new_player, critical_path, full_playthrough)'
