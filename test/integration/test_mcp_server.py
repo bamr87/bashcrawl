@@ -7,33 +7,19 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = [pytest.mark.integration]
+from fixtures.skips import (
+    requires_mcp,
+    requires_textual,
+    skip_textual_on_windows,
+)
 
-_IS_WINDOWS = sys.platform == "win32"
+pytestmark = [pytest.mark.integration]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
 
 
-def _has_mcp() -> bool:
-    try:
-        import mcp  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
-
-def _has_textual() -> bool:
-    try:
-        import textual  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
-
-@pytest.mark.skipif(not _has_mcp(), reason="mcp package not installed")
+@requires_mcp
 class TestMcpEngineTools:
     """Exercise MCP tool functions against engine-mode sessions."""
 
@@ -77,12 +63,10 @@ class TestMcpEngineTools:
         assert done.get("ok") is True
 
 
-@pytest.mark.skipif(not _has_mcp(), reason="mcp package not installed")
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
-@pytest.mark.skipif(
-    _IS_WINDOWS,
-    reason="MCP headless Textual session unreliable on Windows CI; covered on Linux/macOS",
-)
+@requires_mcp
+@requires_textual
+@skip_textual_on_windows
+@pytest.mark.textual
 class TestMcpHeadlessTools:
     """Headless mode: screenshots + commands."""
 

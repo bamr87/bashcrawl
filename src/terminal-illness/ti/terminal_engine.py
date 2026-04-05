@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# Runtime ownership: Python gameplay command runtime.
+# See docs/architecture-runtime.md for boundaries.
+
 import re
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
@@ -11,6 +14,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from .engine.command_table import COMMAND_TABLE
 from .game_state import GameState
 from .filesystem import GameFileSystem
 from .quests import check_quest_completion, quest_list
@@ -171,25 +175,9 @@ class TerminalEngine:
         self._registry[name] = CommandSpec(name=name, handler=handler, help_text=help_text)
 
     def _register_commands(self) -> None:
-        self._register("help", self._cmd_help, "Show available commands")
-        self._register("pwd", self._cmd_pwd, "Print working directory")
-        self._register("ls", self._cmd_ls, "List directory contents")
-        self._register("cd", self._cmd_cd, "Change directory")
-        self._register("mkdir", self._cmd_mkdir, "Create directory")
-        self._register("touch", self._cmd_touch, "Create empty file")
-        self._register("cat", self._cmd_cat, "Print file contents")
-        self._register("grep", self._cmd_grep, "Search for text in a file")
-        self._register("rm", self._cmd_rm, "Remove a file")
-        self._register("cp", self._cmd_cp, "Copy a file")
-        self._register("mv", self._cmd_mv, "Move/rename file or directory")
-        self._register("export", self._cmd_export, "Set a game variable")
-        self._register("echo", self._cmd_echo, "Print text or variable value")
-        self._register("save", self._cmd_save, "Save your progress")
-        self._register("load", self._cmd_load, "Load your progress")
-        self._register("merlin", self._cmd_merlin, "Ask Merlin for a hint")
-        self._register("exit", self._cmd_exit, "Exit the game")
-        self._register("volume", self._cmd_volume, "Set audio volume (0-100)")
-        self._register("mute", self._cmd_mute, "Toggle audio mute")
+        for name, method_name, help_text in COMMAND_TABLE:
+            handler = getattr(self, method_name)
+            self._register(name, handler, help_text)
 
     def run_loop(self) -> None:
         self._render_header()

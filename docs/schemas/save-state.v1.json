@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bashcrawl/save-state/v1",
+  "title": "Bashcrawl Save State V1",
+  "type": "object",
+  "required": [
+    "current_quest_id",
+    "completed_quest_ids",
+    "learned_commands",
+    "current_location",
+    "inventory",
+    "hp",
+    "experience_points",
+    "game_level",
+    "game_started",
+    "session_count",
+    "last_session",
+    "scrolls_read",
+    "mode",
+    "player_name"
+  ],
+  "properties": {
+    "current_quest_id": { "type": "integer" },
+    "completed_quest_ids": { "type": "string" },
+    "learned_commands": { "type": "string" },
+    "current_location": { "type": "string" },
+    "inventory": { "type": "string" },
+    "hp": { "type": "integer" },
+    "experience_points": { "type": "integer" },
+    "game_level": { "type": "string" },
+    "game_started": { "type": "string" },
+    "session_count": { "type": "integer" },
+    "last_session": { "type": "string" },
+    "scrolls_read": { "type": "string" },
+    "mode": { "type": "string" },
+    "player_name": { "type": "string" }
+  },
+  "additionalProperties": true
+}

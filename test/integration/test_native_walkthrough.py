@@ -9,16 +9,14 @@ from __future__ import annotations
 
 import os
 import subprocess
-import sys
 import pytest
 from pathlib import Path
 
+from fixtures.skips import IS_WINDOWS
 from fixtures.logical_paths import resolve_logical_path
 from fixtures.walkthrough import load_walkthrough
 
 pytestmark = pytest.mark.integration
-
-_IS_WINDOWS = sys.platform == "win32"
 
 _WT = load_walkthrough()
 
@@ -103,13 +101,13 @@ class TestNativeScrollReadability:
 
     @pytest.mark.parametrize("room_path", _WT.rooms_with_scrolls())
     def test_scroll_cat_succeeds(self, game_root, room_path):
-        """cat <room>/scroll should exit 0 and produce content."""
+        """cat <room>/scroll should exit 0 and produce content.
+
+        Existence/coverage checks live in TestScrollFiles + walkthrough validator;
+        this test focuses only on runtime readability via native `cat`.
+        """
         base = resolve_logical_path(game_root, room_path)
-        if base is None or not base.is_dir():
-            pytest.skip(f"Room not found: {room_path}")
-        scroll_path = base / "scroll"
-        if not scroll_path.exists():
-            pytest.skip(f"Scroll not found at {room_path}")
+        scroll_path = (base / "scroll") if base else (game_root / room_path / "scroll")
         env = os.environ.copy()
         result = subprocess.run(
             ["cat", str(scroll_path)],
@@ -122,7 +120,7 @@ class TestNativeScrollReadability:
 class TestNativeScriptExecutability:
     """All game scripts are executable in native bash."""
 
-    @pytest.mark.skipif(_IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
+    @pytest.mark.skipif(IS_WINDOWS, reason="os.access(X_OK) is always True on Windows")
     @pytest.mark.parametrize("enc_path", list(_WT.encounters.keys()))
     def test_script_is_executable(self, game_root, enc_path):
         """Game scripts should have executable permission."""

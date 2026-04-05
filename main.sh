@@ -39,6 +39,8 @@
 #   ./main.sh -c "command"      # Execute a single command (non-interactive)
 #   ./main.sh --batch           # Read commands from stdin, one per line
 #
+# Runtime ownership: this file orchestrates mode selection only.
+# See docs/architecture-runtime.md for layer boundaries.
 
 set -euo pipefail
 

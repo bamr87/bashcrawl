@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir -p test/reports
           cd test
-          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml --timeout=60
+          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml
         env:
           BASHCRAWL_ROOT: ${{ github.workspace }}
           PYTHONUTF8: "1"

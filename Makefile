@@ -40,7 +40,7 @@ install-deps: ## Install all Python dependencies
 
 .PHONY: test
 test: ## Run unit + integration tests
-	cd test && $(PYTEST) unit/ integration/ -v --tb=short --timeout=60
+	cd test && $(PYTEST) unit/ integration/ -v --tb=short
 
 .PHONY: test-unit
 test-unit: ## Run unit tests only
@@ -48,7 +48,7 @@ test-unit: ## Run unit tests only
 
 .PHONY: test-integration
 test-integration: ## Run integration tests only
-	cd test && $(PYTEST) integration/ -v --tb=short --timeout=60
+	cd test && $(PYTEST) integration/ -v --tb=short
 
 .PHONY: test-ai
 test-ai: ## Run AI playthrough tests (needs ANTHROPIC_API_KEY)

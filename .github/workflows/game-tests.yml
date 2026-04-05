@@ -124,4 +124,13 @@ jobs:
 
     - name: Validate walkthrough.json against filesystem
       shell: bash
-      run: python3 scripts/validate_walkthrough_fs.py
+      run: |
+        mkdir -p test/reports
+        python3 scripts/validate_walkthrough_fs.py --json > test/reports/walkthrough-validation.json
+        python3 scripts/validate_walkthrough_fs.py
+
+    - name: Build and validate content index
+      shell: bash
+      run: |
+        mkdir -p test/reports
+        python3 scripts/generate_content_index.py --check --output test/reports/content-index.json

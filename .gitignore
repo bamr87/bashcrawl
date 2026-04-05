@@ -70,8 +70,13 @@ __pycache__
 # Test framework
 test/reports/
 test/.pytest_cache/
+test/.bashcrawl_save.json
+test/agent_playtest*
 .pytest_cache/
 .env
+
+# Generated screenshots metadata
+screenshots/manifest_*.json
 
 # Local virtualenv
 .venv/
