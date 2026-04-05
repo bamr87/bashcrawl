@@ -29,6 +29,10 @@ PYTHONPATH=src/terminal-illness python3 -m ti.agent \
     --screenshot-dir ./logs/screenshots
 ```
 
+For **JSON stdin/stdout** without Textual or screenshots (e.g. Cursor terminal automation), see [cursor-ai.md](cursor-ai.md).
+
+For **MCP tools** (`bashcrawl_start`, `bashcrawl_command`, `bashcrawl_screenshot`, …) usable from Cursor and other MCP clients, run `python3 -m ti.mcp_server` with `PYTHONPATH=src/terminal-illness`; see [cursor-ai.md](cursor-ai.md) § MCP server.
+
 ---
 
 ## Protocol Overview

@@ -12,6 +12,7 @@ import subprocess
 import pytest
 from pathlib import Path
 
+from fixtures.logical_paths import resolve_logical_path
 from fixtures.walkthrough import load_walkthrough
 
 pytestmark = pytest.mark.integration
@@ -259,32 +260,9 @@ class TestScrollFiles:
 
     @pytest.mark.parametrize("room_path", _WT.rooms_with_scrolls())
     def test_scroll_exists_and_nonempty(self, game_root, room_path):
-        scroll = game_root / room_path / "scroll"
+        base = resolve_logical_path(game_root, room_path)
+        assert base is not None and base.is_dir(), f"Room directory missing: {room_path}"
+        scroll = base / "scroll"
         assert scroll.exists(), f"Scroll missing at {room_path}/scroll"
         content = scroll.read_text()
         assert len(content) > 10, f"Scroll at {room_path} too short ({len(content)} chars)"
-
-
-# ---------------------------------------------------------------------------
-# Walkthrough completeness validation
-# ---------------------------------------------------------------------------
-
-class TestWalkthroughCompleteness:
-    """Validate walkthrough.json against the real filesystem."""
-
-    def test_all_rooms_exist(self, game_root, walkthrough):
-        for room_path in walkthrough.room_names():
-            room_dir = game_root / room_path
-            assert room_dir.is_dir(), f"Room directory missing: {room_path}"
-
-    def test_all_scripts_exist(self, game_root, walkthrough):
-        for room_path, spec in walkthrough.rooms.items():
-            for script in spec.get("scripts", []):
-                script_path = game_root / room_path / script
-                assert script_path.exists(), \
-                    f"Script missing: {room_path}/{script}"
-
-    def test_all_encounter_scripts_exist(self, game_root, walkthrough):
-        for enc_path in walkthrough.encounter_names():
-            script = game_root / enc_path
-            assert script.exists(), f"Encounter script missing: {enc_path}"

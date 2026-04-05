@@ -12,6 +12,8 @@ from pathlib import Path
 
 import pytest
 
+from fixtures.skips import requires_bash
+
 pytestmark = pytest.mark.unit
 
 
@@ -290,6 +292,8 @@ class TestScreenshotFixtures:
 # ---------------------------------------------------------------------------
 
 
+@requires_bash
+@pytest.mark.bash
 class TestBashLogScreenshot:
     """Tests for lib/log.sh bc_log_screenshot function."""
 

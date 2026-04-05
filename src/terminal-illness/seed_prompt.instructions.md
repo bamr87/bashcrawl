@@ -8,7 +8,7 @@ Create an interactive terminal-based learning game that teaches command line ski
 
 **Vision**: Transform the intimidating command line interface into an approachable, magical learning environment where users master terminal skills by completing quests, casting "spells" (commands), and exploring dynamic worlds.
 
-**Learning Philosophy**: 
+**Learning Philosophy**:
 - Commands are "spells" that users learn through discovery
 - Each quest introduces 1-2 related commands in logical progression
 - Success builds confidence through immediate positive feedback

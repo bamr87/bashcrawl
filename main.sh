@@ -39,6 +39,8 @@
 #   ./main.sh -c "command"      # Execute a single command (non-interactive)
 #   ./main.sh --batch           # Read commands from stdin, one per line
 #
+# Runtime ownership: this file orchestrates mode selection only.
+# See docs/architecture-runtime.md for layer boundaries.
 
 set -euo pipefail
 
@@ -252,6 +254,54 @@ launch_tui_mode() {
     PYTHONPATH="$ti_dir" python3 -m ti --game-root "$BASHCRAWL_ROOT"
 
     log_event "INFO" "Textual TUI session ended" "tui"
+}
+
+launch_web_mode() {
+    log_event "INFO" "Starting Web Browser TUI..." "web"
+
+    if ! _check_tui_available; then
+        echo -e "${COLOR_WARNING}⚠️  Web mode unavailable (Python 3 + textual package required).${COLOR_RESET}"
+        echo -e "${COLOR_INFO}To install:  pip3 install textual textual-serve${COLOR_RESET}"
+        echo ""
+        sleep 2
+        return
+    fi
+
+    if ! python3 -c "import textual_serve" >/dev/null 2>&1; then
+        echo -e "${COLOR_WARNING}⚠️  textual-serve package not installed.${COLOR_RESET}"
+        echo -e "${COLOR_INFO}To install:  pip3 install textual-serve${COLOR_RESET}"
+        echo ""
+        sleep 2
+        return
+    fi
+
+    local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+    log_event "INFO" "Launching Web TUI server from $ti_dir" "web"
+
+    echo -e "${COLOR_SUCCESS}🌐 Starting Bashcrawl web server...${COLOR_RESET}"
+    echo -e "${COLOR_INFO}Open your browser to http://localhost:8080${COLOR_RESET}"
+    echo -e "${COLOR_DIM}Press Ctrl+C to stop the server.${COLOR_RESET}"
+    echo ""
+
+    PYTHONPATH="$ti_dir" python3 -m ti --web --automation --game-root "$BASHCRAWL_ROOT"
+
+    log_event "INFO" "Web TUI server stopped" "web"
+}
+
+launch_ai_stdio_mode() {
+    log_event "INFO" "Starting AI JSON stdio mode..." "ai_stdio"
+
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo -e "${COLOR_ERROR}python3 is required for --ai-stdio.${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    local ti_dir="${BASHCRAWL_ROOT}/src/terminal-illness"
+    log_event "INFO" "Launching JSON stdio bridge from $ti_dir" "ai_stdio"
+
+    PYTHONPATH="$ti_dir" python3 -m ti --ai-stdio --game-root "$BASHCRAWL_ROOT"
+
+    log_event "INFO" "AI stdio session ended" "ai_stdio"
 }
 
 launch_interactive_mode() {
@@ -571,9 +621,13 @@ show_main_menu() {
         echo -e "  ${COLOR_INFO}5)${COLOR_RESET} Demo              See example gameplay"
         echo -e "  ${COLOR_INFO}6)${COLOR_RESET} Game Status       View progress and statistics"
         echo -e "  ${COLOR_INFO}7)${COLOR_RESET} Reset             Start fresh"
+        echo ""
+        echo -e "  ${COLOR_SUCCESS}9)${COLOR_RESET} ${COLOR_BOLD}Web Browser Mode${COLOR_RESET}  ${COLOR_DIM}(play in your browser via textual-serve)${COLOR_RESET}"
+        echo "     Opens the TUI in any web browser at http://localhost:8080"
+        echo ""
         echo -e "  ${COLOR_DIM}8)${COLOR_RESET} Exit"
         echo ""
-        echo -n "Choose an option (1-8): "
+        echo -n "Choose an option (1-9): "
 
         read -r choice
         echo ""
@@ -608,8 +662,11 @@ show_main_menu() {
                 log_event "INFO" "User exited launcher normally" "exit"
                 exit 0
                 ;;
+            9)
+                launch_web_mode
+                ;;
             *)
-                echo -e "${COLOR_ERROR}Invalid choice. Please select 1-8.${COLOR_RESET}"
+                echo -e "${COLOR_ERROR}Invalid choice. Please select 1-9.${COLOR_RESET}"
                 sleep 2
                 ;;
         esac
@@ -642,6 +699,8 @@ ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
         --agent           Agent mode: Textual TUI with screenshots (recommended)
         --agent-bash      Agent mode: bash-only REPL (no screenshots, no Python)
         --screenshot-dir PATH  Screenshot output directory (default: ./logs/screenshots)
+    -w, --web             Start browser TUI (serves at http://localhost:8080)
+        --ai-stdio        JSON line protocol on stdin/stdout for AI tools (no Textual UI)
     -h, --help            Show this help message
     -v, --version         Show version information
     --debug               Enable debug logging
@@ -657,6 +716,8 @@ ${COLOR_PRIMARY}EXAMPLES:${COLOR_RESET}
     $SCRIPT_NAME -c "cd entrance"      # Run one command
     $SCRIPT_NAME -c "cat scroll"       # Run another (state persists)
     echo -e "pwd\nls" | $SCRIPT_NAME --batch  # Batch mode
+    $SCRIPT_NAME --web                         # Play in browser at http://localhost:8080
+    $SCRIPT_NAME --ai-stdio                  # Drive game via JSON lines (Cursor / automation)
     $SCRIPT_NAME --agent                       # Agent mode with Textual + screenshots
     $SCRIPT_NAME --agent-bash                  # Bash-only agent REPL (no Python)
 
@@ -664,7 +725,9 @@ ${COLOR_PRIMARY}GAME MODES:${COLOR_RESET}
     ${COLOR_SUCCESS}Textual TUI:${COLOR_RESET}      Visual panels, quest tracker, tab completion (Python 3 + textual)
     ${COLOR_INFO}Classic Mode:${COLOR_RESET}    Safe bash emulator — no Python required
     ${COLOR_WARNING}Native Mode:${COLOR_RESET}     Uses your actual terminal (requires experience)
+    ${COLOR_SUCCESS}Web Browser:${COLOR_RESET}     Play in your browser via textual-serve (Python 3 + textual-serve)
     ${COLOR_INFO}Agent Mode:${COLOR_RESET}      Headless Textual TUI with screenshots for AI agents
+    ${COLOR_INFO}AI stdio:${COLOR_RESET}        JSON lines on stdin/stdout (see docs/cursor-ai.md)
     ${COLOR_INFO}Agent Bash:${COLOR_RESET}      Line-buffered bash REPL for agents (no Python needed)
 
 ${COLOR_PRIMARY}LEARNING PATH:${COLOR_RESET}
@@ -749,6 +812,14 @@ process_arguments() {
                 export BASHCRAWL_AUTO_MODE="batch"
                 shift
                 ;;
+            -w|--web)
+                export BASHCRAWL_AUTO_MODE="web"
+                shift
+                ;;
+            --ai-stdio)
+                export BASHCRAWL_AUTO_MODE="ai_stdio"
+                shift
+                ;;
             --agent)
                 export BASHCRAWL_AUTO_MODE="agent"
                 shift
@@ -812,6 +883,8 @@ main() {
             "reset")         reset_game_state; exit 0 ;;
             "single_command") run_single_command "$BASHCRAWL_SINGLE_CMD"; exit $? ;;
             "batch")         run_batch; exit $? ;;
+            "web")           launch_web_mode; exit $? ;;
+            "ai_stdio")      launch_ai_stdio_mode; exit $? ;;
             "agent")         launch_agent_mode "${BASHCRAWL_SCREENSHOT_DIR:-./logs/screenshots}"; exit $? ;;
             "agent_bash")    launch_agent_bash_mode; exit $? ;;
         esac

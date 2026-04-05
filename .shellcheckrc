@@ -13,6 +13,7 @@ disable=SC2046  # Quote to prevent word splitting (intentional in some cases)
 disable=SC2181  # Check exit code directly (stylistic preference)
 disable=SC2295  # Expansions inside ${..} quoted separately (pattern context)
 disable=SC2329  # Function never invoked (invoked indirectly via sourcing)
+disable=SC2317  # Command appears unreachable (invoked indirectly via hooks/PROMPT_COMMAND)
 
 # Enable additional checks
 enable=check-sourced

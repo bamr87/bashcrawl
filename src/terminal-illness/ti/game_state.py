@@ -33,6 +33,10 @@ class GameState:
     hp: int = 100  # health points (mirrors $HP) — default 100
     hp_set: bool = False  # True once HP is explicitly set via gameplay
     env_vars: Dict[str, str] = field(default_factory=dict)
+    # Audio preferences
+    audio_muted: bool = False
+    audio_sfx_volume: float = 0.7
+    audio_music_volume: float = 0.4
     # Bash-side fields preserved for round-trip compatibility
     game_level: str = "novice"
     game_started: str = "false"
@@ -70,7 +74,7 @@ class GameState:
             self.env_vars[key] = value
 
     def save(self, save_path: Optional[Path] = None) -> None:
-        target = save_path or Path.cwd() / SAVE_FILE_NAME
+        target = save_path or getattr(self, "_save_path", None) or Path.cwd() / SAVE_FILE_NAME
         data = asdict(self)
         # Normalise location: strip leading "/" for bash compatibility
         loc = data.get("current_location", "entrance")
@@ -136,6 +140,9 @@ class GameState:
                 hp=int(data.get("hp", 100)),
                 hp_set=bool(data.get("hp_set", False)),
                 env_vars=dict(data.get("env_vars", {})),
+                audio_muted=bool(data.get("audio_muted", False)),
+                audio_sfx_volume=float(data.get("audio_sfx_volume", 0.7)),
+                audio_music_volume=float(data.get("audio_music_volume", 0.4)),
                 game_level=data.get("game_level", "novice"),
                 game_started=str(data.get("game_started", "false")),
                 session_count=int(data.get("session_count", 0)),

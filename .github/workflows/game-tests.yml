@@ -7,6 +7,8 @@ on:
       - 'entrance/**'
       - 'src/help/**'
       - 'lib/**'
+      - 'scripts/**'
+      - 'test/datasets/**'
       - '*.sh'
   pull_request:
     branches: [main]
@@ -14,17 +16,28 @@ on:
       - 'entrance/**'
       - 'src/help/**'
       - 'lib/**'
+      - 'scripts/**'
+      - 'test/datasets/**'
       - '*.sh'
 
 jobs:
   validate-game:
     name: Validate Game Content
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
 
     - name: Check scroll files exist in main-path rooms
+      shell: bash
       run: |
         echo "=== Checking required scroll files ==="
         errors=0
@@ -51,6 +64,7 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All required scrolls present." || exit 1
 
     - name: Check game executables have shebangs
+      shell: bash
       run: |
         echo "=== Checking game executable shebangs ==="
         errors=0
@@ -70,6 +84,7 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All shebangs correct." || exit 1
 
     - name: Check game executables have boilerplate
+      shell: bash
       run: |
         echo "=== Checking boilerplate comments ==="
 
@@ -84,6 +99,7 @@ jobs:
         done
 
     - name: Check hidden room unlock targets exist
+      shell: bash
       run: |
         echo "=== Checking unlock mechanism targets ==="
         errors=0
@@ -101,73 +117,20 @@ jobs:
         [[ $errors -eq 0 ]] && echo "All unlock targets present." || exit 1
 
     - name: Run game reset dry-run
+      shell: bash
       run: |
         echo "=== Testing reset script ==="
         bash lib/reset.sh --dry
 
     - name: Validate walkthrough.json against filesystem
+      shell: bash
       run: |
-        echo "=== Validating walkthrough.json ==="
-        errors=0
+        mkdir -p test/reports
+        python3 scripts/validate_walkthrough_fs.py --json > test/reports/walkthrough-validation.json
+        python3 scripts/validate_walkthrough_fs.py
 
-        if [[ ! -f test/datasets/walkthrough.json ]]; then
-          echo "ERROR: walkthrough.json not found"
-          exit 1
-        fi
-
-        # Check every room in walkthrough.json exists as a directory
-        for room in $(python3 -c "
-import json, sys
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path in data['rooms']:
-    print(path)
-"); do
-          if [[ ! -d "$room" ]]; then
-            echo "ERROR: Room directory $room/ does not exist"
-            errors=$((errors + 1))
-          else
-            echo "OK: $room/"
-          fi
-        done
-
-        # Check rooms with scroll=true have a scroll file
-        for room in $(python3 -c "
-import json
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path, info in data['rooms'].items():
-    if info.get('scroll'):
-        print(path)
-"); do
-          if [[ ! -f "$room/scroll" ]]; then
-            echo "ERROR: $room/ marked scroll=true but no scroll file"
-            errors=$((errors + 1))
-          else
-            echo "OK: $room/scroll exists"
-          fi
-        done
-
-        # Check encounter scripts exist
-        for script in $(python3 -c "
-import json
-with open('test/datasets/walkthrough.json') as f:
-    data = json.load(f)
-for path in data['encounters']:
-    print(path)
-"); do
-          if [[ ! -f "$script" ]]; then
-            echo "ERROR: Encounter script $script does not exist"
-            errors=$((errors + 1))
-          else
-            echo "OK: $script"
-          fi
-        done
-
-        echo ""
-        if [[ $errors -eq 0 ]]; then
-          echo "walkthrough.json validation passed."
-        else
-          echo "walkthrough.json validation FAILED with $errors errors."
-          exit 1
-        fi
+    - name: Build and validate content index
+      shell: bash
+      run: |
+        mkdir -p test/reports
+        python3 scripts/generate_content_index.py --check --output test/reports/content-index.json

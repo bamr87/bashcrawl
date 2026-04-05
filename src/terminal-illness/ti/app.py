@@ -29,8 +29,12 @@ Layout
 └─────────────────────────────────────────────────────────────────┘
 """
 
+# Runtime ownership: UI/adapters for Python runtime.
+# See docs/architecture-runtime.md for boundaries.
+
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from textual import on, work
@@ -43,6 +47,9 @@ from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Rule,
 from .chat_panel import CHAT_PANEL_CSS, ChatPanel
 from .ai_chat import AIChatService
 from .chat_context import GameContextBuilder
+from .audio import SoundManager, SoundEvent, MusicTrack, area_track_for
+from .settings_panel import SETTINGS_CSS, AudioSettingsScreen
+from .widgets.panels import InventoryPanel, QuestPanel, RoomPanel
 
 if TYPE_CHECKING:
     from .game_state import GameState
@@ -235,6 +242,28 @@ LoadScreen {
 
 # Append chat panel CSS
 _CSS = _CSS.rstrip() + "\n" + CHAT_PANEL_CSS
+# Append settings panel CSS
+_CSS = _CSS.rstrip() + "\n" + SETTINGS_CSS
+
+# Stronger command-bar styling when BASHCRAWL_BROWSER_AUTOMATION=1 (browser / AI tools)
+_AUTOMATION_CSS = """
+/* BASHCRAWL_BROWSER_AUTOMATION=1 — visible command bar for browser automation */
+#command-input {
+    border: solid #7c3aed;
+    background: #1e1e3f;
+    padding: 0 1;
+}
+#command-input:focus {
+    border: solid #a78bfa;
+    background: #1e1e3f;
+}
+#input-row {
+    height: 4;
+}
+"""
+
+if os.environ.get("BASHCRAWL_BROWSER_AUTOMATION") == "1":
+    _CSS += _AUTOMATION_CSS
 
 
 # ---------------------------------------------------------------------------
@@ -252,83 +281,6 @@ def _common_prefix(strings: List[str]) -> str:
             if not prefix:
                 return ""
     return prefix
-
-
-# ---------------------------------------------------------------------------
-# Sidebar panels (Static subclasses for typed refresh methods)
-# ---------------------------------------------------------------------------
-
-class QuestPanel(Static):
-    """Left sidebar: active quest + XP progress."""
-
-    def refresh_quest(self, state: "GameState") -> None:
-        from .quests import quest_list
-
-        quests = quest_list()
-        total = len(quests)
-        done = len(state.completed_quest_ids)
-        xp = state.experience_points
-
-        header = (
-            f"[bold white on #1e1e3f] 📜 ACTIVE QUEST [/bold white on #1e1e3f]  "
-            f"[dim]XP:{xp}  ✅{done}/{total}[/dim]"
-        )
-        divider = f"[dim]{'─' * 26}[/dim]"
-
-        if state.current_quest_id >= total:
-            body = "[bold green]✨ All quests complete![/bold green]\n\n[dim]Explore freely…[/dim]"
-        else:
-            q = quests[state.current_quest_id]
-            body = (
-                f"[bold yellow]{q.title}[/bold yellow]\n\n"
-                f"[dim]{q.objective}[/dim]"
-            )
-
-        self.update(f"{header}\n{divider}\n{body}")
-
-
-class InventoryPanel(Static):
-    """Left sidebar: health bar + inventory items."""
-
-    def refresh_inventory(self, state: "GameState") -> None:
-        hp = state.hp
-        inv = state.inventory
-
-        if hp > 0:
-            filled = max(0, min(10, hp // 10))
-            bar = "█" * filled + "░" * (10 - filled)
-            hp_color = "green" if hp > 50 else "yellow" if hp > 20 else "red"
-            hp_text = f"[{hp_color}]{bar}[/{hp_color}] [dim]{hp}/100[/dim]"
-        else:
-            hp_text = "[dim]─────────── 0/100[/dim]"
-
-        if inv:
-            items_lines = "\n".join(f"  [green]◆[/green] {i.strip()}" for i in inv.split(",") if i.strip())
-        else:
-            items_lines = "  [dim](empty)[/dim]"
-
-        header = "[bold white on #1e1e3f] 🎒 INVENTORY [/bold white on #1e1e3f]"
-        divider = f"[dim]{'─' * 26}[/dim]"
-        self.update(f"{header}\n{divider}\n[dim]HP:[/dim] {hp_text}\n\n[dim]Items:[/dim]\n{items_lines}")
-
-
-class RoomPanel(Static):
-    """Left sidebar: current location + directory listing."""
-
-    def refresh_room(self, cwd: str, items: List[str]) -> None:
-        lines: List[str] = []
-        for item in items[:22]:
-            if item.endswith("/"):
-                lines.append(f"  [bold blue]📁 {item}[/bold blue]")
-            elif item.endswith("*"):
-                lines.append(f"  [bold green]⚡ {item}[/bold green]")
-            else:
-                lines.append(f"  [white]📄 {item}[/white]")
-
-        content = "\n".join(lines) if lines else "  [dim](empty)[/dim]"
-        header = "[bold white on #1e1e3f] 🗺️ LOCATION [/bold white on #1e1e3f]"
-        divider = f"[dim]{'─' * 26}[/dim]"
-        self.update(f"{header}\n{divider}\n[bold cyan]{cwd}[/bold cyan]\n\n{content}")
 
 
 # ---------------------------------------------------------------------------
@@ -460,6 +412,8 @@ class BashcrawlApp(App):
         Binding("f1", "show_help", "Help", show=True),
         Binding("f2", "show_map", "Map", show=True),
         Binding("f3", "toggle_chat", "AI Chat", show=True),
+        Binding("f4", "toggle_mute", "Mute", show=True),
+        Binding("f5", "show_settings", "Settings", show=True),
         Binding("ctrl+l", "clear_log", "Clear", show=True),
         # Tab is handled in on_key so it doesn't bubble to focus-next
     ]
@@ -469,12 +423,20 @@ class BashcrawlApp(App):
         self.game_state = state
         self.fs = fs
         self.agent_mode = agent_mode
-        self._engine: Optional[object] = None  # TerminalEngine, set in on_mount
+        self._session: Optional[object] = None  # GameSession, set in on_mount
+        self._engine: Optional[object] = None  # TerminalEngine alias, set in on_mount
         self._cmd_history: List[str] = []
         self._history_idx: int = -1
         self._chat_svc = AIChatService()
         self._context_builder = GameContextBuilder()
         self._prev_cwd: str = ""  # for room-change detection
+        self._low_health_warned: bool = False  # debounce low-health SFX
+        self._audio = SoundManager(
+            disabled=agent_mode,
+            sfx_volume=state.audio_sfx_volume,
+            music_volume=state.audio_music_volume,
+            muted=state.audio_muted,
+        )
 
     # ------------------------------------------------------------------
     # Compose
@@ -502,7 +464,11 @@ class BashcrawlApp(App):
                 f"[bold cyan]{self.game_state.current_location or '/entrance'}[/bold cyan] $",
                 id="prompt-label",
             )
-            yield Input(placeholder="Enter command…  (Tab=complete  ↑↓=history  F3=AI Chat)", id="command-input")
+            yield Input(
+                placeholder="Enter command…  (Tab=complete  ↑↓=history  F3=AI Chat)",
+                id="command-input",
+                classes="bashcrawl-command-input",
+            )
         yield Footer()
 
     # ------------------------------------------------------------------
@@ -510,22 +476,30 @@ class BashcrawlApp(App):
     # ------------------------------------------------------------------
 
     def on_mount(self) -> None:
-        from .terminal_engine import TerminalEngine
+        from .session import GameSession
 
-        self._engine = TerminalEngine(
-            state=self.game_state,
-            fs=self.fs,
+        self._session = GameSession(
+            self.game_state,
+            self.fs,
             output_callback=self._print_output,
             on_quest_complete=self._on_quest_complete,
+            audio=self._audio,
         )
+        self._engine = self._session.engine
         self._update_subtitle()
         self._refresh_sidebar()
         self._print_welcome()
+        self._audio.play_music(MusicTrack.TITLE_THEME)
+        self._audio.play_sfx(SoundEvent.WELCOME_FANFARE)
         self.query_one("#command-input", Input).focus()
 
         # Startup screens are pushed AFTER mount so the main UI is ready underneath.
-        # In agent mode, skip modal screens entirely.
-        if self.agent_mode:
+        # In agent mode, browser web mode, or browser automation, skip modal screens.
+        if (
+            self.agent_mode
+            or os.environ.get("BASHCRAWL_WEB_MODE") == "1"
+            or os.environ.get("BASHCRAWL_BROWSER_AUTOMATION") == "1"
+        ):
             self._update_subtitle()
             self._refresh_sidebar()
             return
@@ -769,6 +743,10 @@ class BashcrawlApp(App):
         for line in message.splitlines():
             log.write(f"[{colour}]{line}[/{colour}]")
 
+        # Trigger SFX based on output kind
+        if kind == "error":
+            self._audio.play_sfx(SoundEvent.COMMAND_ERROR)
+
     def _refresh_sidebar(self) -> None:
         cwd = (
             self._engine._cwd  # type: ignore[union-attr]
@@ -787,9 +765,11 @@ class BashcrawlApp(App):
             f"[bold cyan]{cwd}[/bold cyan] $"
         )
 
-        # Proactive AI: nudge on room change
+        # Proactive AI: nudge on room change + switch music
         if cwd != self._prev_cwd:
             self._prev_cwd = cwd
+            self._audio.play_sfx(SoundEvent.ROOM_ENTER)
+            self._audio.play_music(area_track_for(cwd))
             nudge = self._chat_svc.nudge("new_room")
             if nudge:
                 try:
@@ -797,24 +777,31 @@ class BashcrawlApp(App):
                 except Exception:
                     pass
 
-        # Proactive AI: nudge on low health
+        # Proactive AI: nudge on low health + SFX (debounced)
         if self.game_state.hp > 0 and self.game_state.hp < 20:
+            if not self._low_health_warned:
+                self._low_health_warned = True
+                self._audio.play_sfx(SoundEvent.LOW_HEALTH_WARNING)
             nudge = self._chat_svc.nudge("low_health")
             if nudge:
                 try:
                     self.query_one("#chat-panel", ChatPanel).append_nudge(nudge)
                 except Exception:
                     pass
+        elif self.game_state.hp >= 20:
+            self._low_health_warned = False
 
     def _update_subtitle(self) -> None:
         name = self.game_state.player_name or "Anonymous"
         hp = self.game_state.hp
         xp = self.game_state.experience_points
         mode = self.game_state.mode
-        self.sub_title = f"{name}  •  HP: {hp}  •  XP: {xp}  •  {mode}"
+        audio_icon = "🔇" if self._audio.muted else "🔊"
+        self.sub_title = f"{name}  •  HP: {hp}  •  XP: {xp}  •  {mode}  •  {audio_icon}"
 
     def _on_quest_complete(self) -> None:
         """Called by TerminalEngine whenever a quest is completed."""
+        self._audio.play_sfx(SoundEvent.QUEST_COMPLETE)
         self._refresh_sidebar()
         self._update_subtitle()
         self.notify(
@@ -909,12 +896,16 @@ class BashcrawlApp(App):
                 pass
 
     def action_quit_game(self) -> None:
+        self._persist_audio_prefs()
         self.game_state.save()
+        self._audio.shutdown()
         self._print_output("info", "💾 Progress saved. Farewell, adventurer!")
         self.exit()
 
     def action_save_game(self) -> None:
+        self._persist_audio_prefs()
         self.game_state.save()
+        self._audio.play_sfx(SoundEvent.SAVE_GAME)
         self.notify("Progress saved!", title="Save", severity="information", timeout=3)
 
     def action_show_help(self) -> None:
@@ -930,3 +921,30 @@ class BashcrawlApp(App):
     def action_clear_log(self) -> None:
         self.query_one("#output-log", RichLog).clear()
         self._print_welcome()
+
+    def action_toggle_mute(self) -> None:
+        """Toggle audio mute (F4)."""
+        muted = self._audio.mute_toggle()
+        icon = "🔇" if muted else "🔊"
+        self.notify(f"{icon} Audio {'muted' if muted else 'unmuted'}", timeout=2)
+        self._update_subtitle()
+
+    def action_show_settings(self) -> None:
+        """Open audio settings panel (F5)."""
+        if self.agent_mode:
+            return
+        cwd = self._engine._cwd if self._engine else "entrance"  # type: ignore[union-attr]
+        self.push_screen(
+            AudioSettingsScreen(self._audio, self.game_state, current_cwd=cwd),
+            self._handle_settings_result,
+        )
+
+    def _handle_settings_result(self, result: None) -> None:
+        """Called when audio settings modal is dismissed."""
+        self._update_subtitle()
+
+    def _persist_audio_prefs(self) -> None:
+        """Copy current audio settings into game state for persistence."""
+        self.game_state.audio_muted = self._audio.muted
+        self.game_state.audio_sfx_volume = self._audio.sfx_volume
+        self.game_state.audio_music_volume = self._audio.music_volume

@@ -12,23 +12,17 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Iterator
 
 import pytest
+
+from fixtures.skips import requires_textual, skip_textual_on_windows
 
 pytestmark = [pytest.mark.integration]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
 SCREENSHOTS_ROOT = REPO_ROOT / "logs" / "screenshots"
-
-
-def _has_textual() -> bool:
-    """Check if textual is importable."""
-    try:
-        import textual  # noqa: F401
-        return True
-    except ImportError:
-        return False
 
 
 def _make_shot_dir(name: str) -> Path:
@@ -60,7 +54,32 @@ def _run_agent(commands: list[str], screenshot_dir: Path, timeout: int = 30) -> 
     return result.stdout
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@pytest.fixture(autouse=True)
+def clean_repo_save_files() -> Iterator[None]:
+    """Isolate agent tests from persisted local save state.
+
+    The agent boot path loads save files from repo root by default. These
+    integration tests expect deterministic startup regardless of prior
+    interactive play sessions on a developer machine.
+    """
+    targets = [REPO_ROOT / ".bashcrawl_save.json", REPO_ROOT / ".ti_save.json"]
+    backups: dict[Path, bytes] = {}
+
+    for path in targets:
+        if path.exists():
+            backups[path] = path.read_bytes()
+            path.unlink()
+
+    try:
+        yield
+    finally:
+        for path, payload in backups.items():
+            path.write_bytes(payload)
+
+
+@requires_textual
+@skip_textual_on_windows
+@pytest.mark.textual
 class TestAgentProtocol:
     """Tests for the agent stdin/stdout protocol."""
 
@@ -117,7 +136,9 @@ class TestAgentProtocol:
         assert "SESSION ENDED" in output
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
+@skip_textual_on_windows
+@pytest.mark.textual
 class TestAgentScreenshots:
     """Tests for SVG screenshot generation."""
 
@@ -167,7 +188,9 @@ class TestAgentScreenshots:
                 shutil.rmtree(shot_dir)
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
+@skip_textual_on_windows
+@pytest.mark.textual
 class TestAgentGameplay:
     """Tests for game command execution through the agent."""
 
@@ -206,7 +229,8 @@ class TestAgentGameplay:
         assert ready_count >= 3  # startup + 2 blank + EXIT
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
+@pytest.mark.bash
 class TestAgentBashMode:
     """Tests for the bash-only agent REPL (via main.sh --agent-bash)."""
 
@@ -244,7 +268,9 @@ class TestAgentBashMode:
         assert "CMD> pwd" in result.stdout
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
+@skip_textual_on_windows
+@pytest.mark.textual
 class TestAgentScreenshotLogging:
     """Tests that screenshots are logged via ScreenshotCapture and TestLogCapture."""
 

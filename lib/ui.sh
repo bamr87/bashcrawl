@@ -465,7 +465,7 @@ start_adventure() {
     LAST_COMMAND_EXIT_CODE=0
 
     if [[ "$(basename "$(pwd)")" != "entrance" ]]; then
-        cd "$BASHCRAWL_ROOT/entrance"
+        cd "$BASHCRAWL_ROOT/entrance" || return
     fi
 
     echo -e "${SUCCESS_COLOR}✨ Adventure initialized!${RESET_COLOR}"

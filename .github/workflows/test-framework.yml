@@ -22,7 +22,7 @@ on:
       run_ai_tests:
         description: 'Run AI playthrough tests'
         required: false
-        default: 'false'
+        default: false
         type: boolean
       scenario:
         description: 'AI scenario to run (all, new_player, critical_path, full_playthrough)'
@@ -40,15 +40,17 @@ jobs:
   unit-and-integration:
     name: Unit & Integration Tests
     runs-on: ${{ matrix.os }}
+    # Cap total runtime (Windows Textual/agent tests can be slow; fail before GHub 6h default)
+    timeout-minutes: 45
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.12']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -58,28 +60,52 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Make game files executable
+        if: runner.os != 'Windows'
         run: bash setup.sh --quick
         env:
           TERM: dumb
 
-      - name: Run unit tests
+      - name: Make game files executable (Windows)
+        if: runner.os == 'Windows'
+        run: bash setup.sh --quick
+        env:
+          TERM: dumb
+
+      - name: Configure PYTHONPATH
+        shell: python
         run: |
+          import os, pathlib
+          ws = pathlib.Path(os.environ["GITHUB_WORKSPACE"])
+          ti = str(ws / "src" / "terminal-illness")
+          tests = str(ws / "test")
+          pypath = ti + os.pathsep + tests
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"PYTHONPATH={pypath}\n")
+
+      - name: Run unit tests
+        shell: bash
+        run: |
+          mkdir -p test/reports
           cd test
           python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
         env:
-          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
 
       - name: Run integration tests
+        shell: bash
         run: |
+          mkdir -p test/reports
           cd test
-          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml --timeout=60
+          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml
         env:
-          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
           BASHCRAWL_ROOT: ${{ github.workspace }}
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
           path: test/reports/
@@ -94,10 +120,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_ai_tests == 'true')
     needs: unit-and-integration
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -141,7 +167,7 @@ jobs:
 
       - name: Upload AI test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ai-playthrough-results
           path: |
@@ -155,10 +181,10 @@ jobs:
     needs: ai-playthrough
     if: always() && needs.ai-playthrough.result == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -201,7 +227,7 @@ jobs:
 
       - name: Upload analysis reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: analysis-reports
           path: test/reports/

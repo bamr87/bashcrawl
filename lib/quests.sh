@@ -347,11 +347,11 @@ mark_scroll_read() {
 restore_saved_location() {
     local rel="${CURRENT_PATH:-bashcrawl}"
     if [[ "$rel" == "bashcrawl" ]]; then
-        cd "$BASHCRAWL_ROOT"
+        cd "$BASHCRAWL_ROOT" || return
     elif [[ -d "$BASHCRAWL_ROOT/$rel" ]]; then
-        cd "$BASHCRAWL_ROOT/$rel"
+        cd "$BASHCRAWL_ROOT/$rel" || return
     else
-        cd "$BASHCRAWL_ROOT"
+        cd "$BASHCRAWL_ROOT" || return
         rel="bashcrawl"
     fi
     CURRENT_PATH="$rel"
@@ -377,7 +377,7 @@ reset_terminal_state() {
 
     rm -f "$HISTORY_FILE"
 
-    cd "$BASHCRAWL_ROOT"
+    cd "$BASHCRAWL_ROOT" || return
 
     echo "Game state has been reset. Type 'start' to begin a new adventure."
 }

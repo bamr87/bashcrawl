@@ -25,23 +25,25 @@ from pathlib import Path
 
 import pytest
 
+from fixtures.skips import requires_textual, skip_textual_on_windows
 from fixtures.walkthrough import Walkthrough, load_walkthrough
 
-pytestmark = [pytest.mark.integration]
+# Walkthrough tests run ti.agent with long subprocess timeouts; CI passes
+# --timeout=60 on integration, which is too low for some steps. Allow 180s per test.
+# Windows: skip entirely — many agent subprocesses × long timeouts makes the job
+# appear to hang; headless Textual on Windows is not a supported target.
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.textual,
+    skip_textual_on_windows,
+    pytest.mark.timeout(180),
+]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TI_DIR = REPO_ROOT / "src" / "terminal-illness"
 
 # Module-level walkthrough for parametrize decorators (loaded once)
 _WT = load_walkthrough()
-
-
-def _has_textual() -> bool:
-    try:
-        import textual  # noqa: F401
-        return True
-    except ImportError:
-        return False
 
 
 def _run_agent(commands: list[str], screenshot_dir: Path, timeout: int = 45) -> str:
@@ -124,7 +126,7 @@ def _run_walkthrough(
     return stdout, shot_dir, cap.screenshots, manifest_data
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
 class TestTuiCriticalPath:
     """Full critical path walkthrough driven by walkthrough.json."""
 
@@ -183,7 +185,7 @@ class TestTuiCriticalPath:
             )
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
 class TestTuiHiddenPaths:
     """Hidden path walkthroughs driven by walkthrough.json."""
 
@@ -208,7 +210,7 @@ class TestTuiHiddenPaths:
             assert (shot_dir / f"{name}.svg").exists(), f"Missing screenshot: {name}.svg"
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
 class TestTuiUIElements:
     """Tests for specific Textual TUI visual elements."""
 
@@ -280,7 +282,7 @@ class TestTuiUIElements:
         assert ratio > 0.8, f"Screenshots differ too much: {s1} vs {s2} bytes"
 
 
-@pytest.mark.skipif(not _has_textual(), reason="textual not installed")
+@requires_textual
 class TestTuiEdgeCases:
     """Edge case tests for the TUI with screenshot verification."""
 

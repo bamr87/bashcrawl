@@ -5,11 +5,15 @@ to clean up without actually mutating the real game.
 """
 
 import subprocess
+
 import pytest
+
+from fixtures.skips import requires_bash
 
 pytestmark = pytest.mark.unit
 
-
+@requires_bash
+@pytest.mark.bash
 class TestResetDryRun:
     """Tests for lib/reset.sh --dry mode."""
 
@@ -46,6 +50,8 @@ class TestResetDryRun:
         assert vault_hidden.exists() == vault_exists_before
 
 
+@requires_bash
+@pytest.mark.bash
 class TestResetInSandbox:
     """Tests for lib/reset.sh actual reset in a sandbox."""
 
@@ -92,4 +98,22 @@ class TestResetInSandbox:
                 timeout=10,
             )
             # Flag should be removed after reset
-            # (depends on reset.sh implementation)
+            assert not flag.exists()
+
+    def test_reset_removes_root_workshop_dir(self, sandbox, sandbox_env):
+        """Verify reset removes a player-created top-level workshop directory."""
+        root_workshop = sandbox / "workshop"
+        root_workshop.mkdir(parents=True, exist_ok=True)
+        (root_workshop / "notes.txt").write_text("temporary player notes\n", encoding="utf-8")
+        assert root_workshop.exists()
+
+        result = subprocess.run(
+            ["bash", str(sandbox / "lib" / "reset.sh")],
+            cwd=str(sandbox),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=sandbox_env,
+        )
+        assert result.returncode == 0, f"Reset failed: {result.stderr}"
+        assert not root_workshop.exists()

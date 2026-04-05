@@ -8,10 +8,32 @@
 # Expects the following to be set before sourcing:
 #   BASHCRAWL_ROOT, COLOR_*, ERROR_COLOR, SUCCESS_COLOR, RESET_COLOR,
 #   LS_COLOR_FLAGS, HISTORY_FILE, and lib/quests.sh + lib/ui.sh sourced.
+# Runtime ownership: classic shell gameplay runtime (command semantics).
+# See docs/architecture-runtime.md for boundaries.
 # ============================================================================
 
 [[ "${_BC_EMULATOR_LOADED:-}" == "$$" ]] && return 0
 _BC_EMULATOR_LOADED="$$"
+
+# Table-driven handlers for simple zero-argument builtins.
+# Format: "<command> <handler_function>"
+_BC_COMMAND_TABLE=$'inventory show_inventory\ni show_inventory\nhealth show_health\nhp show_health\nstatus show_game_status\nmap show_map\nquest show_quest_command\nquests show_quest_command\ntutorial show_emulator_tutorial\ncommands show_available_commands\nmerlin merlin_hint\nstart start_adventure\nlook look_around\nexplore explore_area\nwhoami _cmd_whoami\ndate _cmd_date\n'
+
+_cmd_whoami() { echo "bashcrawl_adventurer"; }
+_cmd_date() { date; }
+
+_dispatch_table_command() {
+    local cmd="$1"
+    shift || true
+    local name handler
+    while read -r name handler; do
+        [[ -n "$name" ]] || continue
+        [[ "$name" == "$cmd" ]] || continue
+        "$handler" "$@"
+        return $?
+    done <<< "$_BC_COMMAND_TABLE"
+    return 127
+}
 
 # ============================================================================
 # COMMAND DISPATCH
@@ -37,6 +59,15 @@ execute_command() {
     local handled=false
     local status=0
 
+    local dispatch_status=127
+    _dispatch_table_command "$cmd" "${original_args[@]}"
+    dispatch_status=$?
+    if [[ $dispatch_status -ne 127 ]]; then
+        handled=true
+        status=$dispatch_status
+    fi
+
+    if ! $handled; then
     case "$cmd" in
         "cd")
             handled=true
@@ -528,6 +559,7 @@ execute_command() {
             fi
             ;;
     esac
+    fi
 
     if [[ "$handled" == true ]]; then
         LAST_COMMAND="$cmd"

@@ -1,20 +1,22 @@
 # ⚔️ Bashcrawl: The Terminal Adventure Game
 
+> **v3.0.0** — Textual TUI, quest system, agent mode, and more
+
 ## Where Heroes Are Forged in the Fires of the Command Line
 
 Bashcrawl is an immersive text-based adventure game that teaches you the fundamentals of POSIX
 terminal navigation through epic dungeon exploration. Transform from a terminal novice into a
-command-line champion by battling monsters, collecting treasures, and:
+command-line champion by battling monsters, collecting treasures, and mastering the command line.
 
-- Progressive difficulty that adapts to your learning pace
-- Achievement badges for completing different quest lines
-- Integration with external learning platforms
+- **Learn by doing** — real terminal commands in a dungeon-crawl setting
+- **Progressive difficulty** — skills build naturally as you explore deeper
+- **Multiple play modes** — Textual TUI, classic bash emulator, native terminal, and agent mode
 
 ![Bashcrawl — entrance gameplay](screenshots/gameplay/03_entrance_cat_scroll.svg)
 
-## 🎮 New! Streamlined Experience
+## 🎮 Getting Started
 
-**Get started with the new unified launcher:**
+**Use the unified launcher:**
 
 ```bash
 git clone https://github.com/bamr87/bashcrawl.git
@@ -27,12 +29,11 @@ cd bashcrawl
 
 ## 🌟 What Makes This Journey Special
 
-- **Learn by Doing**: Master terminal commands through engaging gameplay
-- **Progressive Difficulty**: Skills build naturally as you explore deeper
 - **Quest-Driven Learning**: Earn XP via guided quests with contextual hints
 - **Real Terminal Skills**: Every command you learn applies to real-world development
 - **Hidden Depths**: Secret areas and advanced features reward curious explorers
 - **Multiple Paths**: Different routes through the catacombs teach different skills
+- **Merlin Hint System**: Context-aware guidance when you're stuck
 
 ## 🚀 Quick Start Your Adventure
 
@@ -72,15 +73,23 @@ The setup script will:
 
 Choose from multiple adventure modes:
 
-#### 🎮 Interactive Terminal Emulator (Recommended for Beginners)
+#### 🎮 Textual TUI (Recommended for Beginners)
 
-Safe, contained environment perfect for learning:
+Rich terminal interface built with [Textual](https://textual.textualize.io/) (Python). Falls back to the classic bash emulator if Python is unavailable.
 
 - **Safe Environment**: Cannot access or modify files outside the game
 - **Built-in Help**: Context-aware assistance with `help` command
 - **Game Integration**: Inventory, health, and progress tracking
 - **Beginner-Friendly**: Guided experience with tutorials and hints
 - **Real Commands**: Learn actual terminal commands in a safe space
+
+#### 🖥️ Classic Bash Emulator
+
+Pure-bash emulator — no Python required:
+
+- **Lightweight**: Runs anywhere bash is available
+- **Same Game Content**: Full dungeon, quests, and progression
+- **Safe Sandbox**: Restricted to the game directory
 
 #### 🖥️ Native Terminal Experience (For Experienced Users)
 
@@ -109,24 +118,34 @@ and capture SVG screenshots:
 
 See [docs/agent-protocol.md](docs/agent-protocol.md) for the full specification.
 
-### 🚀 Quick Commands Reference
+### 🚀 Launcher Commands Reference
 
 Once you're set up, use these commands:
 
 ```bash
+# Game launcher
 ./main.sh                    # Launch interactive menu
-./main.sh --interactive      # Start safe terminal emulator
-./main.sh --native           # Start native terminal experience
+./main.sh --interactive      # Textual TUI (default interactive mode)
+./main.sh --classic          # Classic bash emulator (no Python)
+./main.sh --native           # Native terminal experience
 ./main.sh --tutorial         # Launch tutorial mode
 ./main.sh --demo             # Run demonstration mode
+
+# Agent / automation
 ./main.sh --agent            # Agent mode (Textual TUI + screenshots)
 ./main.sh --agent-bash       # Agent mode (bash-only REPL, no Python)
 ./main.sh --screenshot-dir X # Set screenshot output directory
+./main.sh --command "CMD"    # Run a single command and exit
+./main.sh --batch            # Read commands from stdin
+
+# Status & maintenance
 ./main.sh --status           # Show current game status
 ./main.sh --reset            # Reset game state
 ./main.sh --version          # Show version info
 ./main.sh --debug            # Enable debug logging
 ./main.sh --help             # View all options
+
+# Setup
 ./setup.sh --verify          # Check installation
 ./setup.sh --repair          # Fix installation issues
 ./setup.sh --quick           # Quick setup (skip optional steps)
@@ -220,16 +239,18 @@ rmdir dirname       # Delete an empty directory
 - Use `ls` to see what's in a directory before acting
 - Be extra careful with `rm` (delete) commands - there's no recycle bin!
 - When in doubt, use `--help` or `man` to understand a command
-*You are now playing the game. May the gods save you.*
 
-### ☁️ Option 3: Instant Play Online
+### ☁️ Instant Play Online
 
-Launch immediately in your browser (no install required):
+Launch in your browser via Binder (no install required):
 
 | Source | Launch |
 |--------|--------|
 | GitHub (primary) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
 | GitLab (upstream) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/nthiery%2Fbashcrawl/HEAD) |
+| GitHub (this fork) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bamr87/bashcrawl/HEAD) |
+
+> **Note**: The Binder environments run the original upstream content. Features specific to this fork (Textual TUI, quest system, agent mode) require a local install.
 
 ## 🎬 Gameplay Screenshots
 
@@ -338,7 +359,7 @@ The Interactive Terminal Emulator provides a **safe, contained environment** tha
 - Progress indicators and status displays
 - Command history and game state persistence
 
-### 🚀 Quick Commands Reference
+### 🚀 In-Game Commands Reference
 
 ```bash
 # Essential navigation
@@ -385,22 +406,25 @@ These quests cover foundational commands (`pwd`, `ls`, `cd`, `mkdir`, `touch`, `
 
 ### 🎓 Educational Benefits
 
-**Progressive Learning**: Start with basic commands and gradually learn advanced techniques
-**Real Skills**: Every command works exactly like in actual terminals
-**Safe Practice**: Experiment freely without system consequences  
-**Immediate Feedback**: Instant validation of commands and progress
-**Contextual Help**: Get assistance specific to your current situation
+- **Progressive Learning**: Start with basic commands and gradually learn advanced techniques
+- **Real Skills**: Every command works exactly like in actual terminals
+- **Safe Practice**: Experiment freely without system consequences
+- **Immediate Feedback**: Instant validation of commands and progress
+- **Contextual Help**: Get assistance specific to your current situation
 
 ### 🍎 macOS Users: Special Instructions
 
-macOS's default Archive Utility may incorrectly set file permissions. For the best experience:
+macOS's default Archive Utility may incorrectly set file permissions when downloading a zip. Use `git clone` (recommended) or extract via the terminal:
 
 ```bash
-# Download and extract using terminal
-curl -L https://github.com/bamr87/bashcrawl/archive/main.zip -o bashcrawl.zip
+# Option A: git clone (recommended)
+git clone https://github.com/bamr87/bashcrawl.git && cd bashcrawl && ./setup.sh
+
+# Option B: download and extract via terminal
+curl -L https://github.com/bamr87/bashcrawl/archive/refs/heads/main.zip -o bashcrawl.zip
 unzip bashcrawl.zip
-cd bashcrawl-main/entrance
-cat scroll
+cd bashcrawl-main
+./setup.sh
 ```
 
 ## 🎯 Learning Path & Skills
@@ -556,7 +580,7 @@ Your journey follows a carefully designed progression through interconnected cha
 
 ### 📍 **Phase 3: Mastery Chambers**
 
-**� THE RIFT** (Advanced Challenges — unlocked via Vault's Goblet)
+**🌀 THE RIFT** (Advanced Challenges — unlocked via Vault's Goblet)
 
 - **Skills Learned**: Complex command chaining, pipes, advanced scripting
 - **Key Commands**: Complex pipelines, advanced bash scripting
@@ -576,19 +600,18 @@ Your journey follows a carefully designed progression through interconnected cha
 
 ```text
 ENTRANCE (File Viewing)
-    ├── WORKSHOP (mkdir, touch, rm, echo >) — side tutorial
-    │
-    └── CELLAR (File Types & Aliases)
-         └── ARMOURY (Permissions/Combat)
-              └── CHAMBER (Variables/Scripting)
+    ├── workshop/ (mkdir, touch, rm, echo >) — side tutorial
+    └── cellar/ (File Types & Aliases)
+         └── armoury/ (Permissions/Combat)
+              └── chamber/ (Variables/Scripting)
 
 [Hidden rooms unlocked by treasures]
-    ├── CHAPEL → Courtyard → Aviary → Hall (Monster) → Library
-    │            └── Graveyard → Columbarium, Royal Tombs, .Mausoleum
-    ├── VAULT → Stronghold (Goblet) → Nursery → Lab (Ghost)
-    ├── SCRAP (Symlinks/Portals)
-    └── RIFT (unlocked via Vault) → Arena → Pit (Boss Encounters)
-                                  → Spire → Mezzanine → .Elevator → .Satellite
+    ├── .chapel/ → courtyard → aviary → hall (Monster) → library
+    │              └── graveyard → columbarium, royal-tombs, .mausoleum
+    ├── .vault/ → stronghold (Goblet) → nursery → lab (Ghost)
+    ├── .scrap/ (Symlinks/Portals)
+    └── .rift/ (unlocked via Vault) → arena → pit (Boss Encounters)
+                                    → spire → mezzanine → .elevator → .satellite
 ```
 
 ### 🔄 **Interconnected Network**
@@ -703,9 +726,10 @@ git clone https://github.com/bamr87/bashcrawl.git
 
 ### 🤝 Join the Adventure
 
-- **Source Code**: [GitHub Repository](https://github.com/bamr87/bashcrawl)
-- **Bug Reports**: Create issues for problems or suggestions
-- **Contributions**: Submit new rooms, puzzles, or features
+- **Upstream**: [GitLab — slackermedia/bashcrawl](https://gitlab.com/slackermedia/bashcrawl) (original project)
+- **This fork**: [GitHub — bamr87/bashcrawl](https://github.com/bamr87/bashcrawl)
+- **Bug reports**: [Open an issue](https://github.com/bamr87/bashcrawl/issues)
+- **Contributions**: Submit new rooms, puzzles, or features via pull request
 - **Community**: Share your achievements and learn from others
 
 ### 📚 Extended Learning
