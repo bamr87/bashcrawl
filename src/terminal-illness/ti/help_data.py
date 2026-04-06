@@ -8,11 +8,14 @@ Requires: ``pyyaml``
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 import yaml
+
+_T = TypeVar("_T")
 
 
 # ---------------------------------------------------------------------------
@@ -188,6 +191,19 @@ def _load_yaml(filename: str, data_dir: Optional[Path] = None) -> Dict[str, Any]
         return yaml.safe_load(f) or {}
 
 
+def _from_dict(cls: Type[_T], data: Dict[str, Any], **overrides: Any) -> _T:
+    """Instantiate a dataclass from a dict, ignoring unknown keys.
+
+    Only keys that correspond to declared dataclass fields are passed
+    through.  *overrides* are merged on top (useful for injecting the
+    dict key as a ``name`` / ``key`` field).
+    """
+    field_names = {f.name for f in dataclasses.fields(cls)}
+    merged = {k: v for k, v in data.items() if k in field_names}
+    merged.update(overrides)
+    return cls(**merged)
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -201,28 +217,11 @@ def load_rooms(data_dir: Optional[Path] = None) -> Dict[str, RoomHelp]:
     raw = _load_yaml("rooms.yaml", data_dir)
     rooms: Dict[str, RoomHelp] = {}
     for name, info in raw.get("rooms", {}).items():
+        # Coerce unlocked_by to str (YAML may parse it as another type)
         unlocked_by = info.get("unlocked_by")
         if unlocked_by is not None:
-            unlocked_by = str(unlocked_by)
-        rooms[name] = RoomHelp(
-            name=name,
-            emoji=info.get("emoji", ""),
-            title=info.get("title", name),
-            description=info.get("description", ""),
-            path=info.get("path", ""),
-            prompt_label=info.get("prompt_label", "exploring"),
-            context_hint=info.get("context_hint", ""),
-            hidden=bool(info.get("hidden", False)),
-            unlocked_by=unlocked_by,
-            parent=info.get("parent"),
-            children=info.get("children", []),
-            on_enter=info.get("on_enter"),
-            on_exit=info.get("on_exit"),
-            teaches=info.get("teaches", []),
-            key_files=info.get("key_files", []),
-            next_steps=info.get("next_steps", ""),
-            essential_commands=info.get("essential_commands", []),
-        )
+            info = {**info, "unlocked_by": str(unlocked_by)}
+        rooms[name] = _from_dict(RoomHelp, info, name=name)
     return rooms
 
 
@@ -232,11 +231,11 @@ def load_commands(data_dir: Optional[Path] = None) -> List[CommandCategory]:
     categories: List[CommandCategory] = []
     for key, cat_data in raw.get("categories", {}).items():
         cmds = [
-            CommandEntry(command=c["command"], description=c["description"])
+            _from_dict(CommandEntry, c)
             for c in cat_data.get("commands", [])
         ]
         categories.append(
-            CommandCategory(key=key, title=cat_data.get("title", key), commands=cmds)
+            _from_dict(CommandCategory, cat_data, key=key, commands=cmds)
         )
     return categories
 
@@ -247,17 +246,10 @@ def load_quick_ref(data_dir: Optional[Path] = None) -> Dict[str, QuickRefCard]:
     cards: Dict[str, QuickRefCard] = {}
     for key, card_data in raw.get("quick_ref", {}).items():
         sections = [
-            QuickRefSection(
-                title=s.get("title", ""),
-                items=s.get("items", []),
-            )
+            _from_dict(QuickRefSection, s)
             for s in card_data.get("sections", [])
         ]
-        cards[key] = QuickRefCard(
-            key=key,
-            title=card_data.get("title", key),
-            sections=sections,
-        )
+        cards[key] = _from_dict(QuickRefCard, card_data, key=key, sections=sections)
     return cards
 
 
@@ -267,27 +259,12 @@ def load_quests(data_dir: Optional[Path] = None) -> List[Quest]:
     quests: List[Quest] = []
     for q in raw.get("quests", []):
         comp_data = q.get("completion") or {}
-        completion = QuestCompletion(
-            command=comp_data.get("command", ""),
-            location=comp_data.get("location"),
-            args=comp_data.get("args"),
-            args_file=comp_data.get("args_file"),
-            item_check=comp_data.get("item_check"),
-        ) if comp_data else None
+        completion = _from_dict(QuestCompletion, comp_data) if comp_data else None
         next_q = q.get("next_quest")
         quests.append(
-            Quest(
-                id=q["id"],
-                title=q["title"],
-                description=q["description"],
-                objective=q["objective"],
-                required_commands=q.get("required_commands", []),
-                reward=q.get("reward", ""),
-                xp=q.get("xp", 0),
-                location_check=q.get("location_check", ""),
-                hint=q.get("hint", ""),
+            _from_dict(
+                Quest, q,
                 completion=completion,
-                prerequisites=q.get("prerequisites"),
                 next_quest=int(next_q) if next_q is not None else None,
             )
         )
@@ -300,22 +277,10 @@ def load_encounters(data_dir: Optional[Path] = None) -> Dict[str, Encounter]:
     Returns a dict mapping encounter key to :class:`Encounter`.
     """
     raw = _load_yaml("encounters.yaml", data_dir)
-    encounters: Dict[str, Encounter] = {}
-    for key, info in raw.get("encounters", {}).items():
-        encounters[key] = Encounter(
-            key=key,
-            script=info.get("script", ""),
-            room=info.get("room", ""),
-            type=info.get("type", ""),
-            description=info.get("description", ""),
-            icon=info.get("icon", "⚡"),
-            requires_items=info.get("requires_items", []),
-            recommended_items=info.get("recommended_items", []),
-            grants_items=info.get("grants_items", []),
-            unlocks_rooms=info.get("unlocks_rooms", []),
-            damage=info.get("damage", 0),
-        )
-    return encounters
+    return {
+        key: _from_dict(Encounter, info, key=key)
+        for key, info in raw.get("encounters", {}).items()
+    }
 
 
 def load_items(data_dir: Optional[Path] = None) -> Dict[str, Item]:
@@ -324,35 +289,19 @@ def load_items(data_dir: Optional[Path] = None) -> Dict[str, Item]:
     Returns a dict mapping item name to :class:`Item`.
     """
     raw = _load_yaml("items.yaml", data_dir)
-    items: Dict[str, Item] = {}
-    for name, info in raw.get("items", {}).items():
-        items[name] = Item(
-            name=name,
-            icon=info.get("icon", "✦"),
-            type=info.get("type", ""),
-            combat_bonus=info.get("combat_bonus", 0),
-            description=info.get("description", ""),
-        )
-    return items
+    return {
+        name: _from_dict(Item, info, name=name)
+        for name, info in raw.get("items", {}).items()
+    }
 
 
 def load_tutorials(data_dir: Optional[Path] = None) -> Dict[str, TutorialLesson]:
     """Load tutorial lessons from ``tutorials.yaml``."""
     raw = _load_yaml("tutorials.yaml", data_dir)
-    lessons: Dict[str, TutorialLesson] = {}
-    for lesson_id, info in raw.get("lessons", {}).items():
-        lessons[lesson_id] = TutorialLesson(
-            id=lesson_id,
-            title=info.get("title", lesson_id),
-            command=info.get("command", ""),
-            steps=info.get("steps", []),
-            explanation=info.get("explanation", ""),
-            achievement_id=info.get("achievement_id", ""),
-            achievement_name=info.get("achievement_name", ""),
-            achievement_description=info.get("achievement_description", ""),
-            achievement_emoji=info.get("achievement_emoji", ""),
-        )
-    return lessons
+    return {
+        lesson_id: _from_dict(TutorialLesson, info, id=lesson_id)
+        for lesson_id, info in raw.get("lessons", {}).items()
+    }
 
 
 def load_map(data_dir: Optional[Path] = None) -> str:

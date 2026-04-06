@@ -1,22 +1,28 @@
 """Configuration for the Bashcrawl Observatory viewer."""
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
+@dataclass
 class Config:
     """Viewer configuration — all paths derived from game_root."""
 
-    def __init__(self, game_root: str):
-        self.game_root = Path(game_root).resolve()
+    game_root: Path = field(default=Path("."))
+    cache_ttl_seconds: int = 60
+    default_per_page: int = 25
+
+    # Derived paths (set in __post_init__)
+    logs_dir: Path = field(init=False)
+    sessions_dir: Path = field(init=False)
+    screenshots_dir: Path = field(init=False)
+    feedback_dir: Path = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.game_root = Path(self.game_root).resolve()
         self.logs_dir = self.game_root / "logs"
         self.sessions_dir = self.logs_dir / "sessions"
         self.screenshots_dir = self.logs_dir / "screenshots"
         self.feedback_dir = self.logs_dir / "feedback"
-
-        # Cache settings
-        self.cache_ttl_seconds = 60
-
-        # Pagination
-        self.default_per_page = 25
 
     def validate(self) -> list[str]:
         """Return list of validation errors (empty = OK)."""

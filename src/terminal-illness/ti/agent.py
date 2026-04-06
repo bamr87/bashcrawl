@@ -196,25 +196,27 @@ async def _run_agent(
 
 def main() -> None:
     """CLI entry point."""
-    game_root: Optional[Path] = None
-    screenshot_dir = Path("./logs/screenshots")
-    auto_screenshot = True
+    import argparse
 
-    args = sys.argv[1:]
-    i = 0
-    while i < len(args):
-        if args[i] == "--game-root" and i + 1 < len(args):
-            game_root = Path(args[i + 1])
-            i += 2
-        elif args[i] == "--screenshot-dir" and i + 1 < len(args):
-            screenshot_dir = Path(args[i + 1])
-            i += 2
-        elif args[i] == "--no-auto-screenshot":
-            auto_screenshot = False
-            i += 1
-        else:
-            i += 1
+    parser = argparse.ArgumentParser(
+        prog="python -m ti.agent",
+        description="Bashcrawl agent mode — headless TUI with stdin/stdout REPL.",
+    )
+    parser.add_argument(
+        "--game-root", type=Path, default=None,
+        help="Bashcrawl repo root (directory containing entrance/)",
+    )
+    parser.add_argument(
+        "--screenshot-dir", type=Path, default=Path("./logs/screenshots"),
+        help="Directory to save SVG screenshots (default: ./logs/screenshots)",
+    )
+    parser.add_argument(
+        "--no-auto-screenshot", action="store_true",
+        help="Disable automatic screenshots after each command",
+    )
+    opts = parser.parse_args()
 
+    game_root: Optional[Path] = opts.game_root
     if game_root is None:
         try:
             game_root = _find_game_root()
@@ -222,7 +224,7 @@ def main() -> None:
             print(f"Error: {exc}", file=sys.stderr)
             sys.exit(1)
 
-    asyncio.run(_run_agent(game_root, screenshot_dir, auto_screenshot))
+    asyncio.run(_run_agent(game_root, opts.screenshot_dir, not opts.no_auto_screenshot))
 
 
 if __name__ == "__main__":

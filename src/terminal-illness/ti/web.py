@@ -130,36 +130,20 @@ def serve(
 
 def main() -> None:
     """CLI entry point with argument parsing."""
-    args = sys.argv[1:]
+    import argparse
 
-    host = "0.0.0.0"
-    port = 8080
-    game_root: str | None = None
-    debug = False
-    automation = False
+    parser = argparse.ArgumentParser(
+        prog="python -m ti.web",
+        description="Serve the Bashcrawl Textual TUI in a web browser.",
+    )
+    parser.add_argument("--host", default="0.0.0.0", help="Bind address (default: 0.0.0.0)")
+    parser.add_argument("--port", type=int, default=8080, help="Port (default: 8080)")
+    parser.add_argument("--game-root", default=None, help="Bashcrawl repo root")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--automation", action="store_true", help="Browser-friendly command bar")
+    opts = parser.parse_args()
 
-    i = 0
-    while i < len(args):
-        if args[i] == "--host" and i + 1 < len(args):
-            host = args[i + 1]
-            i += 2
-        elif args[i] == "--port" and i + 1 < len(args):
-            port = int(args[i + 1])
-            i += 2
-        elif args[i] == "--game-root" and i + 1 < len(args):
-            game_root = args[i + 1]
-            i += 2
-        elif args[i] == "--debug":
-            debug = True
-            i += 1
-        elif args[i] == "--automation":
-            automation = True
-            i += 1
-        else:
-            print(f"Unknown argument: {args[i]}", file=sys.stderr)
-            sys.exit(1)
-
-    serve(host=host, port=port, game_root=game_root, debug=debug, automation=automation)
+    serve(host=opts.host, port=opts.port, game_root=opts.game_root, debug=opts.debug, automation=opts.automation)
 
 
 if __name__ == "__main__":
