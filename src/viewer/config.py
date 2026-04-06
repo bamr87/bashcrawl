@@ -7,7 +7,7 @@ from pathlib import Path
 class Config:
     """Viewer configuration — all paths derived from game_root."""
 
-    game_root: Path = field(default=Path("."))
+    game_root: Path = field(default_factory=lambda: Path("."))
     cache_ttl_seconds: int = 60
     default_per_page: int = 25
 

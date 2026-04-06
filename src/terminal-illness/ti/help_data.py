@@ -45,6 +45,11 @@ class RoomHelp:
     next_steps: str = ""
     essential_commands: List[Dict[str, str]] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        # YAML may parse unlocked_by as a non-string type; coerce to str.
+        if self.unlocked_by is not None:
+            self.unlocked_by = str(self.unlocked_by)
+
 
 @dataclass
 class Encounter:
@@ -198,6 +203,8 @@ def _from_dict(cls: Type[_T], data: Dict[str, Any], **overrides: Any) -> _T:
     through.  *overrides* are merged on top (useful for injecting the
     dict key as a ``name`` / ``key`` field).
     """
+    if not dataclasses.is_dataclass(cls):
+        raise TypeError(f"{cls} is not a dataclass")
     field_names = {f.name for f in dataclasses.fields(cls)}
     merged = {k: v for k, v in data.items() if k in field_names}
     merged.update(overrides)
@@ -215,14 +222,10 @@ def load_rooms(data_dir: Optional[Path] = None) -> Dict[str, RoomHelp]:
     Returns a dict mapping room name to :class:`RoomHelp`.
     """
     raw = _load_yaml("rooms.yaml", data_dir)
-    rooms: Dict[str, RoomHelp] = {}
-    for name, info in raw.get("rooms", {}).items():
-        # Coerce unlocked_by to str (YAML may parse it as another type)
-        unlocked_by = info.get("unlocked_by")
-        if unlocked_by is not None:
-            info = {**info, "unlocked_by": str(unlocked_by)}
-        rooms[name] = _from_dict(RoomHelp, info, name=name)
-    return rooms
+    return {
+        name: _from_dict(RoomHelp, info, name=name)
+        for name, info in raw.get("rooms", {}).items()
+    }
 
 
 def load_commands(data_dir: Optional[Path] = None) -> List[CommandCategory]:
