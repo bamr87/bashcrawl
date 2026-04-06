@@ -1,0 +1,382 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+random_page () {
+
+    # For each spell added, increase total_spells by one (1)
+    # So, the number of the spells will be 0 through n - 1.  If
+    # there are five spells in the tome, then they will be
+    # numbered from 0 through 4.  The operation to choose the
+    # current spell will pick a random number, 0 through n - 1.
+    # That spell will be displayed.
+    total_spells=6
+    curr_spell=$(( ${RANDOM} % ${total_spells} ))
+
+    case ${curr_spell} in
+        0)
+            cat << EOF
+
+View the world in color!
+
+If you have a modern, color terminal, you can view the
+output of the ls command in color!  This will still be a
+valid command if you don't have a color terminal, you just
+won't see colors.  Try this:
+
+alias ls='ls -F --color=auto'
+
+Now when you run the "ls" command by itself, rooms
+(directories), scrolls (text files), and encounters
+(executable files) should each have different colors.
+Depending on the \$LS_COLORS variable, many other files will
+have different colors too!
+
+You can read more about colors by consulting the
+"dircolors" manual.  To read more, type this spell:
+
+man dircolors
+
+In the manual, you can type 'q' (without quotes) to
+exit the manual page.
+
+EOF
+        ;;
+        1)
+            cat << EOF
+
+Keep track of where you've been!
+
+Instead of using "cd <room>" and "cd .." to
+navigate the catacombs, you can keep track of the
+rooms you've been in by using "pushd" and "popd".
+"pushd", as the name implies, pushes the directory you
+pass as the argument onto the room (directory) stack.
+Use it like so:
+
+pushd <room>
+
+The angle brackets mean you specify the room (directory),
+you don't type the angle brackets.  To see your current
+stack, type the following command:
+
+dirs
+
+This will print out the list of directories on the stack.
+The data structure is a known as a stack, because you only
+add or remove elements from the top of the stack, it is also
+known as a LIFO (Last In, First Out) data structure.  To
+remove the top room (directory) from the stack, and change
+directory to the new directory on the top of the stack, use
+"popd", like so:
+
+popd
+
+This will remove the top element of the stack ("pop" it off the
+stack), and change directory to the next top of the stack.
+
+Here's an example.  You're in a room (directory) called
+~/bashcrawl/entrance/field/, with the following
+other rooms:
+
+cemetary/ jail/ oubliette/
+
+To change directory to the cemetary, and place it on the directory
+stack, use this:
+
+pushd cemetary
+
+Now, the directory stack (output of the "dirs" command),
+shows this:
+
+~/bashcrawl/entrance/field/cemetary ~/bashcrawl/entrance/field
+
+...and your current directory (present working directory,
+held in the \$PWD variable) is the cemetary.  To go back to
+the field, run "popd".  The directory stack will return to
+~/bashcrawl/entrance/field, and your current directory will
+be that directory.  You can mix and match "pushd" with "cd",
+and only the directories you add with "pushd" will be on the
+stack.  This is useful for returning to another directory,
+after exploring the rest of the dungeon.
+
+Good luck!
+
+EOF
+        ;;
+    2)
+        [ -f ../monster ] && monster="monster" || monster="carcass"
+        cat << EOF
+
+Map the entire dungeon!
+
+You can see the layout of the entire dungeon using the
+"tree" command.  You may need to install it as a separate
+package, consult your operating system package manager for
+details on how to do this.  If you're reading this from the
+library, your relative current directory path should be:
+
+entrance/chapel/courtyard/aviary/hall/library
+
+If you run the following command, from the library:
+
+tree -F ..
+
+You should see this:
+
+..
+├── library/
+│   ├── scroll
+│   └── tome*
+└── ${monster}*
+
+The "tree" command takes many of the same options as the
+"ls" command, including colors and viewing hidden files.  Go
+back to the entrance and try it out!
+
+EOF
+        ;;
+    3)
+        cat << EOF
+
+Use emacs mode to navigate the command prompt (CLI)!
+
+By default, in Bash, emacs mode is enabled.  If it is not
+enabled you can run this in your shell:
+
+set -o emacs
+
+This allows you to move the cursor in the shell faster than
+using the arrow keys alone.  Specific command key
+chords/combinations can be used, like so:
+
+- Ctrl-a:  move cursor to the beginning of the line
+- Ctrl-e:  move cursor to the end of the line
+- Meta-b:  (or Alt-b), move backward one word
+- Meta-f:  (or Alt-f), move forward one word
+- Ctrl-u:  Cut from cursor to beginning of line
+- Ctrl-k:  Cut from cursor to end of line
+- Ctrl-w:  Cut previous word
+- Ctrl-y:  Paste what you just cut with Ctrl-u, Ctrl-k, or
+           Ctrl-w
+- Ctrl-_:  Undo last cut (may not work in all terminals)
+
+Now you can navigate the shell like a pro!
+
+EOF
+        ;;
+    4)
+        cat << EOF
+
+Use the tmux terminal multiplexer!
+
+tmux is a terminal multiplexer, which allows the user to
+manage sessions, windows, and panes within the terminal.
+The biggest reason to use a terminal multiplexer is that it
+keeps the shells in each of its panes persistent, meaning
+you can detach and reattach to tmux panes, windows, and
+sessions (possibly from another computer altogether),
+without losing your work, or where you were.  You can even
+use tmux to share the terminal with another user (who is
+using a different computer from the one you are using), just
+have them connect to the same session!
+
+tmux is a separate package, and may not be installed by
+default.  Consult your operating system package manager
+manual for details on installing tmux.
+
+You can launch tmux using the following command:
+
+tmux new-session -s <session_name>
+
+Where <session_name> can be replaced by the arbitrary name
+you want to give the session.  If you don't want to name the
+session, you can leave off "-s <session_name>".
+
+By default, tmux will create the new session with one
+window, and that window will have but one pane.  Each pane
+created by tmux is a pseudo terminal, running its own
+independent shell.  There will be a status bar at the bottom
+of the tmux pane, with the session name (if any) and
+numbered windows.
+
+To interact with tmux inside of a tmux pane, you pass the
+prefix key, which is Ctrl-b by default.  You can then hit
+another key to have tmux do something useful.  One such
+useful thing is to split the tmux pane vertically, with a
+horizontal line separating your old pane and the freshly
+launched new pane on the bottom.  To do this, type the
+following:
+
+Ctrl-b, then %
+
+Instead of %, you can type " to split the pane horizontally,
+with a vertical line separating the two panes.  You can type
+:, to enter the tmux shell, and issue arbitrary tmux
+commands that way.  See the tmux manual for details:
+
+man tmux
+
+To detach from the tmux session, you can issue the following
+keystrokes:
+
+Ctrl-b, then d
+
+...for "Detach".  Then, later on, possibly from a different computer
+altogether (connecting to the computer running tmux over SSH
+or some other remote shell program), you can attach to the
+tmux session with the following command:
+
+tmux attach -t <session_name>
+
+tmux has a complete configuration language, which is by
+default stored in ~/.tmux.conf.  You can set up arbitrary
+keystrokes in the configuration file, to make tmux behave
+however you want.  The limit is your imagination!
+
+EOF
+        ;;
+    5)
+        cat << EOF
+
+Learn simple brace expansion and for loops!
+
+Let's say you have several files, named like so:
+
+file00
+file01
+file02
+file03
+...
+file97
+file98
+file99
+
+You can loop through them, and perform any operation on
+them.  For instance, let's assume you want to compress each
+file individually, without adding them to a single, large
+tar (or ZIP) archive.   Instead of laboriously running the
+commands 100 times for 100 files, you can use a for loop,
+and operate on each file individually.
+
+One way to achieve this is through a simple brace expansion.
+In Bash, insted of writing the following (which is very
+labor intensive):
+
+gzip file00
+gzip file01
+gzip file02
+gzip file03
+...
+gzip file97
+gzip file98
+gzip file99
+
+You can achieve the same results by typing the following
+brace expansion:
+
+gzip file{00..99}
+
+You can also put this into a for loop, like so:
+
+for i in {00..99}; do
+    gzip file\${i}
+done
+
+Yet another loop (that doesn't use a brace expansion) could
+be:
+
+for file in file*; do
+    gzip \${file}
+done
+
+All of the above commands achieve the same result, each file
+will be compressed with gzip individually.
+
+EOF
+        ;;
+        # Add new spells here
+    esac
+}
+
+cat << EOF
+
+You see a large tome on the table, open
+to a page in the middle of the book.
+
+EOF
+
+printf "Do you read it? y/n  "
+read RESP
+
+if [ "${RESP}" = "y" -o "${RESP}" = "Y" ]; then
+    cat << EOF
+
+The tome appears to be a book of spells.  Here is the
+first spell:
+
+EOF
+
+    while [ "${RESP}" = 'y' -o "${RESP}" = 'Y' ]; do
+        random_page
+
+        printf "Do you want to read another spell? y/n  "
+        read RESP
+    done
+fi
+
+# --- Hidden Study Unlock ---
+# If the player has progressed far enough (amulet from cellar + coins from
+# chamber), reading the tome causes a bookshelf to shift, revealing the
+# hidden study behind it.
+_has_amulet=false
+_has_coins=false
+grep --quiet amulet <<< "$I" 2>/dev/null && _has_amulet=true
+grep --quiet coins  <<< "$I" 2>/dev/null && _has_coins=true
+
+if $_has_amulet && $_has_coins; then
+    if [ -d .study ]; then
+        # Unlock the hidden study
+        mv .study study 2>/dev/null
+        cat << EOF
+
+As you close the tome, you hear stone grinding behind you.
+One of the bookshelves has shifted, revealing a narrow
+passage into a hidden study!
+
+    ls
+    cd study
+
+EOF
+    elif [ -d study ]; then
+        cat << EOF
+
+The passage to the hidden study remains open behind the
+bookshelf.
+
+EOF
+    fi
+fi
+
+
+
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
+#
+#     ./tome
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================

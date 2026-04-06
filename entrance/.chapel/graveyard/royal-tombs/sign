@@ -1,0 +1,13 @@
+# 
+# Visitor, heed this sign:
+# 
+# Within these tombs lies magic old,
+# A spell of aid for your travail.
+# Speak the words, be brave and bold,
+# And guidance shall your path unveil.
+#
+# grep King royals 
+#
+# This spell lists only the lines that contain "King"
+# from the file "royals"
+

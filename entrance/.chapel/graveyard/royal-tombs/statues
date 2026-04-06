@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+#import global functions from toplevel directory
+FUNCTIONS=$(pwd)
+FUNCTIONS=${FUNCTIONS%entrance*}entrance/.functions
+. $FUNCTIONS
+
+# this runs after the statue has been "destroyed"
+# and this file has been renamed to 'pieces'
+if [ "$0" = "./king" ]; then
+    cat << EOF
+You have already unveiled the secret number.
+
+Remember it by adding it to your inventory:
+
+export I=7432,\$I
+EOF
+    exit 1
+fi
+
+# start the statue encounter
+cat << EOF
+Standing in front of the statues, you are thinking about the symbols
+on the padlock. Do you have an item in your inventory that looks familiar?
+
+EOF
+printf "Do you have the item? y/n  "
+
+read RESP
+
+if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
+    if grep  --quiet --only-matching crown <<< $I; then
+        cat << EOF
+
+You hold the crown in your hands, pondering where to place it.
+
+EOF
+        printf "Enter the number of the statue where you want to place the crown:  "
+
+        read RESP
+
+        if [ "${RESP:0:1}" -eq "5" -o "${RESP:0:2}" -eq "05" ]; then
+            cat << EOF
+
+You come upon a solitary grave marked by a grand statue of a king,
+his once-majestic figure now weathered and worn. The crown
+that once adorned his head is missing. Vines climb the statue's base,
+weaving around the king's feet.
+
+As you gently place the crown on the statue's head, a low rumble
+echoes through the ground, and the stone king's eyes slowly open,
+glowing with an ethereal light. The statue shifts, raising its arm
+to reveal a hidden engraving on the base—a secret number, **7432**
+etched in ancient script. It faintly pulses gold, and the king nods
+solemnly to you before returning to stillness.
+
+Remove the crown from your inventory:
+
+export I=\$(sed 's/crown,//' <<< \$I)
+
+Remember the number by adding it to your inventory:
+
+export I=7432,\$I
+
+EOF
+            mv statues king
+        else
+            cat << EOF
+
+The weathered gravestone is flanked by ivy-clad pillars, while a
+majestic marble statue stands atop it. The statue, depicting a serene
+figure in royal attire with a tilted crown, gazes out solemnly. Around
+the base, broken lanterns and cracked urns hint at past grandeur,
+their silence only interrupted by the rustling leaves and distant
+raven calls.
+
+As you adjust the crown on the statue's head, it slips from its
+precarious perch and falls to the ground with a clatter.
+In that instant, a dark shimmer of magic escapes from the statue,
+wrapping around you with an unsettling chill.
+
+EOF
+            let HP=HP-5
+            export HP
+            if [ "$HP" -le 0 ]; then
+                cat << EOF
+A wave of unease washes over you, and a heavy weight seems to settle in
+your chest. You are slain by the magic.
+
+EOF
+                gameover
+                exit 1
+            else
+                cat << EOF
+The magic leaves you feeling disoriented and uneasy, as if shadows
+of the past have momentarily clouded your mind and sapped your strength.
+
+Deduct 5 from your HP variable:
+
+let "HP=HP-5"
+
+EOF
+            fi
+
+        fi
+    else
+        echo "You don't have it! Continue searching."
+        echo
+        exit
+    fi
+
+else
+    cat << EOF
+You step back from the statues, continuing your search for the Item.
+EOF
+
+fi
+
+
+
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
+#
+#     ./statues
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================

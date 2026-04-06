@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+#
+# If you are reading this, you have wandered out of bounds
+# and are reading the code that drives the game.
+#
+#                    Congratulations!
+#
+# Learning Linux is all about curiosity, so read this code and see
+# if you can figure out what it does.
+#
+# When you're ready to continue playing the game, though, stick to
+# the scrolls. If you're stuck, go to Gitlab and create an issue.
+# We're happy to provide hints.
+#
+
+if [ -e 15 ]; then
+    cat << EOF
+You open the niche, revealing a hidden plaque with a number etched 
+into its surface. The quiet of the graveyard thickens as the number 
+**2712** emerges from the shadows.
+
+Remember the number by adding it to your inventory:
+
+export I=2712,\$I
+
+EOF
+else
+    cat << EOF
+You haven't touched the right niche yet.
+Please try again.
+EOF
+fi
+
+
+
+# ========================================================================
+# If you are seeing this, you used 'cat' to read an executable file.
+# That is great curiosity! But to USE this item, run it with:
+#
+#     ./open
+#
+# Files marked with * in 'ls -F' output are executables (programs).
+# The ./ prefix means "run the file right here in this directory."
+# ========================================================================

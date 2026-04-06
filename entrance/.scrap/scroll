@@ -1,0 +1,59 @@
+
+================================================================================
+                          THE SCRAP HEAP
+================================================================================
+
+You enter a dusty alcove littered with discarded parchments
+and broken tools.  Among the debris, you find an ancient
+note scratched into the stone wall:
+
+"Descend, bold traveller, into the dungeons of POSIX
+ which the shadow of Scartaris touches, and you will
+ learn the magickal incantations of the Wildebeest."
+
+--------------------------------------------------------------------------------
+                     SYMLINK SPELL: ln -s
+--------------------------------------------------------------------------------
+
+A symlink is a magickal portal — a shortcut that points
+to another location without moving the original.
+
+CREATING A PORTAL:
+
+    ln -s TARGET LINK_NAME
+
+EXAMPLE — Create a portal to a hidden rift:
+
+    From the entrance:
+        ln -s .rift portal
+
+    From the chamber:
+        ln -s ../../../../.rift portal
+
+Once created, you can walk through the portal:
+
+    cd portal
+
+NOTE: The portal points to where something IS, not where
+you want it to BE.  If the target path is wrong, the portal
+leads nowhere.
+
+CHECK IF SOMETHING IS A PORTAL:
+
+    ls -l
+
+    Symlinks appear as:  portal -> .rift
+
+REMOVE A PORTAL:
+
+    rm portal
+
+    This removes the link, NOT the destination!
+
+--------------------------------------------------------------------------------
+              "I have done this, in the place of the
+               singing flame."
+                     — Arnnisen the Gray
+--------------------------------------------------------------------------------
+
+================================================================================

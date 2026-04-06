@@ -1,0 +1,40 @@
+
+================================================================================
+                     THE NURSERY OF THE STILL DEAD
+================================================================================
+
+Once a thriving nursery filled with vibrant plants,
+this is now the Nursery of the Still Dead (it says so,
+in writing on the wall).
+
+Withered roots snake across the floor, and the air
+carries the faint scent of dried herbs and old earth.
+
+================================================================================
+                   SEARCHING IN DEPTH: find
+================================================================================
+
+The 'find' command searches through directories recursively,
+revealing items hidden in rooms within rooms within rooms.
+
+COMMAND                      PURPOSE
+--------                     --------
+find . -name "scroll"        Find all scrolls below this room
+find . -type d               Find all rooms (directories) below
+find . -type f               Find all objects (files) below
+
+Try it now to discover what lies beneath the nursery:
+
+    $ find . -type f
+
+You may discover the laboratory hidden below...
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd lab           Descend into the abandoned laboratory
+    cd ..            Return to the stronghold
+    pwd              Confirm your location
+
+================================================================================

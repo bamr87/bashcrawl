@@ -1,0 +1,48 @@
+
+================================================================================
+                        THE GRAVEYARD
+================================================================================
+
+The graveyard is a haunting place, shrouded in mist and silence.
+
+Rusted iron gates creak in the cold wind, leading to a field of
+weathered tombstones, some cracked and others half-hidden by ivy.
+
+Twisted, barren trees loom over the field, with branches like
+skeletal fingers reaching toward a perpetually overcast sky.
+The air is thick with the scent of damp earth and decay.
+Every footstep on the gravel path seems to echo in
+the oppressive stillness.
+
+A dark and crumbling mausoleum stands ominously in the
+centre, its door secured with an old rusty padlock.
+
+================================================================================
+                   HIDDEN FILES: ls -a
+================================================================================
+
+Not everything in the graveyard is visible.  Some things
+are hidden — their names begin with a dot (.)
+
+To see ALL items, including hidden ones:
+
+    $ ls -a
+
+Try it now.  Can you find the hidden mausoleum?
+
+Hidden files and directories are common in the terminal:
+    .bashrc        Your shell configuration
+    .ssh/          Secure shell keys
+    .git/          Version control data
+
+================================================================================
+                       NAVIGATION
+================================================================================
+
+    cd columbarium       Enter the wall of niches
+    cd lower-quadrant    Visit the modest graves
+    cd royal-tombs       Explore the royal burial ground
+    cd .mausoleum        Enter the hidden mausoleum (use ls -a to find it!)
+    cd ..                Return to the chapel
+
+================================================================================
