@@ -3,7 +3,7 @@
 # For the full project, use the root requirements.txt + requirements-dev.txt instead.
 
 # AI Agent (LLM provider)
-anthropic>=0.40.0
+anthropic>=0.97.0
 
 # Environment variables from .env files
 python-dotenv>=1.0
