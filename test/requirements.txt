@@ -19,7 +19,7 @@ jsonschema>=4.20
 
 # Terminal-illness dependencies (also needed for testing)
 textual>=0.65.0
-rich>=13.7.1
+rich>=15.0.0
 prompt_toolkit>=3.0.47
 pyyaml>=6.0
 
