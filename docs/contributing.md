@@ -11,6 +11,16 @@ with steps to reproduce.
 git clone https://github.com/bamr87/bashcrawl.git
 cd bashcrawl
 bash setup.sh
+python3 -m pip install -e ".[dev]"
+```
+
+Canonical local workflow:
+
+```bash
+bash scripts/lint.sh all
+bash scripts/run_tests.sh default
+python3 -m viewer --game-root .
+python3 -m ti --game-root .
 ```
 
 ## Adding Game Content
@@ -59,6 +69,17 @@ shellcheck main.sh setup.sh help.sh lib/*.sh src/help/*.sh
 ```
 
 CI runs ShellCheck, yamllint, markdownlint, and game content validation on every PR.
+
+## Runtime Boundary Checklist
+
+When implementing a feature, confirm these before opening a PR:
+
+1. **Owner layer chosen first** (launcher, shell runtime, Python runtime, UI/adapters, or content contracts) per [architecture-runtime.md](architecture-runtime.md).
+2. **Boundary tests updated** at the layer where behavior changed (unit/integration plus parity tests when shell+Python behavior should match).
+3. **Contract data checked** by running:
+   - `python3 scripts/validate_content_contracts.py`
+   - `python3 scripts/validate_walkthrough_fs.py`
+4. **Schema compatibility preserved** for `.bashcrawl_save.json` and documented data contracts (`src/help/data/*.yaml`, `test/datasets/walkthrough.json`).
 
 ## Pull Request Process
 

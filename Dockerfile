@@ -50,6 +50,7 @@ WORKDIR ${BASHCRAWL_ROOT}
 # Copy game content and library scripts
 COPY entrance/ entrance/
 COPY lib/ lib/
+COPY scripts/ scripts/
 COPY main.sh setup.sh help.sh test_json.sh ./
 COPY src/help/ src/help/
 COPY .shellcheckrc .env.example ./
@@ -177,8 +178,9 @@ ENV PYTHONPATH="${BASHCRAWL_ROOT}/src/terminal-illness"
 
 WORKDIR ${BASHCRAWL_ROOT}/test
 
-ENTRYPOINT ["pytest"]
-CMD ["-m", "not ai and not demo", "--timeout=30", "-v"]
+WORKDIR ${BASHCRAWL_ROOT}
+ENTRYPOINT ["/bin/bash", "scripts/run_tests.sh"]
+CMD ["default"]
 
 # ============================================================================
 # Stage: lint — ShellCheck + yamllint + markdownlint
@@ -199,7 +201,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv ${VIRTUAL_ENV}
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
-RUN pip install --no-cache-dir yamllint
+RUN pip install --no-cache-dir yamllint ruff
 RUN npm install -g markdownlint-cli
 
 # Copy config files needed for linting
@@ -208,7 +210,7 @@ COPY docs/ docs/
 COPY .github/ .github/
 
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["echo '=== ShellCheck ===' && shellcheck *.sh src/help/*.sh lib/*.sh && echo '=== yamllint ===' && yamllint -c .yamllint.yml .github/workflows/*.yml && echo '=== markdownlint ===' && markdownlint '**/*.md' --config .markdownlint.json && echo '✅ All lint checks passed'"]
+CMD ["bash scripts/lint.sh all"]
 
 # Default image when `docker build` is run without --target (otherwise final stage would be lint)
 FROM game

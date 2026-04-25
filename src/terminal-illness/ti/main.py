@@ -16,26 +16,52 @@ by the in-app welcome/load screens.
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 from pathlib import Path
 
 
-def _print_usage() -> None:
-    print(
-        "Usage: python -m ti [OPTIONS]\n"
-        "\n"
-        "Options:\n"
-        "  --game-root PATH   Bashcrawl repo root (directory containing entrance/)\n"
-        "  --web                Serve TUI in the browser (textual-serve)\n"
-        "  --host ADDR          Bind address for --web (default: 0.0.0.0)\n"
-        "  --port N             Port for --web (default: 8080)\n"
-        "  --debug              Debug logging for --web\n"
-        "  --automation         Browser-friendly command bar (with --web)\n"
-        "  --ai-stdio           JSON lines on stdin/stdout (no Textual UI)\n"
-        "  -h, --help           Show this message\n",
-        file=sys.stderr,
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Bashcrawl Textual TUI entrypoint")
+    parser.add_argument(
+        "--game-root",
+        type=Path,
+        default=None,
+        help="Bashcrawl repo root (directory containing entrance/)",
     )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Serve TUI in the browser (textual-serve)",
+    )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Bind address for --web (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="Port for --web (default: 8080)",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Debug logging for --web",
+    )
+    parser.add_argument(
+        "--automation",
+        action="store_true",
+        help="Browser-friendly command bar (with --web)",
+    )
+    parser.add_argument(
+        "--ai-stdio",
+        action="store_true",
+        help="JSON lines on stdin/stdout (no Textual UI)",
+    )
+    return parser
 
 
 def _find_game_root() -> Path:
@@ -54,66 +80,18 @@ def _find_game_root() -> Path:
     )
 
 
-def _parse_args() -> dict:
-    """Parse CLI arguments into a dict of options."""
-    args = sys.argv[1:]
-    opts: dict = {
-        "game_root": None,
-        "web": False,
-        "host": "0.0.0.0",
-        "port": 8080,
-        "debug": False,
-        "automation": False,
-        "ai_stdio": False,
-    }
-
-    i = 0
-    while i < len(args):
-        a = args[i]
-        if a in ("-h", "--help"):
-            _print_usage()
-            sys.exit(0)
-        if a == "--game-root" and i + 1 < len(args):
-            opts["game_root"] = Path(args[i + 1])
-            i += 2
-        elif a == "--web":
-            opts["web"] = True
-            i += 1
-        elif a == "--host" and i + 1 < len(args):
-            opts["host"] = args[i + 1]
-            i += 2
-        elif a == "--port" and i + 1 < len(args):
-            opts["port"] = int(args[i + 1])
-            i += 2
-        elif a == "--debug":
-            opts["debug"] = True
-            i += 1
-        elif a == "--automation":
-            opts["automation"] = True
-            i += 1
-        elif a == "--ai-stdio":
-            opts["ai_stdio"] = True
-            i += 1
-        elif a.startswith("-"):
-            print(f"Error: unknown option: {a!r}", file=sys.stderr)
-            _print_usage()
-            sys.exit(2)
-        else:
-            print(f"Error: unexpected argument: {a!r}", file=sys.stderr)
-            _print_usage()
-            sys.exit(2)
-
-    return opts
+def _parse_args() -> argparse.Namespace:
+    return _build_parser().parse_args()
 
 
 def run() -> None:
     opts = _parse_args()
 
-    if opts["automation"]:
+    if opts.automation:
         os.environ["BASHCRAWL_BROWSER_AUTOMATION"] = "1"
 
     # ── Resolve game root ───────────────────────────────────────────────
-    game_root: Path | None = opts["game_root"]
+    game_root: Path | None = opts.game_root
     if game_root is None:
         try:
             game_root = _find_game_root()
@@ -122,21 +100,21 @@ def run() -> None:
             sys.exit(1)
 
     # ── AI / automation: JSON lines on stdin/stdout (no Textual) ────────
-    if opts["ai_stdio"]:
+    if opts.ai_stdio:
         from .stdio_bridge import run_json_stdio
 
         run_json_stdio(game_root)
         return
 
     # ── Web mode: delegate to textual-serve ─────────────────────────────
-    if opts["web"]:
+    if opts.web:
         from .web import serve
         serve(
-            host=opts["host"],
-            port=opts["port"],
+            host=opts.host,
+            port=opts.port,
             game_root=str(game_root),
-            debug=opts["debug"],
-            automation=opts["automation"],
+            debug=opts.debug,
+            automation=opts.automation,
         )
         return
 

@@ -42,6 +42,9 @@
             <a href="{{ url_for('pages.tests_dashboard') }}" class="{% if request.path == '/tests' %}active{% endif %}">
                 🧪 Tests
             </a>
+            <a href="{{ url_for('pages.intro_terminal_demo') }}" class="{% if request.path == '/demo/intro' %}active{% endif %}">
+                🎮 Lite Demo
+            </a>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
         </div>
     </nav>

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Bashcrawl Lite Demo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/intro_terminal.css') }}">
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>🎮 Bashcrawl Lite Demo</h1>
+    <p class="subtitle">
+        Pure JavaScript intro experience mirroring the TUI layout (header, sidebar, terminal log, prompt).
+        Includes the early path: Entrance → Cellar → Armoury → Chamber.
+    </p>
+</header>
+
+<section class="lite-terminal" id="lite-terminal-root">
+    <div class="lite-header">
+        <div class="lite-title">⚔️ BASHCRAWL — Terminal Dungeon (Lite)</div>
+        <div class="lite-subtitle" id="lite-subtitle"></div>
+    </div>
+
+    <div class="lite-main">
+        <aside class="lite-sidebar">
+            <section class="lite-panel">
+                <h3>📜 ACTIVE QUEST</h3>
+                <div id="quest-panel"></div>
+            </section>
+            <section class="lite-panel">
+                <h3>🎒 INVENTORY</h3>
+                <div id="inventory-panel"></div>
+            </section>
+            <section class="lite-panel lite-room-panel">
+                <h3>🗺️ LOCATION</h3>
+                <div id="room-panel"></div>
+            </section>
+        </aside>
+
+        <section class="lite-log-wrap">
+            <pre id="output-log" class="lite-log" aria-live="polite"></pre>
+        </section>
+    </div>
+
+    <div class="lite-input-row">
+        <label for="command-input" id="prompt-label" class="lite-prompt"></label>
+        <input id="command-input" class="lite-input" autocomplete="off" spellcheck="false" />
+    </div>
+
+    <div class="lite-footer">
+        <span>Enter=run</span>
+        <span>↑↓=history</span>
+        <span>Tab=complete</span>
+        <span><code>help</code> for commands</span>
+        <span><code>reset</code> to restart</span>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/intro_terminal_data.js') }}"></script>
+<script src="{{ url_for('static', filename='js/intro_terminal.js') }}"></script>
+{% endblock %}

@@ -252,3 +252,9 @@ def tests_dashboard():
     return render_template("tests/dashboard.html",
                            interface_counts=interface_counts,
                            interface_passed=interface_passed)
+
+
+@pages_bp.route("/demo/intro")
+def intro_terminal_demo():
+    """Bashcrawl-lite browser terminal demo (pure JavaScript)."""
+    return render_template("demo/intro.html")

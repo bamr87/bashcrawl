@@ -1,0 +1,153 @@
+commands:
+  - name: help
+    help: Show available commands
+    python_handler: _cmd_help
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: pwd
+    help: Print working directory
+    python_handler: _cmd_pwd
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: ls
+    help: List directory contents
+    python_handler: _cmd_ls
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: cd
+    help: Change directory
+    python_handler: _cmd_cd
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: mkdir
+    help: Create directory
+    python_handler: _cmd_mkdir
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: touch
+    help: Create empty file
+    python_handler: _cmd_touch
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: cat
+    help: Print file contents
+    python_handler: _cmd_cat
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: grep
+    help: Search for text in a file
+    python_handler: _cmd_grep
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: rm
+    help: Remove a file
+    python_handler: _cmd_rm
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: cp
+    help: Copy a file
+    python_handler: _cmd_cp
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: mv
+    help: Move or rename a file or directory
+    python_handler: _cmd_mv
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: export
+    help: Set a game variable
+    python_handler: _cmd_export
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: echo
+    help: Print text or variable value
+    python_handler: _cmd_echo
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: true
+  - name: save
+    help: Save your progress
+    python_handler: _cmd_save
+    runtimes:
+      bash: true
+      python: true
+      ai: true
+      demo: false
+  - name: load
+    help: Load your progress
+    python_handler: _cmd_load
+    runtimes:
+      bash: true
+      python: true
+      ai: false
+      demo: false
+  - name: merlin
+    help: Ask Merlin for a hint
+    python_handler: _cmd_merlin
+    runtimes:
+      bash: true
+      python: true
+      ai: false
+      demo: false
+  - name: exit
+    help: Exit the game
+    python_handler: _cmd_exit
+    runtimes:
+      bash: false
+      python: true
+      ai: true
+      demo: false
+  - name: volume
+    help: Set audio volume (0-100)
+    python_handler: _cmd_volume
+    runtimes:
+      bash: false
+      python: true
+      ai: false
+      demo: false
+  - name: mute
+    help: Toggle audio mute
+    python_handler: _cmd_mute
+    runtimes:
+      bash: false
+      python: true
+      ai: false
+      demo: false

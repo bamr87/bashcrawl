@@ -126,6 +126,8 @@ jobs:
       shell: bash
       run: |
         mkdir -p test/reports
+        python3 scripts/validate_content_contracts.py --json > test/reports/content-contracts-validation.json
+        python3 scripts/validate_content_contracts.py
         python3 scripts/validate_walkthrough_fs.py --json > test/reports/walkthrough-validation.json
         python3 scripts/validate_walkthrough_fs.py
 
@@ -134,3 +136,8 @@ jobs:
       run: |
         mkdir -p test/reports
         python3 scripts/generate_content_index.py --check --output test/reports/content-index.json
+
+    - name: Validate runtime command parity
+      shell: bash
+      run: |
+        python3 scripts/validate_runtime_commands.py > test/reports/runtime-command-validation.json

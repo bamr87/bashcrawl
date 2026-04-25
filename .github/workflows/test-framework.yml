@@ -77,27 +77,22 @@ jobs:
           import os, pathlib
           ws = pathlib.Path(os.environ["GITHUB_WORKSPACE"])
           ti = str(ws / "src" / "terminal-illness")
+          viewer = str(ws / "src")
           tests = str(ws / "test")
-          pypath = ti + os.pathsep + tests
+          pypath = ti + os.pathsep + viewer + os.pathsep + tests
           with open(os.environ["GITHUB_ENV"], "a") as f:
               f.write(f"PYTHONPATH={pypath}\n")
 
       - name: Run unit tests
         shell: bash
-        run: |
-          mkdir -p test/reports
-          cd test
-          python -m pytest unit/ -v --tb=short --junitxml=reports/unit-results.xml
+        run: bash scripts/run_tests.sh unit
         env:
           PYTHONUTF8: "1"
           PYTHONIOENCODING: utf-8
 
       - name: Run integration tests
         shell: bash
-        run: |
-          mkdir -p test/reports
-          cd test
-          python -m pytest integration/ -v --tb=short --junitxml=reports/integration-results.xml
+        run: bash scripts/run_tests.sh integration
         env:
           BASHCRAWL_ROOT: ${{ github.workspace }}
           PYTHONUTF8: "1"
@@ -139,17 +134,16 @@ jobs:
 
       - name: Run AI playthrough tests
         run: |
-          cd test
           SCENARIO="${{ github.event.inputs.scenario || 'critical_path' }}"
           if [ "$SCENARIO" = "all" ]; then
-            python -m pytest ai/ -v --tb=long -m ai --timeout=600 \
-              --junitxml=reports/ai-results.xml
+            bash scripts/run_tests.sh ai
           else
+            cd test
             python -m pytest ai/ -v --tb=long -m ai --timeout=300 \
               -k "$SCENARIO" --junitxml=reports/ai-results.xml
           fi
         env:
-          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/test
+          PYTHONPATH: ${{ github.workspace }}/src/terminal-illness:${{ github.workspace }}/src:${{ github.workspace }}/test
           BASHCRAWL_ROOT: ${{ github.workspace }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
@@ -194,7 +188,7 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Download AI test artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ai-playthrough-results
           path: test/

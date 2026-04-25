@@ -11,3 +11,6 @@ pytest-asyncio>=0.23.0
 
 # Schema validation (used in tests)
 jsonschema>=4.20
+
+# Python static checks
+ruff>=0.13.0

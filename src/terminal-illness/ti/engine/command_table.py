@@ -1,10 +1,18 @@
-"""Shared command table for TerminalEngine registration."""
+"""Shared command table for TerminalEngine registration.
+
+Primary source of truth is ``src/help/data/runtime_commands.yaml``.
+Falls back to the in-file defaults if YAML is unavailable.
+"""
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Final
 
-COMMAND_TABLE: Final[list[tuple[str, str, str]]] = [
+import yaml
+
+
+_DEFAULT_COMMAND_TABLE: Final[list[tuple[str, str, str]]] = [
     ("help", "_cmd_help", "Show available commands"),
     ("pwd", "_cmd_pwd", "Print working directory"),
     ("ls", "_cmd_ls", "List directory contents"),
@@ -25,3 +33,42 @@ COMMAND_TABLE: Final[list[tuple[str, str, str]]] = [
     ("volume", "_cmd_volume", "Set audio volume (0-100)"),
     ("mute", "_cmd_mute", "Toggle audio mute"),
 ]
+
+
+def _runtime_commands_path() -> Path:
+    # .../src/terminal-illness/ti/engine/command_table.py -> repo root
+    repo_root = Path(__file__).resolve().parents[4]
+    return repo_root / "src/help/data/runtime_commands.yaml"
+
+
+def _load_command_table() -> list[tuple[str, str, str]]:
+    path = _runtime_commands_path()
+    if not path.is_file():
+        return list(_DEFAULT_COMMAND_TABLE)
+
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return list(_DEFAULT_COMMAND_TABLE)
+
+    commands = data.get("commands", [])
+    loaded: list[tuple[str, str, str]] = []
+    if not isinstance(commands, list):
+        return list(_DEFAULT_COMMAND_TABLE)
+
+    for item in commands:
+        if not isinstance(item, dict):
+            continue
+        runtimes = item.get("runtimes", {})
+        if isinstance(runtimes, dict) and not bool(runtimes.get("python", False)):
+            continue
+        name = str(item.get("name", "")).strip()
+        handler = str(item.get("python_handler", "")).strip()
+        help_text = str(item.get("help", "")).strip()
+        if name and handler and help_text:
+            loaded.append((name, handler, help_text))
+
+    return loaded or list(_DEFAULT_COMMAND_TABLE)
+
+
+COMMAND_TABLE: Final[list[tuple[str, str, str]]] = _load_command_table()

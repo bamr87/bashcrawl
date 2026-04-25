@@ -54,6 +54,12 @@ cd bashcrawl
 ./setup.sh
 ```
 
+For development workflows (tests, viewer, MCP), install the Python package in editable mode:
+
+```bash
+python3 -m pip install -e ".[dev]"
+```
+
 The setup script will:
 - Verify system requirements
 - Create necessary directories and game state files

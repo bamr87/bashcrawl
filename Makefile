@@ -23,7 +23,7 @@ PYTEST := $(PYTHON) -m pytest
 SHELLCHECK := shellcheck
 COMPOSE := docker compose
 
-export PYTHONPATH := $(GAME_ROOT)/src/terminal-illness:$(GAME_ROOT)/test
+export PYTHONPATH := $(GAME_ROOT)/src/terminal-illness:$(GAME_ROOT)/src:$(GAME_ROOT)/test
 export BASHCRAWL_ROOT := $(GAME_ROOT)
 
 # ── Setup ──────────────────────────────────────────────────────────────
@@ -40,19 +40,19 @@ install-deps: ## Install all Python dependencies
 
 .PHONY: test
 test: ## Run unit + integration tests
-	cd test && $(PYTEST) unit/ integration/ -v --tb=short
+	@bash scripts/run_tests.sh default
 
 .PHONY: test-unit
 test-unit: ## Run unit tests only
-	cd test && $(PYTEST) unit/ -v --tb=short
+	@bash scripts/run_tests.sh unit
 
 .PHONY: test-integration
 test-integration: ## Run integration tests only
-	cd test && $(PYTEST) integration/ -v --tb=short
+	@bash scripts/run_tests.sh integration
 
 .PHONY: test-ai
 test-ai: ## Run AI playthrough tests (needs ANTHROPIC_API_KEY)
-	cd test && $(PYTEST) -m ai -v --tb=short --timeout=120
+	@bash scripts/run_tests.sh ai
 
 .PHONY: test-mcp
 test-mcp: ## Run MCP integration tests in local .venv
@@ -60,28 +60,21 @@ test-mcp: ## Run MCP integration tests in local .venv
 
 .PHONY: test-demo
 test-demo: ## Run demo walkthrough tests
-	cd test && $(PYTEST) -m demo -v --tb=short --timeout=60
+	@bash scripts/run_tests.sh demo
 
 .PHONY: test-all
 test-all: ## Run all tests including AI and demo
-	cd test && $(PYTEST) -v --tb=short --timeout=120
+	@bash scripts/run_tests.sh all
 
 # ── Linting ────────────────────────────────────────────────────────────
 
 .PHONY: lint
-lint: lint-shell ## Run all linters
+lint: ## Run all linters
+	@bash scripts/lint.sh all
 
 .PHONY: lint-shell
 lint-shell: ## Run ShellCheck on all shell scripts
-	@echo "=== ShellCheck ==="
-	find . -name "*.sh" -not -path "./.git/*" -not -path "./.venv/*" \
-		-exec $(SHELLCHECK) {} +
-	@echo "=== ShellCheck: game executables ==="
-	@for f in $$(find entrance/ -type f -executable 2>/dev/null); do \
-		if head -1 "$$f" | grep -q 'bash'; then \
-			$(SHELLCHECK) --severity=error "$$f"; \
-		fi; \
-	done
+	@bash scripts/lint.sh shell
 
 # ── Docker (compose) ───────────────────────────────────────────────────
 
@@ -131,6 +124,16 @@ clean-all: clean ## Reset game state and remove generated files
 	@rm -rf logs/sessions/* logs/screenshots/*
 	@rm -f .bashcrawl_save.json .setup_complete
 	@echo "All generated files removed."
+
+.PHONY: validate-contracts
+validate-contracts: ## Validate shared content contracts
+	@python3 scripts/validate_content_contracts.py
+	@python3 scripts/validate_walkthrough_fs.py
+	@python3 scripts/validate_runtime_commands.py
+
+.PHONY: generate-contract-docs
+generate-contract-docs: ## Generate docs from shared contracts
+	@python3 scripts/generate_contract_docs.py
 
 # ── Help ───────────────────────────────────────────────────────────────
 

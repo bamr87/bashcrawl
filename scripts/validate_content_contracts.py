@@ -1,0 +1,427 @@
+#!/usr/bin/env python3
+"""Validate shared Bashcrawl content contracts.
+
+Checks:
+- YAML data files are readable and structurally sane
+- room/quest/encounter references line up across YAML and walkthrough data
+- walkthrough paths resolve on disk (supports hidden-room logical paths)
+- required room scrolls and encounter scripts exist
+- save-state schema has required keys expected by runtimes
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_TEST_ROOT = _REPO_ROOT / "test"
+if str(_TEST_ROOT) not in sys.path:
+    sys.path.insert(0, str(_TEST_ROOT))
+
+from fixtures.logical_paths import resolve_logical_path  # noqa: E402
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_mode",
+        help="Emit machine-readable JSON report instead of plain text",
+    )
+    return parser.parse_args()
+
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise ValueError(f"{path.name} must contain a YAML object at top-level")
+    return data
+
+
+def _add_error(errors: list[str], message: str) -> None:
+    errors.append(message)
+
+
+def _add_warning(warnings: list[str], message: str) -> None:
+    warnings.append(message)
+
+
+def _normalize_logical(path: str) -> str:
+    parts = [p for p in path.replace("\\", "/").strip("/").split("/") if p]
+    out = []
+    for part in parts:
+        out.append(part[1:] if part.startswith(".") else part)
+    return "/".join(out)
+
+
+def _validate_required_files(root: Path, errors: list[str], report: dict[str, Any]) -> dict[str, Any]:
+    files = {
+        "rooms_yaml": root / "src/help/data/rooms.yaml",
+        "quests_yaml": root / "src/help/data/quests.yaml",
+        "encounters_yaml": root / "src/help/data/encounters.yaml",
+        "walkthrough_json": root / "test/datasets/walkthrough.json",
+        "save_schema": root / "docs/schemas/save-state.v1.json",
+    }
+    out: dict[str, Any] = {}
+    for key, path in files.items():
+        exists = path.is_file()
+        out[key] = {"path": str(path.relative_to(root)), "exists": exists}
+        if not exists:
+            _add_error(errors, f"Missing required file: {path.relative_to(root)}")
+    report["required_files"] = out
+    return out
+
+
+def _validate_save_schema(root: Path, errors: list[str], report: dict[str, Any]) -> None:
+    schema_path = root / "docs/schemas/save-state.v1.json"
+    if not schema_path.is_file():
+        report["save_schema"] = {"ok": False, "missing": True}
+        return
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    required = set(schema.get("required", []))
+    expected_required = {
+        "current_quest_id",
+        "completed_quest_ids",
+        "learned_commands",
+        "current_location",
+        "inventory",
+        "hp",
+        "experience_points",
+        "game_level",
+        "game_started",
+        "session_count",
+        "last_session",
+        "scrolls_read",
+        "mode",
+        "player_name",
+    }
+    missing = sorted(expected_required - required)
+    if missing:
+        _add_error(errors, f"Save schema missing required keys: {', '.join(missing)}")
+    report["save_schema"] = {
+        "ok": not missing,
+        "required_count": len(required),
+        "missing_expected_required": missing,
+    }
+
+
+def _validate_rooms_and_walkthrough(
+    root: Path,
+    rooms_data: dict[str, Any],
+    walkthrough: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+    report: dict[str, Any],
+) -> None:
+    rooms_map = rooms_data.get("rooms", {})
+    wt_rooms = walkthrough.get("rooms", {})
+    if not isinstance(rooms_map, dict):
+        _add_error(errors, "rooms.yaml: 'rooms' must be an object")
+        rooms_map = {}
+    if not isinstance(wt_rooms, dict):
+        _add_error(errors, "walkthrough.json: 'rooms' must be an object")
+        wt_rooms = {}
+
+    yaml_paths: dict[str, str] = {}
+    for room_name, spec in rooms_map.items():
+        if not isinstance(spec, dict):
+            _add_error(errors, f"rooms.yaml: room '{room_name}' must be an object")
+            continue
+        room_path = str(spec.get("path", "")).strip()
+        if room_name == "unknown":
+            continue
+        if not room_path:
+            _add_error(errors, f"rooms.yaml: room '{room_name}' is missing 'path'")
+            continue
+        if room_path == "bashcrawl":
+            continue
+        yaml_paths[room_path] = room_name
+
+    wt_paths = set(str(p) for p in wt_rooms.keys())
+    yaml_path_set = set(yaml_paths.keys())
+    wt_norm = {_normalize_logical(p) for p in wt_paths}
+    yaml_norm = {_normalize_logical(p) for p in yaml_path_set}
+    missing_in_walkthrough = sorted(yaml_norm - wt_norm)
+    missing_in_rooms_yaml = sorted(wt_norm - yaml_norm)
+
+    for p in missing_in_walkthrough:
+        _add_warning(warnings, f"rooms.yaml path not represented in walkthrough.json: {p}")
+    for p in missing_in_rooms_yaml:
+        _add_warning(warnings, f"walkthrough room not represented in rooms.yaml: {p}")
+
+    resolved_rooms: list[dict[str, Any]] = []
+    missing_paths: list[str] = []
+    missing_scrolls: list[str] = []
+    for logical_path, spec in wt_rooms.items():
+        resolved = resolve_logical_path(root, logical_path)
+        exists = bool(resolved and resolved.is_dir())
+        if not exists:
+            missing_paths.append(logical_path)
+            _add_error(errors, f"Walkthrough room path missing on disk: {logical_path}")
+        has_scroll = bool(isinstance(spec, dict) and spec.get("scroll"))
+        scroll_ok = True
+        resolved_scroll = None
+        if has_scroll:
+            scroll_candidate = (resolved / "scroll") if resolved else None
+            scroll_ok = bool(scroll_candidate and scroll_candidate.is_file())
+            resolved_scroll = (
+                str(scroll_candidate.relative_to(root))
+                if scroll_candidate and scroll_candidate.exists()
+                else None
+            )
+            if not scroll_ok:
+                missing_scrolls.append(f"{logical_path}/scroll")
+                _add_error(errors, f"Walkthrough room missing scroll file: {logical_path}/scroll")
+
+        resolved_rooms.append(
+            {
+                "logical": logical_path,
+                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "exists": exists,
+                "requires_scroll": has_scroll,
+                "scroll_ok": scroll_ok,
+                "resolved_scroll": resolved_scroll,
+            }
+        )
+
+    report["rooms"] = {
+        "yaml_count": len(yaml_path_set),
+        "walkthrough_count": len(wt_paths),
+        "missing_in_walkthrough": missing_in_walkthrough,
+        "missing_in_rooms_yaml": missing_in_rooms_yaml,
+        "missing_paths_on_disk": missing_paths,
+        "missing_scrolls_on_disk": missing_scrolls,
+        "resolved": resolved_rooms,
+    }
+
+
+def _validate_quests(
+    quests_data: dict[str, Any],
+    walkthrough: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+    report: dict[str, Any],
+) -> None:
+    yaml_quests = quests_data.get("quests", [])
+    wt_quests = walkthrough.get("quests", [])
+    if not isinstance(yaml_quests, list):
+        _add_error(errors, "quests.yaml: 'quests' must be a list")
+        yaml_quests = []
+    if not isinstance(wt_quests, list):
+        _add_error(errors, "walkthrough.json: 'quests' must be a list")
+        wt_quests = []
+
+    yaml_by_id: dict[int, dict[str, Any]] = {}
+    for q in yaml_quests:
+        if not isinstance(q, dict):
+            _add_error(errors, "quests.yaml: each quest entry must be an object")
+            continue
+        qid = q.get("id")
+        if not isinstance(qid, int):
+            _add_error(errors, f"quests.yaml: quest id must be int, got {qid!r}")
+            continue
+        yaml_by_id[qid] = q
+
+    wt_by_id: dict[int, dict[str, Any]] = {}
+    for q in wt_quests:
+        if not isinstance(q, dict):
+            _add_error(errors, "walkthrough.json: each quest entry must be an object")
+            continue
+        qid = q.get("id")
+        if not isinstance(qid, int):
+            _add_error(errors, f"walkthrough.json: quest id must be int, got {qid!r}")
+            continue
+        wt_by_id[qid] = q
+
+    missing_in_walkthrough = sorted(set(yaml_by_id) - set(wt_by_id))
+    missing_in_yaml = sorted(set(wt_by_id) - set(yaml_by_id))
+    for qid in missing_in_walkthrough:
+        _add_warning(warnings, f"Quest id {qid} exists in quests.yaml but not walkthrough.json")
+    for qid in missing_in_yaml:
+        _add_warning(warnings, f"Quest id {qid} exists in walkthrough.json but not quests.yaml")
+
+    field_mismatches: list[dict[str, Any]] = []
+    for qid in sorted(set(yaml_by_id) & set(wt_by_id)):
+        yq = yaml_by_id[qid]
+        wq = wt_by_id[qid]
+        ycmd = str((yq.get("completion") or {}).get("command") or "").strip()
+        wcmd = str(wq.get("command") or "").strip()
+        if ycmd and wcmd and ycmd != wcmd:
+            field_mismatches.append({"id": qid, "field": "command", "yaml": ycmd, "walkthrough": wcmd})
+            _add_warning(warnings, f"Quest {qid} command mismatch (yaml={ycmd}, walkthrough={wcmd})")
+
+        yxp = yq.get("xp")
+        wxp = wq.get("xp")
+        if isinstance(yxp, int) and isinstance(wxp, int) and yxp != wxp:
+            field_mismatches.append({"id": qid, "field": "xp", "yaml": yxp, "walkthrough": wxp})
+            _add_warning(warnings, f"Quest {qid} XP mismatch (yaml={yxp}, walkthrough={wxp})")
+
+    report["quests"] = {
+        "yaml_count": len(yaml_by_id),
+        "walkthrough_count": len(wt_by_id),
+        "missing_in_walkthrough": missing_in_walkthrough,
+        "missing_in_yaml": missing_in_yaml,
+        "mismatches": field_mismatches,
+    }
+
+
+def _validate_encounters(
+    root: Path,
+    encounters_data: dict[str, Any],
+    walkthrough: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+    report: dict[str, Any],
+) -> None:
+    entries = encounters_data.get("encounters", {})
+    wt_rooms = walkthrough.get("rooms", {})
+    if not isinstance(entries, dict):
+        _add_error(errors, "encounters.yaml: 'encounters' must be an object")
+        entries = {}
+    if not isinstance(wt_rooms, dict):
+        wt_rooms = {}
+
+    room_by_slug: dict[str, str] = {}
+    rooms_yaml = _load_yaml(root / "src/help/data/rooms.yaml").get("rooms", {})
+    if isinstance(rooms_yaml, dict):
+        for slug, spec in rooms_yaml.items():
+            if isinstance(spec, dict):
+                room_by_slug[slug] = str(spec.get("path", ""))
+
+    expected_paths: set[str] = set()
+    for room_path, spec in wt_rooms.items():
+        if not isinstance(spec, dict):
+            continue
+        for script in spec.get("scripts", []):
+            expected_paths.add(_normalize_logical(f"{room_path}/{script}"))
+
+    missing_on_disk: list[str] = []
+    missing_in_walkthrough: list[str] = []
+    checked: list[dict[str, Any]] = []
+    for key, spec in entries.items():
+        if not isinstance(spec, dict):
+            _add_error(errors, f"encounters.yaml: encounter '{key}' must be an object")
+            continue
+        room_slug = str(spec.get("room", ""))
+        script = str(spec.get("script", ""))
+        if not room_slug or not script:
+            _add_error(errors, f"encounters.yaml: encounter '{key}' missing room/script")
+            continue
+        room_path = room_by_slug.get(room_slug, "")
+        logical = f"{room_path}/{script}" if room_path else script
+        resolved = resolve_logical_path(root, logical) if room_path else None
+        on_disk = bool(resolved and resolved.is_file())
+        if not on_disk:
+            missing_on_disk.append(logical)
+            _add_warning(warnings, f"Encounter script missing on disk: {logical}")
+        logical_norm = _normalize_logical(logical)
+        if room_path and logical_norm not in expected_paths:
+            missing_in_walkthrough.append(logical)
+            _add_warning(warnings, f"Encounter path not present in walkthrough.json: {logical_norm}")
+        checked.append(
+            {
+                "key": key,
+                "logical": logical,
+                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "on_disk": on_disk,
+                "in_walkthrough": logical_norm in expected_paths if room_path else False,
+            }
+        )
+
+    report["encounters"] = {
+        "yaml_count": len(entries),
+        "walkthrough_script_count": len(expected_paths),
+        "missing_on_disk": sorted(set(missing_on_disk)),
+        "missing_in_walkthrough": sorted(set(missing_in_walkthrough)),
+        "checked": checked,
+    }
+
+
+def validate(root: Path) -> dict[str, Any]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    report: dict[str, Any] = {}
+    _validate_required_files(root, errors, report)
+
+    files = report.get("required_files", {})
+    required_ok = all(v.get("exists") for v in files.values()) if files else False
+    if not required_ok:
+        return {
+            "ok": False,
+            "error_count": len(errors),
+            "errors": errors,
+            **report,
+        }
+
+    rooms_data = _load_yaml(root / "src/help/data/rooms.yaml")
+    quests_data = _load_yaml(root / "src/help/data/quests.yaml")
+    encounters_data = _load_yaml(root / "src/help/data/encounters.yaml")
+    walkthrough = json.loads((root / "test/datasets/walkthrough.json").read_text(encoding="utf-8"))
+
+    _validate_save_schema(root, errors, report)
+    _validate_rooms_and_walkthrough(root, rooms_data, walkthrough, errors, warnings, report)
+    _validate_quests(quests_data, walkthrough, errors, warnings, report)
+    _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
+
+    return {
+        "ok": not errors,
+        "error_count": len(errors),
+        "warning_count": len(warnings),
+        "errors": errors,
+        "warnings": warnings,
+        **report,
+    }
+
+
+def _emit_text(result: dict[str, Any]) -> None:
+    rooms = result.get("rooms", {})
+    quests = result.get("quests", {})
+    enc = result.get("encounters", {})
+    save_schema = result.get("save_schema", {})
+
+    print("=== Contract Validation Summary ===")
+    print(f"Rooms: yaml={rooms.get('yaml_count', 0)} walkthrough={rooms.get('walkthrough_count', 0)}")
+    print(f"Quests: yaml={quests.get('yaml_count', 0)} walkthrough={quests.get('walkthrough_count', 0)}")
+    print(
+        "Encounters: "
+        f"yaml={enc.get('yaml_count', 0)} walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
+    )
+    print(f"Save schema required keys: {save_schema.get('required_count', 0)}")
+    print(f"Warnings: {result.get('warning_count', 0)}")
+    print("")
+
+    if result.get("ok"):
+        for warning in result.get("warnings", []):
+            print(f"WARNING: {warning}")
+        print("content contracts validation passed.")
+        return
+
+    print(f"content contracts validation FAILED with {result.get('error_count', 0)} error(s):")
+    for err in result.get("errors", []):
+        print(f"- {err}")
+    if result.get("warnings"):
+        print("\nWarnings:")
+        for warning in result.get("warnings", []):
+            print(f"- {warning}")
+
+
+def main() -> int:
+    args = parse_args()
+    result = validate(Path.cwd())
+    if args.json_mode:
+        print(json.dumps(result, indent=2))
+    else:
+        _emit_text(result)
+    return 0 if result.get("ok") else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
