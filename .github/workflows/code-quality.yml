@@ -18,7 +18,7 @@ jobs:
     name: Security Analysis (CodeQL)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
@@ -35,7 +35,7 @@ jobs:
     name: Quality Metrics
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 

@@ -56,7 +56,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.12']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -124,7 +124,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_ai_tests == 'true')
     needs: unit-and-integration
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
@@ -184,7 +184,7 @@ jobs:
     needs: ai-playthrough
     if: always() && needs.ai-playthrough.result == 'success'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
