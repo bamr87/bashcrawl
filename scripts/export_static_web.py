@@ -10,7 +10,6 @@ from typing import Any
 
 import yaml
 
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "web" / "data"
 
@@ -158,11 +157,23 @@ def build_docs() -> dict[str, Any]:
         "commands": commands,
         "quests": quests,
         "glossary": [
-            {"term": "directory", "definition": "A folder that can contain files and other directories."},
+            {
+                "term": "directory",
+                "definition": "A folder that can contain files and other directories.",
+            },
             {"term": "path", "definition": "A text address for a file or directory."},
-            {"term": "hidden file", "definition": "A file or directory whose name starts with a dot."},
-            {"term": "executable", "definition": "A file you can run as a program, often shown with *."},
-            {"term": "environment variable", "definition": "A named value available to commands, like I or HP."},
+            {
+                "term": "hidden file",
+                "definition": "A file or directory whose name starts with a dot.",
+            },
+            {
+                "term": "executable",
+                "definition": "A file you can run as a program, often shown with *.",
+            },
+            {
+                "term": "environment variable",
+                "definition": "A named value available to commands, like I or HP.",
+            },
         ],
     }
 

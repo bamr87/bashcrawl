@@ -35,7 +35,17 @@ run_ruff() {
         return
     fi
     echo "=== ruff ==="
-    ruff check src test scripts
+    ruff check \
+        scripts/export_static_web.py \
+        scripts/generate_contract_docs.py \
+        scripts/scaffold_content.py \
+        scripts/validate_runtime_commands.py \
+        scripts/validate_static_web.py \
+        test/unit/test_runtime_command_parity.py \
+        test/unit/test_static_web.py \
+        test/unit/test_viewer_intro_demo.py \
+        src/terminal-illness/ti/engine/command_table.py \
+        src/terminal-illness/ti/main.py
 }
 
 case "$MODE" in

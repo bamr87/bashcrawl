@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from fixtures.skips import requires_bash
+
 pytestmark = pytest.mark.unit
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "docs" / "schemas" / "save-state.v1.json"
@@ -49,6 +51,7 @@ def test_python_state_matches_schema(tmp_path):
     _validate_min_schema(data, schema)
 
 
+@requires_bash
 def test_shell_state_matches_schema(sandbox):
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     script = f"""
@@ -67,6 +70,7 @@ state_save
     _validate_min_schema(data, schema)
 
 
+@requires_bash
 def test_shell_python_state_roundtrip_compatible(sandbox):
     from ti.game_state import GameState
 

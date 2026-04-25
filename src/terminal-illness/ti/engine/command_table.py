@@ -11,7 +11,6 @@ from typing import Final
 
 import yaml
 
-
 _DEFAULT_COMMAND_TABLE: Final[list[tuple[str, str, str]]] = [
     ("help", "_cmd_help", "Show available commands"),
     ("pwd", "_cmd_pwd", "Print working directory"),
