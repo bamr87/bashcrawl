@@ -135,6 +135,19 @@ validate-contracts: ## Validate shared content contracts
 generate-contract-docs: ## Generate docs from shared contracts
 	@python3 scripts/generate_contract_docs.py
 
+.PHONY: web-build
+web-build: ## Build static GitHub Pages web data
+	@python3 scripts/export_static_web.py
+
+.PHONY: web-test
+web-test: web-build ## Validate static web bundle
+	@python3 scripts/validate_static_web.py
+	@python3 scripts/validate_runtime_commands.py
+
+.PHONY: web-preview
+web-preview: web-build ## Preview static web app at http://127.0.0.1:8000
+	@cd web && python3 -m http.server 8000 --bind 127.0.0.1
+
 # ── Help ───────────────────────────────────────────────────────────────
 
 .PHONY: help

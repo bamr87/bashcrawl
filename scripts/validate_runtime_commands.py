@@ -36,7 +36,15 @@ def _python_commands() -> set[str]:
 def _bash_commands() -> set[str]:
     text = _read(ROOT / "lib/emulator.sh")
     commands = set(re.findall(r"\n([a-z0-9_-]+)\s+[a-zA-Z0-9_]+\n", text))
-    commands.update(re.findall(r'^\s*"([a-z0-9_-]+)"\)\s*$', text, re.MULTILINE))
+    table = re.search(r"_BC_COMMAND_TABLE=\$'(.*?)'", text, re.DOTALL)
+    if table:
+        for line in table.group(1).replace("\\n", "\n").splitlines():
+            parts = line.split()
+            if parts:
+                commands.add(parts[0])
+    for case_expr in re.findall(r'^\s*([|"a-z0-9_-]+)\)\s*$', text, re.MULTILINE):
+        for name in re.findall(r'"([a-z0-9_-]+)"', case_expr):
+            commands.add(name)
     return commands
 
 
@@ -46,11 +54,13 @@ def _ai_commands() -> set[str]:
 
 
 def _demo_commands() -> set[str]:
-    text = _read(ROOT / "src/viewer/static/js/intro_terminal_data.js")
-    m = re.search(r"COMMANDS:\s*\[(.*?)\]", text, re.DOTALL)
+    text = _read(ROOT / "web/assets/js/runtime.js")
+    m = re.search(r"this\.handlers\s*=\s*\{(.*?)\};", text, re.DOTALL)
     if not m:
         return set()
-    return set(re.findall(r'"([a-z0-9_-]+)"', m.group(1)))
+    keys = set(re.findall(r"^\s*([a-z][a-z0-9_-]*):", m.group(1), re.MULTILINE))
+    keys.update(re.findall(r'^\s*"([a-z][a-z0-9_-]*)":', m.group(1), re.MULTILINE))
+    return keys
 
 
 def validate() -> dict[str, Any]:

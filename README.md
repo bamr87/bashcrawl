@@ -60,6 +60,18 @@ For development workflows (tests, viewer, MCP), install the Python package in ed
 python3 -m pip install -e ".[dev]"
 ```
 
+### Static Web Version
+
+Bashcrawl also ships a GitHub Pages-compatible browser build under `web/`.
+It runs fully client-side with a TUI-inspired layout, local browser saves, and
+in-game documentation.
+
+```bash
+make web-build      # regenerate web/data/*.json from game content
+make web-test       # validate static assets and command parity
+make web-preview    # preview at http://127.0.0.1:8000
+```
+
 The setup script will:
 - Verify system requirements
 - Create necessary directories and game state files

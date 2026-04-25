@@ -38,7 +38,7 @@ commands:
       bash: true
       python: true
       ai: true
-      demo: false
+      demo: true
   - name: touch
     help: Create empty file
     python_handler: _cmd_touch
@@ -46,7 +46,39 @@ commands:
       bash: true
       python: true
       ai: true
-      demo: false
+      demo: true
+  - name: less
+    help: Page through file contents
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: head
+    help: Show the first lines of a file
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: tail
+    help: Show the last lines of a file
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: wc
+    help: Count lines, words, and characters in a file
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
   - name: cat
     help: Print file contents
     python_handler: _cmd_cat
@@ -70,7 +102,7 @@ commands:
       bash: true
       python: true
       ai: true
-      demo: false
+      demo: true
   - name: cp
     help: Copy a file
     python_handler: _cmd_cp
@@ -78,7 +110,7 @@ commands:
       bash: true
       python: true
       ai: true
-      demo: false
+      demo: true
   - name: mv
     help: Move or rename a file or directory
     python_handler: _cmd_mv
@@ -86,7 +118,7 @@ commands:
       bash: true
       python: true
       ai: true
-      demo: false
+      demo: true
   - name: export
     help: Set a game variable
     python_handler: _cmd_export
@@ -102,6 +134,78 @@ commands:
       bash: true
       python: true
       ai: true
+      demo: true
+  - name: let
+    help: Evaluate simple shell arithmetic
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: alias
+    help: Create command aliases
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: history
+    help: Show command history
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: clear
+    help: Clear the terminal output
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: quest
+    help: Show active quest
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: inventory
+    help: Show inventory
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: health
+    help: Show health
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: status
+    help: Show game status
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
+      demo: true
+  - name: reset
+    help: Reset browser game state
+    python_handler: ""
+    runtimes:
+      bash: true
+      python: false
+      ai: false
       demo: true
   - name: save
     help: Save your progress

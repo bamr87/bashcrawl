@@ -1,0 +1,1000 @@
+{
+  "categories": {
+    "navigation": {
+      "title": "Navigation",
+      "commands": [
+        {
+          "command": "pwd",
+          "description": "Print Working Directory - shows your exact location"
+        },
+        {
+          "command": "ls",
+          "description": "List files and directories in current location"
+        },
+        {
+          "command": "ls -F",
+          "description": "List with type indicators: * = executable, / = directory, @ = link"
+        },
+        {
+          "command": "ls -la",
+          "description": "List ALL files including hidden (.), with permissions and details"
+        },
+        {
+          "command": "ls -lh",
+          "description": "List with human-readable file sizes"
+        },
+        {
+          "command": "cd <path>",
+          "description": "Change directory to specified path"
+        },
+        {
+          "command": "cd ..",
+          "description": "Move up one directory level"
+        },
+        {
+          "command": "cd ~",
+          "description": "Go to home directory"
+        },
+        {
+          "command": "cd -",
+          "description": "Go back to previous directory"
+        }
+      ]
+    },
+    "file_viewing": {
+      "title": "File Content Viewing",
+      "commands": [
+        {
+          "command": "cat <file>",
+          "description": "Display entire file contents at once"
+        },
+        {
+          "command": "less <file>",
+          "description": "View file page by page (Space=next page, b=previous, q=quit)"
+        },
+        {
+          "command": "head <file>",
+          "description": "Show first 10 lines of file"
+        },
+        {
+          "command": "head -n 20 <file>",
+          "description": "Show first 20 lines of file"
+        },
+        {
+          "command": "tail <file>",
+          "description": "Show last 10 lines of file"
+        },
+        {
+          "command": "tail -f <file>",
+          "description": "Follow file changes in real-time"
+        },
+        {
+          "command": "wc <file>",
+          "description": "Count lines, words, and characters"
+        }
+      ]
+    },
+    "file_operations": {
+      "title": "File Operations",
+      "commands": [
+        {
+          "command": "cp <source> <dest>",
+          "description": "Copy file or directory"
+        },
+        {
+          "command": "mv <source> <dest>",
+          "description": "Move/rename file or directory"
+        },
+        {
+          "command": "rm <file>",
+          "description": "Delete file (CAREFUL - no undo!)"
+        },
+        {
+          "command": "mkdir <name>",
+          "description": "Create new directory"
+        },
+        {
+          "command": "rmdir <name>",
+          "description": "Remove empty directory"
+        },
+        {
+          "command": "chmod +x <file>",
+          "description": "Make file executable"
+        },
+        {
+          "command": "chmod -x <file>",
+          "description": "Remove executable permission"
+        }
+      ]
+    },
+    "search": {
+      "title": "Search and Find",
+      "commands": [
+        {
+          "command": "find . -name \"*pattern*\"",
+          "description": "Find files/directories by name pattern"
+        },
+        {
+          "command": "find . -type f",
+          "description": "Find only files"
+        },
+        {
+          "command": "find . -type d",
+          "description": "Find only directories"
+        },
+        {
+          "command": "grep \"pattern\" <file>",
+          "description": "Search for pattern within file"
+        },
+        {
+          "command": "grep -r \"pattern\" .",
+          "description": "Search for pattern in all files recursively"
+        },
+        {
+          "command": "which <command>",
+          "description": "Show location of command executable"
+        }
+      ]
+    },
+    "system_info": {
+      "title": "System Information",
+      "commands": [
+        {
+          "command": "whoami",
+          "description": "Show current username"
+        },
+        {
+          "command": "date",
+          "description": "Show current date and time"
+        },
+        {
+          "command": "uptime",
+          "description": "Show system uptime and load"
+        },
+        {
+          "command": "df -h",
+          "description": "Show disk space usage (human-readable)"
+        },
+        {
+          "command": "du -sh *",
+          "description": "Show directory sizes"
+        },
+        {
+          "command": "ps aux",
+          "description": "Show running processes"
+        }
+      ]
+    },
+    "history_shortcuts": {
+      "title": "Command History and Shortcuts",
+      "commands": [
+        {
+          "command": "history",
+          "description": "Show command history"
+        },
+        {
+          "command": "!!",
+          "description": "Repeat last command"
+        },
+        {
+          "command": "!<number>",
+          "description": "Repeat command number from history"
+        },
+        {
+          "command": "Ctrl+R",
+          "description": "Search command history interactively"
+        },
+        {
+          "command": "Tab",
+          "description": "Auto-complete file/directory names"
+        },
+        {
+          "command": "Ctrl+C",
+          "description": "Stop/cancel current command"
+        },
+        {
+          "command": "Ctrl+L",
+          "description": "Clear terminal screen"
+        }
+      ]
+    },
+    "game_specific": {
+      "title": "Game-Specific",
+      "commands": [
+        {
+          "command": "echo $I",
+          "description": "Check your inventory"
+        },
+        {
+          "command": "echo $HP",
+          "description": "Check your health points"
+        },
+        {
+          "command": "export I=item,$I",
+          "description": "Add item to inventory"
+        },
+        {
+          "command": "./executable",
+          "description": "Run executable files (treasures, potions, etc.)"
+        },
+        {
+          "command": "cat scroll",
+          "description": "Read area documentation"
+        },
+        {
+          "command": "help",
+          "description": "Show the help system"
+        },
+        {
+          "command": "help commands",
+          "description": "Show detailed command reference"
+        },
+        {
+          "command": "help tips",
+          "description": "Show advanced tips and tricks"
+        },
+        {
+          "command": "man <command>",
+          "description": "Manual page for any command"
+        }
+      ]
+    }
+  },
+  "quick_ref": {
+    "basic": {
+      "title": "Quick Reference: Basic Commands",
+      "sections": [
+        {
+          "title": "NAVIGATION",
+          "items": [
+            {
+              "cmd": "pwd",
+              "desc": "Show current location"
+            },
+            {
+              "cmd": "ls",
+              "desc": "List files"
+            },
+            {
+              "cmd": "ls -F",
+              "desc": "List with type indicators"
+            },
+            {
+              "cmd": "ls -la",
+              "desc": "List all including hidden"
+            },
+            {
+              "cmd": "cd <dir>",
+              "desc": "Change directory"
+            },
+            {
+              "cmd": "cd ..",
+              "desc": "Go up one level"
+            }
+          ]
+        },
+        {
+          "title": "FILE VIEWING",
+          "items": [
+            {
+              "cmd": "cat <file>",
+              "desc": "Show entire file"
+            },
+            {
+              "cmd": "less <file>",
+              "desc": "View file page by page"
+            },
+            {
+              "cmd": "head <file>",
+              "desc": "Show first 10 lines"
+            },
+            {
+              "cmd": "tail <file>",
+              "desc": "Show last 10 lines"
+            }
+          ]
+        },
+        {
+          "title": "BASHCRAWL SPECIFIC",
+          "items": [
+            {
+              "cmd": "echo $I",
+              "desc": "Check inventory"
+            },
+            {
+              "cmd": "export I=item,$I",
+              "desc": "Add item to inventory"
+            },
+            {
+              "cmd": "./treasure",
+              "desc": "Run interactive elements"
+            },
+            {
+              "cmd": "cat scroll",
+              "desc": "Read area documentation"
+            }
+          ]
+        }
+      ]
+    },
+    "advanced": {
+      "title": "Quick Reference: Advanced Commands",
+      "sections": [
+        {
+          "title": "SEARCH & FIND",
+          "items": [
+            {
+              "cmd": "find . -name \"pattern\"",
+              "desc": "Find files by name"
+            },
+            {
+              "cmd": "find . -type f",
+              "desc": "Find files only"
+            },
+            {
+              "cmd": "find . -type d",
+              "desc": "Find directories only"
+            },
+            {
+              "cmd": "grep \"text\" <file>",
+              "desc": "Search within file"
+            },
+            {
+              "cmd": "grep -r \"text\" .",
+              "desc": "Search all files"
+            }
+          ]
+        },
+        {
+          "title": "FILE OPERATIONS",
+          "items": [
+            {
+              "cmd": "chmod +x <file>",
+              "desc": "Make file executable"
+            },
+            {
+              "cmd": "cp <src> <dest>",
+              "desc": "Copy file/directory"
+            },
+            {
+              "cmd": "mv <src> <dest>",
+              "desc": "Move/rename"
+            },
+            {
+              "cmd": "mkdir <name>",
+              "desc": "Create directory"
+            },
+            {
+              "cmd": "which <command>",
+              "desc": "Find command location"
+            }
+          ]
+        },
+        {
+          "title": "SYSTEM INFO",
+          "items": [
+            {
+              "cmd": "ps aux",
+              "desc": "Show running processes"
+            },
+            {
+              "cmd": "df -h",
+              "desc": "Show disk usage"
+            },
+            {
+              "cmd": "history",
+              "desc": "Show command history"
+            },
+            {
+              "cmd": "man <command>",
+              "desc": "Show manual page"
+            }
+          ]
+        }
+      ]
+    },
+    "shortcuts": {
+      "title": "Quick Reference: Keyboard Shortcuts",
+      "sections": [
+        {
+          "title": "ESSENTIAL SHORTCUTS",
+          "items": [
+            {
+              "cmd": "Tab",
+              "desc": "Auto-complete names"
+            },
+            {
+              "cmd": "Ctrl+C",
+              "desc": "Stop current command"
+            },
+            {
+              "cmd": "Ctrl+L",
+              "desc": "Clear screen"
+            },
+            {
+              "cmd": "Ctrl+R",
+              "desc": "Search command history"
+            },
+            {
+              "cmd": "Up/Down arrows",
+              "desc": "Navigate command history"
+            }
+          ]
+        },
+        {
+          "title": "CURSOR MOVEMENT",
+          "items": [
+            {
+              "cmd": "Ctrl+A",
+              "desc": "Start of line"
+            },
+            {
+              "cmd": "Ctrl+E",
+              "desc": "End of line"
+            },
+            {
+              "cmd": "Ctrl+U",
+              "desc": "Delete to start"
+            },
+            {
+              "cmd": "Ctrl+K",
+              "desc": "Delete to end"
+            },
+            {
+              "cmd": "Alt+Left / Alt+Right",
+              "desc": "Move by word"
+            }
+          ]
+        },
+        {
+          "title": "COMMAND TRICKS",
+          "items": [
+            {
+              "cmd": "!!",
+              "desc": "Repeat last command"
+            },
+            {
+              "cmd": "!<number>",
+              "desc": "Repeat command by #"
+            },
+            {
+              "cmd": "command1 && command2",
+              "desc": "Run if first succeeds"
+            },
+            {
+              "cmd": "command1 || command2",
+              "desc": "Run if first fails"
+            }
+          ]
+        }
+      ]
+    },
+    "bashcrawl": {
+      "title": "Quick Reference: Bashcrawl Game",
+      "sections": [
+        {
+          "title": "GETTING STARTED",
+          "items": [
+            {
+              "cmd": "cat scroll",
+              "desc": "Read area instructions"
+            },
+            {
+              "cmd": "ls -F",
+              "desc": "See interactive elements"
+            },
+            {
+              "cmd": "./treasure",
+              "desc": "Collect items"
+            },
+            {
+              "cmd": "export I=item,$I",
+              "desc": "Add to inventory"
+            },
+            {
+              "cmd": "echo $I",
+              "desc": "Check inventory"
+            }
+          ]
+        },
+        {
+          "title": "EXPLORATION",
+          "items": [
+            {
+              "cmd": "cd entrance",
+              "desc": "Start the game"
+            },
+            {
+              "cmd": "cd cellar",
+              "desc": "Basic challenges"
+            },
+            {
+              "cmd": "cd armoury",
+              "desc": "Combat training"
+            },
+            {
+              "cmd": "cd ..",
+              "desc": "Go back"
+            },
+            {
+              "cmd": "ls -la",
+              "desc": "Find hidden secrets"
+            }
+          ]
+        },
+        {
+          "title": "HELP SYSTEM",
+          "items": [
+            {
+              "cmd": "help",
+              "desc": "Context-aware help"
+            },
+            {
+              "cmd": "help suggest",
+              "desc": "Smart recommendations"
+            },
+            {
+              "cmd": "help tutorial",
+              "desc": "Interactive learning"
+            },
+            {
+              "cmd": "help ai",
+              "desc": "AI system status"
+            },
+            {
+              "cmd": "help qref basic",
+              "desc": "This reference card"
+            }
+          ]
+        },
+        {
+          "title": "TROUBLESHOOTING",
+          "items": [
+            {
+              "cmd": "pwd",
+              "desc": "Where am I?"
+            },
+            {
+              "cmd": "ls -la",
+              "desc": "What's actually here?"
+            },
+            {
+              "cmd": "chmod +x <file>",
+              "desc": "Fix permission errors"
+            },
+            {
+              "cmd": "help suggest error",
+              "desc": "Get error solutions"
+            }
+          ]
+        }
+      ]
+    },
+    "permissions": {
+      "title": "Quick Reference: File Permissions",
+      "sections": [
+        {
+          "title": "UNDERSTANDING PERMISSIONS",
+          "items": [
+            {
+              "cmd": "drwxrwxrwx",
+              "desc": "d=dir, rwx=read/write/exec"
+            },
+            {
+              "cmd": "-rwxr-xr-x",
+              "desc": "-=file, 755 permissions"
+            },
+            {
+              "cmd": "First rwx: owner",
+              "desc": "Second rwx: group"
+            },
+            {
+              "cmd": "Third rwx: others",
+              "desc": "*=executable in ls -F"
+            }
+          ]
+        },
+        {
+          "title": "COMMON PERMISSION FIXES",
+          "items": [
+            {
+              "cmd": "chmod +x <file>",
+              "desc": "Make executable"
+            },
+            {
+              "cmd": "chmod -x <file>",
+              "desc": "Remove execute"
+            },
+            {
+              "cmd": "chmod 755 <file>",
+              "desc": "rwxr-xr-x"
+            },
+            {
+              "cmd": "chmod 644 <file>",
+              "desc": "rw-r--r--"
+            },
+            {
+              "cmd": "ls -la <file>",
+              "desc": "Check current perms"
+            }
+          ]
+        },
+        {
+          "title": "PERMISSION NUMBERS",
+          "items": [
+            {
+              "cmd": "4 = read (r)",
+              "desc": "2 = write (w)"
+            },
+            {
+              "cmd": "1 = execute (x)",
+              "desc": "0 = no permission"
+            },
+            {
+              "cmd": "7 = 4+2+1 = rwx",
+              "desc": "5 = 4+1 = r-x"
+            },
+            {
+              "cmd": "6 = 4+2 = rw-",
+              "desc": "3 = 2+1 = -wx"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "runtime": [
+    {
+      "name": "help",
+      "help": "Show available commands",
+      "python_handler": "_cmd_help",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "pwd",
+      "help": "Print working directory",
+      "python_handler": "_cmd_pwd",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "ls",
+      "help": "List directory contents",
+      "python_handler": "_cmd_ls",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "cd",
+      "help": "Change directory",
+      "python_handler": "_cmd_cd",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "mkdir",
+      "help": "Create directory",
+      "python_handler": "_cmd_mkdir",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "touch",
+      "help": "Create empty file",
+      "python_handler": "_cmd_touch",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "less",
+      "help": "Page through file contents",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "head",
+      "help": "Show the first lines of a file",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "tail",
+      "help": "Show the last lines of a file",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "wc",
+      "help": "Count lines, words, and characters in a file",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "cat",
+      "help": "Print file contents",
+      "python_handler": "_cmd_cat",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "grep",
+      "help": "Search for text in a file",
+      "python_handler": "_cmd_grep",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "rm",
+      "help": "Remove a file",
+      "python_handler": "_cmd_rm",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "cp",
+      "help": "Copy a file",
+      "python_handler": "_cmd_cp",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "mv",
+      "help": "Move or rename a file or directory",
+      "python_handler": "_cmd_mv",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "export",
+      "help": "Set a game variable",
+      "python_handler": "_cmd_export",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "echo",
+      "help": "Print text or variable value",
+      "python_handler": "_cmd_echo",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": true
+      }
+    },
+    {
+      "name": "let",
+      "help": "Evaluate simple shell arithmetic",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "alias",
+      "help": "Create command aliases",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "history",
+      "help": "Show command history",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "clear",
+      "help": "Clear the terminal output",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "quest",
+      "help": "Show active quest",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "inventory",
+      "help": "Show inventory",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "health",
+      "help": "Show health",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "status",
+      "help": "Show game status",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "reset",
+      "help": "Reset browser game state",
+      "python_handler": "",
+      "runtimes": {
+        "bash": true,
+        "python": false,
+        "ai": false,
+        "demo": true
+      }
+    },
+    {
+      "name": "save",
+      "help": "Save your progress",
+      "python_handler": "_cmd_save",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": true,
+        "demo": false
+      }
+    },
+    {
+      "name": "load",
+      "help": "Load your progress",
+      "python_handler": "_cmd_load",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    },
+    {
+      "name": "merlin",
+      "help": "Ask Merlin for a hint",
+      "python_handler": "_cmd_merlin",
+      "runtimes": {
+        "bash": true,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    },
+    {
+      "name": "exit",
+      "help": "Exit the game",
+      "python_handler": "_cmd_exit",
+      "runtimes": {
+        "bash": false,
+        "python": true,
+        "ai": true,
+        "demo": false
+      }
+    },
+    {
+      "name": "volume",
+      "help": "Set audio volume (0-100)",
+      "python_handler": "_cmd_volume",
+      "runtimes": {
+        "bash": false,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    },
+    {
+      "name": "mute",
+      "help": "Toggle audio mute",
+      "python_handler": "_cmd_mute",
+      "runtimes": {
+        "bash": false,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    }
+  ]
+}

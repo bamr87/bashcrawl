@@ -23,6 +23,17 @@ python3 -m viewer --game-root .
 python3 -m ti --game-root .
 ```
 
+Static web workflow:
+
+```bash
+make web-build
+make web-test
+make web-preview
+```
+
+The static web app lives in `web/` and is rebuilt from `entrance/` plus
+`src/help/data/*.yaml`; do not hand-edit generated files under `web/data/`.
+
 ## Adding Game Content
 
 ### New Room

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bashcrawl Web</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
+    <link rel="stylesheet" href="./assets/css/theme.css">
+    <link rel="stylesheet" href="./assets/css/terminal.css">
+</head>
+<body>
+    <main class="web-shell" id="app">
+        <header class="tui-header">
+            <div>
+                <strong>BASHCRAWL</strong>
+                <span class="tui-header-subtitle">Terminal Dungeon Web</span>
+            </div>
+            <div class="tui-header-actions">
+                <button id="docs-toggle" class="tui-button" type="button">Docs</button>
+                <button id="theme-toggle" class="tui-button" type="button">Theme</button>
+            </div>
+        </header>
+
+        <section class="tui-main" aria-label="Bashcrawl web terminal">
+            <aside class="tui-sidebar" aria-label="Game status panels">
+                <section class="tui-panel">
+                    <h2>Active Quest</h2>
+                    <div id="quest-panel"></div>
+                </section>
+                <section class="tui-panel">
+                    <h2>Inventory</h2>
+                    <div id="inventory-panel"></div>
+                </section>
+                <section class="tui-panel tui-room-panel">
+                    <h2>Location</h2>
+                    <div id="room-panel"></div>
+                </section>
+            </aside>
+
+            <section class="tui-content">
+                <pre id="output-log" class="tui-log" aria-live="polite"></pre>
+            </section>
+        </section>
+
+        <form class="tui-input-row" id="command-form">
+            <label id="prompt-label" class="tui-prompt" for="command-input">/entrance $</label>
+            <input id="command-input" class="tui-input" autocomplete="off" spellcheck="false">
+        </form>
+
+        <footer class="tui-footer">
+            <span>Enter=run</span>
+            <span>Up/Down=history</span>
+            <span>Tab=complete</span>
+            <span>F1=docs</span>
+            <span>Ctrl+L=clear</span>
+        </footer>
+    </main>
+
+    <aside id="docs-drawer" class="docs-drawer" aria-label="Bashcrawl documentation" aria-hidden="true">
+        <div class="docs-header">
+            <h2>Documentation</h2>
+            <button id="docs-close" class="tui-button" type="button">Close</button>
+        </div>
+        <input id="docs-search" class="docs-search" type="search" placeholder="Search commands, rooms, quests">
+        <div id="docs-content" class="docs-content"></div>
+    </aside>
+
+    <script src="./assets/js/storage.js"></script>
+    <script src="./assets/js/runtime.js"></script>
+    <script src="./assets/js/docs.js"></script>
+    <script src="./assets/js/game.js"></script>
+</body>
+</html>

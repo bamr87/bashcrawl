@@ -1,0 +1,2019 @@
+{
+  "quick_start": [
+    "Run pwd to see where you are.",
+    "Run ls or ls -F to inspect the room.",
+    "Run cat scroll to read room instructions.",
+    "Use cd <room> to move through the dungeon."
+  ],
+  "rooms": {
+    "bashcrawl": {
+      "emoji": "🏠",
+      "title": "THE LOBBY",
+      "path": "bashcrawl",
+      "prompt_label": "lobby",
+      "context_hint": "You are in the main lobby. Type 'cd entrance' to begin your adventure.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": null,
+      "children": [
+        "entrance"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "The main lobby — gateway to the catacombs",
+      "teaches": [
+        "Starting the game"
+      ],
+      "key_files": [],
+      "next_steps": "Type 'cd entrance' to begin",
+      "essential_commands": [
+        {
+          "command": "cd entrance",
+          "description": "Enter the catacombs"
+        },
+        {
+          "command": "ls",
+          "description": "Look around"
+        }
+      ]
+    },
+    "entrance": {
+      "emoji": "🚪",
+      "title": "THE ENTRANCE HALL",
+      "path": "entrance",
+      "prompt_label": "starting hall",
+      "context_hint": "You stand at the entrance to the catacombs. Read the 'scroll' for guidance.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "bashcrawl",
+      "children": [
+        "cellar",
+        "workshop",
+        "chapel",
+        "vault",
+        "scrap",
+        "rift"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "This is your starting point - learn basic navigation here",
+      "teaches": [
+        "Basic navigation (cd, ls, pwd)",
+        "Reading files with cat"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "documentation"
+        },
+        {
+          "name": "README.md",
+          "description": "overview"
+        }
+      ],
+      "next_steps": "Explore the cellar/ directory",
+      "essential_commands": [
+        {
+          "command": "cat scroll",
+          "description": "Read the area documentation"
+        },
+        {
+          "command": "ls -F",
+          "description": "List files with type indicators"
+        },
+        {
+          "command": "cd cellar",
+          "description": "Move to the next area"
+        }
+      ]
+    },
+    "cellar": {
+      "emoji": "🏰",
+      "title": "THE CELLAR",
+      "path": "entrance/cellar",
+      "prompt_label": "underground",
+      "context_hint": "You are in the underground cellar. Use ls -F to distinguish file types. Find the emerald!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "entrance",
+      "children": [
+        "armoury"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Learn file types and basic interaction here",
+      "teaches": [
+        "File types and type indicators",
+        "Running executable scripts",
+        "Inventory management with export"
+      ],
+      "key_files": [
+        {
+          "name": "treasure",
+          "description": "inventory system"
+        }
+      ],
+      "next_steps": "Collect your first amulet, then explore armoury/",
+      "essential_commands": [
+        {
+          "command": "./treasure",
+          "description": "Run the treasure script"
+        },
+        {
+          "command": "export I=amulet,$I",
+          "description": "Add items to inventory"
+        },
+        {
+          "command": "echo $I",
+          "description": "Check your inventory"
+        }
+      ]
+    },
+    "armoury": {
+      "emoji": "🗡️",
+      "title": "THE ARMOURY",
+      "path": "entrance/cellar/armoury",
+      "prompt_label": "weapons hall",
+      "context_hint": "You have entered the armoury. Master chmod and ./script for combat!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "cellar",
+      "children": [
+        "chamber"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Advanced area focusing on file permissions and combat",
+      "teaches": [
+        "File permissions (chmod)",
+        "Running potions and combat scripts",
+        "Health points and variables"
+      ],
+      "key_files": [
+        {
+          "name": "potion",
+          "description": "health restoration"
+        },
+        {
+          "name": "treasure",
+          "description": "sword collection"
+        }
+      ],
+      "next_steps": "Drink the potion, collect the sword, descend to chamber/",
+      "essential_commands": [
+        {
+          "command": "chmod +x filename",
+          "description": "Make files executable"
+        },
+        {
+          "command": "./potion",
+          "description": "Drink a potion for health"
+        },
+        {
+          "command": "ls -l",
+          "description": "Check file permissions"
+        }
+      ]
+    },
+    "chamber": {
+      "emoji": "💎",
+      "title": "THE CHAMBER",
+      "path": "entrance/cellar/armoury/chamber",
+      "prompt_label": "treasure room",
+      "context_hint": "The treasure chamber! Run ./treasure, ./statue, or ./spell for rewards.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "armoury",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Advanced challenges and complex interactions",
+      "teaches": [
+        "Shell variables and arithmetic (let)",
+        "Combat encounters (statue)",
+        "Symlinks and portals (ln -s)"
+      ],
+      "key_files": [
+        {
+          "name": "statue",
+          "description": "combat encounter"
+        },
+        {
+          "name": "spell",
+          "description": "symlink portal creation"
+        },
+        {
+          "name": "treasure",
+          "description": "final treasure"
+        }
+      ],
+      "next_steps": "Face the statue, then cast the spell to create a portal",
+      "essential_commands": [
+        {
+          "command": "./statue",
+          "description": "Face the statue boss fight"
+        },
+        {
+          "command": "./spell",
+          "description": "Create a portal (symlink)"
+        },
+        {
+          "command": "let \"HP=HP-5\"",
+          "description": "Arithmetic with variables"
+        }
+      ]
+    },
+    "workshop": {
+      "emoji": "🔨",
+      "title": "THE WORKSHOP",
+      "path": "entrance/workshop",
+      "prompt_label": "creation tutorial",
+      "context_hint": "The workshop teaches creation: mkdir, touch, rm, echo >. Practice shaping the world!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "entrance",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Tutorial room for file operations",
+      "teaches": [
+        "Creating directories with mkdir",
+        "Creating files with touch",
+        "Removing files with rm",
+        "Copying files with cp",
+        "Writing to files with echo >"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "workshop tutorial"
+        }
+      ],
+      "next_steps": "Practice creating and managing files",
+      "essential_commands": [
+        {
+          "command": "mkdir new_room",
+          "description": "Create a new directory"
+        },
+        {
+          "command": "touch artifact",
+          "description": "Create a new file"
+        },
+        {
+          "command": "rm artifact",
+          "description": "Remove a file"
+        }
+      ]
+    },
+    "chapel": {
+      "emoji": "⛪",
+      "title": "THE CHAPEL",
+      "path": "entrance/.chapel",
+      "prompt_label": "hidden sanctuary",
+      "context_hint": "Chapel path: Discover hidden commands and the ancient library tome.",
+      "hidden": true,
+      "unlocked_by": "amulet",
+      "parent": "entrance",
+      "children": [
+        "courtyard",
+        "graveyard"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A hidden sanctuary unlocked by collecting treasures — learn grep",
+      "teaches": [
+        "Searching text with grep",
+        "Case-insensitive searching",
+        "Pattern matching basics"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "grep tutorial"
+        },
+        {
+          "name": "ghost",
+          "description": "encounter (executable)"
+        }
+      ],
+      "next_steps": "Explore the graveyard or continue to the courtyard",
+      "essential_commands": [
+        {
+          "command": "grep pattern file",
+          "description": "Search for text in a file"
+        },
+        {
+          "command": "grep -i pattern *",
+          "description": "Case-insensitive search"
+        },
+        {
+          "command": "ls -la",
+          "description": "Look for hidden paths forward"
+        }
+      ]
+    },
+    "courtyard": {
+      "emoji": "🏛️",
+      "title": "THE COURTYARD",
+      "path": "entrance/.chapel/courtyard",
+      "prompt_label": "chapel grounds",
+      "context_hint": "Chapel path: Discover hidden commands and the ancient library tome.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "chapel",
+      "children": [
+        "aviary"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "An open area leading deeper into the castle — learn pipes",
+      "teaches": [
+        "Combining commands with pipes",
+        "Chaining output between programs"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "pipes tutorial"
+        }
+      ],
+      "next_steps": "Continue deeper into the aviary",
+      "essential_commands": [
+        {
+          "command": "ls | grep pattern",
+          "description": "Pipe output to grep"
+        },
+        {
+          "command": "cat scroll | wc -l",
+          "description": "Count lines"
+        },
+        {
+          "command": "cd aviary",
+          "description": "Continue deeper"
+        }
+      ]
+    },
+    "aviary": {
+      "emoji": "🦅",
+      "title": "THE AVIARY",
+      "path": "entrance/.chapel/courtyard/aviary",
+      "prompt_label": "bird sanctuary",
+      "context_hint": "Chapel path: Discover hidden commands and the ancient library tome.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "courtyard",
+      "children": [
+        "hall"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A towering room filled with caged birds — learn output redirection",
+      "teaches": [
+        "Output redirection with > and >>",
+        "Creating and appending to files"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "redirection tutorial"
+        }
+      ],
+      "next_steps": "Continue to the great hall",
+      "essential_commands": [
+        {
+          "command": "echo 'text' > file",
+          "description": "Write to a file"
+        },
+        {
+          "command": "echo 'more' >> file",
+          "description": "Append to a file"
+        },
+        {
+          "command": "cat file",
+          "description": "Verify file contents"
+        }
+      ]
+    },
+    "hall": {
+      "emoji": "🏛️",
+      "title": "THE GREAT HALL",
+      "path": "entrance/.chapel/courtyard/aviary/hall",
+      "prompt_label": "grand chamber",
+      "context_hint": "Chapel path: Discover hidden commands and the ancient library tome.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "aviary",
+      "children": [
+        "library"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A grand hall connecting to the library — learn sorting and filtering",
+      "teaches": [
+        "Sorting output with sort",
+        "Removing duplicates with uniq"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "sort/uniq tutorial"
+        }
+      ],
+      "next_steps": "Enter the ancient library",
+      "essential_commands": [
+        {
+          "command": "sort file",
+          "description": "Sort file contents"
+        },
+        {
+          "command": "ls | sort -r",
+          "description": "Reverse sort listing"
+        },
+        {
+          "command": "uniq file",
+          "description": "Remove duplicates"
+        }
+      ]
+    },
+    "library": {
+      "emoji": "📚",
+      "title": "THE ANCIENT LIBRARY",
+      "path": "entrance/.chapel/courtyard/aviary/hall/library",
+      "prompt_label": "ancient tomes",
+      "context_hint": "Chapel path: Discover hidden commands and the ancient library tome.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "hall",
+      "children": [
+        "study"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Deep within the chapel — learn self-teaching commands",
+      "teaches": [
+        "Reading manuals with man",
+        "Using --help for quick reference",
+        "The tome teaches random advanced tips"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "man command tutorial"
+        },
+        {
+          "name": "tome",
+          "description": "random spell book (executable)"
+        }
+      ],
+      "next_steps": "Read the tome with ./tome — if you carry the right items, a secret may reveal itself",
+      "essential_commands": [
+        {
+          "command": "man ls",
+          "description": "Read the manual for ls"
+        },
+        {
+          "command": "./tome",
+          "description": "Consult the ancient tome"
+        },
+        {
+          "command": "ls --help",
+          "description": "Quick help for ls"
+        }
+      ]
+    },
+    "study": {
+      "emoji": "📜",
+      "title": "THE HIDDEN STUDY",
+      "path": "entrance/.chapel/courtyard/aviary/hall/library/.study",
+      "prompt_label": "secret study",
+      "context_hint": "The study holds the grimoire. Run ./grimoire to open the portal.",
+      "hidden": true,
+      "unlocked_by": "amulet,coins",
+      "parent": "library",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Secret room behind the library bookshelf — learn shell functions",
+      "teaches": [
+        "Creating shell functions",
+        "Difference between alias and function",
+        "Building the 'bc' bashcrawl command",
+        "Discovering the help system source"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "shell function tutorial"
+        },
+        {
+          "name": "grimoire",
+          "description": "opens portal to help source (executable)"
+        }
+      ],
+      "next_steps": "Run ./grimoire to open the portal, then cd portal to reach the Scriptorium",
+      "essential_commands": [
+        {
+          "command": "./grimoire",
+          "description": "Open portal to the Scriptorium"
+        },
+        {
+          "command": "cd portal",
+          "description": "Step through the portal"
+        },
+        {
+          "command": "source init_help.sh",
+          "description": "Activate the help system"
+        }
+      ]
+    },
+    "graveyard": {
+      "emoji": "🪦",
+      "title": "THE GRAVEYARD",
+      "path": "entrance/.chapel/graveyard",
+      "prompt_label": "resting place",
+      "context_hint": "The graveyard holds secrets. Use ls -a to find the hidden mausoleum.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "chapel",
+      "children": [
+        "columbarium",
+        "lower-quadrant",
+        "royal-tombs",
+        "mausoleum"
+      ],
+      "on_enter": "A cold wind howls through the tombstones...",
+      "on_exit": null,
+      "description": "A misty place beyond the chapel — learn find",
+      "teaches": [
+        "Locating files with find",
+        "Finding by name, type, and permissions"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "find tutorial"
+        }
+      ],
+      "next_steps": "Search for hidden files and paths",
+      "essential_commands": [
+        {
+          "command": "find . -name 'scroll'",
+          "description": "Find all scrolls"
+        },
+        {
+          "command": "find . -type d",
+          "description": "Find directories"
+        },
+        {
+          "command": "find . -executable",
+          "description": "Find runnable files"
+        }
+      ]
+    },
+    "columbarium": {
+      "emoji": "🏺",
+      "title": "THE COLUMBARIUM",
+      "path": "entrance/.chapel/graveyard/columbarium",
+      "prompt_label": "burial niches",
+      "context_hint": "Study the niches carefully. Use grep and touch to solve the puzzle.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "graveyard",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Rows of burial niches with inscribed symbols",
+      "teaches": [
+        "Using touch to create files",
+        "Using grep to search data"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "columbarium puzzle"
+        },
+        {
+          "name": "niches",
+          "description": "symbol-to-number data"
+        }
+      ],
+      "next_steps": "Solve the niche puzzle to find a padlock number",
+      "essential_commands": [
+        {
+          "command": "grep pattern niches",
+          "description": "Search the niches"
+        },
+        {
+          "command": "touch number",
+          "description": "Enter a number"
+        }
+      ]
+    },
+    "lower-quadrant": {
+      "emoji": "🪦",
+      "title": "THE LOWER QUADRANT",
+      "path": "entrance/.chapel/graveyard/lower-quadrant",
+      "prompt_label": "old graves",
+      "context_hint": "Sort the gravestones to find the year of death.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "graveyard",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Weathered gravestones with dates and names",
+      "teaches": [
+        "Sorting data with sort"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "sorting puzzle"
+        },
+        {
+          "name": "gravestones",
+          "description": "CSV gravestone data"
+        }
+      ],
+      "next_steps": "Sort the gravestones to find a padlock number",
+      "essential_commands": [
+        {
+          "command": "sort gravestones",
+          "description": "Sort the gravestone records"
+        }
+      ]
+    },
+    "royal-tombs": {
+      "emoji": "👑",
+      "title": "THE ROYAL TOMBS",
+      "path": "entrance/.chapel/graveyard/royal-tombs",
+      "prompt_label": "royal crypts",
+      "context_hint": "Use grep to search the royals list for the crown placement.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "graveyard",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Ornate tombs of ancient rulers",
+      "teaches": [
+        "Using grep to search records"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "royal tombs puzzle"
+        },
+        {
+          "name": "royals",
+          "description": "list of kings"
+        },
+        {
+          "name": "sign",
+          "description": "grep hint"
+        }
+      ],
+      "next_steps": "Find the crown placement number for the padlock",
+      "essential_commands": [
+        {
+          "command": "grep King royals",
+          "description": "Search for kings"
+        }
+      ]
+    },
+    "mausoleum": {
+      "emoji": "🏛️",
+      "title": "THE MAUSOLEUM",
+      "path": "entrance/.chapel/graveyard/.mausoleum",
+      "prompt_label": "hidden crypt",
+      "context_hint": "Use sort and uniq to find the unique line in the room file.",
+      "hidden": true,
+      "unlocked_by": "padlock",
+      "parent": "graveyard",
+      "children": [],
+      "on_enter": "The heavy stone door grinds open...",
+      "on_exit": null,
+      "description": "A hidden crypt behind the padlock",
+      "teaches": [
+        "Piping commands with sort | uniq"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "sort/uniq puzzle"
+        },
+        {
+          "name": "room",
+          "description": "data file for sort|uniq"
+        },
+        {
+          "name": "loot",
+          "description": "chest puzzle (executable)"
+        }
+      ],
+      "next_steps": "Use sort room | uniq to find the chest combination",
+      "essential_commands": [
+        {
+          "command": "sort room | uniq",
+          "description": "Find the unique line"
+        },
+        {
+          "command": "./loot",
+          "description": "Open the chest"
+        }
+      ]
+    },
+    "vault": {
+      "emoji": "🔒",
+      "title": "THE VAULT",
+      "path": "entrance/.vault",
+      "prompt_label": "treasure hold",
+      "context_hint": "Vault path: Master variables, collect the goblet to unlock the Rift!",
+      "hidden": true,
+      "unlocked_by": "amulet",
+      "parent": "entrance",
+      "children": [
+        "stronghold"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A hidden vault — learn shell variables and environment",
+      "teaches": [
+        "Shell variables and environment",
+        "Setting and reading variables",
+        "Environment inspection with env"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "variables tutorial"
+        }
+      ],
+      "next_steps": "Explore the stronghold within",
+      "essential_commands": [
+        {
+          "command": "echo $VARIABLE",
+          "description": "Print variable value"
+        },
+        {
+          "command": "export VAR=value",
+          "description": "Set environment variable"
+        },
+        {
+          "command": "env | grep VAR",
+          "description": "Search environment"
+        }
+      ]
+    },
+    "stronghold": {
+      "emoji": "🏯",
+      "title": "THE STRONGHOLD",
+      "path": "entrance/.vault/stronghold",
+      "prompt_label": "vault heart",
+      "context_hint": "Vault path: Master variables, collect the goblet to unlock the Rift!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "vault",
+      "children": [
+        "nursery"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "Fortified area within the vault — goblet challenge unlocks the rift",
+      "teaches": [
+        "Advanced variable manipulation",
+        "Inventory-gated challenges"
+      ],
+      "key_files": [
+        {
+          "name": "goblet",
+          "description": "checks for orb1, unlocks .rift (executable)"
+        }
+      ],
+      "next_steps": "Complete the goblet challenge to unlock the rift",
+      "essential_commands": [
+        {
+          "command": "./goblet",
+          "description": "Attempt the goblet challenge"
+        },
+        {
+          "command": "echo $I",
+          "description": "Check inventory for orb1"
+        },
+        {
+          "command": "set | grep HP",
+          "description": "Inspect shell variables"
+        }
+      ]
+    },
+    "nursery": {
+      "emoji": "🍼",
+      "title": "THE NURSERY",
+      "path": "entrance/.vault/stronghold/nursery",
+      "prompt_label": "vault garden",
+      "context_hint": "Vault path: Master variables, collect the goblet to unlock the Rift!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "stronghold",
+      "children": [
+        "lab"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A quiet room within the vault complex — learn process management",
+      "teaches": [
+        "Process management with ps",
+        "Job control (bg, fg, jobs)"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "process tutorial"
+        }
+      ],
+      "next_steps": "Continue exploring the vault complex",
+      "essential_commands": [
+        {
+          "command": "ps",
+          "description": "List running processes"
+        },
+        {
+          "command": "jobs",
+          "description": "List background jobs"
+        },
+        {
+          "command": "bg / fg",
+          "description": "Background/foreground jobs"
+        }
+      ]
+    },
+    "lab": {
+      "emoji": "🧪",
+      "title": "THE LABORATORY",
+      "path": "entrance/.vault/stronghold/nursery/lab",
+      "prompt_label": "alchemy room",
+      "context_hint": "Vault path: Master variables, collect the goblet to unlock the Rift!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "nursery",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "An alchemist's lab — learn process substitution and advanced piping",
+      "teaches": [
+        "Process substitution with <()",
+        "Output duplication with tee",
+        "Building commands with xargs"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "process substitution tutorial"
+        }
+      ],
+      "next_steps": "Apply your knowledge across the dungeon",
+      "essential_commands": [
+        {
+          "command": "diff <(cmd1) <(cmd2)",
+          "description": "Process substitution"
+        },
+        {
+          "command": "tee file",
+          "description": "Duplicate output"
+        },
+        {
+          "command": "command | xargs",
+          "description": "Build commands from input"
+        }
+      ]
+    },
+    "scrap": {
+      "emoji": "🔗",
+      "title": "THE SCRAP HEAP",
+      "path": "entrance/.scrap",
+      "prompt_label": "symlink portal",
+      "context_hint": "The Scrap teaches symlinks: ln -s creates portals. Find the path to the Rift!",
+      "hidden": true,
+      "unlocked_by": "amulet",
+      "parent": "entrance",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A hidden directory teaching symbolic links",
+      "teaches": [
+        "Creating symbolic links with ln -s",
+        "Reading link targets"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "symlink tutorial"
+        }
+      ],
+      "next_steps": "Practice creating and inspecting symlinks",
+      "essential_commands": [
+        {
+          "command": "ln -s target linkname",
+          "description": "Create symbolic link"
+        },
+        {
+          "command": "ls -l",
+          "description": "See link targets (->)"
+        },
+        {
+          "command": "readlink linkname",
+          "description": "Show link destination"
+        }
+      ]
+    },
+    "rift": {
+      "emoji": "🌀",
+      "title": "THE RIFT",
+      "path": "entrance/.rift",
+      "prompt_label": "advanced realm",
+      "context_hint": "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!",
+      "hidden": true,
+      "unlocked_by": "goblet",
+      "parent": "entrance",
+      "children": [
+        "arena",
+        "spire"
+      ],
+      "on_enter": "Reality shimmers and tears apart before you...",
+      "on_exit": null,
+      "description": "A dimensional tear — advanced scripting and checksums",
+      "teaches": [
+        "File checksums (sha256sum, md5sum)",
+        "File comparison with diff",
+        "Advanced bash scripting"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "checksums tutorial"
+        }
+      ],
+      "next_steps": "Explore the arena or ascend the spire",
+      "essential_commands": [
+        {
+          "command": "sha256sum file",
+          "description": "Compute file checksum"
+        },
+        {
+          "command": "md5sum file",
+          "description": "Alternative checksum"
+        },
+        {
+          "command": "diff file1 file2",
+          "description": "Compare files"
+        }
+      ]
+    },
+    "arena": {
+      "emoji": "⚔️",
+      "title": "THE ARENA",
+      "path": "entrance/.rift/arena",
+      "prompt_label": "combat pit",
+      "context_hint": "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "rift",
+      "children": [
+        "pit"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A battle zone within the rift — learn loops and iteration",
+      "teaches": [
+        "For loops over files",
+        "While read loops",
+        "Conditional tests"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "loops tutorial"
+        }
+      ],
+      "next_steps": "Descend into the pit",
+      "essential_commands": [
+        {
+          "command": "for f in *; do echo $f; done",
+          "description": "Loop over files"
+        },
+        {
+          "command": "while read line; do ...",
+          "description": "Read loop"
+        },
+        {
+          "command": "test -f file && echo yes",
+          "description": "Conditional test"
+        }
+      ]
+    },
+    "pit": {
+      "emoji": "🕳️",
+      "title": "THE PIT",
+      "path": "entrance/.rift/arena/pit",
+      "prompt_label": "boss lair",
+      "context_hint": "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "arena",
+      "children": [],
+      "on_enter": "The ground gives way beneath your feet...",
+      "on_exit": null,
+      "description": "The deepest point of the arena — learn error handling",
+      "teaches": [
+        "Exit codes and error checking",
+        "Error handling with || and &&",
+        "Traps for cleanup"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "error handling tutorial"
+        }
+      ],
+      "next_steps": "Emerge victorious with mastery of error handling",
+      "essential_commands": [
+        {
+          "command": "echo $?",
+          "description": "Check last exit code"
+        },
+        {
+          "command": "command || echo fail",
+          "description": "Handle errors"
+        },
+        {
+          "command": "trap 'cleanup' EXIT",
+          "description": "Set exit trap"
+        }
+      ]
+    },
+    "spire": {
+      "emoji": "🗼",
+      "title": "THE SPIRE",
+      "path": "entrance/.rift/spire",
+      "prompt_label": "tower ascent",
+      "context_hint": "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "rift",
+      "children": [
+        "mezzanine"
+      ],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "A tower rising from the rift — learn text processing",
+      "teaches": [
+        "Text processing with awk",
+        "Text substitution with sed",
+        "Field extraction with cut"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "text processing tutorial"
+        }
+      ],
+      "next_steps": "Climb to the mezzanine",
+      "essential_commands": [
+        {
+          "command": "awk '{print $1}' file",
+          "description": "Extract columns"
+        },
+        {
+          "command": "sed 's/old/new/' file",
+          "description": "Text substitution"
+        },
+        {
+          "command": "cut -d',' -f1 file",
+          "description": "Cut fields"
+        }
+      ]
+    },
+    "mezzanine": {
+      "emoji": "🎭",
+      "title": "THE MEZZANINE",
+      "path": "entrance/.rift/spire/mezzanine",
+      "prompt_label": "elevator access",
+      "context_hint": "The Rift: Advanced challenges. Boss encounters in the Pit, secrets in the Spire!",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": "spire",
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "An elevated platform within the spire — learn advanced regex",
+      "teaches": [
+        "Extended regular expressions",
+        "Bash regex matching with [[ =~ ]]",
+        "Perl-compatible regex"
+      ],
+      "key_files": [
+        {
+          "name": "scroll",
+          "description": "regex tutorial"
+        }
+      ],
+      "next_steps": "Master regex patterns to complete the dungeon",
+      "essential_commands": [
+        {
+          "command": "grep -E 'regex' file",
+          "description": "Extended regex"
+        },
+        {
+          "command": "[[ $var =~ pattern ]]",
+          "description": "Bash regex match"
+        },
+        {
+          "command": "grep -P '\\d+' file",
+          "description": "Perl regex"
+        }
+      ]
+    },
+    "unknown": {
+      "emoji": "🗺️",
+      "title": "UNKNOWN TERRITORY",
+      "path": "",
+      "prompt_label": "exploring",
+      "context_hint": "You're in an uncharted area! Use pwd to find your location.",
+      "hidden": false,
+      "unlocked_by": null,
+      "parent": null,
+      "children": [],
+      "on_enter": null,
+      "on_exit": null,
+      "description": "You're in an uncharted area!",
+      "teaches": [
+        "Use navigation commands to orient yourself"
+      ],
+      "key_files": [],
+      "next_steps": "Use pwd to find your location, ls -la to explore",
+      "essential_commands": [
+        {
+          "command": "pwd",
+          "description": "Show current location"
+        },
+        {
+          "command": "ls -la",
+          "description": "List all files including hidden"
+        },
+        {
+          "command": "cd ..",
+          "description": "Go back to parent directory"
+        }
+      ]
+    }
+  },
+  "commands": {
+    "categories": {
+      "navigation": {
+        "title": "Navigation",
+        "commands": [
+          {
+            "command": "pwd",
+            "description": "Print Working Directory - shows your exact location"
+          },
+          {
+            "command": "ls",
+            "description": "List files and directories in current location"
+          },
+          {
+            "command": "ls -F",
+            "description": "List with type indicators: * = executable, / = directory, @ = link"
+          },
+          {
+            "command": "ls -la",
+            "description": "List ALL files including hidden (.), with permissions and details"
+          },
+          {
+            "command": "ls -lh",
+            "description": "List with human-readable file sizes"
+          },
+          {
+            "command": "cd <path>",
+            "description": "Change directory to specified path"
+          },
+          {
+            "command": "cd ..",
+            "description": "Move up one directory level"
+          },
+          {
+            "command": "cd ~",
+            "description": "Go to home directory"
+          },
+          {
+            "command": "cd -",
+            "description": "Go back to previous directory"
+          }
+        ]
+      },
+      "file_viewing": {
+        "title": "File Content Viewing",
+        "commands": [
+          {
+            "command": "cat <file>",
+            "description": "Display entire file contents at once"
+          },
+          {
+            "command": "less <file>",
+            "description": "View file page by page (Space=next page, b=previous, q=quit)"
+          },
+          {
+            "command": "head <file>",
+            "description": "Show first 10 lines of file"
+          },
+          {
+            "command": "head -n 20 <file>",
+            "description": "Show first 20 lines of file"
+          },
+          {
+            "command": "tail <file>",
+            "description": "Show last 10 lines of file"
+          },
+          {
+            "command": "tail -f <file>",
+            "description": "Follow file changes in real-time"
+          },
+          {
+            "command": "wc <file>",
+            "description": "Count lines, words, and characters"
+          }
+        ]
+      },
+      "file_operations": {
+        "title": "File Operations",
+        "commands": [
+          {
+            "command": "cp <source> <dest>",
+            "description": "Copy file or directory"
+          },
+          {
+            "command": "mv <source> <dest>",
+            "description": "Move/rename file or directory"
+          },
+          {
+            "command": "rm <file>",
+            "description": "Delete file (CAREFUL - no undo!)"
+          },
+          {
+            "command": "mkdir <name>",
+            "description": "Create new directory"
+          },
+          {
+            "command": "rmdir <name>",
+            "description": "Remove empty directory"
+          },
+          {
+            "command": "chmod +x <file>",
+            "description": "Make file executable"
+          },
+          {
+            "command": "chmod -x <file>",
+            "description": "Remove executable permission"
+          }
+        ]
+      },
+      "search": {
+        "title": "Search and Find",
+        "commands": [
+          {
+            "command": "find . -name \"*pattern*\"",
+            "description": "Find files/directories by name pattern"
+          },
+          {
+            "command": "find . -type f",
+            "description": "Find only files"
+          },
+          {
+            "command": "find . -type d",
+            "description": "Find only directories"
+          },
+          {
+            "command": "grep \"pattern\" <file>",
+            "description": "Search for pattern within file"
+          },
+          {
+            "command": "grep -r \"pattern\" .",
+            "description": "Search for pattern in all files recursively"
+          },
+          {
+            "command": "which <command>",
+            "description": "Show location of command executable"
+          }
+        ]
+      },
+      "system_info": {
+        "title": "System Information",
+        "commands": [
+          {
+            "command": "whoami",
+            "description": "Show current username"
+          },
+          {
+            "command": "date",
+            "description": "Show current date and time"
+          },
+          {
+            "command": "uptime",
+            "description": "Show system uptime and load"
+          },
+          {
+            "command": "df -h",
+            "description": "Show disk space usage (human-readable)"
+          },
+          {
+            "command": "du -sh *",
+            "description": "Show directory sizes"
+          },
+          {
+            "command": "ps aux",
+            "description": "Show running processes"
+          }
+        ]
+      },
+      "history_shortcuts": {
+        "title": "Command History and Shortcuts",
+        "commands": [
+          {
+            "command": "history",
+            "description": "Show command history"
+          },
+          {
+            "command": "!!",
+            "description": "Repeat last command"
+          },
+          {
+            "command": "!<number>",
+            "description": "Repeat command number from history"
+          },
+          {
+            "command": "Ctrl+R",
+            "description": "Search command history interactively"
+          },
+          {
+            "command": "Tab",
+            "description": "Auto-complete file/directory names"
+          },
+          {
+            "command": "Ctrl+C",
+            "description": "Stop/cancel current command"
+          },
+          {
+            "command": "Ctrl+L",
+            "description": "Clear terminal screen"
+          }
+        ]
+      },
+      "game_specific": {
+        "title": "Game-Specific",
+        "commands": [
+          {
+            "command": "echo $I",
+            "description": "Check your inventory"
+          },
+          {
+            "command": "echo $HP",
+            "description": "Check your health points"
+          },
+          {
+            "command": "export I=item,$I",
+            "description": "Add item to inventory"
+          },
+          {
+            "command": "./executable",
+            "description": "Run executable files (treasures, potions, etc.)"
+          },
+          {
+            "command": "cat scroll",
+            "description": "Read area documentation"
+          },
+          {
+            "command": "help",
+            "description": "Show the help system"
+          },
+          {
+            "command": "help commands",
+            "description": "Show detailed command reference"
+          },
+          {
+            "command": "help tips",
+            "description": "Show advanced tips and tricks"
+          },
+          {
+            "command": "man <command>",
+            "description": "Manual page for any command"
+          }
+        ]
+      }
+    },
+    "quick_ref": {
+      "basic": {
+        "title": "Quick Reference: Basic Commands",
+        "sections": [
+          {
+            "title": "NAVIGATION",
+            "items": [
+              {
+                "cmd": "pwd",
+                "desc": "Show current location"
+              },
+              {
+                "cmd": "ls",
+                "desc": "List files"
+              },
+              {
+                "cmd": "ls -F",
+                "desc": "List with type indicators"
+              },
+              {
+                "cmd": "ls -la",
+                "desc": "List all including hidden"
+              },
+              {
+                "cmd": "cd <dir>",
+                "desc": "Change directory"
+              },
+              {
+                "cmd": "cd ..",
+                "desc": "Go up one level"
+              }
+            ]
+          },
+          {
+            "title": "FILE VIEWING",
+            "items": [
+              {
+                "cmd": "cat <file>",
+                "desc": "Show entire file"
+              },
+              {
+                "cmd": "less <file>",
+                "desc": "View file page by page"
+              },
+              {
+                "cmd": "head <file>",
+                "desc": "Show first 10 lines"
+              },
+              {
+                "cmd": "tail <file>",
+                "desc": "Show last 10 lines"
+              }
+            ]
+          },
+          {
+            "title": "BASHCRAWL SPECIFIC",
+            "items": [
+              {
+                "cmd": "echo $I",
+                "desc": "Check inventory"
+              },
+              {
+                "cmd": "export I=item,$I",
+                "desc": "Add item to inventory"
+              },
+              {
+                "cmd": "./treasure",
+                "desc": "Run interactive elements"
+              },
+              {
+                "cmd": "cat scroll",
+                "desc": "Read area documentation"
+              }
+            ]
+          }
+        ]
+      },
+      "advanced": {
+        "title": "Quick Reference: Advanced Commands",
+        "sections": [
+          {
+            "title": "SEARCH & FIND",
+            "items": [
+              {
+                "cmd": "find . -name \"pattern\"",
+                "desc": "Find files by name"
+              },
+              {
+                "cmd": "find . -type f",
+                "desc": "Find files only"
+              },
+              {
+                "cmd": "find . -type d",
+                "desc": "Find directories only"
+              },
+              {
+                "cmd": "grep \"text\" <file>",
+                "desc": "Search within file"
+              },
+              {
+                "cmd": "grep -r \"text\" .",
+                "desc": "Search all files"
+              }
+            ]
+          },
+          {
+            "title": "FILE OPERATIONS",
+            "items": [
+              {
+                "cmd": "chmod +x <file>",
+                "desc": "Make file executable"
+              },
+              {
+                "cmd": "cp <src> <dest>",
+                "desc": "Copy file/directory"
+              },
+              {
+                "cmd": "mv <src> <dest>",
+                "desc": "Move/rename"
+              },
+              {
+                "cmd": "mkdir <name>",
+                "desc": "Create directory"
+              },
+              {
+                "cmd": "which <command>",
+                "desc": "Find command location"
+              }
+            ]
+          },
+          {
+            "title": "SYSTEM INFO",
+            "items": [
+              {
+                "cmd": "ps aux",
+                "desc": "Show running processes"
+              },
+              {
+                "cmd": "df -h",
+                "desc": "Show disk usage"
+              },
+              {
+                "cmd": "history",
+                "desc": "Show command history"
+              },
+              {
+                "cmd": "man <command>",
+                "desc": "Show manual page"
+              }
+            ]
+          }
+        ]
+      },
+      "shortcuts": {
+        "title": "Quick Reference: Keyboard Shortcuts",
+        "sections": [
+          {
+            "title": "ESSENTIAL SHORTCUTS",
+            "items": [
+              {
+                "cmd": "Tab",
+                "desc": "Auto-complete names"
+              },
+              {
+                "cmd": "Ctrl+C",
+                "desc": "Stop current command"
+              },
+              {
+                "cmd": "Ctrl+L",
+                "desc": "Clear screen"
+              },
+              {
+                "cmd": "Ctrl+R",
+                "desc": "Search command history"
+              },
+              {
+                "cmd": "Up/Down arrows",
+                "desc": "Navigate command history"
+              }
+            ]
+          },
+          {
+            "title": "CURSOR MOVEMENT",
+            "items": [
+              {
+                "cmd": "Ctrl+A",
+                "desc": "Start of line"
+              },
+              {
+                "cmd": "Ctrl+E",
+                "desc": "End of line"
+              },
+              {
+                "cmd": "Ctrl+U",
+                "desc": "Delete to start"
+              },
+              {
+                "cmd": "Ctrl+K",
+                "desc": "Delete to end"
+              },
+              {
+                "cmd": "Alt+Left / Alt+Right",
+                "desc": "Move by word"
+              }
+            ]
+          },
+          {
+            "title": "COMMAND TRICKS",
+            "items": [
+              {
+                "cmd": "!!",
+                "desc": "Repeat last command"
+              },
+              {
+                "cmd": "!<number>",
+                "desc": "Repeat command by #"
+              },
+              {
+                "cmd": "command1 && command2",
+                "desc": "Run if first succeeds"
+              },
+              {
+                "cmd": "command1 || command2",
+                "desc": "Run if first fails"
+              }
+            ]
+          }
+        ]
+      },
+      "bashcrawl": {
+        "title": "Quick Reference: Bashcrawl Game",
+        "sections": [
+          {
+            "title": "GETTING STARTED",
+            "items": [
+              {
+                "cmd": "cat scroll",
+                "desc": "Read area instructions"
+              },
+              {
+                "cmd": "ls -F",
+                "desc": "See interactive elements"
+              },
+              {
+                "cmd": "./treasure",
+                "desc": "Collect items"
+              },
+              {
+                "cmd": "export I=item,$I",
+                "desc": "Add to inventory"
+              },
+              {
+                "cmd": "echo $I",
+                "desc": "Check inventory"
+              }
+            ]
+          },
+          {
+            "title": "EXPLORATION",
+            "items": [
+              {
+                "cmd": "cd entrance",
+                "desc": "Start the game"
+              },
+              {
+                "cmd": "cd cellar",
+                "desc": "Basic challenges"
+              },
+              {
+                "cmd": "cd armoury",
+                "desc": "Combat training"
+              },
+              {
+                "cmd": "cd ..",
+                "desc": "Go back"
+              },
+              {
+                "cmd": "ls -la",
+                "desc": "Find hidden secrets"
+              }
+            ]
+          },
+          {
+            "title": "HELP SYSTEM",
+            "items": [
+              {
+                "cmd": "help",
+                "desc": "Context-aware help"
+              },
+              {
+                "cmd": "help suggest",
+                "desc": "Smart recommendations"
+              },
+              {
+                "cmd": "help tutorial",
+                "desc": "Interactive learning"
+              },
+              {
+                "cmd": "help ai",
+                "desc": "AI system status"
+              },
+              {
+                "cmd": "help qref basic",
+                "desc": "This reference card"
+              }
+            ]
+          },
+          {
+            "title": "TROUBLESHOOTING",
+            "items": [
+              {
+                "cmd": "pwd",
+                "desc": "Where am I?"
+              },
+              {
+                "cmd": "ls -la",
+                "desc": "What's actually here?"
+              },
+              {
+                "cmd": "chmod +x <file>",
+                "desc": "Fix permission errors"
+              },
+              {
+                "cmd": "help suggest error",
+                "desc": "Get error solutions"
+              }
+            ]
+          }
+        ]
+      },
+      "permissions": {
+        "title": "Quick Reference: File Permissions",
+        "sections": [
+          {
+            "title": "UNDERSTANDING PERMISSIONS",
+            "items": [
+              {
+                "cmd": "drwxrwxrwx",
+                "desc": "d=dir, rwx=read/write/exec"
+              },
+              {
+                "cmd": "-rwxr-xr-x",
+                "desc": "-=file, 755 permissions"
+              },
+              {
+                "cmd": "First rwx: owner",
+                "desc": "Second rwx: group"
+              },
+              {
+                "cmd": "Third rwx: others",
+                "desc": "*=executable in ls -F"
+              }
+            ]
+          },
+          {
+            "title": "COMMON PERMISSION FIXES",
+            "items": [
+              {
+                "cmd": "chmod +x <file>",
+                "desc": "Make executable"
+              },
+              {
+                "cmd": "chmod -x <file>",
+                "desc": "Remove execute"
+              },
+              {
+                "cmd": "chmod 755 <file>",
+                "desc": "rwxr-xr-x"
+              },
+              {
+                "cmd": "chmod 644 <file>",
+                "desc": "rw-r--r--"
+              },
+              {
+                "cmd": "ls -la <file>",
+                "desc": "Check current perms"
+              }
+            ]
+          },
+          {
+            "title": "PERMISSION NUMBERS",
+            "items": [
+              {
+                "cmd": "4 = read (r)",
+                "desc": "2 = write (w)"
+              },
+              {
+                "cmd": "1 = execute (x)",
+                "desc": "0 = no permission"
+              },
+              {
+                "cmd": "7 = 4+2+1 = rwx",
+                "desc": "5 = 4+1 = r-x"
+              },
+              {
+                "cmd": "6 = 4+2 = rw-",
+                "desc": "3 = 2+1 = -wx"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "quests": [
+    {
+      "id": 0,
+      "title": "Awakening: Know Thy Place",
+      "description": "You awaken in a strange dungeon. The air hums with arcane energy.",
+      "objective": "Cast the 'pwd' spell to reveal your place in the dungeon.",
+      "hint": "Type 'pwd' and press Enter to see your current chamber.",
+      "required_commands": [
+        "pwd"
+      ],
+      "completion": {
+        "command": "pwd",
+        "location": null,
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "50 XP and the 'Navigation Novice' ribbon",
+      "reward_name": "Navigation Novice ribbon",
+      "xp": 50,
+      "prerequisites": null,
+      "next_quest": 1
+    },
+    {
+      "id": 1,
+      "title": "Eyes to See",
+      "description": "The walls whisper: see what lies around you.",
+      "objective": "Use 'ls' to reveal nearby rooms and scrolls.",
+      "hint": "Try 'ls' to survey the room's contents.",
+      "required_commands": [
+        "ls"
+      ],
+      "completion": {
+        "command": "ls",
+        "location": null,
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "50 XP and a glimmering lens",
+      "reward_name": "Glimmering lens",
+      "xp": 50,
+      "prerequisites": null,
+      "next_quest": 2
+    },
+    {
+      "id": 2,
+      "title": "First Steps",
+      "description": "A dark passage leads deeper into the dungeon.",
+      "objective": "Use 'cd cellar' to descend into the cellar.",
+      "hint": "Use 'cd cellar' to descend into the cellar.",
+      "required_commands": [
+        "cd"
+      ],
+      "completion": {
+        "command": "cd",
+        "location": "cellar",
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "100 XP and the Pathwalker's charm",
+      "reward_name": "Pathwalker's charm",
+      "xp": 100,
+      "location_check": "cellar",
+      "prerequisites": null,
+      "next_quest": 3
+    },
+    {
+      "id": 3,
+      "title": "Ancient Knowledge",
+      "description": "A dusty scroll rests on a stone pedestal.",
+      "objective": "Use 'cat scroll' to read the ancient knowledge.",
+      "hint": "Try 'cat scroll' to read the ancient knowledge on the pedestal.",
+      "required_commands": [
+        "cat"
+      ],
+      "completion": {
+        "command": "cat",
+        "location": null,
+        "args": "scroll",
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "100 XP and a reader's sigil",
+      "reward_name": "Reader's sigil",
+      "xp": 100,
+      "prerequisites": null,
+      "next_quest": 4
+    },
+    {
+      "id": 4,
+      "title": "Shape the World",
+      "description": "The workshop calls — create something new.",
+      "objective": "Navigate to the workshop and use 'mkdir' to create a directory.",
+      "hint": "Use 'mkdir' to shape a new workspace.",
+      "required_commands": [
+        "mkdir"
+      ],
+      "completion": {
+        "command": "mkdir",
+        "location": null,
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "100 XP and a builder's sigil",
+      "reward_name": "Builder's sigil",
+      "xp": 100,
+      "prerequisites": null,
+      "next_quest": 5
+    },
+    {
+      "id": 5,
+      "title": "Spark of Creation",
+      "description": "Your workspace yearns for a first artifact.",
+      "objective": "Use 'touch' to create a new file.",
+      "hint": "Use 'touch notes.txt' to conjure a new file.",
+      "required_commands": [
+        "touch"
+      ],
+      "completion": {
+        "command": "touch",
+        "location": null,
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "100 XP and a scribe's quill",
+      "reward_name": "Scribe's quill",
+      "xp": 100,
+      "prerequisites": null,
+      "next_quest": 6
+    },
+    {
+      "id": 6,
+      "title": "Seek the Whisper",
+      "description": "Hidden phrases linger in old scrolls.",
+      "objective": "Use 'grep' to search for a word within a scroll.",
+      "hint": "Run 'grep catacombs scroll' to uncover the hidden clue.",
+      "required_commands": [
+        "grep"
+      ],
+      "completion": {
+        "command": "grep",
+        "location": "armoury|cellar",
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "150 XP and the Whisperer's token",
+      "reward_name": "Whisperer's token",
+      "xp": 150,
+      "location_check": "armoury|cellar",
+      "prerequisites": null,
+      "next_quest": 7
+    },
+    {
+      "id": 7,
+      "title": "The Bashcrawl Grimoire",
+      "description": "Deep in the chapel library, a tome of forgotten spells guards a secret.",
+      "objective": "Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.",
+      "hint": "Find the library, read the tome, then source the grimoire.",
+      "required_commands": [
+        "source"
+      ],
+      "completion": {
+        "command": "source",
+        "location": "study|help",
+        "args": null,
+        "args_file": null,
+        "item_check": "amulet,coins"
+      },
+      "reward": "200 XP and the Scriptorium Key (permanent help system access)",
+      "reward_name": "Scriptorium Key",
+      "xp": 200,
+      "location_check": "study|help",
+      "prerequisites": "amulet and coins in inventory, tome read in library",
+      "next_quest": null
+    }
+  ],
+  "glossary": [
+    {
+      "term": "directory",
+      "definition": "A folder that can contain files and other directories."
+    },
+    {
+      "term": "path",
+      "definition": "A text address for a file or directory."
+    },
+    {
+      "term": "hidden file",
+      "definition": "A file or directory whose name starts with a dot."
+    },
+    {
+      "term": "executable",
+      "definition": "A file you can run as a program, often shown with *."
+    },
+    {
+      "term": "environment variable",
+      "definition": "A named value available to commands, like I or HP."
+    }
+  ]
+}
