@@ -1,5 +1,35 @@
 {
   "categories": {
+    "pipelines_and_text": {
+      "title": "Pipelines & Text Magic (Web)",
+      "commands": [
+        { "command": "sort <file>", "description": "Sort lines alphabetically (-n numeric, -r reverse)" },
+        { "command": "uniq", "description": "Drop adjacent duplicate lines (use after sort)" },
+        { "command": "sort verses | uniq", "description": "Real pipeline: order then dedupe" },
+        { "command": "grep -i pat <file>", "description": "Case-insensitive grep; supports -v invert" },
+        { "command": "head -n 5", "description": "First 5 lines (works on stdin too)" },
+        { "command": "tail -n 5", "description": "Last 5 lines (works on stdin too)" },
+        { "command": "wc", "description": "Counts lines/words/chars (file or stdin)" },
+        { "command": "find . -name notes", "description": "Find files in the current subtree" },
+        { "command": "tree", "description": "ASCII tree of the current room" },
+        { "command": "file <name>", "description": "Identify what a thing is" }
+      ]
+    },
+    "ascii_spells": {
+      "title": "ASCII Spells & Effects (Web)",
+      "commands": [
+        { "command": "banner", "description": "Print the Bashcrawl ASCII banner" },
+        { "command": "cowsay <msg>", "description": "An ASCII cow says your message (also accepts piped stdin)" },
+        { "command": "fortune", "description": "Random terminal fortune cookie" },
+        { "command": "figlet <text>", "description": "Big spaced-out banner text" },
+        { "command": "sl", "description": "Steam locomotive — for typo penance" },
+        { "command": "map", "description": "Mini-map of the dungeon, marking your location" },
+        { "command": "look", "description": "Friendly description of the current room" },
+        { "command": "hint", "description": "Hint for the active quest" },
+        { "command": "xp", "description": "Show level + XP progress bar" },
+        { "command": "env", "description": "Print game environment variables" }
+      ]
+    },
     "navigation": {
       "title": "Navigation",
       "commands": [

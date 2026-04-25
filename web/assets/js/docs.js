@@ -8,11 +8,12 @@
     }
 
     class DocsPanel {
-        constructor({ drawer, content, search, input }) {
+        constructor({ drawer, content, search, input, onOpenChange }) {
             this.drawer = drawer;
             this.content = content;
             this.search = search;
             this.input = input;
+            this.onOpenChange = onOpenChange;
             this.drawer.inert = true;
             this.drawer.hidden = true;
             this.docs = null;
@@ -32,12 +33,17 @@
             this.render();
         }
 
+        isOpen() {
+            return this.drawer.classList.contains("open");
+        }
+
         open() {
             this.drawer.hidden = false;
             this.drawer.classList.add("open");
             this.drawer.setAttribute("aria-hidden", "false");
             this.drawer.inert = false;
             this.search.focus();
+            if (this.onOpenChange) this.onOpenChange(true);
         }
 
         close() {
@@ -46,6 +52,7 @@
             this.drawer.inert = true;
             this.drawer.hidden = true;
             this.input.focus();
+            if (this.onOpenChange) this.onOpenChange(false);
         }
 
         toggle() {
@@ -106,13 +113,22 @@
         renderCommands(query) {
             const categories = this.docs.commands?.categories || {};
             const rendered = [];
+            let catIndex = 0;
             for (const [key, category] of Object.entries(categories)) {
                 const commands = (category.commands || []).filter((cmd) => this.matches(query, `${cmd.command} ${cmd.description} ${category.title}`));
                 if (!commands.length && query) continue;
+                const catId = `docs-cat-${catIndex++}`;
+                const listItems = commands
+                    .map(
+                        (cmd) =>
+                            `<li><button class="docs-command" type="button" data-command="${htmlEscape(cmd.command.split(" ")[0])}">${htmlEscape(cmd.command)}</button> <span class="docs-cmd-desc">${htmlEscape(cmd.description)}</span></li>`,
+                    )
+                    .join("");
                 rendered.push(
-                    `<div><strong>${htmlEscape(category.title || key)}</strong><p>${
-                        commands.map((cmd) => `<button class="docs-command" type="button" data-command="${htmlEscape(cmd.command.split(" ")[0])}">${htmlEscape(cmd.command)}</button> ${htmlEscape(cmd.description)}`).join("<br>")
-                    }</p></div>`,
+                    `<section class="docs-cmd-block" aria-labelledby="${htmlEscape(catId)}">` +
+                        `<h4 class="docs-cmd-cat" id="${htmlEscape(catId)}">${htmlEscape(category.title || key)}</h4>` +
+                        `<ul class="docs-cmd-list">${listItems}</ul>` +
+                        `</section>`,
                 );
             }
             if (!rendered.length) return "";

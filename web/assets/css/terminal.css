@@ -24,6 +24,8 @@ body {
 }
 
 .tui-header {
+    position: relative;
+    z-index: 20;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -32,6 +34,7 @@ body {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--accent-purple);
+    background: var(--bg-secondary);
 }
 
 .tui-header-subtitle {
@@ -56,6 +59,32 @@ body {
 .tui-button:hover,
 .tui-button:focus {
     border-color: var(--accent-purple);
+    outline: none;
+}
+
+a.tui-header-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+a.tui-header-link:hover,
+a.tui-header-link:focus {
+    border-color: var(--accent-purple);
+    outline: none;
+}
+
+.tui-footer-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.tui-footer-link:hover,
+.tui-footer-link:focus {
+    text-decoration: underline;
     outline: none;
 }
 
@@ -151,6 +180,19 @@ body {
     font-family: var(--font-mono);
     font-weight: 700;
     white-space: nowrap;
+    min-width: 0;
+    flex: 0 1 auto;
+    max-width: min(50vw, 22rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+    .tui-prompt {
+        white-space: normal;
+        word-break: break-all;
+        max-width: 45%;
+    }
 }
 
 .tui-input {
@@ -187,6 +229,59 @@ body {
 .kind-magic { color: var(--accent-yellow); }
 .kind-dim { color: var(--text-secondary); }
 .kind-output { color: var(--text-primary); }
+.kind-art {
+    color: var(--accent-purple);
+    white-space: pre;
+    word-break: normal;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 6px rgba(192, 132, 252, 0.25);
+}
+.kind-banner {
+    color: var(--accent-yellow);
+    white-space: pre;
+    word-break: normal;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.45);
+}
+
+@keyframes bc-sparkle {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.0); transform: translateY(0); }
+    25%      { box-shadow: 0 0 18px 4px rgba(251, 191, 36, 0.55); transform: translateY(-1px); }
+    60%      { box-shadow: 0 0 12px 3px rgba(192, 132, 252, 0.55); transform: translateY(0); }
+}
+.fx-sparkle {
+    animation: bc-sparkle 900ms ease-out;
+    border-color: var(--accent-yellow) !important;
+}
+
+@keyframes bc-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+}
+.fx-shake { animation: bc-shake 320ms ease-in-out; }
+
+@keyframes bc-pop {
+    0% { transform: scale(1); color: var(--accent-yellow); }
+    50% { transform: scale(1.18); color: var(--accent-green); }
+    100% { transform: scale(1); }
+}
+.fx-pop {
+    display: inline-block;
+    animation: bc-pop 600ms ease-out;
+}
+
+@keyframes bc-fadein {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.tui-log span { animation: bc-fadein 140ms ease-out both; }
+
+.tui-log .kind-magic, .tui-log .kind-success {
+    text-shadow: 0 0 4px currentColor;
+}
 
 .docs-drawer {
     position: fixed;
@@ -246,6 +341,35 @@ body {
 
 .docs-card h3 {
     margin: 0 0 0.45rem;
+}
+
+.docs-cmd-block {
+    margin-top: 0.75rem;
+}
+
+.docs-cmd-block:first-child {
+    margin-top: 0;
+}
+
+.docs-cmd-cat {
+    margin: 0 0 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-heading);
+}
+
+.docs-cmd-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+}
+
+.docs-cmd-list li {
+    margin: 0.2rem 0;
+}
+
+.docs-cmd-desc {
+    color: var(--text-primary);
 }
 
 .docs-command {

@@ -13,6 +13,122 @@
         return tokens;
     }
 
+    function splitPipes(line) {
+        const segments = [];
+        let depth = 0;
+        let quote = null;
+        let buf = "";
+        for (let i = 0; i < line.length; i += 1) {
+            const ch = line[i];
+            if (quote) {
+                if (ch === quote) quote = null;
+                buf += ch;
+                continue;
+            }
+            if (ch === "'" || ch === "\"") { quote = ch; buf += ch; continue; }
+            if (ch === "(" || ch === "[") depth += 1;
+            if (ch === ")" || ch === "]") depth = Math.max(0, depth - 1);
+            if (ch === "|" && depth === 0) {
+                segments.push(buf);
+                buf = "";
+                continue;
+            }
+            buf += ch;
+        }
+        segments.push(buf);
+        return segments.map((s) => s.trim()).filter(Boolean);
+    }
+
+    function asLines(text) {
+        if (text == null) return [];
+        return String(text).split("\n");
+    }
+
+    const ART = {
+        banner: [
+            "       ╔════════════════════════════════════════════════════╗",
+            "       ║   ____            __                       __      ║",
+            "       ║  / __ )___ ______/ /_  ______________ ___ / /      ║",
+            "       ║ / __  / __ `/ ___/ __ \\/ ___/ ___/ __ `__ \\/ /      ║",
+            "       ║/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / / /__    ║",
+            "       ║\\____/\\__,_/____/_/ /_/\\___/_/  /_/ /_/ /_/____/    ║",
+            "       ║                                                    ║",
+            "       ║       Type  pwd  to begin the descent. F1 for help ║",
+            "       ╚════════════════════════════════════════════════════╝",
+        ].join("\n"),
+        cow: (msg) => {
+            const m = String(msg || "Moo.");
+            const top = " " + "_".repeat(m.length + 2);
+            const mid = "< " + m + " >";
+            const bot = " " + "-".repeat(m.length + 2);
+            return [
+                top,
+                mid,
+                bot,
+                "        \\   ^__^",
+                "         \\  (oo)\\_______",
+                "            (__)\\       )\\/\\",
+                "                ||----w |",
+                "                ||     ||",
+            ].join("\n");
+        },
+        sl: [
+            "      ====        ________                ___________",
+            "  _D _|  |_______/        \\__I_I_____===__|_________|",
+            "   |(_)---  |   H\\________/ |   |        =|___ ___|",
+            "   /     |  |   H  |  |     |   |         ||_| |_||",
+            "  |      |  |   H  |__--------------------| [___] |",
+            "  | ________|___H__/__|_____/[][]~\\_______|       |",
+            "  |/ |   |-----------I_____I [][] []  D   |=======|__",
+            "__/ =| o |=-O=====O=====O=====O \\ ____Y___________|__|",
+            " |/-=|___|=    ||    ||    ||    |_____/~\\___/   ",
+            "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/         ",
+        ].join("\n"),
+        sparkle: [
+            "      .   *  .   .  *  .   *",
+            "    *  ✦  .   *  ✧   .  *  ✦   ✧",
+            "      ✦  ✧ ✦  Q U E S T  ✦ ✧ ✦",
+            "    *      C O M P L E T E      *",
+            "      ✧  *   .  ✦   . *  ✧   ✦",
+        ].join("\n"),
+        skull: [
+            "        _____",
+            "       /     \\",
+            "      | () () |",
+            "       \\  ^  /",
+            "        |||||",
+            "        |||||",
+        ].join("\n"),
+        portal: [
+            "          .  *  .   *  .   .",
+            "        ╭───────────────────╮",
+            "        │  ◌  the portal  ◌  │",
+            "        │   ───→  /scriptorium",
+            "        ╰───────────────────╯",
+            "          *  .   .  *  .  *",
+        ].join("\n"),
+        treasure: [
+            "       _.--\"\"--._",
+            "      / _      _ \\",
+            "     | (o)____(o) |",
+            "      \\ '--.__,--' /",
+            "       `-._____.-'",
+        ].join("\n"),
+    };
+
+    const FORTUNES = [
+        "In the catacombs, you have ZERO bytes of fear.",
+        "chmod 777 your dreams. Permissions matter.",
+        "/dev/null is full. Please try again.",
+        "An unhandled exception walks into a bar. The bar pretends nothing happened.",
+        "Cellar mages prefer ls -F over divination.",
+        "Warning: pipes are not for plumbers in this realm.",
+        "When in doubt, cd .. and try again.",
+        "If you can name it, you can grep it.",
+        "The shell is patient. The shell is kind. The shell still won't run that typo.",
+        "May your prompts be short and your scripts be sourced.",
+    ];
+
     function defaultState(root) {
         return {
             cwd: root || "/entrance",
@@ -52,6 +168,7 @@
                 export: this.cmdExport,
                 let: this.cmdLet,
                 alias: this.cmdAlias,
+                source: this.cmdSource,
                 mkdir: this.cmdMkdir,
                 touch: this.cmdTouch,
                 cp: this.cmdCp,
@@ -63,27 +180,74 @@
                 inventory: this.cmdInventory,
                 health: this.cmdHealth,
                 status: this.cmdStatus,
-                "save": this.cmdSave,
-                "reset": this.cmdReset,
+                save: this.cmdSave,
+                reset: this.cmdReset,
+                sort: this.cmdSort,
+                uniq: this.cmdUniq,
+                find: this.cmdFind,
+                tree: this.cmdTree,
+                file: this.cmdFile,
+                chmod: this.cmdChmod,
+                man: this.cmdMan,
+                whoami: this.cmdWhoami,
+                date: this.cmdDate,
+                env: this.cmdEnv,
+                map: this.cmdMap,
+                look: this.cmdLook,
+                hint: this.cmdHint,
+                xp: this.cmdXp,
+                fortune: this.cmdFortune,
+                cowsay: this.cmdCowsay,
+                figlet: this.cmdFiglet,
+                banner: this.cmdBanner,
+                sl: this.cmdSl,
             };
         }
 
         execute(line) {
-            const expanded = this.applyAlias(line.trim());
+            const segments = splitPipes(line.trim());
+            if (!segments.length) return [];
+            let stdin = null;
+            const collected = [];
+            for (let i = 0; i < segments.length; i += 1) {
+                const segment = segments[i];
+                const result = this.executeSegment(segment, stdin);
+                const isLast = i === segments.length - 1;
+                if (!isLast) {
+                    stdin = result
+                        .filter((r) => r.action !== "clear" && r.action !== "reset" && r.kind !== "error")
+                        .map((r) => r.text || "")
+                        .join("\n");
+                    if (result.some((r) => r.kind === "error")) {
+                        collected.push(...result);
+                        return collected;
+                    }
+                    continue;
+                }
+                collected.push(...result);
+            }
+            return collected;
+        }
+
+        executeSegment(segment, stdin) {
+            const expanded = this.applyAlias(segment.trim());
             const tokens = tokenize(expanded);
             if (!tokens.length) return [];
             const cmd = tokens[0];
             const args = tokens.slice(1);
             this.bump(cmd);
-
-            let output;
+            this.state.stats.lastPipedIn = stdin != null;
             if (cmd.startsWith("./")) {
-                output = this.runScript(cmd.slice(2));
-            } else {
-                const handler = this.handlers[cmd];
-                output = handler ? handler.call(this, args) : [{ kind: "error", text: `Unknown command: ${cmd}. Try help.` }];
+                const output = this.runScript(cmd.slice(2));
+                this.advanceQuests(cmd, args);
+                return output;
             }
-            this.advanceQuests(cmd, args);
+            const handler = this.handlers[cmd];
+            if (!handler) {
+                return [{ kind: "error", text: `Unknown command: ${cmd}. Try help.` }];
+            }
+            const output = handler.call(this, args, stdin);
+            this.advanceQuests(cmd, args, stdin);
             return output;
         }
 
@@ -156,7 +320,10 @@
         }
 
         cmdHelp() {
-            return [{ kind: "info", text: "Open the Docs panel with F1 or the Docs button. Try: pwd, ls -F, cat scroll, cd cellar." }];
+            return [
+                { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
+                { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
+            ];
         }
 
         cmdPwd() {
@@ -194,41 +361,262 @@
             return [{ kind: "output", text }];
         }
 
-        cmdHead(args) {
+        cmdHead(args, stdin) {
             const countIndex = args.indexOf("-n");
             const count = countIndex >= 0 ? Number(args[countIndex + 1]) || 10 : 10;
             const file = args.find((arg, index) => arg !== "-n" && index !== countIndex + 1);
-            const text = this.readFile(this.resolve(file || ""));
-            if (text === null) return [{ kind: "error", text: "head requires a readable file" }];
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "head requires a readable file or piped input" }];
             return [{ kind: "output", text: text.split("\n").slice(0, count).join("\n") }];
         }
 
-        cmdTail(args) {
+        cmdTail(args, stdin) {
             const countIndex = args.indexOf("-n");
             const count = countIndex >= 0 ? Number(args[countIndex + 1]) || 10 : 10;
             const file = args.find((arg, index) => arg !== "-n" && index !== countIndex + 1);
-            const text = this.readFile(this.resolve(file || ""));
-            if (text === null) return [{ kind: "error", text: "tail requires a readable file" }];
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "tail requires a readable file or piped input" }];
             return [{ kind: "output", text: text.split("\n").slice(-count).join("\n") }];
         }
 
-        cmdWc(args) {
+        cmdWc(args, stdin) {
             const file = args.find((arg) => !arg.startsWith("-"));
-            const text = this.readFile(this.resolve(file || ""));
-            if (text === null) return [{ kind: "error", text: "wc requires a readable file" }];
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "wc requires a readable file or piped input" }];
             const lines = text ? text.split("\n").length : 0;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-            return [{ kind: "output", text: `${lines} ${words} ${text.length} ${file}` }];
+            return [{ kind: "output", text: `${lines} ${words} ${text.length}${file ? ` ${file}` : ""}` }];
         }
 
-        cmdGrep(args) {
-            if (args.length < 2) return [{ kind: "error", text: "grep requires a pattern and file" }];
-            const [pattern, file] = args;
-            const text = this.readFile(this.resolve(file));
-            if (text === null) return [{ kind: "error", text: `No such file: ${file}` }];
-            const re = new RegExp(escapeRegExp(pattern), "i");
-            const matches = text.split("\n").filter((line) => re.test(line));
+        cmdGrep(args, stdin) {
+            const flags = args.filter((a) => a.startsWith("-"));
+            const positional = args.filter((a) => !a.startsWith("-"));
+            const pattern = positional[0];
+            const file = positional[1];
+            if (!pattern) return [{ kind: "error", text: "grep requires a pattern" }];
+            let text;
+            if (file) {
+                text = this.readFile(this.resolve(file));
+                if (text === null) return [{ kind: "error", text: `No such file: ${file}` }];
+            } else if (stdin != null) {
+                text = stdin;
+            } else {
+                return [{ kind: "error", text: "grep needs a file or piped input" }];
+            }
+            const flagStr = flags.join("");
+            const insensitive = flagStr.includes("i");
+            const invert = flagStr.includes("v");
+            const re = new RegExp(escapeRegExp(pattern), insensitive ? "i" : "");
+            const matches = text.split("\n").filter((line) => {
+                const m = re.test(line);
+                return invert ? !m : m;
+            });
             return [{ kind: "output", text: matches.join("\n") || `(no matches for '${pattern}')` }];
+        }
+
+        cmdSort(args, stdin) {
+            const flags = args.filter((a) => a.startsWith("-")).join("");
+            const file = args.find((a) => !a.startsWith("-"));
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "sort requires a file or piped input" }];
+            const lines = text.split("\n");
+            lines.sort((a, b) => (flags.includes("n") ? Number(a) - Number(b) : a.localeCompare(b)));
+            if (flags.includes("r")) lines.reverse();
+            return [{ kind: "output", text: lines.join("\n") }];
+        }
+
+        cmdUniq(args, stdin) {
+            const file = args.find((a) => !a.startsWith("-"));
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "uniq requires a file or piped input" }];
+            const out = [];
+            let prev = null;
+            for (const line of text.split("\n")) {
+                if (line !== prev) out.push(line);
+                prev = line;
+            }
+            return [{ kind: "output", text: out.join("\n") }];
+        }
+
+        cmdFind(args) {
+            const startArg = args[0] && !args[0].startsWith("-") ? args[0] : ".";
+            const startPath = this.resolve(startArg === "." ? "." : startArg);
+            const nameIdx = args.indexOf("-name");
+            const typeIdx = args.indexOf("-type");
+            const pattern = nameIdx >= 0 ? args[nameIdx + 1] : null;
+            const filterType = typeIdx >= 0 ? args[typeIdx + 1] : null;
+            if ((nameIdx >= 0 && !pattern) || (typeIdx >= 0 && !filterType)) {
+                return [{ kind: "error", text: "find -name <glob> or -type f|d expected" }];
+            }
+            const re = pattern ? new RegExp("^" + escapeRegExp(pattern).replace(/\\\*/g, ".*").replace(/\\\?/g, ".") + "$") : null;
+            const matches = [];
+            const visit = (path) => {
+                const isDir = this.isDir(path);
+                const name = this.basename(path) || "/";
+                const typeMatch = !filterType || (filterType === "d" && isDir) || (filterType === "f" && !isDir);
+                const nameMatch = !re || re.test(name);
+                if (typeMatch && nameMatch && path !== startPath) matches.push(path.replace(startPath, "."));
+                if (!isDir) return;
+                for (const entry of this.entries(path, true)) {
+                    visit((path === "/" ? "" : path) + "/" + entry.name);
+                }
+            };
+            visit(startPath);
+            return [{ kind: "output", text: matches.join("\n") || "(nothing found)" }];
+        }
+
+        cmdTree(args) {
+            const startArg = args[0] || ".";
+            const startPath = this.resolve(startArg);
+            if (!this.isDir(startPath)) return [{ kind: "error", text: `tree: not a directory: ${startArg}` }];
+            const lines = [this.basename(startPath) || "/"];
+            const walk = (path, prefix, depth) => {
+                if (depth > 4) return;
+                const items = this.entries(path, false);
+                items.forEach((entry, idx) => {
+                    const last = idx === items.length - 1;
+                    const tee = last ? "└── " : "├── ";
+                    const marker = entry.type === "dir" ? "/" : entry.type === "exec" ? "*" : "";
+                    lines.push(prefix + tee + entry.name + marker);
+                    if (entry.type === "dir") {
+                        walk(path + "/" + entry.name, prefix + (last ? "    " : "│   "), depth + 1);
+                    }
+                });
+            };
+            walk(startPath, "", 0);
+            return [{ kind: "art", text: lines.join("\n") }];
+        }
+
+        cmdFile(args) {
+            if (!args[0]) return [{ kind: "error", text: "file requires a path" }];
+            const path = this.resolve(args[0]);
+            const node = this.node(path);
+            if (!node) return [{ kind: "error", text: `${args[0]}: no such file` }];
+            const meta = this.world.encounters[path];
+            if (this.isDir(path)) return [{ kind: "output", text: `${args[0]}: directory` }];
+            if (meta) return [{ kind: "output", text: `${args[0]}: executable script (${meta.type || "encounter"})` }];
+            const text = this.readFile(path) || "";
+            const looksAscii = /[━╔╚║┃─│└┘┌┐]/.test(text) || /^\s*[!#@]/.test(text);
+            return [{ kind: "output", text: `${args[0]}: ${looksAscii ? "ASCII art / scroll" : "text file"}` }];
+        }
+
+        cmdChmod(args) {
+            if (args.length < 2) return [{ kind: "error", text: "chmod +x|-x <file>" }];
+            const [mode, target] = args;
+            const path = this.resolve(target);
+            const node = this.state.userNodes[path];
+            if (!node) return [{ kind: "error", text: "Web Bashcrawl chmod only changes session-created files." }];
+            if (mode === "+x") {
+                node.type = "exec";
+                this.state.flags.chmod_x = true;
+                return [{ kind: "success", text: `Marked ${target} as executable.` }];
+            }
+            if (mode === "-x") {
+                node.type = "file";
+                return [{ kind: "success", text: `Removed executable bit from ${target}.` }];
+            }
+            return [{ kind: "info", text: `chmod ${mode} ${target}: numeric modes are decorative in the web port.` }];
+        }
+
+        cmdMan(args) {
+            const cmd = args[0];
+            if (!cmd) return [{ kind: "info", text: "Usage: man <command>" }];
+            const reference = (this.commands?.categories || {});
+            for (const cat of Object.values(reference)) {
+                const found = (cat.commands || []).find((entry) => entry.command === cmd || entry.command.startsWith(cmd + " "));
+                if (found) {
+                    return [{ kind: "info", text: `NAME\n    ${found.command}\n\nDESCRIPTION\n    ${found.description}` }];
+                }
+            }
+            if (this.handlers[cmd]) return [{ kind: "info", text: `NAME\n    ${cmd}\n\nDESCRIPTION\n    Built-in for Bashcrawl Web. Try '${cmd} --help' or open Docs (F1).` }];
+            return [{ kind: "error", text: `man: no entry for '${cmd}'` }];
+        }
+
+        cmdWhoami() {
+            return [{ kind: "info", text: "adventurer  (you have walked these halls before...)" }];
+        }
+
+        cmdDate() {
+            return [{ kind: "output", text: new Date().toString() }];
+        }
+
+        cmdEnv() {
+            const lines = [
+                `I=${this.state.inventory.join(",")}`,
+                `HP=${this.state.hp}`,
+                `XP=${this.state.xp}`,
+                `CWD=${this.state.cwd}`,
+                ...Object.entries(this.state.envVars).map(([k, v]) => `${k}=${v}`),
+            ];
+            return [{ kind: "output", text: lines.join("\n") }];
+        }
+
+        cmdMap() {
+            const here = this.state.cwd;
+            const arrow = (path) => path === here ? " ← you are here" : "";
+            const lines = [
+                "  /entrance" + arrow("/entrance"),
+                "  ├── cellar/" + arrow("/entrance/cellar"),
+                "  │   └── armoury/" + arrow("/entrance/cellar/armoury"),
+                "  │       ├── chamber/" + arrow("/entrance/cellar/armoury/chamber"),
+                "  │       └── workshop/" + arrow("/entrance/cellar/armoury/workshop"),
+                "  ├── scriptorium/" + arrow("/entrance/scriptorium"),
+                "  │   └── observatory/" + arrow("/entrance/scriptorium/observatory"),
+                "  └── .chapel/  (hidden — try ls -la)",
+                "      └── courtyard/aviary/hall/library/.study/" + arrow("/entrance/.chapel/courtyard/aviary/hall/library/.study"),
+            ];
+            return [{ kind: "art", text: lines.join("\n") }];
+        }
+
+        cmdLook() {
+            const meta = this.currentRoomMeta();
+            const out = [];
+            if (meta.title) out.push(`${meta.emoji || "•"} ${meta.title}`);
+            if (meta.hint) out.push(meta.hint);
+            const entries = this.entries(this.state.cwd, false).map((entry) => {
+                const marker = entry.type === "dir" ? "/" : entry.type === "exec" ? "*" : "";
+                return `  ${entry.name}${marker}`;
+            });
+            return [{ kind: "info", text: out.join("\n") }, { kind: "output", text: entries.join("\n") || "(empty)" }];
+        }
+
+        cmdHint() {
+            const q = this.quests[this.state.currentQuestId];
+            if (!q) return [{ kind: "success", text: "No quests left. Try `map`, `tree`, `cowsay hi`, or `./oracle` in /entrance/scriptorium." }];
+            return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}` }];
+        }
+
+        cmdXp() {
+            const xp = this.state.xp;
+            const level = Math.max(1, 1 + Math.floor(xp / 200));
+            const into = xp % 200;
+            const filled = Math.round(into / 20);
+            const bar = "█".repeat(filled) + "░".repeat(10 - filled);
+            return [{ kind: "info", text: `Level ${level}  ${bar}  ${into}/200 to next level  (total ${xp} XP)` }];
+        }
+
+        cmdFortune() {
+            const text = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+            return [{ kind: "magic", text: `🥠  ${text}` }];
+        }
+
+        cmdCowsay(args, stdin) {
+            const msg = (args.length ? args.join(" ") : stdin) || "Moo.";
+            return [{ kind: "art", text: ART.cow(msg) }];
+        }
+
+        cmdFiglet(args) {
+            const text = args.join(" ") || "BASHCRAWL";
+            const upper = text.toUpperCase();
+            return [{ kind: "art", text: upper.split("").map((c) => c).join(" ") + "\n" + "=".repeat(upper.length * 2) }];
+        }
+
+        cmdBanner() {
+            return [{ kind: "art", text: ART.banner }];
+        }
+
+        cmdSl() {
+            return [{ kind: "art", text: ART.sl + "\n     (Sometimes typos take you for a ride. Try `ls`.)" }];
         }
 
         cmdEcho(args) {
@@ -267,6 +655,27 @@
             const value = joined.slice(idx + 1).trim().replace(/^['"]|['"]$/g, "");
             this.state.aliases[key] = value;
             return [{ kind: "success", text: `Alias set: ${key}='${value}'` }];
+        }
+
+        cmdSource(args) {
+            if (!args[0]) return [{ kind: "error", text: "Usage: source <file>" }];
+            const raw = args[0].replace(/^\.\//, "");
+            const path = this.resolve(raw);
+            const base = this.basename(path);
+            const inStudy = this.state.cwd.includes("study");
+            if (inStudy && base === "grimoire") {
+                if (this.readFile(path) === null) return [{ kind: "error", text: `No such file: ${raw}` }];
+                if (!this.state.inventory.includes("grimoire")) this.state.inventory.push("grimoire");
+                this.state.aliases.bc = "echo 42";
+                return [
+                    { kind: "magic", text: "📕 The grimoire's knowledge merges with your shell." },
+                    { kind: "success", text: "Defined `bc` as a quick demo (output: 42). Scriptorium quest ready." },
+                ];
+            }
+            if (this.readFile(path) !== null) {
+                return [{ kind: "info", text: `Sourced ${raw} (no extra definitions in the web port).` }];
+            }
+            return [{ kind: "error", text: `Cannot source: ${raw}` }];
         }
 
         cmdMkdir(args) {
@@ -362,7 +771,7 @@
                 if (!this.state.inventory.includes(item)) this.state.inventory.push(item);
             }
             if (encounter.damage) this.state.hp = Math.max(0, this.state.hp - Number(encounter.damage));
-            if (encounter.heals) this.state.hp = Math.min(100, Number(encounter.heals));
+            if (encounter.heals) this.state.hp = Math.min(100, this.state.hp + Number(encounter.heals));
             this.state.flags[encounter.key] = true;
             if ((encounter.grants_items || []).length) {
                 messages.push({ kind: "success", text: `Inventory gained: ${encounter.grants_items.join(", ")}` });
@@ -384,7 +793,7 @@
             else this.state.envVars[key] = value;
         }
 
-        advanceQuests(cmd, args) {
+        advanceQuests(cmd, args, stdin) {
             let changed = false;
             while (this.state.currentQuestId < this.quests.length) {
                 const q = this.quests[this.state.currentQuestId];
@@ -396,6 +805,9 @@
                     if (!allowed.some((loc) => this.state.cwd.includes(loc))) break;
                 }
                 if (comp.args && args[0] !== comp.args) break;
+                if (comp.args_contains && !args.join(" ").includes(comp.args_contains)) break;
+                if (comp.piped_with && !(stdin != null && stdin.length > 0)) break;
+                if (comp.flag && !this.state.flags[comp.flag]) break;
                 if (comp.item_check) {
                     const needed = String(comp.item_check).split(",").map((v) => v.trim());
                     if (!needed.every((item) => this.state.inventory.includes(item))) break;

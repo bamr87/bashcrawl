@@ -13,6 +13,11 @@
         "hidden": false
       },
       {
+        "name": "scriptorium",
+        "type": "dir",
+        "hidden": false
+      },
+      {
         "name": "scroll",
         "type": "file",
         "hidden": false
@@ -42,6 +47,19 @@
         "type": "dir",
         "hidden": true
       }
+    ],
+    "/entrance/scriptorium": [
+      { "name": "scroll", "type": "file", "hidden": false },
+      { "name": "verses", "type": "file", "hidden": false },
+      { "name": "notes", "type": "file", "hidden": false },
+      { "name": "oracle", "type": "exec", "hidden": false },
+      { "name": "cowherd", "type": "exec", "hidden": false },
+      { "name": "observatory", "type": "dir", "hidden": false }
+    ],
+    "/entrance/scriptorium/observatory": [
+      { "name": "scroll", "type": "file", "hidden": false },
+      { "name": "starlog", "type": "file", "hidden": false },
+      { "name": "comet", "type": "exec", "hidden": false }
     ],
     "/entrance/.vault": [
       {
@@ -579,6 +597,11 @@
     ]
   },
   "files": {
+    "/entrance/scriptorium/scroll": "\n╔══════════════════════════════════════════════════════════════════════╗\n║                      📜 THE SCRIPTORIUM                              ║\n║              where pipes carry wisdom between spells                 ║\n╚══════════════════════════════════════════════════════════════════════╝\n\n     .:*~*:._.:*~*:._.:*~*:._.:*~*:._.:*~*:._.:*~*:._.:*~*:.\n\nIn this hall the scribes joined spells with a single character, |\nThe `pipe` lets the output of one spell become the input of another.\n\nTRY THESE INCANTATIONS:\n\n    cat verses                 — read the dusty book of repeated lines\n    sort verses                — order them alphabetically\n    sort verses | uniq         — collapse the duplicates (a true pipeline)\n    grep moon verses           — only the lines that whisper of the moon\n    cat verses | wc            — counts of lines, words, characters\n    cat verses | tail -n 3     — last three lines of the river\n    find . -name notes         — locate a hidden page\n    tree                       — see the room as a branching scroll\n    cowsay 'hello, terminal!'  — let a humble cow speak\n    ./oracle                   — the oracle whispers a fortune\n    cd observatory             — climb into the night sky\n\nA quiet voice from the shelves: 'A quest awaits a clean pipeline. Try sort | uniq.'\n",
+    "/entrance/scriptorium/verses": "moon over silent towers\nbones beneath the willow tree\nmoon over silent towers\nfire in the lower halls\nbones beneath the willow tree\nmoon over silent towers\nlanterns swing in the cellar wind\nfire in the lower halls\n",
+    "/entrance/scriptorium/notes": "Hidden pages flutter behind the shelf.\nThe scribes left a single keyword to find: 'starlight'.\nIf you can FIND this file by name, the keeper of records will applaud.\n",
+    "/entrance/scriptorium/observatory/scroll": "\n              .  *  .   .   *   .    *\n                 ✦  ✧   ✦   ✧    ✦\n          .   *   .  THE OBSERVATORY  .   *\n                 ✦  ✧   ✦   ✧    ✦\n              *   .  *  .   .   *   .\n\nA brass telescope points up through a missing roof.\nYou may:\n    cat starlog              — log of recent night sightings\n    sort starlog | uniq      — true catalogue of constellations\n    grep -i comet starlog    — search for cometary lines\n    ./comet                  — release the comet (visual flourish)\n    figlet stars             — engrave a banner\n    map                      — see where you stand\n",
+    "/entrance/scriptorium/observatory/starlog": "Orion\nUrsa Major\nUrsa Major\nCassiopeia\nLyra\nOrion\nComet of 1066\nLyra\nDraco\nCassiopeia\nComet of 1066\n",
     "/entrance/README.md": "# 🚪 Welcome to the Entrance - Your Terminal Adventure Begins Here\n\n## 🌟 First Steps into the Catacombs\n\nCongratulations, brave adventurer! You've successfully entered the mystical catacombs of Bashcrawl.\nThis entrance chamber is where you'll learn the fundamental magic spells (terminal commands) needed to\nsurvive your journey through the underground dungeons.\n\n## 📜 Your First Scroll\n\nStart your adventure by reading the ancient scroll in this room:\n\n```bash\ncat scroll\n```\n\nThis scroll contains the essential viewing spells and navigation magic you'll need throughout your journey.\n\n## 🎯 Essential Spells to Master\n\nBefore venturing deeper, master these fundamental incantations:\n\n### Navigation Magic\n\n- `ls` - Reveals all items in your current location\n- `ls -F` - Shows item types (directories end with `/`, executables with `*`)\n- `cd directory` - Moves you to a different chamber\n- `pwd` - Shows your exact location in the catacombs\n\n### Viewing Spells\n\n- `cat filename` - Displays entire scroll contents\n- `less filename` - Reads long scrolls page by page (press 'q' to quit)\n- `head filename` - Shows the beginning of a scroll (first 10 lines)\n- `tail filename` - Shows the end of a scroll (last 10 lines)\n- `wc filename` - Counts words, lines, and characters in a scroll\n\n## 🗺️ Your Learning Path\n\nThe entrance connects to several chambers, each teaching different skills:\n\n### 🏰 **THE CELLAR** (Next Recommended Step)\n\n- **Access**: `cd cellar`\n- **Focus**: Learning to distinguish between doorways and objects\n- **Skills**: Advanced listing (`ls -F`), shell aliases, file type recognition\n- **Reward**: Emerald amulet (your first treasure!)\n\n### Hidden Chambers (Unlocked Later)\n\n- **Chapel**: Prayer and reflection skills\n- **Vault**: Treasure management and inventory systems\n- **Scrap**: Symlinks, shortcuts, and portal creation\n- **Armoury**: Combat skills and executable files\n\n## 🎮 Game Mechanics\n\n### Inventory System\n\nAs you progress, you'll collect treasures and items. Create an inventory variable to track your wealth:\n\n```bash\nexport I=treasure_name,$I\necho $I  # Check your current inventory\n```\n\n### Shell Aliases\n\nMake your spells more powerful with aliases:\n\n```bash\nalias ls='ls -F'  # Now 'ls' automatically shows file types\n```\n\n## 💡 Pro Tips for New Terminal Adventurers\n\n1. **Read Every Scroll**: Each scroll contains crucial knowledge\n2. **Experiment Safely**: Practice commands in this safe starting area\n3. **Use Tab Completion**: Press Tab to auto-complete file names\n4. **Ask for Help**: Use `--help` with most commands for guidance\n5. **Stay Curious**: Hidden files (starting with `.`) contain secrets\n\n## 🚨 Important Notes\n\n- **Hidden Files**: Some files start with `.` and are hidden by default\n- **Executable Files**: Files ending with `*` can be run as programs\n- **Safety First**: This is a learning environment - experiment freely!\n\n## 🎯 Your Mission\n\n1. **Master the Basic Spells**: Practice all viewing commands on the scroll\n2. **Explore Thoroughly**: Use `ls` to see all available paths\n3. **Descend to the Cellar**: Your next major challenge awaits below\n4. **Build Your Skills**: Each chamber teaches essential terminal abilities\n\n## 🆘 Need Help?\n\n- Stuck on a command? Try `command --help`\n- Lost? Use `pwd` to see where you are\n- Confused? Re-read the scrolls - they contain all the answers\n- Really stuck? Check the project's GitLab repository for hints\n\n## 🎊 Begin Your Adventure\n\nWhen you're ready to start learning, read the scroll:\n\n```bash\ncat scroll\n```\n\nThen practice the viewing spells and prepare to descend into the cellar:\n\n```bash\ncd cellar\n```\n\n**May your terminal skills grow strong, brave adventurer!**\n\n---\n\n*Remember: Every expert was once a beginner. Take your time, experiment, and enjoy the journey of*\n*mastering the command line through adventure!*\n",
     "/entrance/scroll": "\n================================================================================\n                           ANCIENT SCROLL OF SIGHT\n================================================================================\n\nIt is pitch black in these catacombs.\nYou have magickal spells that reveal the world around you.\n\n================================================================================\n                      BASIC MOVEMENT INCANTATIONS\n================================================================================\n\nCOMMAND            PURPOSE                      DESCRIPTION\n--------           --------                     -----------\nls                 See room contents            List all items in current room\ncd directory       Move to a room               Enter a directory (room)\ncd ..              Go back                      Return to the previous room\npwd                Where am I?                  Print your current location\n\n================================================================================\n                         MAGICKAL VIEWING SPELLS\n================================================================================\n\nCOMMAND            PURPOSE                      DESCRIPTION\n--------           --------                     -----------\ncat filename       View scrolls fully           Display entire scroll content\nless filename      Read long scrolls            Page through text (q to quit)\nhead filename      Peek at scroll start         See first 10 lines only\ntail filename      Check scroll ending          See last 10 lines only\nwc filename        Count scroll contents        Count lines, words, characters\n\nTry looking around this room, then move into one of the next rooms.\n\n================================================================================\n                          EXAMPLE INCANTATIONS\n================================================================================\n\n    $ pwd                    # Where am I?\n    $ ls                     # What is in this room?\n    $ cat scroll             # Read a scroll (you are doing this now!)\n    $ less scroll            # Page through a long scroll (press q to quit)\n    $ head scroll            # See just the beginning\n    $ tail scroll            # See just the ending\n    $ wc scroll              # How long is this scroll?\n    $ cd cellar              # Move into the cellar\n    $ cd ..                  # Come back to where you were\n\nRemember to cast these spells when you discover new scrolls and treasures!\n\n================================================================================\n                           THE FIRST CHALLENGE\n================================================================================\n\nBefore you venture deeper into the catacombs, you must prove your mastery\nof the viewing spells. Practice reading this very scroll with different\ncommands to understand their power.\n\nSIDE PATH — THE WORKSHOP:\nIf you are new to the terminal, visit the workshop first. It teaches\nyou how to create files and directories:\n\n    cd workshop\n\nNEXT DESTINATION:\nWhen you are ready, seek the CELLAR — a chamber that lies beneath this\nentrance. The cellar holds ancient secrets about seeing through illusions\nand distinguishing between doorways and objects.\n\n    cd cellar\n\nLOST? Remember these two spells:\n    pwd                      Shows exactly where you are\n    cd ..                    Takes you back one room\n\nMay your terminal skills grow strong, brave adventurer!\n\n================================================================================\n",
     "/entrance/.functions": "# shellcheck shell=bash\n#\n# If you are reading this, you have wandered out of bounds\n# and are reading the code that drives the game.\n#\n#                    Congratulations!\n#\n# Learning Linux is all about curiosity, so read this code and see\n# if you can figure out what it does.\n#\n# When you're ready to continue playing the game, though, stick to\n# the scrolls. If you're stuck, go to Gitlab and create an issue.\n# We're happy to provide hints.\n# \n\n# This is a custom function.\n# A function is a snippet of code that you can use in other files.\n# Whenever you see the `gameover`command in a file of this\n# dungeon, that's a \"call\" to this function.\ngameover () {\n    CORPSE=\"$(mktemp corpse.XXX)\"\n    cat << EOF2 > \"$CORPSE\"\n#!/bin/bash\nCORPSE=\\$(basename \\$0)\n\necho\nif [ ! -e .\\$CORPSE.looted ]; then\n    cat << EOF\nYou see the corpse of a slain adventurer on the floor of the\ndungeon.  You find the following items on the corpse:\n\n${I}\n\nEOF\n\n    touch .\\$CORPSE.looted\nelse\n    echo \"This corpse has already been looted.\"\n    echo\nfi\n\n# ========================================================================\n# If you are seeing this, you used 'cat' to read an executable file.\n# To USE this item, run it with:  ./$CORPSE\n# ========================================================================\nEOF2\n    chmod +x \"$CORPSE\"\n\n    cat << EOF\n\n================================================================================\n                         YOU HAVE PERISHED\n================================================================================\n\nYour adventure has come to an end.  A corpse bearing your\nbelongings now lies on the dungeon floor.\n\nTO START OVER:\n    1. Navigate to the entrance:  cd entrance\n       (or just keep pressing:    cd ..    until you get there)\n    2. Reset your variables:      unset I HP\n    3. Read the scroll again:     cat scroll\n\nYour corpse ($CORPSE) can be looted by running:  ./$CORPSE\n\n================================================================================\nEOF\n\n    curr=\"$(basename \"$PWD\")\"\n    while [ \"$curr\" != \"entrance\" ]; do\n        cd .. 2>/dev/null || break\n        curr=\"$(basename \"$PWD\")\"\n    done\n    unset I\n    unset HP\n}\n\n# Intelligent Help System Function\n# Searches for help.sh in the bashcrawl root directory\nhelp() {\n    local root\n    root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]:-$0}\")\" && pwd)\"\n    root=\"${root%entrance*}\"\n    \n    if [[ -f \"${root}help.sh\" ]]; then\n        bash \"${root}help.sh\" \"$@\"\n    elif [[ -f \"${root}src/help/bashcrawl_help.sh\" ]]; then\n        bash \"${root}src/help/bashcrawl_help.sh\" \"$@\"\n    else\n        echo \"Help system not available. Try: cat scroll\"\n    fi\n}\n",
@@ -669,20 +692,54 @@
         "Reading files with cat"
       ],
       "hidden": false,
-      "next_steps": "Explore the cellar/ directory",
+      "next_steps": "Explore the cellar/ directory or visit scriptorium/ for pipes & ASCII art",
       "essential_commands": [
-        {
-          "command": "cat scroll",
-          "description": "Read the area documentation"
-        },
-        {
-          "command": "ls -F",
-          "description": "List files with type indicators"
-        },
-        {
-          "command": "cd cellar",
-          "description": "Move to the next area"
-        }
+        { "command": "cat scroll", "description": "Read the area documentation" },
+        { "command": "ls -F", "description": "List files with type indicators" },
+        { "command": "cd cellar", "description": "Move to the next area" },
+        { "command": "cd scriptorium", "description": "Visit the hall of pipes & art" }
+      ]
+    },
+    "/entrance/scriptorium": {
+      "slug": "scriptorium",
+      "title": "THE SCRIPTORIUM",
+      "emoji": "📜",
+      "hint": "Pipes (|) flow here. Combine sort, uniq, grep, wc, head, tail.",
+      "description": "Pipelines, find, tree, and ASCII spells.",
+      "teaches": [
+        "Shell pipelines with |",
+        "Sorting and de-duplicating output",
+        "Finding files by name with find",
+        "Drawing the world with tree",
+        "ASCII spells: cowsay, fortune, figlet"
+      ],
+      "hidden": false,
+      "next_steps": "Try `sort verses | uniq`, then `./oracle` and `cd observatory`.",
+      "essential_commands": [
+        { "command": "sort verses | uniq", "description": "Order then deduplicate" },
+        { "command": "find . -name notes", "description": "Locate the hidden page" },
+        { "command": "tree", "description": "ASCII tree of this room" },
+        { "command": "./oracle", "description": "Speak with the oracle" },
+        { "command": "cowsay hi", "description": "Cow speaks back" }
+      ]
+    },
+    "/entrance/scriptorium/observatory": {
+      "slug": "observatory",
+      "title": "THE OBSERVATORY",
+      "emoji": "🔭",
+      "hint": "A brass telescope. Catalogue the stars with sort and uniq.",
+      "description": "Stargazing and the comet encounter.",
+      "teaches": [
+        "Combining grep, sort, uniq for catalogues",
+        "Running spell encounters"
+      ],
+      "hidden": false,
+      "next_steps": "Run `./comet` for a flourish and a heal.",
+      "essential_commands": [
+        { "command": "sort starlog | uniq", "description": "Distinct sightings" },
+        { "command": "grep -i comet starlog", "description": "Find comet entries" },
+        { "command": "./comet", "description": "Release the comet" },
+        { "command": "figlet stars", "description": "Banner the night" }
       ]
     },
     "/entrance/cellar": {
@@ -697,7 +754,7 @@
         "Inventory management with export"
       ],
       "hidden": false,
-      "next_steps": "Collect your first amulet, then explore armoury/",
+      "next_steps": "For the mkdir quest: `cd ..` then `cd workshop` (or `cd armoury` then `cd workshop`). Run `./treasure` first if you want the cellar amulet.",
       "essential_commands": [
         {
           "command": "./treasure",
@@ -1352,6 +1409,45 @@
     }
   },
   "encounters": {
+    "/entrance/scriptorium/oracle": {
+      "key": "oracle",
+      "script": "oracle",
+      "type": "spell",
+      "description": "The oracle whispers a fortune.",
+      "icon": "🔮",
+      "requires_items": [],
+      "recommended_items": [],
+      "grants_items": ["fortune"],
+      "unlocks_rooms": [],
+      "damage": 0,
+      "heals": 0
+    },
+    "/entrance/scriptorium/cowherd": {
+      "key": "cowherd",
+      "script": "cowherd",
+      "type": "spell",
+      "description": "An ASCII cow lows wisdom from the field.",
+      "icon": "🐄",
+      "requires_items": [],
+      "recommended_items": [],
+      "grants_items": ["bell"],
+      "unlocks_rooms": [],
+      "damage": 0,
+      "heals": 0
+    },
+    "/entrance/scriptorium/observatory/comet": {
+      "key": "comet",
+      "script": "comet",
+      "type": "spell",
+      "description": "A comet streaks across the night sky.",
+      "icon": "☄️",
+      "requires_items": [],
+      "recommended_items": [],
+      "grants_items": ["star_chart"],
+      "unlocks_rooms": [],
+      "damage": 0,
+      "heals": 5
+    },
     "/entrance/cellar/treasure": {
       "key": "treasure_cellar",
       "script": "treasure",

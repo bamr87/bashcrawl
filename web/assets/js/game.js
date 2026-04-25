@@ -29,13 +29,29 @@
         content: dom.docsContent,
         search: dom.docsSearch,
         input: dom.input,
+        onOpenChange(open) {
+            dom.docsToggle.setAttribute("aria-expanded", String(open));
+        },
     });
     docsPanel.setData(data.docs, runtime);
 
     const logLines = [];
+    const BANNER = [
+        "       ╔════════════════════════════════════════════════════╗",
+        "       ║   ____            __                       __      ║",
+        "       ║  / __ )___ ______/ /_  ______________ ___ / /      ║",
+        "       ║ / __  / __ `/ ___/ __ \\/ ___/ ___/ __ `__ \\/ /      ║",
+        "       ║/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / / /__    ║",
+        "       ║\\____/\\__,_/____/_/ /_/\\___/_/  /_/ /_/ /_/____/    ║",
+        "       ║                                                    ║",
+        "       ║       Type  pwd  to begin the descent. F1 for help ║",
+        "       ╚════════════════════════════════════════════════════╝",
+    ].join("\n");
+    append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
-    append("dim", "Start with: pwd, ls -F, cat scroll, cd cellar. Press F1 for docs.");
+    append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cd scriptorium then sort verses | uniq  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
     render();
+    let prevState = snapshotState();
 
     dom.form.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -45,7 +61,7 @@
         runLine(line);
     });
 
-    dom.input.addEventListener("keydown", (event) => {
+    function commandInputKeydown(event) {
         if (event.key === "Enter") {
             event.preventDefault();
             const line = dom.input.value.trim();
@@ -63,11 +79,36 @@
         } else if (event.key === "F1") {
             event.preventDefault();
             docsPanel.toggle();
+        } else if (event.key === "?" && !dom.input.value.trim()) {
+            event.preventDefault();
+            docsPanel.open();
+        } else if (event.key === "/" && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            docsPanel.toggle();
         } else if (event.key.toLowerCase() === "l" && event.ctrlKey) {
             event.preventDefault();
             logLines.length = 0;
             renderLog();
         }
+    }
+
+    function docsSearchKeydown(event) {
+        if (event.key === "F1") {
+            event.preventDefault();
+            docsPanel.toggle();
+        } else if (event.key === "/" && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            docsPanel.toggle();
+        }
+    }
+
+    dom.input.addEventListener("keydown", commandInputKeydown);
+    dom.docsSearch.addEventListener("keydown", docsSearchKeydown);
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !docsPanel.isOpen()) return;
+        event.preventDefault();
+        docsPanel.close();
     });
 
     dom.docsToggle.addEventListener("click", () => docsPanel.toggle());
@@ -84,6 +125,16 @@
             return [key, await response.json()];
         }));
         return Object.fromEntries(entries);
+    }
+
+    function snapshotState() {
+        return {
+            xp: runtime.state.xp,
+            hp: runtime.state.hp,
+            completed: runtime.state.completedQuestIds.length,
+            currentQuestId: runtime.state.currentQuestId,
+            inventory: runtime.state.inventory.slice(),
+        };
     }
 
     function runLine(line) {
@@ -105,7 +156,64 @@
             }
             append(out.kind, out.text || "");
         }
+        const after = snapshotState();
+        triggerEffects(prevState, after);
+        prevState = after;
         saveAndRender();
+    }
+
+    function triggerEffects(prev, next) {
+        if (next.completed > prev.completed) {
+            appendSparkleArt();
+            flashPanel(dom.quest);
+        }
+        if (next.hp < prev.hp) {
+            shakePanel(dom.inventory);
+        }
+        if (next.xp > prev.xp) {
+            popXp();
+        }
+        if (next.inventory.length > prev.inventory.length) {
+            flashPanel(dom.inventory);
+        }
+    }
+
+    function appendSparkleArt() {
+        const lines = [
+            "      .   *  .   .  *  .   *",
+            "    *  ✦  .   *  ✧   .  *  ✦   ✧",
+            "      ✦  ✧ ✦  Q U E S T  ✦ ✧ ✦",
+            "    *      C O M P L E T E      *",
+            "      ✧  *   .  ✦   . *  ✧   ✦",
+        ].join("\n");
+        append("art", lines);
+    }
+
+    function flashPanel(el) {
+        if (!el || !el.parentElement) return;
+        const target = el.closest(".tui-panel") || el;
+        target.classList.remove("fx-sparkle");
+        void target.offsetWidth;
+        target.classList.add("fx-sparkle");
+        setTimeout(() => target.classList.remove("fx-sparkle"), 1100);
+    }
+
+    function shakePanel(el) {
+        if (!el || !el.parentElement) return;
+        const target = el.closest(".tui-panel") || el;
+        target.classList.remove("fx-shake");
+        void target.offsetWidth;
+        target.classList.add("fx-shake");
+        setTimeout(() => target.classList.remove("fx-shake"), 360);
+    }
+
+    function popXp() {
+        const xpSpan = dom.quest.querySelector(".kind-dim");
+        if (!xpSpan) return;
+        xpSpan.classList.remove("fx-pop");
+        void xpSpan.offsetWidth;
+        xpSpan.classList.add("fx-pop");
+        setTimeout(() => xpSpan.classList.remove("fx-pop"), 700);
     }
 
     function append(kind, text) {
@@ -154,7 +262,9 @@
     }
 
     function renderPrompt() {
-        dom.prompt.textContent = `${runtime.state.cwd} $`;
+        const p = `${runtime.state.cwd} $`;
+        dom.prompt.textContent = p;
+        dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
     }
 
     function renderLog() {
@@ -184,6 +294,15 @@
     function initTheme() {
         const saved = localStorage.getItem("bashcrawl-web-theme");
         if (saved) document.documentElement.setAttribute("data-theme", saved);
+        syncThemeLabel();
+    }
+
+    function syncThemeLabel() {
+        const t = document.documentElement.getAttribute("data-theme") || "dark";
+        const isDark = t === "dark";
+        dom.themeToggle.textContent = isDark ? "Dark" : "Light";
+        dom.themeToggle.setAttribute("aria-pressed", String(isDark));
+        dom.themeToggle.setAttribute("title", isDark ? "Switch to light theme" : "Switch to dark theme");
     }
 
     function toggleTheme() {
@@ -191,6 +310,7 @@
         const next = current === "dark" ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("bashcrawl-web-theme", next);
+        syncThemeLabel();
     }
 
     function escapeHtml(value) {

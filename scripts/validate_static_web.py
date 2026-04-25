@@ -11,6 +11,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 
+# index.html is allowed to link to the project repo; other absolute URLs are rejected.
+ALLOWED_INDEX_ABSOLUTE_HREFS = frozenset(
+    {
+        "https://github.com/bamr87/bashcrawl",
+    }
+)
+
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
@@ -39,6 +46,8 @@ def validate() -> dict:
     if "url_for(" in index or "{{" in index:
         errors.append("web/index.html must not contain Jinja syntax")
     for src in re.findall(r'(?:src|href)="([^"]+)"', index):
+        if src in ALLOWED_INDEX_ABSOLUTE_HREFS:
+            continue
         if src.startswith("/") or src.startswith("http://") or src.startswith("https://"):
             errors.append(f"Static asset URL must be relative: {src}")
 
