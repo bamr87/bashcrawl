@@ -1,6 +1,6 @@
 # Terminal-Illness component dependencies
 # For the full project, use the root requirements.txt instead.
-textual>=0.65.0
+textual>=8.2.4
 rich>=13.7.1
 prompt_toolkit>=3.0.47
 pyyaml>=6.0
