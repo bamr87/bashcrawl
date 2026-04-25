@@ -13,6 +13,8 @@
             this.content = content;
             this.search = search;
             this.input = input;
+            this.drawer.inert = true;
+            this.drawer.hidden = true;
             this.docs = null;
             this.runtime = null;
             this.search.addEventListener("input", () => this.render());
@@ -31,14 +33,19 @@
         }
 
         open() {
+            this.drawer.hidden = false;
             this.drawer.classList.add("open");
             this.drawer.setAttribute("aria-hidden", "false");
+            this.drawer.inert = false;
             this.search.focus();
         }
 
         close() {
             this.drawer.classList.remove("open");
             this.drawer.setAttribute("aria-hidden", "true");
+            this.drawer.inert = true;
+            this.drawer.hidden = true;
+            this.input.focus();
         }
 
         toggle() {

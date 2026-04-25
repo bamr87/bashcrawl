@@ -159,7 +159,7 @@
 
     function renderLog() {
         dom.log.innerHTML = logLines.map((line) => `<span class="kind-${line.kind || "output"}">${escapeHtml(line.text)}</span>`).join("\n");
-        dom.log.scrollTop = dom.log.scrollHeight;
+        dom.log.scrollTop = Math.max(0, dom.log.scrollHeight - dom.log.clientHeight);
     }
 
     function historyStep(direction) {
