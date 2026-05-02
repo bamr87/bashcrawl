@@ -6,7 +6,7 @@
 anthropic>=0.40.0
 
 # Environment variables from .env files
-python-dotenv>=1.0
+python-dotenv>=1.2.2
 
 # Test runner
 pytest>=8.0
