@@ -5,4 +5,4 @@ rich>=13.7.1
 prompt_toolkit>=3.0.47
 pyyaml>=6.0
 anthropic>=0.40.0
-miniaudio>=1.59
+miniaudio>=1.71
