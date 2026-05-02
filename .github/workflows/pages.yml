@@ -46,7 +46,7 @@ jobs:
           python3 scripts/validate_runtime_commands.py
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: web
 
