@@ -197,7 +197,7 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Download AI test artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: ai-playthrough-results
           path: test/
