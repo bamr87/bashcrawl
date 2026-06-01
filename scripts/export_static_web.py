@@ -190,7 +190,12 @@ def main() -> int:
     write_json(out / "quests.json", build_quests())
     write_json(out / "commands.json", build_commands())
     write_json(out / "docs.json", build_docs())
-    print(f"Exported static web data to {out.relative_to(ROOT)}")
+    try:
+        shown: Path = out.relative_to(ROOT)
+    except ValueError:
+        # --output-dir may point outside the repo (e.g. a temp dir in tests).
+        shown = out
+    print(f"Exported static web data to {shown}")
     return 0
 
 

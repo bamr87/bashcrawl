@@ -32,9 +32,25 @@ export BASHCRAWL_ROOT := $(GAME_ROOT)
 setup: ## Run first-time game setup (quick mode)
 	@bash setup.sh --quick
 
+VENV := .venv
+
 .PHONY: install-deps
-install-deps: ## Install all Python dependencies
-	$(PIP) install -r requirements.txt -r requirements-dev.txt
+install-deps: ## Install all Python dependencies (use `make venv` on system Python)
+	@$(PIP) install -r requirements.txt -r requirements-dev.txt || { \
+		echo ""; \
+		echo "pip install failed. On Debian/Ubuntu (externally-managed system"; \
+		echo "Python) this usually means a system package cannot be uninstalled."; \
+		echo "Use an isolated environment instead:  make venv"; \
+		exit 1; \
+	}
+
+.PHONY: venv
+venv: ## Create .venv and install all dependencies (recommended on system Python)
+	$(PYTHON) -m venv $(VENV)
+	$(VENV)/bin/python -m pip install --upgrade pip
+	$(VENV)/bin/python -m pip install -r requirements.txt -r requirements-dev.txt
+	@echo ""
+	@echo "Virtualenv ready. Activate it with:  source $(VENV)/bin/activate"
 
 # ── Testing ────────────────────────────────────────────────────────────
 
