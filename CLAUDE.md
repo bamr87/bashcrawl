@@ -54,7 +54,7 @@ make clean             # reset game state to defaults
 make clean-all         # also remove logs/sessions, screenshots, save files
 
 # Docker (docker compose)
-make docker-build docker-game docker-tui docker-web docker-test docker-lint
+make docker-build docker-game docker-tui docker-viewer docker-web docker-test docker-lint
 ```
 
 ### Running a single test
@@ -110,7 +110,7 @@ a dotted directory to its visible name:
 |-----------|---------|
 | `main.sh` | Launcher + embedded quest flow (pwd→ls→cd→mkdir→touch→cat→grep). Sources `lib/colors.sh`, `lib/log.sh`. |
 | `setup.sh` | Permissions/system checks; makes game files executable. |
-| `help.sh` | Root shim delegating to `src/help/bashcrawl_help.sh`; context-aware (detects location, tracks progress). |
+| `help.sh` | Root shim that `exec`s `src/help.sh` (which sources `src/help/bashcrawl_help.sh`); context-aware (detects location, tracks progress). |
 | `src/help/` | Help engine (`bashcrawl_help.sh`, `ai_engine.sh`, `command_suggester.sh`, `init_help.sh`); YAML data in `src/help/data/`. |
 | `lib/` | Shared shell libs: `colors.sh`, `log.sh` (JSONL logging), `reset.sh`, `state.sh`, `quests.sh`, `room_loader.sh`, `analyze.sh`, `report.sh`, etc. |
 | `entrance/.functions` | Defines `gameover()` (combat death) and `help()` (delegates to `$BASHCRAWL_ROOT/help.sh`). |
@@ -146,7 +146,8 @@ mv ../../.chapel ../../chapel   # Unlock a hidden room (target may be 2+ levels 
 - **Game executables** use no strict mode, emit plain text, and never modify tracked files.
 - macOS compatibility: use `sed -i.bak` (not bare `sed -i`); auto-detect `ls` color flags
   (`--color=auto` vs `-G`) rather than hardcoding GNU options.
-- `.shellcheckrc` disables SC2034, SC2086, SC1091, SC2154. The lint job shellchecks all `*.sh`
+- `.shellcheckrc` disables a number of checks (a non-exhaustive subset: SC2034, SC2086, SC1091,
+  SC2154, SC2155, SC2126; see the file for the full list). The lint job shellchecks all `*.sh`
   plus executable game files under `entrance/` (severity=error for the latter).
 
 ### Scroll content (depth-graded — see `.github/instructions/scrolls.instructions.md`)
@@ -183,11 +184,12 @@ CI (`game-tests.yml`) and the unit suite (`test_runtime_command_parity.py`,
 - **CI** (`.github/workflows/`): `ci.yml` (shellcheck/yamllint/markdownlint),
   `code-quality.yml` (CodeQL, Python), `game-tests.yml` (scroll/shebang/unlock validation),
   `test-framework.yml` (pytest), `pages.yml` (static web), `release.yml`, `dependency-update.yml`.
-  markdownlint config caps lines at 120 (`.markdownlint.json`).
+  `.markdownlint.json` disables MD013 (no line-length cap) plus several other rules.
 - **MCP server**: `ti.mcp_server`, configured in `.cursor/mcp.json` with
   `PYTHONPATH=src/terminal-illness`; tested via `make test-mcp`.
-- **Game state**: `.game_state`/`.game_data/` at repo root (created by `main.sh`),
-  `~/.bashcrawl_progress` (help system).
+- **Game state**: canonical save is `.bashcrawl_save.json` at repo root (shared by bash and
+  Python via `lib/state.sh`); a legacy `.game_state` is auto-migrated and removed. Help-system
+  progress lives in `~/.bashcrawl_progress`.
 - **Logging**: JSONL session logs in `logs/sessions/` via `lib/log.sh`; browsed with the
   `src/viewer/` Flask app (`make docker-viewer`).
 - **Docs**: human docs in `docs/`; generated docs in `docs/generated/` (do not hand-edit).
