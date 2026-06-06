@@ -404,7 +404,9 @@ encounters:
     damage: 0
 
   display_elevator:
-    script: "display"
+    # The display script lives inside the hidden .elevator/ sub-room reached
+    # from the mezzanine; the path is relative to the mezzanine room.
+    script: ".elevator/display"
     room: "mezzanine"
     type: "puzzle"
     description: "Elevator floor display"

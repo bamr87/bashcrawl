@@ -54,10 +54,19 @@ cd bashcrawl
 ./setup.sh
 ```
 
-For development workflows (tests, viewer, MCP), install the Python package in editable mode:
+For development workflows (tests, viewer, MCP), install the Python dependencies. On a
+system Python (e.g. Debian/Ubuntu, which marks the environment as externally managed),
+use an isolated virtualenv so the install doesn't conflict with system packages:
 
 ```bash
-python3 -m pip install -e ".[dev]"
+make venv                       # creates .venv and installs everything
+source .venv/bin/activate
+```
+
+Or, if you manage your own environment, install the package in editable mode:
+
+```bash
+python3 -m pip install -e ".[dev]"   # or: make install-deps
 ```
 
 ### Static Web Version

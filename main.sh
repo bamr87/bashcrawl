@@ -700,7 +700,7 @@ ${COLOR_PRIMARY}OPTIONS:${COLOR_RESET}
         --agent-bash      Agent mode: bash-only REPL (no screenshots, no Python)
         --screenshot-dir PATH  Screenshot output directory (default: ./logs/screenshots)
     -w, --web             Start browser TUI (serves at http://localhost:8080)
-        --ai-stdio        JSON line protocol on stdin/stdout for AI tools (no Textual UI)
+        --ai-stdio        Plain-text commands in, JSON results out, for AI tools (no Textual UI)
     -h, --help            Show this help message
     -v, --version         Show version information
     --debug               Enable debug logging
@@ -717,7 +717,7 @@ ${COLOR_PRIMARY}EXAMPLES:${COLOR_RESET}
     $SCRIPT_NAME -c "cat scroll"       # Run another (state persists)
     echo -e "pwd\nls" | $SCRIPT_NAME --batch  # Batch mode
     $SCRIPT_NAME --web                         # Play in browser at http://localhost:8080
-    $SCRIPT_NAME --ai-stdio                  # Drive game via JSON lines (Cursor / automation)
+    $SCRIPT_NAME --ai-stdio                  # Drive game: plain-text cmd in, JSON out (Cursor / automation)
     $SCRIPT_NAME --agent                       # Agent mode with Textual + screenshots
     $SCRIPT_NAME --agent-bash                  # Bash-only agent REPL (no Python)
 
@@ -727,7 +727,7 @@ ${COLOR_PRIMARY}GAME MODES:${COLOR_RESET}
     ${COLOR_WARNING}Native Mode:${COLOR_RESET}     Uses your actual terminal (requires experience)
     ${COLOR_SUCCESS}Web Browser:${COLOR_RESET}     Play in your browser via textual-serve (Python 3 + textual-serve)
     ${COLOR_INFO}Agent Mode:${COLOR_RESET}      Headless Textual TUI with screenshots for AI agents
-    ${COLOR_INFO}AI stdio:${COLOR_RESET}        JSON lines on stdin/stdout (see docs/cursor-ai.md)
+    ${COLOR_INFO}AI stdio:${COLOR_RESET}        Plain-text commands in, JSON results out (see docs/cursor-ai.md)
     ${COLOR_INFO}Agent Bash:${COLOR_RESET}      Line-buffered bash REPL for agents (no Python needed)
 
 ${COLOR_PRIMARY}LEARNING PATH:${COLOR_RESET}

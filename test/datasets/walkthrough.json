@@ -255,7 +255,7 @@
     "entrance/.rift/arena/pit": {
       "path": "entrance/.rift/arena/pit",
       "children": [],
-      "scripts": ["nyarlathotep", "drummer", "wizard-light"],
+      "scripts": ["nyarlathotep", "drummer", "wizard-light", "treasure", "platinum", "end"],
       "scroll": true,
       "scroll_teaches": ["health readiness"],
       "hidden": false,

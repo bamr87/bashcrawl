@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,32 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "web" / "data"
+
+
+def _git_ignored(paths: list[Path]) -> set[Path]:
+    """Return the subset of ``paths`` that git ignores.
+
+    The shipped tree keeps rooms hidden (``entrance/.chapel``) and lets play
+    unlock visible copies (``entrance/chapel``, ``entrance/workshop``) that are
+    listed in ``.gitignore`` as runtime state. Exporting the live filesystem
+    would otherwise leak whatever rooms happened to be unlocked on the build
+    machine, so we drop git-ignored paths to keep the bundle deterministic.
+    Returns an empty set if git is unavailable.
+    """
+    if not paths:
+        return set()
+    try:
+        proc = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            cwd=ROOT,
+            input="\n".join(str(p) for p in paths),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return set()
+    return {Path(line) for line in proc.stdout.splitlines() if line.strip()}
 
 
 def parse_args() -> argparse.Namespace:
@@ -102,10 +129,20 @@ def build_world() -> dict[str, Any]:
     dirs: dict[str, list[dict[str, Any]]] = {}
     files: dict[str, str] = {}
 
-    for dir_path in [entrance, *[p for p in entrance.rglob("*") if p.is_dir()]]:
+    ignored = _git_ignored([entrance, *entrance.rglob("*")])
+
+    def _is_ignored(path: Path) -> bool:
+        return path in ignored or any(parent in ignored for parent in path.parents)
+
+    room_dirs = [entrance, *[p for p in entrance.rglob("*") if p.is_dir()]]
+    for dir_path in room_dirs:
+        if _is_ignored(dir_path):
+            continue
         web_dir = _web_path(dir_path)
         children: list[dict[str, Any]] = []
         for child in sorted(dir_path.iterdir(), key=lambda p: (p.name.startswith("."), p.name)):
+            if _is_ignored(child):
+                continue
             typ = _entry_type(child, set(encounters_by_path))
             children.append(
                 {
@@ -190,7 +227,12 @@ def main() -> int:
     write_json(out / "quests.json", build_quests())
     write_json(out / "commands.json", build_commands())
     write_json(out / "docs.json", build_docs())
-    print(f"Exported static web data to {out.relative_to(ROOT)}")
+    try:
+        shown: Path = out.relative_to(ROOT)
+    except ValueError:
+        # --output-dir may point outside the repo (e.g. a temp dir in tests).
+        shown = out
+    print(f"Exported static web data to {shown}")
     return 0
 
 
