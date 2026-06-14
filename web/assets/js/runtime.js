@@ -44,6 +44,21 @@
         return String(text).split("\n");
     }
 
+    // Local-day helpers for the Daily Challenge (browser Date is fine here).
+    function isoDay(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    }
+    function todayStr() { return isoDay(new Date()); }
+    function yesterdayStr() { return isoDay(new Date(Date.now() - 86400000)); }
+    function dailyGoalFor(dateStr) {
+        let h = 0;
+        for (const c of dateStr) h += c.charCodeAt(0);
+        return 30 + (h % 4) * 10; // 30 / 40 / 50 / 60
+    }
+
     // ── Encounter Creature Gallery ──────────────────────────────────────
     // Monospace-safe ASCII portraits keyed by encounter SCRIPT BASENAME
     // (runScript receives cmd.slice(2)). Pure ASCII only — no variation-
@@ -260,6 +275,7 @@
             speedrunBest: null,
             achievements: [],
             bestiary: [],
+            daily: { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null },
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -334,17 +350,20 @@
                 sheet: this.cmdProfile,
                 bestiary: this.cmdBestiary,
                 codex: this.cmdBestiary,
+                daily: this.cmdDaily,
+                challenge: this.cmdDaily,
             };
         }
 
         execute(line) {
+            this.refreshDaily();
             // While the Training Arena is active, every line is an answer, not a command.
             const out = (this.state.trainer && this.state.trainer.active)
                 ? this.trainerInput(line)
                 : this.runPipeline(line);
-            // Achievements are checked after every line, in all modes.
-            const unlocked = this.checkAchievements();
-            return unlocked.length ? out.concat(unlocked) : out;
+            // Achievements first (they award XP), then the daily-challenge check.
+            const extra = this.checkAchievements().concat(this.checkDaily());
+            return extra.length ? out.concat(extra) : out;
         }
 
         runPipeline(line) {
@@ -513,7 +532,7 @@
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
-                { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, or 'bestiary' to catalogue encounters." },
+                { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge." },
             ];
         }
 
@@ -618,6 +637,52 @@
                 { kind: "output", text: `${label("Best speed run")}${best}` },
                 { kind: "output", text: `${label("Inventory")}${inv.length ? inv.join(", ") : "(empty)"}` },
                 { kind: "dim", text: "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow" },
+            ];
+        }
+
+        // ── Daily Challenge ──────────────────────────────────────────────────
+        // Each local day offers an XP goal; completing it on consecutive days
+        // builds a streak. Rolls over automatically on the first command of a
+        // new day. Date use is fine in the browser.
+        refreshDaily() {
+            if (!this.state.daily) {
+                this.state.daily = { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null };
+            }
+            const d = this.state.daily;
+            const today = todayStr();
+            if (d.date === today) return;
+            // New day: reset the day's progress (streak is judged on completion).
+            d.date = today;
+            d.baselineXp = this.state.xp;
+            d.goal = dailyGoalFor(today);
+            d.completed = false;
+        }
+
+        checkDaily() {
+            const d = this.state.daily;
+            if (!d || d.completed || !d.date) return [];
+            const earned = this.state.xp - d.baselineXp;
+            if (earned < d.goal) return [];
+            d.completed = true;
+            d.streak = (d.lastDate === yesterdayStr()) ? d.streak + 1 : 1;
+            d.lastDate = d.date;
+            this.state.xp += 25;
+            return [
+                { kind: "success", text: `🔥 Daily challenge complete!  +25 XP  ·  Streak: ${d.streak} day${d.streak === 1 ? "" : "s"}` },
+                { kind: "dim", text: "Come back tomorrow to keep the streak alive." },
+            ];
+        }
+
+        cmdDaily() {
+            this.refreshDaily();
+            const d = this.state.daily;
+            const earned = Math.max(0, this.state.xp - d.baselineXp);
+            return [
+                { kind: "magic", text: `✨ Daily Challenge — ${d.date}` },
+                { kind: "output", text: `   Goal:     earn ${d.goal} XP today` },
+                { kind: "output", text: `   Progress: ${d.completed ? "✅ complete" : `${Math.min(earned, d.goal)}/${d.goal} XP`}` },
+                { kind: "output", text: `   Streak:   ${d.streak} day${d.streak === 1 ? "" : "s"}` },
+                { kind: "dim", text: d.completed ? "   Done! Return tomorrow to extend your streak." : "   Earn XP via train / speedrun / pathfind / encounters / badges." },
             ];
         }
 
