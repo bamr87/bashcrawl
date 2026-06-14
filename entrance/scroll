@@ -55,14 +55,22 @@ Before you venture deeper into the catacombs, you must prove your mastery
 of the viewing spells. Practice reading this very scroll with different
 commands to understand their power.
 
-SIDE PATH — THE WORKSHOP:
-If you are new to the terminal, visit the workshop first. It teaches
-you how to create files and directories:
+SIDE PATH -- BUILD YOUR OWN WORKSHOP:
+The workshop does not exist yet -- a true mage does not merely explore
+rooms, they CONJURE them. Build your first room with your bare hands:
 
-    cd workshop
+    mkdir workshop           # Conjure a new room from the void
+    cd workshop              # Step inside the room you just made
+    pwd                      # Confirm the room is real
+    touch hammer             # Forge your first artifact
+    ls                       # Behold your creation
+    cd ..                    # Return here to the entrance
+
+You have just bent the dungeon to your will. mkdir, touch, ls, and cd
+are the foundation of all creation magick.
 
 NEXT DESTINATION:
-When you are ready, seek the CELLAR — a chamber that lies beneath this
+When you are ready, seek the CELLAR -- a chamber that lies beneath this
 entrance. The cellar holds ancient secrets about seeing through illusions
 and distinguishing between doorways and objects.
 

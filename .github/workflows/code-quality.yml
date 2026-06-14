@@ -13,6 +13,10 @@ permissions:
   security-events: write
   actions: read
 
+concurrency:
+  group: code-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security-scan:
     name: Security Analysis (CodeQL)

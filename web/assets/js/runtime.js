@@ -44,6 +44,28 @@
         return String(text).split("\n");
     }
 
+    // ── Encounter Creature Gallery ──────────────────────────────────────
+    // Monospace-safe ASCII portraits keyed by encounter SCRIPT BASENAME
+    // (runScript receives cmd.slice(2)). Pure ASCII only — no variation-
+    // selector emoji. Keys MUST match a real encounter basename in world.json
+    // or the line is never emitted. Color + glow come from the .kind-art rule.
+    const ENCOUNTER_ART = {
+        treasure: ["      ______________", "     /\\             \\", "    /  )=============)", "   /  /  .--------.  \\", "  (  (  / ()  ()()  \\ )", "   \\  \\ '----------' / )", "    \\  )============( /", "     \\/____________\\/", "      jewels gleam within..."].join("\n"),
+        monster:  ["        .--.   .--.", "       (    `.'    )", "        )       O ( ", "       (  .-\"\"\"-.  )", "        \\/  ^ ^  \\/", "        (|  (_)  |)", "         \\  '-'  /", "      .---'.___.'---.", "     ( the serpent coils )"].join("\n"),
+        ghost:    ["       .-=========-.", "      / .-\"\"\"\"\"\"-. \\", "     / /  o    o  \\ \\", "     | |    ..    | |", "     | |   '--'   | |", "      \\ \\        / /", "       '-\\_/\\/\\_/-'", "        )  (  )  (", "       boo... it drifts"].join("\n"),
+        potion:   ["          .-=-.", "          | _ |", "          |( )|", "         .'   '.", "        / ~ ~ ~ \\", "       | ~ ~ ~ ~ |", "       | ~ ~ ~ ~ |", "        '._____.'", "     a glowing brew bubbles"].join("\n"),
+        statue:   ["        .------.", "       | .----. |", "       | | OO | |", "       | | <> | |", "       | '----' |", "      _|        |_", "     /   stone    \\", "    /______________\\", "     the guardian wakes"].join("\n"),
+        goblet:   ["        \\        /", "         \\.----./", "          \\    /", "           \\  /", "            )(", "           /  \\", "          /____\\", "      a jeweled goblet stands"].join("\n"),
+        spell:    ["          *  .  +", "        .  _||_  .", "      +   /    \\   *", "     .   | rune |   .", "      *   \\____/   +", "        '  |  |  '", "     ~ the glyph ignites ~"].join("\n"),
+        crystal:  ["         _________", "        /  _   _  \\", "       |  (o) (o)  |", "       |     >     |", "       |   \\___/   |", "        \\_________/", "      the crystal murmurs..."].join("\n"),
+    };
+
+    // Return the {kind:'art'} portrait for a script basename, or null. O(1), pure.
+    function encounterArtLine(script) {
+        const art = ENCOUNTER_ART[script];
+        return art ? { kind: "art", text: art } : null;
+    }
+
     const ART = {
         banner: [
             "       ╔════════════════════════════════════════════════════╗",
@@ -129,6 +151,53 @@
         "May your prompts be short and your scripts be sourced.",
     ];
 
+    // ── The Training Arena mini-game ──────────────────────────────────────
+    // Riddle -> the real command(s) that answer it. Players practice by
+    // casting actual spells (active recall), the most durable way to memorise.
+    const TRIALS = [
+        { cat: "see", riddle: "Reveal everything standing in your current room.", answers: ["ls"], hint: "Three letters — short for 'list'.", teaches: "ls lists the contents of a room (directory)." },
+        { cat: "see", riddle: "Reveal even the HIDDEN passages here (names that begin with a dot).", answers: ["ls -a", "ls -la", "ls -al", "ls -a ."], hint: "ls needs the 'all' flag: -a", teaches: "ls -a shows hidden entries whose names start with a dot." },
+        { cat: "move", riddle: "Cast the spell that tells you exactly where you stand.", answers: ["pwd"], hint: "Print Working Directory.", teaches: "pwd prints your current location." },
+        { cat: "move", riddle: "Descend into the room named 'cellar'.", answers: ["cd cellar"], hint: "Change Directory into cellar.", teaches: "cd <room> walks you into another directory." },
+        { cat: "move", riddle: "Climb back to the room you came from.", answers: ["cd .."], hint: "'..' means the parent room.", teaches: "cd .. moves up one directory." },
+        { cat: "read", riddle: "Read the entire scroll lying in this room.", answers: ["cat scroll"], hint: "conCATenate the scroll to your screen.", teaches: "cat <file> prints a file's full contents." },
+        { cat: "read", riddle: "Peek at only the FIRST lines of the scroll.", answers: ["head scroll"], hint: "The opposite of 'tail'.", teaches: "head shows the first lines of a file." },
+        { cat: "read", riddle: "Glimpse only the LAST lines of the scroll.", answers: ["tail scroll"], hint: "The opposite of 'head'.", teaches: "tail shows the last lines of a file." },
+        { cat: "search", riddle: "Hunt the scroll for the word 'amulet'.", answers: ["grep amulet scroll"], hint: "grep <word> <file>", teaches: "grep finds lines matching a pattern inside a file." },
+        { cat: "search", riddle: "Count how many lines the scroll holds.", answers: ["wc -l scroll", "wc scroll"], hint: "Word Count, with the -l (lines) flag.", teaches: "wc -l counts the lines in a file." },
+        { cat: "make", riddle: "Conjure a brand-new room called 'workshop'.", answers: ["mkdir workshop"], hint: "MaKe DIRectory.", teaches: "mkdir creates a new directory (room)." },
+        { cat: "make", riddle: "Forge an empty artifact named 'torch'.", answers: ["touch torch"], hint: "One word — it 'touches' a file into being.", teaches: "touch creates an empty file." },
+        { cat: "magic", riddle: "Summon your inventory by echoing the $I treasure-rune.", answers: ["echo $i", 'echo "$i"'], hint: "echo $I", teaches: "echo prints text; $I holds your inventory." },
+        { cat: "magic", riddle: "Run the 'treasure' encounter waiting in this room.", answers: ["./treasure"], hint: "Execute it with a leading ./", teaches: "./<script> runs an executable in the current room." },
+        { cat: "magic", riddle: "Draw the map of the whole dungeon.", answers: ["map", "tree"], hint: "One short word — or the branching 'tree'.", teaches: "map / tree reveal the dungeon's layout." },
+    ];
+    const ARENA_OPEN = [
+        "   __        __",
+        "  /  |      |  \\   THE  TRAINING  ARENA",
+        " | (o)|    |(o) |  ~ Spell Drills ~",
+        "  \\__/  /\\  \\__/   prove your craft, adventurer",
+        "  ====================================",
+    ].join("\n");
+    const ARENA_DONE = [
+        "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *",
+        "  =================================================",
+    ].join("\n");
+    const ARENA_RANKS = [
+        { min: 0, title: "Novice Whisperer" },
+        { min: 40, title: "Apprentice of the Shell" },
+        { min: 80, title: "Adept Spellcaster" },
+        { min: 130, title: "Terminal Master" },
+        { min: 190, title: "Archmage of the Command Line" },
+    ];
+    // Compass rose for the Path-Finder mini-game (box-safe ASCII).
+    const PATHFIND_ART = [
+        "       .  N  .",
+        "    .   \\ | /   .",
+        "   W ----(+)---- E",
+        "    '   / | \\   '",
+        "       '  S  '",
+    ].join("\n");
+
     function defaultState(root) {
         return {
             cwd: root || "/entrance",
@@ -143,6 +212,10 @@
             history: [],
             historyIndex: -1,
             flags: {},
+            reveals: {},
+            trainer: null,
+            pathfind: null,
+            speedrunBest: null,
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -201,10 +274,23 @@
                 figlet: this.cmdFiglet,
                 banner: this.cmdBanner,
                 sl: this.cmdSl,
+                train: this.cmdTrain,
+                drill: this.cmdTrain,
+                practice: this.cmdTrain,
+                arena: this.cmdTrain,
+                speedrun: this.cmdSpeedrun,
+                speed: this.cmdSpeedrun,
+                pathfind: this.cmdPathfind,
+                seek: this.cmdPathfind,
+                journey: this.cmdPathfind,
             };
         }
 
         execute(line) {
+            // While the Training Arena is active, every line is an answer, not a command.
+            if (this.state.trainer && this.state.trainer.active) {
+                return this.trainerInput(line);
+            }
             const segments = splitPipes(line.trim());
             if (!segments.length) return [];
             let stdin = null;
@@ -225,6 +311,10 @@
                     continue;
                 }
                 collected.push(...result);
+            }
+            // Path-Finder watches normal play: count moves, detect arrival.
+            if (this.state.pathfind && this.state.pathfind.active) {
+                collected.push(...this.pathfindObserve(line));
             }
             return collected;
         }
@@ -278,30 +368,57 @@
             return "/" + parts.join("/");
         }
 
+        // Translate a player-visible path (e.g. /entrance/chapel) into the actual
+        // stored world path (e.g. /entrance/.chapel) for any room the player has
+        // unlocked. Mirrors the bash treasure's `mv ../.chapel ../chapel`.
+        actual(path) {
+            const reveals = this.state.reveals || {};
+            let best = null;
+            for (const visible of Object.keys(reveals)) {
+                if (path === visible || path.startsWith(visible + "/")) {
+                    if (!best || visible.length > best.length) best = visible;
+                }
+            }
+            return best ? reveals[best] + path.slice(best.length) : path;
+        }
+
         basename(path) {
             return path.split("/").filter(Boolean).pop() || "";
         }
 
         node(path) {
-            if (this.world.directories[path]) return { type: "dir" };
-            if (Object.prototype.hasOwnProperty.call(this.world.files, path)) return { type: "file" };
+            const real = this.actual(path);
+            if (this.world.directories[real]) return { type: "dir" };
+            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return { type: "file" };
             return this.state.userNodes[path] || null;
         }
 
         isDir(path) {
-            return Boolean(this.world.directories[path] || this.state.userNodes[path]?.type === "dir");
+            return Boolean(this.world.directories[this.actual(path)] || this.state.userNodes[path]?.type === "dir");
         }
 
         readFile(path) {
-            if (Object.prototype.hasOwnProperty.call(this.world.files, path)) return this.world.files[path];
+            const real = this.actual(path);
+            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return this.world.files[real];
             const node = this.state.userNodes[path];
             if (node && node.type === "file") return node.content || "";
             return null;
         }
 
         entries(path, showHidden = false) {
-            const base = this.world.directories[path] || [];
-            const result = base.filter((entry) => showHidden || !entry.hidden).map((entry) => ({ ...entry }));
+            const real = this.actual(path);
+            const reveals = this.state.reveals || {};
+            const base = this.world.directories[real] || [];
+            const result = [];
+            for (const entry of base) {
+                // A hidden room the player has unlocked is shown un-dotted and visible,
+                // matching the bash treasure that renames `.chapel` -> `chapel`.
+                if (entry.hidden && reveals[`${path}/${entry.name.replace(/^\./, "")}`.replace(/\/+/g, "/")]) {
+                    result.push({ name: entry.name.replace(/^\./, ""), type: entry.type, hidden: false });
+                } else if (showHidden || !entry.hidden) {
+                    result.push({ ...entry });
+                }
+            }
             const prefix = path.endsWith("/") ? path : `${path}/`;
             for (const [nodePath, node] of Object.entries(this.state.userNodes)) {
                 if (this.parentPath(nodePath) !== path) continue;
@@ -316,14 +433,206 @@
         }
 
         currentRoomMeta() {
-            return this.world.rooms[this.state.cwd] || {};
+            return this.world.rooms[this.actual(this.state.cwd)] || {};
+        }
+
+        // Reveal a hidden room by logical name (e.g. "chapel"), mapping the visible
+        // path to its stored dotted path. Returns a message if newly unlocked.
+        revealRoom(name) {
+            const dotName = `.${name}`;
+            for (const [dirPath, list] of Object.entries(this.world.directories)) {
+                if (!Array.isArray(list) || !list.some((e) => e.name === dotName && e.hidden)) continue;
+                const visiblePath = `${dirPath}/${name}`.replace(/\/+/g, "/");
+                const realPath = `${dirPath}/${dotName}`.replace(/\/+/g, "/");
+                if (this.state.reveals[visiblePath]) return null;
+                this.state.reveals[visiblePath] = realPath;
+                return { kind: "success", text: `🔓 A new passage opens: ${name}/` };
+            }
+            return null;
         }
 
         cmdHelp() {
             return [
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
+                { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
             ];
+        }
+
+        // Prompt shown in the input row; the Arena swaps in a battle prompt.
+        // ── Path-Finder mini-game ───────────────────────────────────────────
+        // Gives the player a target room and lets them navigate there with REAL
+        // cd/ls/pwd; counts cd "moves" and detects arrival. Practices the core
+        // navigation skill (distinct from the recall-based Training Arena).
+        cmdPathfind(args) {
+            if (this.state.trainer && this.state.trainer.active) {
+                return [{ kind: "error", text: "Finish or quit the Training Arena first (type 'quit')." }];
+            }
+            const sub = (args[0] || "").toLowerCase();
+            const pf = this.state.pathfind;
+            if (["quit", "stop", "abort", "q"].includes(sub)) {
+                if (!pf || !pf.active) return [{ kind: "dim", text: "No journey in progress." }];
+                const target = pf.targetTitle;
+                this.state.pathfind = null;
+                return [{ kind: "dim", text: `Journey to ${target} abandoned.` }];
+            }
+            if (pf && pf.active) {
+                return [
+                    { kind: "magic", text: `🧭 Still seeking ${pf.targetTitle}  ·  ${pf.moves} move(s) so far` },
+                    { kind: "dim", text: "Use cd / ls / pwd to find it. 'pathfind quit' to abandon." },
+                ];
+            }
+            // Pick a reachable main-path target that isn't the current room.
+            const candidates = [
+                "/entrance",
+                "/entrance/cellar",
+                "/entrance/cellar/armoury",
+                "/entrance/cellar/armoury/chamber",
+            ].filter((p) => this.isDir(p) && p !== this.state.cwd);
+            if (!candidates.length) return [{ kind: "error", text: "No reachable destination right now." }];
+            const target = candidates[Math.floor(Math.random() * candidates.length)];
+            const targetTitle = (this.world.rooms[target] || {}).title || target;
+            this.state.pathfind = { active: true, target, targetTitle, moves: 0 };
+            return [
+                { kind: "art", text: PATHFIND_ART },
+                { kind: "info", text: `Find your way to ${targetTitle}.` },
+                { kind: "dim", text: "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon." },
+            ];
+        }
+
+        pathfindObserve(line) {
+            const pf = this.state.pathfind;
+            const cmd = tokenize(line.trim())[0];
+            if (cmd === "cd") pf.moves += 1;
+            if (this.state.cwd !== pf.target) return [];
+            // Arrived.
+            const moves = pf.moves;
+            const xp = Math.max(15, 45 - moves * 5);
+            this.state.xp += xp;
+            const title = pf.targetTitle;
+            this.state.pathfind = null;
+            const flair = moves <= 1 ? "  A direct route!" : moves <= 3 ? "  Swiftly done." : "";
+            return [
+                { kind: "success", text: `🧭 You reached ${title} in ${moves} move${moves === 1 ? "" : "s"}!  +${xp} XP${flair}` },
+                { kind: "dim", text: "Type 'pathfind' to seek a new destination." },
+            ];
+        }
+
+        promptLabel() {
+            const t = this.state.trainer;
+            if (t && t.active) {
+                return `${t.speed ? "speed" : "arena"} ${Math.min(t.pos + 1, t.queue.length)}/${t.queue.length} ❯`;
+            }
+            const pf = this.state.pathfind;
+            if (pf && pf.active) {
+                return `seek ${pf.targetTitle} [${pf.moves}] ❯`;
+            }
+            return `${this.state.cwd} $`;
+        }
+
+        cmdTrain() {
+            return this.startArena(false);
+        }
+
+        cmdSpeedrun() {
+            return this.startArena(true);
+        }
+
+        startArena(speed) {
+            const count = Math.min(8, TRIALS.length);
+            const pool = TRIALS.map((_, i) => i);
+            for (let i = pool.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            this.state.trainer = {
+                queue: pool.slice(0, count), pos: 0, score: 0, streak: 0, best: 0, tries: 0,
+                active: true, speed: !!speed, startedAt: speed ? Date.now() : 0,
+            };
+            if (speed) {
+                const best = this.state.speedrunBest;
+                return [
+                    { kind: "art", text: ARENA_OPEN },
+                    { kind: "magic", text: `SPEED RUN — clear ${count} trials against the clock!` },
+                    { kind: "dim", text: best != null ? `Your best: ${best.toFixed(1)}s. Beat it!` : "No record yet — set the first time!" },
+                    { kind: "dim", text: "Answer fast.  skip = pass · quit = leave" },
+                    ...this.trainerChallenge(),
+                ];
+            }
+            return [
+                { kind: "art", text: ARENA_OPEN },
+                { kind: "info", text: `${count} trials await. Answer each by casting the real spell.` },
+                { kind: "dim", text: "Commands:  hint = clue · skip = pass · quit = leave the arena" },
+                ...this.trainerChallenge(),
+            ];
+        }
+
+        trainerChallenge() {
+            const t = this.state.trainer;
+            const q = TRIALS[t.queue[t.pos]];
+            const flame = t.streak >= 3 ? "  🔥" : "";
+            return [
+                { kind: "magic", text: `✨  Trial ${t.pos + 1}/${t.queue.length}   ·   Score ${t.score} XP   ·   Streak ${t.streak}${flame}` },
+                { kind: "output", text: `    ${q.riddle}` },
+            ];
+        }
+
+        trainerInput(raw) {
+            const t = this.state.trainer;
+            const cmd = raw.trim().replace(/\s+/g, " ").toLowerCase();
+            if (["quit", "exit", ":q", "q"].includes(cmd)) return this.trainerFinish(true);
+            const q = TRIALS[t.queue[t.pos]];
+            if (cmd === "hint") return [{ kind: "dim", text: `💡 ${q.hint}` }];
+            if (cmd === "skip") {
+                t.streak = 0; t.tries = 0; t.pos += 1;
+                return [{ kind: "dim", text: `↷ Skipped. The spell was:  ${q.answers[0]}  — ${q.teaches}` }, ...this.advanceTrainer()];
+            }
+            if (q.answers.includes(cmd)) {
+                const gained = 10 + Math.min(t.streak, 5) * 2;
+                t.score += gained; t.streak += 1; t.best = Math.max(t.best, t.streak);
+                this.state.xp += gained;
+                t.tries = 0; t.pos += 1;
+                const cheer = t.streak >= 3 ? `  🔥 ${t.streak} in a row!` : "";
+                return [{ kind: "success", text: `✅ Correct!  +${gained} XP${cheer}   ${q.teaches}` }, ...this.advanceTrainer()];
+            }
+            t.tries += 1; t.streak = 0;
+            if (t.tries >= 2) {
+                t.tries = 0; t.pos += 1;
+                return [{ kind: "error", text: `❌ The spell was:  ${q.answers[0]}  — ${q.teaches}` }, ...this.advanceTrainer()];
+            }
+            return [{ kind: "error", text: `❌ "${raw.trim()}" fizzles. Try once more, or type 'hint'.` }];
+        }
+
+        advanceTrainer() {
+            const t = this.state.trainer;
+            if (t.pos >= t.queue.length) return this.trainerFinish(false);
+            return this.trainerChallenge();
+        }
+
+        trainerFinish(quit) {
+            const t = this.state.trainer;
+            const answered = t.pos;
+            const rank = ARENA_RANKS.filter((r) => t.score >= r.min).pop() || ARENA_RANKS[0];
+            const completed = answered >= t.queue.length;
+            this.state.trainer = null;
+            const lines = [];
+            if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
+            lines.push({ kind: "art", text: ARENA_DONE });
+            lines.push({ kind: "info", text: `Trials answered: ${answered}/${t.queue.length}   ·   Earned: ${t.score} XP   ·   Best streak: ${t.best}` });
+            // Speed Run: record elapsed time and best, only on a full clear.
+            if (t.speed && completed && t.startedAt) {
+                const elapsed = Math.round((Date.now() - t.startedAt) / 100) / 10;
+                const prevBest = this.state.speedrunBest;
+                const isRecord = prevBest == null || elapsed < prevBest;
+                if (isRecord) this.state.speedrunBest = elapsed;
+                lines.push({ kind: "magic", text: `⏱  Time: ${elapsed.toFixed(1)}s` });
+                lines.push(isRecord
+                    ? { kind: "success", text: `🏆 NEW RECORD!  (previous: ${prevBest != null ? prevBest.toFixed(1) + "s" : "none"})` }
+                    : { kind: "dim", text: `Best: ${prevBest.toFixed(1)}s — try again to beat it.` });
+            }
+            lines.push({ kind: "success", text: `🏅 Rank attained:  ${rank.title}` });
+            lines.push({ kind: "dim", text: t.speed ? "Type 'speedrun' to race again, or 'train' for untimed practice." : "Type 'train' to drill again, or return to exploring the dungeon." });
+            return lines;
         }
 
         cmdPwd() {
@@ -767,6 +1076,8 @@
             const encounter = this.world.encounters[path];
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];
+            const portrait = encounterArtLine(script);
+            if (portrait) messages.unshift(portrait);
             for (const item of encounter.grants_items || []) {
                 if (!this.state.inventory.includes(item)) this.state.inventory.push(item);
             }
@@ -775,6 +1086,10 @@
             this.state.flags[encounter.key] = true;
             if ((encounter.grants_items || []).length) {
                 messages.push({ kind: "success", text: `Inventory gained: ${encounter.grants_items.join(", ")}` });
+            }
+            for (const room of encounter.unlocks_rooms || []) {
+                const unlocked = this.revealRoom(room);
+                if (unlocked) messages.push(unlocked);
             }
             if (encounter.damage) messages.push({ kind: "error", text: `You took ${encounter.damage} damage.` });
             if (encounter.heals) messages.push({ kind: "success", text: `HP restored to ${this.state.hp}.` });

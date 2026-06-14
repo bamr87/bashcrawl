@@ -129,8 +129,10 @@ a.tui-header-link:focus {
 }
 
 .tui-room-panel {
-    flex: 1;
-    overflow: auto;
+    /* Size to content; let the whole .tui-sidebar scroll (it is overflow:auto)
+       rather than collapsing this panel to its title when several panels share
+       a short viewport. */
+    flex: 0 0 auto;
 }
 
 .tui-content {
@@ -279,6 +281,42 @@ a.tui-header-link:focus {
 }
 .tui-log span { animation: bc-fadein 140ms ease-out both; }
 
+/* Encounter Creature Gallery: scan-in reveal for freshly-mounted ASCII art.
+   renderLog() rebuilds the <pre> on every render, so each art span re-mounts
+   and re-runs this animation. Color/glow stay on .kind-art (theme-aware via
+   CSS vars). Gated on reduced-motion with a static fallback. */
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-art-reveal {
+        from { opacity: 0; transform: translateY(3px); clip-path: inset(0 100% 0 0); filter: brightness(1.6); }
+        60%  { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1.25); }
+        to   { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1); }
+    }
+    /* display:inline-block is REQUIRED — without it transform/clip-path/filter
+       are ignored on the inline art spans (cf. .fx-pop, which does the same). */
+    .tui-log span.kind-art {
+        display: inline-block;
+        animation: bc-art-reveal 420ms ease-out both;
+    }
+    .tui-log span.kind-art + span.kind-art { animation-delay: 40ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art { animation-delay: 80ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 120ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 160ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 200ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 240ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 280ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 320ms; }
+}
+/* Static fallback: under reduced-motion the art appears instantly, fully lit. */
+@media (prefers-reduced-motion: reduce) {
+    .tui-log span.kind-art {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        clip-path: none;
+        filter: none;
+    }
+}
+
 .tui-log .kind-magic, .tui-log .kind-success {
     text-shadow: 0 0 4px currentColor;
 }
@@ -394,4 +432,488 @@ a.tui-header-link:focus {
         border-right: 0;
         border-bottom: 1px solid var(--border-color);
     }
+}
+
+/* ============================================================
+ * Pixel Hero Companion
+ * CSS-drawn sprite — no emoji, no glyphs. Theme-aware via vars.
+ * All motion gated behind prefers-reduced-motion: no-preference.
+ * ============================================================ */
+.hero-panel {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+.hero-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0 0.1rem;
+}
+
+/* Sprite frame. --hpx is the pixel unit; the whole sprite lives in this box. */
+.hero-sprite {
+    --hpx: 7px;
+    position: relative;
+    width: calc(var(--hpx) * 9);
+    height: calc(var(--hpx) * 9);
+    image-rendering: pixelated;
+    transform: translateZ(0);
+}
+
+/* Each body part is an absolutely-placed crisp pixel block. */
+.hero-px {
+    position: absolute;
+    display: block;
+    border-radius: 1px;
+}
+
+/* Helm (metal/heading tone) */
+.hero-helm {
+    top: 0;
+    left: calc(var(--hpx) * 2);
+    width: calc(var(--hpx) * 5);
+    height: calc(var(--hpx) * 2);
+    background: var(--text-secondary);
+    box-shadow: inset 0 calc(var(--hpx) * -0.4) 0 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Face (skin = warm accent) */
+.hero-face {
+    top: calc(var(--hpx) * 2);
+    left: calc(var(--hpx) * 2.5);
+    width: calc(var(--hpx) * 4);
+    height: calc(var(--hpx) * 2);
+    background: var(--accent-yellow);
+    box-shadow:
+        inset calc(var(--hpx) * 0.8) calc(var(--hpx) * 0.6) 0 0 var(--bg-primary),
+        inset calc(var(--hpx) * -1.4) calc(var(--hpx) * 0.6) 0 0 var(--bg-primary);
+}
+
+/* Torso (tunic = green adventurer) */
+.hero-torso {
+    top: calc(var(--hpx) * 4);
+    left: calc(var(--hpx) * 2);
+    width: calc(var(--hpx) * 5);
+    height: calc(var(--hpx) * 3);
+    background: var(--accent-green);
+    box-shadow: inset 0 calc(var(--hpx) * -0.6) 0 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Arms */
+.hero-arm {
+    top: calc(var(--hpx) * 4);
+    width: var(--hpx);
+    height: calc(var(--hpx) * 2.4);
+    background: var(--accent-yellow);
+}
+.hero-arm-l { left: calc(var(--hpx) * 1); }
+.hero-arm-r { left: calc(var(--hpx) * 7); }
+
+/* Legs (boots = muted) */
+.hero-legs {
+    top: calc(var(--hpx) * 7);
+    left: calc(var(--hpx) * 2.5);
+    width: calc(var(--hpx) * 4);
+    height: calc(var(--hpx) * 2);
+    background: var(--text-muted);
+    box-shadow: inset calc(var(--hpx) * 1) 0 0 0 var(--bg-card);
+}
+
+/* Blade held in right hand (steel = blue accent). Pure CSS bar, not a glyph. */
+.hero-blade {
+    top: calc(var(--hpx) * 1);
+    left: calc(var(--hpx) * 7.6);
+    width: calc(var(--hpx) * 0.7);
+    height: calc(var(--hpx) * 5);
+    background: var(--accent-blue);
+    box-shadow:
+        0 calc(var(--hpx) * 0) 0 0 var(--accent-blue),
+        0 calc(var(--hpx) * 4.6) 0 0 var(--accent-yellow); /* pommel */
+    transform-origin: bottom center;
+}
+
+/* Ground shadow (sits under the sprite) */
+.hero-shadow {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--hpx) * -0.6);
+    width: calc(var(--hpx) * 6);
+    height: calc(var(--hpx) * 1);
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 50%;
+    filter: blur(1px);
+}
+[data-theme="light"] .hero-shadow { background: rgba(0, 0, 0, 0.16); }
+
+/* Sparkle particles (hidden until 'item' mood). CSS dots, not emoji. */
+.hero-fx {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.hero-spark {
+    position: absolute;
+    width: calc(var(--hpx) * 0.8);
+    height: calc(var(--hpx) * 0.8);
+    border-radius: 50%;
+    background: var(--accent-yellow);
+    box-shadow: 0 0 6px 1px rgba(251, 191, 36, 0.7);
+    opacity: 0;
+}
+.hero-spark-1 { top: 10%; left: 12%; }
+.hero-spark-2 { top: 4%;  left: 70%; }
+.hero-spark-3 { top: 38%; left: 86%; }
+
+.hero-mood-label {
+    margin: 0;
+    font-size: 0.78rem;
+    min-height: 1.05em;
+}
+
+/* ---- Static mood tints (apply in ALL motion preferences) ---- */
+.hero-stage[data-mood="hurt"] .hero-torso { background: var(--accent-red); }
+.hero-stage[data-mood="hurt"] .hero-face  { background: var(--accent-red); }
+.hero-stage[data-mood="xp"]   .hero-sprite { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.65)); }
+.hero-stage[data-mood="quest"] .hero-blade { background: var(--accent-yellow); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--accent-yellow); }
+
+/* ---- Motion — only when reduced motion is NOT requested ---- */
+@media (prefers-reduced-motion: no-preference) {
+    .hero-stage[data-mood="idle"] .hero-sprite {
+        animation: hero-bob 2600ms ease-in-out infinite;
+    }
+    @keyframes hero-bob {
+        0%, 100% { transform: translateY(0) translateZ(0); }
+        50%      { transform: translateY(calc(var(--hpx) * -0.5)) translateZ(0); }
+    }
+
+    .hero-stage[data-mood="hurt"] .hero-sprite {
+        animation: hero-hurt 480ms ease-in-out 1;
+    }
+    @keyframes hero-hurt {
+        0%   { transform: translateX(0) rotate(0); }
+        20%  { transform: translateX(calc(var(--hpx) * -0.8)) rotate(-5deg); }
+        45%  { transform: translateX(calc(var(--hpx) * 0.6)) rotate(4deg); }
+        70%  { transform: translateX(calc(var(--hpx) * -0.4)) rotate(-2deg); }
+        100% { transform: translateX(0) rotate(0); }
+    }
+
+    .hero-stage[data-mood="quest"] .hero-sprite {
+        animation: hero-cheer 720ms cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+    }
+    .hero-stage[data-mood="quest"] .hero-arm-r,
+    .hero-stage[data-mood="quest"] .hero-blade {
+        animation: hero-thrust 720ms ease-out 2;
+        transform-origin: bottom center;
+    }
+    @keyframes hero-cheer {
+        0%, 100% { transform: translateY(0); }
+        40%      { transform: translateY(calc(var(--hpx) * -1.6)); }
+    }
+    @keyframes hero-thrust {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        40%      { transform: translateY(calc(var(--hpx) * -0.8)) rotate(-12deg); }
+    }
+
+    .hero-stage[data-mood="item"] .hero-sprite {
+        animation: hero-hop 520ms ease-out 1;
+    }
+    .hero-stage[data-mood="item"] .hero-spark {
+        animation: hero-twinkle 620ms ease-out 1;
+    }
+    .hero-stage[data-mood="item"] .hero-spark-2 { animation-delay: 90ms; }
+    .hero-stage[data-mood="item"] .hero-spark-3 { animation-delay: 180ms; }
+    @keyframes hero-hop {
+        0%, 100% { transform: translateY(0); }
+        45%      { transform: translateY(calc(var(--hpx) * -0.9)); }
+    }
+    @keyframes hero-twinkle {
+        0%   { opacity: 0; transform: scale(0.4); }
+        40%  { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 0; transform: scale(0.6); }
+    }
+
+    .hero-stage[data-mood="xp"] .hero-sprite {
+        animation: hero-glow 760ms ease-in-out 1;
+    }
+    @keyframes hero-glow {
+        0%, 100% { filter: drop-shadow(0 0 0 rgba(34, 211, 238, 0)); transform: scale(1); }
+        50%      { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.8)); transform: scale(1.06); }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-sprite,
+    .hero-arm-r,
+    .hero-blade,
+    .hero-spark { animation: none !important; }
+}
+
+/* ============================================================
+   Terminal Juice Pack — feel-good micro-animations.
+   All motion gated on reduced-motion; theme tokens only.
+   (Piece 4 "typewriter" was intentionally dropped: it mangles
+   wrapped lines and would fight the encounter-art reveal.)
+   ============================================================ */
+
+/* (1) Blinking block cursor on the prompt label. Static solid block
+   under reduced-motion. */
+#prompt-label::after {
+    content: "";
+    display: inline-block;
+    width: 0.6ch;
+    height: 1em;
+    margin-left: 0.15ch;
+    vertical-align: -0.12em;
+    background: var(--accent-green);
+    border-radius: 1px;
+    opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-caret-blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+    }
+    #prompt-label::after {
+        animation: bc-caret-blink 1.05s steps(1, end) infinite;
+    }
+}
+
+/* (2) Floating "+N XP" number near #quest-panel (created/removed by JS). */
+.bc-xp-float {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+    pointer-events: none;
+    z-index: 5;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent-green);
+    text-shadow: 0 0 6px rgba(74, 222, 128, 0.55);
+    will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-xp-rise {
+        0%   { transform: translateY(0) scale(0.9); opacity: 0; }
+        15%  { transform: translateY(-2px) scale(1.05); opacity: 1; }
+        70%  { transform: translateY(-22px) scale(1); opacity: 1; }
+        100% { transform: translateY(-34px) scale(0.95); opacity: 0; }
+    }
+    .bc-xp-float { animation: bc-xp-rise 1100ms ease-out both; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .bc-xp-float { opacity: 1; }
+}
+
+/* (3) Animated HP fill bar (the text bar in renderInventory stays as fallback).
+   Width driven by --hp (0..100); color shifts green->amber->red via a class. */
+.bc-hpbar {
+    position: relative;
+    height: 8px;
+    margin: 0.4rem 0 0.1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    overflow: hidden;
+}
+.bc-hpbar-fill {
+    height: 100%;
+    width: calc(var(--hp, 100) * 1%);
+    border-radius: inherit;
+    background: var(--accent-green);
+}
+.bc-hpbar-fill.is-mid { background: var(--accent-yellow); }
+.bc-hpbar-fill.is-low { background: var(--accent-red); }
+@media (prefers-reduced-motion: no-preference) {
+    .bc-hpbar-fill {
+        transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                    background-color 420ms ease;
+    }
+}
+
+/* ============================================================
+   CRT Retro Mode — optional overlay, toggled in the header.
+   Activated by body[data-crt="on"] (set by game.js). Pure-CSS:
+   scanlines + vignette via a ::after layer on .web-shell, plus a
+   phosphor glow on the log text. Flicker is motion-only; the
+   scanlines/vignette/glow stay static under reduced motion.
+   ============================================================ */
+body[data-crt="on"] .web-shell {
+    position: relative;
+}
+
+body[data-crt="on"] .web-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(0, 0, 0, 0) 55%,
+            rgba(0, 0, 0, 0.28) 100%
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.16) 0,
+            rgba(0, 0, 0, 0.16) 1px,
+            rgba(0, 0, 0, 0) 1px,
+            rgba(0, 0, 0, 0) 3px
+        );
+    mix-blend-mode: multiply;
+}
+
+/* Light theme: soften scanlines/vignette so multiply doesn't muddy it. */
+[data-theme="light"] body[data-crt="on"] .web-shell::after {
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(0, 0, 0, 0) 60%,
+            rgba(45, 36, 25, 0.14) 100%
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            rgba(45, 36, 25, 0.07) 0,
+            rgba(45, 36, 25, 0.07) 1px,
+            rgba(0, 0, 0, 0) 1px,
+            rgba(0, 0, 0, 0) 3px
+        );
+}
+
+/* Soft phosphor glow on the terminal text; readability preserved. */
+body[data-crt="on"] .tui-log {
+    text-shadow:
+        0 0 1px rgba(74, 222, 128, 0.35),
+        0 0 6px rgba(74, 222, 128, 0.12);
+}
+[data-theme="light"] body[data-crt="on"] .tui-log {
+    text-shadow:
+        0 0 1px rgba(34, 211, 238, 0.30),
+        0 0 5px rgba(34, 211, 238, 0.10);
+}
+
+/* Barely-there flicker — MOTION ONLY. */
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-crt-flicker {
+        0%, 100% { opacity: 1; }
+        48%      { opacity: 0.97; }
+        50%      { opacity: 0.93; }
+        52%      { opacity: 0.985; }
+        70%      { opacity: 0.96; }
+    }
+    body[data-crt="on"] .web-shell::after {
+        animation: bc-crt-flicker 4.5s steps(1, end) infinite;
+        will-change: opacity;
+    }
+}
+
+/* ============================================================
+   Living Banner & Room Vignettes
+   All motion gated behind prefers-reduced-motion; static first.
+   ============================================================ */
+
+/* (1) LIVING BANNER — base is a plain solid accent (identical to the
+   prior look in every theme); the gradient shimmer applies ONLY when
+   motion is welcome and background-clip:text is supported. */
+.tui-log .kind-banner {
+    color: var(--accent-yellow);
+}
+@media (prefers-reduced-motion: no-preference) {
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+        .tui-log .kind-banner {
+            background-image: linear-gradient(
+                100deg,
+                var(--accent-yellow) 0%,
+                var(--accent-yellow) 35%,
+                var(--accent-green) 50%,
+                var(--accent-yellow) 65%,
+                var(--accent-yellow) 100%
+            );
+            background-size: 220% 100%;
+            background-repeat: no-repeat;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-shadow: none; /* glyphs are transparent; drop inherited glow */
+            animation: bc-banner-sweep 6s linear infinite;
+        }
+    }
+}
+@keyframes bc-banner-sweep {
+    from { background-position: 140% 0; }
+    to   { background-position: -40% 0; }
+}
+
+/* (2) ROOM VIGNETTE — small ASCII mascot below the Location panel. */
+.room-vignette {
+    margin: 0.5rem 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.15;
+    white-space: pre;
+    word-break: normal;
+    overflow: hidden;
+    color: var(--accent-purple);
+    opacity: 0.92;
+    text-shadow: 0 0 6px rgba(192, 132, 252, 0.22);
+}
+.room-vignette[data-room-art="entrance"],
+.room-vignette[data-room-art="cellar"] {
+    color: var(--accent-yellow);
+    text-shadow: 0 0 7px rgba(251, 191, 36, 0.35);
+}
+.room-vignette[data-room-art="vault"] {
+    color: var(--accent-blue);
+    text-shadow: 0 0 7px rgba(34, 211, 238, 0.35);
+}
+.room-vignette[data-room-art="graveyard"] {
+    color: var(--text-secondary);
+    text-shadow: none;
+}
+.room-vignette[data-room-art="rift"] {
+    color: var(--accent-purple);
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+}
+@media (prefers-reduced-motion: no-preference) {
+    .room-vignette[data-room-art="entrance"],
+    .room-vignette[data-room-art="cellar"] {
+        animation: bc-vignette-flicker 2.4s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="vault"] {
+        animation: bc-vignette-shimmer 3.6s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="graveyard"] {
+        animation: bc-vignette-drift 5s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="rift"] {
+        animation: bc-vignette-swirl 4s ease-in-out infinite;
+    }
+}
+@keyframes bc-vignette-flicker {
+    0%, 100% { opacity: 0.9;  filter: brightness(1); }
+    18%      { opacity: 1;    filter: brightness(1.18); }
+    32%      { opacity: 0.82; filter: brightness(0.92); }
+    54%      { opacity: 0.97; filter: brightness(1.1); }
+    71%      { opacity: 0.86; filter: brightness(0.96); }
+}
+@keyframes bc-vignette-shimmer {
+    0%, 100% { opacity: 0.85; text-shadow: 0 0 5px rgba(34, 211, 238, 0.25); }
+    50%      { opacity: 1;    text-shadow: 0 0 11px rgba(34, 211, 238, 0.6); }
+}
+@keyframes bc-vignette-drift {
+    0%, 100% { opacity: 0.78; }
+    50%      { opacity: 0.95; }
+}
+@keyframes bc-vignette-swirl {
+    0%, 100% { opacity: 0.85; filter: brightness(0.95); text-shadow: 0 0 6px rgba(192, 132, 252, 0.3); }
+    50%      { opacity: 1;    filter: brightness(1.15); text-shadow: 0 0 13px rgba(192, 132, 252, 0.6); }
 }

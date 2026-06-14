@@ -134,7 +134,15 @@ def build_world() -> dict[str, Any]:
     def _is_ignored(path: Path) -> bool:
         return path in ignored or any(parent in ignored for parent in path.parents)
 
-    room_dirs = [entrance, *[p for p in entrance.rglob("*") if p.is_dir()]]
+    # Sort the directory list deterministically. rglob() returns filesystem
+    # order, which differs across platforms (macOS vs Linux CI) and would make
+    # the emitted directories-dict key order — and thus world.json — unstable,
+    # breaking test_committed_web_data_is_fresh.
+    subdirs = sorted(
+        (p for p in entrance.rglob("*") if p.is_dir()),
+        key=lambda p: p.as_posix(),
+    )
+    room_dirs = [entrance, *subdirs]
     for dir_path in room_dirs:
         if _is_ignored(dir_path):
             continue

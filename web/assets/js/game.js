@@ -20,6 +20,7 @@
         docsContent: document.getElementById("docs-content"),
         docsSearch: document.getElementById("docs-search"),
         themeToggle: document.getElementById("theme-toggle"),
+        crtToggle: document.getElementById("crt-toggle"),
     };
 
     const data = await loadData();
@@ -34,6 +35,75 @@
         },
     });
     docsPanel.setData(data.docs, runtime);
+
+    // === Room vignettes: box-safe ASCII mascot per area (banner shimmer is pure CSS) ===
+    const ROOM_VIGNETTES = {
+        entrance: [
+            "  (  )      (  )   ",
+            "  )(   /\\   )(     ",
+            "  ||  /  \\  ||     ",
+            " _||_/    \\_||_    ",
+            "[==||      ||==]   ",
+            "   ''      ''      ",
+        ],
+        cellar: [
+            "   (~)        (~)  ",
+            "  .[ ].      .[ ]. ",
+            "  | | |      | | | ",
+            "  | | |      | | | ",
+            " _|_|_|_    _|_|_|_",
+            " '-----'    '-----'",
+        ],
+        graveyard: [
+            " .---.   __   .---.",
+            " | + |  /  \\  | R |",
+            " |   | |    | |   |",
+            " *web* |    | ~~~~ ",
+            "_|___|_|____|_|___|",
+            "  ~~~     ~~~   ~~~",
+        ],
+        vault: [
+            "      /\\          ",
+            "     /  \\   /\\    ",
+            "    / /\\ \\ /  \\   ",
+            "    \\ \\/ / \\  /   ",
+            "     \\  /   \\/    ",
+            "      \\/  *  .    ",
+        ],
+        rift: [
+            "    . * .   .  *   ",
+            "   *  .-~~~-.  .   ",
+            "  .  /  _    \\ *   ",
+            "  * |  ( o )  | .  ",
+            "   . \\  ~-~  / *   ",
+            "    * '-...-'  .   ",
+        ],
+        deep: [
+            "    *  .   *   .   ",
+            "  .   .-~~~~-.  *  ",
+            "  *  / shadow \\ .  ",
+            "   . \\        / *  ",
+            "  .   '------'  .  ",
+        ],
+    };
+
+    function vignetteKeyForRoom(actualPath, cwd) {
+        const p = String(actualPath || cwd || "");
+        if (p.includes("/.rift") || p.includes("/rift")) return "rift";
+        if (p.includes("/.vault") || p.includes("/vault")) return "vault";
+        if (p.includes("/graveyard") || p.includes("/.chapel") || p.includes("/chapel")) return "graveyard";
+        if (p.includes("/cellar") || p.includes("/armoury") || p.includes("/chamber")) return "cellar";
+        if (p === "/entrance" || p.endsWith("/entrance") || p.includes("/workshop") || p.includes("/scriptorium")) return "entrance";
+        return "deep";
+    }
+
+    function roomVignetteHtml() {
+        const actual = (runtime.actual ? runtime.actual(runtime.state.cwd) : runtime.state.cwd);
+        const key = vignetteKeyForRoom(actual, runtime.state.cwd);
+        const art = ROOM_VIGNETTES[key] || ROOM_VIGNETTES.deep;
+        const safe = art.map(escapeHtml).join("\n");
+        return `<pre class="room-vignette" data-room-art="${key}" aria-hidden="true">${safe}</pre>`;
+    }
 
     const logLines = [];
     const BANNER = [
@@ -50,6 +120,10 @@
     append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cd scriptorium then sort verses | uniq  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
+    append("magic", "🆕 Mini-games:  train  (drill commands)  ·  speedrun  (timed, beat your best)  ·  pathfind  (quest to a room). All earn XP.");
+    if (runtime.state.trainer && runtime.state.trainer.active) {
+        for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
+    }
     render();
     let prevState = snapshotState();
 
@@ -114,8 +188,10 @@
     dom.docsToggle.addEventListener("click", () => docsPanel.toggle());
     dom.docsClose.addEventListener("click", () => docsPanel.close());
     dom.themeToggle.addEventListener("click", toggleTheme);
+    dom.crtToggle.addEventListener("click", toggleCrt);
 
     initTheme();
+    initCrt();
     dom.input.focus();
 
     async function loadData() {
@@ -138,7 +214,8 @@
     }
 
     function runLine(line) {
-        append("dim", `${runtime.state.cwd} $ ${line}`);
+        const promptEcho = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
+        append("dim", `${promptEcho} ${line}`);
         if (!runtime.state.history.length || runtime.state.history[runtime.state.history.length - 1] !== line) {
             runtime.state.history.push(line);
         }
@@ -166,15 +243,20 @@
         if (next.completed > prev.completed) {
             appendSparkleArt();
             flashPanel(dom.quest);
+            applyHeroMood("quest");
         }
         if (next.hp < prev.hp) {
             shakePanel(dom.inventory);
+            applyHeroMood("hurt");
         }
         if (next.xp > prev.xp) {
             popXp();
+            floatXp(next.xp - prev.xp);
+            applyHeroMood("xp");
         }
         if (next.inventory.length > prev.inventory.length) {
             flashPanel(dom.inventory);
+            applyHeroMood("item");
         }
     }
 
@@ -232,6 +314,7 @@
     function render() {
         renderQuest();
         renderInventory();
+        renderHpBar();
         renderRoom();
         renderPrompt();
         renderLog();
@@ -258,11 +341,13 @@
             const marker = entry.type === "dir" ? "/" : entry.type === "exec" ? "*" : "";
             return `${entry.type === "dir" ? "📁" : entry.type === "exec" ? "⚡" : "📄"} ${escapeHtml(entry.name)}${marker}`;
         }).join("<br>");
-        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p><p>${entries || "(empty)"}</p>`;
+        // Vignette sits under the room name (before the scrollable entry list)
+        // so the ambient mascot stays visible even when contents are long.
+        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p>${roomVignetteHtml()}<p>${entries || "(empty)"}</p>`;
     }
 
     function renderPrompt() {
-        const p = `${runtime.state.cwd} $`;
+        const p = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
         dom.prompt.textContent = p;
         dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
     }
@@ -311,6 +396,115 @@
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("bashcrawl-web-theme", next);
         syncThemeLabel();
+    }
+
+    // === CRT Retro Mode (mirrors the theme toggle) ===
+    // Persists to localStorage 'bashcrawl-web-crt'; default OFF; sets data-crt on <body>.
+    function initCrt() {
+        const on = localStorage.getItem("bashcrawl-web-crt") === "on";
+        document.body.setAttribute("data-crt", on ? "on" : "off");
+        syncCrtLabel();
+    }
+
+    function syncCrtLabel() {
+        const on = document.body.getAttribute("data-crt") === "on";
+        dom.crtToggle.textContent = on ? "CRT On" : "CRT Off";
+        dom.crtToggle.setAttribute("aria-pressed", String(on));
+        dom.crtToggle.setAttribute("title", on ? "Disable retro CRT overlay" : "Enable retro CRT overlay");
+    }
+
+    function toggleCrt() {
+        const next = document.body.getAttribute("data-crt") === "on" ? "off" : "on";
+        document.body.setAttribute("data-crt", next);
+        localStorage.setItem("bashcrawl-web-crt", next);
+        syncCrtLabel();
+    }
+
+    // === Pixel Hero Companion helpers ===
+    // Swaps the hero panel's data-mood (drives CSS reactions), then returns to
+    // "idle" after the reaction. One tracked timer, cleared before re-arming —
+    // no setInterval/rAF. Safe if the panel is absent (every access guarded).
+    let heroMoodTimer = null;
+    const HERO_MOOD_MS = { hurt: 600, quest: 1500, item: 700, xp: 900, idle: 0 };
+    const HERO_MOOD_LABELS = {
+        idle: "Catching their breath.",
+        hurt: "Ow! That stung.",
+        quest: "Quest cleared! Huzzah!",
+        item: "Ooh, shiny loot!",
+        xp: "Growing stronger...",
+    };
+
+    function applyHeroMood(mood) {
+        const stage = document.getElementById("hero-panel");
+        if (!stage) return;
+        const label = document.getElementById("hero-mood-label");
+        const next = HERO_MOOD_MS[mood] != null ? mood : "idle";
+        if (heroMoodTimer) {
+            clearTimeout(heroMoodTimer);
+            heroMoodTimer = null;
+        }
+        // Re-trigger the CSS animation even if the same mood repeats.
+        stage.dataset.mood = "idle";
+        void stage.offsetWidth;
+        stage.dataset.mood = next;
+        stage.setAttribute("aria-label", `Pixel adventurer companion (${next})`);
+        if (label && HERO_MOOD_LABELS[next]) label.textContent = HERO_MOOD_LABELS[next];
+        if (next !== "idle") {
+            heroMoodTimer = setTimeout(() => {
+                stage.dataset.mood = "idle";
+                stage.setAttribute("aria-label", "Pixel adventurer companion (idle)");
+                if (label) label.textContent = HERO_MOOD_LABELS.idle;
+                heroMoodTimer = null;
+            }, HERO_MOOD_MS[next]);
+        }
+    }
+
+    // === Terminal Juice Pack helpers ===
+    // (2) Floating "+N XP" number near the quest panel.
+    function floatXp(amount) {
+        const panel = dom.quest && dom.quest.closest(".tui-panel");
+        if (!panel || amount <= 0) return;
+        const cs = getComputedStyle(panel);
+        if (cs.position === "static") panel.style.position = "relative";
+        const node = document.createElement("span");
+        node.className = "bc-xp-float";
+        node.setAttribute("aria-hidden", "true");
+        node.textContent = `+${amount} XP`;
+        panel.appendChild(node);
+        let done = false;
+        const cleanup = () => {
+            if (done) return;
+            done = true;
+            node.remove();
+        };
+        node.addEventListener("animationend", cleanup, { once: true });
+        // Safety net: remove even if animationend never fires (reduced-motion).
+        setTimeout(cleanup, 1300);
+    }
+
+    // (3) Smooth HP fill bar. One persistent <div> inside #inventory-panel;
+    // re-inserted after renderInventory() rewrites innerHTML. The text bar
+    // in renderInventory() stays as the fallback.
+    function renderHpBar() {
+        if (!dom.inventory) return;
+        const hp = Math.max(0, Math.min(100, runtime.state.hp));
+        let bar = dom.inventory.querySelector(".bc-hpbar");
+        if (!bar) {
+            bar = document.createElement("div");
+            bar.className = "bc-hpbar";
+            bar.setAttribute("role", "img");
+            const fill = document.createElement("div");
+            fill.className = "bc-hpbar-fill";
+            bar.appendChild(fill);
+            dom.inventory.insertBefore(bar, dom.inventory.firstChild);
+        } else if (bar.parentElement !== dom.inventory) {
+            dom.inventory.insertBefore(bar, dom.inventory.firstChild);
+        }
+        const fill = bar.firstElementChild;
+        fill.style.setProperty("--hp", String(hp));
+        fill.classList.toggle("is-low", hp <= 25);
+        fill.classList.toggle("is-mid", hp > 25 && hp <= 50);
+        bar.setAttribute("aria-label", `Health ${hp} of 100`);
     }
 
     function escapeHtml(value) {

@@ -19,6 +19,7 @@
                 <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer">Docs</button>
                 <button id="theme-toggle" class="tui-button" type="button">Dark</button>
+                <button id="crt-toggle" class="tui-button" type="button" aria-pressed="false">CRT Off</button>
             </div>
         </header>
 
@@ -31,6 +32,31 @@
                 <section class="tui-panel">
                     <h2>Inventory</h2>
                     <div id="inventory-panel"></div>
+                </section>
+                <!-- Pixel Hero Companion: CSS-only layered pixels (no emoji/glyphs),
+                     theme-aware, reacts to game events via data-mood. -->
+                <section class="tui-panel hero-panel">
+                    <h2>Hero</h2>
+                    <div id="hero-panel" class="hero-stage" data-mood="idle" role="img" aria-label="Pixel adventurer companion (idle)">
+                        <div class="hero-sprite">
+                            <div class="hero-shadow" aria-hidden="true"></div>
+                            <div class="hero-body" aria-hidden="true">
+                                <span class="hero-px hero-helm"></span>
+                                <span class="hero-px hero-face"></span>
+                                <span class="hero-px hero-torso"></span>
+                                <span class="hero-px hero-arm hero-arm-l"></span>
+                                <span class="hero-px hero-arm hero-arm-r"></span>
+                                <span class="hero-px hero-legs"></span>
+                                <span class="hero-px hero-blade"></span>
+                            </div>
+                            <div class="hero-fx" aria-hidden="true">
+                                <span class="hero-spark hero-spark-1"></span>
+                                <span class="hero-spark hero-spark-2"></span>
+                                <span class="hero-spark hero-spark-3"></span>
+                            </div>
+                        </div>
+                        <p id="hero-mood-label" class="kind-dim hero-mood-label">Ready for the descent.</p>
+                    </div>
                 </section>
                 <section class="tui-panel tui-room-panel">
                     <h2>Location</h2>

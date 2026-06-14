@@ -20,6 +20,13 @@ on:
       - 'test/datasets/**'
       - '*.sh'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: game-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-game:
     name: Validate Game Content
