@@ -215,6 +215,7 @@
             reveals: {},
             trainer: null,
             pathfind: null,
+            speedrunBest: null,
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -277,6 +278,8 @@
                 drill: this.cmdTrain,
                 practice: this.cmdTrain,
                 arena: this.cmdTrain,
+                speedrun: this.cmdSpeedrun,
+                speed: this.cmdSpeedrun,
                 pathfind: this.cmdPathfind,
                 seek: this.cmdPathfind,
                 journey: this.cmdPathfind,
@@ -452,7 +455,7 @@
             return [
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
-                { kind: "magic", text: "Mini-games:  'train' drills your spells in the Training Arena;  'pathfind' sends you questing to a target room. Both grant XP." },
+                { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
             ];
         }
 
@@ -518,7 +521,7 @@
         promptLabel() {
             const t = this.state.trainer;
             if (t && t.active) {
-                return `arena ${Math.min(t.pos + 1, t.queue.length)}/${t.queue.length} ❯`;
+                return `${t.speed ? "speed" : "arena"} ${Math.min(t.pos + 1, t.queue.length)}/${t.queue.length} ❯`;
             }
             const pf = this.state.pathfind;
             if (pf && pf.active) {
@@ -528,13 +531,34 @@
         }
 
         cmdTrain() {
+            return this.startArena(false);
+        }
+
+        cmdSpeedrun() {
+            return this.startArena(true);
+        }
+
+        startArena(speed) {
             const count = Math.min(8, TRIALS.length);
             const pool = TRIALS.map((_, i) => i);
             for (let i = pool.length - 1; i > 0; i -= 1) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
-            this.state.trainer = { queue: pool.slice(0, count), pos: 0, score: 0, streak: 0, best: 0, tries: 0, active: true };
+            this.state.trainer = {
+                queue: pool.slice(0, count), pos: 0, score: 0, streak: 0, best: 0, tries: 0,
+                active: true, speed: !!speed, startedAt: speed ? Date.now() : 0,
+            };
+            if (speed) {
+                const best = this.state.speedrunBest;
+                return [
+                    { kind: "art", text: ARENA_OPEN },
+                    { kind: "magic", text: `SPEED RUN — clear ${count} trials against the clock!` },
+                    { kind: "dim", text: best != null ? `Your best: ${best.toFixed(1)}s. Beat it!` : "No record yet — set the first time!" },
+                    { kind: "dim", text: "Answer fast.  skip = pass · quit = leave" },
+                    ...this.trainerChallenge(),
+                ];
+            }
             return [
                 { kind: "art", text: ARENA_OPEN },
                 { kind: "info", text: `${count} trials await. Answer each by casting the real spell.` },
@@ -589,13 +613,25 @@
             const t = this.state.trainer;
             const answered = t.pos;
             const rank = ARENA_RANKS.filter((r) => t.score >= r.min).pop() || ARENA_RANKS[0];
+            const completed = answered >= t.queue.length;
             this.state.trainer = null;
             const lines = [];
             if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
             lines.push({ kind: "art", text: ARENA_DONE });
             lines.push({ kind: "info", text: `Trials answered: ${answered}/${t.queue.length}   ·   Earned: ${t.score} XP   ·   Best streak: ${t.best}` });
+            // Speed Run: record elapsed time and best, only on a full clear.
+            if (t.speed && completed && t.startedAt) {
+                const elapsed = Math.round((Date.now() - t.startedAt) / 100) / 10;
+                const prevBest = this.state.speedrunBest;
+                const isRecord = prevBest == null || elapsed < prevBest;
+                if (isRecord) this.state.speedrunBest = elapsed;
+                lines.push({ kind: "magic", text: `⏱  Time: ${elapsed.toFixed(1)}s` });
+                lines.push(isRecord
+                    ? { kind: "success", text: `🏆 NEW RECORD!  (previous: ${prevBest != null ? prevBest.toFixed(1) + "s" : "none"})` }
+                    : { kind: "dim", text: `Best: ${prevBest.toFixed(1)}s — try again to beat it.` });
+            }
             lines.push({ kind: "success", text: `🏅 Rank attained:  ${rank.title}` });
-            lines.push({ kind: "dim", text: "Type 'train' to drill again, or return to exploring the dungeon." });
+            lines.push({ kind: "dim", text: t.speed ? "Type 'speedrun' to race again, or 'train' for untimed practice." : "Type 'train' to drill again, or return to exploring the dungeon." });
             return lines;
         }
 
