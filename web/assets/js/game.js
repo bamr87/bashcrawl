@@ -179,6 +179,7 @@
         }
         if (next.xp > prev.xp) {
             popXp();
+            floatXp(next.xp - prev.xp);
             applyHeroMood("xp");
         }
         if (next.inventory.length > prev.inventory.length) {
@@ -241,6 +242,7 @@
     function render() {
         renderQuest();
         renderInventory();
+        renderHpBar();
         renderRoom();
         renderPrompt();
         renderLog();
@@ -359,6 +361,54 @@
                 heroMoodTimer = null;
             }, HERO_MOOD_MS[next]);
         }
+    }
+
+    // === Terminal Juice Pack helpers ===
+    // (2) Floating "+N XP" number near the quest panel.
+    function floatXp(amount) {
+        const panel = dom.quest && dom.quest.closest(".tui-panel");
+        if (!panel || amount <= 0) return;
+        const cs = getComputedStyle(panel);
+        if (cs.position === "static") panel.style.position = "relative";
+        const node = document.createElement("span");
+        node.className = "bc-xp-float";
+        node.setAttribute("aria-hidden", "true");
+        node.textContent = `+${amount} XP`;
+        panel.appendChild(node);
+        let done = false;
+        const cleanup = () => {
+            if (done) return;
+            done = true;
+            node.remove();
+        };
+        node.addEventListener("animationend", cleanup, { once: true });
+        // Safety net: remove even if animationend never fires (reduced-motion).
+        setTimeout(cleanup, 1300);
+    }
+
+    // (3) Smooth HP fill bar. One persistent <div> inside #inventory-panel;
+    // re-inserted after renderInventory() rewrites innerHTML. The text bar
+    // in renderInventory() stays as the fallback.
+    function renderHpBar() {
+        if (!dom.inventory) return;
+        const hp = Math.max(0, Math.min(100, runtime.state.hp));
+        let bar = dom.inventory.querySelector(".bc-hpbar");
+        if (!bar) {
+            bar = document.createElement("div");
+            bar.className = "bc-hpbar";
+            bar.setAttribute("role", "img");
+            const fill = document.createElement("div");
+            fill.className = "bc-hpbar-fill";
+            bar.appendChild(fill);
+            dom.inventory.insertBefore(bar, dom.inventory.firstChild);
+        } else if (bar.parentElement !== dom.inventory) {
+            dom.inventory.insertBefore(bar, dom.inventory.firstChild);
+        }
+        const fill = bar.firstElementChild;
+        fill.style.setProperty("--hp", String(hp));
+        fill.classList.toggle("is-low", hp <= 25);
+        fill.classList.toggle("is-mid", hp > 25 && hp <= 50);
+        bar.setAttribute("aria-label", `Health ${hp} of 100`);
     }
 
     function escapeHtml(value) {
