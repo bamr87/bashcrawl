@@ -189,6 +189,21 @@
         { min: 130, title: "Terminal Master" },
         { min: 190, title: "Archmage of the Command Line" },
     ];
+    // Achievements catalog. Icons use only emoji verified to render in COLOR in
+    // the monospace log. test(s) reads runtime state; unlocked once, +5 XP each.
+    const ACHIEVEMENTS = [
+        { id: "first_steps", icon: "🧭", title: "First Steps", desc: "Found your place with pwd.", test: (s) => (s.stats.commands.pwd || 0) > 0 },
+        { id: "cartographer", icon: "✨", title: "Cartographer", desc: "Charted the dungeon with map or tree.", test: (s) => (s.stats.commands.map || 0) > 0 || (s.stats.commands.tree || 0) > 0 },
+        { id: "scholar", icon: "💡", title: "Scholar", desc: "Read three ancient scrolls.", test: (s) => (s.stats.catScrollCount || 0) >= 3 },
+        { id: "world_builder", icon: "⚡", title: "World-Builder", desc: "Conjured a room with mkdir.", test: (s) => (s.stats.commands.mkdir || 0) > 0 },
+        { id: "treasure_hunter", icon: "💰", title: "Treasure Hunter", desc: "Claimed your first loot.", test: (s) => (s.inventory || []).length > 0 },
+        { id: "key_master", icon: "🔓", title: "Key-Master", desc: "Unlocked a hidden room.", test: (s) => Object.keys(s.reveals || {}).length > 0 },
+        { id: "arena_graduate", icon: "🏅", title: "Arena Graduate", desc: "Cleared a Training Arena run.", test: (s) => !!(s.flags && s.flags.arena_cleared) },
+        { id: "speed_demon", icon: "🏆", title: "Speed Demon", desc: "Finished a timed Speed Run.", test: (s) => s.speedrunBest != null },
+        { id: "trailblazer", icon: "✅", title: "Trailblazer", desc: "Completed a Path-Finder journey.", test: (s) => !!(s.flags && s.flags.pathfind_done) },
+        { id: "seasoned", icon: "🔥", title: "Seasoned Adventurer", desc: "Earned 150 XP.", test: (s) => (s.xp || 0) >= 150 },
+    ];
+
     // Compass rose for the Path-Finder mini-game (box-safe ASCII).
     const PATHFIND_ART = [
         "       .  N  .",
@@ -216,6 +231,7 @@
             trainer: null,
             pathfind: null,
             speedrunBest: null,
+            achievements: [],
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -283,14 +299,22 @@
                 pathfind: this.cmdPathfind,
                 seek: this.cmdPathfind,
                 journey: this.cmdPathfind,
+                achievements: this.cmdAchievements,
+                badges: this.cmdAchievements,
             };
         }
 
         execute(line) {
             // While the Training Arena is active, every line is an answer, not a command.
-            if (this.state.trainer && this.state.trainer.active) {
-                return this.trainerInput(line);
-            }
+            const out = (this.state.trainer && this.state.trainer.active)
+                ? this.trainerInput(line)
+                : this.runPipeline(line);
+            // Achievements are checked after every line, in all modes.
+            const unlocked = this.checkAchievements();
+            return unlocked.length ? out.concat(unlocked) : out;
+        }
+
+        runPipeline(line) {
             const segments = splitPipes(line.trim());
             if (!segments.length) return [];
             let stdin = null;
@@ -456,6 +480,7 @@
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
+                { kind: "dim", text: "Type 'achievements' to see the badges you can earn." },
             ];
         }
 
@@ -511,11 +536,44 @@
             this.state.xp += xp;
             const title = pf.targetTitle;
             this.state.pathfind = null;
+            this.state.flags.pathfind_done = true;
             const flair = moves <= 1 ? "  A direct route!" : moves <= 3 ? "  Swiftly done." : "";
             return [
                 { kind: "success", text: `🧭 You reached ${title} in ${moves} move${moves === 1 ? "" : "s"}!  +${xp} XP${flair}` },
                 { kind: "dim", text: "Type 'pathfind' to seek a new destination." },
             ];
+        }
+
+        // ── Achievements ─────────────────────────────────────────────────────
+        // Evaluate the catalog against current state; award any newly-earned
+        // badge (once each, +5 XP) and return announcement lines.
+        checkAchievements() {
+            if (!Array.isArray(this.state.achievements)) this.state.achievements = [];
+            const have = this.state.achievements;
+            const out = [];
+            for (const a of ACHIEVEMENTS) {
+                if (have.includes(a.id)) continue;
+                let earned = false;
+                try { earned = !!a.test(this.state); } catch (e) { earned = false; }
+                if (!earned) continue;
+                have.push(a.id);
+                this.state.xp += 5;
+                out.push({ kind: "success", text: `${a.icon} Achievement unlocked: ${a.title} — ${a.desc}  (+5 XP)` });
+            }
+            return out;
+        }
+
+        cmdAchievements() {
+            const have = this.state.achievements || [];
+            const lines = [{ kind: "magic", text: `🏅 Achievements — ${have.length}/${ACHIEVEMENTS.length} unlocked` }];
+            for (const a of ACHIEVEMENTS) {
+                const got = have.includes(a.id);
+                lines.push({
+                    kind: got ? "success" : "dim",
+                    text: got ? `${a.icon} ${a.title} — ${a.desc}` : `🔒 ${a.title} — ${a.desc}`,
+                });
+            }
+            return lines;
         }
 
         promptLabel() {
@@ -614,6 +672,7 @@
             const answered = t.pos;
             const rank = ARENA_RANKS.filter((r) => t.score >= r.min).pop() || ARENA_RANKS[0];
             const completed = answered >= t.queue.length;
+            if (completed) this.state.flags.arena_cleared = true;
             this.state.trainer = null;
             const lines = [];
             if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
