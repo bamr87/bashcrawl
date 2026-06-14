@@ -50,6 +50,10 @@
     append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cd scriptorium then sort verses | uniq  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
+    append("magic", "🆕 New: type  train  to enter the Training Arena — a mini-game to drill your commands for XP.");
+    if (runtime.state.trainer && runtime.state.trainer.active) {
+        for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
+    }
     render();
     let prevState = snapshotState();
 
@@ -138,7 +142,8 @@
     }
 
     function runLine(line) {
-        append("dim", `${runtime.state.cwd} $ ${line}`);
+        const promptEcho = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
+        append("dim", `${promptEcho} ${line}`);
         if (!runtime.state.history.length || runtime.state.history[runtime.state.history.length - 1] !== line) {
             runtime.state.history.push(line);
         }
@@ -166,15 +171,19 @@
         if (next.completed > prev.completed) {
             appendSparkleArt();
             flashPanel(dom.quest);
+            applyHeroMood("quest");
         }
         if (next.hp < prev.hp) {
             shakePanel(dom.inventory);
+            applyHeroMood("hurt");
         }
         if (next.xp > prev.xp) {
             popXp();
+            applyHeroMood("xp");
         }
         if (next.inventory.length > prev.inventory.length) {
             flashPanel(dom.inventory);
+            applyHeroMood("item");
         }
     }
 
@@ -262,7 +271,7 @@
     }
 
     function renderPrompt() {
-        const p = `${runtime.state.cwd} $`;
+        const p = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
         dom.prompt.textContent = p;
         dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
     }
@@ -311,6 +320,45 @@
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("bashcrawl-web-theme", next);
         syncThemeLabel();
+    }
+
+    // === Pixel Hero Companion helpers ===
+    // Swaps the hero panel's data-mood (drives CSS reactions), then returns to
+    // "idle" after the reaction. One tracked timer, cleared before re-arming —
+    // no setInterval/rAF. Safe if the panel is absent (every access guarded).
+    let heroMoodTimer = null;
+    const HERO_MOOD_MS = { hurt: 600, quest: 1500, item: 700, xp: 900, idle: 0 };
+    const HERO_MOOD_LABELS = {
+        idle: "Catching their breath.",
+        hurt: "Ow! That stung.",
+        quest: "Quest cleared! Huzzah!",
+        item: "Ooh, shiny loot!",
+        xp: "Growing stronger...",
+    };
+
+    function applyHeroMood(mood) {
+        const stage = document.getElementById("hero-panel");
+        if (!stage) return;
+        const label = document.getElementById("hero-mood-label");
+        const next = HERO_MOOD_MS[mood] != null ? mood : "idle";
+        if (heroMoodTimer) {
+            clearTimeout(heroMoodTimer);
+            heroMoodTimer = null;
+        }
+        // Re-trigger the CSS animation even if the same mood repeats.
+        stage.dataset.mood = "idle";
+        void stage.offsetWidth;
+        stage.dataset.mood = next;
+        stage.setAttribute("aria-label", `Pixel adventurer companion (${next})`);
+        if (label && HERO_MOOD_LABELS[next]) label.textContent = HERO_MOOD_LABELS[next];
+        if (next !== "idle") {
+            heroMoodTimer = setTimeout(() => {
+                stage.dataset.mood = "idle";
+                stage.setAttribute("aria-label", "Pixel adventurer companion (idle)");
+                if (label) label.textContent = HERO_MOOD_LABELS.idle;
+                heroMoodTimer = null;
+            }, HERO_MOOD_MS[next]);
+        }
     }
 
     function escapeHtml(value) {

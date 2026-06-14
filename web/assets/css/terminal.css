@@ -279,6 +279,42 @@ a.tui-header-link:focus {
 }
 .tui-log span { animation: bc-fadein 140ms ease-out both; }
 
+/* Encounter Creature Gallery: scan-in reveal for freshly-mounted ASCII art.
+   renderLog() rebuilds the <pre> on every render, so each art span re-mounts
+   and re-runs this animation. Color/glow stay on .kind-art (theme-aware via
+   CSS vars). Gated on reduced-motion with a static fallback. */
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-art-reveal {
+        from { opacity: 0; transform: translateY(3px); clip-path: inset(0 100% 0 0); filter: brightness(1.6); }
+        60%  { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1.25); }
+        to   { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1); }
+    }
+    /* display:inline-block is REQUIRED — without it transform/clip-path/filter
+       are ignored on the inline art spans (cf. .fx-pop, which does the same). */
+    .tui-log span.kind-art {
+        display: inline-block;
+        animation: bc-art-reveal 420ms ease-out both;
+    }
+    .tui-log span.kind-art + span.kind-art { animation-delay: 40ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art { animation-delay: 80ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 120ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 160ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 200ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 240ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 280ms; }
+    .tui-log span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art + span.kind-art { animation-delay: 320ms; }
+}
+/* Static fallback: under reduced-motion the art appears instantly, fully lit. */
+@media (prefers-reduced-motion: reduce) {
+    .tui-log span.kind-art {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        clip-path: none;
+        filter: none;
+    }
+}
+
 .tui-log .kind-magic, .tui-log .kind-success {
     text-shadow: 0 0 4px currentColor;
 }
@@ -394,4 +430,221 @@ a.tui-header-link:focus {
         border-right: 0;
         border-bottom: 1px solid var(--border-color);
     }
+}
+
+/* ============================================================
+ * Pixel Hero Companion
+ * CSS-drawn sprite — no emoji, no glyphs. Theme-aware via vars.
+ * All motion gated behind prefers-reduced-motion: no-preference.
+ * ============================================================ */
+.hero-panel {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+.hero-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0 0.1rem;
+}
+
+/* Sprite frame. --hpx is the pixel unit; the whole sprite lives in this box. */
+.hero-sprite {
+    --hpx: 7px;
+    position: relative;
+    width: calc(var(--hpx) * 9);
+    height: calc(var(--hpx) * 9);
+    image-rendering: pixelated;
+    transform: translateZ(0);
+}
+
+/* Each body part is an absolutely-placed crisp pixel block. */
+.hero-px {
+    position: absolute;
+    display: block;
+    border-radius: 1px;
+}
+
+/* Helm (metal/heading tone) */
+.hero-helm {
+    top: 0;
+    left: calc(var(--hpx) * 2);
+    width: calc(var(--hpx) * 5);
+    height: calc(var(--hpx) * 2);
+    background: var(--text-secondary);
+    box-shadow: inset 0 calc(var(--hpx) * -0.4) 0 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Face (skin = warm accent) */
+.hero-face {
+    top: calc(var(--hpx) * 2);
+    left: calc(var(--hpx) * 2.5);
+    width: calc(var(--hpx) * 4);
+    height: calc(var(--hpx) * 2);
+    background: var(--accent-yellow);
+    box-shadow:
+        inset calc(var(--hpx) * 0.8) calc(var(--hpx) * 0.6) 0 0 var(--bg-primary),
+        inset calc(var(--hpx) * -1.4) calc(var(--hpx) * 0.6) 0 0 var(--bg-primary);
+}
+
+/* Torso (tunic = green adventurer) */
+.hero-torso {
+    top: calc(var(--hpx) * 4);
+    left: calc(var(--hpx) * 2);
+    width: calc(var(--hpx) * 5);
+    height: calc(var(--hpx) * 3);
+    background: var(--accent-green);
+    box-shadow: inset 0 calc(var(--hpx) * -0.6) 0 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Arms */
+.hero-arm {
+    top: calc(var(--hpx) * 4);
+    width: var(--hpx);
+    height: calc(var(--hpx) * 2.4);
+    background: var(--accent-yellow);
+}
+.hero-arm-l { left: calc(var(--hpx) * 1); }
+.hero-arm-r { left: calc(var(--hpx) * 7); }
+
+/* Legs (boots = muted) */
+.hero-legs {
+    top: calc(var(--hpx) * 7);
+    left: calc(var(--hpx) * 2.5);
+    width: calc(var(--hpx) * 4);
+    height: calc(var(--hpx) * 2);
+    background: var(--text-muted);
+    box-shadow: inset calc(var(--hpx) * 1) 0 0 0 var(--bg-card);
+}
+
+/* Blade held in right hand (steel = blue accent). Pure CSS bar, not a glyph. */
+.hero-blade {
+    top: calc(var(--hpx) * 1);
+    left: calc(var(--hpx) * 7.6);
+    width: calc(var(--hpx) * 0.7);
+    height: calc(var(--hpx) * 5);
+    background: var(--accent-blue);
+    box-shadow:
+        0 calc(var(--hpx) * 0) 0 0 var(--accent-blue),
+        0 calc(var(--hpx) * 4.6) 0 0 var(--accent-yellow); /* pommel */
+    transform-origin: bottom center;
+}
+
+/* Ground shadow (sits under the sprite) */
+.hero-shadow {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--hpx) * -0.6);
+    width: calc(var(--hpx) * 6);
+    height: calc(var(--hpx) * 1);
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 50%;
+    filter: blur(1px);
+}
+[data-theme="light"] .hero-shadow { background: rgba(0, 0, 0, 0.16); }
+
+/* Sparkle particles (hidden until 'item' mood). CSS dots, not emoji. */
+.hero-fx {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.hero-spark {
+    position: absolute;
+    width: calc(var(--hpx) * 0.8);
+    height: calc(var(--hpx) * 0.8);
+    border-radius: 50%;
+    background: var(--accent-yellow);
+    box-shadow: 0 0 6px 1px rgba(251, 191, 36, 0.7);
+    opacity: 0;
+}
+.hero-spark-1 { top: 10%; left: 12%; }
+.hero-spark-2 { top: 4%;  left: 70%; }
+.hero-spark-3 { top: 38%; left: 86%; }
+
+.hero-mood-label {
+    margin: 0;
+    font-size: 0.78rem;
+    min-height: 1.05em;
+}
+
+/* ---- Static mood tints (apply in ALL motion preferences) ---- */
+.hero-stage[data-mood="hurt"] .hero-torso { background: var(--accent-red); }
+.hero-stage[data-mood="hurt"] .hero-face  { background: var(--accent-red); }
+.hero-stage[data-mood="xp"]   .hero-sprite { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.65)); }
+.hero-stage[data-mood="quest"] .hero-blade { background: var(--accent-yellow); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--accent-yellow); }
+
+/* ---- Motion — only when reduced motion is NOT requested ---- */
+@media (prefers-reduced-motion: no-preference) {
+    .hero-stage[data-mood="idle"] .hero-sprite {
+        animation: hero-bob 2600ms ease-in-out infinite;
+    }
+    @keyframes hero-bob {
+        0%, 100% { transform: translateY(0) translateZ(0); }
+        50%      { transform: translateY(calc(var(--hpx) * -0.5)) translateZ(0); }
+    }
+
+    .hero-stage[data-mood="hurt"] .hero-sprite {
+        animation: hero-hurt 480ms ease-in-out 1;
+    }
+    @keyframes hero-hurt {
+        0%   { transform: translateX(0) rotate(0); }
+        20%  { transform: translateX(calc(var(--hpx) * -0.8)) rotate(-5deg); }
+        45%  { transform: translateX(calc(var(--hpx) * 0.6)) rotate(4deg); }
+        70%  { transform: translateX(calc(var(--hpx) * -0.4)) rotate(-2deg); }
+        100% { transform: translateX(0) rotate(0); }
+    }
+
+    .hero-stage[data-mood="quest"] .hero-sprite {
+        animation: hero-cheer 720ms cubic-bezier(0.34, 1.56, 0.64, 1) 2;
+    }
+    .hero-stage[data-mood="quest"] .hero-arm-r,
+    .hero-stage[data-mood="quest"] .hero-blade {
+        animation: hero-thrust 720ms ease-out 2;
+        transform-origin: bottom center;
+    }
+    @keyframes hero-cheer {
+        0%, 100% { transform: translateY(0); }
+        40%      { transform: translateY(calc(var(--hpx) * -1.6)); }
+    }
+    @keyframes hero-thrust {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        40%      { transform: translateY(calc(var(--hpx) * -0.8)) rotate(-12deg); }
+    }
+
+    .hero-stage[data-mood="item"] .hero-sprite {
+        animation: hero-hop 520ms ease-out 1;
+    }
+    .hero-stage[data-mood="item"] .hero-spark {
+        animation: hero-twinkle 620ms ease-out 1;
+    }
+    .hero-stage[data-mood="item"] .hero-spark-2 { animation-delay: 90ms; }
+    .hero-stage[data-mood="item"] .hero-spark-3 { animation-delay: 180ms; }
+    @keyframes hero-hop {
+        0%, 100% { transform: translateY(0); }
+        45%      { transform: translateY(calc(var(--hpx) * -0.9)); }
+    }
+    @keyframes hero-twinkle {
+        0%   { opacity: 0; transform: scale(0.4); }
+        40%  { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 0; transform: scale(0.6); }
+    }
+
+    .hero-stage[data-mood="xp"] .hero-sprite {
+        animation: hero-glow 760ms ease-in-out 1;
+    }
+    @keyframes hero-glow {
+        0%, 100% { filter: drop-shadow(0 0 0 rgba(34, 211, 238, 0)); transform: scale(1); }
+        50%      { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.8)); transform: scale(1.06); }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-sprite,
+    .hero-arm-r,
+    .hero-blade,
+    .hero-spark { animation: none !important; }
 }

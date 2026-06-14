@@ -26,6 +26,7 @@ make help              # List all targets
 make setup             # First-time game setup (bash setup.sh --quick)
 make install-deps      # pip install requirements.txt + requirements-dev.txt
                        # (or: python3 -m pip install -e ".[dev]")
+make venv              # create .venv and install all deps (recommended on system Python)
 
 # Testing — runs pytest from within test/ with markers
 make test              # unit + integration (the default suite; skips ai + demo)
