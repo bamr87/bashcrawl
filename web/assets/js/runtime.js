@@ -189,6 +189,14 @@
         { min: 130, title: "Terminal Master" },
         { min: 190, title: "Archmage of the Command Line" },
     ];
+    // Compass rose for the Path-Finder mini-game (box-safe ASCII).
+    const PATHFIND_ART = [
+        "       .  N  .",
+        "    .   \\ | /   .",
+        "   W ----(+)---- E",
+        "    '   / | \\   '",
+        "       '  S  '",
+    ].join("\n");
 
     function defaultState(root) {
         return {
@@ -206,6 +214,7 @@
             flags: {},
             reveals: {},
             trainer: null,
+            pathfind: null,
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -268,6 +277,9 @@
                 drill: this.cmdTrain,
                 practice: this.cmdTrain,
                 arena: this.cmdTrain,
+                pathfind: this.cmdPathfind,
+                seek: this.cmdPathfind,
+                journey: this.cmdPathfind,
             };
         }
 
@@ -296,6 +308,10 @@
                     continue;
                 }
                 collected.push(...result);
+            }
+            // Path-Finder watches normal play: count moves, detect arrival.
+            if (this.state.pathfind && this.state.pathfind.active) {
+                collected.push(...this.pathfindObserve(line));
             }
             return collected;
         }
@@ -436,15 +452,77 @@
             return [
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
-                { kind: "magic", text: "Mini-game:  type  train  to enter the Training Arena and drill your spells for XP." },
+                { kind: "magic", text: "Mini-games:  'train' drills your spells in the Training Arena;  'pathfind' sends you questing to a target room. Both grant XP." },
             ];
         }
 
         // Prompt shown in the input row; the Arena swaps in a battle prompt.
+        // ── Path-Finder mini-game ───────────────────────────────────────────
+        // Gives the player a target room and lets them navigate there with REAL
+        // cd/ls/pwd; counts cd "moves" and detects arrival. Practices the core
+        // navigation skill (distinct from the recall-based Training Arena).
+        cmdPathfind(args) {
+            if (this.state.trainer && this.state.trainer.active) {
+                return [{ kind: "error", text: "Finish or quit the Training Arena first (type 'quit')." }];
+            }
+            const sub = (args[0] || "").toLowerCase();
+            const pf = this.state.pathfind;
+            if (["quit", "stop", "abort", "q"].includes(sub)) {
+                if (!pf || !pf.active) return [{ kind: "dim", text: "No journey in progress." }];
+                const target = pf.targetTitle;
+                this.state.pathfind = null;
+                return [{ kind: "dim", text: `Journey to ${target} abandoned.` }];
+            }
+            if (pf && pf.active) {
+                return [
+                    { kind: "magic", text: `🧭 Still seeking ${pf.targetTitle}  ·  ${pf.moves} move(s) so far` },
+                    { kind: "dim", text: "Use cd / ls / pwd to find it. 'pathfind quit' to abandon." },
+                ];
+            }
+            // Pick a reachable main-path target that isn't the current room.
+            const candidates = [
+                "/entrance",
+                "/entrance/cellar",
+                "/entrance/cellar/armoury",
+                "/entrance/cellar/armoury/chamber",
+            ].filter((p) => this.isDir(p) && p !== this.state.cwd);
+            if (!candidates.length) return [{ kind: "error", text: "No reachable destination right now." }];
+            const target = candidates[Math.floor(Math.random() * candidates.length)];
+            const targetTitle = (this.world.rooms[target] || {}).title || target;
+            this.state.pathfind = { active: true, target, targetTitle, moves: 0 };
+            return [
+                { kind: "art", text: PATHFIND_ART },
+                { kind: "info", text: `Find your way to ${targetTitle}.` },
+                { kind: "dim", text: "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon." },
+            ];
+        }
+
+        pathfindObserve(line) {
+            const pf = this.state.pathfind;
+            const cmd = tokenize(line.trim())[0];
+            if (cmd === "cd") pf.moves += 1;
+            if (this.state.cwd !== pf.target) return [];
+            // Arrived.
+            const moves = pf.moves;
+            const xp = Math.max(15, 45 - moves * 5);
+            this.state.xp += xp;
+            const title = pf.targetTitle;
+            this.state.pathfind = null;
+            const flair = moves <= 1 ? "  A direct route!" : moves <= 3 ? "  Swiftly done." : "";
+            return [
+                { kind: "success", text: `🧭 You reached ${title} in ${moves} move${moves === 1 ? "" : "s"}!  +${xp} XP${flair}` },
+                { kind: "dim", text: "Type 'pathfind' to seek a new destination." },
+            ];
+        }
+
         promptLabel() {
             const t = this.state.trainer;
             if (t && t.active) {
                 return `arena ${Math.min(t.pos + 1, t.queue.length)}/${t.queue.length} ❯`;
+            }
+            const pf = this.state.pathfind;
+            if (pf && pf.active) {
+                return `seek ${pf.targetTitle} [${pf.moves}] ❯`;
             }
             return `${this.state.cwd} $`;
         }

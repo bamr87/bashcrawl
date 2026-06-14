@@ -120,7 +120,7 @@
     append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cd scriptorium then sort verses | uniq  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
-    append("magic", "🆕 New: type  train  to enter the Training Arena — a mini-game to drill your commands for XP.");
+    append("magic", "🆕 Mini-games:  train  (drill commands in the Training Arena)  ·  pathfind  (quest to a target room). Both earn XP.");
     if (runtime.state.trainer && runtime.state.trainer.active) {
         for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
     }
