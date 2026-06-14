@@ -212,6 +212,13 @@
         "    '   / | \\   '",
         "       '  S  '",
     ].join("\n");
+    // Header for the profile / character sheet (box-safe ASCII).
+    const PROFILE_ART = [
+        "  .-----------------------------.",
+        "  |      C H A R A C T E R      |",
+        "  |          S H E E T          |",
+        "  '-----------------------------'",
+    ].join("\n");
 
     function defaultState(root) {
         return {
@@ -301,6 +308,9 @@
                 journey: this.cmdPathfind,
                 achievements: this.cmdAchievements,
                 badges: this.cmdAchievements,
+                profile: this.cmdProfile,
+                stats: this.cmdProfile,
+                sheet: this.cmdProfile,
             };
         }
 
@@ -480,7 +490,7 @@
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
-                { kind: "dim", text: "Type 'achievements' to see the badges you can earn." },
+                { kind: "dim", text: "Type 'achievements' for badges, or 'profile' for your character sheet." },
             ];
         }
 
@@ -561,6 +571,31 @@
                 out.push({ kind: "success", text: `${a.icon} Achievement unlocked: ${a.title} — ${a.desc}  (+5 XP)` });
             }
             return out;
+        }
+
+        // Character sheet: a one-glance summary of all progress.
+        cmdProfile() {
+            const s = this.state;
+            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
+            const cmds = s.stats.commands || {};
+            const distinct = Object.keys(cmds).length;
+            const total = Object.values(cmds).reduce((a, b) => a + b, 0);
+            const inv = s.inventory || [];
+            const best = s.speedrunBest != null ? `${s.speedrunBest.toFixed(1)}s` : "—";
+            const label = (text) => `  ${(text + ":").padEnd(18)}`;
+            return [
+                { kind: "art", text: PROFILE_ART },
+                { kind: "magic", text: `  Rank:  ${rank}` },
+                { kind: "output", text: `${label("XP")}${s.xp}        HP: ${s.hp}/100` },
+                { kind: "output", text: `${label("Quests")}${s.completedQuestIds.length}/${this.quests.length} complete` },
+                { kind: "output", text: `${label("Badges")}${(s.achievements || []).length}/${ACHIEVEMENTS.length} earned` },
+                { kind: "output", text: `${label("Scrolls read")}${s.stats.catScrollCount || 0}` },
+                { kind: "output", text: `${label("Commands")}${distinct} distinct (${total} cast)` },
+                { kind: "output", text: `${label("Hidden rooms")}${Object.keys(s.reveals || {}).length} unlocked` },
+                { kind: "output", text: `${label("Best speed run")}${best}` },
+                { kind: "output", text: `${label("Inventory")}${inv.length ? inv.join(", ") : "(empty)"}` },
+                { kind: "dim", text: "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow" },
+            ];
         }
 
         cmdAchievements() {
