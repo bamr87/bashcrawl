@@ -252,6 +252,7 @@
         if (next.hp < prev.hp) {
             shakePanel(dom.inventory);
             applyHeroMood("hurt");
+            screenFlash("damage");
         }
         if (next.xp > prev.xp) {
             popXp();
@@ -273,6 +274,19 @@
             "      ✧  *   .  ✦   . *  ✧   ✦",
         ].join("\n");
         append("art", lines);
+    }
+
+    // Brief full-screen flash via a transient overlay element (no pseudo-element
+    // conflicts with the CRT/level-up layers). Auto-removed; reduced-motion-safe.
+    function screenFlash(kind) {
+        const el = document.createElement("div");
+        el.className = `bc-screenflash bc-screenflash-${kind}`;
+        el.setAttribute("aria-hidden", "true");
+        document.body.appendChild(el);
+        let done = false;
+        const cleanup = () => { if (done) return; done = true; el.remove(); };
+        el.addEventListener("animationend", cleanup, { once: true });
+        setTimeout(cleanup, 1000);
     }
 
     function flashLevelUp() {

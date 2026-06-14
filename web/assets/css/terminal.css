@@ -946,3 +946,31 @@ body[data-crt="on"] .tui-log {
         animation: bc-levelup-flash 900ms ease-out;
     }
 }
+
+/* ============================================================
+   Damage flash — a brief red edge-pulse over the viewport when
+   the player takes a hit (HP drops). A transient full-screen
+   overlay element appended/removed by game.js. Motion-gated:
+   under reduced motion the element has no styling and is inert.
+   ============================================================ */
+.bc-screenflash {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-damage-flash {
+        0%   { opacity: 0; }
+        12%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .bc-screenflash-damage {
+        background: radial-gradient(
+            ellipse at center,
+            rgba(248, 113, 113, 0) 40%,
+            rgba(248, 113, 113, 0.5) 100%
+        );
+        animation: bc-damage-flash 600ms ease-out;
+    }
+}
