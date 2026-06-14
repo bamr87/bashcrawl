@@ -917,3 +917,32 @@ body[data-crt="on"] .tui-log {
     0%, 100% { opacity: 0.85; filter: brightness(0.95); text-shadow: 0 0 6px rgba(192, 132, 252, 0.3); }
     50%      { opacity: 1;    filter: brightness(1.15); text-shadow: 0 0 13px rgba(192, 132, 252, 0.6); }
 }
+
+/* ============================================================
+   Level-Up flash — a brief golden bloom over the whole shell
+   when the player's rank advances. Motion-gated; under reduced
+   motion the class is inert (the ::before only exists in the
+   no-preference block) so nothing flashes.
+   ============================================================ */
+.web-shell.fx-levelup { position: relative; }
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-levelup-flash {
+        0%   { opacity: 0; }
+        20%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .web-shell.fx-levelup::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        pointer-events: none;
+        background: radial-gradient(
+            ellipse at center,
+            rgba(251, 191, 36, 0.38) 0%,
+            rgba(251, 191, 36, 0.10) 45%,
+            rgba(251, 191, 36, 0) 75%
+        );
+        animation: bc-levelup-flash 900ms ease-out;
+    }
+}

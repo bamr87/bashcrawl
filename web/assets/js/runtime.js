@@ -247,6 +247,12 @@
         "    '   / | \\   '",
         "       '  S  '",
     ].join("\n");
+    // Banner shown when the player's rank advances (box-safe ASCII).
+    const LEVELUP_ART = [
+        "    .  *  .       *   .    *  .",
+        "   *   L E V E L   U P !   *",
+        "    *  .   *       .   *  .  *",
+    ].join("\n");
     // Header for the profile / character sheet (box-safe ASCII).
     const PROFILE_ART = [
         "  .-----------------------------.",
@@ -276,6 +282,7 @@
             achievements: [],
             bestiary: [],
             daily: { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null },
+            rankIndex: 0,
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -361,9 +368,25 @@
             const out = (this.state.trainer && this.state.trainer.active)
                 ? this.trainerInput(line)
                 : this.runPipeline(line);
-            // Achievements first (they award XP), then the daily-challenge check.
-            const extra = this.checkAchievements().concat(this.checkDaily());
+            // Achievements first (they award XP), then daily, then rank-up (reads final XP).
+            const extra = this.checkAchievements().concat(this.checkDaily()).concat(this.checkRankUp());
             return extra.length ? out.concat(extra) : out;
+        }
+
+        // Celebrate when accumulated XP crosses an ARENA_RANKS threshold.
+        checkRankUp() {
+            const idx = ARENA_RANKS.reduce((acc, r, i) => ((this.state.xp || 0) >= r.min ? i : acc), 0);
+            if (typeof this.state.rankIndex !== "number") {
+                this.state.rankIndex = idx; // baseline for older saves; no retroactive party
+                return [];
+            }
+            if (idx <= this.state.rankIndex) return [];
+            this.state.rankIndex = idx;
+            return [
+                { kind: "control", action: "levelup" },
+                { kind: "art", text: LEVELUP_ART },
+                { kind: "success", text: `★  You are now ${ARENA_RANKS[idx].title}!` },
+            ];
         }
 
         runPipeline(line) {

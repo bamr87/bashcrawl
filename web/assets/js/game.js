@@ -231,6 +231,10 @@
                 docsPanel.setData(data.docs, runtime);
                 window.BashcrawlStorage.clear();
             }
+            if (out.action === "levelup") {
+                flashLevelUp();
+                continue;
+            }
             append(out.kind, out.text || "");
         }
         const after = snapshotState();
@@ -269,6 +273,15 @@
             "      ✧  *   .  ✦   . *  ✧   ✦",
         ].join("\n");
         append("art", lines);
+    }
+
+    function flashLevelUp() {
+        const shell = document.querySelector(".web-shell");
+        if (!shell) return;
+        shell.classList.remove("fx-levelup");
+        void shell.offsetWidth;
+        shell.classList.add("fx-levelup");
+        setTimeout(() => shell.classList.remove("fx-levelup"), 950);
     }
 
     function flashPanel(el) {
