@@ -58,7 +58,26 @@
         goblet:   ["        \\        /", "         \\.----./", "          \\    /", "           \\  /", "            )(", "           /  \\", "          /____\\", "      a jeweled goblet stands"].join("\n"),
         spell:    ["          *  .  +", "        .  _||_  .", "      +   /    \\   *", "     .   | rune |   .", "      *   \\____/   +", "        '  |  |  '", "     ~ the glyph ignites ~"].join("\n"),
         crystal:  ["         _________", "        /  _   _  \\", "       |  (o) (o)  |", "       |     >     |", "       |   \\___/   |", "        \\_________/", "      the crystal murmurs..."].join("\n"),
+        penguin:  ["        .--.", "       /o  o\\", "       \\ <> /", "      /|    |\\", "     ` |    | `", "       |____|", "       /    \\", "    a dapper penguin"].join("\n"),
+        nyarlathotep: ["      .-~~~-.", "     / .   . \\", "    |  (o o)  |", "     \\  \\_/  /", "    .-/.   .\\-.", "    ) (|   |) (", "     ~~ \\___/ ~~", "    the crawling chaos"].join("\n"),
+        fountain: ["       .  .  .", "        \\ | /", "       .-=^=-.", "      (   :   )", "       \\ ~~~ /", "        |___|", "       /_____\\", "    a wishing fountain"].join("\n"),
     };
+
+    // Bestiary metadata (display name + blurb) for each catalogued encounter,
+    // in the order shown by the `bestiary` command.
+    const BESTIARY = [
+        { key: "treasure", name: "Treasure Chest", blurb: "Spills jewels for the bold." },
+        { key: "monster", name: "Coiled Serpent", blurb: "Strikes at the unprepared." },
+        { key: "ghost", name: "Restless Ghost", blurb: "Drifts through locked doors." },
+        { key: "potion", name: "Glowing Potion", blurb: "Restores a weary hero's vigor." },
+        { key: "statue", name: "Stone Guardian", blurb: "Wakes when you draw near." },
+        { key: "goblet", name: "Jeweled Goblet", blurb: "A prize of the deep vaults." },
+        { key: "spell", name: "Igniting Rune", blurb: "Crackles with raw magick." },
+        { key: "crystal", name: "Murmuring Crystal", blurb: "Whispers half-truths." },
+        { key: "penguin", name: "Dapper Penguin", blurb: "Inexplicably formal." },
+        { key: "nyarlathotep", name: "The Crawling Chaos", blurb: "Best left uncatalogued." },
+        { key: "fountain", name: "Wishing Fountain", blurb: "Bubbles with possibility." },
+    ];
 
     // Return the {kind:'art'} portrait for a script basename, or null. O(1), pure.
     function encounterArtLine(script) {
@@ -201,6 +220,7 @@
         { id: "arena_graduate", icon: "🏅", title: "Arena Graduate", desc: "Cleared a Training Arena run.", test: (s) => !!(s.flags && s.flags.arena_cleared) },
         { id: "speed_demon", icon: "🏆", title: "Speed Demon", desc: "Finished a timed Speed Run.", test: (s) => s.speedrunBest != null },
         { id: "trailblazer", icon: "✅", title: "Trailblazer", desc: "Completed a Path-Finder journey.", test: (s) => !!(s.flags && s.flags.pathfind_done) },
+        { id: "naturalist", icon: "✨", title: "Naturalist", desc: "Catalogued 5 creatures in the bestiary.", test: (s) => (s.bestiary || []).length >= 5 },
         { id: "seasoned", icon: "🔥", title: "Seasoned Adventurer", desc: "Earned 150 XP.", test: (s) => (s.xp || 0) >= 150 },
     ];
 
@@ -239,6 +259,7 @@
             pathfind: null,
             speedrunBest: null,
             achievements: [],
+            bestiary: [],
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -311,6 +332,8 @@
                 profile: this.cmdProfile,
                 stats: this.cmdProfile,
                 sheet: this.cmdProfile,
+                bestiary: this.cmdBestiary,
+                codex: this.cmdBestiary,
             };
         }
 
@@ -490,7 +513,7 @@
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
-                { kind: "dim", text: "Type 'achievements' for badges, or 'profile' for your character sheet." },
+                { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, or 'bestiary' to catalogue encounters." },
             ];
         }
 
@@ -596,6 +619,31 @@
                 { kind: "output", text: `${label("Inventory")}${inv.length ? inv.join(", ") : "(empty)"}` },
                 { kind: "dim", text: "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow" },
             ];
+        }
+
+        // Bestiary: catalogue of encounters you've run. `bestiary <key>` shows
+        // the art + blurb for a discovered creature; bare `bestiary` lists all.
+        cmdBestiary(args) {
+            const seen = this.state.bestiary || [];
+            const want = (args[0] || "").toLowerCase();
+            if (want) {
+                const entry = BESTIARY.find((e) => e.key === want);
+                if (!entry) return [{ kind: "error", text: `No such creature: ${want}` }];
+                if (!seen.includes(want)) return [{ kind: "dim", text: `You haven't encountered the ${entry.name} yet.` }];
+                return [
+                    { kind: "art", text: ENCOUNTER_ART[want] || "" },
+                    { kind: "magic", text: `  ${entry.name}` },
+                    { kind: "output", text: `  ${entry.blurb}` },
+                ];
+            }
+            const lines = [{ kind: "magic", text: `✨ Bestiary — ${seen.length}/${BESTIARY.length} catalogued` }];
+            for (const e of BESTIARY) {
+                lines.push(seen.includes(e.key)
+                    ? { kind: "success", text: `  ✅ ${e.name} — ${e.blurb}` }
+                    : { kind: "dim", text: "  🔒 ??? — undiscovered" });
+            }
+            lines.push({ kind: "dim", text: "  Run an encounter (e.g. ./treasure) to catalogue it.  'bestiary <name>' to view one." });
+            return lines;
         }
 
         cmdAchievements() {
@@ -1171,7 +1219,11 @@
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];
             const portrait = encounterArtLine(script);
-            if (portrait) messages.unshift(portrait);
+            if (portrait) {
+                messages.unshift(portrait);
+                if (!Array.isArray(this.state.bestiary)) this.state.bestiary = [];
+                if (!this.state.bestiary.includes(script)) this.state.bestiary.push(script);
+            }
             for (const item of encounter.grants_items || []) {
                 if (!this.state.inventory.includes(item)) this.state.inventory.push(item);
             }
