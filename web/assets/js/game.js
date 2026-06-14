@@ -20,6 +20,7 @@
         docsContent: document.getElementById("docs-content"),
         docsSearch: document.getElementById("docs-search"),
         themeToggle: document.getElementById("theme-toggle"),
+        crtToggle: document.getElementById("crt-toggle"),
     };
 
     const data = await loadData();
@@ -118,8 +119,10 @@
     dom.docsToggle.addEventListener("click", () => docsPanel.toggle());
     dom.docsClose.addEventListener("click", () => docsPanel.close());
     dom.themeToggle.addEventListener("click", toggleTheme);
+    dom.crtToggle.addEventListener("click", toggleCrt);
 
     initTheme();
+    initCrt();
     dom.input.focus();
 
     async function loadData() {
@@ -322,6 +325,28 @@
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("bashcrawl-web-theme", next);
         syncThemeLabel();
+    }
+
+    // === CRT Retro Mode (mirrors the theme toggle) ===
+    // Persists to localStorage 'bashcrawl-web-crt'; default OFF; sets data-crt on <body>.
+    function initCrt() {
+        const on = localStorage.getItem("bashcrawl-web-crt") === "on";
+        document.body.setAttribute("data-crt", on ? "on" : "off");
+        syncCrtLabel();
+    }
+
+    function syncCrtLabel() {
+        const on = document.body.getAttribute("data-crt") === "on";
+        dom.crtToggle.textContent = on ? "CRT On" : "CRT Off";
+        dom.crtToggle.setAttribute("aria-pressed", String(on));
+        dom.crtToggle.setAttribute("title", on ? "Disable retro CRT overlay" : "Enable retro CRT overlay");
+    }
+
+    function toggleCrt() {
+        const next = document.body.getAttribute("data-crt") === "on" ? "off" : "on";
+        document.body.setAttribute("data-crt", next);
+        localStorage.setItem("bashcrawl-web-crt", next);
+        syncCrtLabel();
     }
 
     // === Pixel Hero Companion helpers ===
