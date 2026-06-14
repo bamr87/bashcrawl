@@ -845,9 +845,14 @@ body[data-crt="on"] .tui-log {
         }
     }
 }
+/* Sweep stays within [0%, 100%]: with background-size:220% and no-repeat,
+   any position outside this range leaves part of the text uncovered by the
+   gradient, which (because text-fill is transparent) makes those glyphs
+   vanish mid-animation. Both endpoints render all-yellow (the green shine
+   sits just off-screen), so the loop repeats seamlessly with no jump. */
 @keyframes bc-banner-sweep {
-    from { background-position: 140% 0; }
-    to   { background-position: -40% 0; }
+    from { background-position: 100% 0; }
+    to   { background-position: 0% 0; }
 }
 
 /* (2) ROOM VIGNETTE — small ASCII mascot below the Location panel. */
