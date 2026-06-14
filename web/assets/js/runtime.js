@@ -272,6 +272,7 @@
             userNodes: {},
             completedQuestIds: [],
             currentQuestId: 0,
+            visited: [],
             history: [],
             historyIndex: -1,
             flags: {},
