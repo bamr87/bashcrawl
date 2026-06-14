@@ -100,7 +100,13 @@ jobs:
           PYTHONUTF8: "1"
           PYTHONIOENCODING: utf-8
 
+      # Integration tests shell out to the POSIX game (subprocess `bash main.sh …`).
+      # On the Windows runner `bash` resolves to the WSL stub (no distro installed),
+      # so the game never runs and every test fails. This is a POSIX-shell game;
+      # Windows still runs the full unit suite above (which validates cross-platform
+      # Python, incl. the static-web export). Integration coverage stays on Linux+macOS.
       - name: Run integration tests
+        if: runner.os != 'Windows'
         shell: bash
         run: bash scripts/run_tests.sh integration
         env:
