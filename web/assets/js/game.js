@@ -36,6 +36,75 @@
     });
     docsPanel.setData(data.docs, runtime);
 
+    // === Room vignettes: box-safe ASCII mascot per area (banner shimmer is pure CSS) ===
+    const ROOM_VIGNETTES = {
+        entrance: [
+            "  (  )      (  )   ",
+            "  )(   /\\   )(     ",
+            "  ||  /  \\  ||     ",
+            " _||_/    \\_||_    ",
+            "[==||      ||==]   ",
+            "   ''      ''      ",
+        ],
+        cellar: [
+            "   (~)        (~)  ",
+            "  .[ ].      .[ ]. ",
+            "  | | |      | | | ",
+            "  | | |      | | | ",
+            " _|_|_|_    _|_|_|_",
+            " '-----'    '-----'",
+        ],
+        graveyard: [
+            " .---.   __   .---.",
+            " | + |  /  \\  | R |",
+            " |   | |    | |   |",
+            " *web* |    | ~~~~ ",
+            "_|___|_|____|_|___|",
+            "  ~~~     ~~~   ~~~",
+        ],
+        vault: [
+            "      /\\          ",
+            "     /  \\   /\\    ",
+            "    / /\\ \\ /  \\   ",
+            "    \\ \\/ / \\  /   ",
+            "     \\  /   \\/    ",
+            "      \\/  *  .    ",
+        ],
+        rift: [
+            "    . * .   .  *   ",
+            "   *  .-~~~-.  .   ",
+            "  .  /  _    \\ *   ",
+            "  * |  ( o )  | .  ",
+            "   . \\  ~-~  / *   ",
+            "    * '-...-'  .   ",
+        ],
+        deep: [
+            "    *  .   *   .   ",
+            "  .   .-~~~~-.  *  ",
+            "  *  / shadow \\ .  ",
+            "   . \\        / *  ",
+            "  .   '------'  .  ",
+        ],
+    };
+
+    function vignetteKeyForRoom(actualPath, cwd) {
+        const p = String(actualPath || cwd || "");
+        if (p.includes("/.rift") || p.includes("/rift")) return "rift";
+        if (p.includes("/.vault") || p.includes("/vault")) return "vault";
+        if (p.includes("/graveyard") || p.includes("/.chapel") || p.includes("/chapel")) return "graveyard";
+        if (p.includes("/cellar") || p.includes("/armoury") || p.includes("/chamber")) return "cellar";
+        if (p === "/entrance" || p.endsWith("/entrance") || p.includes("/workshop") || p.includes("/scriptorium")) return "entrance";
+        return "deep";
+    }
+
+    function roomVignetteHtml() {
+        const actual = (runtime.actual ? runtime.actual(runtime.state.cwd) : runtime.state.cwd);
+        const key = vignetteKeyForRoom(actual, runtime.state.cwd);
+        const art = ROOM_VIGNETTES[key] || ROOM_VIGNETTES.deep;
+        const safe = art.map(escapeHtml).join("\n");
+        return `<pre class="room-vignette" data-room-art="${key}" aria-hidden="true">${safe}</pre>`;
+    }
+
     const logLines = [];
     const BANNER = [
         "       ╔════════════════════════════════════════════════════╗",
@@ -272,7 +341,9 @@
             const marker = entry.type === "dir" ? "/" : entry.type === "exec" ? "*" : "";
             return `${entry.type === "dir" ? "📁" : entry.type === "exec" ? "⚡" : "📄"} ${escapeHtml(entry.name)}${marker}`;
         }).join("<br>");
-        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p><p>${entries || "(empty)"}</p>`;
+        // Vignette sits under the room name (before the scrollable entry list)
+        // so the ambient mascot stays visible even when contents are long.
+        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p>${roomVignetteHtml()}<p>${entries || "(empty)"}</p>`;
     }
 
     function renderPrompt() {

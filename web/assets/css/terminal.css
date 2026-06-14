@@ -129,8 +129,10 @@ a.tui-header-link:focus {
 }
 
 .tui-room-panel {
-    flex: 1;
-    overflow: auto;
+    /* Size to content; let the whole .tui-sidebar scroll (it is overflow:auto)
+       rather than collapsing this panel to its title when several panels share
+       a short viewport. */
+    flex: 0 0 auto;
 }
 
 .tui-content {
@@ -808,4 +810,110 @@ body[data-crt="on"] .tui-log {
         animation: bc-crt-flicker 4.5s steps(1, end) infinite;
         will-change: opacity;
     }
+}
+
+/* ============================================================
+   Living Banner & Room Vignettes
+   All motion gated behind prefers-reduced-motion; static first.
+   ============================================================ */
+
+/* (1) LIVING BANNER — base is a plain solid accent (identical to the
+   prior look in every theme); the gradient shimmer applies ONLY when
+   motion is welcome and background-clip:text is supported. */
+.tui-log .kind-banner {
+    color: var(--accent-yellow);
+}
+@media (prefers-reduced-motion: no-preference) {
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+        .tui-log .kind-banner {
+            background-image: linear-gradient(
+                100deg,
+                var(--accent-yellow) 0%,
+                var(--accent-yellow) 35%,
+                var(--accent-green) 50%,
+                var(--accent-yellow) 65%,
+                var(--accent-yellow) 100%
+            );
+            background-size: 220% 100%;
+            background-repeat: no-repeat;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-shadow: none; /* glyphs are transparent; drop inherited glow */
+            animation: bc-banner-sweep 6s linear infinite;
+        }
+    }
+}
+@keyframes bc-banner-sweep {
+    from { background-position: 140% 0; }
+    to   { background-position: -40% 0; }
+}
+
+/* (2) ROOM VIGNETTE — small ASCII mascot below the Location panel. */
+.room-vignette {
+    margin: 0.5rem 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.15;
+    white-space: pre;
+    word-break: normal;
+    overflow: hidden;
+    color: var(--accent-purple);
+    opacity: 0.92;
+    text-shadow: 0 0 6px rgba(192, 132, 252, 0.22);
+}
+.room-vignette[data-room-art="entrance"],
+.room-vignette[data-room-art="cellar"] {
+    color: var(--accent-yellow);
+    text-shadow: 0 0 7px rgba(251, 191, 36, 0.35);
+}
+.room-vignette[data-room-art="vault"] {
+    color: var(--accent-blue);
+    text-shadow: 0 0 7px rgba(34, 211, 238, 0.35);
+}
+.room-vignette[data-room-art="graveyard"] {
+    color: var(--text-secondary);
+    text-shadow: none;
+}
+.room-vignette[data-room-art="rift"] {
+    color: var(--accent-purple);
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+}
+@media (prefers-reduced-motion: no-preference) {
+    .room-vignette[data-room-art="entrance"],
+    .room-vignette[data-room-art="cellar"] {
+        animation: bc-vignette-flicker 2.4s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="vault"] {
+        animation: bc-vignette-shimmer 3.6s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="graveyard"] {
+        animation: bc-vignette-drift 5s ease-in-out infinite;
+    }
+    .room-vignette[data-room-art="rift"] {
+        animation: bc-vignette-swirl 4s ease-in-out infinite;
+    }
+}
+@keyframes bc-vignette-flicker {
+    0%, 100% { opacity: 0.9;  filter: brightness(1); }
+    18%      { opacity: 1;    filter: brightness(1.18); }
+    32%      { opacity: 0.82; filter: brightness(0.92); }
+    54%      { opacity: 0.97; filter: brightness(1.1); }
+    71%      { opacity: 0.86; filter: brightness(0.96); }
+}
+@keyframes bc-vignette-shimmer {
+    0%, 100% { opacity: 0.85; text-shadow: 0 0 5px rgba(34, 211, 238, 0.25); }
+    50%      { opacity: 1;    text-shadow: 0 0 11px rgba(34, 211, 238, 0.6); }
+}
+@keyframes bc-vignette-drift {
+    0%, 100% { opacity: 0.78; }
+    50%      { opacity: 0.95; }
+}
+@keyframes bc-vignette-swirl {
+    0%, 100% { opacity: 0.85; filter: brightness(0.95); text-shadow: 0 0 6px rgba(192, 132, 252, 0.3); }
+    50%      { opacity: 1;    filter: brightness(1.15); text-shadow: 0 0 13px rgba(192, 132, 252, 0.6); }
 }
