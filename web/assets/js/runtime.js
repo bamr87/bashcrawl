@@ -359,6 +359,10 @@
                 codex: this.cmdBestiary,
                 daily: this.cmdDaily,
                 challenge: this.cmdDaily,
+                commands: this.cmdCommands,
+                cmds: this.cmdCommands,
+                menu: this.cmdCommands,
+                features: this.cmdCommands,
             };
         }
 
@@ -556,6 +560,7 @@
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
                 { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge." },
+                { kind: "info", text: "New here? Type 'commands' for the full command deck of web-exclusive features." },
             ];
         }
 
@@ -744,6 +749,67 @@
                     text: got ? `${a.icon} ${a.title} — ${a.desc}` : `🔒 ${a.title} — ${a.desc}`,
                 });
             }
+            return lines;
+        }
+
+        // ── Command reference ────────────────────────────────────────────────
+        // Discoverability hub for the web-only features. These commands have no
+        // bash equivalent and are otherwise invisible, so surface them grouped
+        // by purpose with a one-line "what it does" and live progress counts.
+        cmdCommands() {
+            const s = this.state;
+            const badges = (s.achievements || []).length;
+            const seen = (s.bestiary || []).length;
+            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
+            const groups = [
+                {
+                    title: "🎮 Mini-games (earn XP)",
+                    items: [
+                        ["train", "Drill spells from memory in the Training Arena"],
+                        ["speedrun", "Same trials, against the clock — beat your best time"],
+                        ["pathfind", "Navigate to a target room in the fewest cd moves"],
+                    ],
+                },
+                {
+                    title: "📊 Progress & collection",
+                    items: [
+                        ["profile", `Your character sheet — ${rank}, XP, stats`],
+                        ["achievements", `Badge catalogue — ${badges}/${ACHIEVEMENTS.length} unlocked`],
+                        ["bestiary", `Creature codex — ${seen}/${BESTIARY.length} catalogued`],
+                        ["daily", "Today's challenge and your streak"],
+                    ],
+                },
+                {
+                    title: "🧭 Navigation & lore",
+                    items: [
+                        ["map", "ASCII map of the dungeon"],
+                        ["look", "Describe the current room and its contents"],
+                        ["hint", "A nudge toward the next objective"],
+                        ["quest", "Your active quest objectives"],
+                    ],
+                },
+                {
+                    title: "✨ Flavour",
+                    items: [
+                        ["cowsay <text>", "An ASCII cow speaks"],
+                        ["fortune", "A random adage"],
+                        ["banner <text>", "Big block letters"],
+                        ["sl", "Watch a train roll by"],
+                    ],
+                },
+            ];
+            const lines = [
+                { kind: "banner", text: "BASHCRAWL — COMMAND DECK" },
+                { kind: "dim", text: "Web-exclusive commands beyond the core POSIX toolkit. Type any name to run it." },
+            ];
+            for (const g of groups) {
+                lines.push({ kind: "magic", text: g.title });
+                for (const [name, desc] of g.items) {
+                    const pad = name.padEnd(16, " ");
+                    lines.push({ kind: "output", text: `  ${pad}${desc}` });
+                }
+            }
+            lines.push({ kind: "dim", text: "Core commands (ls, cd, cat, grep, find, tree...) work too — see Docs (F1)." });
             return lines;
         }
 
