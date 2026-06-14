@@ -917,3 +917,194 @@ body[data-crt="on"] .tui-log {
     0%, 100% { opacity: 0.85; filter: brightness(0.95); text-shadow: 0 0 6px rgba(192, 132, 252, 0.3); }
     50%      { opacity: 1;    filter: brightness(1.15); text-shadow: 0 0 13px rgba(192, 132, 252, 0.6); }
 }
+
+/* ============================================================
+   Level-Up flash — a brief golden bloom over the whole shell
+   when the player's rank advances. Motion-gated; under reduced
+   motion the class is inert (the ::before only exists in the
+   no-preference block) so nothing flashes.
+   ============================================================ */
+.web-shell.fx-levelup { position: relative; }
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-levelup-flash {
+        0%   { opacity: 0; }
+        20%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .web-shell.fx-levelup::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        pointer-events: none;
+        background: radial-gradient(
+            ellipse at center,
+            rgba(251, 191, 36, 0.38) 0%,
+            rgba(251, 191, 36, 0.10) 45%,
+            rgba(251, 191, 36, 0) 75%
+        );
+        animation: bc-levelup-flash 900ms ease-out;
+    }
+}
+
+/* ============================================================
+   Damage flash — a brief red edge-pulse over the viewport when
+   the player takes a hit (HP drops). A transient full-screen
+   overlay element appended/removed by game.js. Motion-gated:
+   under reduced motion the element has no styling and is inert.
+   ============================================================ */
+.bc-screenflash {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-damage-flash {
+        0%   { opacity: 0; }
+        12%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .bc-screenflash-damage {
+        background: radial-gradient(
+            ellipse at center,
+            rgba(248, 113, 113, 0) 40%,
+            rgba(248, 113, 113, 0.5) 100%
+        );
+        animation: bc-damage-flash 600ms ease-out;
+    }
+}
+
+/* === Sidebar overhaul: inventory items, collapsible quest log, generative map === */
+
+/* Keep the map panel sized to its content; the whole .tui-sidebar scrolls. */
+.map-panel {
+    flex: 0 0 auto;
+}
+
+/* --- Inventory: vitals bar, then a clear carried-items list --- */
+.inv-hp {
+    margin: 0 0 0.4rem;
+}
+.inv-heading {
+    margin: 0.2rem 0 0.3rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.inv-items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.inv-items li {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent-yellow);
+}
+.inv-empty {
+    margin: 0;
+    font-style: italic;
+}
+
+/* Label that marks the room's contents (distinct from carried inventory). */
+.room-contents-label {
+    margin: 0.35rem 0 0.15rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* --- Collapsible quest log --- */
+.quest-log {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.4rem;
+}
+.quest-log > summary {
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--accent-blue);
+    user-select: none;
+}
+.quest-log > summary::-webkit-details-marker {
+    display: none;
+}
+.quest-log > summary::before {
+    content: "▸ ";
+    color: var(--text-secondary);
+}
+.quest-log[open] > summary::before {
+    content: "▾ ";
+}
+.quest-log > summary:hover {
+    color: var(--accent-purple);
+}
+.ql-group {
+    margin: 0.5rem 0 0.2rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.ql-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+}
+.ql-list li {
+    font-size: 0.82rem;
+    line-height: 1.3;
+}
+.ql-done {
+    color: var(--accent-green);
+}
+.ql-active {
+    color: var(--accent-yellow);
+    font-weight: 700;
+}
+.ql-locked,
+.ql-side {
+    color: var(--text-secondary);
+}
+
+/* --- Generative dungeon map (fog-of-war tree) --- */
+.map-tree {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text-secondary);
+}
+.map-tree .map-seen {
+    color: var(--accent-blue);
+}
+.map-tree .map-here {
+    color: var(--accent-yellow);
+    font-weight: 700;
+}
+.map-tree .map-fog {
+    color: var(--text-secondary);
+    opacity: 0.55;
+}
+.map-legend {
+    margin: 0.4rem 0 0;
+    font-size: 0.7rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .map-tree .map-here {
+        text-shadow: 0 0 6px rgba(251, 191, 36, 0.45);
+    }
+}
