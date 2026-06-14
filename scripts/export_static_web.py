@@ -138,7 +138,11 @@ def build_world() -> dict[str, Any]:
     # order, which differs across platforms (macOS vs Linux CI) and would make
     # the emitted directories-dict key order — and thus world.json — unstable,
     # breaking test_committed_web_data_is_fresh.
-    room_dirs = [entrance, *sorted((p for p in entrance.rglob("*") if p.is_dir()), key=lambda p: p.as_posix())]
+    subdirs = sorted(
+        (p for p in entrance.rglob("*") if p.is_dir()),
+        key=lambda p: p.as_posix(),
+    )
+    room_dirs = [entrance, *subdirs]
     for dir_path in room_dirs:
         if _is_ignored(dir_path):
             continue
