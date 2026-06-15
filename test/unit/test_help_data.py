@@ -17,6 +17,7 @@ ALL_GAME_ROOMS = {
     "scrap",                                                   # symlink room
     "rift", "arena", "pit", "spire", "mezzanine",             # rift path
     "workshop",                                                # player-created
+    "scriptorium",                                             # cp/mv tutorial
     "columbarium", "lower-quadrant", "royal-tombs", "mausoleum",  # graveyard sub-rooms
     "bashcrawl",                                               # virtual lobby root
 }

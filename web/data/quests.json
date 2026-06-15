@@ -177,6 +177,52 @@
       "xp": 200,
       "location_check": "study|help",
       "prerequisites": "amulet and coins in inventory, tome read in library",
+      "next_quest": 8
+    },
+    {
+      "id": 8,
+      "title": "The Copyist",
+      "description": "The Scriptorium Key opens a hall of scribes who never lose a spell.",
+      "objective": "Enter the scriptorium, read its scroll, then use 'cp' to duplicate the manuscript.",
+      "hint": "From the entrance, 'cd scriptorium', 'cat scroll', then 'cp manuscript backup'.",
+      "required_commands": [
+        "cp"
+      ],
+      "completion": {
+        "command": "cp",
+        "location": "scriptorium",
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "100 XP and a Scribe's quill",
+      "reward_name": "Scribe's quill",
+      "xp": 100,
+      "location_check": "scriptorium",
+      "prerequisites": null,
+      "next_quest": 9
+    },
+    {
+      "id": 9,
+      "title": "The Archivist",
+      "description": "A true scribe organises as well as copies.",
+      "objective": "In the scriptorium, use 'mv' to rename or move a file (for example 'mv backup archive').",
+      "hint": "Use 'mv backup archive' to rename your copy, then 'ls' to confirm.",
+      "required_commands": [
+        "mv"
+      ],
+      "completion": {
+        "command": "mv",
+        "location": "scriptorium",
+        "args": null,
+        "args_file": null,
+        "item_check": null
+      },
+      "reward": "150 XP and the Archivist's seal",
+      "reward_name": "Archivist's seal",
+      "xp": 150,
+      "location_check": "scriptorium",
+      "prerequisites": null,
       "next_quest": null
     }
   ]

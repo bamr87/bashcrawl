@@ -43,7 +43,7 @@ rooms:
     hidden: false
     unlocked_by: null
     parent: bashcrawl
-    children: [cellar, workshop, chapel, vault, scrap, rift]
+    children: [cellar, workshop, scriptorium, chapel, vault, scrap, rift]
     on_enter: null
     on_exit: null
     description: "This is your starting point - learn basic navigation here"
@@ -187,6 +187,34 @@ rooms:
         description: "Create a new file"
       - command: "rm artifact"
         description: "Remove a file"
+
+  scriptorium:
+    emoji: "📜"
+    title: "THE SCRIPTORIUM"
+    path: "entrance/scriptorium"
+    prompt_label: "hall of scribes"
+    context_hint: "The scriptorium teaches duplication and transmutation: cp and mv."
+    hidden: false
+    unlocked_by: null
+    parent: entrance
+    children: []
+    on_enter: null
+    on_exit: null
+    description: "Tutorial room for copying and moving files"
+    teaches:
+      - "Copying files with cp"
+      - "Renaming and moving files with mv"
+    key_files:
+      - name: scroll
+        description: "scriptorium tutorial"
+      - name: manuscript
+        description: "a file to copy and rename"
+    next_steps: "Duplicate the manuscript, then rename your copy"
+    essential_commands:
+      - command: "cp manuscript backup"
+        description: "Duplicate a file"
+      - command: "mv backup archive"
+        description: "Rename a file"
 
   chapel:
     emoji: "⛪"

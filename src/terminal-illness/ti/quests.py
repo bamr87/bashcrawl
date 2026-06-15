@@ -87,6 +87,25 @@ def _hardcoded_quests() -> List[Quest]:
                                          item_check="amulet,coins"),
               reward="200 XP and the Scriptorium Key",
               xp=200, location_check="study|help"),
+        Quest(id=8, title="The Copyist",
+              description="The Scriptorium Key opens a hall of scribes.",
+              objective="Enter the scriptorium ('cd ../scriptorium', read its "
+                        "scroll) and use 'cp' to duplicate the manuscript.",
+              hint="From the entrance, 'cd scriptorium', 'cat scroll', then "
+                   "'cp manuscript backup'.",
+              required_commands=["cp"],
+              completion=QuestCompletion(command="cp", location="scriptorium"),
+              reward="100 XP and a Scribe's quill",
+              xp=100, location_check="scriptorium"),
+        Quest(id=9, title="The Archivist",
+              description="A true scribe organises as well as copies.",
+              objective="In the scriptorium, use 'mv' to rename or move a file "
+                        "(for example 'mv backup archive').",
+              hint="Use 'mv backup archive' to rename your copy, then 'ls'.",
+              required_commands=["mv"],
+              completion=QuestCompletion(command="mv", location="scriptorium"),
+              reward="150 XP and the Archivist's seal",
+              xp=150, location_check="scriptorium"),
     ]
 
 

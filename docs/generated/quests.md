@@ -49,3 +49,15 @@ Generated from `src/help/data/quests.yaml`.
 - XP: `200`
 - Completion command: `source`
 - Completion location: `study|help`
+
+## Quest 8: The Copyist
+- Objective: Enter the scriptorium, read its scroll, then use 'cp' to duplicate the manuscript.
+- XP: `100`
+- Completion command: `cp`
+- Completion location: `scriptorium`
+
+## Quest 9: The Archivist
+- Objective: In the scriptorium, use 'mv' to rename or move a file (for example 'mv backup archive').
+- XP: `150`
+- Completion command: `mv`
+- Completion location: `scriptorium`

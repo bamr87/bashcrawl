@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "description": "Bashcrawl complete solutions manual — single source of truth for all game content, test steps, and expected state transitions",
     "last_updated": "2026-03-04",
-    "total_rooms": 26,
+    "total_rooms": 27,
     "total_scripts": 18,
-    "total_quests": 8,
+    "total_quests": 10,
     "total_scrolls": 25
   },
 
@@ -17,13 +17,15 @@
     {"id": 4, "title": "Shape the World", "command": "mkdir", "target": "workshop", "xp": 100, "prerequisite": 3},
     {"id": 5, "title": "Spark of Creation", "command": "touch", "target": "notes.txt", "xp": 100, "prerequisite": 4},
     {"id": 6, "title": "Seek the Whisper", "command": "grep", "target": null, "xp": 150, "prerequisite": 5},
-    {"id": 7, "title": "The Bashcrawl Grimoire", "command": "source", "target": null, "xp": 200, "prerequisite": 6}
+    {"id": 7, "title": "The Bashcrawl Grimoire", "command": "source", "target": null, "xp": 200, "prerequisite": 6},
+    {"id": 8, "title": "The Copyist", "command": "cp", "target": "manuscript", "xp": 100, "prerequisite": 7},
+    {"id": 9, "title": "The Archivist", "command": "mv", "target": "backup", "xp": 150, "prerequisite": 8}
   ],
 
   "rooms": {
     "entrance": {
       "path": "entrance",
-      "children": ["cellar", "workshop", ".chapel", ".vault", ".scrap", ".rift"],
+      "children": ["cellar", "workshop", "scriptorium", ".chapel", ".vault", ".scrap", ".rift"],
       "scripts": [],
       "scroll": true,
       "scroll_teaches": ["ls", "cd", "pwd", "cat", "wc", "head", "tail", "less"],
@@ -72,6 +74,16 @@
       "depth": 1,
       "unlock_prerequisite": null,
       "note": "Player-created via 'mkdir workshop' in the entrance (gitignored); absent on a fresh clone"
+    },
+    "entrance/scriptorium": {
+      "path": "entrance/scriptorium",
+      "children": [],
+      "scripts": [],
+      "scroll": true,
+      "scroll_teaches": ["cp", "mv"],
+      "hidden": false,
+      "depth": 1,
+      "unlock_prerequisite": null
     },
     "entrance/chapel": {
       "path": "entrance/chapel",

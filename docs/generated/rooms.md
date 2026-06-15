@@ -134,6 +134,12 @@ Generated from `src/help/data/rooms.yaml`.
 - Hidden: `True`
 - Hint: The Scrap teaches symlinks: ln -s creates portals. Find the path to the Rift!
 
+## scriptorium
+- Title: THE SCRIPTORIUM
+- Path: `entrance/scriptorium`
+- Hidden: `False`
+- Hint: The scriptorium teaches duplication and transmutation: cp and mv.
+
 ## spire
 - Title: THE SPIRE
 - Path: `entrance/.rift/spire`

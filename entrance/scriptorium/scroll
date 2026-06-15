@@ -1,0 +1,65 @@
+
+================================================================================
+                          THE SCRIPTORIUM
+================================================================================
+
+You step into a vast hall of scribes.  Rows of slanted
+desks stretch into the distance, each piled with parchment.
+This is where the dungeon's spells are COPIED and ORGANISED
+-- the art of duplication and transmutation.
+
+On the desk before you lies a single file:
+
+    manuscript
+
+================================================================================
+                 THE SPELL OF DUPLICATION: cp
+================================================================================
+
+The 'cp' (copy) spell makes a duplicate of a file.  The
+original stays where it is; a copy appears under a new name.
+
+    cp SOURCE DEST
+
+For example, to copy the manuscript into a backup:
+
+    cp manuscript backup
+
+Now run 'ls' and you will see BOTH 'manuscript' and 'backup'.
+Scribes copy a scroll before editing it, so the original is
+never lost.
+
+================================================================================
+                THE SPELL OF TRANSMUTATION: mv
+================================================================================
+
+The 'mv' (move) spell does two things.  It can RENAME a file:
+
+    mv backup archive          # 'backup' becomes 'archive'
+
+...or MOVE a file into another room (directory):
+
+    mv archive somewhere/      # send 'archive' into 'somewhere'
+
+Unlike 'cp', 'mv' does not leave the original behind -- the
+file is transmuted from one name (or place) to another.
+
+────────────────────────────────────────────────────────────────────────────────
+ cp  vs  mv
+────────────────────────────────────────────────────────────────────────────────
+    cp   duplicates  -> you end up with TWO files
+    mv   relocates   -> you end up with ONE file, moved or renamed
+
+================================================================================
+                            PRACTICE
+================================================================================
+
+    1.  cp manuscript backup      Duplicate the manuscript
+    2.  ls                        See both files
+    3.  mv backup archive         Rename your copy
+    4.  ls                        See the rename took effect
+
+Master the scribes' craft, and no spell will ever be lost
+to you again.
+
+================================================================================
