@@ -261,3 +261,52 @@ that can run terminal commands but cannot interact with full-screen TUI applicat
 4. **JSON status**: Machine-readable game state for programmatic decision-making.
 5. **SVG screenshots**: Visual snapshots for documentation, debugging, and
    screenshot regression testing.
+
+## Blank-Slate Playtest Mode
+
+A second protocol turns the MCP server into a **content validator**: an agent
+that assumes *no* terminal skills and *no* game knowledge plays a fresh game
+using only what a real new player sees on screen. Where it gets stuck pinpoints
+which scroll/quest/encounter fails to teach the next step. It is the basis of the
+`Blank-Slate Audit` CI job and `make playtest`.
+
+### MCP tools (`ti.mcp_server`)
+
+| Tool | Purpose |
+|------|---------|
+| `bashcrawl_start(fresh=true)` | Start a brand-new game in a throwaway **sandbox copy** of the game tree (quest 0, empty inventory) and begin recording. The real repo is never mutated. |
+| `bashcrawl_observe(session_id)` | Return **only** what a player sees: `screen` (the last command's output) + `hud` (location, HP, XP, inventory, current quest title/objective, room items). No command list, completion criteria, or walkthrough. |
+| `bashcrawl_command(session_id, command)` | Run one command. Each turn is classified (progress / error / repeat) and logged. |
+| `bashcrawl_report_gap(session_id, reason)` | The agent calls this — instead of guessing from outside knowledge — when the on-screen content doesn't say what to do next. Logged as a self-reported `content_gap`. |
+| `bashcrawl_stop(session_id)` | Finalize the JSONL log and discard the sandbox. |
+
+The session log (durable, under `logs/sessions/blank_slate/`, gitignored) records
+`discovery` / `struggle` / `content_gap` / `quest_complete` events for offline
+scoring.
+
+### The no-cheat guarantee
+
+When Claude Code is the player, it is launched with the bashcrawl MCP server as
+its **only** tools (`--allowedTools "mcp__bashcrawl__*"`, built-ins denied), so it
+cannot `cat` scroll files off disk or read the walkthrough — it must play through
+the game. `scripts/playtest.sh` adds a transcript cheat-guard that fails the run
+if any built-in tool call appears.
+
+### Running it
+
+```bash
+# One-time (maintainer): create a subscription token and add it as the
+# CLAUDE_CODE_OAUTH_TOKEN repo secret for CI.
+claude setup-token
+
+# Locally (needs the claude CLI + an OAuth token or ANTHROPIC_API_KEY):
+make playtest            # N sessions -> test/reports/blank_slate/report.md
+
+# Deterministic, no API (the same runner + scorer, scripted command path):
+make test                # includes test/integration/test_blank_slate.py
+```
+
+Scoring (`python -m analysis.blank_slate_report <session.jsonl>`) reports a
+**self-teaching completeness %** and a severity-ranked content-gap list tying each
+stall to the room/quest, the command the walkthrough expected, and what that
+room's scroll is supposed to teach.
