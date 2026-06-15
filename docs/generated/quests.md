@@ -27,19 +27,19 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `None`
 
 ## Quest 4: Shape the World
-- Objective: Navigate to the workshop and use 'mkdir' to create a directory.
+- Objective: Return to the entrance with 'cd ..', then use 'mkdir workshop' to conjure a new room.
 - XP: `100`
 - Completion command: `mkdir`
 - Completion location: `None`
 
 ## Quest 5: Spark of Creation
-- Objective: Use 'touch' to create a new file.
+- Objective: Use 'touch' to create a new file, for example 'touch notes.md'.
 - XP: `100`
 - Completion command: `touch`
 - Completion location: `None`
 
 ## Quest 6: Seek the Whisper
-- Objective: Use 'grep' to search for a word within a scroll.
+- Objective: In a room that has a scroll (like the cellar), use 'grep' to search it, e.g. 'grep magic scroll'.
 - XP: `150`
 - Completion command: `grep`
 - Completion location: `armoury|cellar`

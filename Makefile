@@ -74,6 +74,13 @@ test-ai: ## Run AI playthrough tests (needs ANTHROPIC_API_KEY)
 test-mcp: ## Run MCP integration tests in local .venv
 	@bash scripts/test_mcp.sh
 
+.PHONY: playtest
+playtest: ## Blank-slate playtest: Claude Code (OAuth) plays via MCP, then score
+	@bash scripts/playtest.sh
+
+.PHONY: test-blank-slate
+test-blank-slate: playtest ## Alias for `make playtest`
+
 .PHONY: test-demo
 test-demo: ## Run demo walkthrough tests
 	@bash scripts/run_tests.sh demo

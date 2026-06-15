@@ -161,9 +161,12 @@ def _validate_rooms_and_walkthrough(
     missing_paths: list[str] = []
     missing_scrolls: list[str] = []
     for logical_path, spec in wt_rooms.items():
+        # Player-created rooms (conjured at runtime with 'mkdir', gitignored) do
+        # not exist in a clean checkout, so they are exempt from the on-disk check.
+        player_created = bool(isinstance(spec, dict) and spec.get("player_created"))
         resolved = resolve_logical_path(root, logical_path)
         exists = bool(resolved and resolved.is_dir())
-        if not exists:
+        if not exists and not player_created:
             missing_paths.append(logical_path)
             _add_error(errors, f"Walkthrough room path missing on disk: {logical_path}")
         has_scroll = bool(isinstance(spec, dict) and spec.get("scroll"))

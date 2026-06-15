@@ -40,6 +40,11 @@ VALID_EVENTS = {
     "launcher_info",
     "launcher_success",
     "launcher_error",
+    # Blank-slate playtest instrumentation (ti.playtest.recorder)
+    "discovery",
+    "struggle",
+    "content_gap",
+    "quest_complete",
 }
 
 
