@@ -39,10 +39,10 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `None`
 
 ## Quest 6: Seek the Whisper
-- Objective: In a room that has a scroll (like the cellar), use 'grep' to search it, e.g. 'grep magic scroll'.
+- Objective: Find any room with a scroll and use 'grep' to search it, e.g. 'grep magic scroll'.
 - XP: `150`
 - Completion command: `grep`
-- Completion location: `armoury|cellar`
+- Completion location: `None`
 
 ## Quest 7: The Bashcrawl Grimoire
 - Objective: With the amulet and coins, reach the study, run './grimoire', then 'source' the help script.

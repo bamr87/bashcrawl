@@ -67,14 +67,13 @@ def _hardcoded_quests() -> List[Quest]:
               xp=100),
         Quest(id=6, title="Seek the Whisper",
               description="Hidden phrases linger in old scrolls.",
-              objective="In a room that has a scroll (like the cellar), use "
-                        "'grep' to search it, e.g. 'grep magic scroll'.",
+              objective="Find any room with a scroll and use 'grep' to search "
+                        "it, e.g. 'grep magic scroll'.",
               hint="Run 'grep catacombs scroll'.",
               required_commands=["grep"],
-              completion=QuestCompletion(command="grep",
-                                         location="armoury|cellar"),
+              completion=QuestCompletion(command="grep"),
               reward="150 XP and the Whisperer's token",
-              xp=150, location_check="armoury|cellar"),
+              xp=150),
         Quest(id=7, title="The Bashcrawl Grimoire",
               description="Deep in the chapel library, a tome guards a secret.",
               objective="Carry the amulet and coins to the hidden study, run "

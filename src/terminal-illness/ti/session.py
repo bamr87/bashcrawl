@@ -34,6 +34,14 @@ def snapshot_state(
         q = quests[q_idx]
         quest_title = q.title
         quest_objective = q.objective
+    elif quests:
+        # All quests complete — a closing victory screen.
+        quest_title = "🏆 You have completed Bashcrawl!"
+        quest_objective = (
+            f"All {len(quests)} quests done · {state.experience_points} XP · "
+            f"inventory: {state.inventory.strip(',') or '(none)'}. "
+            "Wander the hidden rooms, or type 'exit' to rest, hero."
+        )
     try:
         items = fs.ls(cwd, "")
     except Exception:

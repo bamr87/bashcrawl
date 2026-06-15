@@ -19,9 +19,9 @@ if ! grep --quiet "$ITEM" <<<"$I" ; then
 A white crystal, forged by the Queen of Winter, on the
 frosty ground.
 
-You can prefix this item to your inventory:
+You can collect this item by prefixing it to your inventory:
 
-I=$ITEM,\$I
+export I=$ITEM,\$I
 
 Remember, you can check your inventory:
 

@@ -139,13 +139,13 @@ quests:
   - id: 6
     title: "Seek the Whisper"
     description: "Hidden phrases linger in old scrolls."
-    objective: "In a room that has a scroll (like the cellar), use 'grep' to search it, e.g. 'grep magic scroll'."
+    objective: "Find any room with a scroll and use 'grep' to search it, e.g. 'grep magic scroll'."
     hint: "Run 'grep catacombs scroll' to uncover the hidden clue."
     required_commands:
       - grep
     completion:
       command: "grep"
-      location: "armoury|cellar"
+      location: null
       args: null
       args_file: null
       item_check: null
