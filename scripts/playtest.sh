@@ -42,8 +42,31 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
     echo "[playtest] No CLAUDE_CODE_OAUTH_TOKEN (or ANTHROPIC_API_KEY) set." >&2
-    echo "[playtest] Generate a token with 'claude setup-token' and export it. Skipping." >&2
+    echo "[playtest] A headless 'claude -p' subprocess does NOT inherit an interactive" >&2
+    echo "[playtest] Claude Code login — it needs an explicit credential. Generate one with" >&2
+    echo "[playtest] 'claude setup-token' and 'export CLAUDE_CODE_OAUTH_TOKEN=...'. Skipping." >&2
     exit 0
+fi
+
+# The MCP server needs the 'mcp' package + the 'ti' module importable. CI installs
+# those into the runner's python, so the committed .mcp.json ('python3') works there.
+# Locally they usually live only in .venv, so prefer that interpreter when present.
+MCP_CONFIG="$ROOT_DIR/.mcp.json"
+if [ -x "$ROOT_DIR/.venv/bin/python" ]; then
+    MCP_CONFIG="$(mktemp -t bashcrawl_mcp.XXXXXX)"
+    cat >"$MCP_CONFIG" <<JSON
+{
+  "mcpServers": {
+    "bashcrawl": {
+      "type": "stdio",
+      "command": "$ROOT_DIR/.venv/bin/python",
+      "args": ["-m", "ti.mcp_server"],
+      "env": { "PYTHONPATH": "$ROOT_DIR/src/terminal-illness" }
+    }
+  }
+}
+JSON
+    echo "[playtest] Using .venv python for the MCP server."
 fi
 
 rm -f "${LOG_DIR:?}"/*.jsonl 2>/dev/null || true
@@ -56,7 +79,7 @@ while [ "$seed" -le "$SEEDS" ]; do
     claude -p "${PROMPT}
 
 (This is playtest run #${seed}. Begin now.)" \
-        --mcp-config "$ROOT_DIR/.mcp.json" \
+        --mcp-config "$MCP_CONFIG" \
         --allowedTools "mcp__bashcrawl__*" \
         --disallowedTools "Bash,Read,Edit,Write,Grep,Glob,WebFetch,WebSearch,NotebookEdit,Task" \
         --permission-mode "$PERMISSION_MODE" \

@@ -48,15 +48,18 @@ def _hardcoded_quests() -> List[Quest]:
               xp=100),
         Quest(id=4, title="Shape the World",
               description="The workshop calls — create something new.",
-              objective="Use 'mkdir' to create a directory.",
-              hint="Use 'mkdir' to shape a new workspace.",
+              objective="Go up with 'cd ..', then 'cd workshop', then use "
+                        "'mkdir <name>' to create a directory.",
+              hint="From the cellar, 'cd ..' returns to the entrance; then "
+                   "'cd workshop', then 'mkdir forge'.",
               required_commands=["mkdir"],
               completion=QuestCompletion(command="mkdir"),
               reward="100 XP and a builder's sigil",
               xp=100),
         Quest(id=5, title="Spark of Creation",
               description="Your workspace yearns for a first artifact.",
-              objective="Use 'touch' to create a new file.",
+              objective="Use 'touch <filename>' to create a new file "
+                        "(for example 'touch notes.md').",
               hint="Use 'touch notes.txt'.",
               required_commands=["touch"],
               completion=QuestCompletion(command="touch"),
@@ -64,7 +67,8 @@ def _hardcoded_quests() -> List[Quest]:
               xp=100),
         Quest(id=6, title="Seek the Whisper",
               description="Hidden phrases linger in old scrolls.",
-              objective="Use 'grep' to search for a word.",
+              objective="In a room that has a scroll (like the cellar), use "
+                        "'grep <word> scroll' to search it for a word.",
               hint="Run 'grep catacombs scroll'.",
               required_commands=["grep"],
               completion=QuestCompletion(command="grep",

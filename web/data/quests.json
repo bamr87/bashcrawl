@@ -93,8 +93,8 @@
       "id": 4,
       "title": "Shape the World",
       "description": "The workshop calls — create something new.",
-      "objective": "Navigate to the workshop and use 'mkdir' to create a directory.",
-      "hint": "Use 'mkdir' to shape a new workspace.",
+      "objective": "Go up with 'cd ..', then 'cd workshop', then use 'mkdir <name>' to create a directory.",
+      "hint": "From the cellar, 'cd ..' returns to the entrance; then 'cd workshop', then 'mkdir forge'.",
       "required_commands": [
         "mkdir"
       ],
@@ -115,7 +115,7 @@
       "id": 5,
       "title": "Spark of Creation",
       "description": "Your workspace yearns for a first artifact.",
-      "objective": "Use 'touch' to create a new file.",
+      "objective": "Use 'touch <filename>' to create a new file (for example 'touch notes.md').",
       "hint": "Use 'touch notes.txt' to conjure a new file.",
       "required_commands": [
         "touch"
@@ -137,7 +137,7 @@
       "id": 6,
       "title": "Seek the Whisper",
       "description": "Hidden phrases linger in old scrolls.",
-      "objective": "Use 'grep' to search for a word within a scroll.",
+      "objective": "In a room that has a scroll (like the cellar), use 'grep <word> scroll' to search it for a word.",
       "hint": "Run 'grep catacombs scroll' to uncover the hidden clue.",
       "required_commands": [
         "grep"

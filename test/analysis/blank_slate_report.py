@@ -184,6 +184,9 @@ def _rank_gaps(
         gaps.append({
             "room": room,
             "quest_id": qid,
+            # The on-screen objective the player was actually stuck on (recorded
+            # at gap time); falls back to the walkthrough command by id.
+            "quest_objective": e.get("quest_objective"),
             "expected_command": quest_cmd.get(qid),
             "scroll_teaches": room_meta.get("scroll_teaches", []),
             "has_scroll": bool(room_meta.get("scroll")),
@@ -259,9 +262,10 @@ def generate_markdown(score: Dict[str, Any]) -> str:
                 g["severity"], g["severity"]
             )
             teaches = ", ".join(g["scroll_teaches"]) or "(no scroll)"
+            objective = g.get("quest_objective") or f"expected `{g['expected_command']}`"
             lines.append(
-                f"- **{tag}** in `{g['room']}` (quest {g['quest_id']}). "
-                f"Expected `{g['expected_command']}`; the scroll here teaches: {teaches}. "
+                f"- **{tag}** in `{g['room']}` (quest {g['quest_id']}: {objective}). "
+                f"The scroll here teaches: {teaches}. "
                 f"Reason: {g['reason']}. Tried: {', '.join(g['attempted'][-4:]) or '—'}"
             )
     lines.append("")

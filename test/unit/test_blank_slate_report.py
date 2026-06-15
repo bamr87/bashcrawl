@@ -59,6 +59,16 @@ def test_self_reported_gap_ranks_below_auto() -> None:
     assert score["gaps"][0]["severity"] == "reported"
 
 
+def test_gap_carries_on_screen_quest_objective() -> None:
+    events = [
+        {"event": "content_gap", "room": "entrance/cellar", "quest_id": 3,
+         "quest_objective": "Use 'cat scroll' to read the ancient knowledge.", "reason": "stuck"},
+        {"event": "session_end"},
+    ]
+    score = score_session(events, _wt())
+    assert score["gaps"][0]["quest_objective"] == "Use 'cat scroll' to read the ancient knowledge."
+
+
 def test_normalize_room_matches_walkthrough_keys() -> None:
     assert normalize_room("/entrance/cellar") == "entrance/cellar"
     assert normalize_room("entrance") == "entrance"

@@ -13,9 +13,9 @@
     {"id": 0, "title": "Awakening: Know Thy Place", "command": "pwd", "target": null, "xp": 50, "prerequisite": null},
     {"id": 1, "title": "Eyes to See", "command": "ls", "target": null, "xp": 50, "prerequisite": 0},
     {"id": 2, "title": "First Steps", "command": "cd", "target": "cellar", "xp": 100, "prerequisite": 1},
-    {"id": 3, "title": "Shape the World", "command": "mkdir", "target": "workshop", "xp": 100, "prerequisite": 2},
-    {"id": 4, "title": "Spark of Creation", "command": "touch", "target": "notes.txt", "xp": 100, "prerequisite": 3},
-    {"id": 5, "title": "Read the Signs", "command": "cat", "target": "notes.txt", "xp": 100, "prerequisite": 4},
+    {"id": 3, "title": "Ancient Knowledge", "command": "cat", "target": "scroll", "xp": 100, "prerequisite": 2},
+    {"id": 4, "title": "Shape the World", "command": "mkdir", "target": "workshop", "xp": 100, "prerequisite": 3},
+    {"id": 5, "title": "Spark of Creation", "command": "touch", "target": "notes.txt", "xp": 100, "prerequisite": 4},
     {"id": 6, "title": "Seek the Whisper", "command": "grep", "target": null, "xp": 150, "prerequisite": 5},
     {"id": 7, "title": "The Bashcrawl Grimoire", "command": "source", "target": null, "xp": 200, "prerequisite": 6}
   ],
@@ -679,7 +679,7 @@
       "command": "mkdir workshop",
       "screenshot_name": "022_mkdir_workshop",
       "teaches": "Creating directories",
-      "quest_completed": {"id": 3, "title": "Shape the World", "xp": 100}
+      "quest_completed": {"id": 4, "title": "Shape the World", "xp": 100}
     },
     {
       "step_id": "cp_23",
@@ -694,7 +694,7 @@
       "command": "touch notes.txt",
       "screenshot_name": "024_touch_notes",
       "teaches": "Creating files",
-      "quest_completed": {"id": 4, "title": "Spark of Creation", "xp": 100}
+      "quest_completed": {"id": 5, "title": "Spark of Creation", "xp": 100}
     },
     {
       "step_id": "cp_25",
@@ -702,7 +702,7 @@
       "command": "cat notes.txt",
       "screenshot_name": "025_cat_notes",
       "teaches": "Reading files (empty file)",
-      "quest_completed": {"id": 5, "title": "Read the Signs", "xp": 100}
+      "quest_completed": {"id": 3, "title": "Ancient Knowledge", "xp": 100}
     }
   ],
 
