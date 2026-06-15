@@ -93,7 +93,7 @@
         if (p.includes("/.vault") || p.includes("/vault")) return "vault";
         if (p.includes("/graveyard") || p.includes("/.chapel") || p.includes("/chapel")) return "graveyard";
         if (p.includes("/cellar") || p.includes("/armoury") || p.includes("/chamber")) return "cellar";
-        if (p === "/entrance" || p.endsWith("/entrance") || p.includes("/workshop") || p.includes("/scriptorium")) return "entrance";
+        if (p === "/entrance" || p.endsWith("/entrance") || p.includes("/workshop")) return "entrance";
         return "deep";
     }
 
@@ -119,7 +119,7 @@
     ].join("\n");
     append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
-    append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cd scriptorium then sort verses | uniq  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
+    append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
     append("magic", "🆕 Mini-games:  train  (drill commands)  ·  speedrun  (timed, beat your best)  ·  pathfind  (quest to a room). All earn XP.");
     if (runtime.state.trainer && runtime.state.trainer.active) {
         for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
