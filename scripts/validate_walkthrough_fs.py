@@ -67,7 +67,15 @@ def validate(root: Path) -> dict:
     errors: list[str] = []
     report = {"rooms": [], "scrolls": [], "encounters": []}
 
-    for room in data["rooms"]:
+    for room, spec in data["rooms"].items():
+        # Player-created rooms (e.g. the workshop the player conjures with
+        # 'mkdir workshop') are gitignored and absent on a fresh clone, so skip
+        # the on-disk existence requirement for them.
+        if isinstance(spec, dict) and spec.get("player_created"):
+            report["rooms"].append(
+                {"logical": room, "resolved": None, "ok": True, "player_created": True}
+            )
+            continue
         resolved = resolve_logical_path(root, room)
         ok = resolved is not None and resolved.is_dir()
         if not ok:

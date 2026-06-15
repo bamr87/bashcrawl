@@ -48,10 +48,10 @@ def _hardcoded_quests() -> List[Quest]:
               xp=100),
         Quest(id=4, title="Shape the World",
               description="The workshop calls — create something new.",
-              objective="Go up with 'cd ..', then 'cd workshop', then use "
-                        "'mkdir <name>' to create a directory.",
+              objective="Return to the entrance with 'cd ..', then use "
+                        "'mkdir workshop' to conjure a new room.",
               hint="From the cellar, 'cd ..' returns to the entrance; then "
-                   "'cd workshop', then 'mkdir forge'.",
+                   "'mkdir workshop', then 'cd workshop' to enter.",
               required_commands=["mkdir"],
               completion=QuestCompletion(command="mkdir"),
               reward="100 XP and a builder's sigil",

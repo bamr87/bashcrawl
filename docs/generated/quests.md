@@ -27,7 +27,7 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `None`
 
 ## Quest 4: Shape the World
-- Objective: Go up with 'cd ..', then 'cd workshop', then use 'mkdir <name>' to create a directory.
+- Objective: Return to the entrance with 'cd ..', then use 'mkdir workshop' to conjure a new room.
 - XP: `100`
 - Completion command: `mkdir`
 - Completion location: `None`

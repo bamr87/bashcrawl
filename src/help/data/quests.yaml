@@ -101,8 +101,8 @@ quests:
   - id: 4
     title: "Shape the World"
     description: "The workshop calls — create something new."
-    objective: "Go up with 'cd ..', then 'cd workshop', then use 'mkdir <name>' to create a directory."
-    hint: "From the cellar, 'cd ..' returns to the entrance; then 'cd workshop', then 'mkdir forge'."
+    objective: "Return to the entrance with 'cd ..', then use 'mkdir workshop' to conjure a new room."
+    hint: "From the cellar, 'cd ..' returns to the entrance; then 'mkdir workshop', then 'cd workshop' to enter."
     required_commands:
       - mkdir
     completion:

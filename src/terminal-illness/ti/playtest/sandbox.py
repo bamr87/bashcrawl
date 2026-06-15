@@ -83,12 +83,8 @@ def create_sandbox(game_root: Path | None = None) -> Path:
         game_root = find_game_root()
 
     sandbox = Path(tempfile.mkdtemp(prefix="bashcrawl_play_"))
-
-    def _ignore(_directory: str, contents: list[str]) -> set[str]:
-        return {c for c in contents if c in _EXCLUDE}
-
-    shutil.copytree(game_root, sandbox / "game", ignore=_ignore)
     game_dir = sandbox / "game"
+    _populate_sandbox(game_root, game_dir)
 
     _clean_game_state(game_dir)
     (game_dir / "logs" / "sessions").mkdir(parents=True, exist_ok=True)
@@ -108,6 +104,51 @@ def create_sandbox(game_root: Path | None = None) -> Path:
         _chmod_game_files(game_dir)
 
     return sandbox
+
+
+def _tracked_files(src: Path) -> list[str] | None:
+    """git-tracked paths under ``src`` (relative), or ``None`` if not a git repo.
+
+    Using tracked files makes the sandbox reflect a *clean checkout*: gitignored
+    local artifacts (e.g. a previously player-created ``entrance/workshop``, combat
+    flag files, unlocked-room copies) are excluded, so a playtest sees the game a
+    fresh player would. Working-tree content is used, so uncommitted edits to
+    tracked files are still honored.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(src), "ls-files", "-z"],
+            capture_output=True,
+            timeout=20,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode != 0:
+        return None
+    return [p for p in result.stdout.decode("utf-8", "replace").split("\0") if p]
+
+
+def _populate_sandbox(src: Path, dst: Path) -> None:
+    """Copy the game tree into ``dst`` — tracked files only when ``src`` is a repo."""
+    tracked = _tracked_files(src)
+    if tracked is None:
+        # Not a git checkout: fall back to a full copy minus build/test dirs.
+        def _ignore(_directory: str, contents: list[str]) -> set[str]:
+            return {c for c in contents if c in _EXCLUDE}
+
+        shutil.copytree(src, dst, ignore=_ignore)
+        return
+
+    dst.mkdir(parents=True, exist_ok=True)
+    for rel in tracked:
+        if rel.split("/", 1)[0] in _EXCLUDE:
+            continue
+        source = src / rel
+        if not source.is_file():  # submodule pointers / odd entries
+            continue
+        target = dst / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
 
 
 def sandbox_game_dir(sandbox: Path) -> Path:

@@ -61,16 +61,17 @@
       "depth": 3,
       "unlock_prerequisite": null
     },
-    "entrance/cellar/armoury/workshop": {
-      "path": "entrance/cellar/armoury/workshop",
+    "entrance/workshop": {
+      "path": "entrance/workshop",
       "children": [],
       "scripts": [],
       "scroll": false,
       "scroll_teaches": [],
       "hidden": false,
-      "depth": 3,
+      "player_created": true,
+      "depth": 1,
       "unlock_prerequisite": null,
-      "note": "Pre-exists in armoury; different from entrance/workshop which player creates"
+      "note": "Player-created via 'mkdir workshop' in the entrance (gitignored); absent on a fresh clone"
     },
     "entrance/chapel": {
       "path": "entrance/chapel",
