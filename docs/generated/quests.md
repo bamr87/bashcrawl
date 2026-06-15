@@ -33,13 +33,13 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `None`
 
 ## Quest 5: Spark of Creation
-- Objective: Use 'touch <filename>' to create a new file (for example 'touch notes.md').
+- Objective: Use 'touch' to create a new file, for example 'touch notes.md'.
 - XP: `100`
 - Completion command: `touch`
 - Completion location: `None`
 
 ## Quest 6: Seek the Whisper
-- Objective: In a room that has a scroll (like the cellar), use 'grep <word> scroll' to search it for a word.
+- Objective: In a room that has a scroll (like the cellar), use 'grep' to search it, e.g. 'grep magic scroll'.
 - XP: `150`
 - Completion command: `grep`
 - Completion location: `armoury|cellar`

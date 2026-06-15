@@ -58,8 +58,8 @@ def _hardcoded_quests() -> List[Quest]:
               xp=100),
         Quest(id=5, title="Spark of Creation",
               description="Your workspace yearns for a first artifact.",
-              objective="Use 'touch <filename>' to create a new file "
-                        "(for example 'touch notes.md').",
+              objective="Use 'touch' to create a new file, for example "
+                        "'touch notes.md'.",
               hint="Use 'touch notes.txt'.",
               required_commands=["touch"],
               completion=QuestCompletion(command="touch"),
@@ -68,7 +68,7 @@ def _hardcoded_quests() -> List[Quest]:
         Quest(id=6, title="Seek the Whisper",
               description="Hidden phrases linger in old scrolls.",
               objective="In a room that has a scroll (like the cellar), use "
-                        "'grep <word> scroll' to search it for a word.",
+                        "'grep' to search it, e.g. 'grep magic scroll'.",
               hint="Run 'grep catacombs scroll'.",
               required_commands=["grep"],
               completion=QuestCompletion(command="grep",

@@ -61,7 +61,13 @@ def main() -> int:
     root = Path.cwd()
 
     walkthrough = json.loads((root / "test" / "datasets" / "walkthrough.json").read_text(encoding="utf-8"))
-    wt_rooms = {normalize_logical_path(p) for p in walkthrough["rooms"].keys()}
+    # Player-created rooms (e.g. the workshop conjured with 'mkdir workshop') are
+    # gitignored and absent on a clean checkout, so they are not expected on disk.
+    wt_rooms = {
+        normalize_logical_path(p)
+        for p, spec in walkthrough["rooms"].items()
+        if not (isinstance(spec, dict) and spec.get("player_created"))
+    }
     wt_encounters = {normalize_logical_path(p) for p in walkthrough["encounters"].keys()}
 
     rooms_yaml = load_yaml_map(root / "src" / "help" / "data" / "rooms.yaml")
