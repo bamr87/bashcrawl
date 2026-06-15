@@ -291,7 +291,10 @@ class TerminalEngine:
             q = quest_list()[self.state.current_quest_id]
             self.state.completed_quest_ids.append(q.id)
             self.state.current_quest_id += 1
-            self.state.experience_points += 100 if "100" in q.reward else 50
+            # Award the quest's defined XP (matches the AI and web runtimes).
+            # Previously this guessed from the reward string ("100 if '100' in
+            # q.reward else 50"), which under-paid quests 6/7/9 (150/200/150 XP).
+            self.state.experience_points += q.xp
             self._emit_output("magic", f"Quest complete: {q.title}! Reward: {q.reward}")
             self.state.save()
             if self._on_quest_complete:

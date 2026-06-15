@@ -167,6 +167,23 @@ class TestQuestProgression:
         engine.execute_command("pwd")
         assert engine.state.experience_points > initial_xp
 
+    def test_python_engine_awards_full_quest_xp(self, sandbox):
+        """GameSession awards the quest's defined xp, not a reward-string guess.
+
+        Regression: quests 6/7/9 (150/200/150 XP) were under-paid to 50 by
+        `100 if "100" in q.reward else 50`.
+        """
+        from ti.quests import quest_list
+        from ti.session import GameSession
+
+        # Fresh save path so we get a clean state starting in the entrance
+        # (which has a scroll to grep), not a stale on-disk save.
+        session = GameSession.load(sandbox, save_path=sandbox / ".xp_regress_save.json")
+        session.state.current_quest_id = 6  # 'grep', xp=150
+        before = session.state.experience_points
+        session.execute_line("grep magic scroll")
+        assert session.state.experience_points - before == quest_list()[6].xp == 150
+
 
 class TestRoomTracking:
     """Tests for room visit tracking."""
