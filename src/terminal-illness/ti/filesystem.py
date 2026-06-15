@@ -289,4 +289,23 @@ class GameFileSystem:
             if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
                 value = value[1:-1]
             updates[key] = value
+
+        # Also honor `let "VAR=expr"` arithmetic (combat: the statue/monster
+        # print `let "HP=HP-5"`). Auto-apply it the same way as export so
+        # encounters actually change HP instead of being inert.
+        merged = {**current_env, **updates}
+        for m in re.finditer(r'let\s+"?([A-Za-z_]\w*)\s*=\s*([^"\n]+?)"?\s*$', output, re.MULTILINE):
+            key = m.group(1)
+            expr = re.sub(
+                r"[A-Za-z_]\w*",
+                lambda mm: str(merged.get(mm.group(0), "0")),
+                m.group(2),
+            )
+            if re.fullmatch(r"[0-9+\-*/%() ]+", expr.strip()):
+                try:
+                    result_val = str(int(eval(expr)))  # noqa: S307 - arithmetic only
+                except Exception:
+                    continue
+                updates[key] = result_val
+                merged[key] = result_val
         return updates

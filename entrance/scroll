@@ -76,6 +76,10 @@ and distinguishing between doorways and objects.
 
     cd cellar
 
+(You may also spy a SCRIPTORIUM nearby. It is an advanced hall of scribes --
+the magic there will make more sense once you have mastered the deeper rooms,
+so leave it for later in your journey.)
+
 LOST? Remember these two spells:
     pwd                      Shows exactly where you are
     cd ..                    Takes you back one room
