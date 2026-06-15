@@ -75,8 +75,8 @@ test-mcp: ## Run MCP integration tests in local .venv
 	@bash scripts/test_mcp.sh
 
 .PHONY: playtest
-playtest: ## Blank-slate playtest: Claude Code (OAuth) plays via MCP, then score
-	@bash scripts/playtest.sh
+playtest: ## Playtest: Claude Code (OAuth) plays via MCP, then score (PROMPT=persona SEEDS=n)
+	@BLANK_SLATE_PROMPT="$(PROMPT)" bash scripts/playtest.sh $(SEEDS)
 
 .PHONY: test-blank-slate
 test-blank-slate: playtest ## Alias for `make playtest`

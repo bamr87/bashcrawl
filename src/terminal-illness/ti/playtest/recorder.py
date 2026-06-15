@@ -29,6 +29,10 @@ ERROR = "error"
 REPEAT = "repeat"
 NEUTRAL = "neutral"
 
+# Categories the playing agent may tag qualitative feedback with
+# (see bashcrawl_feedback and the report's "Player feedback" section).
+FEEDBACK_CATEGORIES = ("rationale", "unclear", "bug", "enhancement", "note")
+
 
 def _state_progressed(before: Dict[str, Any], after: Dict[str, Any]) -> bool:
     """True if the snapshot changed in a way a player would call progress."""
@@ -216,6 +220,28 @@ class SessionRecorder:
         # An honest self-report resets the auto-detector so we don't double-count.
         self._struggle_run = 0
         self._gap_open = False
+
+    def record_feedback(self, category: str, message: str,
+                        state: Optional[Dict[str, Any]] = None) -> str:
+        """Record categorized qualitative feedback from the playing agent.
+
+        Distinct from ``record_gap`` (a blocker): this is the agent's running
+        commentary used to improve the game — why it chose a command, content
+        that was confusing, a bug, or a UI/UX enhancement idea. Returns the
+        normalized category actually logged.
+        """
+        cat = (category or "").strip().lower()
+        if cat not in FEEDBACK_CATEGORIES:
+            cat = "note"
+        self.log(
+            "feedback",
+            category=cat,
+            message=message,
+            room=(state or {}).get("cwd"),
+            quest_id=(state or {}).get("current_quest_id"),
+            quest_objective=(state or {}).get("quest_objective"),
+        )
+        return cat
 
 
 def _preview(outputs: List[Dict[str, str]], limit: int = 240) -> str:

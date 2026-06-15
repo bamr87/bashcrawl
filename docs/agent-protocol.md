@@ -277,12 +277,30 @@ which scroll/quest/encounter fails to teach the next step. It is the basis of th
 | `bashcrawl_start(fresh=true)` | Start a brand-new game in a throwaway **sandbox copy** of the game tree (quest 0, empty inventory) and begin recording. The real repo is never mutated. |
 | `bashcrawl_observe(session_id)` | Return **only** what a player sees: `screen` (the last command's output) + `hud` (location, HP, XP, inventory, current quest title/objective, room items). No command list, completion criteria, or walkthrough. |
 | `bashcrawl_command(session_id, command)` | Run one command. Each turn is classified (progress / error / repeat) and logged. |
-| `bashcrawl_report_gap(session_id, reason)` | The agent calls this — instead of guessing from outside knowledge — when the on-screen content doesn't say what to do next. Logged as a self-reported `content_gap`. |
+| `bashcrawl_report_gap(session_id, reason)` | The agent calls this — instead of guessing from outside knowledge — when the on-screen content doesn't say what to do next (a blocker). Logged as a self-reported `content_gap`. |
+| `bashcrawl_feedback(session_id, category, message)` | Categorized commentary to improve the game (not a blocker): `rationale` (why it chose a command/path), `unclear` (confusing scroll/quest text), `bug` (didn't work as described), `enhancement` (UI/UX or content idea). Logged as a `feedback` event and grouped in the report. |
 | `bashcrawl_stop(session_id)` | Finalize the JSONL log and discard the sandbox. |
 
 The session log (durable, under `logs/sessions/blank_slate/`, gitignored) records
-`discovery` / `struggle` / `content_gap` / `quest_complete` events for offline
-scoring.
+`discovery` / `struggle` / `content_gap` / `quest_complete` / `feedback` events for
+offline scoring.
+
+### Agent personas (prompts)
+
+What the agent is asked to do is defined by a **prompt persona** — a text file in
+`scripts/playtest_prompts/`. Pick one with `PROMPT=<name>` (or pass a path to your
+own file); the default is `blank-slate`:
+
+| Persona | Focus |
+|---------|-------|
+| `blank-slate` | A first-time user who learns only from on-screen content — tests whether the game is self-teaching. Reports gaps; files feedback when something is confusing. |
+| `content-critic` | Plays competently and critiques the teaching — records its rationale for each move and flags unclear text, bugs, and missing examples. |
+| `ux-reviewer` | Evaluates the experience — files UI/UX `enhancement` feedback (HUD clarity, guidance, pacing, action feedback). |
+
+```bash
+make playtest                      # default blank-slate persona
+make playtest PROMPT=ux-reviewer   # or content-critic, or a path to a custom prompt
+```
 
 ### The no-cheat guarantee
 

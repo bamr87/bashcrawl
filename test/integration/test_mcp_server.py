@@ -200,6 +200,35 @@ class TestMcpBlankSlate:
         assert "error" in refused
         await bashcrawl_stop(plain["session_id"])
 
+    @pytest.mark.asyncio
+    async def test_feedback_logged_with_category(self) -> None:
+        """bashcrawl_feedback records categorized feedback; bad category -> note."""
+        import json
+
+        sys.path.insert(0, str(TI_DIR))
+        from ti.mcp_server import (
+            bashcrawl_feedback,
+            bashcrawl_start,
+            bashcrawl_stop,
+        )
+
+        start = await bashcrawl_start(game_root=str(REPO_ROOT), fresh=True)
+        sid = start["session_id"]
+        log_path = Path(start["log_path"])
+
+        ok = await bashcrawl_feedback(sid, category="enhancement",
+                                      message="Show the quest objective in a sticky header.")
+        assert ok.get("ok") is True and ok.get("category") == "enhancement"
+        weird = await bashcrawl_feedback(sid, category="frobnicate", message="x")
+        assert weird.get("category") == "note"  # unknown category normalizes
+
+        events = [json.loads(line) for line in log_path.read_text().splitlines()]
+        fb = [e for e in events if e["event"] == "feedback"]
+        assert {e["category"] for e in fb} == {"enhancement", "note"}
+        assert any("sticky header" in e["message"] for e in fb)
+
+        await bashcrawl_stop(sid)
+
 
 def test_game_session_fixture_executes(mcp_session) -> None:
     """``mcp_session`` fixture: basic command execution."""

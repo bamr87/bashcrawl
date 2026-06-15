@@ -149,7 +149,23 @@ def score_session(events: List[Dict[str, Any]], walkthrough: Dict[str, Any]) -> 
         "completeness": completeness,
         "struggle": {"total": len(struggles), "by_room": by_room},
         "gaps": gaps,
+        "feedback": _collect_feedback(events),
     }
+
+
+def _collect_feedback(events: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    """Group the agent's qualitative feedback events by category."""
+    by_cat: Dict[str, List[Dict[str, Any]]] = {}
+    for e in events:
+        if e.get("event") != "feedback":
+            continue
+        cat = e.get("category") or "note"
+        by_cat.setdefault(cat, []).append({
+            "message": e.get("message", ""),
+            "room": normalize_room(e.get("room", "")),
+            "quest_objective": e.get("quest_objective"),
+        })
+    return by_cat
 
 
 def _rank_gaps(
@@ -217,6 +233,10 @@ def aggregate(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
             key = (g["room"], g["quest_id"])
             if key not in seen or _sev(g) < _sev(seen[key]):
                 seen[key] = g
+    merged_feedback: Dict[str, List[Dict[str, Any]]] = {}
+    for s in scores:
+        for cat, items in (s.get("feedback") or {}).items():
+            merged_feedback.setdefault(cat, []).extend(items)
     return {
         "runs": len(scores),
         "self_teaching_pct_median": round(statistics.median(pcts), 1),
@@ -226,6 +246,7 @@ def aggregate(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
             statistics.median(s["completeness"]["quests"]["furthest"] for s in scores)
         ),
         "gaps": sorted(seen.values(), key=lambda g: (_sev(g), str(g["room"]))),
+        "feedback": merged_feedback,
     }
 
 
@@ -269,7 +290,34 @@ def generate_markdown(score: Dict[str, Any]) -> str:
                 f"Reason: {g['reason']}. Tried: {', '.join(g['attempted'][-4:]) or '—'}"
             )
     lines.append("")
+    lines.extend(_feedback_markdown(score.get("feedback") or {}))
     return "\n".join(lines)
+
+
+# Order + labels for the feedback section (most actionable first).
+_FEEDBACK_LABELS = [
+    ("bug", "Bugs / not working as expected"),
+    ("unclear", "Unclear content"),
+    ("enhancement", "UI/UX enhancement ideas"),
+    ("rationale", "Command rationale"),
+    ("note", "Other notes"),
+]
+
+
+def _feedback_markdown(feedback: Dict[str, List[Dict[str, Any]]]) -> List[str]:
+    if not any(feedback.values()):
+        return []
+    lines = ["## Player feedback", ""]
+    for cat, label in _FEEDBACK_LABELS:
+        items = feedback.get(cat) or []
+        if not items:
+            continue
+        lines.append(f"### {label} ({len(items)})")
+        for item in items:
+            loc = f"`{item['room']}` — " if item.get("room") else ""
+            lines.append(f"- {loc}{item['message']}")
+        lines.append("")
+    return lines
 
 
 def main(argv: Optional[List[str]] = None) -> int:

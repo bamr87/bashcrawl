@@ -45,6 +45,7 @@ VALID_EVENTS = {
     "struggle",
     "content_gap",
     "quest_complete",
+    "feedback",
 }
 
 

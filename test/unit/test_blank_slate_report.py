@@ -69,6 +69,27 @@ def test_gap_carries_on_screen_quest_objective() -> None:
     assert score["gaps"][0]["quest_objective"] == "Use 'cat scroll' to read the ancient knowledge."
 
 
+def test_feedback_grouped_by_category_in_report() -> None:
+    from analysis.blank_slate_report import generate_markdown
+
+    events = [
+        {"event": "feedback", "category": "bug", "room": "/entrance/cellar",
+         "message": "treasure auto-added the amulet"},
+        {"event": "feedback", "category": "enhancement", "room": "entrance",
+         "message": "sticky quest header"},
+        {"event": "feedback", "category": "unclear", "room": "entrance",
+         "message": "scroll buried the key spell"},
+        {"event": "session_end"},
+    ]
+    score = score_session(events, _wt())
+    fb = score["feedback"]
+    assert set(fb) == {"bug", "enhancement", "unclear"}
+    md = generate_markdown(score)
+    assert "## Player feedback" in md
+    assert "Bugs / not working as expected" in md
+    assert "sticky quest header" in md
+
+
 def test_normalize_room_matches_walkthrough_keys() -> None:
     assert normalize_room("/entrance/cellar") == "entrance/cellar"
     assert normalize_room("entrance") == "entrance"

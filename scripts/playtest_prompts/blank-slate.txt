@@ -22,6 +22,13 @@ Instead call bashcrawl_report_gap with a short explanation of what you were
 trying to figure out and what you tried. Then make your best attempt and
 continue.
 
+Whenever something is worth telling the game's makers — even if you eventually
+worked it out — call bashcrawl_feedback(category, message):
+  - "unclear": a scroll, quest, or message that was confusing or ambiguous.
+  - "bug": something did not behave as the text said it would.
+  - "enhancement": a small change that would have helped you.
+Quote the exact scroll line or room when you can.
+
 Keep going until you finish the game or are well and truly stuck. When you are
 done, call bashcrawl_stop. Do not use any tool other than the bashcrawl tools,
 and never try to read files on the computer directly — only play through the

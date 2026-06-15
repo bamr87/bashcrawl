@@ -228,6 +228,42 @@ async def bashcrawl_report_gap(
 
 
 @mcp.tool()
+async def bashcrawl_feedback(
+    session_id: str,
+    category: str,
+    message: str,
+) -> dict[str, Any]:
+    """Record qualitative feedback to improve the game (distinct from being stuck).
+
+    Use this for running commentary the maintainers can act on. Categories:
+      - ``rationale``: why you chose this command or path (your reasoning).
+      - ``unclear``: a scroll, quest, or message that was confusing or ambiguous
+        (even if you eventually figured it out).
+      - ``bug``: something did not work as expected / looked broken.
+      - ``enhancement``: a UI/UX or content improvement you would suggest.
+    For a hard blocker (the screen never told you what to do) use
+    ``bashcrawl_report_gap`` instead.
+
+    Args:
+        category: one of rationale | unclear | bug | enhancement.
+        message: the specific, actionable feedback (quote the scroll/room if useful).
+    """
+    async with _lock:
+        eng_session = _engines.get(session_id)
+        meta = _meta.get(session_id)
+
+    if meta is None:
+        return {
+            "error": "bashcrawl_feedback is only available for fresh playtest "
+            "sessions (bashcrawl_start with fresh=true).",
+        }
+    state = eng_session.snapshot() if eng_session is not None else {}
+    recorder: SessionRecorder = meta["recorder"]
+    logged = recorder.record_feedback(category, message, state)
+    return {"ok": True, "logged": "feedback", "category": logged}
+
+
+@mcp.tool()
 async def bashcrawl_screenshot(
     session_id: str,
     max_chars: int = 500_000,

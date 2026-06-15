@@ -69,10 +69,26 @@ JSON
     echo "[playtest] Using .venv python for the MCP server."
 fi
 
-rm -f "${LOG_DIR:?}"/*.jsonl 2>/dev/null || true
-PROMPT="$(cat "$ROOT_DIR/scripts/blank_slate_prompt.txt")"
+# ── Persona prompt selection ──────────────────────────────────────────────────
+# BLANK_SLATE_PROMPT may be a built-in persona name (a file in
+# scripts/playtest_prompts/) or a path to a custom prompt file. Default: blank-slate.
+PROMPTS_DIR="$ROOT_DIR/scripts/playtest_prompts"
+PROMPT_NAME="${BLANK_SLATE_PROMPT:-}"
+[ -z "$PROMPT_NAME" ] && PROMPT_NAME="blank-slate"
+if [ -f "$PROMPT_NAME" ]; then
+    PROMPT_FILE="$PROMPT_NAME"
+elif [ -f "$PROMPTS_DIR/$PROMPT_NAME.txt" ]; then
+    PROMPT_FILE="$PROMPTS_DIR/$PROMPT_NAME.txt"
+else
+    echo "[playtest] Unknown prompt '$PROMPT_NAME'. Use a file path or one of:" >&2
+    for f in "$PROMPTS_DIR"/*.txt; do echo "  - $(basename "$f" .txt)" >&2; done
+    exit 4
+fi
+PROMPT="$(cat "$PROMPT_FILE")"
 
-echo "[playtest] $SEEDS session(s), model=$MODEL, max-turns=$MAX_TURNS"
+rm -f "${LOG_DIR:?}"/*.jsonl 2>/dev/null || true
+
+echo "[playtest] persona=$PROMPT_NAME, $SEEDS session(s), model=$MODEL, max-turns=$MAX_TURNS"
 seed=1
 while [ "$seed" -le "$SEEDS" ]; do
     echo "[playtest] --- seed $seed/$SEEDS ---"
