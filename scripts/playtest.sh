@@ -20,6 +20,24 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Load a local .env (gitignored) so a token saved there is picked up without an
+# explicit export. Only well-formed KEY=VALUE lines are exported; blanks,
+# comments, and stray lines (e.g. a token accidentally split across lines) are
+# skipped, so a malformed .env can never break the run. Real environment
+# variables already set take precedence (we do not overwrite them).
+if [ -f "$ROOT_DIR/.env" ]; then
+    while IFS= read -r _line || [ -n "$_line" ]; do
+        case "$_line" in
+            '' | '#'*) ;;
+            [A-Za-z_]*=*)
+                _key="${_line%%=*}"
+                [ -z "$(printf '%s' "${!_key:-}")" ] && export "$_key=${_line#*=}"
+                ;;
+        esac
+    done <"$ROOT_DIR/.env"
+    unset _line _key
+fi
+
 SEEDS="${1:-${BLANK_SLATE_SEEDS:-3}}"
 MODEL="${BLANK_SLATE_MODEL:-claude-sonnet-4-6}"
 MAX_TURNS="${BLANK_SLATE_MAX_TURNS:-80}"
