@@ -856,10 +856,10 @@
     {
       "name": "let",
       "help": "Evaluate simple shell arithmetic",
-      "python_handler": "",
+      "python_handler": "_cmd_let",
       "runtimes": {
         "bash": true,
-        "python": false,
+        "python": true,
         "ai": false,
         "demo": true
       }

@@ -458,7 +458,16 @@ class TerminalEngine:
     def _cmd_cd(self, args: List[str]) -> Tuple[str, str, str]:
         if not args:
             raise ValueError("cd requires a path")
-        new_cwd = self.fs.cd(self._cwd, args[0])
+        target = args[0]
+        if target == "-":  # return to the previous directory
+            prev = getattr(self, "_prev_cwd", None)
+            if not prev:
+                return "info", "cd", "No previous directory yet."
+            self._prev_cwd, self._cwd = self._cwd, prev
+            self.state.current_location = self._cwd
+            return "success", "cd", f"Moved to {self._cwd}"
+        new_cwd = self.fs.cd(self._cwd, target)
+        self._prev_cwd = self._cwd
         self._cwd = new_cwd
         self.state.current_location = new_cwd
         # Room-enter SFX is handled in app.py _refresh_sidebar
@@ -549,6 +558,34 @@ class TerminalEngine:
     def _cmd_bc(self, args: List[str]) -> Tuple[str, str, str]:
         """The Bashcrawl help command bound by the grimoire — delegates to help."""
         return self._cmd_help(args)
+
+    def _cmd_let(self, args: List[str]) -> Tuple[str, str, str]:
+        """`let "VAR=expr"` — shell arithmetic (e.g. the chamber's `let HP=HP-5`)."""
+        expr = " ".join(args).strip().strip('"').strip("'")
+        if "=" not in expr:
+            return "error", "let", 'Usage: let "VAR=expression"'
+        var, rhs = expr.split("=", 1)
+        var = var.strip()
+        # Substitute known numeric variables, then guard the expression so only
+        # digits and arithmetic operators reach eval().
+        rhs_num = self._expand_vars(rhs)
+        rhs_num = rhs_num.replace("HP", str(self.state.hp))
+        rhs_num = rhs_num.replace("XP", str(self.state.experience_points))
+        for key, val in self.state.env_vars.items():
+            rhs_num = rhs_num.replace(key, val)
+        if not re.fullmatch(r"[0-9+\-*/%() ]+", rhs_num.strip()):
+            return "error", "let", f"let: cannot evaluate '{rhs.strip()}'"
+        try:
+            value = int(eval(rhs_num))  # noqa: S307 - input restricted to arithmetic
+        except Exception:
+            return "error", "let", f"let: cannot evaluate '{rhs.strip()}'"
+        if var.upper() == "HP":
+            self.state.hp = value
+            self.state.hp_set = True
+            tail = "  You have fallen!" if value <= 0 else ""
+            return "success", "let", f"HP = {value}{tail}"
+        self.state.set_env(var, str(value))
+        return "success", "let", f"{var} = {value}"
 
     def _expand_vars(self, text: str) -> str:
         """Expand $VAR references in *text* using game state."""

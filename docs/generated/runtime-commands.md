@@ -23,7 +23,7 @@ Generated from `src/help/data/runtime_commands.yaml`.
 | source | yes | no | no | no |
 | bc | yes | no | no | no |
 | echo | yes | yes | yes | yes |
-| let | no | yes | no | yes |
+| let | yes | yes | no | yes |
 | alias | no | yes | no | yes |
 | history | no | yes | no | yes |
 | clear | no | yes | no | yes |

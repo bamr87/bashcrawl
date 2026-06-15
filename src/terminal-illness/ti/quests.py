@@ -77,10 +77,10 @@ def _hardcoded_quests() -> List[Quest]:
               xp=150, location_check="armoury|cellar"),
         Quest(id=7, title="The Bashcrawl Grimoire",
               description="Deep in the chapel library, a tome guards a secret.",
-              objective="Find the hidden study (try 'ls -a'), run './grimoire', "
-                        "then 'source' the help script it reveals to bind 'bc'.",
-              hint="In the library run './tome' to shift the shelves, 'cd' into "
-                   "the study, './grimoire', then 'source' the init_help.sh path.",
+              objective="Carry the amulet and coins to the hidden study, run "
+                        "'./grimoire', then 'source' the help script to bind 'bc'.",
+              hint="You need the amulet (cellar) and coins (chamber); then "
+                   "'./grimoire' in the study and 'source' the init_help.sh path.",
               required_commands=["source"],
               completion=QuestCompletion(command="source",
                                          location="study|help",

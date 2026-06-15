@@ -160,8 +160,8 @@
       "id": 7,
       "title": "The Bashcrawl Grimoire",
       "description": "Deep in the chapel library, a tome of forgotten spells guards a secret.",
-      "objective": "Find the hidden study behind the library, run './grimoire', then 'source' the help script to bind 'bc'.",
-      "hint": "Run './tome' to shift the shelves, enter the study, './grimoire', then 'source' the init_help.sh path.",
+      "objective": "With the amulet and coins, reach the study, run './grimoire', then 'source' the help script.",
+      "hint": "Need the amulet (cellar) + coins (chamber); then './grimoire' in the study, 'source' init_help.sh.",
       "required_commands": [
         "source"
       ],
