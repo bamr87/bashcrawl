@@ -14,6 +14,7 @@ Sessions
 from __future__ import annotations
 
 import asyncio
+import os
 import uuid
 from pathlib import Path
 from typing import Any, Dict
@@ -81,7 +82,14 @@ async def bashcrawl_start(
         game_dir = sandbox_game_dir(sandbox)
         save_path = game_dir / ".playtest_save.json"  # nonexistent -> fresh state
         session = GameSession.load(game_dir, save_path=save_path)
-        log_path = game_dir / "logs" / "sessions" / f"blank_slate_{sid}.jsonl"
+        # Write the log to a DURABLE location outside the sandbox so it survives
+        # bashcrawl_stop (which discards the sandbox) for the offline scorer.
+        # logs/sessions/ is gitignored, so this never churns the repo.
+        log_dir = Path(
+            os.environ.get("BASHCRAWL_PLAYTEST_LOG_DIR")
+            or (source_root / "logs" / "sessions" / "blank_slate")
+        )
+        log_path = log_dir / f"{sid}.jsonl"
         recorder = SessionRecorder(sid, log_path)
         recorder.start(session.snapshot())
         async with _lock:
