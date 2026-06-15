@@ -24,6 +24,8 @@ _DEFAULT_COMMAND_TABLE: Final[list[tuple[str, str, str]]] = [
     ("cp", "_cmd_cp", "Copy a file"),
     ("mv", "_cmd_mv", "Move/rename file or directory"),
     ("export", "_cmd_export", "Set a game variable"),
+    ("source", "_cmd_source", "Run a script in the current shell (e.g. the help system)"),
+    ("bc", "_cmd_bc", "Bashcrawl help command (bound by the grimoire)"),
     ("echo", "_cmd_echo", "Print text or variable value"),
     ("save", "_cmd_save", "Save your progress"),
     ("load", "_cmd_load", "Load your progress"),

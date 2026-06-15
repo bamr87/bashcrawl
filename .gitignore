@@ -80,3 +80,6 @@ screenshots/manifest_*.json
 
 # Local virtualenv
 .venv/
+
+# Blank-slate playtest transcripts (Claude stream-json output)
+logs/blank_slate_transcripts/

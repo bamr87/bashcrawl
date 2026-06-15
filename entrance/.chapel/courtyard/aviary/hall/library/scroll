@@ -12,6 +12,24 @@ Before you, there is a small table with a very large
 book open on it.
 
 ================================================================================
+                   SEEING WHAT IS HIDDEN: ls -a
+================================================================================
+
+Not everything in the dungeon is in plain sight.  Files and
+rooms whose names begin with a dot (.) are HIDDEN -- a normal
+'ls' will not show them.  To reveal them, add the -a ("all")
+flag:
+
+    ls -a            List everything, including hidden names
+    ls -la           The same, with details (one per line)
+
+Hidden names you find this way can still be entered:
+
+    cd .somewhere
+
+Keep this spell in mind here -- this library guards a secret.
+
+================================================================================
                    THE ART OF SELF-LEARNING: man
 ================================================================================
 

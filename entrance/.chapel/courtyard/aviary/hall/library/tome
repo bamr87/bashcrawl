@@ -318,7 +318,15 @@ to a page in the middle of the book.
 EOF
 
 printf "Do you read it? y/n  "
-read RESP
+# Only loop for an interactive terminal. When run non-interactively (the
+# Python/MCP engine pipes input), show a single spell instead of replaying
+# whatever is on stdin, which used to dump the same spell several times.
+if [ -t 0 ]; then
+    read RESP
+else
+    RESP=y
+    echo
+fi
 
 if [ "${RESP}" = "y" -o "${RESP}" = "Y" ]; then
     cat << EOF
@@ -328,12 +336,17 @@ first spell:
 
 EOF
 
-    while [ "${RESP}" = 'y' -o "${RESP}" = 'Y' ]; do
-        random_page
+    random_page
 
+    if [ -t 0 ]; then
         printf "Do you want to read another spell? y/n  "
         read RESP
-    done
+        while [ "${RESP}" = 'y' -o "${RESP}" = 'Y' ]; do
+            random_page
+            printf "Do you want to read another spell? y/n  "
+            read RESP
+        done
+    fi
 fi
 
 # --- Hidden Study Unlock ---

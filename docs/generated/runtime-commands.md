@@ -20,6 +20,8 @@ Generated from `src/help/data/runtime_commands.yaml`.
 | cp | yes | yes | yes | yes |
 | mv | yes | yes | yes | yes |
 | export | yes | yes | yes | yes |
+| source | yes | no | no | no |
+| bc | yes | no | no | no |
 | echo | yes | yes | yes | yes |
 | let | no | yes | no | yes |
 | alias | no | yes | no | yes |

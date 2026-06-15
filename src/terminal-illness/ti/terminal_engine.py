@@ -116,6 +116,25 @@ class TerminalEngine:
             return None
 
         cmd_line = _normalize_merged_cmd_line(cmd_line)
+
+        # Single-line shell function definition: NAME () { ... }
+        # (taught in the hidden study / grimoire, e.g. `bc () { ...; }`). The
+        # engine doesn't run arbitrary bash, but it acknowledges the spell so
+        # following the scrolls never errors — and binds `bc` for convenience.
+        fn = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\(\)\s*\{", cmd_line.strip())
+        if fn:
+            name = fn.group(1)
+            if name not in self.state.learned_commands:
+                self.state.learned_commands.append(name)
+            extra = (
+                "  Type 'bc' from any room for help."
+                if name == "bc"
+                else "  Call it by name like any built-in spell."
+            )
+            self._emit_output("magic", f"Spell '{name}' inscribed.{extra}")
+            self._maybe_advance_quest()
+            return None
+
         parts = cmd_line.strip().split()
         cmd, args = parts[0], parts[1:]
 
@@ -496,6 +515,13 @@ class TerminalEngine:
     def _cmd_export(self, args: List[str]) -> Tuple[str, str, str]:
         if not args:
             raise ValueError("export requires VAR=value")
+        # `export -f NAME` exports a shell function (e.g. the grimoire's `bc`).
+        # The engine has no real functions, so acknowledge it gracefully.
+        if args[0] == "-f":
+            name = args[1] if len(args) > 1 else ""
+            return "success", "export", (
+                f"Function '{name}' exported." if name else "Function exported."
+            )
         assignment = " ".join(args)
         if "=" not in assignment:
             raise ValueError("Usage: export VAR=value")
@@ -504,6 +530,25 @@ class TerminalEngine:
         value = self._expand_vars(value.strip())
         self.state.set_env(key.strip(), value)
         return "success", "export", f"Exported {key.strip()}={value}"
+
+    def _cmd_source(self, args: List[str]) -> Tuple[str, str, str]:
+        """`source <file>` — run a script in the current shell.
+
+        The only thing the dungeon asks you to source is the help system's init
+        script (the grimoire's final spell), so this binds the `bc` help command
+        and completes the Grimoire quest. Any argument is accepted.
+        """
+        if not args:
+            return "error", "source", "source: filename argument required"
+        return "magic", "source", (
+            "You source the help system. The 'bc' spell is now bound — type "
+            "'bc' from any room for contextual help, 'bc commands' for the full "
+            "reference, or 'bc map' for the dungeon map."
+        )
+
+    def _cmd_bc(self, args: List[str]) -> Tuple[str, str, str]:
+        """The Bashcrawl help command bound by the grimoire — delegates to help."""
+        return self._cmd_help(args)
 
     def _expand_vars(self, text: str) -> str:
         """Expand $VAR references in *text* using game state."""

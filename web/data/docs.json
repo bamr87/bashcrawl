@@ -1974,8 +1974,8 @@
       "id": 7,
       "title": "The Bashcrawl Grimoire",
       "description": "Deep in the chapel library, a tome of forgotten spells guards a secret.",
-      "objective": "Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.",
-      "hint": "Find the library, read the tome, then source the grimoire.",
+      "objective": "Find the hidden study behind the library, run './grimoire', then 'source' the help script to bind 'bc'.",
+      "hint": "Run './tome' to shift the shelves, enter the study, './grimoire', then 'source' the init_help.sh path.",
       "required_commands": [
         "source"
       ],

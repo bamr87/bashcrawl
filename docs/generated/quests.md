@@ -45,7 +45,7 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `armoury|cellar`
 
 ## Quest 7: The Bashcrawl Grimoire
-- Objective: Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.
+- Objective: Find the hidden study behind the library, run './grimoire', then 'source' the help script to bind 'bc'.
 - XP: `200`
 - Completion command: `source`
 - Completion location: `study|help`

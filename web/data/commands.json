@@ -821,6 +821,28 @@
       }
     },
     {
+      "name": "source",
+      "help": "Run a script in the current shell (e.g. the help system)",
+      "python_handler": "_cmd_source",
+      "runtimes": {
+        "bash": false,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    },
+    {
+      "name": "bc",
+      "help": "Bashcrawl help command (bound by the grimoire)",
+      "python_handler": "_cmd_bc",
+      "runtimes": {
+        "bash": false,
+        "python": true,
+        "ai": false,
+        "demo": false
+      }
+    },
+    {
       "name": "echo",
       "help": "Print text or variable value",
       "python_handler": "_cmd_echo",
