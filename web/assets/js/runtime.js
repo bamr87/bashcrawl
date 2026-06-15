@@ -121,14 +121,6 @@
             "        |||||",
             "        |||||",
         ].join("\n"),
-        portal: [
-            "          .  *  .   *  .   .",
-            "        ╭───────────────────╮",
-            "        │  ◌  the portal  ◌  │",
-            "        │   ───→  /scriptorium",
-            "        ╰───────────────────╯",
-            "          *  .   .  *  .  *",
-        ].join("\n"),
         treasure: [
             "       _.--\"\"--._",
             "      / _      _ \\",
@@ -454,7 +446,7 @@
         cmdHelp() {
             return [
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
-                { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./oracle" },
+                { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./treasure" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
             ];
         }
@@ -860,21 +852,32 @@
             return [{ kind: "output", text: lines.join("\n") }];
         }
 
+        // Draw the dungeon map by walking the live runtime filesystem, so the map
+        // never advertises a room you cannot actually `cd` into. Only directories
+        // (rooms) are shown; revealed hidden rooms appear un-dotted via entries().
         cmdMap() {
             const here = this.state.cwd;
-            const arrow = (path) => path === here ? " ← you are here" : "";
-            const lines = [
-                "  /entrance" + arrow("/entrance"),
-                "  ├── cellar/" + arrow("/entrance/cellar"),
-                "  │   └── armoury/" + arrow("/entrance/cellar/armoury"),
-                "  │       ├── chamber/" + arrow("/entrance/cellar/armoury/chamber"),
-                "  │       └── workshop/" + arrow("/entrance/cellar/armoury/workshop"),
-                "  ├── scriptorium/" + arrow("/entrance/scriptorium"),
-                "  │   └── observatory/" + arrow("/entrance/scriptorium/observatory"),
-                "  └── .chapel/  (hidden — try ls -la)",
-                "      └── courtyard/aviary/hall/library/.study/" + arrow("/entrance/.chapel/courtyard/aviary/hall/library/.study"),
-            ];
-            return [{ kind: "art", text: lines.join("\n") }];
+            const root = this.world.root || "/entrance";
+            const marker = (path) => (path === here ? "  ← you are here" : "");
+            const lines = [root + marker(root)];
+            const walk = (path, prefix, depth) => {
+                if (depth > 4) return;
+                const rooms = this.entries(path, false).filter((entry) => entry.type === "dir");
+                rooms.forEach((entry, idx) => {
+                    const last = idx === rooms.length - 1;
+                    const tee = last ? "└── " : "├── ";
+                    const childPath = `${path === "/" ? "" : path}/${entry.name}`;
+                    lines.push(prefix + tee + entry.name + "/" + marker(childPath));
+                    walk(childPath, prefix + (last ? "    " : "│   "), depth + 1);
+                });
+            };
+            walk(root, "  ", 0);
+            const out = [{ kind: "art", text: lines.join("\n") }];
+            // Teach that the dungeon hides more than it shows, until it doesn't.
+            if (this.entries(root, true).some((entry) => entry.type === "dir" && entry.hidden)) {
+                out.push({ kind: "dim", text: "Some passages stay hidden until unlocked — try `ls -la` and read the scrolls." });
+            }
+            return out;
         }
 
         cmdLook() {
@@ -891,7 +894,7 @@
 
         cmdHint() {
             const q = this.quests[this.state.currentQuestId];
-            if (!q) return [{ kind: "success", text: "No quests left. Try `map`, `tree`, `cowsay hi`, or `./oracle` in /entrance/scriptorium." }];
+            if (!q) return [{ kind: "success", text: "No quests left. Try `map`, `tree`, `cowsay hi`, or the `train` / `speedrun` / `pathfind` mini-games." }];
             return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}` }];
         }
 
