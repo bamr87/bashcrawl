@@ -44,6 +44,21 @@
         return String(text).split("\n");
     }
 
+    // Local-day helpers for the Daily Challenge (browser Date is fine here).
+    function isoDay(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    }
+    function todayStr() { return isoDay(new Date()); }
+    function yesterdayStr() { return isoDay(new Date(Date.now() - 86400000)); }
+    function dailyGoalFor(dateStr) {
+        let h = 0;
+        for (const c of dateStr) h += c.charCodeAt(0);
+        return 30 + (h % 4) * 10; // 30 / 40 / 50 / 60
+    }
+
     // ── Encounter Creature Gallery ──────────────────────────────────────
     // Monospace-safe ASCII portraits keyed by encounter SCRIPT BASENAME
     // (runScript receives cmd.slice(2)). Pure ASCII only — no variation-
@@ -58,7 +73,26 @@
         goblet:   ["        \\        /", "         \\.----./", "          \\    /", "           \\  /", "            )(", "           /  \\", "          /____\\", "      a jeweled goblet stands"].join("\n"),
         spell:    ["          *  .  +", "        .  _||_  .", "      +   /    \\   *", "     .   | rune |   .", "      *   \\____/   +", "        '  |  |  '", "     ~ the glyph ignites ~"].join("\n"),
         crystal:  ["         _________", "        /  _   _  \\", "       |  (o) (o)  |", "       |     >     |", "       |   \\___/   |", "        \\_________/", "      the crystal murmurs..."].join("\n"),
+        penguin:  ["        .--.", "       /o  o\\", "       \\ <> /", "      /|    |\\", "     ` |    | `", "       |____|", "       /    \\", "    a dapper penguin"].join("\n"),
+        nyarlathotep: ["      .-~~~-.", "     / .   . \\", "    |  (o o)  |", "     \\  \\_/  /", "    .-/.   .\\-.", "    ) (|   |) (", "     ~~ \\___/ ~~", "    the crawling chaos"].join("\n"),
+        fountain: ["       .  .  .", "        \\ | /", "       .-=^=-.", "      (   :   )", "       \\ ~~~ /", "        |___|", "       /_____\\", "    a wishing fountain"].join("\n"),
     };
+
+    // Bestiary metadata (display name + blurb) for each catalogued encounter,
+    // in the order shown by the `bestiary` command.
+    const BESTIARY = [
+        { key: "treasure", name: "Treasure Chest", blurb: "Spills jewels for the bold." },
+        { key: "monster", name: "Coiled Serpent", blurb: "Strikes at the unprepared." },
+        { key: "ghost", name: "Restless Ghost", blurb: "Drifts through locked doors." },
+        { key: "potion", name: "Glowing Potion", blurb: "Restores a weary hero's vigor." },
+        { key: "statue", name: "Stone Guardian", blurb: "Wakes when you draw near." },
+        { key: "goblet", name: "Jeweled Goblet", blurb: "A prize of the deep vaults." },
+        { key: "spell", name: "Igniting Rune", blurb: "Crackles with raw magick." },
+        { key: "crystal", name: "Murmuring Crystal", blurb: "Whispers half-truths." },
+        { key: "penguin", name: "Dapper Penguin", blurb: "Inexplicably formal." },
+        { key: "nyarlathotep", name: "The Crawling Chaos", blurb: "Best left uncatalogued." },
+        { key: "fountain", name: "Wishing Fountain", blurb: "Bubbles with possibility." },
+    ];
 
     // Return the {kind:'art'} portrait for a script basename, or null. O(1), pure.
     function encounterArtLine(script) {
@@ -181,6 +215,22 @@
         { min: 130, title: "Terminal Master" },
         { min: 190, title: "Archmage of the Command Line" },
     ];
+    // Achievements catalog. Icons use only emoji verified to render in COLOR in
+    // the monospace log. test(s) reads runtime state; unlocked once, +5 XP each.
+    const ACHIEVEMENTS = [
+        { id: "first_steps", icon: "🧭", title: "First Steps", desc: "Found your place with pwd.", test: (s) => (s.stats.commands.pwd || 0) > 0 },
+        { id: "cartographer", icon: "✨", title: "Cartographer", desc: "Charted the dungeon with map or tree.", test: (s) => (s.stats.commands.map || 0) > 0 || (s.stats.commands.tree || 0) > 0 },
+        { id: "scholar", icon: "💡", title: "Scholar", desc: "Read three ancient scrolls.", test: (s) => (s.stats.catScrollCount || 0) >= 3 },
+        { id: "world_builder", icon: "⚡", title: "World-Builder", desc: "Conjured a room with mkdir.", test: (s) => (s.stats.commands.mkdir || 0) > 0 },
+        { id: "treasure_hunter", icon: "💰", title: "Treasure Hunter", desc: "Claimed your first loot.", test: (s) => (s.inventory || []).length > 0 },
+        { id: "key_master", icon: "🔓", title: "Key-Master", desc: "Unlocked a hidden room.", test: (s) => Object.keys(s.reveals || {}).length > 0 },
+        { id: "arena_graduate", icon: "🏅", title: "Arena Graduate", desc: "Cleared a Training Arena run.", test: (s) => !!(s.flags && s.flags.arena_cleared) },
+        { id: "speed_demon", icon: "🏆", title: "Speed Demon", desc: "Finished a timed Speed Run.", test: (s) => s.speedrunBest != null },
+        { id: "trailblazer", icon: "✅", title: "Trailblazer", desc: "Completed a Path-Finder journey.", test: (s) => !!(s.flags && s.flags.pathfind_done) },
+        { id: "naturalist", icon: "✨", title: "Naturalist", desc: "Catalogued 5 creatures in the bestiary.", test: (s) => (s.bestiary || []).length >= 5 },
+        { id: "seasoned", icon: "🔥", title: "Seasoned Adventurer", desc: "Earned 150 XP.", test: (s) => (s.xp || 0) >= 150 },
+    ];
+
     // Compass rose for the Path-Finder mini-game (box-safe ASCII).
     const PATHFIND_ART = [
         "       .  N  .",
@@ -188,6 +238,19 @@
         "   W ----(+)---- E",
         "    '   / | \\   '",
         "       '  S  '",
+    ].join("\n");
+    // Banner shown when the player's rank advances (box-safe ASCII).
+    const LEVELUP_ART = [
+        "    .  *  .       *   .    *  .",
+        "   *   L E V E L   U P !   *",
+        "    *  .   *       .   *  .  *",
+    ].join("\n");
+    // Header for the profile / character sheet (box-safe ASCII).
+    const PROFILE_ART = [
+        "  .-----------------------------.",
+        "  |      C H A R A C T E R      |",
+        "  |          S H E E T          |",
+        "  '-----------------------------'",
     ].join("\n");
 
     function defaultState(root) {
@@ -201,6 +264,7 @@
             userNodes: {},
             completedQuestIds: [],
             currentQuestId: 0,
+            visited: [],
             history: [],
             historyIndex: -1,
             flags: {},
@@ -208,6 +272,10 @@
             trainer: null,
             pathfind: null,
             speedrunBest: null,
+            achievements: [],
+            bestiary: [],
+            daily: { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null },
+            rankIndex: 0,
             stats: { commands: {}, catScrollCount: 0, initialized: false },
         };
     }
@@ -275,14 +343,50 @@
                 pathfind: this.cmdPathfind,
                 seek: this.cmdPathfind,
                 journey: this.cmdPathfind,
+                achievements: this.cmdAchievements,
+                badges: this.cmdAchievements,
+                profile: this.cmdProfile,
+                stats: this.cmdProfile,
+                sheet: this.cmdProfile,
+                bestiary: this.cmdBestiary,
+                codex: this.cmdBestiary,
+                daily: this.cmdDaily,
+                challenge: this.cmdDaily,
+                commands: this.cmdCommands,
+                cmds: this.cmdCommands,
+                menu: this.cmdCommands,
+                features: this.cmdCommands,
             };
         }
 
         execute(line) {
+            this.refreshDaily();
             // While the Training Arena is active, every line is an answer, not a command.
-            if (this.state.trainer && this.state.trainer.active) {
-                return this.trainerInput(line);
+            const out = (this.state.trainer && this.state.trainer.active)
+                ? this.trainerInput(line)
+                : this.runPipeline(line);
+            // Achievements first (they award XP), then daily, then rank-up (reads final XP).
+            const extra = this.checkAchievements().concat(this.checkDaily()).concat(this.checkRankUp());
+            return extra.length ? out.concat(extra) : out;
+        }
+
+        // Celebrate when accumulated XP crosses an ARENA_RANKS threshold.
+        checkRankUp() {
+            const idx = ARENA_RANKS.reduce((acc, r, i) => ((this.state.xp || 0) >= r.min ? i : acc), 0);
+            if (typeof this.state.rankIndex !== "number") {
+                this.state.rankIndex = idx; // baseline for older saves; no retroactive party
+                return [];
             }
+            if (idx <= this.state.rankIndex) return [];
+            this.state.rankIndex = idx;
+            return [
+                { kind: "control", action: "levelup" },
+                { kind: "art", text: LEVELUP_ART },
+                { kind: "success", text: `★  You are now ${ARENA_RANKS[idx].title}!` },
+            ];
+        }
+
+        runPipeline(line) {
             const segments = splitPipes(line.trim());
             if (!segments.length) return [];
             let stdin = null;
@@ -448,6 +552,8 @@
                 { kind: "info", text: "Open the Docs panel with F1 (or click Docs)." },
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./treasure" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
+                { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge." },
+                { kind: "info", text: "New here? Type 'commands' for the full command deck of web-exclusive features." },
             ];
         }
 
@@ -503,11 +609,201 @@
             this.state.xp += xp;
             const title = pf.targetTitle;
             this.state.pathfind = null;
+            this.state.flags.pathfind_done = true;
             const flair = moves <= 1 ? "  A direct route!" : moves <= 3 ? "  Swiftly done." : "";
             return [
                 { kind: "success", text: `🧭 You reached ${title} in ${moves} move${moves === 1 ? "" : "s"}!  +${xp} XP${flair}` },
                 { kind: "dim", text: "Type 'pathfind' to seek a new destination." },
             ];
+        }
+
+        // ── Achievements ─────────────────────────────────────────────────────
+        // Evaluate the catalog against current state; award any newly-earned
+        // badge (once each, +5 XP) and return announcement lines.
+        checkAchievements() {
+            if (!Array.isArray(this.state.achievements)) this.state.achievements = [];
+            const have = this.state.achievements;
+            const out = [];
+            for (const a of ACHIEVEMENTS) {
+                if (have.includes(a.id)) continue;
+                let earned = false;
+                try { earned = !!a.test(this.state); } catch (e) { earned = false; }
+                if (!earned) continue;
+                have.push(a.id);
+                this.state.xp += 5;
+                out.push({ kind: "success", text: `${a.icon} Achievement unlocked: ${a.title} — ${a.desc}  (+5 XP)` });
+            }
+            return out;
+        }
+
+        // Character sheet: a one-glance summary of all progress.
+        cmdProfile() {
+            const s = this.state;
+            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
+            const cmds = s.stats.commands || {};
+            const distinct = Object.keys(cmds).length;
+            const total = Object.values(cmds).reduce((a, b) => a + b, 0);
+            const inv = s.inventory || [];
+            const best = s.speedrunBest != null ? `${s.speedrunBest.toFixed(1)}s` : "—";
+            const label = (text) => `  ${(text + ":").padEnd(18)}`;
+            return [
+                { kind: "art", text: PROFILE_ART },
+                { kind: "magic", text: `  Rank:  ${rank}` },
+                { kind: "output", text: `${label("XP")}${s.xp}        HP: ${s.hp}/100` },
+                { kind: "output", text: `${label("Quests")}${s.completedQuestIds.length}/${this.quests.length} complete` },
+                { kind: "output", text: `${label("Badges")}${(s.achievements || []).length}/${ACHIEVEMENTS.length} earned` },
+                { kind: "output", text: `${label("Scrolls read")}${s.stats.catScrollCount || 0}` },
+                { kind: "output", text: `${label("Commands")}${distinct} distinct (${total} cast)` },
+                { kind: "output", text: `${label("Hidden rooms")}${Object.keys(s.reveals || {}).length} unlocked` },
+                { kind: "output", text: `${label("Best speed run")}${best}` },
+                { kind: "output", text: `${label("Inventory")}${inv.length ? inv.join(", ") : "(empty)"}` },
+                { kind: "dim", text: "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow" },
+            ];
+        }
+
+        // ── Daily Challenge ──────────────────────────────────────────────────
+        // Each local day offers an XP goal; completing it on consecutive days
+        // builds a streak. Rolls over automatically on the first command of a
+        // new day. Date use is fine in the browser.
+        refreshDaily() {
+            if (!this.state.daily) {
+                this.state.daily = { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null };
+            }
+            const d = this.state.daily;
+            const today = todayStr();
+            if (d.date === today) return;
+            // New day: reset the day's progress (streak is judged on completion).
+            d.date = today;
+            d.baselineXp = this.state.xp;
+            d.goal = dailyGoalFor(today);
+            d.completed = false;
+        }
+
+        checkDaily() {
+            const d = this.state.daily;
+            if (!d || d.completed || !d.date) return [];
+            const earned = this.state.xp - d.baselineXp;
+            if (earned < d.goal) return [];
+            d.completed = true;
+            d.streak = (d.lastDate === yesterdayStr()) ? d.streak + 1 : 1;
+            d.lastDate = d.date;
+            this.state.xp += 25;
+            return [
+                { kind: "success", text: `🔥 Daily challenge complete!  +25 XP  ·  Streak: ${d.streak} day${d.streak === 1 ? "" : "s"}` },
+                { kind: "dim", text: "Come back tomorrow to keep the streak alive." },
+            ];
+        }
+
+        cmdDaily() {
+            this.refreshDaily();
+            const d = this.state.daily;
+            const earned = Math.max(0, this.state.xp - d.baselineXp);
+            return [
+                { kind: "magic", text: `✨ Daily Challenge — ${d.date}` },
+                { kind: "output", text: `   Goal:     earn ${d.goal} XP today` },
+                { kind: "output", text: `   Progress: ${d.completed ? "✅ complete" : `${Math.min(earned, d.goal)}/${d.goal} XP`}` },
+                { kind: "output", text: `   Streak:   ${d.streak} day${d.streak === 1 ? "" : "s"}` },
+                { kind: "dim", text: d.completed ? "   Done! Return tomorrow to extend your streak." : "   Earn XP via train / speedrun / pathfind / encounters / badges." },
+            ];
+        }
+
+        // Bestiary: catalogue of encounters you've run. `bestiary <key>` shows
+        // the art + blurb for a discovered creature; bare `bestiary` lists all.
+        cmdBestiary(args) {
+            const seen = this.state.bestiary || [];
+            const want = (args[0] || "").toLowerCase();
+            if (want) {
+                const entry = BESTIARY.find((e) => e.key === want);
+                if (!entry) return [{ kind: "error", text: `No such creature: ${want}` }];
+                if (!seen.includes(want)) return [{ kind: "dim", text: `You haven't encountered the ${entry.name} yet.` }];
+                return [
+                    { kind: "art", text: ENCOUNTER_ART[want] || "" },
+                    { kind: "magic", text: `  ${entry.name}` },
+                    { kind: "output", text: `  ${entry.blurb}` },
+                ];
+            }
+            const lines = [{ kind: "magic", text: `✨ Bestiary — ${seen.length}/${BESTIARY.length} catalogued` }];
+            for (const e of BESTIARY) {
+                lines.push(seen.includes(e.key)
+                    ? { kind: "success", text: `  ✅ ${e.name} — ${e.blurb}` }
+                    : { kind: "dim", text: "  🔒 ??? — undiscovered" });
+            }
+            lines.push({ kind: "dim", text: "  Run an encounter (e.g. ./treasure) to catalogue it.  'bestiary <name>' to view one." });
+            return lines;
+        }
+
+        cmdAchievements() {
+            const have = this.state.achievements || [];
+            const lines = [{ kind: "magic", text: `🏅 Achievements — ${have.length}/${ACHIEVEMENTS.length} unlocked` }];
+            for (const a of ACHIEVEMENTS) {
+                const got = have.includes(a.id);
+                lines.push({
+                    kind: got ? "success" : "dim",
+                    text: got ? `${a.icon} ${a.title} — ${a.desc}` : `🔒 ${a.title} — ${a.desc}`,
+                });
+            }
+            return lines;
+        }
+
+        // ── Command reference ────────────────────────────────────────────────
+        // Discoverability hub for the web-only features. These commands have no
+        // bash equivalent and are otherwise invisible, so surface them grouped
+        // by purpose with a one-line "what it does" and live progress counts.
+        cmdCommands() {
+            const s = this.state;
+            const badges = (s.achievements || []).length;
+            const seen = (s.bestiary || []).length;
+            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
+            const groups = [
+                {
+                    title: "🎮 Mini-games (earn XP)",
+                    items: [
+                        ["train", "Drill spells from memory in the Training Arena"],
+                        ["speedrun", "Same trials, against the clock — beat your best time"],
+                        ["pathfind", "Navigate to a target room in the fewest cd moves"],
+                    ],
+                },
+                {
+                    title: "📊 Progress & collection",
+                    items: [
+                        ["profile", `Your character sheet — ${rank}, XP, stats`],
+                        ["achievements", `Badge catalogue — ${badges}/${ACHIEVEMENTS.length} unlocked`],
+                        ["bestiary", `Creature codex — ${seen}/${BESTIARY.length} catalogued`],
+                        ["daily", "Today's challenge and your streak"],
+                    ],
+                },
+                {
+                    title: "🧭 Navigation & lore",
+                    items: [
+                        ["map", "ASCII map of the dungeon"],
+                        ["look", "Describe the current room and its contents"],
+                        ["hint", "A nudge toward the next objective"],
+                        ["quest", "Your active quest objectives"],
+                    ],
+                },
+                {
+                    title: "✨ Flavour",
+                    items: [
+                        ["cowsay <text>", "An ASCII cow speaks"],
+                        ["fortune", "A random adage"],
+                        ["banner <text>", "Big block letters"],
+                        ["sl", "Watch a train roll by"],
+                    ],
+                },
+            ];
+            const lines = [
+                { kind: "banner", text: "BASHCRAWL — COMMAND DECK" },
+                { kind: "dim", text: "Web-exclusive commands beyond the core POSIX toolkit. Type any name to run it." },
+            ];
+            for (const g of groups) {
+                lines.push({ kind: "magic", text: g.title });
+                for (const [name, desc] of g.items) {
+                    const pad = name.padEnd(16, " ");
+                    lines.push({ kind: "output", text: `  ${pad}${desc}` });
+                }
+            }
+            lines.push({ kind: "dim", text: "Core commands (ls, cd, cat, grep, find, tree...) work too — see Docs (F1)." });
+            return lines;
         }
 
         promptLabel() {
@@ -606,6 +902,7 @@
             const answered = t.pos;
             const rank = ARENA_RANKS.filter((r) => t.score >= r.min).pop() || ARENA_RANKS[0];
             const completed = answered >= t.queue.length;
+            if (completed) this.state.flags.arena_cleared = true;
             this.state.trainer = null;
             const lines = [];
             if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
@@ -1080,7 +1377,11 @@
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];
             const portrait = encounterArtLine(script);
-            if (portrait) messages.unshift(portrait);
+            if (portrait) {
+                messages.unshift(portrait);
+                if (!Array.isArray(this.state.bestiary)) this.state.bestiary = [];
+                if (!this.state.bestiary.includes(script)) this.state.bestiary.push(script);
+            }
             for (const item of encounter.grants_items || []) {
                 if (!this.state.inventory.includes(item)) this.state.inventory.push(item);
             }

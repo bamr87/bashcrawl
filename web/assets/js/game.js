@@ -10,6 +10,7 @@
         quest: document.getElementById("quest-panel"),
         inventory: document.getElementById("inventory-panel"),
         room: document.getElementById("room-panel"),
+        map: document.getElementById("map-panel"),
         log: document.getElementById("output-log"),
         prompt: document.getElementById("prompt-label"),
         input: document.getElementById("command-input"),
@@ -104,6 +105,18 @@
         const safe = art.map(escapeHtml).join("\n");
         return `<pre class="room-vignette" data-room-art="${key}" aria-hidden="true">${safe}</pre>`;
     }
+
+    // Optional side objectives, grounded in real, checkable state: each hidden
+    // area is "done" once the player has revealed it (reveals map a visible path
+    // like /entrance/chapel to its dotted source). Kept separate from the main
+    // story chain so the quest log can show both tracks. Declared up here so it
+    // is initialized before the first render() during init.
+    const SIDE_QUESTS = [
+        { key: "chapel", name: "The Hidden Chapel", hint: "Search for a dotfile and unlock the chapel with grep." },
+        { key: "vault", name: "The Sealed Vault", hint: "Use variables to breach the vault." },
+        { key: "scrap", name: "The Scrapyard", hint: "Find the scrap and master symbolic links." },
+        { key: "rift", name: "The Rift", hint: "Tear open the rift for advanced trials." },
+    ];
 
     const logLines = [];
     const BANNER = [
@@ -231,6 +244,10 @@
                 docsPanel.setData(data.docs, runtime);
                 window.BashcrawlStorage.clear();
             }
+            if (out.action === "levelup") {
+                flashLevelUp();
+                continue;
+            }
             append(out.kind, out.text || "");
         }
         const after = snapshotState();
@@ -248,6 +265,7 @@
         if (next.hp < prev.hp) {
             shakePanel(dom.inventory);
             applyHeroMood("hurt");
+            screenFlash("damage");
         }
         if (next.xp > prev.xp) {
             popXp();
@@ -271,6 +289,28 @@
         append("art", lines);
     }
 
+    // Brief full-screen flash via a transient overlay element (no pseudo-element
+    // conflicts with the CRT/level-up layers). Auto-removed; reduced-motion-safe.
+    function screenFlash(kind) {
+        const el = document.createElement("div");
+        el.className = `bc-screenflash bc-screenflash-${kind}`;
+        el.setAttribute("aria-hidden", "true");
+        document.body.appendChild(el);
+        let done = false;
+        const cleanup = () => { if (done) return; done = true; el.remove(); };
+        el.addEventListener("animationend", cleanup, { once: true });
+        setTimeout(cleanup, 1000);
+    }
+
+    function flashLevelUp() {
+        const shell = document.querySelector(".web-shell");
+        if (!shell) return;
+        shell.classList.remove("fx-levelup");
+        void shell.offsetWidth;
+        shell.classList.add("fx-levelup");
+        setTimeout(() => shell.classList.remove("fx-levelup"), 950);
+    }
+
     function flashPanel(el) {
         if (!el || !el.parentElement) return;
         const target = el.closest(".tui-panel") || el;
@@ -290,7 +330,7 @@
     }
 
     function popXp() {
-        const xpSpan = dom.quest.querySelector(".kind-dim");
+        const xpSpan = dom.quest.querySelector(".quest-xp") || dom.quest.querySelector(".kind-dim");
         if (!xpSpan) return;
         xpSpan.classList.remove("fx-pop");
         void xpSpan.offsetWidth;
@@ -312,27 +352,84 @@
     }
 
     function render() {
+        recordVisit();
         renderQuest();
         renderInventory();
         renderHpBar();
         renderRoom();
+        renderMap();
         renderPrompt();
         renderLog();
+    }
+
+    // Record the current room (and its ancestors, so the trunk is always solid)
+    // into the persisted visited-set that drives the generative map's fog of war.
+    function recordVisit() {
+        const visited = runtime.state.visited || (runtime.state.visited = []);
+        const seen = new Set(visited);
+        const parts = runtime.state.cwd.split("/").filter(Boolean);
+        let acc = "";
+        for (const part of parts) {
+            acc += "/" + part;
+            if (!seen.has(acc)) { visited.push(acc); seen.add(acc); }
+        }
+    }
+
+    function sideQuestDone(key) {
+        const reveals = runtime.state.reveals || {};
+        return Object.keys(reveals).some((path) => path.endsWith("/" + key));
+    }
+
+    function questStatus(quest) {
+        if (runtime.state.completedQuestIds.includes(quest.id)) return "done";
+        if (quest.id === runtime.state.currentQuestId) return "active";
+        return "locked";
+    }
+
+    // Collapsible <details> log: every main-story quest plus the optional side
+    // quests, each tagged done / active / locked. Collapsed by default to keep
+    // the sidebar compact; the at-a-glance current quest stays above it.
+    function renderQuestLog() {
+        const mainRows = runtime.quests.map((quest) => {
+            const status = questStatus(quest);
+            const icon = status === "done" ? "✅" : status === "active" ? "▶" : "🔒";
+            return `<li class="ql-${status}">${icon} ${escapeHtml(quest.title)}</li>`;
+        }).join("");
+        const sideRows = SIDE_QUESTS.map((side) => {
+            const done = sideQuestDone(side.key);
+            const icon = done ? "✅" : "○";
+            return `<li class="ql-${done ? "done" : "side"}" title="${escapeHtml(side.hint)}">${icon} ${escapeHtml(side.name)}</li>`;
+        }).join("");
+        const mainDone = runtime.state.completedQuestIds.length;
+        const sideDoneCount = SIDE_QUESTS.filter((s) => sideQuestDone(s.key)).length;
+        return `<details class="quest-log">`
+            + `<summary>Quest Log — ${mainDone}/${runtime.quests.length} main · ${sideDoneCount}/${SIDE_QUESTS.length} side</summary>`
+            + `<p class="ql-group">Main Quests</p><ul class="ql-list">${mainRows}</ul>`
+            + `<p class="ql-group">Side Quests</p><ul class="ql-list">${sideRows}</ul>`
+            + `</details>`;
     }
 
     function renderQuest() {
         const quest = runtime.quests[runtime.state.currentQuestId];
         const complete = runtime.state.completedQuestIds.length;
-        dom.quest.innerHTML = quest
-            ? `<p><strong>${escapeHtml(quest.title)}</strong></p><p>${escapeHtml(quest.objective)}</p><p class="kind-dim">${complete}/${runtime.quests.length} complete • ${runtime.state.xp} XP</p>`
-            : `<p class="kind-success">All quests complete.</p><p>${runtime.state.xp} XP earned.</p>`;
+        const summary = quest
+            ? `<p><strong>${escapeHtml(quest.title)}</strong></p><p>${escapeHtml(quest.objective)}</p><p class="kind-dim quest-xp">${complete}/${runtime.quests.length} complete • ${runtime.state.xp} XP</p>`
+            : `<p class="kind-success">All quests complete.</p><p class="quest-xp">${runtime.state.xp} XP earned.</p>`;
+        dom.quest.innerHTML = summary + renderQuestLog();
     }
 
     function renderInventory() {
         const hp = Math.max(0, Math.min(100, runtime.state.hp));
         const filled = Math.round(hp / 10);
         const bar = "█".repeat(filled) + "░".repeat(10 - filled);
-        dom.inventory.innerHTML = `<p>HP <span class="${hp > 40 ? "kind-success" : "kind-error"}">${bar}</span> ${hp}/100</p><p>${runtime.state.inventory.map(escapeHtml).join(", ") || "(empty)"}</p>`;
+        const items = runtime.state.inventory || [];
+        const itemsHtml = items.length
+            ? `<ul class="inv-items">${items.map((item) => `<li>💰 ${escapeHtml(item)}</li>`).join("")}</ul>`
+            : `<p class="inv-empty kind-dim">No treasures yet — explore rooms and grab the loot.</p>`;
+        dom.inventory.innerHTML =
+            `<p class="inv-hp">HP <span class="${hp > 40 ? "kind-success" : "kind-error"}">${bar}</span> ${hp}/100</p>`
+            + `<p class="inv-heading kind-dim">Items carried (${items.length})</p>`
+            + itemsHtml;
     }
 
     function renderRoom() {
@@ -342,8 +439,58 @@
             return `${entry.type === "dir" ? "📁" : entry.type === "exec" ? "⚡" : "📄"} ${escapeHtml(entry.name)}${marker}`;
         }).join("<br>");
         // Vignette sits under the room name (before the scrollable entry list)
-        // so the ambient mascot stays visible even when contents are long.
-        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p>${roomVignetteHtml()}<p>${entries || "(empty)"}</p>`;
+        // so the ambient mascot stays visible even when contents are long. The
+        // "In this room" label distinguishes room contents from carried items.
+        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p>${roomVignetteHtml()}<p class="room-contents-label kind-dim">In this room</p><p>${entries || "(empty)"}</p>`;
+    }
+
+    // ── Generative dungeon map ───────────────────────────────────────────────
+    // A fog-of-war tree built live from the runtime filesystem. Only rooms the
+    // player has entered (visited) and the visible doors leading off them
+    // (their direct dir-children) are drawn, so the map grows organically as the
+    // player explores and never reveals undiscovered or still-hidden areas.
+    function mapJoin(parent, name) {
+        return (parent === "/" ? "" : parent) + "/" + name;
+    }
+
+    function dirChildren(path) {
+        if (!runtime.isDir(path)) return [];
+        return runtime.entries(path, false)
+            .filter((entry) => entry.type === "dir")
+            .map((entry) => mapJoin(path, entry.name));
+    }
+
+    function mapNodeLabel(path, visited) {
+        const name = runtime.basename(path) || path.replace(/^\//, "");
+        const isHere = path === runtime.state.cwd;
+        const cls = isHere ? "map-here" : visited.has(path) ? "map-seen" : "map-fog";
+        const marker = isHere ? " ←" : "";
+        return `<span class="${cls}">${escapeHtml(name)}/</span>${marker}`;
+    }
+
+    function mapBuild(path, prefix, visited, discovered, out) {
+        const kids = dirChildren(path).filter((child) => discovered.has(child));
+        kids.forEach((child, i) => {
+            const last = i === kids.length - 1;
+            out.push(prefix + (last ? "└── " : "├── ") + mapNodeLabel(child, visited));
+            mapBuild(child, prefix + (last ? "    " : "│   "), visited, discovered, out);
+        });
+    }
+
+    function renderMap() {
+        if (!dom.map) return;
+        const root = (runtime.world && runtime.world.root) || "/entrance";
+        const visited = new Set(runtime.state.visited || []);
+        visited.add(runtime.state.cwd);
+        const discovered = new Set([root]);
+        for (const node of visited) {
+            discovered.add(node);
+            for (const child of dirChildren(node)) discovered.add(child);
+        }
+        const out = [mapNodeLabel(root, visited)];
+        mapBuild(root, "", visited, discovered, out);
+        const legend = `<p class="map-legend kind-dim">${visited.size} room${visited.size === 1 ? "" : "s"} explored · ← you are here</p>`;
+        dom.map.innerHTML = `<pre class="map-tree" aria-label="Discovered dungeon map">${out.join("\n")}</pre>${legend}`;
     }
 
     function renderPrompt() {
