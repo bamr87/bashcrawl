@@ -30,7 +30,10 @@ class GameState:
     mode: str = "classic"  # classic | dynamic
     # Game variables mirroring bash env vars
     inventory: str = ""  # comma-separated items (mirrors $I)
-    hp: int = 100  # health points (mirrors $HP) — default 100
+    # Like the bash game, the player has NO health until they drink a potion
+    # (which runs `export HP=15`). Starting at 0 makes the potion read as a gain
+    # instead of a drop from a phantom 100. `game_env` only exposes $HP once set.
+    hp: int = 0  # health points (mirrors $HP) — unset until a potion grants it
     hp_set: bool = False  # True once HP is explicitly set via gameplay
     env_vars: Dict[str, str] = field(default_factory=dict)
     # Audio preferences
@@ -137,7 +140,7 @@ class GameState:
                 session_history=list(data.get("session_history", [])),
                 mode=data.get("mode", "classic"),
                 inventory=data.get("inventory", ""),
-                hp=int(data.get("hp", 100)),
+                hp=int(data.get("hp", 0)),
                 hp_set=bool(data.get("hp_set", False)),
                 env_vars=dict(data.get("env_vars", {})),
                 audio_muted=bool(data.get("audio_muted", False)),

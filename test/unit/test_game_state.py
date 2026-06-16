@@ -22,7 +22,7 @@ class TestGameStateInit:
         assert state.learned_commands == []
         assert state.current_location == "entrance"
         assert state.inventory == ""
-        assert state.hp == 100
+        assert state.hp == 0  # no HP until a potion grants it (matches bash)
         assert state.env_vars == {}
         assert state.experience_points == 0
 
@@ -51,7 +51,7 @@ class TestEnvironmentVariables:
         from ti.game_state import GameState
         state = GameState()
         state.set_env("HP", "not_a_number")
-        assert state.hp == 100  # Should not crash, keep default
+        assert state.hp == 0  # Should not crash, keep default (0 = unset)
 
     def test_set_custom_var(self):
         from ti.game_state import GameState
