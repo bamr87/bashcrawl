@@ -1,208 +1,132 @@
-"""Integration tests for the Bashcrawl MCP tool layer (in-process, no stdio server)."""
+"""Smoke tests for the lean, bash-driven playtest harness.
+
+Replaces the retired Textual-TUI MCP tests. The harness plays the *real*
+``entrance/`` dungeon in a sandbox, so these tests exercise navigation,
+interactive encounters, the audit recorder, and the scorer end to end without
+needing the ``mcp`` transport installed. A final test imports the FastMCP shell
+only when ``mcp`` is available.
+"""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+import json
 
 import pytest
 
-from fixtures.skips import (
-    requires_mcp,
-    requires_textual,
-    skip_textual_on_windows,
-)
+from playtest import scorer
+from playtest.bash_session import BashGameSession
+from playtest.harness import PlaytestHarness
+from playtest.recorder import SessionRecorder
+from playtest.sandbox import create_sandbox, destroy_sandbox, sandbox_game_dir
 
-pytestmark = [pytest.mark.integration]
-
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-TI_DIR = REPO_ROOT / "src" / "terminal-illness"
+pytestmark = pytest.mark.integration
 
 
-@requires_mcp
-class TestMcpEngineTools:
-    """Exercise MCP tool functions against engine-mode sessions."""
-
-    @pytest.mark.asyncio
-    async def test_start_command_state_stop(self) -> None:
-        sys.path.insert(0, str(TI_DIR))
-        from ti.mcp_server import (
-            bashcrawl_command,
-            bashcrawl_completions,
-            bashcrawl_room,
-            bashcrawl_start,
-            bashcrawl_state,
-            bashcrawl_stop,
-            bashcrawl_screenshot,
-        )
-
-        start = await bashcrawl_start(game_root=str(REPO_ROOT), mode="engine")
-        assert "error" not in start, start
-        sid = start["session_id"]
-
-        pwd = await bashcrawl_command(sid, "pwd")
-        assert "error" not in pwd, pwd
-        assert pwd["exit"] is False
-        assert any(o.get("kind") for o in pwd["outputs"])
-        assert "cwd" in pwd["state"]
-
-        st = await bashcrawl_state(sid)
-        assert "state" in st and "cwd" in st["state"]
-
-        room = await bashcrawl_room(sid)
-        assert "cwd" in room and "items" in room
-
-        comp = await bashcrawl_completions(sid, "c")
-        assert "candidates" in comp
-        assert isinstance(comp["candidates"], list)
-
-        shot = await bashcrawl_screenshot(sid)
-        assert "error" in shot
-
-        done = await bashcrawl_stop(sid)
-        assert done.get("ok") is True
+@pytest.fixture
+def game_session():
+    sandbox = create_sandbox()
+    session = BashGameSession(sandbox_game_dir(sandbox))
+    session.start()
+    try:
+        yield session
+    finally:
+        session.close()
+        destroy_sandbox(sandbox)
 
 
-@requires_mcp
-@requires_textual
-@skip_textual_on_windows
-@pytest.mark.textual
-class TestMcpHeadlessTools:
-    """Headless mode: screenshots + commands."""
-
-    @pytest.mark.asyncio
-    async def test_headless_screenshot_and_stop(self) -> None:
-        sys.path.insert(0, str(TI_DIR))
-        from ti.mcp_server import bashcrawl_command, bashcrawl_screenshot, bashcrawl_start, bashcrawl_stop
-
-        start = await bashcrawl_start(game_root=str(REPO_ROOT), mode="headless")
-        assert "error" not in start, start
-        sid = start["session_id"]
-
-        out = await bashcrawl_command(sid, "pwd")
-        assert "error" not in out, out
-        assert isinstance(out["outputs"], list)
-
-        svg = await bashcrawl_screenshot(sid, max_chars=50_000)
-        assert "error" not in svg, svg
-        assert "svg" in svg
-        assert "<" in svg["svg"] or "svg" in svg["svg"].lower()
-
-        done = await bashcrawl_stop(sid)
-        assert done.get("ok") is True
+def test_navigation_tracks_cwd(game_session):
+    assert game_session.snapshot()["cwd"] == "entrance"
+    game_session.run("cd cellar")
+    assert game_session.snapshot()["cwd"] == "entrance/cellar"
+    out = game_session.run("cat scroll")
+    text = " ".join(o["text"] for o in out)
+    assert len(text) > 200 and ("===" in text or "###" in text), "scroll content should be shown"
 
 
-@requires_mcp
-class TestMcpBlankSlate:
-    """Fresh, isolated, instrumented playtest sessions (blank-slate mode)."""
-
-    @pytest.mark.asyncio
-    async def test_fresh_session_isolated_and_clean(self) -> None:
-        """A fresh session starts at quest 0 and never mutates the real repo."""
-        import subprocess
-
-        sys.path.insert(0, str(TI_DIR))
-        from ti.mcp_server import (
-            bashcrawl_command,
-            bashcrawl_start,
-            bashcrawl_state,
-            bashcrawl_stop,
-        )
-
-        def repo_dirty_entrance() -> str:
-            return subprocess.run(
-                ["git", "status", "--porcelain", "entrance"],
-                cwd=str(REPO_ROOT), capture_output=True, text=True,
-            ).stdout.strip()
-
-        before = repo_dirty_entrance()
-
-        start = await bashcrawl_start(game_root=str(REPO_ROOT), fresh=True)
-        assert "error" not in start, start
-        assert start.get("fresh") is True
-        sid = start["session_id"]
-
-        st = await bashcrawl_state(sid)
-        assert st["state"]["current_quest_id"] == 0
-        assert st["state"]["inventory"] in ("", None)
-
-        # Drive an unlock (cellar treasure renames .chapel -> chapel) in the sandbox.
-        await bashcrawl_command(sid, "cd cellar")
-        treasure = await bashcrawl_command(sid, "./treasure")
-        assert "error" not in treasure, treasure
-
-        done = await bashcrawl_stop(sid)
-        assert done.get("ok") is True
-        assert done.get("fresh") is True
-        assert "content_gap" in done["events"] or "command" in done["events"]
-
-        # The real repo's entrance/ tree is untouched by the sandboxed unlock.
-        assert repo_dirty_entrance() == before
-
-    @pytest.mark.asyncio
-    async def test_observe_is_player_only(self) -> None:
-        """bashcrawl_observe exposes the HUD but no solution metadata."""
-        sys.path.insert(0, str(TI_DIR))
-        from ti.mcp_server import (
-            bashcrawl_command,
-            bashcrawl_observe,
-            bashcrawl_start,
-            bashcrawl_stop,
-        )
-
-        start = await bashcrawl_start(game_root=str(REPO_ROOT), fresh=True)
-        sid = start["session_id"]
-
-        obs0 = await bashcrawl_observe(sid)
-        assert set(obs0.keys()) == {"screen", "hud"}
-        hud = obs0["hud"]
-        assert "cwd" in hud and "quest_objective" in hud
-        # No leakage of the solution / engine internals.
-        leaky = {"completed_quest_ids", "current_quest_id", "quest_total",
-                 "learned_commands", "mode", "player_name"}
-        assert leaky.isdisjoint(hud.keys()), hud.keys()
-
-        await bashcrawl_command(sid, "pwd")
-        obs1 = await bashcrawl_observe(sid)
-        assert obs1["screen"]  # the last command's output is now visible
-
-        await bashcrawl_stop(sid)
-
-    @pytest.mark.asyncio
-    async def test_report_gap_logged(self) -> None:
-        """report_gap writes a self-reported content_gap; rejects non-fresh sessions."""
-        import json
-
-        sys.path.insert(0, str(TI_DIR))
-        from ti.mcp_server import (
-            bashcrawl_report_gap,
-            bashcrawl_start,
-            bashcrawl_stop,
-        )
-
-        start = await bashcrawl_start(game_root=str(REPO_ROOT), fresh=True)
-        sid = start["session_id"]
-        log_path = Path(start["log_path"])
-
-        gap = await bashcrawl_report_gap(sid, reason="The scroll never said how to dig.")
-        assert gap.get("ok") is True
-
-        events = [json.loads(line) for line in log_path.read_text().splitlines()]
-        gaps = [e for e in events if e["event"] == "content_gap"]
-        assert gaps and gaps[-1]["self_reported"] is True
-        assert "dig" in gaps[-1]["reason"]
-
-        await bashcrawl_stop(sid)
-
-        # Non-fresh engine sessions have no recorder -> gap reporting is refused.
-        plain = await bashcrawl_start(game_root=str(REPO_ROOT), mode="engine")
-        refused = await bashcrawl_report_gap(plain["session_id"], reason="x")
-        assert "error" in refused
-        await bashcrawl_stop(plain["session_id"])
+def test_interactive_encounter_prompt(game_session):
+    game_session.run("cd cellar/armoury/chamber")
+    out = game_session.run("./statue")
+    assert "y/n" in " ".join(o["text"] for o in out).lower()
+    assert game_session.snapshot()["awaiting_input"] is True
+    game_session.run("n")  # decline
+    assert game_session.snapshot()["awaiting_input"] is False
 
 
-def test_game_session_fixture_executes(mcp_session) -> None:
-    """``mcp_session`` fixture: basic command execution."""
-    result, outputs = mcp_session.execute_line("pwd")
-    assert result != "exit"
-    assert isinstance(outputs, list)
+def test_recorder_and_scorer(tmp_path, game_session):
+    rec = SessionRecorder("testsid", tmp_path / "s.jsonl")
+    rec.start(game_session.snapshot())
+    for cmd in ["ls", "cat scroll", "cd cellar", "cat scroll"]:
+        before = game_session.snapshot()
+        outputs = game_session.run(cmd)
+        after = game_session.snapshot()
+        rec.record_command(cmd, outputs, before, after)
+    rec.end(game_session.snapshot())
+
+    lines = (tmp_path / "s.jsonl").read_text(encoding="utf-8").splitlines()
+    assert lines and all(json.loads(ln) for ln in lines), "log must be valid JSONL"
+
+    report = scorer.score(tmp_path, gate_rooms=1, gate_scrolls=1)
+    assert report["count"] == 1
+    assert report["median_scrolls"] >= 1
+    assert report["passed"] is True
+
+
+def test_harness_roundtrip(tmp_path, monkeypatch):
+    monkeypatch.setenv("BASHCRAWL_PLAYTEST_LOG_DIR", str(tmp_path))
+    harness = PlaytestHarness()
+    try:
+        screen = harness.start(fresh=True)
+        assert "Location : entrance" in screen
+        moved = harness.command("cd cellar")
+        assert "Location : entrance/cellar" in moved
+        scroll = harness.command("cat scroll")
+        assert len(scroll) > 200 and ("===" in scroll or "###" in scroll)
+        harness.report_gap("just checking the gap path")
+    finally:
+        harness.close()
+    assert list(tmp_path.glob("*.jsonl")), "a session log should have been written"
+
+
+def test_sentinel_not_forgeable_via_env(game_session):
+    """`env`/`set`/`echo $PS1` print PS1's raw value — it must NOT desync us.
+
+    Regression: the sentinel used to be forgeable because PS1's literal text
+    matched the prompt regex, shifting every later reply by one turn.
+    """
+    game_session.run("env | head -40")
+    out = game_session.run("echo MARKER42")
+    assert any("MARKER42" in o["text"] for o in out), out
+    snap = game_session.snapshot()
+    assert snap["cwd"] == "entrance"
+    assert "scroll" in snap["room_items"], snap["room_items"]
+
+    game_session.run("echo $PS1")
+    out = game_session.run("echo MARKER43")
+    assert any("MARKER43" in o["text"] for o in out), out
+
+
+def test_slow_output_not_misread_as_prompt(game_session):
+    """A mid-output pause (sleep) must not truncate output or desync turns."""
+    out = game_session.run("echo part1; sleep 1; echo part2")
+    text = "\n".join(o["text"] for o in out)
+    assert "part1" in text and "part2" in text, text
+    assert game_session.snapshot()["awaiting_input"] is False
+    out = game_session.run("echo NEXT")
+    assert any("NEXT" in o["text"] for o in out), out
+
+
+def test_multiline_input_collapses_to_one_turn(game_session):
+    """A multi-line payload must yield exactly one reply, not a shifted queue."""
+    out = game_session.run("echo A\necho B")
+    text = "\n".join(o["text"] for o in out)
+    assert "A" in text and "B" in text, text
+    out = game_session.run("echo C")
+    assert any("C" in o["text"] for o in out), out
+
+
+def test_mcp_transport_imports():
+    pytest.importorskip("mcp")
+    from playtest import mcp_server
+
+    assert mcp_server.mcp is not None
+    assert callable(mcp_server.main)

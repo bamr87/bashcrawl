@@ -1113,3 +1113,461 @@ body[data-crt="on"] .tui-log {
         text-shadow: 0 0 6px rgba(251, 191, 36, 0.45);
     }
 }
+
+/* ============================================================
+ * Mode shell: nav tabs · landing · Practice Arcade · Reference
+ * (flagship additions — Story · Arcade · Reference router)
+ * ============================================================ */
+
+/* ── Mode nav tabs (header) ── */
+.mode-nav {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.mode-tab {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.mode-tab:hover,
+.mode-tab:focus-visible {
+    color: var(--text-heading);
+    border-color: var(--accent-blue);
+    outline: none;
+}
+
+.mode-tab-on {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background: var(--bg-input);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-blue) 25%, transparent);
+}
+
+.footer-mode-hint {
+    color: var(--accent-purple);
+}
+
+/* ── Inline syntax hint (under the prompt) ── */
+.inline-hint {
+    margin: 0;
+    padding: 0.15rem 1rem 0.35rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    border-top: 1px dashed var(--border-color);
+}
+
+.inline-hint code {
+    color: var(--accent-yellow);
+}
+
+/* ── Chips (shared: spotlight, arcade cards, decks, reference) ── */
+.chip {
+    display: inline-block;
+    margin: 0.1rem 0.2rem 0.1rem 0;
+    padding: 0.08rem 0.45rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--bg-input);
+    color: var(--accent-purple);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
+.cheat-line {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+.cheat-line code {
+    color: var(--accent-yellow);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+/* ── Practice Arcade home (cards grid) ── */
+.arcade-home {
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem 2rem;
+}
+
+.arcade-intro h2 {
+    margin: 0 0 0.2rem;
+    color: var(--text-heading);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+}
+
+.arcade-intro p {
+    margin: 0 0 1rem;
+}
+
+.arcade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+.arcade-card {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.arcade-card:hover,
+.arcade-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--accent-purple);
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--accent-purple) 22%, transparent);
+    outline: none;
+}
+
+.arcade-card h3 {
+    margin: 0.3rem 0 0.25rem;
+    color: var(--text-heading);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+}
+
+.arcade-card p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.arcade-card-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.arcade-card-stats {
+    font-size: 0.75rem;
+}
+
+.arcade-decks {
+    margin-top: 1.25rem;
+}
+
+.arcade-decks p {
+    margin: 0 0 0.4rem;
+    font-size: 0.85rem;
+}
+
+.chip-action {
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease;
+}
+
+.chip-action:hover,
+.chip-action:focus-visible {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    outline: none;
+}
+
+.chip-on {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background: var(--bg-input);
+}
+
+.arcade-best-list {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+/* ── Reference mode ── */
+.ref-main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+}
+
+.ref-controls {
+    padding: 0.8rem 1.5rem 0.4rem;
+}
+
+.ref-search {
+    width: 100%;
+    max-width: 480px;
+}
+
+.ref-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.4rem 1.5rem 2rem;
+}
+
+.ref-chips {
+    margin: 0.4rem 0 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.ref-chips .chip {
+    font-size: 0.78rem;
+    padding: 0.18rem 0.6rem;
+}
+
+.ref-card {
+    margin: 0 0 1rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+}
+
+.ref-card h3 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent-blue);
+    letter-spacing: 0.03em;
+}
+
+.ref-card h4 {
+    margin: 0.8rem 0 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+}
+
+.ref-table-wrap {
+    overflow-x: auto;
+}
+
+.ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.ref-table td {
+    padding: 0.3rem 0.75rem 0.3rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+    vertical-align: top;
+}
+
+.ref-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.ref-cmd {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--accent-yellow);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    cursor: copy;
+    transition: border-color 120ms ease, color 120ms ease;
+}
+
+.ref-cmd:hover {
+    border-color: var(--accent-yellow);
+}
+
+.ref-copied {
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+}
+
+.ref-empty {
+    padding: 1rem 0;
+}
+
+/* ── Landing overlay (first visit) ── */
+.landing-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: color-mix(in srgb, var(--bg-primary) 88%, black);
+    backdrop-filter: blur(3px);
+}
+
+.landing-card {
+    max-width: 720px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 1.6rem 1.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    text-align: center;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+}
+
+.landing-brand {
+    margin: 0 auto 0.6rem;
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: clamp(0.45rem, 1.6vw, 0.75rem);
+    line-height: 1.25;
+    overflow-x: auto;
+    text-align: left;
+    display: inline-block;
+}
+
+.landing-card h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.35rem;
+    color: var(--text-heading);
+}
+
+.landing-card > p {
+    margin: 0 0 1.1rem;
+}
+
+.landing-doors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.landing-door {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.95rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.landing-door:hover,
+.landing-door:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--accent-green);
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--accent-green) 20%, transparent);
+    outline: none;
+}
+
+.landing-door strong {
+    color: var(--text-heading);
+    font-family: var(--font-mono);
+}
+
+.landing-door span:last-child {
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.landing-door-icon {
+    font-size: 1.4rem;
+}
+
+.landing-tip {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.landing-tip code {
+    color: var(--accent-yellow);
+    font-family: var(--font-mono);
+}
+
+/* ── Toast (transient status, bottom-right) ── */
+#bc-toast {
+    position: fixed;
+    right: 1rem;
+    bottom: 3.2rem;
+    z-index: 70;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--accent-green);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+#bc-toast.bc-toast-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Responsive: small screens ── */
+@media (max-width: 900px) {
+    .tui-header {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .mode-nav {
+        order: 3;
+        width: 100%;
+    }
+
+    .arcade-home {
+        padding: 0.9rem 0.9rem 1.5rem;
+    }
+
+    .ref-controls,
+    .ref-content {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .landing-doors {
+        grid-template-columns: 1fr;
+    }
+
+    .tui-footer span:nth-child(n+4):not(#footer-mode-hint) {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mode-tab,
+    .arcade-card,
+    .landing-door,
+    #bc-toast {
+        transition: none;
+    }
+}
+
+/* The `hidden` attribute must always win, even over display rules above
+ * (mode sections and the landing overlay set display:flex/grid). */
+[hidden] {
+    display: none !important;
+}

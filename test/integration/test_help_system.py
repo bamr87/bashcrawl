@@ -98,17 +98,6 @@ class TestHelpScript:
             assert len(result.stdout) > 0
 
 
-class TestHelpInEngine:
-    """Tests for help command within the NonInteractiveEngine."""
-
-    def test_help_command(self, sandbox):
-        from ai.session_runner import NonInteractiveEngine
-        engine = NonInteractiveEngine(sandbox)
-        result = engine.execute_command("help")
-        assert result.kind == "info"
-        assert "pwd" in result.output.lower() or "ls" in result.output.lower()
-
-
 class TestSetupScript:
     """Tests for setup.sh."""
 

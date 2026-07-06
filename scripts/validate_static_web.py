@@ -32,11 +32,15 @@ def validate() -> dict:
         "assets/js/storage.js",
         "assets/js/runtime.js",
         "assets/js/docs.js",
+        "assets/js/reference.js",
+        "assets/js/arcade.js",
         "assets/js/game.js",
+        "assets/js/shell.js",
         "data/world.json",
         "data/quests.json",
         "data/commands.json",
         "data/docs.json",
+        "data/arcade.json",
     ]
     for rel in required:
         if not (WEB / rel).is_file():
@@ -65,6 +69,30 @@ def validate() -> dict:
         for key in ("quick_start", "commands", "rooms", "quests", "glossary"):
             if key not in docs:
                 errors.append(f"docs.json missing {key}")
+
+    if (WEB / "data/arcade.json").is_file():
+        arcade = json.loads(_read(WEB / "data/arcade.json"))
+        for key in ("pipe_puzzles", "hunt_scenarios", "flash_decks"):
+            if not arcade.get(key):
+                errors.append(f"arcade.json missing or empty: {key}")
+        for puzzle in arcade.get("pipe_puzzles", []):
+            for field in ("id", "title", "brief", "file", "input", "target", "hint"):
+                if not puzzle.get(field):
+                    errors.append(f"pipe puzzle {puzzle.get('id', '?')} missing {field}")
+        for hunt in arcade.get("hunt_scenarios", []):
+            for field in ("id", "title", "brief", "sigil", "tree", "files", "hint"):
+                if not hunt.get(field):
+                    errors.append(f"hunt {hunt.get('id', '?')} missing {field}")
+            sigil = str(hunt.get("sigil", ""))
+            carriers = [c for c in (hunt.get("files") or {}).values() if sigil and sigil in c]
+            if len(carriers) != 1:
+                errors.append(f"hunt {hunt.get('id', '?')}: sigil must appear in exactly one file")
+        for deck in arcade.get("flash_decks", []):
+            if not deck.get("cards"):
+                errors.append(f"flash deck {deck.get('id', '?')} has no cards")
+            for card in deck.get("cards", []):
+                if not card.get("q") or not card.get("a"):
+                    errors.append(f"flash deck {deck.get('id', '?')} has a card missing q/a")
 
     return {"ok": not errors, "error_count": len(errors), "errors": errors}
 

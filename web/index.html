@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashcrawl Web</title>
+    <title>Bashcrawl — learn the terminal by playing</title>
+    <meta name="description" content="A free browser dungeon crawl that teaches real bash: explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
     <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
     <link rel="stylesheet" href="./assets/css/theme.css">
     <link rel="stylesheet" href="./assets/css/terminal.css">
@@ -15,6 +16,11 @@
                 <strong>BASHCRAWL</strong>
                 <span class="tui-header-subtitle">Terminal Dungeon Web</span>
             </div>
+            <nav class="mode-nav" id="mode-nav" role="tablist" aria-label="Game modes">
+                <button type="button" class="mode-tab mode-tab-on" data-mode="story" role="tab" aria-selected="true" title="Story dungeon (Alt+1)">⚔ Story</button>
+                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+2)">🕹 Arcade</button>
+                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+3)">📖 Reference</button>
+            </nav>
             <div class="tui-header-actions">
                 <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer">Docs</button>
@@ -23,7 +29,7 @@
             </div>
         </header>
 
-        <section class="tui-main" aria-label="Bashcrawl web terminal">
+        <section class="tui-main" id="mode-story" aria-label="Bashcrawl story dungeon">
             <aside class="tui-sidebar" aria-label="Game status panels">
                 <section class="tui-panel">
                     <h2>Active Quest</h2>
@@ -32,6 +38,12 @@
                 <section class="tui-panel">
                     <h2>Inventory</h2>
                     <div id="inventory-panel"></div>
+                </section>
+                <!-- Concept spotlight: what THIS room teaches, with one-line cheats
+                     (rendered by reference.js from rooms.yaml `teaches`). -->
+                <section class="tui-panel spotlight">
+                    <h2>This Room Teaches</h2>
+                    <div id="spotlight-panel"></div>
                 </section>
                 <!-- Pixel Hero Companion: CSS-only layered pixels (no emoji/glyphs),
                      theme-aware, reacts to game events via data-mood. -->
@@ -77,20 +89,55 @@
             </section>
         </section>
 
+        <!-- Practice Arcade: mini-games on the same bash kernel (arcade.js). -->
+        <section class="tui-main" id="mode-arcade" aria-label="Practice Arcade" hidden>
+            <aside class="tui-sidebar" aria-label="Arcade status panels">
+                <section class="tui-panel">
+                    <h2>Objective</h2>
+                    <div id="arcade-objective"></div>
+                </section>
+                <section class="tui-panel">
+                    <h2>This Run</h2>
+                    <div id="arcade-stats"></div>
+                </section>
+                <section class="tui-panel">
+                    <h2>Concept Cheats</h2>
+                    <div id="arcade-cheats"></div>
+                </section>
+                <section class="tui-panel">
+                    <h2>Best Scores</h2>
+                    <div id="arcade-best"></div>
+                </section>
+            </aside>
+            <section class="tui-content">
+                <div id="arcade-home" class="arcade-home"></div>
+                <pre id="arcade-log" class="tui-log" aria-live="polite" hidden></pre>
+            </section>
+        </section>
+
+        <!-- Reference: searchable cheatsheet library (reference.js). -->
+        <section class="ref-main" id="mode-reference" aria-label="Command reference and cheatsheets" hidden>
+            <div class="ref-controls">
+                <input id="ref-search" class="docs-search ref-search" type="search"
+                       placeholder="Search commands, flags, concepts… " aria-label="Search the reference">
+            </div>
+            <div id="reference-content" class="ref-content"></div>
+        </section>
+
         <form class="tui-input-row" id="command-form">
             <label id="prompt-label" class="tui-prompt" for="command-input">/entrance $</label>
             <input id="command-input" class="tui-input" autocomplete="off" spellcheck="false">
         </form>
+        <p id="inline-hint" class="inline-hint" aria-live="polite" hidden></p>
 
         <footer class="tui-footer">
             <span>Enter=run</span>
-            <span>Up/Down=history</span>
             <span>Tab=complete</span>
-            <span>Esc=close docs</span>
-            <span>?=docs</span>
-            <span>Ctrl+/=docs</span>
+            <span>↑/↓=history</span>
+            <span>Alt+1/2/3=mode</span>
             <span>F1=docs</span>
             <span>Ctrl+L=clear</span>
+            <span id="footer-mode-hint" class="footer-mode-hint"></span>
             <a class="tui-footer-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">github.com/bamr87/bashcrawl</a>
         </footer>
     </main>
@@ -104,9 +151,44 @@
         <div id="docs-content" class="docs-content"></div>
     </aside>
 
+    <!-- First-visit landing: pick a door. Dismisses permanently (shell.js). -->
+    <div id="landing-overlay" class="landing-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Bashcrawl" hidden>
+        <div class="landing-card">
+            <pre class="landing-brand" aria-hidden="true">
+  ____            __                       __
+ / __ )___ ______/ /_  ______________ ___ / /
+/ __  / __ `/ ___/ __ \/ ___/ ___/ __ `__ \/ /
+/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / /__
+\____/\__,_/____/_/ /_/\___/_/  /_/ /_/ /____/</pre>
+            <h1>Learn the terminal by playing.</h1>
+            <p class="kind-dim">Real bash commands. A dungeon that is the filesystem. Free, in your browser.</p>
+            <div class="landing-doors">
+                <button type="button" class="landing-door" data-launch="story">
+                    <span class="landing-door-icon">⚔</span>
+                    <strong>Story</strong>
+                    <span>Descend the dungeon — quests teach you pwd → ls → cd → pipes.</span>
+                </button>
+                <button type="button" class="landing-door" data-launch="arcade">
+                    <span class="landing-door-icon">🕹</span>
+                    <strong>Practice Arcade</strong>
+                    <span>Timed mini-games: navigation, grep/find, pipelines, flashcards.</span>
+                </button>
+                <button type="button" class="landing-door" data-launch="reference">
+                    <span class="landing-door-icon">📖</span>
+                    <strong>Reference</strong>
+                    <span>Searchable cheatsheets for every command the dungeon teaches.</span>
+                </button>
+            </div>
+            <p class="kind-dim landing-tip">Tip: never used a terminal? Take the Story door and type <code>pwd</code>.</p>
+        </div>
+    </div>
+
     <script src="./assets/js/storage.js"></script>
     <script src="./assets/js/runtime.js"></script>
     <script src="./assets/js/docs.js"></script>
+    <script src="./assets/js/reference.js"></script>
+    <script src="./assets/js/arcade.js"></script>
     <script src="./assets/js/game.js"></script>
+    <script src="./assets/js/shell.js"></script>
 </body>
 </html>

@@ -2,8 +2,7 @@
 # Bashcrawl Item Registry — src/help/data/items.yaml
 #
 # Single source of truth for all inventory items. Consumed by:
-#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
-#   - Python terminal-illness wrapper (ti/help_data.py)
+#   - Static web export (scripts/export_static_web.py)
 #
 # Item types: weapon, treasure, consumable, armor, quest, key
 # Adding a new item: add an entry here; both modes pick it up automatically.

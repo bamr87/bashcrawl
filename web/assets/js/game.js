@@ -133,18 +133,25 @@
     append("banner", BANNER);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
-    append("magic", "🆕 Mini-games:  train  (drill commands)  ·  speedrun  (timed, beat your best)  ·  pathfind  (quest to a room). All earn XP.");
+    append("magic", "🕹  Practice Arcade (top nav or Alt+2): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+3.");
+    append("dim", "In-story drills still work too:  train · speedrun · pathfind. Everything earns XP.");
     if (runtime.state.trainer && runtime.state.trainer.active) {
         for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
     }
     render();
     let prevState = snapshotState();
 
+    // Outside story mode even an empty Enter routes (the arcade uses it to
+    // return to the floor after a finished trial).
+    function nonStoryMode() {
+        return window.BashcrawlShell && window.BashcrawlShell.mode() !== "story";
+    }
+
     dom.form.addEventListener("submit", (event) => {
         event.preventDefault();
         const line = dom.input.value.trim();
         dom.input.value = "";
-        if (!line) return;
+        if (!line && !nonStoryMode()) return;
         runLine(line);
     });
 
@@ -153,7 +160,7 @@
             event.preventDefault();
             const line = dom.input.value.trim();
             dom.input.value = "";
-            if (line) runLine(line);
+            if (line || nonStoryMode()) runLine(line);
         } else if (event.key === "ArrowUp") {
             event.preventDefault();
             historyStep(-1);
@@ -174,6 +181,8 @@
             docsPanel.toggle();
         } else if (event.key.toLowerCase() === "l" && event.ctrlKey) {
             event.preventDefault();
+            // Non-story modes clear their own log (e.g. the arcade's).
+            if (window.BashcrawlShell && window.BashcrawlShell.clearLog && window.BashcrawlShell.clearLog()) return;
             logLines.length = 0;
             renderLog();
         }
@@ -227,6 +236,11 @@
     }
 
     function runLine(line) {
+        // Mode router: while the Practice Arcade owns the input, lines go there.
+        if (window.BashcrawlShell && window.BashcrawlShell.mode() !== "story") {
+            window.BashcrawlShell.handleInput(line);
+            return;
+        }
         const promptEcho = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
         append("dim", `${promptEcho} ${line}`);
         if (!runtime.state.history.length || runtime.state.history[runtime.state.history.length - 1] !== line) {
@@ -360,6 +374,8 @@
         renderMap();
         renderPrompt();
         renderLog();
+        // Concept spotlight: surface what the current room teaches (reference.js).
+        if (window.BashcrawlShell) window.BashcrawlShell.onStoryRender(runtime);
     }
 
     // Record the current room (and its ancestors, so the trunk is always solid)
@@ -495,8 +511,18 @@
 
     function renderPrompt() {
         const p = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
-        dom.prompt.textContent = p;
-        dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
+        // Route through the shell so an active Arcade prompt isn't clobbered
+        // by story re-renders (e.g. an arcade XP award updating the sidebar).
+        if (window.BashcrawlShell) {
+            window.BashcrawlShell.setPrompt(p, { fromStory: true });
+            // Mirror the textContent guard: only story owns the tooltip too.
+            if (window.BashcrawlShell.mode() === "story") {
+                dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
+            }
+        } else {
+            dom.prompt.textContent = p;
+            dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
+        }
     }
 
     function renderLog() {
@@ -512,12 +538,18 @@
     }
 
     function completeInput() {
-        const completions = runtime.completions(dom.input.value);
+        // Mode-aware: a non-story mode may own completion (the arcade completes
+        // against its scoped runtime and echoes candidate lists into its own
+        // log). null means the story path below applies.
+        const hook = window.BashcrawlShell && window.BashcrawlShell.completions
+            ? window.BashcrawlShell.completions(dom.input.value)
+            : null;
+        const completions = hook ? hook.list : runtime.completions(dom.input.value);
         if (completions.length === 1) {
             const parts = dom.input.value.split(/\s+/);
             parts[parts.length - 1] = completions[0];
             dom.input.value = parts.join(" ");
-        } else if (completions.length > 1) {
+        } else if (completions.length > 1 && !hook) {
             append("info", completions.join("  "));
             renderLog();
         }
@@ -661,4 +693,26 @@
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;");
     }
-})();
+
+    // Bridge for the shell router (shell.js): story runtime access for the XP
+    // award path, plus the loaded data bundle so shell can boot without
+    // re-fetching. The ready event covers the load-order race (shell.js loads
+    // after this async IIFE finishes fetching data).
+    window.BashcrawlGame = {
+        data,
+        getRuntime: () => runtime,
+        saveAndRender,
+        runLine,
+    };
+    document.dispatchEvent(new CustomEvent("bashcrawl:ready", { detail: { data } }));
+})().catch((error) => {
+    // Boot failed (most commonly: data/*.json fetches blocked under file://).
+    // Surface a plain-text explanation in the log pane instead of a blank UI.
+    console.error("Bashcrawl failed to boot:", error);
+    const log = document.getElementById("output-log");
+    if (log) {
+        log.textContent = "Failed to load game data — if you opened index.html directly, "
+            + "serve the folder instead: python3 -m http.server. "
+            + `(${error && error.message ? error.message : error})`;
+    }
+});

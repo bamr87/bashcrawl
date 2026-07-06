@@ -995,6 +995,41 @@
         "ai": false,
         "demo": false
       }
+    },
+    {
+      "name": "cut",
+      "help": "Extract delimited fields (-d DELIM -f LIST) or characters (-c LIST)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "tr",
+      "help": "Translate or delete characters (tr a-z A-Z, tr -d SET)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "sed",
+      "help": "Stream-edit text with s/pattern/replacement/[g]",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "nl",
+      "help": "Number the lines of a file or piped input",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "rev",
+      "help": "Reverse each line of input",
+      "runtimes": {
+        "demo": true
+      }
     }
   ]
 }

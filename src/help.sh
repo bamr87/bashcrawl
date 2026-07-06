@@ -123,13 +123,11 @@ Option 1 — Use the reset script:
     bash lib/reset.sh           # Smart reset (re-hides rooms, clears state)
     bash lib/reset.sh --dry     # Preview what would be reset
 
-Option 2 — Full git reset (nuclear option):
+Option 2 — Manual reset:
+    unset I HP                  # Clear inventory and health
     git checkout -- entrance/   # Restore all game files
     git clean -fd entrance/     # Remove generated files
     rm -f .game_state           # Remove game state
-
-Option 3 — Via the launcher:
-    bash main.sh                # Choose "Reset Game" from menu
 
 ================================================================================
 EOF

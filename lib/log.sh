@@ -28,7 +28,7 @@ if [[ -z "$BASHCRAWL_ROOT" ]]; then
     if [[ ! -d "${BASHCRAWL_ROOT}/entrance" ]]; then
         _bc_d="$PWD"
         while [[ "$_bc_d" != "/" ]]; do
-            if [[ -d "$_bc_d/entrance" && -f "$_bc_d/main.sh" ]]; then
+            if [[ -d "$_bc_d/entrance" && -f "$_bc_d/help.sh" ]]; then
                 BASHCRAWL_ROOT="$_bc_d"
                 break
             fi

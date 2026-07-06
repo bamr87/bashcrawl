@@ -27,31 +27,6 @@ def _load_manifest() -> list[dict[str, Any]]:
     return [c for c in commands if isinstance(c, dict)]
 
 
-def _python_commands() -> set[str]:
-    text = _read(ROOT / "src/terminal-illness/ti/engine/command_table.py")
-    return set(re.findall(r'\(\s*"([a-z0-9_-]+)"\s*,\s*"_cmd_', text))
-
-
-def _bash_commands() -> set[str]:
-    text = _read(ROOT / "lib/emulator.sh")
-    commands = set(re.findall(r"\n([a-z0-9_-]+)\s+[a-zA-Z0-9_]+\n", text))
-    table = re.search(r"_BC_COMMAND_TABLE=\$'(.*?)'", text, re.DOTALL)
-    if table:
-        for line in table.group(1).replace("\\n", "\n").splitlines():
-            parts = line.split()
-            if parts:
-                commands.add(parts[0])
-    for case_expr in re.findall(r'^\s*([|"a-z0-9_-]+)\)\s*$', text, re.MULTILINE):
-        for name in re.findall(r'"([a-z0-9_-]+)"', case_expr):
-            commands.add(name)
-    return commands
-
-
-def _ai_commands() -> set[str]:
-    text = _read(ROOT / "test/ai/session_runner.py")
-    return set(re.findall(r"def _cmd_([a-z0-9_]+)\(", text))
-
-
 def _demo_commands() -> set[str]:
     text = _read(ROOT / "web/assets/js/runtime.js")
     m = re.search(r"this\.handlers\s*=\s*\{(.*?)\};", text, re.DOTALL)
@@ -64,10 +39,10 @@ def _demo_commands() -> set[str]:
 
 def validate() -> dict[str, Any]:
     manifest = _load_manifest()
+    # The reduced repo ships a single runtime: the browser bash-emulator
+    # ("demo", web/assets/js/runtime.js). The retired python/bash/ai runtimes
+    # were removed with the Textual TUI and the old agent harness.
     runtime_sets = {
-        "python": _python_commands(),
-        "bash": _bash_commands(),
-        "ai": _ai_commands(),
         "demo": _demo_commands(),
     }
 

@@ -3,8 +3,7 @@
 #
 # Single source of truth for all game rooms. Consumed by:
 #   - Bash help scripts (src/help/bashcrawl_help.sh)
-#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
-#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+#   - Static web export (scripts/export_static_web.py)
 #
 # Adding a new room: add an entry here, create the directory under entrance/,
 # and both TUI and Classic modes will pick it up automatically.

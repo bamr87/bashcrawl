@@ -1,0 +1,693 @@
+{
+  "pipe_puzzles": [
+    {
+      "id": "sort-potions",
+      "title": "The Alchemist's Shelf",
+      "brief": "The potion shelf is a mess. Emit the potions in alphabetical order.",
+      "file": "potions.txt",
+      "input": "troll-sweat\ndragon-bile\nmoon-dew\nash-of-oak\npixie-dust",
+      "target": "ash-of-oak\ndragon-bile\nmoon-dew\npixie-dust\ntroll-sweat",
+      "par": 1,
+      "concepts": [
+        "sort"
+      ],
+      "hint": "One command sorts lines: sort potions.txt"
+    },
+    {
+      "id": "dedupe-runes",
+      "title": "Duplicate Runes",
+      "brief": "The scribe copied runes twice. Emit each rune once, sorted.",
+      "file": "runes.txt",
+      "input": "kenaz\nalgiz\nkenaz\ndagaz\nalgiz\nkenaz",
+      "target": "algiz\ndagaz\nkenaz",
+      "par": 2,
+      "concepts": [
+        "sort",
+        "uniq"
+      ],
+      "hint": "uniq only removes ADJACENT duplicates — sort first: sort runes.txt | uniq (or sort -u)"
+    },
+    {
+      "id": "tally-monsters",
+      "title": "The Warden's Tally",
+      "brief": "Count how many of each monster was slain (sorted alphabetically, uniq -c format).",
+      "file": "kills.txt",
+      "input": "ghoul\nwraith\nghoul\nimp\nghoul\nwraith",
+      "target": "3 ghoul\n1 imp\n2 wraith",
+      "par": 2,
+      "concepts": [
+        "sort",
+        "uniq"
+      ],
+      "hint": "sort kills.txt | uniq -c   — uniq -c prefixes each line with its count"
+    },
+    {
+      "id": "top-loot",
+      "title": "Greatest Treasures",
+      "brief": "From the loot ledger, emit the TWO most common items, most common first (uniq -c format).",
+      "file": "loot.txt",
+      "input": "emerald\ngold-coin\nemerald\nsilver-ring\nemerald\ngold-coin",
+      "target": "3 emerald\n2 gold-coin",
+      "par": 4,
+      "concepts": [
+        "sort",
+        "uniq",
+        "head",
+        "pipes"
+      ],
+      "hint": "Chain it: sort | uniq -c | sort -rn | head -n 2"
+    },
+    {
+      "id": "gold-column",
+      "title": "The Ledger's Second Column",
+      "brief": "The ledger is comma-separated: item,gold. Emit ONLY the gold values, in file order.",
+      "file": "ledger.txt",
+      "input": "amulet,120\nsword,85\ngoblet,300",
+      "target": "120\n85\n300",
+      "par": 1,
+      "concepts": [
+        "cut"
+      ],
+      "hint": "cut -d, -f2 ledger.txt   — -d sets the delimiter, -f picks the field"
+    },
+    {
+      "id": "shout-incantation",
+      "title": "SHOUT THE INCANTATION",
+      "brief": "The spell only works in uppercase. Transform the whole scroll.",
+      "file": "whisper.txt",
+      "input": "by ash and ember\nthe gate shall open",
+      "target": "BY ASH AND EMBER\nTHE GATE SHALL OPEN",
+      "par": 2,
+      "concepts": [
+        "tr",
+        "pipes"
+      ],
+      "hint": "tr reads piped input: cat whisper.txt | tr a-z A-Z"
+    },
+    {
+      "id": "redact-name",
+      "title": "Redact the True Name",
+      "brief": "Saying the demon's name summons it. Replace every 'morgul' with 'REDACTED'.",
+      "file": "testimony.txt",
+      "input": "morgul rose at dusk\nwe fled from morgul\nmorgul cannot cross water",
+      "target": "REDACTED rose at dusk\nwe fled from REDACTED\nREDACTED cannot cross water",
+      "par": 1,
+      "concepts": [
+        "sed"
+      ],
+      "hint": "sed 's/old/new/' replaces the first match per line — no g flag needed here (one name per line)"
+    },
+    {
+      "id": "count-sightings",
+      "title": "How Many Sightings?",
+      "brief": "Emit ONLY the number of lines that mention 'ghost' (just the number).",
+      "file": "journal.txt",
+      "input": "day 1: a ghost in the cellar\nday 2: quiet\nday 3: ghost again, by the altar\nday 4: rats\nday 5: the ghost sang",
+      "target": "3",
+      "par": 1,
+      "concepts": [
+        "grep"
+      ],
+      "hint": "grep -c counts matching lines: grep -c ghost journal.txt"
+    },
+    {
+      "id": "grand-pipeline",
+      "title": "The Grand Pipeline",
+      "brief": "From the roster, emit the sorted, unique CLASSES (second ,-field) of entries that contain 'elf'.",
+      "file": "roster.txt",
+      "input": "elf,ranger\ndwarf,smith\nelf,mage\nhuman,knight\nelf,ranger\nhalf-elf,bard",
+      "target": "bard\nmage\nranger",
+      "par": 4,
+      "concepts": [
+        "grep",
+        "cut",
+        "sort",
+        "pipes"
+      ],
+      "hint": "Three links: grep elf roster.txt | cut -d, -f2 | sort -u"
+    },
+    {
+      "id": "numbered-verses",
+      "title": "Number the Verses",
+      "brief": "Emit the first three lines of the epic, each numbered (nl format).",
+      "file": "epic.txt",
+      "input": "the blade was forged\nin mountain fire\nand cooled in tears\nof those who fell",
+      "target": "1  the blade was forged\n2  in mountain fire\n3  and cooled in tears",
+      "par": 2,
+      "concepts": [
+        "head",
+        "nl",
+        "pipes"
+      ],
+      "hint": "head -n 3 epic.txt | nl"
+    }
+  ],
+  "hunt_scenarios": [
+    {
+      "id": "lost-amulet",
+      "title": "The Lost Amulet",
+      "brief": "Somewhere in these chambers a note reveals where the amulet is buried. Find the text that mentions 'amulet' and read it.",
+      "sigil": "SIGIL{amulet-beneath-the-yew}",
+      "par": 3,
+      "concepts": [
+        "grep",
+        "cat"
+      ],
+      "hint": "grep -r amulet .   searches every file under the current room",
+      "tree": {
+        "/hunt": [
+          "chapel/",
+          "crypt/",
+          "well/",
+          "ledger.txt"
+        ],
+        "/hunt/chapel": [
+          "candles.txt",
+          "prayer.txt"
+        ],
+        "/hunt/crypt": [
+          "bones.txt",
+          "epitaph.txt"
+        ],
+        "/hunt/well": [
+          "bucket.txt"
+        ]
+      },
+      "files": {
+        "/hunt/ledger.txt": "3 candles\n1 rope\n2 shovels",
+        "/hunt/chapel/candles.txt": "wax, wax, more wax",
+        "/hunt/chapel/prayer.txt": "guard us from what sleeps below",
+        "/hunt/crypt/bones.txt": "femur, skull, unidentified",
+        "/hunt/crypt/epitaph.txt": "here lies the keeper of the amulet — SIGIL{amulet-beneath-the-yew}",
+        "/hunt/well/bucket.txt": "the rope is frayed"
+      }
+    },
+    {
+      "id": "key-pattern",
+      "title": "A Key With No Door",
+      "brief": "One file in these vaults ends in `.key`. Find it by NAME, then read it.",
+      "sigil": "SIGIL{the-key-sings-at-midnight}",
+      "par": 2,
+      "concepts": [
+        "find",
+        "cat"
+      ],
+      "hint": "find . -name \"*.key\"   — quote the pattern so the shell doesn't expand it first",
+      "tree": {
+        "/hunt": [
+          "vault-a/",
+          "vault-b/",
+          "vault-c/"
+        ],
+        "/hunt/vault-a": [
+          "iron.box",
+          "brass.box"
+        ],
+        "/hunt/vault-b": [
+          "copper.box",
+          "silver.key"
+        ],
+        "/hunt/vault-c": [
+          "gold.box"
+        ]
+      },
+      "files": {
+        "/hunt/vault-a/iron.box": "empty",
+        "/hunt/vault-a/brass.box": "dust",
+        "/hunt/vault-b/copper.box": "a dead spider",
+        "/hunt/vault-b/silver.key": "SIGIL{the-key-sings-at-midnight}",
+        "/hunt/vault-c/gold.box": "a note: 'not here'"
+      }
+    },
+    {
+      "id": "hidden-shrine",
+      "title": "The Hidden Shrine",
+      "brief": "The monks hid their shrine as a dotfile. Reveal what normal eyes cannot see, and read it.",
+      "sigil": "SIGIL{the-shrine-remembers}",
+      "par": 3,
+      "concepts": [
+        "ls",
+        "hidden-files",
+        "cat"
+      ],
+      "hint": "ls -a shows dotfiles; find . -name \".*\" -type f hunts them everywhere",
+      "tree": {
+        "/hunt": [
+          "nave/",
+          "cloister/"
+        ],
+        "/hunt/nave": [
+          "pews.txt",
+          ".relic"
+        ],
+        "/hunt/cloister": [
+          "garden.txt"
+        ]
+      },
+      "files": {
+        "/hunt/nave/pews.txt": "rows of silent oak",
+        "/hunt/nave/.relic": "SIGIL{the-shrine-remembers}",
+        "/hunt/cloister/garden.txt": "herbs and thorns"
+      }
+    },
+    {
+      "id": "deep-archive",
+      "title": "The Deep Archive",
+      "brief": "The record you need is buried levels deep and mentions 'dragon'. Combine your search spells.",
+      "sigil": "SIGIL{scale-of-the-first-flame}",
+      "par": 3,
+      "concepts": [
+        "grep",
+        "find",
+        "pipes"
+      ],
+      "hint": "grep -rl dragon .   lists WHICH files match — then cat the one it names",
+      "tree": {
+        "/hunt": [
+          "stacks/"
+        ],
+        "/hunt/stacks": [
+          "row-i/",
+          "row-ii/"
+        ],
+        "/hunt/stacks/row-i": [
+          "shelf-a/",
+          "ledgers.txt"
+        ],
+        "/hunt/stacks/row-ii": [
+          "shelf-b/"
+        ],
+        "/hunt/stacks/row-i/shelf-a": [
+          "tome-1.txt",
+          "tome-2.txt"
+        ],
+        "/hunt/stacks/row-ii/shelf-b": [
+          "tome-3.txt"
+        ]
+      },
+      "files": {
+        "/hunt/stacks/row-i/ledgers.txt": "acquisitions, disposals",
+        "/hunt/stacks/row-i/shelf-a/tome-1.txt": "on the husbandry of basilisks",
+        "/hunt/stacks/row-i/shelf-a/tome-2.txt": "wyverns are lesser drakes, properly speaking",
+        "/hunt/stacks/row-ii/shelf-b/tome-3.txt": "the last dragon left one scale — SIGIL{scale-of-the-first-flame}"
+      }
+    },
+    {
+      "id": "case-of-the-cloak",
+      "title": "The Case of the Cloak",
+      "brief": "A witness wrote the thief's description, but nobody recalls the letter-case. Search for 'CLOAK' in any case.",
+      "sigil": "SIGIL{crimson-hem-torn}",
+      "par": 2,
+      "concepts": [
+        "grep",
+        "flags"
+      ],
+      "hint": "grep -ri cloak .   — the -i flag ignores case",
+      "tree": {
+        "/hunt": [
+          "reports/"
+        ],
+        "/hunt/reports": [
+          "monday.txt",
+          "tuesday.txt",
+          "wednesday.txt"
+        ]
+      },
+      "files": {
+        "/hunt/reports/monday.txt": "nothing unusual",
+        "/hunt/reports/tuesday.txt": "a figure in a CloAk fled east — SIGIL{crimson-hem-torn}",
+        "/hunt/reports/wednesday.txt": "rain all day"
+      }
+    }
+  ],
+  "flash_decks": [
+    {
+      "id": "permissions-power",
+      "title": "Permissions & Power",
+      "concept": "permissions",
+      "cards": [
+        {
+          "q": "Make the file spell.sh executable",
+          "a": [
+            "chmod +x spell.sh"
+          ],
+          "why": "chmod changes a file's mode; +x adds the execute bit."
+        },
+        {
+          "q": "Run the executable script named ritual in THIS directory",
+          "a": [
+            "./ritual"
+          ],
+          "why": "The ./ prefix means 'right here' — without it the shell only searches $PATH."
+        },
+        {
+          "q": "List the room showing file types (executables get a *)",
+          "a": [
+            "ls -F"
+          ],
+          "why": "-F appends a type marker: / for dirs, * for executables, @ for links."
+        },
+        {
+          "q": "Show permissions, owner, and size for every file, including hidden ones",
+          "a": [
+            "ls -la",
+            "ls -al"
+          ],
+          "why": "-l is long form (permissions first column), -a includes dotfiles."
+        },
+        {
+          "q": "Create a symbolic link named portal pointing to /entrance",
+          "a": [
+            "ln -s /entrance portal"
+          ],
+          "why": "ln -s TARGET NAME forges a soft link — a signpost to another path."
+        }
+      ],
+      "xp": 30
+    },
+    {
+      "id": "variables-magic",
+      "title": "Variables & Magic",
+      "concept": "scripting",
+      "cards": [
+        {
+          "q": "Set an environment variable HP to 30 (visible to child programs)",
+          "a": [
+            "export HP=30"
+          ],
+          "why": "export marks the variable for every command you run afterwards."
+        },
+        {
+          "q": "Print the value of the variable I",
+          "a": [
+            "echo $I"
+          ],
+          "why": "$NAME expands to the variable's value inside a command line."
+        },
+        {
+          "q": "Add 'sword' to the front of inventory variable I, keeping what was there",
+          "a": [
+            "export I=sword,$I"
+          ],
+          "why": "The old value expands inside the new one — this is how bashcrawl treasure works."
+        },
+        {
+          "q": "Show every environment variable",
+          "a": [
+            "env"
+          ],
+          "why": "env dumps the whole spellbook of the current session."
+        },
+        {
+          "q": "Subtract 5 from HP using shell arithmetic",
+          "a": [
+            "let \"HP=HP-5\"",
+            "let HP=HP-5"
+          ],
+          "why": "let evaluates arithmetic; the game's combat damage works exactly like this."
+        }
+      ],
+      "xp": 30
+    },
+    {
+      "id": "pipes-flow",
+      "title": "Pipes & Flow",
+      "concept": "pipes",
+      "cards": [
+        {
+          "q": "Count the lines in scroll",
+          "a": [
+            "wc -l scroll",
+            "cat scroll | wc -l"
+          ],
+          "why": "wc -l counts lines; piping cat into wc teaches the same idea."
+        },
+        {
+          "q": "Show only the first 5 lines of scroll",
+          "a": [
+            "head -n 5 scroll"
+          ],
+          "why": "head shows the start of a file; -n picks how many lines."
+        },
+        {
+          "q": "Sort tome.txt and drop duplicate lines with ONE command",
+          "a": [
+            "sort -u tome.txt"
+          ],
+          "why": "-u (unique) folds duplicates after sorting — shorthand for sort | uniq."
+        },
+        {
+          "q": "Save the output of ls into a file named manifest",
+          "a": [
+            "ls > manifest"
+          ],
+          "why": "> redirects a command's output into a file (overwriting it)."
+        },
+        {
+          "q": "Append the word 'done' to the file log.txt",
+          "a": [
+            "echo done >> log.txt"
+          ],
+          "why": ">> appends instead of overwriting — the file keeps its history."
+        }
+      ],
+      "xp": 30
+    },
+    {
+      "id": "lessons",
+      "title": "Lessons of the Dungeon",
+      "concept": "lessons",
+      "cards": [
+        {
+          "q": "Finding Your Location — which command?",
+          "a": [
+            "pwd"
+          ],
+          "why": "pwd stands for \"Print Working Directory\" - it shows your"
+        },
+        {
+          "q": "Seeing What's Around You — which command?",
+          "a": [
+            "ls"
+          ],
+          "why": "ls stands for \"List\" - it reveals the contents of your current room."
+        },
+        {
+          "q": "Moving Around — which command?",
+          "a": [
+            "cd"
+          ],
+          "why": "cd stands for \"Change Directory\" - it moves you from room to room."
+        }
+      ],
+      "xp": 25,
+      "generated": true
+    },
+    {
+      "id": "ref-navigation",
+      "title": "Navigation",
+      "concept": "navigation",
+      "cards": [
+        {
+          "q": "Print Working Directory - shows your exact location",
+          "a": [
+            "pwd"
+          ],
+          "why": ""
+        },
+        {
+          "q": "List files and directories in current location",
+          "a": [
+            "ls"
+          ],
+          "why": ""
+        },
+        {
+          "q": "List with type indicators: * = executable, / = directory, @ = link",
+          "a": [
+            "ls -F"
+          ],
+          "why": ""
+        },
+        {
+          "q": "List ALL files including hidden (.), with permissions and details",
+          "a": [
+            "ls -la",
+            "ls -al"
+          ],
+          "why": ""
+        },
+        {
+          "q": "List with human-readable file sizes",
+          "a": [
+            "ls -lh",
+            "ls -hl"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Move up one directory level",
+          "a": [
+            "cd .."
+          ],
+          "why": ""
+        },
+        {
+          "q": "Go back to previous directory",
+          "a": [
+            "cd -"
+          ],
+          "why": ""
+        }
+      ],
+      "xp": 25,
+      "generated": true
+    },
+    {
+      "id": "ref-search",
+      "title": "Search and Find",
+      "concept": "search",
+      "cards": [
+        {
+          "q": "Find files/directories by name pattern",
+          "a": [
+            "find . -name \"*pattern*\""
+          ],
+          "why": ""
+        },
+        {
+          "q": "Find only files",
+          "a": [
+            "find . -type f"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Find only directories",
+          "a": [
+            "find . -type d"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Search for pattern in all files recursively",
+          "a": [
+            "grep -r \"pattern\" ."
+          ],
+          "why": ""
+        }
+      ],
+      "xp": 25,
+      "generated": true
+    },
+    {
+      "id": "ref-system_info",
+      "title": "System Information",
+      "concept": "system_info",
+      "cards": [
+        {
+          "q": "Show current username",
+          "a": [
+            "whoami"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show current date and time",
+          "a": [
+            "date"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show system uptime and load",
+          "a": [
+            "uptime"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show disk space usage (human-readable)",
+          "a": [
+            "df -h"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show directory sizes",
+          "a": [
+            "du -sh *"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show running processes",
+          "a": [
+            "ps aux"
+          ],
+          "why": ""
+        }
+      ],
+      "xp": 25,
+      "generated": true
+    },
+    {
+      "id": "ref-game_specific",
+      "title": "Game-Specific",
+      "concept": "game_specific",
+      "cards": [
+        {
+          "q": "Check your inventory",
+          "a": [
+            "echo $I"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Check your health points",
+          "a": [
+            "echo $HP"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Run executable files (treasures, potions, etc.)",
+          "a": [
+            "./executable"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Read area documentation",
+          "a": [
+            "cat scroll"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show the help system",
+          "a": [
+            "help"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show detailed command reference",
+          "a": [
+            "help commands"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Show advanced tips and tricks",
+          "a": [
+            "help tips"
+          ],
+          "why": ""
+        }
+      ],
+      "xp": 25,
+      "generated": true
+    }
+  ]
+}

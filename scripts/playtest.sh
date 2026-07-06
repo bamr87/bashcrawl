@@ -12,8 +12,8 @@
 # Env:     CLAUDE_CODE_OAUTH_TOKEN   subscription token (`claude setup-token`)
 #          BLANK_SLATE_MODEL         model id (default claude-sonnet-4-6)
 #          BLANK_SLATE_MAX_TURNS     per-session turn cap (default 80)
-#          BLANK_SLATE_GATE_QUEST    median furthest quest must be >= this (default 3)
-#          BLANK_SLATE_GATE_SCROLL   median scroll-read %% must be >= this (default 0)
+#          BLANK_SLATE_GATE_ROOMS    median rooms visited must be >= this (default 3)
+#          BLANK_SLATE_GATE_SCROLLS  median scrolls read must be >= this (default 1)
 #          BLANK_SLATE_PERMISSION_MODE  claude --permission-mode (default bypassPermissions)
 set -euo pipefail
 
@@ -24,15 +24,15 @@ SEEDS="${1:-${BLANK_SLATE_SEEDS:-3}}"
 MODEL="${BLANK_SLATE_MODEL:-claude-sonnet-4-6}"
 MAX_TURNS="${BLANK_SLATE_MAX_TURNS:-80}"
 PERMISSION_MODE="${BLANK_SLATE_PERMISSION_MODE:-bypassPermissions}"
-GATE_QUEST="${BLANK_SLATE_GATE_QUEST:-3}"
-GATE_SCROLL="${BLANK_SLATE_GATE_SCROLL:-0}"
+GATE_ROOMS="${BLANK_SLATE_GATE_ROOMS:-3}"
+GATE_SCROLLS="${BLANK_SLATE_GATE_SCROLLS:-1}"
 
 LOG_DIR="$ROOT_DIR/logs/sessions/blank_slate"
 TRANSCRIPT_DIR="$ROOT_DIR/logs/blank_slate_transcripts"
 REPORT_DIR="$ROOT_DIR/test/reports/blank_slate"
 mkdir -p "$LOG_DIR" "$TRANSCRIPT_DIR" "$REPORT_DIR"
 
-export PYTHONPATH="$ROOT_DIR/src/terminal-illness:$ROOT_DIR/src:$ROOT_DIR/test"
+export PYTHONPATH="$ROOT_DIR/src:$ROOT_DIR/test"
 export BASHCRAWL_PLAYTEST_LOG_DIR="$LOG_DIR"
 
 # ── Guards: degrade gracefully when unconfigured (so `make` never hard-fails) ──
@@ -48,9 +48,9 @@ if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; the
     exit 0
 fi
 
-# The MCP server needs the 'mcp' package + the 'ti' module importable. CI installs
-# those into the runner's python, so the committed .mcp.json ('python3') works there.
-# Locally they usually live only in .venv, so prefer that interpreter when present.
+# The MCP server needs the 'mcp' package + the 'playtest' module importable. CI
+# installs those into the runner's python, so the committed .mcp.json ('python3')
+# works there. Locally they usually live only in .venv, so prefer it when present.
 MCP_CONFIG="$ROOT_DIR/.mcp.json"
 if [ -x "$ROOT_DIR/.venv/bin/python" ]; then
     MCP_CONFIG="$(mktemp -t bashcrawl_mcp.XXXXXX)"
@@ -60,8 +60,8 @@ if [ -x "$ROOT_DIR/.venv/bin/python" ]; then
     "bashcrawl": {
       "type": "stdio",
       "command": "$ROOT_DIR/.venv/bin/python",
-      "args": ["-m", "ti.mcp_server"],
-      "env": { "PYTHONPATH": "$ROOT_DIR/src/terminal-illness" }
+      "args": ["-m", "playtest.mcp_server"],
+      "env": { "PYTHONPATH": "$ROOT_DIR/src" }
     }
   }
 }
@@ -105,23 +105,12 @@ if [ "${#logs[@]}" -eq 0 ]; then
     exit 3
 fi
 
-python3 -m analysis.blank_slate_report "${logs[@]}" --json --out "$REPORT_DIR/report.json"
-python3 -m analysis.blank_slate_report "${logs[@]}" --out "$REPORT_DIR/report.md"
-echo "[playtest] Wrote $REPORT_DIR/report.md"
+# ── Score: rooms reached + scrolls read, with content-gap hotspots ──
+python3 -m playtest.scorer --log-dir "$LOG_DIR" \
+    --gate-rooms "$GATE_ROOMS" --gate-scrolls "$GATE_SCROLLS" --json \
+    >"$REPORT_DIR/report.json" || true
+echo "[playtest] Wrote $REPORT_DIR/report.json"
 
-# ── Gate: median furthest quest + median scroll coverage ──
-python3 - "$REPORT_DIR/report.json" "$GATE_QUEST" "$GATE_SCROLL" <<'PY'
-import json, sys, statistics
-report = json.load(open(sys.argv[1]))
-gate_quest, gate_scroll = int(sys.argv[2]), float(sys.argv[3])
-sessions = report.get("sessions", [])
-agg = report.get("aggregate")
-if agg:
-    furthest = agg["furthest_quest_median"]
-else:
-    furthest = sessions[0]["completeness"]["quests"]["furthest"]
-scroll = statistics.median(s["completeness"]["scrolls"]["pct"] for s in sessions)
-print(f"[playtest] median furthest quest={furthest} (gate >= {gate_quest}); "
-      f"median scroll%={scroll} (gate >= {gate_scroll})")
-sys.exit(0 if (furthest >= gate_quest and scroll >= gate_scroll) else 1)
-PY
+# The human-readable run exits non-zero if the gates are not met.
+python3 -m playtest.scorer --log-dir "$LOG_DIR" \
+    --gate-rooms "$GATE_ROOMS" --gate-scrolls "$GATE_SCROLLS"

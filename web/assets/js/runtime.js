@@ -4,13 +4,131 @@
     }
 
     function tokenize(line) {
+        return tokenizeDetailed(line).map((t) => t.text);
+    }
+
+    // Quote-aware tokenizer: keeps whether each token was quoted, so glob
+    // expansion can skip quoted patterns ('*.txt' stays literal, *.txt expands)
+    // exactly like a real shell.
+    function tokenizeDetailed(line) {
         const tokens = [];
         const re = /"([^"]*)"|'([^']*)'|(\S+)/g;
         let match;
         while ((match = re.exec(line))) {
-            tokens.push(match[1] ?? match[2] ?? match[3]);
+            if (match[1] != null) tokens.push({ text: match[1], quoted: true });
+            else if (match[2] != null) tokens.push({ text: match[2], quoted: true });
+            else {
+                // Bare token: strip embedded quoted segments (-d',' -> -d,) and
+                // mark it quoted so glob expansion leaves it literal.
+                const stripped = match[3].replace(/'([^']*)'/g, "$1").replace(/"([^"]*)"/g, "$1");
+                tokens.push({ text: stripped, quoted: stripped !== match[3] });
+            }
         }
         return tokens;
+    }
+
+    // Split a command line at its first unquoted `>` / `>>` output redirection.
+    // Returns { core, redirect, missingTarget, trailingText } where redirect =
+    // { path, append } or null.
+    function splitRedirect(line) {
+        // Pass 1: excise fd-prefixed and duplication redirects (`2>/dev/null`,
+        // `2>&1`, `1>&2`, `>&2`). The emulator has no stderr stream, so these
+        // are no-ops; the rest of the line stays live.
+        let quote = null;
+        for (let i = 0; i < line.length; i += 1) {
+            const ch = line[i];
+            if (quote) {
+                if (ch === quote) quote = null;
+                continue;
+            }
+            if (ch === "'" || ch === "\"") { quote = ch; continue; }
+            if (ch !== ">") continue;
+            // An fd spec is a digit immediately before `>` standing as its own
+            // word (`ls 2>x`), not a digit ending a filename (`sort x2>y`).
+            const isFd = /\d/.test(line[i - 1] || "") && (i < 2 || /\s/.test(line[i - 2]));
+            const start = isFd ? i - 1 : i;
+            let j = i + 1;
+            if (line[j] === ">") j += 1;
+            while (j < line.length && /\s/.test(line[j])) j += 1;
+            let k = j;
+            while (k < line.length && !/\s/.test(line[k])) k += 1;
+            const target = line.slice(j, k);
+            if ((isFd && line[i - 1] === "2") || target.startsWith("&")) {
+                line = line.slice(0, start) + line.slice(k);
+                i = start - 1;
+                continue;
+            }
+            i = k - 1; // real stdout redirect: leave it for pass 2
+        }
+        // Pass 2: split at the first `>` / `>>` that survived pass 1.
+        quote = null;
+        for (let i = 0; i < line.length; i += 1) {
+            const ch = line[i];
+            if (quote) {
+                if (ch === quote) quote = null;
+                continue;
+            }
+            if (ch === "'" || ch === "\"") { quote = ch; continue; }
+            if (ch !== ">") continue;
+            const isFd = /\d/.test(line[i - 1] || "") && (i < 2 || /\s/.test(line[i - 2]));
+            const start = isFd ? i - 1 : i;
+            const append = line[i + 1] === ">";
+            const after = line.slice(i + (append ? 2 : 1)).trim();
+            const words = after ? after.split(/\s+/) : [];
+            return {
+                core: line.slice(0, start).trim(),
+                redirect: words.length ? { path: words[0], append } : null,
+                missingTarget: !words.length,
+                trailingText: words.length > 1,
+            };
+        }
+        return { core: line, redirect: null, missingTarget: false, trailingText: false };
+    }
+
+    // Parse head/tail line-count flags: `-n N`, attached `-nN`, and classic
+    // `-N`. Returns { count, file } with the first non-flag arg as the file.
+    function parseLineCount(args) {
+        let count = 10;
+        let file = null;
+        for (let i = 0; i < args.length; i += 1) {
+            const a = args[i];
+            if (a === "-n") { count = Number(args[++i]) || 10; continue; }
+            const m = a.match(/^-n?(\d+)$/);
+            if (m) { count = Number(m[1]); continue; }
+            if (!a.startsWith("-") && file == null) file = a;
+        }
+        return { count, file };
+    }
+
+    // Parse a cut(1)-style list ("1,3", "2-4", "3-") into [lo, hi] ranges.
+    function parseRangeList(spec) {
+        if (!spec) return null;
+        const ranges = [];
+        for (const part of String(spec).split(",")) {
+            const m = part.match(/^(\d+)?(-)?(\d+)?$/);
+            if (!m || (!m[1] && !m[3])) return null;
+            const lo = m[1] ? Number(m[1]) : 1;
+            const hi = m[2] ? (m[3] ? Number(m[3]) : Infinity) : lo;
+            if (lo < 1 || hi < lo) return null;
+            ranges.push([lo, hi]);
+        }
+        return ranges;
+    }
+
+    // Expand a tr(1) set ("a-z", "A-Za-z0-9") into an array of characters.
+    function expandTrSet(spec) {
+        const chars = [];
+        for (let i = 0; i < spec.length; i += 1) {
+            if (spec[i + 1] === "-" && spec[i + 2] && spec[i + 2] !== "-") {
+                const lo = spec.charCodeAt(i);
+                const hi = spec.charCodeAt(i + 2);
+                for (let c = lo; c <= hi; c += 1) chars.push(String.fromCharCode(c));
+                i += 2;
+            } else {
+                chars.push(spec[i]);
+            }
+        }
+        return chars;
     }
 
     function splitPipes(line) {
@@ -317,6 +435,11 @@
                 reset: this.cmdReset,
                 sort: this.cmdSort,
                 uniq: this.cmdUniq,
+                cut: this.cmdCut,
+                tr: this.cmdTr,
+                sed: this.cmdSed,
+                nl: this.cmdNl,
+                rev: this.cmdRev,
                 find: this.cmdFind,
                 tree: this.cmdTree,
                 file: this.cmdFile,
@@ -360,6 +483,9 @@
         }
 
         execute(line) {
+            // Bare/scoped mode (Practice Arcade sandboxes): no dailies, badges,
+            // rank-ups, or trainer forks — just the pipeline.
+            if (this.bare) return this.runPipeline(line);
             this.refreshDaily();
             // While the Training Arena is active, every line is an answer, not a command.
             const out = (this.state.trainer && this.state.trainer.active)
@@ -387,7 +513,12 @@
         }
 
         runPipeline(line) {
-            const segments = splitPipes(line.trim());
+            // `cmd > file` / `cmd >> file`: capture the pipeline's stdout into a
+            // player-created file instead of the log — real shell redirection.
+            const { core, redirect, missingTarget, trailingText } = splitRedirect(line.trim());
+            if (missingTarget) return [{ kind: "error", text: "syntax error: expected a filename after >" }];
+            if (trailingText) return [{ kind: "error", text: "syntax error: unexpected text after > FILE" }];
+            const segments = splitPipes(core);
             if (!segments.length) return [];
             let stdin = null;
             const collected = [];
@@ -408,6 +539,16 @@
                 }
                 collected.push(...result);
             }
+            if (redirect && !collected.some((r) => r.kind === "error")) {
+                const text = collected
+                    .filter((r) => !r.action)
+                    .map((r) => r.text || "")
+                    .join("\n");
+                const failure = this.writeFile(redirect.path, text, redirect.append);
+                if (failure) return [failure];
+                const lineCount = text ? text.split("\n").length : 0;
+                return [{ kind: "dim", text: `(${redirect.append ? "appended" : "wrote"} ${lineCount} line${lineCount === 1 ? "" : "s"} to ${redirect.path})` }];
+            }
             // Path-Finder watches normal play: count moves, detect arrival.
             if (this.state.pathfind && this.state.pathfind.active) {
                 collected.push(...this.pathfindObserve(line));
@@ -415,12 +556,62 @@
             return collected;
         }
 
+        // Persist text into a player-visible file (userNodes overlay; shadows a
+        // same-named world file, mirroring a real overwrite).
+        writeFile(rawPath, text, append) {
+            const path = this.resolve(rawPath);
+            if (this.isDir(path)) return { kind: "error", text: `cannot write to ${rawPath}: is a directory` };
+            const parent = this.parentPath(path);
+            if (!this.isDir(parent)) return { kind: "error", text: `cannot write to ${rawPath}: no such directory` };
+            let content = text;
+            if (append) {
+                const prev = this.readFile(path);
+                if (prev) content = prev.replace(/\n$/, "") + "\n" + text;
+            }
+            this.state.userNodes[path] = { type: "file", content };
+            return null;
+        }
+
+        // Expand an unquoted glob pattern against the directory it points into.
+        // Returns matched names (dir prefix preserved), or [] when nothing matches
+        // (caller keeps the literal token, like bash without nullglob).
+        expandGlob(pattern) {
+            const slash = pattern.lastIndexOf("/");
+            const dirRaw = slash >= 0 ? pattern.slice(0, slash + 1) : "";
+            const nameRaw = slash >= 0 ? pattern.slice(slash + 1) : pattern;
+            if (!nameRaw || !/[*?]/.test(nameRaw)) return [];
+            const dirPath = slash >= 0 ? this.resolve(dirRaw || "/") : this.state.cwd;
+            if (!this.isDir(dirPath)) return [];
+            const re = new RegExp(
+                "^" + escapeRegExp(nameRaw).replace(/\\\*/g, "[^/]*").replace(/\\\?/g, "[^/]") + "$"
+            );
+            return this.entries(dirPath, nameRaw.startsWith("."))
+                .map((entry) => entry.name)
+                .filter((name) => re.test(name))
+                .sort()
+                .map((name) => dirRaw + name);
+        }
+
         executeSegment(segment, stdin) {
             const expanded = this.applyAlias(segment.trim());
-            const tokens = tokenize(expanded);
-            if (!tokens.length) return [];
-            const cmd = tokens[0];
-            const args = tokens.slice(1);
+            const detailed = tokenizeDetailed(expanded);
+            if (!detailed.length) return [];
+            const cmd = detailed[0].text;
+            // Glob expansion: unquoted * / ? args expand against the filesystem;
+            // quoted patterns stay literal (teaches why `find -name "*.txt"`
+            // needs those quotes).
+            const args = [];
+            for (let i = 1; i < detailed.length; i += 1) {
+                const token = detailed[i];
+                if (!token.quoted && !token.text.startsWith("-") && /[*?]/.test(token.text)) {
+                    const matches = this.expandGlob(token.text);
+                    if (matches.length) {
+                        args.push(...matches);
+                        continue;
+                    }
+                }
+                args.push(token.text);
+            }
             this.bump(cmd);
             this.state.stats.lastPipedIn = stdin != null;
             if (cmd.startsWith("./")) {
@@ -494,10 +685,12 @@
         }
 
         readFile(path) {
-            const real = this.actual(path);
-            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return this.world.files[real];
+            // Player-written files shadow shipped world files (a `>` redirect onto
+            // an existing file overwrites it, exactly like a real filesystem).
             const node = this.state.userNodes[path];
             if (node && node.type === "file") return node.content || "";
+            const real = this.actual(path);
+            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return this.world.files[real];
             return null;
         }
 
@@ -944,8 +1137,18 @@
         }
 
         cmdCd(args) {
+            // `cd -` bounces back to the previous room, printing it like bash.
+            if (args[0] === "-") {
+                const prev = this.state.prevCwd;
+                if (!prev) return [{ kind: "error", text: "cd: OLDPWD not set" }];
+                if (!this.isDir(prev)) return [{ kind: "error", text: `Not a directory: ${prev}` }];
+                this.state.prevCwd = this.state.cwd;
+                this.state.cwd = prev;
+                return [{ kind: "output", text: prev }, { kind: "success", text: `Moved to ${prev}` }];
+            }
             const next = this.resolve(args[0] || this.world.root);
             if (!this.isDir(next)) return [{ kind: "error", text: `Not a directory: ${args[0] || next}` }];
+            this.state.prevCwd = this.state.cwd;
             this.state.cwd = next;
             return [{ kind: "success", text: `Moved to ${next}` }];
         }
@@ -960,21 +1163,17 @@
         }
 
         cmdHead(args, stdin) {
-            const countIndex = args.indexOf("-n");
-            const count = countIndex >= 0 ? Number(args[countIndex + 1]) || 10 : 10;
-            const file = args.find((arg, index) => arg !== "-n" && index !== countIndex + 1);
+            const { count, file } = parseLineCount(args);
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "head requires a readable file or piped input" }];
             return [{ kind: "output", text: text.split("\n").slice(0, count).join("\n") }];
         }
 
         cmdTail(args, stdin) {
-            const countIndex = args.indexOf("-n");
-            const count = countIndex >= 0 ? Number(args[countIndex + 1]) || 10 : 10;
-            const file = args.find((arg, index) => arg !== "-n" && index !== countIndex + 1);
+            const { count, file } = parseLineCount(args);
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "tail requires a readable file or piped input" }];
-            return [{ kind: "output", text: text.split("\n").slice(-count).join("\n") }];
+            return [{ kind: "output", text: count > 0 ? text.split("\n").slice(-count).join("\n") : "" }];
         }
 
         cmdWc(args, stdin) {
@@ -987,29 +1186,91 @@
         }
 
         cmdGrep(args, stdin) {
-            const flags = args.filter((a) => a.startsWith("-"));
-            const positional = args.filter((a) => !a.startsWith("-"));
+            const flags = args.filter((a) => a.startsWith("-") && a.length > 1);
+            const positional = args.filter((a) => !a.startsWith("-") || a === "-");
             const pattern = positional[0];
-            const file = positional[1];
-            if (!pattern) return [{ kind: "error", text: "grep requires a pattern" }];
-            let text;
-            if (file) {
-                text = this.readFile(this.resolve(file));
-                if (text === null) return [{ kind: "error", text: `No such file: ${file}` }];
-            } else if (stdin != null) {
-                text = stdin;
-            } else {
-                return [{ kind: "error", text: "grep needs a file or piped input" }];
-            }
-            const flagStr = flags.join("");
+            let files = positional.slice(1);
+            if (!pattern) return [{ kind: "error", text: "grep requires a pattern. Usage: grep [-rilnvc] PATTERN [FILE...]" }];
+            const flagStr = flags.join("").replace(/-/g, "");
             const insensitive = flagStr.includes("i");
             const invert = flagStr.includes("v");
-            const re = new RegExp(escapeRegExp(pattern), insensitive ? "i" : "");
-            const matches = text.split("\n").filter((line) => {
-                const m = re.test(line);
-                return invert ? !m : m;
-            });
-            return [{ kind: "output", text: matches.join("\n") || `(no matches for '${pattern}')` }];
+            const recursive = flagStr.includes("r") || flagStr.includes("R");
+            const namesOnly = flagStr.includes("l");
+            const countOnly = flagStr.includes("c");
+            const numbered = flagStr.includes("n");
+            const wordMatch = flagStr.includes("w");
+            // Real grep patterns are regular expressions. Try the pattern as a
+            // regex first; fall back to a literal match if it doesn't compile.
+            let re;
+            const body = wordMatch ? `\\b(?:${pattern})\\b` : pattern;
+            try {
+                re = new RegExp(body, insensitive ? "i" : "");
+            } catch (err) {
+                re = new RegExp(wordMatch ? `\\b${escapeRegExp(pattern)}\\b` : escapeRegExp(pattern), insensitive ? "i" : "");
+            }
+            if (recursive) {
+                const roots = files.length ? files : ["."];
+                files = [];
+                const walk = (path, label) => {
+                    if (this.isDir(path)) {
+                        // Real grep -r searches dotfiles too (it only skips . and ..).
+                        for (const entry of this.entries(path, true)) {
+                            walk(`${path === "/" ? "" : path}/${entry.name}`, `${label}/${entry.name}`);
+                        }
+                    } else if (this.readFile(path) !== null) {
+                        files.push(label);
+                    }
+                };
+                for (const root of roots) walk(this.resolve(root), root.replace(/\/$/, ""));
+            }
+            const showName = files.length > 1 || recursive;
+            const out = [];
+            let anyMatch = false;
+            const scan = (text, label) => {
+                let count = 0;
+                const lines = [];
+                text.split("\n").forEach((lineText, idx) => {
+                    const hit = re.test(lineText);
+                    if (invert ? !hit : hit) {
+                        count += 1;
+                        lines.push(`${showName ? `${label}:` : ""}${numbered ? `${idx + 1}:` : ""}${lineText}`);
+                    }
+                });
+                if (count > 0) anyMatch = true;
+                if (namesOnly) {
+                    if (count > 0) out.push(label);
+                } else if (countOnly) {
+                    out.push(`${showName ? `${label}:` : ""}${count}`);
+                } else {
+                    out.push(...lines);
+                }
+            };
+            if (files.length) {
+                for (const file of files) {
+                    // grep FILE convention: a lone '-' means read the pipe (stdin).
+                    if (file === "-") {
+                        if (stdin == null) return [{ kind: "error", text: "grep: -: no piped input" }];
+                        scan(stdin, "(stdin)");
+                        continue;
+                    }
+                    const path = this.resolve(file);
+                    if (this.isDir(path)) {
+                        out.push(`grep: ${file}: is a directory`);
+                        continue;
+                    }
+                    const text = this.readFile(path);
+                    if (text === null) return [{ kind: "error", text: `grep: ${file}: no such file` }];
+                    scan(text, file);
+                }
+            } else if (stdin != null) {
+                scan(stdin, "(stdin)");
+            } else {
+                return [{ kind: "error", text: "grep needs a file or piped input. Usage: grep [-rilnvc] PATTERN [FILE...]" }];
+            }
+            if (!anyMatch && !countOnly) {
+                return [{ kind: "output", text: `(no matches for '${pattern}')` }];
+            }
+            return [{ kind: "output", text: out.join("\n") }];
         }
 
         cmdSort(args, stdin) {
@@ -1017,22 +1278,145 @@
             const file = args.find((a) => !a.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "sort requires a file or piped input" }];
-            const lines = text.split("\n");
-            lines.sort((a, b) => (flags.includes("n") ? Number(a) - Number(b) : a.localeCompare(b)));
+            let lines = text.split("\n");
+            // -n keys off the leading number like real sort(1); non-numeric = 0.
+            const numKey = (s) => { const n = parseFloat(s.trimStart()); return Number.isNaN(n) ? 0 : n; };
+            lines.sort((a, b) => (flags.includes("n") ? numKey(a) - numKey(b) : a.localeCompare(b)));
             if (flags.includes("r")) lines.reverse();
+            if (flags.includes("u")) {
+                const seen = new Set();
+                lines = lines.filter((l) => (seen.has(l) ? false : (seen.add(l), true)));
+            }
             return [{ kind: "output", text: lines.join("\n") }];
         }
 
         cmdUniq(args, stdin) {
+            const flags = args.filter((a) => a.startsWith("-")).join("");
             const file = args.find((a) => !a.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "uniq requires a file or piped input" }];
-            const out = [];
-            let prev = null;
+            const counting = flags.includes("c");
+            const dupesOnly = flags.includes("d");
+            const groups = [];
             for (const line of text.split("\n")) {
-                if (line !== prev) out.push(line);
-                prev = line;
+                const last = groups[groups.length - 1];
+                if (last && last.line === line) last.count += 1;
+                else groups.push({ line, count: 1 });
             }
+            const out = groups
+                .filter((g) => (dupesOnly ? g.count > 1 : true))
+                .map((g) => (counting ? `${String(g.count).padStart(7)} ${g.line}` : g.line));
+            return [{ kind: "output", text: out.join("\n") }];
+        }
+
+        // cut -d DELIM -f LIST  |  cut -c LIST  — extract fields or characters.
+        cmdCut(args, stdin) {
+            let delim = "\t";
+            let fieldSpec = null;
+            let charSpec = null;
+            const files = [];
+            for (let i = 0; i < args.length; i += 1) {
+                const a = args[i];
+                if (a === "-d") delim = args[++i] ?? "\t";
+                else if (a.startsWith("-d") && a.length > 2) delim = a.slice(2);
+                else if (a === "-f") fieldSpec = args[++i];
+                else if (a.startsWith("-f") && a.length > 2) fieldSpec = a.slice(2);
+                else if (a === "-c") charSpec = args[++i];
+                else if (a.startsWith("-c") && a.length > 2) charSpec = a.slice(2);
+                else if (!a.startsWith("-")) files.push(a);
+            }
+            if (!fieldSpec && !charSpec) {
+                return [{ kind: "error", text: "cut requires -f LIST (with -d DELIM) or -c LIST" }];
+            }
+            const text = files[0] ? this.readFile(this.resolve(files[0])) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "cut requires a file or piped input" }];
+            const wants = parseRangeList(fieldSpec || charSpec);
+            if (!wants) return [{ kind: "error", text: `cut: invalid list: ${fieldSpec || charSpec}` }];
+            const out = text.split("\n").map((line) => {
+                if (charSpec) {
+                    return wants.map(([lo, hi]) => line.slice(lo - 1, hi === Infinity ? undefined : hi)).join("");
+                }
+                const parts = line.split(delim);
+                if (parts.length === 1) return line; // no delimiter: pass through, like real cut
+                const picked = [];
+                wants.forEach(([lo, hi]) => {
+                    for (let f = lo; f <= Math.min(hi, parts.length); f += 1) picked.push(parts[f - 1]);
+                });
+                return picked.join(delim);
+            });
+            return [{ kind: "output", text: out.join("\n") }];
+        }
+
+        // tr SET1 SET2 (translate) | tr -d SET1 (delete). Supports a-z ranges.
+        cmdTr(args, stdin) {
+            if (stdin == null) return [{ kind: "error", text: "tr reads piped input. Try: cat file | tr a-z A-Z" }];
+            const del = args[0] === "-d";
+            const squeeze = args[0] === "-s";
+            const sets = args.filter((a) => a !== "-d" && a !== "-s");
+            const set1 = expandTrSet(sets[0] || "");
+            if (!set1.length) return [{ kind: "error", text: "tr requires a character set. Usage: tr SET1 SET2 | tr -d SET1" }];
+            if (del) {
+                const drop = new Set(set1);
+                return [{ kind: "output", text: [...stdin].filter((ch) => !drop.has(ch)).join("") }];
+            }
+            if (squeeze) {
+                const squeezeSet = new Set(set1);
+                let prev = null;
+                const kept = [...stdin].filter((ch) => {
+                    const dup = ch === prev && squeezeSet.has(ch);
+                    prev = ch;
+                    return !dup;
+                });
+                return [{ kind: "output", text: kept.join("") }];
+            }
+            const set2 = expandTrSet(sets[1] || "");
+            if (!set2.length) return [{ kind: "error", text: "tr requires two sets. Usage: tr SET1 SET2" }];
+            const map = new Map();
+            set1.forEach((ch, i) => map.set(ch, set2[Math.min(i, set2.length - 1)]));
+            return [{ kind: "output", text: [...stdin].map((ch) => map.get(ch) ?? ch).join("") }];
+        }
+
+        // sed 's/pattern/replacement/[g]' — the classic substitute, on files or stdin.
+        cmdSed(args, stdin) {
+            const expr = args.find((a) => !a.startsWith("-"));
+            const file = args.filter((a) => !a.startsWith("-"))[1];
+            const m = expr && expr.match(/^s(.)((?:\\.|[^\\])*?)\1((?:\\.|[^\\])*?)\1([gi]*)$/);
+            if (!m) return [{ kind: "error", text: "sed supports substitution: sed 's/pattern/replacement/g'" }];
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "sed requires a file or piped input" }];
+            const caseFlag = m[4].includes("i") ? "i" : "";
+            let re;
+            try {
+                re = new RegExp(m[2], caseFlag);
+            } catch (err) {
+                re = new RegExp(escapeRegExp(m[2].replace(/\\(.)/g, "$1")), caseFlag);
+            }
+            const global = m[4].includes("g");
+            // Escape `$` so JS replace metacharacters ($&, $1) stay literal like sed.
+            const replacement = m[3].replace(/\\(.)/g, "$1").replace(/\$/g, "$$$$");
+            const out = text.split("\n").map((line) => (
+                global
+                    ? line.replace(new RegExp(re.source, re.flags + "g"), replacement)
+                    : line.replace(re, replacement)
+            ));
+            return [{ kind: "output", text: out.join("\n") }];
+        }
+
+        // nl — number lines (handy inside pipelines).
+        cmdNl(args, stdin) {
+            const file = args.find((a) => !a.startsWith("-"));
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "nl requires a file or piped input" }];
+            const out = text.split("\n").map((line, i) => `${String(i + 1).padStart(6)}  ${line}`);
+            return [{ kind: "output", text: out.join("\n") }];
+        }
+
+        // rev — reverse each line of input.
+        cmdRev(args, stdin) {
+            const file = args.find((a) => !a.startsWith("-"));
+            const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
+            if (text === null) return [{ kind: "error", text: "rev requires a file or piped input" }];
+            const out = text.split("\n").map((line) => [...line].reverse().join(""));
             return [{ kind: "output", text: out.join("\n") }];
         }
 
@@ -1237,7 +1621,10 @@
             const idx = joined.indexOf("=");
             if (idx < 1) return [{ kind: "error", text: "Usage: export VAR=value" }];
             const key = joined.slice(0, idx).trim();
-            const value = joined.slice(idx + 1).trim();
+            // Expand $NAME / ${NAME} in the value like a real shell, so
+            // `export I=amulet,$I` accumulates inventory instead of storing "$I".
+            const value = joined.slice(idx + 1).trim()
+                .replace(/\$\{(\w+)\}|\$([A-Za-z_]\w*)/g, (_, braced, bare) => this.getVar(braced || bare));
             this.setVar(key, value);
             return [{ kind: "success", text: `Exported ${key}=${value}` }];
         }
@@ -1303,13 +1690,15 @@
         }
 
         cmdCp(args) {
-            if (args.length < 2) return [{ kind: "error", text: "cp requires source and destination" }];
-            const src = this.resolve(args[0]);
-            const dst = this.resolve(args[1]);
+            const eff = args.filter((a) => !a.startsWith("-"));
+            if (eff.length < 2) return [{ kind: "error", text: "cp requires source and destination" }];
+            if (eff.length > 2) return [{ kind: "error", text: "cp: too many arguments (glob matched several files?)" }];
+            const src = this.resolve(eff[0]);
+            const dst = this.resolve(eff[1]);
             const text = this.readFile(src);
-            if (text === null) return [{ kind: "error", text: `No such file: ${args[0]}` }];
+            if (text === null) return [{ kind: "error", text: `No such file: ${eff[0]}` }];
             this.state.userNodes[dst] = { type: "file", content: text };
-            return [{ kind: "success", text: `Copied ${args[0]} to ${args[1]}` }];
+            return [{ kind: "success", text: `Copied ${eff[0]} to ${eff[1]}` }];
         }
 
         cmdMv(args) {
@@ -1326,9 +1715,17 @@
         cmdRm(args) {
             if (!args[0]) return [{ kind: "error", text: "rm requires a file" }];
             const path = this.resolve(args[0]);
-            if (!this.state.userNodes[path]) return [{ kind: "error", text: "Only session-created files can be removed in Web Bashcrawl." }];
-            delete this.state.userNodes[path];
-            return [{ kind: "success", text: `Removed ${args[0]}` }];
+            const userNode = this.state.userNodes[path];
+            const worldFile = Object.prototype.hasOwnProperty.call(this.world.files, this.actual(path));
+            if (userNode) {
+                delete this.state.userNodes[path];
+                // A `>` overwrite of a shipped file only shadows it; rm peels
+                // the shadow off and the original shows through again.
+                if (worldFile) return [{ kind: "dim", text: `Removed your written copy of ${args[0]} — the original remains.` }];
+                return [{ kind: "success", text: `Removed ${args[0]}` }];
+            }
+            if (worldFile) return [{ kind: "error", text: `rm: cannot remove '${args[0]}': the dungeon's own files are indestructible` }];
+            return [{ kind: "error", text: "Only session-created files can be removed in Web Bashcrawl." }];
         }
 
         cmdHistory() {

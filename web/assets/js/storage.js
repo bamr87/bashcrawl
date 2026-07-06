@@ -21,12 +21,31 @@
     }
 
     function save(state) {
-        global.localStorage.setItem(KEY, JSON.stringify(state));
+        try {
+            global.localStorage.setItem(KEY, JSON.stringify(state));
+        } catch (_) { /* storage full/blocked: progress just doesn't persist */ }
     }
 
     function clear() {
         global.localStorage.removeItem(KEY);
     }
 
-    global.BashcrawlStorage = { load, save, clear, KEY };
+    // Namespaced side-stores (arcade scores, shell prefs) — additive keys so the
+    // long-lived story save above is never touched by new features.
+    function loadKey(key, fallback) {
+        try {
+            const raw = global.localStorage.getItem(key);
+            return raw ? { ...fallback, ...JSON.parse(raw) } : { ...fallback };
+        } catch (_) {
+            return { ...fallback };
+        }
+    }
+
+    function saveKey(key, value) {
+        try {
+            global.localStorage.setItem(key, JSON.stringify(value));
+        } catch (_) { /* storage full/blocked: scores just don't persist */ }
+    }
+
+    global.BashcrawlStorage = { load, save, clear, KEY, loadKey, saveKey };
 })(window);

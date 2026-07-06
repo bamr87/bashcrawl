@@ -20,6 +20,6 @@ echo "[mcp-test] Installing/updating dependencies in .venv"
 "$PIP_BIN" install --upgrade pip >/dev/null
 "$PIP_BIN" install -r requirements.txt -r test/requirements.txt >/dev/null
 
-echo "[mcp-test] Running MCP integration tests"
-PYTHONPATH="${ROOT_DIR}/src/terminal-illness:${ROOT_DIR}/test" \
+echo "[mcp-test] Running playtest-harness smoke tests"
+PYTHONPATH="${ROOT_DIR}/src:${ROOT_DIR}/test" \
     "$PYTHON_BIN" -m pytest -q test/integration/test_mcp_server.py

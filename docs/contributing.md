@@ -19,8 +19,13 @@ Canonical local workflow:
 ```bash
 bash scripts/lint.sh all
 bash scripts/run_tests.sh default
-python3 -m viewer --game-root .
-python3 -m ti --game-root .
+```
+
+Playtest harness (MCP server for AI agents, plus scoring):
+
+```bash
+PYTHONPATH=src python3 -m playtest.mcp_server
+PYTHONPATH=src python3 -m playtest.scorer
 ```
 
 Static web workflow:
@@ -76,7 +81,7 @@ Key rules:
 ### Linting
 
 ```bash
-shellcheck main.sh setup.sh help.sh lib/*.sh src/help/*.sh
+shellcheck setup.sh help.sh lib/*.sh src/help/*.sh
 ```
 
 CI runs ShellCheck, yamllint, markdownlint, and game content validation on every PR.
@@ -85,12 +90,12 @@ CI runs ShellCheck, yamllint, markdownlint, and game content validation on every
 
 When implementing a feature, confirm these before opening a PR:
 
-1. **Owner layer chosen first** (launcher, shell runtime, Python runtime, UI/adapters, or content contracts) per [architecture-runtime.md](architecture-runtime.md).
-2. **Boundary tests updated** at the layer where behavior changed (unit/integration plus parity tests when shell+Python behavior should match).
+1. **Owner surface chosen first** (bash game content under `entrance/`, static web trainer in `web/`, or playtest harness in `src/playtest/`).
+2. **Boundary tests updated** at the layer where behavior changed (unit/integration).
 3. **Contract data checked** by running:
    - `python3 scripts/validate_content_contracts.py`
    - `python3 scripts/validate_walkthrough_fs.py`
-4. **Schema compatibility preserved** for `.bashcrawl_save.json` and documented data contracts (`src/help/data/*.yaml`, `test/datasets/walkthrough.json`).
+4. **Data contracts kept in sync** (`src/help/data/*.yaml`, `test/datasets/walkthrough.json`), and the web bundle rebuilt (`make web-build`) when game content changes.
 
 ## Pull Request Process
 

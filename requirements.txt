@@ -1,27 +1,12 @@
 # Bashcrawl — Runtime Dependencies
 # ==================================
-# Install everything needed to play the game and run the viewer:
+# The game is pure bash and needs NO Python to play (cd entrance && cat scroll).
+# Python is only needed to build the static web bundle and to run the lean MCP
+# playtest harness:
 #   pip install -r requirements.txt
 
-# Terminal-Illness (Python TUI)
-textual>=0.65.0
-rich>=13.7.1
-prompt_toolkit>=3.0.47
+# Static web export + content-contract validators
 pyyaml>=6.0
 
-# AI features (Merlin chat)
-anthropic>=0.40.0
-
-# Environment variable loading
-python-dotenv>=1.0
-
-# Browser TUI (serve Textual app in a web browser)
-textual-serve>=1.1.0
-
-# MCP server for AI / IDE integration (bashcrawl_start, bashcrawl_command, …)
+# MCP server for the blank-slate playtest harness (bashcrawl_start/observe/...)
 mcp>=1.0.0
-
-# Observatory log viewer
-flask>=3.0
-markdown>=3.5
-watchdog>=4.0

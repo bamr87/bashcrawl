@@ -17,13 +17,13 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    - Run `git status` to identify all modified, added, and deleted files
    - Run `git diff --cached` for staged changes and `git diff` for unstaged changes
    - Categorize changes by type:
-     - **Features**: New rooms, encounters, game mechanics, or launcher functionality
+     - **Features**: New rooms, encounters, game mechanics, or web trainer functionality
      - **Bug Fixes**: Issues resolved in game scripts, help system, or lib utilities
      - **Breaking Changes**: Room renames, inventory format changes, unlock path alterations
      - **Content**: `scroll` file additions or edits (educational text)
      - **Documentation**: README, CHANGELOG, or `docs/` updates
      - **Refactoring**: Code improvements without gameplay changes
-     - **Dependencies**: `requirements.txt` updates in `test/`, `src/terminal-illness/`, or `src/viewer/`
+     - **Dependencies**: root `requirements.txt` / `requirements-dev.txt` or `test/requirements.txt` updates
      - **Tests**: Additions or modifications in `test/`
      - **CI**: Changes to `.github/workflows/` or `.shellcheckrc`
 
@@ -33,13 +33,12 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
 
 3. **Bashcrawl-Specific Change Categories**:
    - **Game Content** (`entrance/`, `entrance/cellar/`, `entrance/cellar/armoury/`, hidden dirs): scrolls, treasures, potions, spells, encounters
-   - **Launcher** (`main.sh`): interactive menu, CLI modes, embedded quest system
    - **Setup** (`setup.sh`): permissions, system checks
    - **Help System** (`help.sh`, `src/help/`): contextual help, AI engine, command suggester
-   - **Lib Utilities** (`lib/`): `colors.sh`, `log.sh`, `reset.sh`, `analyze.sh`, `report.sh`
-   - **Terminal Illness TUI** (`src/terminal-illness/`): Python Textual app, agent mode
-   - **Log Viewer** (`src/viewer/`): Flask web app for session log analytics
-   - **Tests** (`test/`): unit, integration, ai, demo test suites
+   - **Lib Utilities** (`lib/`): `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`
+   - **Static Web Trainer** (`web/`, `scripts/export_static_web.py`): browser-based trainer, rebuilt with `make web-build`
+   - **Playtest Harness** (`src/playtest/`): MCP server, sandbox, recorder, scorer
+   - **Tests** (`test/`): unit and integration test suites
 
 ## Step 2: Run Appropriate Tests
 
@@ -55,8 +54,8 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    shellcheck *.sh src/help/*.sh lib/*.sh
    
    # YAML and Markdown lint (matches CI)
-   yamllint .
-   markdownlint '**/*.md' --config .markdownlint.yml
+   yamllint -c .yamllint.yml .
+   markdownlint '**/*.md' --config .markdownlint.json
    ```
 
 3. **Execute Python Tests**:
@@ -69,9 +68,6 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    
    # Real filesystem + bash integration tests
    cd test && pytest -m "integration" -q
-   
-   # AI-driven playthroughs (requires ANTHROPIC_API_KEY)
-   cd test && pytest -m "ai" --timeout=120 -q
    
    # Full suite (unit + integration, matches CI default)
    cd test && pytest -q
@@ -94,7 +90,7 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    - Update `README.md` for user-facing gameplay or setup changes
    - Update `docs/` pages for new mechanics, rooms, or advanced features
    - Update `src/help/HELP_REFERENCE.md` if help system commands change
-   - Update `src/terminal-illness/README.md` for TUI or agent mode changes
+   - Rebuild the static web bundle with `make web-build` if game content or YAML registries changed
 
 2. **Update Game Content Documentation**:
    - Ensure new `scroll` files follow the depth-appropriate format (see `.github/instructions/scrolls.instructions.md`):
@@ -160,11 +156,10 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    Scopes (bashcrawl-specific):
    - `game`: Core game content (`entrance/` tree, encounters)
    - `scroll`: Educational scroll content
-   - `launcher`: `main.sh` changes
    - `help`: Help system (`help.sh`, `src/help/`)
    - `lib`: Shared utilities (`lib/`)
-   - `tui`: Terminal Illness TUI (`src/terminal-illness/`)
-   - `viewer`: Log viewer Flask app (`src/viewer/`)
+   - `web`: Static web trainer (`web/`, `scripts/export_static_web.py`)
+   - `playtest`: MCP playtest harness (`src/playtest/`)
    - `test`: Test suite (`test/`)
    - `ci`: GitHub Actions workflows
 
@@ -296,14 +291,13 @@ If issues are discovered after pushing:
 ```bash
 # Shell linting
 shellcheck *.sh src/help/*.sh lib/*.sh   # Lint all scripts
-yamllint .                                # Lint YAML files
+yamllint -c .yamllint.yml .              # Lint YAML files
 
 # Python tests
 source .venv/bin/activate
 cd test
 pytest -m "unit" -q                      # Fast unit tests
 pytest -m "integration" -q              # Integration tests
-pytest -m "ai" --timeout=120 -q         # AI playthroughs (needs API key)
 pytest -q                               # Default: unit + integration
 
 # Game validation
@@ -317,8 +311,9 @@ bash help.sh                            # Contextual help
 bash help.sh map                        # Dungeon map
 bash help.sh commands                   # Command reference
 
-# Log viewer
-source .venv/bin/activate && python3 -m src.viewer --port 5000
+# Static web trainer
+make web-build                          # Rebuild web/ data from the registries
+make web-preview                        # Serve web/ at http://127.0.0.1:8000
 
 # Git workflow
 git add -A                              # Stage all changes
@@ -331,4 +326,4 @@ gh pr create --base main --head <branch> --title "feat(game): add workshop room"
 
 ---
 
-**Note**: Game executables must never modify git-tracked files. All player state changes are done via `export` commands printed to the player. Always run shellcheck and the unit+integration test suite before pushing. The `ai` test marker requires `ANTHROPIC_API_KEY` to be set.
+**Note**: Game executables must never modify git-tracked files. All player state changes are done via `export` commands printed to the player. Always run shellcheck and the unit+integration test suite before pushing.

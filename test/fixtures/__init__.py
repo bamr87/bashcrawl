@@ -31,7 +31,7 @@ def find_game_root() -> Path:
     candidate = Path(__file__).resolve().parent
     for _ in range(6):
         candidate = candidate.parent
-        if (candidate / "entrance").is_dir() and (candidate / "main.sh").is_file():
+        if (candidate / "entrance").is_dir() and (candidate / "help.sh").is_file():
             return candidate
     raise FileNotFoundError("Cannot find bashcrawl game root from test fixtures")
 
