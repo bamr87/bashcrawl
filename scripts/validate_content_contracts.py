@@ -313,6 +313,82 @@ def _validate_encounters(
     }
 
 
+# Encounter scripts the shebang/boilerplate contract applies to (the classic
+# interactive executables; data files like `roster`/`gravestones` are exempt).
+_SCRIPT_NAMES = ("treasure", "potion", "spell", "statue", "monster", "ghost", "goblet")
+
+# Hidden areas that treasures unlock via `mv .name name` — one of the two forms
+# must exist on disk or the unlock instruction printed to the player is a lie.
+_UNLOCK_DIRS = (".chapel", ".vault", ".rift", ".scrap")
+
+# Main-path rooms every new player walks through; their scrolls carry the core
+# lessons and should stay substantial.
+_MAIN_PATH_ROOMS = (
+    "entrance",
+    "entrance/cellar",
+    "entrance/cellar/armoury",
+    "entrance/cellar/armoury/chamber",
+)
+
+
+def _validate_game_scripts(
+    root: Path,
+    errors: list[str],
+    warnings: list[str],
+    report: dict[str, Any],
+) -> None:
+    """Filesystem conventions for game executables and unlock wiring.
+
+    Folded in from the retired game-tests workflow so the checks run locally
+    (`make validate-contracts`) and in CI from a single source of truth.
+    """
+    entrance = root / "entrance"
+    bad_shebangs: list[str] = []
+    missing_boilerplate: list[str] = []
+    script_count = 0
+
+    for name in _SCRIPT_NAMES:
+        for script in sorted(entrance.rglob(name)):
+            if not script.is_file():
+                continue
+            script_count += 1
+            rel = script.relative_to(root).as_posix()
+            text = script.read_text(encoding="utf-8", errors="replace")
+            first_line = text.splitlines()[0] if text else ""
+            if first_line not in ("#!/usr/bin/env bash", "#!/bin/bash"):
+                bad_shebangs.append(rel)
+                _add_error(errors, f"Game script missing bash shebang: {rel} (got: {first_line!r})")
+            if "wandered out of bounds" not in text:
+                missing_boilerplate.append(rel)
+                _add_warning(warnings, f"Game script missing standard boilerplate comment: {rel}")
+
+    missing_unlocks: list[str] = []
+    for hidden in _UNLOCK_DIRS:
+        visible = hidden.lstrip(".")
+        if not (entrance / hidden).is_dir() and not (entrance / visible).is_dir():
+            missing_unlocks.append(hidden)
+            _add_error(errors, f"Unlock target missing on disk: entrance/{hidden} (or entrance/{visible})")
+
+    thin_scrolls: list[str] = []
+    for room in _MAIN_PATH_ROOMS:
+        scroll = root / room / "scroll"
+        if scroll.is_file():
+            lines = len(scroll.read_text(encoding="utf-8", errors="replace").splitlines())
+            if lines < 30:
+                thin_scrolls.append(f"{room}/scroll ({lines} lines)")
+                _add_warning(warnings, f"Main-path scroll unusually short: {room}/scroll has {lines} lines (expected 30+)")
+        else:
+            _add_error(errors, f"Main-path scroll missing: {room}/scroll")
+
+    report["game_scripts"] = {
+        "script_count": script_count,
+        "bad_shebangs": bad_shebangs,
+        "missing_boilerplate": missing_boilerplate,
+        "missing_unlock_targets": missing_unlocks,
+        "thin_main_path_scrolls": thin_scrolls,
+    }
+
+
 def validate(root: Path) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -337,6 +413,7 @@ def validate(root: Path) -> dict[str, Any]:
     _validate_rooms_and_walkthrough(root, rooms_data, walkthrough, errors, warnings, report)
     _validate_quests(quests_data, walkthrough, errors, warnings, report)
     _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
+    _validate_game_scripts(root, errors, warnings, report)
 
     return {
         "ok": not errors,

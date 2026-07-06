@@ -1,5 +1,15 @@
 name: CI
 
+# The one PR/push gate. Three jobs, each mirroring a local make target so a
+# green local run predicts a green CI run:
+#   lint        →  make lint          (shellcheck, yamllint, markdownlint, ruff)
+#   test        →  make validate-contracts + make test  (full pytest suite)
+#   macos-smoke →  real terminal play on macOS's default bash 3.2
+#
+# Content rules (shebangs, scrolls, unlock wiring) live in
+# scripts/validate_content_contracts.py — not inline here — so they are
+# testable locally and this file stays orchestration-only.
+
 on:
   push:
     branches: [main, develop]
@@ -14,54 +24,93 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  shellcheck:
-    name: ShellCheck
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v6
-    - name: Install lint tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y shellcheck
-    - name: Lint shell scripts
-      run: bash scripts/lint.sh shell
+      - uses: actions/checkout@v6
 
-  yamllint:
-    name: YAML Lint
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v6
-    - name: Install lint tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install yamllint
-    - name: Lint YAML files
-      run: bash scripts/lint.sh yaml
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
 
-  markdownlint:
-    name: Markdown Lint
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v6
-    - name: Install lint tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y nodejs npm
-        sudo npm install -g markdownlint-cli
-    - name: Lint Markdown files
-      run: bash scripts/lint.sh markdown
+      - name: Install linters
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q shellcheck
+          python -m pip install --quiet --upgrade pip
+          pip install --quiet yamllint ruff
+          sudo npm install --silent -g markdownlint-cli
 
-  ruff:
-    name: Ruff
+      - name: ShellCheck
+        run: bash scripts/lint.sh shell
+
+      - name: yamllint
+        run: bash scripts/lint.sh yaml
+
+      - name: markdownlint
+        run: bash scripts/lint.sh markdown
+
+      - name: ruff
+        run: bash scripts/lint.sh python
+
+  test:
+    name: Contracts + Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
-      with:
-        python-version: '3.12'
-    - name: Install lint tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install ruff
-    - name: Lint Python files
-      run: bash scripts/lint.sh python
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet --upgrade pip
+          pip install --quiet -r requirements.txt -r requirements-dev.txt
+
+      - name: Validate content contracts
+        run: make validate-contracts
+
+      - name: Run test suite (unit + integration)
+        run: make test
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-reports
+          path: test/reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  macos-smoke:
+    name: macOS bash 3.2 smoke
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Play the game on stock macOS bash
+        run: |
+          # macOS ships bash 3.2 at /bin/bash — the oldest shell real players
+          # use. Run the actual game loop against it, not a newer bash.
+          /bin/bash --version | head -1
+          /bin/bash setup.sh --verify
+          cd entrance
+          cat scroll > /dev/null
+          cd cellar
+          /bin/bash ./treasure | grep -q amulet
+          cd armoury/chamber
+          export HP=15 I=sword
+          printf 'y\ny\n' | /bin/bash ./statue | grep -qi diamond
+          cd "$GITHUB_WORKSPACE"
+          /bin/bash help.sh > /dev/null
+          /bin/bash lib/reset.sh --dry
+          echo "macOS smoke: OK"

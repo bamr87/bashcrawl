@@ -78,6 +78,23 @@ jobs:
           BLANK_SLATE_GATE_SCROLLS: ${{ github.event.inputs.gate_scrolls || '1' }}
         run: bash scripts/playtest.sh "${{ github.event.inputs.seeds || '3' }}"
 
+      - name: Write run summary
+        if: always()
+        env:
+          PYTHONPATH: src
+        run: |
+          {
+            echo "## Blank-Slate Audit"
+            echo ""
+            echo '```'
+            python3 -m playtest.scorer \
+              --log-dir logs/sessions/blank_slate \
+              --gate-rooms "${{ github.event.inputs.gate_rooms || '3' }}" \
+              --gate-scrolls "${{ github.event.inputs.gate_scrolls || '1' }}" \
+              || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload playtest report
         if: always()
         uses: actions/upload-artifact@v5
@@ -87,3 +104,4 @@ jobs:
             test/reports/blank_slate/
             logs/sessions/blank_slate/
           retention-days: 30
+          if-no-files-found: ignore
