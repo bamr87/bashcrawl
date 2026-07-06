@@ -141,7 +141,7 @@ bash lib/reset.sh          # Execute
 
 ## Integration Points
 
-- **GitHub CI** (`.github/workflows/`) — `ci.yml` (shellcheck, yamllint, markdownlint), `game-tests.yml` (scroll/shebang/unlock validation), `pages.yml` (static web build + deploy), `dependency-update.yml`, `blank-slate-audit.yml`
+- **GitHub CI** (`.github/workflows/`) — `ci.yml` (the PR gate: lint + contracts + full pytest + macOS bash-3.2 smoke), `pages.yml` (static web build + deploy), `blank-slate-audit.yml` (weekly agent playtest). Dependabot owns dependency updates.
 - **Game state** — environment variables (`$I`, `$HP`) plus untracked flag files (e.g. `.statue_defeated`); `~/.bashcrawl_progress` (created by help system)
 - **Logging** — JSONL session logs in `logs/sessions/` via `lib/log.sh`
 - **Static web trainer** (`web/`) — data exported from the YAML registries by `scripts/export_static_web.py` (`make web-build`), validated with `make web-test`, deployed via `pages.yml`

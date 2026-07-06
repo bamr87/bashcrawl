@@ -1,5 +1,10 @@
 name: GitHub Pages
 
+# Rebuild web/data from the game content, validate the bundle, and deploy
+# web/ to GitHub Pages. CI (ci.yml) already proves the committed bundle is
+# fresh on every PR; the rebuild here is belt-and-braces so the deployed
+# artifact always matches the content on main.
+
 on:
   push:
     branches: [main]
@@ -26,24 +31,23 @@ jobs:
   build:
     name: Build Static Web
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
 
       - name: Install export dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
+          python -m pip install --quiet --upgrade pip
+          pip install --quiet pyyaml
 
       - name: Build and validate static web app
-        run: |
-          python3 scripts/export_static_web.py
-          python3 scripts/validate_static_web.py
-          python3 scripts/validate_runtime_commands.py
+        run: make web-test
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
@@ -54,6 +58,7 @@ jobs:
     name: Deploy Static Web
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

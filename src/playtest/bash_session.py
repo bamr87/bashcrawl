@@ -250,7 +250,11 @@ class BashGameSession:
 
     def _list_room(self) -> List[str]:
         out = self._run_internal("ls -1a 2>/dev/null")
-        return [ln for ln in (l.strip() for l in out.splitlines()) if ln and ln not in (".", "..")]
+        return [
+            entry
+            for entry in (line.strip() for line in out.splitlines())
+            if entry and entry not in (".", "..")
+        ]
 
     # -- observation -------------------------------------------------------
     def rel_cwd(self) -> str:

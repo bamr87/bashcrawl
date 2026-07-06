@@ -52,6 +52,19 @@ drives the *real* bash game. Net: ~350 files and ~75k lines removed.
 
 ### Changed
 
+- **CI/CD redesigned** (5 workflows → 3): `ci.yml` is now the single PR/push gate
+  with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/
+  markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a
+  gap where 175 tests ran nowhere, plus `make validate-contracts` and junit
+  artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing
+  the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted —
+  its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth)
+  moved into `validate_content_contracts.py` so they run locally too.
+  `dependency-update.yml` deleted — redundant with Dependabot, and its
+  `pip freeze` rewrite would have destroyed the commented requirements files.
+  `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml`
+  now writes the scorer verdict to the run summary. `make validate-contracts`
+  additionally runs the content-index check.
 - Terminal play is launcher-free: `./setup.sh && cd entrance && cat scroll`.
 - Python deps reduced to `pyyaml` + `mcp` (dev: `pytest`, `pytest-timeout`,
   `jsonschema`, `ruff`).

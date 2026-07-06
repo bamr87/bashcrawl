@@ -10,13 +10,11 @@ Provides utilities to:
 from __future__ import annotations
 
 import json
-import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
 
 # Required fields for every JSONL log event
 REQUIRED_FIELDS = {"ts", "sid", "event"}

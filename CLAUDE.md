@@ -159,9 +159,14 @@ system, the web export, and the docs. When changing game content or registries:
 
 ## Integration Points
 
-- **CI** (`.github/workflows/`): `ci.yml` (shellcheck/yamllint/markdownlint/ruff),
-  `game-tests.yml` (scroll/shebang/unlock/contract validation), `pages.yml` (web build +
-  GitHub Pages deploy), `blank-slate-audit.yml` (weekly agent playtest), `dependency-update.yml`.
+- **CI** (`.github/workflows/`, three workflows): `ci.yml` is the PR/push gate — `lint`
+  (shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`), `test`
+  (`make validate-contracts` + the full pytest suite via `make test`), and `macos-smoke`
+  (real gameplay on stock macOS bash 3.2). `pages.yml` builds + deploys `web/` on main.
+  `blank-slate-audit.yml` is the weekly agent playtest. Every CI check mirrors a local
+  `make` target; content rules (shebangs/scrolls/unlocks) live in
+  `validate_content_contracts.py`, not inline in workflows. Dependabot owns all
+  dependency updates (`.github/dependabot.yml`).
 - **MCP server**: `playtest.mcp_server`, configured in `.mcp.json` / `.cursor/mcp.json` with
   `PYTHONPATH=src`; smoke-tested via `make test-mcp`.
 - **Logging**: JSONL session logs in `logs/sessions/` (playtest recorder + test log capture).

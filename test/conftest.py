@@ -29,9 +29,9 @@ REPO_ROOT = TEST_DIR.parent
 sys.path.insert(0, str(TEST_DIR))
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from fixtures import create_sandbox, destroy_sandbox, find_game_root, game_env
-from fixtures.log_capture import TestLogCapture
-from fixtures.walkthrough import Walkthrough, load_walkthrough
+from fixtures import create_sandbox, destroy_sandbox, find_game_root, game_env  # noqa: E402
+from fixtures.log_capture import TestLogCapture  # noqa: E402
+from fixtures.walkthrough import Walkthrough, load_walkthrough  # noqa: E402
 
 _RUN_ID: str = f"R{int(time.time())}"
 _RUN_SESSION_FILES: list[str] = []

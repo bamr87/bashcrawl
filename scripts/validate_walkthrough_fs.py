@@ -83,7 +83,9 @@ def validate(root: Path) -> dict:
         report["rooms"].append(
             {
                 "logical": room,
-                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "resolved": (
+                    str(resolved.relative_to(root)) if resolved and resolved.exists() else None
+                ),
                 "ok": ok,
             }
         )
@@ -119,7 +121,9 @@ def validate(root: Path) -> dict:
         report["encounters"].append(
             {
                 "logical": script_path,
-                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "resolved": (
+                    str(resolved.relative_to(root)) if resolved and resolved.exists() else None
+                ),
                 "ok": ok,
             }
         )

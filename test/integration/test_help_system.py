@@ -5,8 +5,8 @@ the command suggester, and location-specific help for all rooms.
 """
 
 import subprocess
+
 import pytest
-from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
@@ -134,7 +134,9 @@ class TestHelpEngineDetectLocation:
     RIFT_ROOMS = ["rift", "arena", "pit", "spire", "mezzanine"]
     MISC_ROOMS = ["scrap", "workshop"]
 
-    @pytest.mark.parametrize("room", MAIN_ROOMS + CHAPEL_ROOMS + VAULT_ROOMS + RIFT_ROOMS + MISC_ROOMS)
+    @pytest.mark.parametrize(
+        "room", MAIN_ROOMS + CHAPEL_ROOMS + VAULT_ROOMS + RIFT_ROOMS + MISC_ROOMS
+    )
     def test_detect_location_function(self, sandbox, room):
         """Verify detect_location() outputs the expected room name for each path."""
         # Build a script that sources bashcrawl_help.sh and calls detect_location()

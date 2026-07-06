@@ -21,7 +21,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 DATASETS_DIR = Path(__file__).resolve().parent.parent / "datasets"
 WALKTHROUGH_PATH = DATASETS_DIR / "walkthrough.json"
 

@@ -61,6 +61,7 @@ validate-contracts: ## Validate shared content contracts against the filesystem
 	@$(PYTHON) scripts/validate_content_contracts.py
 	@$(PYTHON) scripts/validate_walkthrough_fs.py
 	@$(PYTHON) scripts/validate_runtime_commands.py
+	@$(PYTHON) scripts/generate_content_index.py --check
 
 .PHONY: generate-contract-docs
 generate-contract-docs: ## Generate docs from shared contracts

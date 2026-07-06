@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import os
 import subprocess
-import pytest
 from pathlib import Path
 
-from fixtures.skips import IS_WINDOWS
+import pytest
 from fixtures.logical_paths import resolve_logical_path
+from fixtures.skips import IS_WINDOWS
 from fixtures.walkthrough import load_walkthrough
 
 pytestmark = pytest.mark.integration
@@ -108,7 +108,6 @@ class TestNativeScrollReadability:
         """
         base = resolve_logical_path(game_root, room_path)
         scroll_path = (base / "scroll") if base else (game_root / room_path / "scroll")
-        env = os.environ.copy()
         result = subprocess.run(
             ["cat", str(scroll_path)],
             capture_output=True, text=True, timeout=5,
