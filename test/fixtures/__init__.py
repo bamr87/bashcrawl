@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Generator
 
 # Directories/files to exclude from the sandbox copy (not needed for gameplay)
 _EXCLUDE = {

@@ -14,7 +14,9 @@ import yaml
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=None, help="write index JSON to this path")
-    parser.add_argument("--check", action="store_true", help="exit non-zero if mismatches are detected")
+    parser.add_argument(
+        "--check", action="store_true", help="exit non-zero if mismatches are detected"
+    )
     return parser.parse_args()
 
 
@@ -60,7 +62,8 @@ def main() -> int:
     args = parse_args()
     root = Path.cwd()
 
-    walkthrough = json.loads((root / "test" / "datasets" / "walkthrough.json").read_text(encoding="utf-8"))
+    walkthrough_path = root / "test" / "datasets" / "walkthrough.json"
+    walkthrough = json.loads(walkthrough_path.read_text(encoding="utf-8"))
     # Player-created rooms (e.g. the workshop conjured with 'mkdir workshop') are
     # gitignored and absent on a clean checkout, so they are not expected on disk.
     wt_rooms = {
@@ -73,7 +76,9 @@ def main() -> int:
     rooms_yaml = load_yaml_map(root / "src" / "help" / "data" / "rooms.yaml")
     encounters_yaml = load_yaml_map(root / "src" / "help" / "data" / "encounters.yaml")
     room_entries = rooms_yaml.get("rooms", {}) if isinstance(rooms_yaml, dict) else {}
-    encounter_entries = encounters_yaml.get("encounters", {}) if isinstance(encounters_yaml, dict) else {}
+    encounter_entries = (
+        encounters_yaml.get("encounters", {}) if isinstance(encounters_yaml, dict) else {}
+    )
     reg_rooms = {
         normalize_logical_path(spec.get("path", ""))
         for spec in room_entries.values()
@@ -86,7 +91,9 @@ def main() -> int:
         if isinstance(spec, dict) and spec.get("path")
     }
     reg_encounters = {
-        normalize_logical_path(f"{room_slug_to_path.get(spec.get('room', ''), 'entrance')}/{spec.get('script', '')}")
+        normalize_logical_path(
+            f"{room_slug_to_path.get(spec.get('room', ''), 'entrance')}/{spec.get('script', '')}"
+        )
         for spec in encounter_entries.values()
         if isinstance(spec, dict) and spec.get("script")
     }

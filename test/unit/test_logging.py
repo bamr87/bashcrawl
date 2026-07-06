@@ -5,8 +5,8 @@ TestLogCapture utility used throughout the test framework.
 """
 
 import json
+
 import pytest
-from pathlib import Path
 
 pytestmark = pytest.mark.unit
 
@@ -118,7 +118,7 @@ class TestLogCapture:
         capture.end()
         assert capture.file_path.exists()
         content = capture.file_path.read_text()
-        lines = [l for l in content.strip().split("\n") if l]
+        lines = [ln for ln in content.strip().split("\n") if ln]
         assert len(lines) == 3  # start + room + end
         for line in lines:
             data = json.loads(line)

@@ -9,9 +9,9 @@ environment setup matching the walkthrough state.
 
 import os
 import subprocess
-import pytest
 from pathlib import Path
 
+import pytest
 from fixtures.logical_paths import resolve_logical_path
 from fixtures.walkthrough import load_walkthrough
 

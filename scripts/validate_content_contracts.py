@@ -61,7 +61,9 @@ def _normalize_logical(path: str) -> str:
     return "/".join(out)
 
 
-def _validate_required_files(root: Path, errors: list[str], report: dict[str, Any]) -> dict[str, Any]:
+def _validate_required_files(
+    root: Path, errors: list[str], report: dict[str, Any]
+) -> dict[str, Any]:
     files = {
         "rooms_yaml": root / "src/help/data/rooms.yaml",
         "quests_yaml": root / "src/help/data/quests.yaml",
@@ -152,7 +154,9 @@ def _validate_rooms_and_walkthrough(
         resolved_rooms.append(
             {
                 "logical": logical_path,
-                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "resolved": (
+                    str(resolved.relative_to(root)) if resolved and resolved.exists() else None
+                ),
                 "exists": exists,
                 "requires_scroll": has_scroll,
                 "scroll_ok": scroll_ok,
@@ -223,8 +227,12 @@ def _validate_quests(
         ycmd = str((yq.get("completion") or {}).get("command") or "").strip()
         wcmd = str(wq.get("command") or "").strip()
         if ycmd and wcmd and ycmd != wcmd:
-            field_mismatches.append({"id": qid, "field": "command", "yaml": ycmd, "walkthrough": wcmd})
-            _add_warning(warnings, f"Quest {qid} command mismatch (yaml={ycmd}, walkthrough={wcmd})")
+            field_mismatches.append(
+                {"id": qid, "field": "command", "yaml": ycmd, "walkthrough": wcmd}
+            )
+            _add_warning(
+                warnings, f"Quest {qid} command mismatch (yaml={ycmd}, walkthrough={wcmd})"
+            )
 
         yxp = yq.get("xp")
         wxp = wq.get("xp")
@@ -293,12 +301,16 @@ def _validate_encounters(
         logical_norm = _normalize_logical(logical)
         if room_path and logical_norm not in expected_paths:
             missing_in_walkthrough.append(logical)
-            _add_warning(warnings, f"Encounter path not present in walkthrough.json: {logical_norm}")
+            _add_warning(
+                warnings, f"Encounter path not present in walkthrough.json: {logical_norm}"
+            )
         checked.append(
             {
                 "key": key,
                 "logical": logical,
-                "resolved": str(resolved.relative_to(root)) if resolved and resolved.exists() else None,
+                "resolved": (
+                    str(resolved.relative_to(root)) if resolved and resolved.exists() else None
+                ),
                 "on_disk": on_disk,
                 "in_walkthrough": logical_norm in expected_paths if room_path else False,
             }
@@ -367,7 +379,10 @@ def _validate_game_scripts(
         visible = hidden.lstrip(".")
         if not (entrance / hidden).is_dir() and not (entrance / visible).is_dir():
             missing_unlocks.append(hidden)
-            _add_error(errors, f"Unlock target missing on disk: entrance/{hidden} (or entrance/{visible})")
+            _add_error(
+                errors,
+                f"Unlock target missing on disk: entrance/{hidden} (or entrance/{visible})",
+            )
 
     thin_scrolls: list[str] = []
     for room in _MAIN_PATH_ROOMS:
@@ -376,7 +391,11 @@ def _validate_game_scripts(
             lines = len(scroll.read_text(encoding="utf-8", errors="replace").splitlines())
             if lines < 30:
                 thin_scrolls.append(f"{room}/scroll ({lines} lines)")
-                _add_warning(warnings, f"Main-path scroll unusually short: {room}/scroll has {lines} lines (expected 30+)")
+                _add_warning(
+                    warnings,
+                    f"Main-path scroll unusually short: {room}/scroll has {lines} lines"
+                    " (expected 30+)",
+                )
         else:
             _add_error(errors, f"Main-path scroll missing: {room}/scroll")
 
@@ -431,11 +450,18 @@ def _emit_text(result: dict[str, Any]) -> None:
     enc = result.get("encounters", {})
 
     print("=== Contract Validation Summary ===")
-    print(f"Rooms: yaml={rooms.get('yaml_count', 0)} walkthrough={rooms.get('walkthrough_count', 0)}")
-    print(f"Quests: yaml={quests.get('yaml_count', 0)} walkthrough={quests.get('walkthrough_count', 0)}")
+    print(
+        f"Rooms: yaml={rooms.get('yaml_count', 0)} "
+        f"walkthrough={rooms.get('walkthrough_count', 0)}"
+    )
+    print(
+        f"Quests: yaml={quests.get('yaml_count', 0)} "
+        f"walkthrough={quests.get('walkthrough_count', 0)}"
+    )
     print(
         "Encounters: "
-        f"yaml={enc.get('yaml_count', 0)} walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
+        f"yaml={enc.get('yaml_count', 0)} "
+        f"walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
     )
     print(f"Warnings: {result.get('warning_count', 0)}")
     print("")

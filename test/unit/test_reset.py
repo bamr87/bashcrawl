@@ -7,7 +7,6 @@ to clean up without actually mutating the real game.
 import subprocess
 
 import pytest
-
 from fixtures.skips import requires_bash
 
 pytestmark = pytest.mark.unit
