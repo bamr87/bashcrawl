@@ -1,27 +1,11 @@
-# Bashcrawl Testing Framework Dependencies
-# ==========================================
-# For the full project, use the root requirements.txt + requirements-dev.txt instead.
-
-# AI Agent (LLM provider)
-anthropic>=0.40.0
-
-# Environment variables from .env files
-python-dotenv>=1.0
-
-# Test runner
-pytest>=8.0
-pytest-cov>=5.0
-pytest-timeout>=2.3
-pytest-asyncio>=0.23.0
-
-# Schema validation
-jsonschema>=4.20
-
-# Terminal-illness dependencies (also needed for testing)
-textual>=0.65.0
-rich>=13.7.1
-prompt_toolkit>=3.0.47
-pyyaml>=6.0
-
-# MCP server tests (ti.mcp_server)
-mcp>=1.0.0
+anthropic==0.116.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+prompt_toolkit==3.0.52
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0
+pytest-timeout==2.4.0
+PyYAML==6.0.3
+rich==15.0.0
+textual==8.2.8
