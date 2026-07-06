@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
-  <rect width="400" height="300" fill="#1a1a2e" rx="8"/>
-  <rect x="140" y="90" width="120" height="90" rx="6" fill="none" stroke="#444" stroke-width="2"/>
-  <line x1="140" y1="90" x2="260" y2="180" stroke="#444" stroke-width="2"/>
-  <line x1="260" y1="90" x2="140" y2="180" stroke="#444" stroke-width="2"/>
-  <text x="200" y="210" text-anchor="middle" fill="#666" font-family="monospace" font-size="13">no preview available</text>
-</svg>

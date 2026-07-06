@@ -2,10 +2,10 @@
   "mcpServers": {
     "bashcrawl": {
       "command": "python3",
-      "args": ["-m", "ti.mcp_server"],
+      "args": ["-m", "playtest.mcp_server"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/src/terminal-illness"
+        "PYTHONPATH": "${workspaceFolder}/src"
       }
     }
   }

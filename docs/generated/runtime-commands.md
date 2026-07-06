@@ -36,3 +36,8 @@ Generated from `src/help/data/runtime_commands.yaml`.
 | exit | yes | no | yes | no |
 | volume | yes | no | no | no |
 | mute | yes | no | no | no |
+| cut | no | no | no | yes |
+| tr | no | no | no | yes |
+| sed | no | no | no | yes |
+| nl | no | no | no | yes |
+| rev | no | no | no | yes |

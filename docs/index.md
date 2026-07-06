@@ -7,11 +7,10 @@ are scrolls, and executables are encounters.
 
 - [Getting Started](getting-started.md) — Installation, setup, and your first game
 - [Gameplay Guide](gameplay.md) — Mechanics, rooms, inventory, combat, and progression
-- [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, scroll standards, and AI agent tests
+- [Complete Walkthrough](walkthrough.md) — Every path, puzzle, and command in the dungeon
+- [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, and scroll standards
 - [Contributing](contributing.md) — How to add rooms, write scrolls, and submit changes
-- [Observatory Viewer](viewer.md) — Web UI for browsing session logs, screenshots, and analytics
 - [Improvement Plan](improvement-plan.md) — Known issues and planned enhancements
-- [Logging Framework](logging-framework-plan.md) — Architecture for gameplay analytics
 
 ## Quick Start
 
@@ -21,3 +20,6 @@ cd bashcrawl
 bash setup.sh
 cd entrance && cat scroll
 ```
+
+Prefer the browser? Run `make web-preview` (or open `web/index.html`) to play the
+static web trainer.

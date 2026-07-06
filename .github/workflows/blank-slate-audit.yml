@@ -1,12 +1,13 @@
 name: Blank-Slate Audit
 
 # Claude Code (authenticated with a subscription OAuth token) plays Bashcrawl
-# from scratch through the MCP server, using ONLY on-screen content, and we score
-# how far a no-knowledge player gets. Fails if the game stops being self-teaching.
+# from scratch through the playtest MCP server (python3 -m playtest.mcp_server),
+# using ONLY on-screen content, and we score how far a no-knowledge player gets.
+# Fails if the game stops being self-teaching.
 #
 # Prerequisite (one-time, by a maintainer): run `claude setup-token` locally and
 # add the result as the repository secret CLAUDE_CODE_OAUTH_TOKEN. Without it the
-# job is a graceful no-op (the script skips).
+# job is a graceful no-op (scripts/playtest.sh skips).
 
 on:
   schedule:
@@ -22,10 +23,14 @@ on:
         description: 'Model id for the playing agent'
         required: false
         default: 'claude-sonnet-4-6'
-      gate_quest:
-        description: 'Median furthest quest the agent must reach (gate)'
+      gate_rooms:
+        description: 'Median rooms visited the agent must reach (gate)'
         required: false
         default: '3'
+      gate_scrolls:
+        description: 'Median scrolls read the agent must reach (gate)'
+        required: false
+        default: '1'
 
 permissions:
   contents: read
@@ -49,12 +54,12 @@ jobs:
           cache: 'pip'
           cache-dependency-path: |
             requirements.txt
-            test/requirements.txt
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r test/requirements.txt
+          # The MCP server needs the 'mcp' package + pyyaml; both are in requirements.txt.
+          pip install -r requirements.txt
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -67,8 +72,10 @@ jobs:
       - name: Run blank-slate playtest + gate
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          PYTHONPATH: src
           BLANK_SLATE_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-4-6' }}
-          BLANK_SLATE_GATE_QUEST: ${{ github.event.inputs.gate_quest || '3' }}
+          BLANK_SLATE_GATE_ROOMS: ${{ github.event.inputs.gate_rooms || '3' }}
+          BLANK_SLATE_GATE_SCROLLS: ${{ github.event.inputs.gate_scrolls || '1' }}
         run: bash scripts/playtest.sh "${{ github.event.inputs.seeds || '3' }}"
 
       - name: Upload playtest report

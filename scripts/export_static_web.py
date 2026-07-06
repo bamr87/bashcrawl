@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -187,6 +188,114 @@ def build_commands() -> dict[str, Any]:
     }
 
 
+# Cards must be literally typable in the flash-game input. Skip key chords,
+# history expansions, and arrow glyphs, and anything outside plain shell text.
+# Uppercase stays allowed: `ls -F` and `echo $HP` are perfectly typable answers.
+_UNTYPABLE_TOKENS = ("Ctrl", "Tab", "Alt", "!!", "!$", "↑", "↓")
+_TYPABLE_RE = re.compile(r"""^[A-Za-z0-9 ./|>*"'=$-]+$""")
+# `cmd -ab` (single dash, exactly two flag letters) — flag order is arbitrary.
+_TWO_FLAG_RE = re.compile(r"^(.+) -([A-Za-z0-9])([A-Za-z0-9])$")
+
+
+def _card_answers(command: str) -> list[str]:
+    """Accepted answers for a card: the command, plus swapped two-flag order."""
+    answers = [command]
+    match = _TWO_FLAG_RE.match(command)
+    if match:
+        swapped = f"{match.group(1)} -{match.group(3)}{match.group(2)}"
+        if swapped != command:
+            answers.append(swapped)
+    return answers
+
+
+def _flash_decks_from_commands(reference: dict[str, Any]) -> list[dict[str, Any]]:
+    """Generate Command Flash decks from commands.yaml categories.
+
+    Only commands typable verbatim become cards (entries with <placeholders>,
+    key chords like Ctrl+R/Tab, or history expansions are reference-only).
+    Duplicate descriptions within a deck are ambiguous questions — the first
+    wins. Small categories are skipped — a deck needs enough cards to be a
+    meaningful drill.
+    """
+    decks: list[dict[str, Any]] = []
+    for key, category in (reference.get("categories") or {}).items():
+        cards = []
+        seen_descriptions: set[str] = set()
+        for spec in category.get("commands", []):
+            command = str(spec.get("command", "")).strip()
+            description = str(spec.get("description", "")).strip()
+            if not command or not description or "<" in command:
+                continue
+            if any(token in command for token in _UNTYPABLE_TOKENS):
+                continue
+            if not _TYPABLE_RE.match(command):
+                continue
+            if description in seen_descriptions:
+                continue
+            seen_descriptions.add(description)
+            cards.append({"q": description, "a": _card_answers(command), "why": ""})
+        if len(cards) >= 4:
+            decks.append(
+                {
+                    "id": f"ref-{key}",
+                    "title": category.get("title", key),
+                    "concept": key,
+                    "cards": cards,
+                    "xp": 25,
+                    "generated": True,
+                }
+            )
+    return decks
+
+
+def _flash_deck_from_tutorials(tutorials: dict[str, Any]) -> dict[str, Any] | None:
+    """One deck quizzing the core lesson commands from tutorials.yaml."""
+    cards = []
+    for spec in (tutorials.get("lessons") or {}).values():
+        if not isinstance(spec, dict):
+            continue
+        command = str(spec.get("command", "")).strip()
+        title = str(spec.get("title", "")).strip()
+        if not command or not title or "<" in command:
+            continue
+        cards.append(
+            {
+                "q": f"{title} — which command?",
+                "a": [command],
+                "why": (str(spec.get("explanation", "")).strip().splitlines() or [""])[0],
+            }
+        )
+    if len(cards) < 3:
+        return None
+    return {
+        "id": "lessons",
+        "title": "Lessons of the Dungeon",
+        "concept": "lessons",
+        "cards": cards,
+        "xp": 25,
+        "generated": True,
+    }
+
+
+def build_arcade() -> dict[str, Any]:
+    """Merge the arcade.yaml registry with decks generated from other registries."""
+    arcade = _load_yaml(ROOT / "src/help/data/arcade.yaml")
+    reference = _load_yaml(ROOT / "src/help/data/commands.yaml")
+    tutorials = _load_yaml(ROOT / "src/help/data/tutorials.yaml")
+
+    decks = list(arcade.get("flash_decks") or [])
+    lesson_deck = _flash_deck_from_tutorials(tutorials)
+    if lesson_deck:
+        decks.append(lesson_deck)
+    decks.extend(_flash_decks_from_commands(reference))
+
+    return {
+        "pipe_puzzles": arcade.get("pipe_puzzles") or [],
+        "hunt_scenarios": arcade.get("hunt_scenarios") or [],
+        "flash_decks": decks,
+    }
+
+
 def build_docs() -> dict[str, Any]:
     rooms = _load_yaml(ROOT / "src/help/data/rooms.yaml").get("rooms", {})
     commands = _load_yaml(ROOT / "src/help/data/commands.yaml")
@@ -235,6 +344,7 @@ def main() -> int:
     write_json(out / "quests.json", build_quests())
     write_json(out / "commands.json", build_commands())
     write_json(out / "docs.json", build_docs())
+    write_json(out / "arcade.json", build_arcade())
     try:
         shown: Path = out.relative_to(ROOT)
     except ValueError:

@@ -5,9 +5,7 @@
 
 # Test runner
 pytest>=8.0
-pytest-cov>=5.0
 pytest-timeout>=2.3
-pytest-asyncio>=0.23.0
 
 # Schema validation (used in tests)
 jsonschema>=4.20

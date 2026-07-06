@@ -2,8 +2,7 @@
 # Bashcrawl Quest Definitions — src/help/data/quests.yaml
 #
 # Single source of truth for all quests. Consumed by:
-#   - Python terminal-illness wrapper (src/terminal-illness/ti/quests.py)
-#   - Bash quest engine (lib/quests.sh via lib/room_loader.sh)
+#   - Static web export (scripts/export_static_web.py)
 #   - Bash help system for quest-aware suggestions
 #
 # The `completion` block provides machine-readable criteria that both the

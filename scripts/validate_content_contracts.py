@@ -6,7 +6,7 @@ Checks:
 - room/quest/encounter references line up across YAML and walkthrough data
 - walkthrough paths resolve on disk (supports hidden-room logical paths)
 - required room scrolls and encounter scripts exist
-- save-state schema has required keys expected by runtimes
+- walkthrough.json stays in sync with the on-disk room/scroll/encounter layout
 """
 
 from __future__ import annotations
@@ -67,7 +67,6 @@ def _validate_required_files(root: Path, errors: list[str], report: dict[str, An
         "quests_yaml": root / "src/help/data/quests.yaml",
         "encounters_yaml": root / "src/help/data/encounters.yaml",
         "walkthrough_json": root / "test/datasets/walkthrough.json",
-        "save_schema": root / "docs/schemas/save-state.v1.json",
     }
     out: dict[str, Any] = {}
     for key, path in files.items():
@@ -77,40 +76,6 @@ def _validate_required_files(root: Path, errors: list[str], report: dict[str, An
             _add_error(errors, f"Missing required file: {path.relative_to(root)}")
     report["required_files"] = out
     return out
-
-
-def _validate_save_schema(root: Path, errors: list[str], report: dict[str, Any]) -> None:
-    schema_path = root / "docs/schemas/save-state.v1.json"
-    if not schema_path.is_file():
-        report["save_schema"] = {"ok": False, "missing": True}
-        return
-
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    required = set(schema.get("required", []))
-    expected_required = {
-        "current_quest_id",
-        "completed_quest_ids",
-        "learned_commands",
-        "current_location",
-        "inventory",
-        "hp",
-        "experience_points",
-        "game_level",
-        "game_started",
-        "session_count",
-        "last_session",
-        "scrolls_read",
-        "mode",
-        "player_name",
-    }
-    missing = sorted(expected_required - required)
-    if missing:
-        _add_error(errors, f"Save schema missing required keys: {', '.join(missing)}")
-    report["save_schema"] = {
-        "ok": not missing,
-        "required_count": len(required),
-        "missing_expected_required": missing,
-    }
 
 
 def _validate_rooms_and_walkthrough(
@@ -369,7 +334,6 @@ def validate(root: Path) -> dict[str, Any]:
     encounters_data = _load_yaml(root / "src/help/data/encounters.yaml")
     walkthrough = json.loads((root / "test/datasets/walkthrough.json").read_text(encoding="utf-8"))
 
-    _validate_save_schema(root, errors, report)
     _validate_rooms_and_walkthrough(root, rooms_data, walkthrough, errors, warnings, report)
     _validate_quests(quests_data, walkthrough, errors, warnings, report)
     _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
@@ -388,7 +352,6 @@ def _emit_text(result: dict[str, Any]) -> None:
     rooms = result.get("rooms", {})
     quests = result.get("quests", {})
     enc = result.get("encounters", {})
-    save_schema = result.get("save_schema", {})
 
     print("=== Contract Validation Summary ===")
     print(f"Rooms: yaml={rooms.get('yaml_count', 0)} walkthrough={rooms.get('walkthrough_count', 0)}")
@@ -397,7 +360,6 @@ def _emit_text(result: dict[str, Any]) -> None:
         "Encounters: "
         f"yaml={enc.get('yaml_count', 0)} walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
     )
-    print(f"Save schema required keys: {save_schema.get('required_count', 0)}")
     print(f"Warnings: {result.get('warning_count', 0)}")
     print("")
 

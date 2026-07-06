@@ -5,7 +5,7 @@ applyTo: "**/entrance/**,**/src/help/data/**"
 
 # Bashcrawl Room Creation Instructions
 
-This guide explains how to add new rooms, encounters, items, and quests to Bashcrawl. The game uses a **data-driven registry** — all game content is defined in YAML files under `src/help/data/`. Both the Classic (Bash emulator) and TUI (Python Textual) modes read from these same files, so a single set of changes works everywhere.
+This guide explains how to add new rooms, encounters, items, and quests to Bashcrawl. The game uses a **data-driven registry** — all game content is defined in YAML files under `src/help/data/`. The help system, the contract validators, and the static web trainer (`scripts/export_static_web.py` → `web/`) all read from these same files, so a single set of changes works everywhere.
 
 ## Architecture Overview
 
@@ -27,14 +27,14 @@ entrance/               ← Filesystem tree that players navigate
 └── ...
 
 lib/
-├── room_loader.sh      ← Bash loader: parses YAML → shell variables
-├── ui.sh               ← Prompt, map, inventory display (reads registry)
-├── emulator.sh         ← Command dispatch (dynamic ./* execution)
-└── quests.sh           ← Quest evaluator (generic, reads registry)
+├── yaml_reader.sh      ← Bash YAML parsing helpers
+├── colors.sh           ← Shared color constants
+├── log.sh              ← JSONL session logging
+└── reset.sh            ← Game-state reset (restores hidden dirs, permissions)
 
-src/terminal-illness/ti/
-├── help_data.py        ← Python loader: load_rooms/encounters/items/quests
-└── quests.py           ← Python quest evaluator (reads quests.yaml)
+scripts/
+├── export_static_web.py           ← Builds the static web trainer (web/) from the registries
+└── validate_content_contracts.py  ← Checks registries against the real filesystem
 ```
 
 ## Adding a New Room
@@ -117,15 +117,14 @@ Create the scroll file following the conventions in `scrolls.instructions.md`. M
 
 ### Step 5: Verify
 
-Run the game and navigate to the new room:
+Navigate to the new room in a real shell:
 
 ```bash
-bash main.sh
 cd entrance/my_new_room
 cat scroll
 ```
 
-The prompt, map highlighting, context hints, and help system will all pick up the new room automatically from the registry.
+The help system and the static web trainer (`make web-build`) pick up the new room automatically from the registry. Run `make validate-contracts` to confirm the registry matches the filesystem.
 
 ## Adding a New Encounter (Executable Script)
 
@@ -213,7 +212,7 @@ items:
 
 ## Adding a New Quest
 
-Quests are tracked objectives with machine-readable completion criteria. Both the Bash and Python engines evaluate them generically.
+Quests are tracked objectives with machine-readable completion criteria. The static web trainer evaluates them generically from the registry.
 
 ### Add an Entry to quests.yaml
 
@@ -241,7 +240,7 @@ quests:
 
 ### Completion Criteria Reference
 
-The `completion` block is evaluated generically by both engines. All non-null fields must match:
+The `completion` block is evaluated generically from the registry. All non-null fields must match:
 
 | Field | Evaluation | Example |
 |-------|-----------|---------|
@@ -299,7 +298,7 @@ This follows the same pattern used by `entrance/cellar/treasure` to reveal `.cha
 
 ## Room Event Hooks
 
-The `on_enter` and `on_exit` fields in `rooms.yaml` are displayed automatically when the player navigates with `cd`:
+The `on_enter` and `on_exit` fields in `rooms.yaml` provide atmospheric text shown when the player enters or leaves a room:
 
 ```yaml
   graveyard:
@@ -307,7 +306,7 @@ The `on_enter` and `on_exit` fields in `rooms.yaml` are displayed automatically 
     on_exit: "The iron gate creaks shut behind you."
 ```
 
-These are fired by `safe_cd()` in `lib/emulator.sh`. Set to `null` for rooms with no atmospheric text.
+These are exported into the static web trainer's data (`make web-build`) and displayed by its runtime. Set to `null` for rooms with no atmospheric text.
 
 ## Complete Example: Adding a Room End-to-End
 
@@ -412,13 +411,12 @@ Update armoury's children:
 ### 7. Verify
 
 ```bash
-bash main.sh
 cd entrance/cellar/armoury/forge
 cat scroll
 ./anvil
 ```
 
-The prompt shows `🔥 forge [smithy] ⚔️`, the context hint appears after `ls`, the encounter icon shows in area context, and the inventory displays the new item with its registered icon.
+Then run `make validate-contracts` to confirm the registries match the filesystem, and `make web-build` to regenerate the static web trainer — it picks up the room title, context hint, encounter icon, and item icon from the registries.
 
 ## Validation Checklist
 
@@ -455,9 +453,9 @@ QUESTS.YAML (if adding a quest):
 ✅ completion block has valid command and criteria
 ✅ Previous quest's next_quest points to new quest id
 
-CROSS-MODE COMPATIBILITY:
-✅ Game works in Classic mode: bash main.sh
-✅ Game works in TUI mode: bash main.sh --tui (if python3 + textual installed)
+CROSS-SURFACE COMPATIBILITY:
+✅ Game plays natively: cd entrance && cat scroll, then navigate to the new room
+✅ Registries match the filesystem: make validate-contracts
+✅ Static web bundle builds and validates: make web-test (preview with make web-preview)
 ✅ YAML files parse without errors: python3 -c "import yaml; yaml.safe_load(open('file'))"
-✅ Bash scripts parse without errors: bash -n lib/ui.sh lib/quests.sh lib/emulator.sh
 ```

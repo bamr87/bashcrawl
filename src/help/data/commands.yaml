@@ -3,7 +3,7 @@
 #
 # Shared command reference data. Consumed by:
 #   - Bash help scripts (src/help/bashcrawl_help.sh, quick_ref.sh)
-#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+#   - Static web export (scripts/export_static_web.py)
 # ============================================================================
 
 categories:

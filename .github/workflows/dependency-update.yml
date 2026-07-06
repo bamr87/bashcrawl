@@ -28,32 +28,30 @@ jobs:
         pip install --upgrade pip
 
         # Install current deps from both requirement files
-        pip install -r src/terminal-illness/requirements.txt
-        pip install -r test/requirements.txt
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
 
         # Attempt to upgrade all installed packages
         pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 \
           | xargs -n1 pip install -U || true
 
-        # Regenerate pinned requirements for terminal-illness
-        pip freeze | grep -iE '^(textual|rich|prompt.toolkit|pyyaml|anthropic)' \
-          > src/terminal-illness/requirements.txt.new
+        # Regenerate pinned runtime requirements (mcp server + web export)
+        pip freeze | grep -iE '^(mcp|pyyaml)' > requirements.txt.new
 
-        if ! diff -q src/terminal-illness/requirements.txt \
-                     src/terminal-illness/requirements.txt.new >/dev/null 2>&1; then
-          mv src/terminal-illness/requirements.txt.new src/terminal-illness/requirements.txt
+        if ! diff -q requirements.txt requirements.txt.new >/dev/null 2>&1; then
+          mv requirements.txt.new requirements.txt
         else
-          rm src/terminal-illness/requirements.txt.new
+          rm requirements.txt.new
         fi
 
-        # Regenerate pinned requirements for test
-        pip freeze | grep -iE '^(anthropic|pytest|jsonschema|textual|rich|prompt.toolkit|pyyaml)' \
-          > test/requirements.txt.new
+        # Regenerate pinned dev requirements (tests + linting)
+        pip freeze | grep -iE '^(pytest|jsonschema|ruff|yamllint)' \
+          > requirements-dev.txt.new
 
-        if ! diff -q test/requirements.txt test/requirements.txt.new >/dev/null 2>&1; then
-          mv test/requirements.txt.new test/requirements.txt
+        if ! diff -q requirements-dev.txt requirements-dev.txt.new >/dev/null 2>&1; then
+          mv requirements-dev.txt.new requirements-dev.txt
         else
-          rm test/requirements.txt.new
+          rm requirements-dev.txt.new
         fi
 
     - name: Create Pull Request
@@ -66,8 +64,8 @@ jobs:
           ## Dependency Updates
 
           Updated Python dependencies in:
-          - `src/terminal-illness/requirements.txt`
-          - `test/requirements.txt`
+          - `requirements.txt`
+          - `requirements-dev.txt`
 
           Please review the changes carefully, run tests to ensure
           compatibility, and check for any breaking changes.

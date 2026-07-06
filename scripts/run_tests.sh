@@ -5,7 +5,7 @@ SUITE="${1:-default}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_DIR="$ROOT_DIR/test"
 
-export PYTHONPATH="${PYTHONPATH:-$ROOT_DIR/src/terminal-illness:$ROOT_DIR/src:$ROOT_DIR/test}"
+export PYTHONPATH="${PYTHONPATH:-$ROOT_DIR/src:$ROOT_DIR/test}"
 export BASHCRAWL_ROOT="${BASHCRAWL_ROOT:-$ROOT_DIR}"
 export PYTHONUTF8="${PYTHONUTF8:-1}"
 export PYTHONIOENCODING="${PYTHONIOENCODING:-utf-8}"
@@ -32,12 +32,6 @@ case "$SUITE" in
         run_pytest "reports/unit-results.xml" unit/ -v --tb=short
         run_pytest "reports/integration-results.xml" integration/ -v --tb=short
         ;;
-    ai)
-        run_pytest "reports/ai-results.xml" ai/ -v --tb=long -m ai --timeout=300
-        ;;
-    demo)
-        run_pytest "reports/demo-results.xml" demo/ -v --tb=short -m demo --timeout=120
-        ;;
     all)
         (
             cd "$TEST_DIR"
@@ -46,7 +40,7 @@ case "$SUITE" in
         ;;
     *)
         echo "Unknown test suite: $SUITE" >&2
-        echo "Usage: scripts/run_tests.sh [default|unit|integration|ai|demo|all]" >&2
+        echo "Usage: scripts/run_tests.sh [default|unit|integration|all]" >&2
         exit 2
         ;;
 esac

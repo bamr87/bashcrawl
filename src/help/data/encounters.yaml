@@ -2,9 +2,9 @@
 # Bashcrawl Encounter Registry — src/help/data/encounters.yaml
 #
 # Single source of truth for all executable game scripts. Consumed by:
-#   - Bash UI layer (lib/ui.sh via lib/room_loader.sh)
-#   - Bash emulator (lib/emulator.sh for script dispatch)
-#   - Python terminal-illness wrapper (ti/help_data.py)
+#   - Static web export (scripts/export_static_web.py)
+#   - Web bash emulator (web/assets/js/runtime.js)
+#   - Static web export (scripts/export_static_web.py)
 #
 # Encounter types: loot, combat, puzzle, spell, npc, trap, merchant, riddle
 # Adding a new encounter: add an entry here and place the script in the room.

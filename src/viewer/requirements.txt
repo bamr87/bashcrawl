@@ -1,5 +1,0 @@
-# Observatory viewer component dependencies
-# For the full project, use the root requirements.txt instead.
-flask>=3.0
-markdown>=3.5
-watchdog>=4.0

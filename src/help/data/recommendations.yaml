@@ -3,7 +3,7 @@
 #
 # Pattern-based help recommendations. Consumed by:
 #   - Bash help scripts (src/help/ai_engine.sh)
-#   - Python terminal-illness wrapper (src/terminal-illness/ti/help_data.py)
+#   - Static web export (scripts/export_static_web.py)
 # ============================================================================
 
 # Player pattern classifications and their corresponding recommendations

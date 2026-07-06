@@ -4,6 +4,64 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.1.0] - 2026-07-06 — The Great Reduction + Web Flagship
+
+The repo is reduced to **two player surfaces plus one harness**: the pure-bash
+terminal game (played with real `cd`/`cat` — no launcher) and a static browser
+trainer generated from the same content, plus a lean MCP playtest harness that
+drives the *real* bash game. Net: ~350 files and ~75k lines removed.
+
+### Added
+
+- **Web mode router** (`web/assets/js/shell.js`): top-nav **Story · Arcade ·
+  Reference**, first-visit landing overlay, hash routing (`#/story` …),
+  Alt+1/2/3 shortcuts, XP bridge, toasts.
+- **Practice Arcade** (`web/assets/js/arcade.js`): mini-game framework over the
+  shared bash emulator — each game is *(seed world + goal predicate + scoring)*
+  on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real
+  dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle**
+  (transform INPUT into TARGET), **Command Flash** (drill decks generated from
+  `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed
+  story XP.
+- **Reference mode + concept spotlight** (`web/assets/js/reference.js`):
+  searchable cheatsheet library from the command registries, a story-sidebar
+  card showing what the current room teaches, and inline syntax hints while
+  typing.
+- **Bash-emulator kernel upgrades** (`web/assets/js/runtime.js`): output
+  redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file +
+  `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new
+  `cut`, `tr`, `sed`, `nl`, `rev` commands.
+- **Arcade content registry** (`src/help/data/arcade.yaml`) exported to
+  `web/data/arcade.json` by `export_static_web.py` (validated by
+  `validate_static_web.py`).
+- **Lean playtest harness** (`src/playtest/`): FastMCP server
+  (`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash
+  session in a sandbox copy of the dungeon; JSONL recorder; scorer with
+  rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
+
+### Removed
+
+- Python Textual TUI + old MCP/agent harness (`src/terminal-illness/`),
+  Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh`
+  launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only
+  `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …).
+  `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
+- TUI/agent/viewer test suites (`test/ai/`, `test/demo/`, `test/analysis/`,
+  and the `ti.*` unit/integration tests) and their CI workflows
+  (`test-framework`, `code-quality`, `release`).
+
+### Changed
+
+- Terminal play is launcher-free: `./setup.sh && cd entrance && cat scroll`.
+- Python deps reduced to `pyyaml` + `mcp` (dev: `pytest`, `pytest-timeout`,
+  `jsonschema`, `ruff`).
+- `validate_runtime_commands.py` validates the single remaining runtime (the
+  web emulator) against `runtime_commands.yaml`.
+- `scripts/playtest.sh` targets `playtest.mcp_server` and gates on median
+  rooms-visited / scrolls-read (`BLANK_SLATE_GATE_ROOMS` / `_SCROLLS`).
+- Makefile, CI workflows, `.mcp.json`, `.vscode/`, docs, README, and CLAUDE.md
+  rewritten for the two-surface architecture.
+
 ## [Unreleased] - 2026-03-04
 
 ### Added
