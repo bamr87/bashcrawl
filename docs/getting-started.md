@@ -55,8 +55,7 @@ A static, dependency-free web app with the same rooms, scrolls, and encounters:
 make web-preview      # serves web/ at http://127.0.0.1:8000
 ```
 
-Or simply open `web/index.html` in a browser. Rebuild the bundle from the game
-content with `make web-build`.
+Or simply open `web/index.html` in a browser. Rebuild the bundle from the game content with `make web-build`.
 
 ## Help System
 
@@ -97,5 +96,4 @@ PYTHONPATH=src python3 -m playtest.scorer        # score a recorded session
 
 ## Next Steps
 
-Read the [Gameplay Guide](gameplay.md) for mechanics, or just `cat scroll` and follow
-the instructions. The game teaches you as you play.
+Read the [Gameplay Guide](gameplay.md) for mechanics, or just `cat scroll` and follow the instructions. The game teaches you as you play.

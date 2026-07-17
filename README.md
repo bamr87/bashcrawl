@@ -3,11 +3,7 @@
 > **v3.1** — one game, two doors: the classic filesystem dungeon in your terminal,
 > and a free browser trainer with mini-games and cheatsheets built from the same content.
 
-Bashcrawl teaches real POSIX terminal skills through a fantasy dungeon crawl.
-The core idea: **the filesystem is the game.** Directories are rooms, files named
-`scroll` are the story and the lessons, and executable scripts are the encounters.
-Every command you learn — `pwd`, `ls`, `cd`, `cat`, `grep`, `find`, pipes, variables,
-permissions — is the real thing, usable on any Linux/macOS machine forever.
+Bashcrawl teaches real POSIX terminal skills through a fantasy dungeon crawl. The core idea: **the filesystem is the game.** Directories are rooms, files named `scroll` are the story and the lessons, and executable scripts are the encounters. Every command you learn — `pwd`, `ls`, `cd`, `cat`, `grep`, `find`, pipes, variables, permissions — is the real thing, usable on any Linux/macOS machine forever.
 
 ## 🎮 Play it
 
@@ -18,8 +14,7 @@ Open the **[web app](https://bamr87.github.io/bashcrawl/)** — no install, free
 Three doors:
 
 - **⚔ Story** — descend the dungeon. Quests guide you from `pwd` to pipes; hidden
-  rooms reward `grep`, `find`, environment variables, and symbolic links. XP,
-  achievements, a fog-of-war map, and a pixel hero cheer you on.
+rooms reward `grep`, `find`, environment variables, and symbolic links. XP, achievements, a fog-of-war map, and a pixel hero cheer you on.
 - **🕹 Practice Arcade** — timed mini-games on the same bash emulator:
   - **Path Navigator** — race through the real dungeon to a target room (`cd`/`ls`/`tree`).
   - **grep/find Hunt** — one file carries the sigil; track it down (`grep -r`, `find -name`, dotfiles).
@@ -28,9 +23,7 @@ Three doors:
 
   Scores persist, bests are tracked, and every win feeds XP back to your story hero.
 - **📖 Reference** — searchable cheatsheets for every command the dungeon teaches,
-  plus a glossary and a map of *where* each concept is taught. While you play the
-  story, a **concept spotlight** shows what the current room teaches, and an
-  inline hint reminds you of syntax as you type.
+plus a glossary and a map of *where* each concept is taught. While you play the story, a **concept spotlight** shows what the current room teaches, and an inline hint reminds you of syntax as you type.
 
 ### Old school, in a real terminal
 
@@ -42,9 +35,7 @@ cd entrance
 cat scroll        # ...and the dungeon takes it from there
 ```
 
-That's the whole game loop: read scrolls, move with `cd`, look with `ls`, run
-encounters with `./treasure`. No launcher, no dependencies, no framework —
-just bash and your curiosity. Stuck? `bash help.sh` gives context-aware help.
+That's the whole game loop: read scrolls, move with `cd`, look with `ls`, run encounters with `./treasure`. No launcher, no dependencies, no framework — just bash and your curiosity. Stuck? `bash help.sh` gives context-aware help.
 
 Reset your dungeon after playing: `bash lib/reset.sh` (preview with `--dry`).
 
@@ -72,8 +63,7 @@ make lint               # shellcheck + yamllint + markdownlint (+ ruff)
 make playtest           # Claude plays the game blind via MCP, then scores it
 ```
 
-Python (3.10+) is only needed for the web export and the playtest harness:
-`pip install -r requirements.txt` (just `pyyaml` + `mcp`).
+Python (3.10+) is only needed for the web export and the playtest harness: `pip install -r requirements.txt` (just `pyyaml` + `mcp`).
 
 ### Adding content
 
@@ -86,8 +76,7 @@ Python (3.10+) is only needed for the web export and the playtest harness:
 
 ### Playtesting with an AI agent
 
-The MCP server lets an agent play exactly like a human at a terminal — a
-persistent bash session in a throwaway copy of the dungeon:
+The MCP server lets an agent play exactly like a human at a terminal — a persistent bash session in a throwaway copy of the dungeon:
 
 ```bash
 PYTHONPATH=src python3 -m playtest.mcp_server   # tools: bashcrawl_start/observe/command/report_gap
@@ -96,9 +85,6 @@ bash scripts/playtest.sh                        # full loop: N blind runs + gap 
 
 ## 🙏 Lineage
 
-Bashcrawl was created by [Seth Kenlon](https://gitlab.com/slackermedia/bashcrawl)
-as a pure-filesystem game for teaching GNU/Linux basics. This fork keeps that
-soul — the terminal game is still just directories, scrolls, and bash — and adds
-the browser trainer generated from the same content.
+Bashcrawl was created by [Seth Kenlon](https://gitlab.com/slackermedia/bashcrawl) as a pure-filesystem game for teaching GNU/Linux basics. This fork keeps that soul — the terminal game is still just directories, scrolls, and bash — and adds the browser trainer generated from the same content.
 
 Contributions welcome — read [docs/contributing.md](docs/contributing.md) first.

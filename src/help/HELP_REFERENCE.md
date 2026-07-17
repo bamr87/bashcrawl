@@ -42,8 +42,7 @@ bash help.sh merlin "how do I find hidden files?"
 bash help.sh ask "what does ls -F do?"
 ```
 
-Merlin is a pure-bash hint engine driven by the YAML registries in
-`src/help/data/` — no API key, no Python, no network access required.
+Merlin is a pure-bash hint engine driven by the YAML registries in `src/help/data/` — no API key, no Python, no network access required.
 
 ## Features
 

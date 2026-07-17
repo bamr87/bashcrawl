@@ -2,9 +2,7 @@
 
 ## 🌟 First Steps into the Catacombs
 
-Congratulations, brave adventurer! You've successfully entered the mystical catacombs of Bashcrawl.
-This entrance chamber is where you'll learn the fundamental magic spells (terminal commands) needed to
-survive your journey through the underground dungeons.
+Congratulations, brave adventurer! You've successfully entered the mystical catacombs of Bashcrawl. This entrance chamber is where you'll learn the fundamental magic spells (terminal commands) needed to survive your journey through the underground dungeons.
 
 ## 📜 Your First Scroll
 
@@ -118,5 +116,4 @@ cd cellar
 
 ---
 
-*Remember: Every expert was once a beginner. Take your time, experiment, and enjoy the journey of*
-*mastering the command line through adventure!*
+*Remember: Every expert was once a beginner. Take your time, experiment, and enjoy the journey of* *mastering the command line through adventure!*

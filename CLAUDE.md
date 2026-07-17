@@ -4,23 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bashcrawl (v3.1) is an educational text-based adventure game that teaches POSIX terminal
-commands through fantasy dungeon-crawl gameplay. The core game is **the filesystem itself**:
-directories are rooms, files named `scroll` are educational content, and executable scripts
-(`treasure`, `potion`, `spell`, `statue`, `ghost`, `monster`, `goblet`) are interactive encounters.
+Bashcrawl (v3.1) is an educational text-based adventure game that teaches POSIX terminal commands through fantasy dungeon-crawl gameplay. The core game is **the filesystem itself**: directories are rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, `statue`, `ghost`, `monster`, `goblet`) are interactive encounters.
 
 Since the v3.1 reduction the repo has exactly **two player surfaces plus one harness**:
 
 - **Terminal-core** (`entrance/`, `help.sh` + `src/help/`, minimal `lib/`) — pure POSIX shell,
   no dependencies, no launcher. Played with real `cd`/`ls`/`cat`: `cd entrance && cat scroll`.
 - **Web trainer** (`web/`) — a static, framework-free browser app with three modes:
-  **Story** (the dungeon on an in-browser bash emulator), **Practice Arcade** (four mini-games
-  on the same emulator: Path Navigator, grep/find Hunt, Pipe Puzzle, Command Flash), and
-  **Reference** (searchable cheatsheets + concept spotlight). Generated from the game content
-  by `scripts/export_static_web.py`; deployed to GitHub Pages by `pages.yml`.
+**Story** (the dungeon on an in-browser bash emulator), **Practice Arcade** (four mini-games on the same emulator: Path Navigator, grep/find Hunt, Pipe Puzzle, Command Flash), and **Reference** (searchable cheatsheets + concept spotlight). Generated from the game content by `scripts/export_static_web.py`; deployed to GitHub Pages by `pages.yml`.
 - **Playtest harness** (`src/playtest/`) — a lean MCP server that lets an AI agent play the
-  *real* bash game in a sandboxed PTY session (`bashcrawl_start/observe/command/report_gap`),
-  with a JSONL recorder and scorer for content-gap audits. Python 3.10+, deps: `pyyaml` + `mcp`.
+*real* bash game in a sandboxed PTY session (`bashcrawl_start/observe/command/report_gap`), with a JSONL recorder and scorer for content-gap audits. Python 3.10+, deps: `pyyaml` + `mcp`.
 
 The removed Textual TUI, Flask viewer, and Docker tooling live only in git history (pre-3.1).
 
@@ -70,8 +63,7 @@ PYTHONPATH=src python3 -m playtest.mcp_server   # MCP playtest server (agents)
 
 Main path: `entrance/` → `cellar/` → `armoury/` → `chamber/`.
 
-Hidden areas (all rooted under `entrance/`) are unlocked by collecting treasures, which `mv`
-a dotted directory to its visible name:
+Hidden areas (all rooted under `entrance/`) are unlocked by collecting treasures, which `mv` a dotted directory to its visible name:
 - `.chapel/` → `graveyard/`, `courtyard/{aviary,hall,library}/` — `grep`, `find`, pipes
 - `.vault/` → `stronghold/{nursery,lab}/` — variables, env, process substitution
 - `.scrap/` — a **directory** (not a file) whose scroll teaches `ln -s`
@@ -97,11 +89,7 @@ a dotted directory to its visible name:
 
 ### Game encounter files
 
-All game executables share a structure: `#!/usr/bin/env bash` shebang, the 14-line "wandered
-out of bounds" boilerplate comment, game-state checks (grep inventory / test `$HP`), story output
-via `cat << EOF` heredocs (plain text, no ANSI), then instructions telling the **player** to run
-`export`/`mv` commands. Game executables must **NEVER mutate git-tracked files** and do not use
-strict mode.
+All game executables share a structure: `#!/usr/bin/env bash` shebang, the 14-line "wandered out of bounds" boilerplate comment, game-state checks (grep inventory / test `$HP`), story output via `cat << EOF` heredocs (plain text, no ANSI), then instructions telling the **player** to run `export`/`mv` commands. Game executables must **NEVER mutate git-tracked files** and do not use strict mode.
 
 State is held entirely in environment variables and untracked flag files:
 ```bash
@@ -146,10 +134,7 @@ mv ../../.chapel ../../chapel   # Unlock a hidden room (target may be 2+ levels 
 
 ## Content Contracts
 
-Game content is described by shared, version-controlled registries (`src/help/data/*.yaml`:
-`rooms.yaml`, `quests.yaml`, `commands.yaml`, `encounters.yaml`, `runtime_commands.yaml`,
-`tutorials.yaml`, `arcade.yaml`, etc.). They are the single source of truth for the help
-system, the web export, and the docs. When changing game content or registries:
+Game content is described by shared, version-controlled registries (`src/help/data/*.yaml`: `rooms.yaml`, `quests.yaml`, `commands.yaml`, `encounters.yaml`, `runtime_commands.yaml`, `tutorials.yaml`, `arcade.yaml`, etc.). They are the single source of truth for the help system, the web export, and the docs. When changing game content or registries:
 - `make validate-contracts` — registries vs. the real filesystem.
 - `make web-test` — regenerates `web/data/*.json` and validates the bundle
   (`test_static_web.py` fails CI if committed data is stale).
@@ -160,13 +145,7 @@ system, the web export, and the docs. When changing game content or registries:
 ## Integration Points
 
 - **CI** (`.github/workflows/`, three workflows): `ci.yml` is the PR/push gate — `lint`
-  (shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`), `test`
-  (`make validate-contracts` + the full pytest suite via `make test`), and `macos-smoke`
-  (real gameplay on stock macOS bash 3.2). `pages.yml` builds + deploys `web/` on main.
-  `blank-slate-audit.yml` is the weekly agent playtest. Every CI check mirrors a local
-  `make` target; content rules (shebangs/scrolls/unlocks) live in
-  `validate_content_contracts.py`, not inline in workflows. Dependabot owns all
-  dependency updates (`.github/dependabot.yml`).
+(shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`), `test` (`make validate-contracts` + the full pytest suite via `make test`), and `macos-smoke` (real gameplay on stock macOS bash 3.2). `pages.yml` builds + deploys `web/` on main. `blank-slate-audit.yml` is the weekly agent playtest. Every CI check mirrors a local `make` target; content rules (shebangs/scrolls/unlocks) live in `validate_content_contracts.py`, not inline in workflows. Dependabot owns all dependency updates (`.github/dependabot.yml`).
 - **MCP server**: `playtest.mcp_server`, configured in `.mcp.json` / `.cursor/mcp.json` with
   `PYTHONPATH=src`; smoke-tested via `make test-mcp`.
 - **Logging**: JSONL session logs in `logs/sessions/` (playtest recorder + test log capture).
