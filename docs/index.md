@@ -1,7 +1,6 @@
 # Bashcrawl Documentation
 
-Learn terminal commands by exploring a fantasy dungeon. Directories are rooms, files
-are scrolls, and executables are encounters.
+Learn terminal commands by exploring a fantasy dungeon. Directories are rooms, files are scrolls, and executables are encounters.
 
 ## Contents
 
@@ -21,5 +20,4 @@ bash setup.sh
 cd entrance && cat scroll
 ```
 
-Prefer the browser? Run `make web-preview` (or open `web/index.html`) to play the
-static web trainer.
+Prefer the browser? Run `make web-preview` (or open `web/index.html`) to play the static web trainer.

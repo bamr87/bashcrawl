@@ -1322,8 +1322,7 @@ Your scrolls light the path forward.
 ================================================================================
 ```
 
-*"The most powerful magic happens when learning feels like adventure."*
-*~ The Bashcrawl Teaching Philosophy*
+*"The most powerful magic happens when learning feels like adventure."* *~ The Bashcrawl Teaching Philosophy*
 
 ### Legacy and Evolution
 

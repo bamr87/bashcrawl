@@ -2,8 +2,7 @@
 
 ## Reporting Issues
 
-Open an issue at [github.com/bamr87/bashcrawl/issues](https://github.com/bamr87/bashcrawl/issues)
-with steps to reproduce.
+Open an issue at [github.com/bamr87/bashcrawl/issues](https://github.com/bamr87/bashcrawl/issues) with steps to reproduce.
 
 ## Development Setup
 
@@ -36,8 +35,7 @@ make web-test
 make web-preview
 ```
 
-The static web app lives in `web/` and is rebuilt from `entrance/` plus
-`src/help/data/*.yaml`; do not hand-edit generated files under `web/data/`.
+The static web app lives in `web/` and is rebuilt from `entrance/` plus `src/help/data/*.yaml`; do not hand-edit generated files under `web/data/`.
 
 ## Adding Game Content
 
@@ -60,8 +58,7 @@ Follow the [executable template](advanced.md#executable-encounter-template):
 
 ### Scroll Content
 
-See `.github/instructions/scrolls.instructions.md` for the full standard.
-Key rules:
+See `.github/instructions/scrolls.instructions.md` for the full standard. Key rules:
 - 80-character width, readable with `cat`
 - Level 1 (entrance): Pure ASCII with `===` dividers
 - Level 2 (intermediate): Unicode box-drawing, emoji, `####` headers

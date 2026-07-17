@@ -36,8 +36,7 @@ entrance/
 
 ## Scroll Format Standards
 
-Scrolls follow a depth-based format hierarchy defined in
-`.github/instructions/scrolls.instructions.md`:
+Scrolls follow a depth-based format hierarchy defined in `.github/instructions/scrolls.instructions.md`:
 
 ### Level 1 — Entrance (Pure ASCII)
 
@@ -122,8 +121,7 @@ Key rules:
 
 ## Agent Playtesting (MCP harness)
 
-A lean MCP playtest harness at `src/playtest/` lets an external agent play the
-real bash game and records every move as JSONL for offline scoring:
+A lean MCP playtest harness at `src/playtest/` lets an external agent play the real bash game and records every move as JSONL for offline scoring:
 
 ```bash
 PYTHONPATH=src python3 -m playtest.mcp_server     # serve the game over MCP

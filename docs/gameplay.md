@@ -1,8 +1,6 @@
 # Gameplay Guide
 
-Bashcrawl teaches terminal commands through a fantasy dungeon adventure. Directories
-are rooms, files named `scroll` are educational content, and executable scripts are
-interactive encounters.
+Bashcrawl teaches terminal commands through a fantasy dungeon adventure. Directories are rooms, files named `scroll` are educational content, and executable scripts are interactive encounters.
 
 ## Core Commands
 
@@ -83,9 +81,7 @@ When you run `ls -F`, indicators reveal file types:
 
 ## Hidden Rooms
 
-Hidden directories (prefixed with `.`) are unlocked when you run treasure
-scripts or complete encounters. They become visible via `ls -la` and
-accessible via `cd`.
+Hidden directories (prefixed with `.`) are unlocked when you run treasure scripts or complete encounters. They become visible via `ls -la` and accessible via `cd`.
 
 The unlock mechanism uses `mv` to rename hidden directories:
 ```
@@ -105,13 +101,10 @@ Combat encounters (`statue`, `monster`, `ghost`) follow this pattern:
 4. Damage is dealt via `let "HP=HP-5"`
 5. If HP ≤ 0, `gameover()` runs — you die and restart at entrance
 
-**Tip:** Always have a sword (`./treasure` in the armoury) and health
-(`./potion`) before entering combat rooms.
+**Tip:** Always have a sword (`./treasure` in the armoury) and health (`./potion`) before entering combat rooms.
 
 ## Game State
 
-The game uses environment variables (`$I`, `$HP`) and file-based flags
-(`.statue_defeated`, renamed directories) to track progress. These persist
-only in your current shell session.
+The game uses environment variables (`$I`, `$HP`) and file-based flags (`.statue_defeated`, renamed directories) to track progress. These persist only in your current shell session.
 
 To start fresh: `bash lib/reset.sh`
