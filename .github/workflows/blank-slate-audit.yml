@@ -7,7 +7,8 @@ name: Blank-Slate Audit
 #
 # Prerequisite (one-time, by a maintainer): run `claude setup-token` locally and
 # add the result as the repository secret CLAUDE_CODE_OAUTH_TOKEN. Without it the
-# job is a graceful no-op (scripts/playtest.sh skips).
+# preflight job emits a warning and the audit job is visibly SKIPPED in the run
+# list (no toolchain installs, no fake green "audit").
 
 on:
   schedule:
@@ -40,8 +41,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    name: Check playtest credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      has_token: ${{ steps.check.outputs.has_token }}
+    steps:
+      - name: Check CLAUDE_CODE_OAUTH_TOKEN
+        id: check
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_token=false" >> "$GITHUB_OUTPUT"
+          msg="CLAUDE_CODE_OAUTH_TOKEN secret is not set — no playtest ran and the self-teaching gate did not gate."
+          msg="$msg Fix: a maintainer runs 'claude setup-token' locally and adds the result as that repository secret."
+          echo "::warning title=Blank-Slate Audit skipped::$msg"
+          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY'
+          ## Blank-Slate Audit — SKIPPED (no credentials)
+
+          The `CLAUDE_CODE_OAUTH_TOKEN` repository secret is not set, so **no playtest ran**
+          and the self-teaching gate did not gate anything.
+
+          **Fix (one-time, by a maintainer):** run `claude setup-token` locally and add the
+          result as the `CLAUDE_CODE_OAUTH_TOKEN` repository secret.
+          SUMMARY
+
   audit:
     name: Blank-slate playthrough
+    needs: preflight
+    if: needs.preflight.outputs.has_token == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
