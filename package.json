@@ -5,7 +5,7 @@
     "description": "Bashcrawl monorepo scripts: TermForge framework tests and JS lint. No runtime dependencies.",
     "license": "MIT",
     "engines": {
-        "node": ">=20"
+        "node": ">=20.16"
     },
     "scripts": {
         "test": "node --test termforge/test/*.test.js",
