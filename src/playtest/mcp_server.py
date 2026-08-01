@@ -18,7 +18,10 @@ from __future__ import annotations
 
 import atexit
 
-from mcp.server.fastmcp import FastMCP
+try:  # mcp 1.x
+    from mcp.server.fastmcp import FastMCP
+except ModuleNotFoundError:  # mcp >= 2.0 renamed FastMCP to MCPServer
+    from mcp.server import MCPServer as FastMCP
 
 from .harness import PlaytestHarness
 

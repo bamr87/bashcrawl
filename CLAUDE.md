@@ -15,9 +15,7 @@ The repo has **two player surfaces, one harness, and one embedded framework**:
 - **Playtest harness** (`src/playtest/`) — a lean MCP server that lets an AI agent play the
 *real* bash game in a sandboxed PTY session (`bashcrawl_start/observe/command/report_gap`), with a JSONL recorder and scorer for content-gap audits. Python 3.10+, deps: `pyyaml` + `mcp`.
 - **TermForge** (`termforge/`) — the universal terminal framework extracted from the web
-emulator (v3.2): an environment-agnostic kernel (parser, VFS with providers, Shell + hook spine, Line protocol, TerminalView + DOM/ANSI sinks) as dual-mode files (classic `<script>`
-+ CJS, zero deps, no build step), plus node hosts (`host-tty.js`, `host-telnet.js`) and apps
-(`bashcrawl.js`, `procwatch/`). Docs: `docs/termforge/architecture.md`, `docs/termforge/authoring-apps.md`, `docs/termforge/telnet-host.md`, `docs/schemas/terminal-protocol.v1.md`. Core is vendored into `web/assets/js/vendor/termforge/` by `make web-build` — **edit `termforge/core/`, never the vendor mirror** (byte-verified by `make web-test`).
+emulator (v3.2): an environment-agnostic kernel (parser, VFS with providers, Shell + hook spine, Line protocol, TerminalView + DOM/ANSI sinks) as dual-mode files (classic script and CJS, zero deps, no build step), plus node hosts (`host-tty.js`, `host-telnet.js`) and apps (`bashcrawl.js`, `procwatch/`). Docs: `docs/termforge/architecture.md`, `docs/termforge/authoring-apps.md`, `docs/termforge/telnet-host.md`, `docs/schemas/terminal-protocol.v1.md`. Core is vendored into `web/assets/js/vendor/termforge/` by `make web-build` — **edit `termforge/core/`, never the vendor mirror** (byte-verified by `make web-test`).
 
 The removed Textual TUI, Flask viewer, and Docker tooling live only in git history (pre-3.1).
 
