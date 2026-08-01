@@ -1,0 +1,575 @@
+{
+  "name": "meta-and-flavour",
+  "seed": 505,
+  "clockStart": 1768478400000,
+  "steps": [
+    {
+      "line": "fortune",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "🥠  Cellar mages prefer ls -F over divination."
+        }
+      ]
+    },
+    {
+      "line": "fortune",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "🥠  In the catacombs, you have ZERO bytes of fear."
+        }
+      ]
+    },
+    {
+      "line": "cowsay hello dungeon",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": " _______________\n< hello dungeon >\n ---------------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||"
+        }
+      ]
+    },
+    {
+      "line": "cowsay",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": " ______\n< Moo. >\n ------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||"
+        }
+      ]
+    },
+    {
+      "line": "echo moo | cowsay",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": " _____\n< moo >\n -----\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||"
+        }
+      ]
+    },
+    {
+      "line": "figlet",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "B A S H C R A W L\n=================="
+        }
+      ]
+    },
+    {
+      "line": "figlet rune",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "R U N E\n========"
+        }
+      ]
+    },
+    {
+      "line": "banner",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "       ╔════════════════════════════════════════════════════╗\n       ║   ____            __                       __      ║\n       ║  / __ )___ ______/ /_  ______________ ___ / /      ║\n       ║ / __  / __ `/ ___/ __ \\/ ___/ ___/ __ `__ \\/ /      ║\n       ║/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / / /__    ║\n       ║\\____/\\__,_/____/_/ /_/\\___/_/  /_/ /_/ /_/____/    ║\n       ║                                                    ║\n       ║       Type  pwd  to begin the descent. F1 for help ║\n       ╚════════════════════════════════════════════════════╝"
+        }
+      ]
+    },
+    {
+      "line": "sl",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ====        ________                ___________\n  _D _|  |_______/        \\__I_I_____===__|_________|\n   |(_)---  |   H\\________/ |   |        =|___ ___|\n   /     |  |   H  |  |     |   |         ||_| |_||\n  |      |  |   H  |__--------------------| [___] |\n  | ________|___H__/__|_____/[][]~\\_______|       |\n  |/ |   |-----------I_____I [][] []  D   |=======|__\n__/ =| o |=-O=====O=====O=====O \\ ____Y___________|__|\n |/-=|___|=    ||    ||    ||    |_____/~\\___/   \n  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/         \n     (Sometimes typos take you for a ride. Try `ls`.)"
+        }
+      ]
+    },
+    {
+      "line": "bestiary",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "✨ Bestiary — 0/11 catalogued"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  Run an encounter (e.g. ./treasure) to catalogue it.  'bestiary <name>' to view one."
+        }
+      ]
+    },
+    {
+      "line": "bestiary treasure",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "You haven't encountered the Treasure Chest yet."
+        }
+      ]
+    },
+    {
+      "line": "bestiary dragon",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "No such creature: dragon"
+        }
+      ]
+    },
+    {
+      "line": "commands",
+      "outputs": [
+        {
+          "kind": "banner",
+          "text": "BASHCRAWL — COMMAND DECK"
+        },
+        {
+          "kind": "dim",
+          "text": "Web-exclusive commands beyond the core POSIX toolkit. Type any name to run it."
+        },
+        {
+          "kind": "magic",
+          "text": "🎮 Mini-games (earn XP)"
+        },
+        {
+          "kind": "output",
+          "text": "  train           Drill spells from memory in the Training Arena"
+        },
+        {
+          "kind": "output",
+          "text": "  speedrun        Same trials, against the clock — beat your best time"
+        },
+        {
+          "kind": "output",
+          "text": "  pathfind        Navigate to a target room in the fewest cd moves"
+        },
+        {
+          "kind": "magic",
+          "text": "📊 Progress & collection"
+        },
+        {
+          "kind": "output",
+          "text": "  profile         Your character sheet — Novice Whisperer, XP, stats"
+        },
+        {
+          "kind": "output",
+          "text": "  achievements    Badge catalogue — 0/11 unlocked"
+        },
+        {
+          "kind": "output",
+          "text": "  bestiary        Creature codex — 0/11 catalogued"
+        },
+        {
+          "kind": "output",
+          "text": "  daily           Today's challenge and your streak"
+        },
+        {
+          "kind": "magic",
+          "text": "🧭 Navigation & lore"
+        },
+        {
+          "kind": "output",
+          "text": "  map             ASCII map of the dungeon"
+        },
+        {
+          "kind": "output",
+          "text": "  look            Describe the current room and its contents"
+        },
+        {
+          "kind": "output",
+          "text": "  hint            A nudge toward the next objective"
+        },
+        {
+          "kind": "output",
+          "text": "  quest           Your active quest objectives"
+        },
+        {
+          "kind": "magic",
+          "text": "✨ Flavour"
+        },
+        {
+          "kind": "output",
+          "text": "  cowsay <text>   An ASCII cow speaks"
+        },
+        {
+          "kind": "output",
+          "text": "  fortune         A random adage"
+        },
+        {
+          "kind": "output",
+          "text": "  banner <text>   Big block letters"
+        },
+        {
+          "kind": "output",
+          "text": "  sl              Watch a train roll by"
+        },
+        {
+          "kind": "dim",
+          "text": "Core commands (ls, cd, cat, grep, find, tree...) work too — see Docs (F1)."
+        }
+      ]
+    },
+    {
+      "line": "daily",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "✨ Daily Challenge — 2026-01-15"
+        },
+        {
+          "kind": "output",
+          "text": "   Goal:     earn 60 XP today"
+        },
+        {
+          "kind": "output",
+          "text": "   Progress: 0/60 XP"
+        },
+        {
+          "kind": "output",
+          "text": "   Streak:   0 days"
+        },
+        {
+          "kind": "dim",
+          "text": "   Earn XP via train / speedrun / pathfind / encounters / badges."
+        }
+      ]
+    },
+    {
+      "line": "let HP=HP-5",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "HP=95"
+        }
+      ]
+    },
+    {
+      "line": "health",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "HP=95"
+        }
+      ]
+    },
+    {
+      "line": "let HP=HP+5",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "HP=100"
+        }
+      ]
+    },
+    {
+      "line": "source scroll",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Sourced scroll (no extra definitions in the web port)."
+        }
+      ]
+    },
+    {
+      "line": "pathfind",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "       .  N  .\n    .   \\ | /   .\n   W ----(+)---- E\n    '   / | \\   '\n       '  S  '"
+        },
+        {
+          "kind": "info",
+          "text": "Find your way to THE ARMOURY."
+        },
+        {
+          "kind": "dim",
+          "text": "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon."
+        }
+      ]
+    },
+    {
+      "line": "pathfind",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "🧭 Still seeking THE ARMOURY  ·  0 move(s) so far"
+        },
+        {
+          "kind": "dim",
+          "text": "Use cd / ls / pwd to find it. 'pathfind quit' to abandon."
+        }
+      ]
+    },
+    {
+      "line": "cd cellar",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar"
+        }
+      ]
+    },
+    {
+      "line": "cd armoury",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar/armoury"
+        },
+        {
+          "kind": "success",
+          "text": "🧭 You reached THE ARMOURY in 2 moves!  +35 XP  Swiftly done."
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'pathfind' to seek a new destination."
+        },
+        {
+          "kind": "success",
+          "text": "✅ Achievement unlocked: Trailblazer — Completed a Path-Finder journey.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Apprentice of the Shell!"
+        }
+      ]
+    },
+    {
+      "line": "cd chamber",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar/armoury/chamber"
+        }
+      ]
+    },
+    {
+      "line": "pathfind quit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "No journey in progress."
+        }
+      ]
+    },
+    {
+      "line": "pathfind",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "       .  N  .\n    .   \\ | /   .\n   W ----(+)---- E\n    '   / | \\   '\n       '  S  '"
+        },
+        {
+          "kind": "info",
+          "text": "Find your way to THE CELLAR."
+        },
+        {
+          "kind": "dim",
+          "text": "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon."
+        }
+      ]
+    },
+    {
+      "line": "pathfind quit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "Journey to THE CELLAR abandoned."
+        }
+      ]
+    },
+    {
+      "line": "help",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Open the Docs panel with F1 (or click Docs)."
+        },
+        {
+          "kind": "dim",
+          "text": "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./treasure"
+        },
+        {
+          "kind": "magic",
+          "text": "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP."
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge."
+        },
+        {
+          "kind": "info",
+          "text": "New here? Type 'commands' for the full command deck of web-exclusive features."
+        }
+      ]
+    },
+    {
+      "line": "reset",
+      "outputs": [
+        {
+          "kind": "control",
+          "action": "reset"
+        },
+        {
+          "kind": "info",
+          "text": "Session reset. Start with pwd."
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance"
+        },
+        {
+          "kind": "success",
+          "text": "🧭 Achievement unlocked: First Steps — Found your place with pwd.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Apprentice of the Shell!"
+        }
+      ]
+    },
+    {
+      "line": "quest",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Eyes to See\nUse 'ls' to reveal nearby rooms and scrolls.\nHint: Try 'ls' to survey the room's contents."
+        }
+      ]
+    },
+    {
+      "line": "daily",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "✨ Daily Challenge — 2026-01-16"
+        },
+        {
+          "kind": "output",
+          "text": "   Goal:     earn 30 XP today"
+        },
+        {
+          "kind": "output",
+          "text": "   Progress: 0/30 XP"
+        },
+        {
+          "kind": "output",
+          "text": "   Streak:   0 days"
+        },
+        {
+          "kind": "dim",
+          "text": "   Earn XP via train / speedrun / pathfind / encounters / badges."
+        }
+      ],
+      "advanceMs": 86400000
+    }
+  ],
+  "finalState": {
+    "cwd": "/entrance",
+    "hp": 100,
+    "xp": 55,
+    "inventory": [],
+    "aliases": {},
+    "envVars": {},
+    "userNodes": {},
+    "completedQuestIds": [
+      0
+    ],
+    "currentQuestId": 1,
+    "visited": [],
+    "history": [],
+    "historyIndex": -1,
+    "flags": {},
+    "reveals": {},
+    "trainer": null,
+    "pathfind": null,
+    "speedrunBest": null,
+    "achievements": [
+      "first_steps"
+    ],
+    "bestiary": [],
+    "daily": {
+      "date": "2026-01-16",
+      "baselineXp": 55,
+      "goal": 30,
+      "completed": false,
+      "streak": 0,
+      "lastDate": null
+    },
+    "rankIndex": 1,
+    "stats": {
+      "commands": {
+        "pwd": 1,
+        "quest": 1,
+        "daily": 1
+      },
+      "catScrollCount": 0,
+      "initialized": false,
+      "lastPipedIn": false
+    }
+  }
+}

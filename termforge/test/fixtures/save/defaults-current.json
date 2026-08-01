@@ -1,0 +1,35 @@
+{
+  "cwd": "/entrance",
+  "hp": 100,
+  "xp": 0,
+  "inventory": [],
+  "aliases": {},
+  "envVars": {},
+  "userNodes": {},
+  "completedQuestIds": [],
+  "currentQuestId": 0,
+  "visited": [],
+  "history": [],
+  "historyIndex": -1,
+  "flags": {},
+  "reveals": {},
+  "trainer": null,
+  "pathfind": null,
+  "speedrunBest": null,
+  "achievements": [],
+  "bestiary": [],
+  "daily": {
+    "date": null,
+    "baselineXp": 0,
+    "goal": 0,
+    "completed": false,
+    "streak": 0,
+    "lastDate": null
+  },
+  "rankIndex": 0,
+  "stats": {
+    "commands": {},
+    "catScrollCount": 0,
+    "initialized": false
+  }
+}

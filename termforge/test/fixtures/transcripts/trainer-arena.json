@@ -1,0 +1,490 @@
+{
+  "name": "trainer-arena",
+  "seed": 404,
+  "clockStart": 1768478400000,
+  "steps": [
+    {
+      "line": "train",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+        },
+        {
+          "kind": "info",
+          "text": "8 trials await. Answer each by casting the real spell."
+        },
+        {
+          "kind": "dim",
+          "text": "Commands:  hint = clue · skip = pass · quit = leave the arena"
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 1/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Descend into the room named 'cellar'."
+        }
+      ]
+    },
+    {
+      "line": "hint",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "💡 Change Directory into cellar."
+        }
+      ]
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  cd cellar  — cd <room> walks you into another directory."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 2/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Cast the spell that tells you exactly where you stand."
+        }
+      ]
+    },
+    {
+      "line": "blargh",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "❌ \"blargh\" fizzles. Try once more, or type 'hint'."
+        }
+      ]
+    },
+    {
+      "line": "blargh",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "❌ The spell was:  pwd  — pwd prints your current location."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 3/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Run the 'treasure' encounter waiting in this room."
+        }
+      ]
+    },
+    {
+      "line": "quit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "You lower your blade and step out of the arena."
+        },
+        {
+          "kind": "art",
+          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+        },
+        {
+          "kind": "info",
+          "text": "Trials answered: 2/8   ·   Earned: 0 XP   ·   Best streak: 0"
+        },
+        {
+          "kind": "success",
+          "text": "🏅 Rank attained:  Novice Whisperer"
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'train' to drill again, or return to exploring the dungeon."
+        }
+      ]
+    },
+    {
+      "line": "speedrun",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+        },
+        {
+          "kind": "magic",
+          "text": "SPEED RUN — clear 8 trials against the clock!"
+        },
+        {
+          "kind": "dim",
+          "text": "No record yet — set the first time!"
+        },
+        {
+          "kind": "dim",
+          "text": "Answer fast.  skip = pass · quit = leave"
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 1/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Climb back to the room you came from."
+        }
+      ]
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  cd ..  — cd .. moves up one directory."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 2/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Run the 'treasure' encounter waiting in this room."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  ./treasure  — ./<script> runs an executable in the current room."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 3/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Conjure a brand-new room called 'workshop'."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  mkdir workshop  — mkdir creates a new directory (room)."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 4/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Draw the map of the whole dungeon."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  map  — map / tree reveal the dungeon's layout."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 5/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Cast the spell that tells you exactly where you stand."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  pwd  — pwd prints your current location."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 6/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Hunt the scroll for the word 'amulet'."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  grep amulet scroll  — grep finds lines matching a pattern inside a file."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 7/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Reveal even the HIDDEN passages here (names that begin with a dot)."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  ls -a  — ls -a shows hidden entries whose names start with a dot."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 8/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Summon your inventory by echoing the $I treasure-rune."
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "skip",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "↷ Skipped. The spell was:  echo $i  — echo prints text; $I holds your inventory."
+        },
+        {
+          "kind": "art",
+          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+        },
+        {
+          "kind": "info",
+          "text": "Trials answered: 8/8   ·   Earned: 0 XP   ·   Best streak: 0"
+        },
+        {
+          "kind": "magic",
+          "text": "⏱  Time: 12.0s"
+        },
+        {
+          "kind": "success",
+          "text": "🏆 NEW RECORD!  (previous: none)"
+        },
+        {
+          "kind": "success",
+          "text": "🏅 Rank attained:  Novice Whisperer"
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'speedrun' to race again, or 'train' for untimed practice."
+        },
+        {
+          "kind": "success",
+          "text": "🏅 Achievement unlocked: Arena Graduate — Cleared a Training Arena run.  (+5 XP)"
+        },
+        {
+          "kind": "success",
+          "text": "🏆 Achievement unlocked: Speed Demon — Finished a timed Speed Run.  (+5 XP)"
+        }
+      ],
+      "advanceMs": 1500
+    },
+    {
+      "line": "speedrun",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+        },
+        {
+          "kind": "magic",
+          "text": "SPEED RUN — clear 8 trials against the clock!"
+        },
+        {
+          "kind": "dim",
+          "text": "Your best: 12.0s. Beat it!"
+        },
+        {
+          "kind": "dim",
+          "text": "Answer fast.  skip = pass · quit = leave"
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 1/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Read the entire scroll lying in this room."
+        }
+      ]
+    },
+    {
+      "line": "quit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "You lower your blade and step out of the arena."
+        },
+        {
+          "kind": "art",
+          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+        },
+        {
+          "kind": "info",
+          "text": "Trials answered: 0/8   ·   Earned: 0 XP   ·   Best streak: 0"
+        },
+        {
+          "kind": "success",
+          "text": "🏅 Rank attained:  Novice Whisperer"
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'speedrun' to race again, or 'train' for untimed practice."
+        }
+      ]
+    },
+    {
+      "line": "train",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+        },
+        {
+          "kind": "info",
+          "text": "8 trials await. Answer each by casting the real spell."
+        },
+        {
+          "kind": "dim",
+          "text": "Commands:  hint = clue · skip = pass · quit = leave the arena"
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 1/8   ·   Score 0 XP   ·   Streak 0"
+        },
+        {
+          "kind": "output",
+          "text": "    Cast the spell that tells you exactly where you stand."
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "❌ \"ls\" fizzles. Try once more, or type 'hint'."
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "✅ Correct!  +10 XP   pwd prints your current location."
+        },
+        {
+          "kind": "magic",
+          "text": "✨  Trial 2/8   ·   Score 10 XP   ·   Streak 1"
+        },
+        {
+          "kind": "output",
+          "text": "    Glimpse only the LAST lines of the scroll."
+        }
+      ]
+    },
+    {
+      "line": "quit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "You lower your blade and step out of the arena."
+        },
+        {
+          "kind": "art",
+          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+        },
+        {
+          "kind": "info",
+          "text": "Trials answered: 1/8   ·   Earned: 10 XP   ·   Best streak: 1"
+        },
+        {
+          "kind": "success",
+          "text": "🏅 Rank attained:  Novice Whisperer"
+        },
+        {
+          "kind": "dim",
+          "text": "Type 'train' to drill again, or return to exploring the dungeon."
+        }
+      ]
+    },
+    {
+      "line": "xp",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Level 1  █░░░░░░░░░  20/200 to next level  (total 20 XP)"
+        }
+      ]
+    }
+  ],
+  "finalState": {
+    "cwd": "/entrance",
+    "hp": 100,
+    "xp": 20,
+    "inventory": [],
+    "aliases": {},
+    "envVars": {},
+    "userNodes": {},
+    "completedQuestIds": [],
+    "currentQuestId": 0,
+    "visited": [],
+    "history": [],
+    "historyIndex": -1,
+    "flags": {
+      "arena_cleared": true
+    },
+    "reveals": {},
+    "trainer": null,
+    "pathfind": null,
+    "speedrunBest": 12,
+    "achievements": [
+      "arena_graduate",
+      "speed_demon"
+    ],
+    "bestiary": [],
+    "daily": {
+      "date": "2026-01-15",
+      "baselineXp": 0,
+      "goal": 60,
+      "completed": false,
+      "streak": 0,
+      "lastDate": null
+    },
+    "rankIndex": 0,
+    "stats": {
+      "commands": {
+        "train": 2,
+        "speedrun": 2,
+        "xp": 1
+      },
+      "catScrollCount": 0,
+      "initialized": false,
+      "lastPipedIn": false
+    }
+  }
+}

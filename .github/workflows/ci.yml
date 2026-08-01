@@ -2,8 +2,8 @@ name: CI
 
 # The one PR/push gate. Three jobs, each mirroring a local make target so a
 # green local run predicts a green CI run:
-#   lint        →  make lint          (shellcheck, yamllint, markdownlint, ruff)
-#   test        →  make validate-contracts + make test  (full pytest suite)
+#   lint        →  make lint + make lint-js  (shellcheck, yamllint, markdownlint, ruff, node --check)
+#   test        →  make validate-contracts + make test + make test-js  (pytest + node --test)
 #   macos-smoke →  real terminal play on macOS's default bash 3.2
 #
 # Content rules (shebangs, scrolls, unlock wiring) live in
@@ -35,6 +35,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install linters
         run: |
           sudo apt-get update -q
@@ -55,6 +59,9 @@ jobs:
       - name: ruff
         run: bash scripts/lint.sh python
 
+      - name: JS syntax (node --check)
+        run: make lint-js
+
   test:
     name: Contracts + Tests
     runs-on: ubuntu-latest
@@ -70,6 +77,10 @@ jobs:
             requirements.txt
             requirements-dev.txt
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install dependencies
         run: |
           python -m pip install --quiet --upgrade pip
@@ -80,6 +91,9 @@ jobs:
 
       - name: Run test suite (unit + integration)
         run: make test
+
+      - name: TermForge framework tests (node --test)
+        run: make test-js
 
       - name: Upload test reports
         if: always()

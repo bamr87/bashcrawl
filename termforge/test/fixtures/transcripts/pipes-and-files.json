@@ -1,0 +1,548 @@
+{
+  "name": "pipes-and-files",
+  "seed": 202,
+  "clockStart": 1768478400000,
+  "steps": [
+    {
+      "line": "cat scroll | wc -l",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "86 438 4086"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll | head -3",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "\n================================================================================\n                           ANCIENT SCROLL OF SIGHT"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll | head -3 | tail -1",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "                           ANCIENT SCROLL OF SIGHT"
+        },
+        {
+          "kind": "success",
+          "text": "💡 Achievement unlocked: Scholar — Read three ancient scrolls.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "head -n 2 scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "\n================================================================================"
+        }
+      ]
+    },
+    {
+      "line": "tail -2 scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "================================================================================\n"
+        }
+      ]
+    },
+    {
+      "line": "echo cherry > fruit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(wrote 1 line to fruit)"
+        }
+      ]
+    },
+    {
+      "line": "echo apple >> fruit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(appended 1 line to fruit)"
+        }
+      ]
+    },
+    {
+      "line": "echo banana >> fruit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(appended 1 line to fruit)"
+        }
+      ]
+    },
+    {
+      "line": "echo apple >> fruit",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(appended 1 line to fruit)"
+        }
+      ]
+    },
+    {
+      "line": "cat fruit",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cherry\napple\nbanana\napple"
+        }
+      ]
+    },
+    {
+      "line": "sort fruit",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "apple\napple\nbanana\ncherry"
+        }
+      ]
+    },
+    {
+      "line": "sort fruit | uniq",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "apple\nbanana\ncherry"
+        }
+      ]
+    },
+    {
+      "line": "sort fruit | uniq -c",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "      2 apple\n      1 banana\n      1 cherry"
+        }
+      ]
+    },
+    {
+      "line": "sort fruit | uniq -d",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "apple"
+        }
+      ]
+    },
+    {
+      "line": "cat fruit | rev",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "yrrehc\nelppa\nananab\nelppa"
+        }
+      ]
+    },
+    {
+      "line": "cat fruit | nl",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "     1  cherry\n     2  apple\n     3  banana\n     4  apple"
+        }
+      ]
+    },
+    {
+      "line": "cat fruit | tr a-z A-Z",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "CHERRY\nAPPLE\nBANANA\nAPPLE"
+        }
+      ]
+    },
+    {
+      "line": "cat fruit | sed 's/apple/mango/'",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cherry\nmango\nbanana\nmango"
+        }
+      ]
+    },
+    {
+      "line": "echo a,b,c | cut -d, -f2",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "b"
+        }
+      ]
+    },
+    {
+      "line": "echo abcdef | cut -c2-4",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "bcd"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll | wc -l > count",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(wrote 1 line to count)"
+        }
+      ]
+    },
+    {
+      "line": "cat count",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "86 438 4086"
+        }
+      ]
+    },
+    {
+      "line": "echo quiet 2>/dev/null",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "quiet"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll 2>&1 | wc -l",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "86 438 4086"
+        }
+      ]
+    },
+    {
+      "line": "echo broken >",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "syntax error: expected a filename after >"
+        }
+      ]
+    },
+    {
+      "line": "echo broken > f g",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "syntax error: unexpected text after > FILE"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll > scroll",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "(wrote 86 lines to scroll)"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll | head -1",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "line": "rm scroll",
+      "outputs": [
+        {
+          "kind": "dim",
+          "text": "Removed your written copy of scroll — the original remains."
+        }
+      ]
+    },
+    {
+      "line": "cat scroll | head -1",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "line": "rm scroll",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "rm: cannot remove 'scroll': the dungeon's own files are indestructible"
+        }
+      ]
+    },
+    {
+      "line": "mkdir camp",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Created directory camp"
+        },
+        {
+          "kind": "success",
+          "text": "⚡ Achievement unlocked: World-Builder — Conjured a room with mkdir.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "touch camp/log",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Touched camp/log"
+        }
+      ]
+    },
+    {
+      "line": "cp fruit camp/fruit2",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Copied fruit to camp/fruit2"
+        }
+      ]
+    },
+    {
+      "line": "mv camp/fruit2 camp/fruit3",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved camp/fruit2 to camp/fruit3"
+        }
+      ]
+    },
+    {
+      "line": "ls camp",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "fruit3  log"
+        }
+      ]
+    },
+    {
+      "line": "rm camp/fruit3",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Removed camp/fruit3"
+        }
+      ]
+    },
+    {
+      "line": "ls camp",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "log"
+        }
+      ]
+    },
+    {
+      "line": "touch torch",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Touched torch"
+        }
+      ]
+    },
+    {
+      "line": "chmod +x torch",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Marked torch as executable."
+        }
+      ]
+    },
+    {
+      "line": "ls -F",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "camp/  cellar/  count  fruit  README.md  scroll  torch*"
+        }
+      ]
+    },
+    {
+      "line": "chmod -x torch",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Removed executable bit from torch."
+        }
+      ]
+    },
+    {
+      "line": "chmod 755 torch",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "chmod 755 torch: numeric modes are decorative in the web port."
+        }
+      ]
+    },
+    {
+      "line": "chmod +x scroll",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Web Bashcrawl chmod only changes session-created files."
+        }
+      ]
+    },
+    {
+      "line": "grep 'ls -a' scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "(no matches for 'ls -a')"
+        }
+      ]
+    },
+    {
+      "line": "grep -c the scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "20"
+        }
+      ]
+    },
+    {
+      "line": "grep -n Bashcrawl scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "(no matches for 'Bashcrawl')"
+        }
+      ]
+    },
+    {
+      "line": "ls c*",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "log"
+        }
+      ]
+    },
+    {
+      "line": "cat 'fru*'",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "No such file: fru*"
+        }
+      ]
+    },
+    {
+      "line": "clear",
+      "outputs": [
+        {
+          "kind": "control",
+          "action": "clear"
+        }
+      ]
+    }
+  ],
+  "finalState": {
+    "cwd": "/entrance",
+    "hp": 100,
+    "xp": 10,
+    "inventory": [],
+    "aliases": {},
+    "envVars": {},
+    "userNodes": {
+      "/entrance/fruit": {
+        "type": "file",
+        "content": "cherry\napple\nbanana\napple"
+      },
+      "/entrance/count": {
+        "type": "file",
+        "content": "86 438 4086"
+      },
+      "/entrance/camp": {
+        "type": "dir"
+      },
+      "/entrance/camp/log": {
+        "type": "file",
+        "content": ""
+      },
+      "/entrance/torch": {
+        "type": "file",
+        "content": ""
+      }
+    },
+    "completedQuestIds": [],
+    "currentQuestId": 0,
+    "visited": [],
+    "history": [],
+    "historyIndex": -1,
+    "flags": {
+      "chmod_x": true
+    },
+    "reveals": {},
+    "trainer": null,
+    "pathfind": null,
+    "speedrunBest": null,
+    "achievements": [
+      "scholar",
+      "world_builder"
+    ],
+    "bestiary": [],
+    "daily": {
+      "date": "2026-01-15",
+      "baselineXp": 0,
+      "goal": 60,
+      "completed": false,
+      "streak": 0,
+      "lastDate": null
+    },
+    "rankIndex": 0,
+    "stats": {
+      "commands": {
+        "cat": 15,
+        "wc": 3,
+        "head": 5,
+        "tail": 2,
+        "echo": 7,
+        "sort": 4,
+        "uniq": 3,
+        "rev": 1,
+        "nl": 1,
+        "tr": 1,
+        "sed": 1,
+        "cut": 2,
+        "rm": 3,
+        "mkdir": 1,
+        "touch": 2,
+        "cp": 1,
+        "mv": 1,
+        "ls": 4,
+        "chmod": 4,
+        "grep": 3,
+        "clear": 1
+      },
+      "catScrollCount": 8,
+      "initialized": false,
+      "lastPipedIn": false
+    }
+  }
+}

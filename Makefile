@@ -20,6 +20,7 @@ SHELL := /bin/bash
 
 GAME_ROOT := $(shell pwd)
 PYTHON := python3
+NODE := node
 VENV := .venv
 
 export PYTHONPATH := $(GAME_ROOT)/src:$(GAME_ROOT)/test
@@ -81,6 +82,10 @@ test-unit: ## Run unit tests only
 test-integration: ## Run integration tests only
 	@bash scripts/run_tests.sh integration
 
+.PHONY: test-js
+test-js: ## Run the TermForge framework tests (node --test, zero deps)
+	@$(NODE) --test termforge/test/*.test.js
+
 .PHONY: test-mcp
 test-mcp: ## Run the playtest-harness smoke tests in a local .venv
 	@bash scripts/test_mcp.sh
@@ -98,6 +103,11 @@ lint: ## Run all linters (shellcheck, yamllint, markdownlint, ruff)
 .PHONY: lint-shell
 lint-shell: ## Run ShellCheck on all shell scripts
 	@bash scripts/lint.sh shell
+
+.PHONY: lint-js
+lint-js: ## Syntax-check every tracked JS file with node --check
+	@set -e; for f in $$(git ls-files '*.js'); do $(NODE) --check "$$f"; done; \
+		echo "lint-js: OK ($$(git ls-files '*.js' | wc -l | tr -d ' ') files)"
 
 # ── Maintenance ───────────────────────────────────────────────────────
 
