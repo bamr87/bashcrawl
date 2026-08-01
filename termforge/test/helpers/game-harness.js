@@ -30,6 +30,10 @@ const RUNTIME_FILES = [
     path.join(VENDOR_JS, "shell.js"),
     path.join(VENDOR_JS, "packs", "posix.js"),
     path.join(VENDOR_JS, "packs", "flavour.js"),
+    path.join(VENDOR_JS, "view.js"),
+    path.join(VENDOR_JS, "sinks", "dom.js"),
+    path.join(VENDOR_JS, "sinks", "ansi.js"),
+    path.join(VENDOR_JS, "input.js"),
     path.join(WEB_JS, "runtime.js"),
 ];
 

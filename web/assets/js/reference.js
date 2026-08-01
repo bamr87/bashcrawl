@@ -10,13 +10,7 @@
  *  3. Inline hint: a one-line syntax reminder under the prompt while typing.
  */
 (function initReference(global) {
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
-    }
+    const escapeHtml = global.TermForge.sinks.escapeHtml;
 
     // One-line syntax hints for the inline helper (command → syntax, note).
     const SYNTAX_HINTS = {

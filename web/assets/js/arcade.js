@@ -17,13 +17,7 @@
 (function initArcade(global) {
     const SCORES_KEY = "bashcrawl-web-arcade-v1";
 
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
-    }
+    const escapeHtml = global.TermForge.sinks.escapeHtml;
 
     // Whitespace-forgiving canonical form for pipe-puzzle output comparison:
     // leading/trailing space and internal runs collapse, blank edges drop.
@@ -41,14 +35,13 @@
 
     function scopedRuntime(world) {
         const RT = global.BashcrawlRuntime;
-        const rt = new RT.Runtime(
+        // Sandbox trial: bare mode skips the game's hook spine (achievements/
+        // daily/rank side-band output), so story flavor never leaks into a trial.
+        return new RT.Runtime(
             { world, quests: { quests: [] }, commands: { categories: {}, quick_ref: {}, runtime: [] } },
-            RT.defaultState(world.root)
+            RT.defaultState(world.root),
+            { bare: true }
         );
-        // Sandbox trial: the runtime skips achievements/daily/rank side-band
-        // output for bare instances, so story flavor never leaks into a trial.
-        rt.bare = true;
-        return rt;
     }
 
     // Build a Runtime world object from a hunt scenario's tree/files spec.
@@ -343,7 +336,13 @@
             this.bridge = { awardXp() {}, toast() {}, setPrompt() {} };
             this.active = null;
             this.ctx = null;
-            this.logLines = [];
+            // The arcade log is its own TerminalView; non-clear control records
+            // append like ordinary lines (historic arcade behavior — scoped
+            // runtimes never emit fanfare actions anyway).
+            this.view = new global.TermForge.view.TerminalView({
+                cap: 500,
+                onControl: () => true,
+            });
             this.persist = global.BashcrawlStorage.loadKey(SCORES_KEY, { games: {} });
             if (!this.persist.games) this.persist.games = {};
         }
@@ -352,6 +351,7 @@
             this.data = data;
             this.dom = dom;
             this.bridge = { ...this.bridge, ...bridge };
+            if (dom.log) this.view.sink = new global.TermForge.sinks.DomSink(dom.log);
             this.renderHome();
         }
 
@@ -419,7 +419,7 @@
                 hints: 0,
                 startedAt: Date.now(),
             };
-            this.logLines = [];
+            this.view.clear();
             if (this.dom.home) this.dom.home.hidden = true;
             if (this.dom.log) this.dom.log.hidden = false;
             this.appendMany(game.intro(this.ctx));
@@ -448,7 +448,7 @@
 
         // Ctrl+L while the arcade owns the input clears the arcade log.
         clearLog() {
-            this.logLines.length = 0;
+            this.view.clear();
             this.renderLog();
         }
 
@@ -535,27 +535,18 @@
             this.renderSide();
         }
 
-        // ── rendering ────────────────────────────────────────────────────
+        // ── rendering (delegated to the shared TerminalView) ─────────────
         append(kind, text) {
-            for (const line of String(text ?? "").split("\n")) {
-                this.logLines.push({ kind: kind || "output", text: line });
-            }
-            if (this.logLines.length > 500) this.logLines.splice(0, this.logLines.length - 500);
+            this.view.appendLine(kind, text);
         }
 
         appendMany(outputs) {
-            for (const out of outputs) {
-                if (out.action === "clear") { this.logLines.length = 0; continue; }
-                this.append(out.kind, out.text || "");
-            }
+            this.view.appendOutputs(outputs);
         }
 
         renderLog() {
             if (!this.dom.log) return;
-            this.dom.log.innerHTML = this.logLines
-                .map((l) => `<span class="kind-${l.kind}">${escapeHtml(l.text)}</span>`)
-                .join("\n");
-            this.dom.log.scrollTop = Math.max(0, this.dom.log.scrollHeight - this.dom.log.clientHeight);
+            this.view.flush();
         }
 
         renderSide() {

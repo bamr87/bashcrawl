@@ -24,6 +24,8 @@
         crtToggle: document.getElementById("crt-toggle"),
     };
 
+    const escapeHtml = window.TermForge.sinks.escapeHtml;
+
     const data = await loadData();
     let runtime = new window.BashcrawlRuntime.Runtime(data, window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root)));
     const docsPanel = new window.BashcrawlDocs.DocsPanel({
@@ -118,7 +120,25 @@
         { key: "rift", name: "The Rift", hint: "Tear open the rift for advanced trials." },
     ];
 
-    const logLines = [];
+    // The story log is a TermForge TerminalView painting into #output-log.
+    // Control routing preserves the historical behavior: "levelup" is pure
+    // fanfare (swallowed after the flash), "reset" rebuilds the runtime and
+    // then falls through to the buffer like any other record.
+    const view = new window.TermForge.view.TerminalView({
+        sink: new window.TermForge.sinks.DomSink(dom.log),
+        cap: 600,
+        onControl(action) {
+            if (action === "reset") {
+                runtime = new window.BashcrawlRuntime.Runtime(data);
+                docsPanel.setData(data.docs, runtime);
+                window.BashcrawlStorage.clear();
+                return true;
+            }
+            if (action === "levelup") flashLevelUp();
+            return false;
+        },
+    });
+    const append = (kind, text) => view.appendLine(kind, text);
     const BANNER = [
         "       ╔════════════════════════════════════════════════════╗",
         "       ║   ____            __                       __      ║",
@@ -183,7 +203,7 @@
             event.preventDefault();
             // Non-story modes clear their own log (e.g. the arcade's).
             if (window.BashcrawlShell && window.BashcrawlShell.clearLog && window.BashcrawlShell.clearLog()) return;
-            logLines.length = 0;
+            view.clear();
             renderLog();
         }
     }
@@ -248,22 +268,7 @@
         }
         runtime.state.historyIndex = runtime.state.history.length;
         const outputs = runtime.execute(line);
-        for (const out of outputs) {
-            if (out.action === "clear") {
-                logLines.length = 0;
-                continue;
-            }
-            if (out.action === "reset") {
-                runtime = new window.BashcrawlRuntime.Runtime(data);
-                docsPanel.setData(data.docs, runtime);
-                window.BashcrawlStorage.clear();
-            }
-            if (out.action === "levelup") {
-                flashLevelUp();
-                continue;
-            }
-            append(out.kind, out.text || "");
-        }
+        view.appendOutputs(outputs);
         const after = snapshotState();
         triggerEffects(prevState, after);
         prevState = after;
@@ -350,13 +355,6 @@
         void xpSpan.offsetWidth;
         xpSpan.classList.add("fx-pop");
         setTimeout(() => xpSpan.classList.remove("fx-pop"), 700);
-    }
-
-    function append(kind, text) {
-        for (const line of String(text).split("\n")) {
-            logLines.push({ kind: kind || "output", text: line });
-        }
-        if (logLines.length > 600) logLines.splice(0, logLines.length - 600);
     }
 
     function saveAndRender() {
@@ -526,15 +524,12 @@
     }
 
     function renderLog() {
-        dom.log.innerHTML = logLines.map((line) => `<span class="kind-${line.kind || "output"}">${escapeHtml(line.text)}</span>`).join("\n");
-        dom.log.scrollTop = Math.max(0, dom.log.scrollHeight - dom.log.clientHeight);
+        view.flush();
     }
 
     function historyStep(direction) {
-        const history = runtime.state.history;
-        if (!history.length) return;
-        runtime.state.historyIndex = Math.max(0, Math.min(history.length, runtime.state.historyIndex + direction));
-        dom.input.value = runtime.state.historyIndex >= history.length ? "" : history[runtime.state.historyIndex];
+        const value = window.TermForge.input.historyStep(runtime.state, direction);
+        if (value != null) dom.input.value = value;
     }
 
     function completeInput() {
@@ -544,13 +539,12 @@
         const hook = window.BashcrawlShell && window.BashcrawlShell.completions
             ? window.BashcrawlShell.completions(dom.input.value)
             : null;
-        const completions = hook ? hook.list : runtime.completions(dom.input.value);
-        if (completions.length === 1) {
-            const parts = dom.input.value.split(/\s+/);
-            parts[parts.length - 1] = completions[0];
-            dom.input.value = parts.join(" ");
-        } else if (completions.length > 1 && !hook) {
-            append("info", completions.join("  "));
+        const candidates = hook ? hook.list : runtime.completions(dom.input.value);
+        const { value, echo } = window.TermForge.input.applyCompletion(dom.input.value, candidates);
+        if (value != null) {
+            dom.input.value = value;
+        } else if (echo && !hook) {
+            append("info", echo);
             renderLog();
         }
     }
@@ -684,14 +678,6 @@
         fill.classList.toggle("is-low", hp <= 25);
         fill.classList.toggle("is-mid", hp > 25 && hp <= 50);
         bar.setAttribute("aria-label", `Health ${hp} of 100`);
-    }
-
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
     }
 
     // Bridge for the shell router (shell.js): story runtime access for the XP

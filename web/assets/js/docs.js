@@ -1,11 +1,5 @@
 (function initDocs(global) {
-    function htmlEscape(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
-    }
+    const htmlEscape = global.TermForge.sinks.escapeHtml;
 
     class DocsPanel {
         constructor({ drawer, content, search, input, onOpenChange }) {
