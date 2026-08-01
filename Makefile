@@ -66,6 +66,10 @@ tty-demo: web-build ## Play bashcrawl in this terminal (JS emulator on node)
 telnet-demo: web-build ## Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)
 	@$(NODE) termforge/node/host-telnet.js --app bashcrawl $(ARGS)
 
+.PHONY: agentwatch
+agentwatch: ## AI-agent task dashboard (ARGS="--data-dir logs/sessions" for real playtest logs)
+	@$(NODE) termforge/node/host-tty.js --app agentwatch $(ARGS)
+
 # ── Content contracts ──────────────────────────────────────────────────
 
 .PHONY: validate-contracts
