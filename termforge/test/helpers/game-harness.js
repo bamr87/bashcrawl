@@ -14,10 +14,15 @@ const WEB_JS = path.join(REPO_ROOT, "web", "assets", "js");
 const DATA_DIR = path.join(REPO_ROOT, "web", "data");
 const FIXTURES_DIR = path.resolve(__dirname, "..", "fixtures");
 
-// Classic scripts the game runtime needs, in index.html order. When the
-// runtime starts consuming vendored TermForge core files (Phase 1+), they are
-// prepended here exactly as index.html prepends their <script> tags.
+// Classic scripts the game runtime needs, in index.html order: the vendored
+// TermForge core first (exactly as index.html loads it), then the runtime.
+// Loading the vendor copies (not termforge/core/) means these tests exercise
+// what the browser actually ships; the vendor freshness check guarantees the
+// two trees are byte-identical.
+const VENDOR_JS = path.join(WEB_JS, "vendor", "termforge");
 const RUNTIME_FILES = [
+    path.join(VENDOR_JS, "protocol.js"),
+    path.join(VENDOR_JS, "parser.js"),
     path.join(WEB_JS, "runtime.js"),
 ];
 

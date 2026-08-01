@@ -45,6 +45,7 @@ venv: ## Create .venv and install web-build + test dependencies
 .PHONY: web-build
 web-build: ## Build the static web bundle from entrance/ + src/help/data/*.yaml
 	@$(PYTHON) scripts/export_static_web.py
+	@$(PYTHON) scripts/vendor_termforge.py
 
 .PHONY: web-test
 web-test: web-build ## Build + validate the static web bundle

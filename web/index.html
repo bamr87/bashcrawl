@@ -183,6 +183,11 @@
         </div>
     </div>
 
+    <!-- TermForge framework core (vendored from termforge/core/ by `make
+         web-build`) loads before every app script. Edit termforge/core/,
+         never these copies. -->
+    <script src="./assets/js/vendor/termforge/protocol.js"></script>
+    <script src="./assets/js/vendor/termforge/parser.js"></script>
     <script src="./assets/js/storage.js"></script>
     <script src="./assets/js/runtime.js"></script>
     <script src="./assets/js/docs.js"></script>

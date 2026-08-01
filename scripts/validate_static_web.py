@@ -8,6 +8,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import vendor_termforge  # noqa: E402  (sibling script, stdlib only)
+
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 
@@ -42,9 +45,20 @@ def validate() -> dict:
         "data/docs.json",
         "data/arcade.json",
     ]
+    # The TermForge core is vendored file-for-file; the manifest drives the
+    # required list so a new core file cannot ship without its vendor copy.
+    vendor_files = [f"assets/js/vendor/termforge/{rel}" for rel in vendor_termforge.manifest()]
+    for baseline in ("protocol.js", "parser.js"):
+        if f"assets/js/vendor/termforge/{baseline}" not in vendor_files:
+            errors.append(f"termforge/core is missing baseline file {baseline}")
+    required += vendor_files
     for rel in required:
         if not (WEB / rel).is_file():
             errors.append(f"Missing static web file: web/{rel}")
+
+    # Vendor mirror freshness: web/assets/js/vendor/termforge/** must be a
+    # byte-identical copy of termforge/core/** (both directions).
+    errors.extend(vendor_termforge.check())
 
     index = _read(WEB / "index.html") if (WEB / "index.html").is_file() else ""
     if "url_for(" in index or "{{" in index:
@@ -54,6 +68,18 @@ def validate() -> dict:
             continue
         if src.startswith("/") or src.startswith("http://") or src.startswith("https://"):
             errors.append(f"Static asset URL must be relative: {src}")
+
+    # Script order: every vendored TermForge core file must be loaded by
+    # index.html, and all of them before the game runtime (which reads
+    # global.TermForge at load time).
+    script_srcs = re.findall(r'<script src="\./([^"]+)"></script>', index)
+    runtime_src = "assets/js/runtime.js"
+    runtime_idx = script_srcs.index(runtime_src) if runtime_src in script_srcs else -1
+    for rel in vendor_files:
+        if rel not in script_srcs:
+            errors.append(f"index.html does not load vendored core file: {rel}")
+        elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
+            errors.append(f"index.html must load {rel} before assets/js/runtime.js")
 
     if (WEB / "data/world.json").is_file():
         world = json.loads(_read(WEB / "data/world.json"))
