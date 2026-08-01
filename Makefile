@@ -56,6 +56,16 @@ web-test: web-build ## Build + validate the static web bundle
 web-preview: web-build ## Preview the web app at http://127.0.0.1:8000
 	@cd web && $(PYTHON) -m http.server 8000 --bind 127.0.0.1
 
+# ── TermForge hosts (the same game/tools, off the browser) ─────────────
+
+.PHONY: tty-demo
+tty-demo: web-build ## Play bashcrawl in this terminal (JS emulator on node)
+	@$(NODE) termforge/node/host-tty.js --app bashcrawl
+
+.PHONY: telnet-demo
+telnet-demo: web-build ## Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)
+	@$(NODE) termforge/node/host-telnet.js --app bashcrawl $(ARGS)
+
 # ── Content contracts ──────────────────────────────────────────────────
 
 .PHONY: validate-contracts

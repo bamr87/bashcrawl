@@ -12,9 +12,11 @@ on:
       - 'web/**'
       - 'entrance/**'
       - 'src/help/data/**'
+      - 'termforge/**'
       - 'scripts/export_static_web.py'
       - 'scripts/validate_static_web.py'
       - 'scripts/validate_runtime_commands.py'
+      - 'scripts/vendor_termforge.py'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>procwatch — TermForge browser demo</title>
+<style>
+    body { background: #10141a; color: #d6e2f0; font-family: ui-monospace, monospace; margin: 2rem auto; max-width: 72rem; }
+    #log { white-space: pre-wrap; border: 1px solid #2a3646; padding: 1rem; min-height: 18rem; max-height: 60vh; overflow-y: auto; }
+    form { display: flex; gap: .5rem; margin-top: .75rem; }
+    input { flex: 1; background: #0b0e13; color: inherit; border: 1px solid #2a3646; font: inherit; padding: .4rem .6rem; }
+    .kind-error { color: #ff7b72; } .kind-success { color: #7ee787; } .kind-info { color: #79c0ff; }
+    .kind-dim { opacity: .6; } .kind-magic { color: #d2a8ff; } .kind-art { color: #e3b341; } .kind-banner { color: #79c0ff; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>procwatch <small>— the same TermForge app, in a browser tab</small></h1>
+<p>Open straight from <code>file://</code>. Mock metrics (no node:os in a browser); the kernel,
+packs, provider VFS, view and sink are the identical classic files the game ships.</p>
+<pre id="log" class="tui-log"></pre>
+<form id="f"><label for="i">/procwatch $</label><input id="i" autocomplete="off" autofocus></form>
+
+<script src="../../core/protocol.js"></script>
+<script src="../../core/parser.js"></script>
+<script src="../../core/state.js"></script>
+<script src="../../core/vfs.js"></script>
+<script src="../../core/hooks.js"></script>
+<script src="../../core/registry.js"></script>
+<script src="../../core/shell.js"></script>
+<script src="../../core/packs/posix.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/sinks/dom.js"></script>
+<script src="../../core/input.js"></script>
+<script>
+(function () {
+    "use strict";
+    const TF = window.TermForge;
+    const mock = {
+        hostname: () => "demo-host",
+        platform: () => "browser demo",
+        uptime: () => "0d 1h 10m (4242s)",
+        loadavg: () => [0.42, 0.4, 0.35].map((n) => (n + Math.random() * 0.05).toFixed(2)).join(" "),
+        memory: () => "used 5.00 GiB / 8.00 GiB (63%)",
+    };
+    const shell = new TF.Shell({
+        world: {
+            root: "/procwatch",
+            directories: { "/procwatch": [{ name: "readme", type: "file", hidden: false }] },
+            files: { "/procwatch/readme": "PROCWATCH browser demo — try: sys · ls sys · cat sys/loadavg | rev" },
+        },
+        packs: [TF.packs.posix, {
+            name: "procwatch",
+            commands: {
+                sys() {
+                    const pad = (l) => `  ${(l + ":").padEnd(11)}`;
+                    return [
+                        { kind: "banner", text: "PROCWATCH" },
+                        ...Object.keys(mock).map((k) => ({ kind: "output", text: `${pad(k)}${mock[k]()}` })),
+                    ];
+                },
+                help() { return [{ kind: "info", text: "sys · ls sys · cat readme — same framework, no server." }]; },
+            },
+        }],
+    });
+    shell.vfs.addProvider({
+        prefix: "/procwatch/sys",
+        isDir: (p) => p === "/procwatch/sys",
+        list: (p) => (p === "/procwatch/sys"
+            ? Object.keys(mock).map((name) => ({ name, type: "file", hidden: false }))
+            : null),
+        read: (p) => {
+            const name = p.split("/").pop();
+            return p.startsWith("/procwatch/sys/") && mock[name] ? String(mock[name]()) : null;
+        },
+    });
+
+    const view = new TF.view.TerminalView({ sink: new TF.sinks.DomSink(document.getElementById("log")), cap: 500 });
+    view.appendLine("banner", "PROCWATCH");
+    view.appendLine("info", "Type: sys · ls sys · cat readme · cat sys/loadavg | rev");
+    view.flush();
+
+    const input = document.getElementById("i");
+    document.getElementById("f").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const line = input.value.trim();
+        input.value = "";
+        if (!line) return;
+        view.appendLine("dim", `${shell.promptLabel()} ${line}`);
+        view.appendOutputs(shell.execute(line));
+        view.flush();
+    });
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            const { value, echo } = TF.input.applyCompletion(input.value, shell.completions(input.value));
+            if (value != null) input.value = value;
+            else if (echo) { view.appendLine("info", echo); view.flush(); }
+        }
+    });
+})();
+</script>
+</body>
+</html>

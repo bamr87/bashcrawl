@@ -58,6 +58,11 @@
                 this._write(this.paint(line) + this.newline);
             }
         }
+
+        /** TerminalView.clear() for streams: erase screen, home the cursor. */
+        clear() {
+            this._write(`${ESC}[2J${ESC}[H`);
+        }
     }
 
     return { AnsiSink, ANSI_STYLES };

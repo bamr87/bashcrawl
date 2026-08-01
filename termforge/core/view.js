@@ -69,7 +69,10 @@
 
         clear() {
             this.lines.length = 0;
-            if (this.sink && this.sink.write) this.sink.write([]);
+            // Render sinks repaint from the buffer on flush(); stream sinks
+            // can't unwrite, so they get an explicit clear() to translate
+            // (e.g. an ANSI erase-screen sequence).
+            if (this.sink && this.sink.clear) this.sink.clear();
         }
 
         /** Full repaint through the sink (for render-style sinks). */
