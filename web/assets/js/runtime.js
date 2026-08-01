@@ -255,6 +255,11 @@
             this.quests = data.quests.quests || [];
             this.commands = data.commands;
             this.state = state || defaultState(this.world.root);
+            // Filesystem semantics live in the TermForge VFS; getState() is a
+            // thunk so `reset` can swap this.state without rebuilding it.
+            this.vfs = global.TermForge.vfs.createVfs(this.world, {
+                getState: () => this.state,
+            });
             this.handlers = {
                 help: this.cmdHelp,
                 pwd: this.cmdPwd,
@@ -489,106 +494,53 @@
             this.state.stats.commands[cmd] = (this.state.stats.commands[cmd] || 0) + 1;
         }
 
+        // ── Filesystem: thin delegates onto the TermForge VFS ────────────────
+        // (semantics live in termforge/core/vfs.js; these keep the public
+        // surface game.js/docs.js/reference.js already consume)
+
         resolve(path, cwd = this.state.cwd) {
-            if (!path || path === ".") return cwd;
-            const base = path.startsWith("/") ? [] : cwd.split("/").filter(Boolean);
-            for (const part of path.split("/")) {
-                if (!part || part === ".") continue;
-                if (part === "..") base.pop();
-                else base.push(part);
-            }
-            return "/" + base.join("/");
+            return this.vfs.resolve(path, cwd);
         }
 
         parentPath(path) {
-            const parts = path.split("/").filter(Boolean);
-            parts.pop();
-            return "/" + parts.join("/");
+            return this.vfs.parentPath(path);
         }
 
-        // Translate a player-visible path (e.g. /entrance/chapel) into the actual
-        // stored world path (e.g. /entrance/.chapel) for any room the player has
-        // unlocked. Mirrors the bash treasure's `mv ../.chapel ../chapel`.
         actual(path) {
-            const reveals = this.state.reveals || {};
-            let best = null;
-            for (const visible of Object.keys(reveals)) {
-                if (path === visible || path.startsWith(visible + "/")) {
-                    if (!best || visible.length > best.length) best = visible;
-                }
-            }
-            return best ? reveals[best] + path.slice(best.length) : path;
+            return this.vfs.actual(path);
         }
 
         basename(path) {
-            return path.split("/").filter(Boolean).pop() || "";
+            return this.vfs.basename(path);
         }
 
         node(path) {
-            const real = this.actual(path);
-            if (this.world.directories[real]) return { type: "dir" };
-            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return { type: "file" };
-            return this.state.userNodes[path] || null;
+            return this.vfs.node(path);
         }
 
         isDir(path) {
-            return Boolean(this.world.directories[this.actual(path)] || this.state.userNodes[path]?.type === "dir");
+            return this.vfs.isDir(path);
         }
 
         readFile(path) {
-            // Player-written files shadow shipped world files (a `>` redirect onto
-            // an existing file overwrites it, exactly like a real filesystem).
-            const node = this.state.userNodes[path];
-            if (node && node.type === "file") return node.content || "";
-            const real = this.actual(path);
-            if (Object.prototype.hasOwnProperty.call(this.world.files, real)) return this.world.files[real];
-            return null;
+            return this.vfs.readFile(path);
         }
 
         entries(path, showHidden = false) {
-            const real = this.actual(path);
-            const reveals = this.state.reveals || {};
-            const base = this.world.directories[real] || [];
-            const result = [];
-            for (const entry of base) {
-                // A hidden room the player has unlocked is shown un-dotted and visible,
-                // matching the bash treasure that renames `.chapel` -> `chapel`.
-                if (entry.hidden && reveals[`${path}/${entry.name.replace(/^\./, "")}`.replace(/\/+/g, "/")]) {
-                    result.push({ name: entry.name.replace(/^\./, ""), type: entry.type, hidden: false });
-                } else if (showHidden || !entry.hidden) {
-                    result.push({ ...entry });
-                }
-            }
-            const prefix = path.endsWith("/") ? path : `${path}/`;
-            for (const [nodePath, node] of Object.entries(this.state.userNodes)) {
-                if (this.parentPath(nodePath) !== path) continue;
-                const name = this.basename(nodePath);
-                if (!showHidden && name.startsWith(".")) continue;
-                if (!result.some((entry) => entry.name === name)) {
-                    result.push({ name, type: node.type, hidden: name.startsWith(".") });
-                }
-                void prefix;
-            }
-            return result.sort((a, b) => a.name.localeCompare(b.name));
+            return this.vfs.entries(path, showHidden);
         }
 
         currentRoomMeta() {
-            return this.world.rooms[this.actual(this.state.cwd)] || {};
+            return this.vfs.roomMeta(this.state.cwd);
         }
 
         // Reveal a hidden room by logical name (e.g. "chapel"), mapping the visible
         // path to its stored dotted path. Returns a message if newly unlocked.
         revealRoom(name) {
-            const dotName = `.${name}`;
-            for (const [dirPath, list] of Object.entries(this.world.directories)) {
-                if (!Array.isArray(list) || !list.some((e) => e.name === dotName && e.hidden)) continue;
-                const visiblePath = `${dirPath}/${name}`.replace(/\/+/g, "/");
-                const realPath = `${dirPath}/${dotName}`.replace(/\/+/g, "/");
-                if (this.state.reveals[visiblePath]) return null;
-                this.state.reveals[visiblePath] = realPath;
-                return { kind: "success", text: `🔓 A new passage opens: ${name}/` };
-            }
-            return null;
+            const found = this.vfs.findHiddenDir(name);
+            if (!found || this.state.reveals[found.visiblePath]) return null;
+            this.state.reveals[found.visiblePath] = found.realPath;
+            return { kind: "success", text: `🔓 A new passage opens: ${name}/` };
         }
 
         cmdHelp() {

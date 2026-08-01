@@ -23,6 +23,8 @@ const VENDOR_JS = path.join(WEB_JS, "vendor", "termforge");
 const RUNTIME_FILES = [
     path.join(VENDOR_JS, "protocol.js"),
     path.join(VENDOR_JS, "parser.js"),
+    path.join(VENDOR_JS, "state.js"),
+    path.join(VENDOR_JS, "vfs.js"),
     path.join(WEB_JS, "runtime.js"),
 ];
 
