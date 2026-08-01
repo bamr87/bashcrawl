@@ -21,8 +21,8 @@
     // member through `this`.
     //
     // An app composes packs with buildHandlers(), or writes an explicit
-    // handlers literal referencing pack functions directly — bashcrawl does
-    // the latter so its full command surface is enumerable in one place.
+    // handlers literal referencing pack functions directly — the flagship
+    // game does the latter so its command surface is enumerable in one place.
 
     /** Merge packs into one name -> function map; later packs win. */
     function buildHandlers(...packs) {

@@ -90,9 +90,31 @@ Subscribe app behavior on `shell.hooks` (full table in [architecture.md](archite
 - `execDispatch(name)` — make `./thing` do something (return `Line[]`, or `null` to decline).
 - `postCommand(cmd, args, stdin, outputs)` — telemetry/scoring after every command.
 
-## The worked example
+## Branding: the uiText copy deck
+
+The framework core is brand-neutral (enforced by `termforge/test/content-separation.test.js`); every player-facing string a core pack emits comes from the Shell's **uiText** deck, which apps override at construction:
+
+```js
+const shell = new TermForge.Shell({
+    world,
+    packs: [TermForge.packs.posix, TermForge.packs.flavour],
+    uiText: {
+        figletDefault: "MYTOOL",
+        bannerArt: myAsciiLogo,
+        fortunes: ["Your tool's own proverbs."],
+        rmWorldFile: (name) => `rm: '${name}' is part of the deployment — refusing.`,
+        manBuiltinNote: (cmd) => `See docs/${cmd}.md.`,
+    },
+});
+```
+
+Entries are strings, arrays, or `(args) => string` templates; unset keys keep the neutral defaults in `DEFAULT_UI_TEXT` (`termforge/core/shell.js`). Packs read the deck through `this.text(key, ...args)` — do the same in your own packs so your commands stay rebrandable. The flagship game's entire voice (its legacy error strings, fortune deck, and banner art) is exactly one such override: `GAME_UI_TEXT` in `web/assets/js/runtime.js`.
+
+## The worked examples
 
 `termforge/apps/procwatch/` (~150 lines) is the reference custom tool: an injectable metric source (`node:os` by default, `MOCK_SOURCE` for tests and the `demo.html` browser demo), a `sys` dashboard pack, and the provider mount described above. Its tests (`termforge/test/apps.test.js`) show the whole surface exercised without any host.
+
+`termforge/apps/agentwatch/` (`make agentwatch`) is the dashboard-shaped example: a **TaskSource** interface (`agents()` + `events(limit)`) projected three ways at once — `board`/`agent <id>`/`feed` commands, live provider files (`cat agents/forge`, `grep -r failed .`), and any host. It ships a deterministic simulated fleet (state ticks once per read — no clock, no randomness, so tests replay exactly) plus a JSONL adapter that turns this repo's real agent-playtest telemetry (`logs/sessions/**`) into a live board: `make agentwatch ARGS="--data-dir logs/sessions"`. Writing your own monitor = implementing TaskSource and passing it to `createApp({ source })`.
 
 ## How bashcrawl itself is an app
 

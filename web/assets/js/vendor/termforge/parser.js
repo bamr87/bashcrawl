@@ -12,7 +12,7 @@
     // TermForge command-line parser: quote-aware tokenizing, `|` pipeline
     // splitting, `>`/`>>` redirection, and the small flag/list/set parsers the
     // POSIX command pack shares. Pure functions, no environment dependencies.
-    // Extracted verbatim from the bashcrawl web emulator.
+    // Extracted verbatim from the original browser emulator.
 
     function escapeRegExp(value) {
         return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

@@ -138,8 +138,24 @@ test("injectables: clock, rng, encodeBase64", () => {
     });
     assert.match(textOf(shell.execute("date")), /2026/);
     const fortune = textOf(shell.execute("fortune"));
-    assert.match(fortune, /ZERO bytes of fear/, "rng()=0 draws the first fortune");
+    assert.match(fortune, /cd \.\. and try again/, "rng()=0 draws the first neutral fortune");
     assert.strictEqual(shell.encodeBase64("hi"), "aGk=");
+});
+
+test("uiText: neutral defaults, app overrides, template entries", () => {
+    const neutral = makeShell();
+    assert.strictEqual(neutral.text("execFileKind"), "program");
+    assert.match(neutral.manBuiltinNote("ls"), /^Built-in command/);
+    const branded = makeShell({
+        uiText: {
+            fortunes: ["Fortune favours the override."],
+            manBuiltinNote: (cmd) => `See the ${cmd} chapter of the manual.`,
+        },
+    });
+    assert.match(textOf(branded.execute("fortune")), /favours the override/);
+    assert.strictEqual(branded.manBuiltinNote("ls"), "See the ls chapter of the manual.");
+    assert.strictEqual(branded.text("execFileKind"), "program",
+        "unset keys keep their neutral defaults");
 });
 
 test("writes into provider mounts are refused", () => {

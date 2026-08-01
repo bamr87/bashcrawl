@@ -14,7 +14,7 @@
     // A world is three flat maps (the shape scripts/export_static_web.py and
     // arcade's worldFromScenario both produce):
     //
-    //   { root:        "/entrance",
+    //   { root:        "/base",
     //     directories: { "/path": [{name, type: "dir"|"file"|"exec", hidden}] },
     //     files:       { "/path/file": "contents" },
     //     rooms:       { "/path": {...meta...} },          // optional
@@ -24,7 +24,7 @@
     //   - state.userNodes — session-created files/dirs; a written file shadows
     //     a same-named world file (and `rm` peels the shadow off again).
     //   - state.reveals   — visible-path -> stored-path aliases for unlocked
-    //     hidden rooms (`/entrance/chapel` -> `/entrance/.chapel`), applied
+    //     hidden directories (`/base/secret` -> `/base/.secret`), applied
     //     longest-prefix-first by actual().
     //   - providers       — dynamic read-only subtrees (monitoring tools map
     //     live data to virtual files); longest matching mount wins and takes
@@ -33,7 +33,7 @@
     // State is fetched through getState() on every call so a host can swap the
     // whole state object (reset) without rebuilding the VFS.
     //
-    // Filesystem semantics are extracted verbatim from the bashcrawl web
+    // Filesystem semantics are extracted verbatim from the original browser
     // emulator; providers are additive and inert unless mounted.
 
     /** @typedef {{name: string, type: "dir"|"file"|"exec", hidden: boolean}} Entry */
@@ -85,9 +85,9 @@
             return "/" + parts.join("/");
         }
 
-        // Translate a player-visible path (e.g. /entrance/chapel) into the actual
-        // stored world path (e.g. /entrance/.chapel) for any room the player has
-        // unlocked. Mirrors the bash treasure's `mv ../.chapel ../chapel`.
+        // Translate a visible path (e.g. /base/secret) into the actual stored
+        // world path (e.g. /base/.secret) for any hidden directory a reveal has
+        // unlocked — mirroring an `mv .secret secret` on a real filesystem.
         function actual(path) {
             const reveals = getState().reveals || {};
             let best = null;
@@ -147,8 +147,8 @@
             const base = world.directories[real] || [];
             const result = [];
             for (const entry of base) {
-                // A hidden room the player has unlocked is shown un-dotted and visible,
-                // matching the bash treasure that renames `.chapel` -> `chapel`.
+                // A hidden directory an app has revealed is shown un-dotted and
+                // visible, matching a rename of `.secret` -> `secret`.
                 if (entry.hidden && reveals[`${path}/${entry.name.replace(/^\./, "")}`.replace(/\/+/g, "/")]) {
                     result.push({ name: entry.name.replace(/^\./, ""), type: entry.type, hidden: false });
                 } else if (showHidden || !entry.hidden) {
@@ -163,13 +163,18 @@
                     result.push({ name, type: nodeEntry.type, hidden: name.startsWith(".") });
                 }
             }
-            // Provider mounts appear as directories in their parent's listing.
+            // Provider mounts appear in their parent's listing; the mount root
+            // decides whether it presents as a directory or a single file.
             for (const mount of providers) {
                 if (parentPath(mount.prefix) !== path) continue;
                 const name = basename(mount.prefix);
                 if (!showHidden && name.startsWith(".")) continue;
                 if (!result.some((entry) => entry.name === name)) {
-                    result.push({ name, type: "dir", hidden: name.startsWith(".") });
+                    result.push({
+                        name,
+                        type: mount.isDir(mount.prefix) ? "dir" : "file",
+                        hidden: name.startsWith("."),
+                    });
                 }
             }
             return result.sort((a, b) => a.name.localeCompare(b.name));
@@ -179,7 +184,7 @@
             return (world.rooms || {})[actual(path)] || {};
         }
 
-        // Locate a hidden directory by logical name (e.g. "chapel"): returns
+        // Locate a hidden directory by logical name (e.g. "secret"): returns
         // { visiblePath, realPath } for the first world directory containing a
         // hidden `.name` entry, or null. Pure — recording the reveal is the
         // caller's job (it lives in state).

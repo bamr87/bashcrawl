@@ -46,6 +46,35 @@
         return Buffer.from(String(text), "latin1").toString("base64");
     }
 
+    // The framework's neutral copy deck. Every player-facing string a core
+    // pack emits that an app might want to brand lives here; apps override
+    // entries via the `uiText` constructor option (the flagship game supplies
+    // its legacy wording this way — content stays with the app, mechanics
+    // stay in the framework). Entries are strings, arrays, or (args) => string
+    // templates, resolved by Shell#text().
+    const DEFAULT_UI_TEXT = Object.freeze({
+        manBuiltinNote: (cmd) => `Built-in command. Try '${cmd} --help'.`,
+        chmodSessionOnly: "chmod only changes files created in this session.",
+        chmodDecorative: (mode, target) => `chmod ${mode} ${target}: numeric modes are decorative here.`,
+        mvSessionOnly: "mv only moves files created in this session.",
+        rmWorldFile: (name) => `rm: cannot remove '${name}': read-only world file`,
+        rmSessionOnly: "rm only removes files created in this session.",
+        execFileKind: "program",
+        figletDefault: "TERMFORGE",
+        bannerArt: [
+            "   ╔════════════════════════════════════╗",
+            "   ║   T  E  R  M  F  O  R  G  E        ║",
+            "   ║   one kernel, every terminal       ║",
+            "   ╚════════════════════════════════════╝",
+        ].join("\n"),
+        fortunes: [
+            "When in doubt, cd .. and try again.",
+            "If you can name it, you can grep it.",
+            "The shell is patient. The shell is kind. The shell still won't run that typo.",
+            "May your prompts be short and your scripts be sourced.",
+        ],
+    });
+
     class Shell {
         /**
          * @param {object} options
@@ -58,6 +87,8 @@
          * @param {{now: () => number}} [options.clock]
          * @param {() => number} [options.rng]
          * @param {(s: string) => string} [options.encodeBase64]
+         * @param {object} [options.uiText]   app copy overriding DEFAULT_UI_TEXT
+         *                                    entries (branding lives in apps)
          * @param {boolean} [options.bare]    skip ALL hooks in execute() (scoped
          *                                    sandboxes; also settable post-hoc)
          */
@@ -71,9 +102,16 @@
             this.clock = opts.clock || { now: () => Date.now() };
             this.rng = opts.rng || Math.random;
             this.encodeBase64 = opts.encodeBase64 || defaultEncodeBase64;
+            this.uiText = { ...DEFAULT_UI_TEXT, ...(opts.uiText || {}) };
             this.bare = Boolean(opts.bare);
             this.vfs = deps.vfs.createVfs(this.world, { getState: () => this.state });
             this.handlers = opts.handlers || deps.registry.buildHandlers(...(opts.packs || []));
+        }
+
+        /** Resolve a uiText entry; function entries are templates. */
+        text(key, ...args) {
+            const entry = this.uiText[key];
+            return typeof entry === "function" ? entry(...args) : entry;
         }
 
         // ── Execution spine ──────────────────────────────────────────────────
@@ -287,9 +325,9 @@
         }
 
         // `man` fallback text for handler-backed commands with no docs entry;
-        // apps override to point at their own help surface.
+        // apps rebrand it via uiText.manBuiltinNote.
         manBuiltinNote(cmd) {
-            return `Built-in command. Try '${cmd} --help'.`;
+            return this.text("manBuiltinNote", cmd);
         }
 
         completions(text) {
@@ -302,5 +340,5 @@
         }
     }
 
-    return { Shell };
+    return { Shell, DEFAULT_UI_TEXT };
 });

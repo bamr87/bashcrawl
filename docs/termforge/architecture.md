@@ -83,6 +83,8 @@ All app-specific behavior attaches through the HookBus instead of living in the 
 
 Determinism: `clock`, `rng`, and `encodeBase64` are injectable; tests pin them (the golden fixtures replay byte-identically forever) and hosts default to the environment's own.
 
+Content stays out of the framework: every brandable string a core pack emits routes through the Shell's `uiText` copy deck (`DEFAULT_UI_TEXT` in `shell.js` holds the neutral defaults; apps override entries — the game's voice is `GAME_UI_TEXT` in `runtime.js`). `termforge/test/content-separation.test.js` fails the build if game vocabulary appears anywhere under `termforge/core/`.
+
 ## VFS: worlds, overlay, reveals, providers
 
 A world is flat maps — the exact shape `scripts/export_static_web.py` emits and `arcade.js`'s `worldFromScenario` builds:

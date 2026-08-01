@@ -12,10 +12,10 @@
     // TermForge shell state — the framework-owned slice of a session.
     //
     // Framework apps and node hosts start from defaultShellState() and may add
-    // their own fields on top. The bashcrawl game deliberately does NOT build
+    // their own fields on top. The flagship game deliberately does NOT build
     // its state from this module: its fused defaultState() literal in
-    // web/assets/js/runtime.js is the persisted-save shape
-    // (bashcrawl-web-state-v1) and is locked by fixture, key order included.
+    // web/assets/js/runtime.js is the persisted-save shape and is locked by
+    // fixture, key order included.
 
     /** Fresh shell state rooted at a world path. */
     function defaultShellState(root) {

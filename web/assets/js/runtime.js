@@ -164,12 +164,51 @@
         };
     }
 
+    // The game's voice, layered over the framework's neutral copy deck: the
+    // exact historical Bashcrawl Web strings, fortune deck, and banner art.
+    // Content lives here with the app; termforge/core stays brand-neutral
+    // (enforced by termforge/test/content-separation.test.js).
+    const GAME_UI_TEXT = {
+        manBuiltinNote: (cmd) => `Built-in for Bashcrawl Web. Try '${cmd} --help' or open Docs (F1).`,
+        chmodSessionOnly: "Web Bashcrawl chmod only changes session-created files.",
+        chmodDecorative: (mode, target) => `chmod ${mode} ${target}: numeric modes are decorative in the web port.`,
+        mvSessionOnly: "Web Bashcrawl only moves files you created in this session.",
+        rmWorldFile: (name) => `rm: cannot remove '${name}': the dungeon's own files are indestructible`,
+        rmSessionOnly: "Only session-created files can be removed in Web Bashcrawl.",
+        execFileKind: "encounter",
+        figletDefault: "BASHCRAWL",
+        bannerArt: [
+            "       ╔════════════════════════════════════════════════════╗",
+            "       ║   ____            __                       __      ║",
+            "       ║  / __ )___ ______/ /_  ______________ ___ / /      ║",
+            "       ║ / __  / __ `/ ___/ __ \\/ ___/ ___/ __ `__ \\/ /      ║",
+            "       ║/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / / /__    ║",
+            "       ║\\____/\\__,_/____/_/ /_/\\___/_/  /_/ /_/ /_/____/    ║",
+            "       ║                                                    ║",
+            "       ║       Type  pwd  to begin the descent. F1 for help ║",
+            "       ╚════════════════════════════════════════════════════╝",
+        ].join("\n"),
+        fortunes: [
+            "In the catacombs, you have ZERO bytes of fear.",
+            "chmod 777 your dreams. Permissions matter.",
+            "/dev/null is full. Please try again.",
+            "An unhandled exception walks into a bar. The bar pretends nothing happened.",
+            "Cellar mages prefer ls -F over divination.",
+            "Warning: pipes are not for plumbers in this realm.",
+            "When in doubt, cd .. and try again.",
+            "If you can name it, you can grep it.",
+            "The shell is patient. The shell is kind. The shell still won't run that typo.",
+            "May your prompts be short and your scripts be sourced.",
+        ],
+    };
+
     class Runtime extends global.TermForge.Shell {
         constructor(data, state, options) {
             super({
                 world: data.world,
                 commands: data.commands,
                 state: state || defaultState(data.world.root),
+                uiText: GAME_UI_TEXT,
                 bare: Boolean(options && options.bare),
             });
             this.quests = data.quests.quests || [];
@@ -308,11 +347,6 @@
                 this.state.flags.chmod_x = true;
             }
             return out;
-        }
-
-        // `man` fallback copy for the game's handler-backed commands.
-        manBuiltinNote(cmd) {
-            return `Built-in for Bashcrawl Web. Try '${cmd} --help' or open Docs (F1).`;
         }
 
         // Celebrate when accumulated XP crosses an ARENA_RANKS threshold.

@@ -44,6 +44,21 @@ compatible, and the terminal-core bash game is untouched.
   `web/assets/js/vendor/termforge/` by `make web-build`
   (`scripts/vendor_termforge.py`), byte-verified bidirectionally by
   `validate_static_web.py`, pytest, and `make web-test`.
+- **`agentwatch`** (`termforge/apps/agentwatch/`, `make agentwatch`) — an
+  AI-agent task dashboard on the framework: a TaskSource interface projected
+  as `board`/`agent <id>`/`feed` commands AND live read-only VFS files
+  (`cat agents/forge`, `grep -r failed .`), over any host. Ships a
+  deterministic demo fleet (state ticks once per read — no clock/randomness)
+  and a JSONL adapter that turns the repo's real agent-playtest telemetry
+  (`logs/sessions/**`) into a live board
+  (`make agentwatch ARGS="--data-dir logs/sessions"`).
+- **uiText copy deck** — the framework/content boundary made mechanical:
+  every brandable string a core pack emits routes through
+  `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire
+  voice (legacy error strings, fortune deck, banner art, figlet default)
+  moved into `GAME_UI_TEXT` in `runtime.js`. A new
+  `content-separation.test.js` fails the build if game vocabulary appears
+  anywhere under `termforge/core/`.
 
 ### Changed
 
@@ -58,6 +73,10 @@ compatible, and the terminal-core bash game is untouched.
 - `defaultState()` now declares two previously-implicit fields (`prevCwd`,
   `stats.lastPipedIn`); persisted-save key order shifts accordingly (additive;
   legacy saves load unchanged — fixture-proven).
+- Host CLI parsing now uses node's standard `util.parseArgs`
+  (`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS
+  provider mounts now list in their parent directory as file or directory
+  according to the mount root's own type.
 
 ### Fixed
 

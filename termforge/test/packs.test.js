@@ -113,13 +113,17 @@ test("mutators: mkdir/touch/cp/mv/rm/chmod respect the overlay rules", () => {
     assert.strictEqual(run(s, "touch camp/tent"), "Touched camp/tent");
     assert.strictEqual(run(s, "cp fruits camp/fruits2"), "Copied fruits to camp/fruits2");
     assert.strictEqual(run(s, "mv camp/fruits2 camp/basket"), "Moved camp/fruits2 to camp/basket");
-    assert.strictEqual(s.execute("mv fruits nope")[0].kind, "error", "world files don't move");
+    assert.strictEqual(run(s, "mv fruits nope"), "mv only moves files created in this session.",
+        "world files don't move — neutral copy");
     assert.strictEqual(run(s, "rm camp/basket"), "Removed camp/basket");
-    assert.strictEqual(s.execute("rm fruits")[0].kind, "error", "world files are indestructible");
+    assert.strictEqual(run(s, "rm fruits"), "rm: cannot remove 'fruits': read-only world file",
+        "world files are indestructible — neutral copy");
     assert.strictEqual(run(s, "chmod +x camp/tent"), "Marked camp/tent as executable.");
     assert.strictEqual(run(s, "ls -F camp"), "tent*");
     assert.strictEqual(run(s, "chmod -x camp/tent"), "Removed executable bit from camp/tent.");
-    assert.strictEqual(s.execute("chmod +x fruits")[0].kind, "error");
+    assert.strictEqual(run(s, "chmod +x fruits"), "chmod only changes files created in this session.");
+    assert.strictEqual(run(s, "chmod 755 camp/tent"),
+        "chmod 755 camp/tent: numeric modes are decorative here.");
 });
 
 test("variables and quoting", () => {
@@ -133,13 +137,14 @@ test("variables and quoting", () => {
     assert.strictEqual(run(s, "env"), "NAME=world\nGREET=hi-world\nN=2");
 });
 
-test("flavour pack renders its art deterministically", () => {
+test("flavour pack renders its art deterministically with neutral content", () => {
     const s = makeShell();
-    assert.match(run(s, "fortune"), /scripts be sourced/, "rng()=0.999 draws the last fortune");
+    assert.match(run(s, "fortune"), /scripts be sourced/, "rng()=0.999 draws the last neutral fortune");
     assert.match(run(s, "cowsay ahoy"), /< ahoy >/);
     assert.match(run(s, "echo piped | cowsay"), /< piped >/);
     assert.strictEqual(run(s, "figlet ab"), "A B\n====");
-    assert.match(run(s, "banner"), /Type {2}pwd {2}to begin/);
+    assert.match(run(s, "figlet"), /^T E R M F O R G E/, "bare figlet uses the neutral default");
+    assert.match(run(s, "banner"), /T {2}E {2}R {2}M {2}F {2}O {2}R {2}G {2}E/);
     assert.match(run(s, "sl"), /typos take you for a ride/);
     assert.deepStrictEqual(s.execute("clear"), [{ kind: "control", action: "clear" }]);
 });

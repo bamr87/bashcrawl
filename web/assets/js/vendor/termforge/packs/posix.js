@@ -15,7 +15,7 @@
     // TermForge POSIX command pack — the portable teaching subset of the
     // classic Unix toolset, operating on the Shell's VFS. Every function is
     // unbound, invoked as fn.call(shell, args, stdin), and returns Line[].
-    // Bodies are extracted verbatim from the bashcrawl web emulator.
+    // Bodies are extracted verbatim from the original browser emulator.
 
     const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet } = deps.parser;
 
@@ -378,7 +378,7 @@
             if (!node) return [{ kind: "error", text: `${args[0]}: no such file` }];
             const meta = (this.world.encounters || {})[path];
             if (this.isDir(path)) return [{ kind: "output", text: `${args[0]}: directory` }];
-            if (meta) return [{ kind: "output", text: `${args[0]}: executable script (${meta.type || "encounter"})` }];
+            if (meta) return [{ kind: "output", text: `${args[0]}: executable script (${meta.type || this.text("execFileKind")})` }];
             const text = this.readFile(path) || "";
             const looksAscii = /[━╔╚║┃─│└┘┌┐]/.test(text) || /^\s*[!#@]/.test(text);
             return [{ kind: "output", text: `${args[0]}: ${looksAscii ? "ASCII art / scroll" : "text file"}` }];
@@ -389,7 +389,7 @@
             const [mode, target] = args;
             const path = this.resolve(target);
             const node = this.state.userNodes[path];
-            if (!node) return [{ kind: "error", text: "Web Bashcrawl chmod only changes session-created files." }];
+            if (!node) return [{ kind: "error", text: this.text("chmodSessionOnly") }];
             if (mode === "+x") {
                 node.type = "exec";
                 return [{ kind: "success", text: `Marked ${target} as executable.` }];
@@ -398,7 +398,7 @@
                 node.type = "file";
                 return [{ kind: "success", text: `Removed executable bit from ${target}.` }];
             }
-            return [{ kind: "info", text: `chmod ${mode} ${target}: numeric modes are decorative in the web port.` }];
+            return [{ kind: "info", text: this.text("chmodDecorative", mode, target) }];
         },
 
         man(args) {
@@ -434,7 +434,7 @@
             if (idx < 1) return [{ kind: "error", text: "Usage: export VAR=value" }];
             const key = joined.slice(0, idx).trim();
             // Expand $NAME / ${NAME} in the value like a real shell, so
-            // `export I=amulet,$I` accumulates inventory instead of storing "$I".
+            // `export LIST=new,$LIST` accumulates instead of storing a literal "$LIST".
             const value = joined.slice(idx + 1).trim()
                 .replace(/\$\{(\w+)\}|\$([A-Za-z_]\w*)/g, (_, braced, bare) => this.getVar(braced || bare));
             this.setVar(key, value);
@@ -507,7 +507,7 @@
             const src = this.resolve(args[0]);
             const dst = this.resolve(args[1]);
             const node = this.state.userNodes[src];
-            if (!node) return [{ kind: "error", text: "Web Bashcrawl only moves files you created in this session." }];
+            if (!node) return [{ kind: "error", text: this.text("mvSessionOnly") }];
             this.state.userNodes[dst] = node;
             delete this.state.userNodes[src];
             return [{ kind: "success", text: `Moved ${args[0]} to ${args[1]}` }];
@@ -525,8 +525,8 @@
                 if (worldFile) return [{ kind: "dim", text: `Removed your written copy of ${args[0]} — the original remains.` }];
                 return [{ kind: "success", text: `Removed ${args[0]}` }];
             }
-            if (worldFile) return [{ kind: "error", text: `rm: cannot remove '${args[0]}': the dungeon's own files are indestructible` }];
-            return [{ kind: "error", text: "Only session-created files can be removed in Web Bashcrawl." }];
+            if (worldFile) return [{ kind: "error", text: this.text("rmWorldFile", args[0]) }];
+            return [{ kind: "error", text: this.text("rmSessionOnly") }];
         },
 
         history() {
