@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bashcrawl (v3.1) is an educational text-based adventure game that teaches POSIX terminal commands through fantasy dungeon-crawl gameplay. The core game is **the filesystem itself**: directories are rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, `statue`, `ghost`, `monster`, `goblet`) are interactive encounters.
+Bashcrawl (v3.2) is an educational text-based adventure game that teaches POSIX terminal commands through fantasy dungeon-crawl gameplay. The core game is **the filesystem itself**: directories are rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, `statue`, `ghost`, `monster`, `goblet`) are interactive encounters.
 
-Since the v3.1 reduction the repo has exactly **two player surfaces plus one harness**:
+The repo has **two player surfaces, one harness, and one embedded framework**:
 
 - **Terminal-core** (`entrance/`, `help.sh` + `src/help/`, minimal `lib/`) — pure POSIX shell,
   no dependencies, no launcher. Played with real `cd`/`ls`/`cat`: `cd entrance && cat scroll`.
@@ -14,6 +14,10 @@ Since the v3.1 reduction the repo has exactly **two player surfaces plus one har
 **Story** (the dungeon on an in-browser bash emulator), **Practice Arcade** (four mini-games on the same emulator: Path Navigator, grep/find Hunt, Pipe Puzzle, Command Flash), and **Reference** (searchable cheatsheets + concept spotlight). Generated from the game content by `scripts/export_static_web.py`; deployed to GitHub Pages by `pages.yml`.
 - **Playtest harness** (`src/playtest/`) — a lean MCP server that lets an AI agent play the
 *real* bash game in a sandboxed PTY session (`bashcrawl_start/observe/command/report_gap`), with a JSONL recorder and scorer for content-gap audits. Python 3.10+, deps: `pyyaml` + `mcp`.
+- **TermForge** (`termforge/`) — the universal terminal framework extracted from the web
+emulator (v3.2): an environment-agnostic kernel (parser, VFS with providers, Shell + hook spine, Line protocol, TerminalView + DOM/ANSI sinks) as dual-mode files (classic `<script>`
++ CJS, zero deps, no build step), plus node hosts (`host-tty.js`, `host-telnet.js`) and apps
+(`bashcrawl.js`, `procwatch/`). Docs: `docs/termforge/architecture.md`, `docs/termforge/authoring-apps.md`, `docs/termforge/telnet-host.md`, `docs/schemas/terminal-protocol.v1.md`. Core is vendored into `web/assets/js/vendor/termforge/` by `make web-build` — **edit `termforge/core/`, never the vendor mirror** (byte-verified by `make web-test`).
 
 The removed Textual TUI, Flask viewer, and Docker tooling live only in git history (pre-3.1).
 
@@ -30,9 +34,13 @@ make validate-contracts# registries <-> filesystem <-> runtime parity
 make generate-contract-docs
 make test              # unit + integration (pytest)
 make test-unit / test-integration
+make test-js           # TermForge framework tests (node --test, zero deps)
 make test-mcp          # playtest-harness smoke tests in a local .venv
 make playtest          # blank-slate agent playtest (needs claude CLI + OAuth token)
 make lint              # shellcheck + yamllint + markdownlint + ruff
+make lint-js           # node --check over every tracked JS file
+make tty-demo          # play bashcrawl in this terminal (JS emulator on node)
+make telnet-demo       # serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)
 make clean             # bash lib/reset.sh — reset game state
 ```
 
@@ -79,13 +87,17 @@ Hidden areas (all rooted under `entrance/`) are unlocked by collecting treasures
 | `src/help/` | Bash help engine; YAML **content registries** in `src/help/data/`. |
 | `lib/` | Minimal shared shell libs: `colors.sh`, `log.sh` (JSONL), `yaml_reader.sh`, `reset.sh`. |
 | `setup.sh` | chmods encounter scripts (`--quick` for tooling/tests). |
-| `web/assets/js/runtime.js` | The in-browser bash emulator (the shared kernel): pipes, `>`/`>>` redirection, globbing, ~74 commands incl. `grep -rilnc`, `cut`, `tr`, `sed`, `nl`, `rev`. |
-| `web/assets/js/game.js` | Story mode: quests, XP, map, hero, effects. |
-| `web/assets/js/arcade.js` | Practice Arcade framework + the 4 mini-games (scoped Runtime per game). |
+| `termforge/core/` | The TermForge kernel (source of truth): `parser`, `vfs` (+ read-only providers), `shell` (hook spine, injectable clock/rng), `packs/{posix,flavour}`, `protocol`, `view`, `sinks/{dom,ansi}`, `input`. Dual-mode files, vendored to `web/assets/js/vendor/termforge/`. |
+| `termforge/node/` | Node hosts: `host-tty.js`, `host-telnet.js` + `telnet-codec.js` (RFC 854 subset), `index.js` (framework namespace for require()). |
+| `termforge/apps/` | `bashcrawl.js` (the game as an App descriptor for the hosts) and `procwatch/` (custom-tool reference: live metrics as provider files). |
+| `termforge/test/` | `node --test` suites incl. golden transcripts (pixel-identity contract; regenerate only via `record-goldens.js --update`) and the telnet loopback integration. |
+| `web/assets/js/runtime.js` | The **bashcrawl game assembly** over TermForge: `class Runtime extends TermForge.Shell`, the full 74-entry `this.handlers` literal (the `validate_runtime_commands.py` regex contract — one `key: ref,` per line, bare references only), and `installGameHooks()` (quests/achievements/daily/trainer/pathfind/encounters). |
+| `web/assets/js/game.js` | Story mode: quests, XP, map, hero, effects (log via the shared TerminalView). |
+| `web/assets/js/arcade.js` | Practice Arcade framework + the 4 mini-games (scoped bare Runtime per game). |
 | `web/assets/js/reference.js` | Cheatsheet library, concept spotlight, inline syntax hints. |
 | `web/assets/js/shell.js` | Mode router (Story·Arcade·Reference), landing overlay, XP bridge, toasts. |
 | `src/playtest/` | `bash_session.py` (PTY bash REPL + sentinel prompt), `sandbox.py`, `recorder.py`, `harness.py`, `mcp_server.py`, `scorer.py`. |
-| `scripts/` | `export_static_web.py`, `validate_*`, `generate_*`, `playtest.sh`, `lint.sh`, `run_tests.sh`. |
+| `scripts/` | `export_static_web.py`, `vendor_termforge.py`, `validate_*`, `generate_*`, `playtest.sh`, `lint.sh`, `run_tests.sh`. |
 
 ### Game encounter files
 
@@ -125,27 +137,31 @@ mv ../../.chapel ../../chapel   # Unlock a hidden room (target may be 2+ levels 
    See `.github/instructions/rooms.instructions.md`.
 
 ### Web JS
-- Framework-free, IIFE modules, load order: `storage → runtime → docs → reference → arcade →
-  game → shell`. New features plug into `shell.js` (mode router) or an arcade game descriptor.
-- A mini-game = *(seed world + goal predicate + scoring)* over a scoped `Runtime` instance —
-  never reimplement command behavior outside `runtime.js`.
+- Framework-free app code, IIFE modules, classic scripts. Load order: the 13 vendored
+TermForge core files (`protocol → parser → state → vfs → hooks → registry → shell → packs/posix → packs/flavour → view → sinks/dom → sinks/ansi → input`), then `storage → runtime → docs → reference → arcade → game → shell`. `validate_static_web.py` enforces that every vendor file loads before `runtime.js`. New features plug into `shell.js` (mode router) or an arcade game descriptor.
+- A mini-game = *(seed world + goal predicate + scoring)* over a scoped bare `Runtime` —
+  never reimplement command behavior outside `termforge/core/` + `runtime.js`.
+- Framework changes go in `termforge/core/` (then `make web-build` re-vendors); game-only
+changes go in `runtime.js`. The `this.handlers = {…}` literal in `runtime.js` must stay a single static literal (validator regex contract).
 - `localStorage` keys: story save `bashcrawl-web-state-v1`, arcade `bashcrawl-web-arcade-v1`,
-  shell prefs `bashcrawl-web-shell-v1` (additive keys; never break the story save).
+shell prefs `bashcrawl-web-shell-v1` (additive keys; never break the story save — `termforge/test/game-save.test.js` locks the shape).
 
 ## Content Contracts
 
 Game content is described by shared, version-controlled registries (`src/help/data/*.yaml`: `rooms.yaml`, `quests.yaml`, `commands.yaml`, `encounters.yaml`, `runtime_commands.yaml`, `tutorials.yaml`, `arcade.yaml`, etc.). They are the single source of truth for the help system, the web export, and the docs. When changing game content or registries:
 - `make validate-contracts` — registries vs. the real filesystem.
-- `make web-test` — regenerates `web/data/*.json` and validates the bundle
-  (`test_static_web.py` fails CI if committed data is stale).
+- `make web-test` — regenerates `web/data/*.json`, re-vendors `termforge/core/`, and
+validates the bundle (`test_static_web.py` fails CI if committed data or the vendor mirror is stale).
 - `scripts/validate_runtime_commands.py` — every `runtime_commands.yaml` entry flagged
-  `demo: true` must have a handler in `web/assets/js/runtime.js`.
+  `demo: true` must appear in the `this.handlers` literal in `web/assets/js/runtime.js`.
+- `make test-js` — the TermForge suite; the golden transcripts are the emulator's
+  behavior contract (a fixture diff is a claimed behavior change).
 - Regenerate docs with `make generate-contract-docs` (writes `docs/generated/*.md`).
 
 ## Integration Points
 
 - **CI** (`.github/workflows/`, three workflows): `ci.yml` is the PR/push gate — `lint`
-(shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`), `test` (`make validate-contracts` + the full pytest suite via `make test`), and `macos-smoke` (real gameplay on stock macOS bash 3.2). `pages.yml` builds + deploys `web/` on main. `blank-slate-audit.yml` is the weekly agent playtest. Every CI check mirrors a local `make` target; content rules (shebangs/scrolls/unlocks) live in `validate_content_contracts.py`, not inline in workflows. Dependabot owns all dependency updates (`.github/dependabot.yml`).
+(shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`, plus `make lint-js`), `test` (`make validate-contracts` + the full pytest suite via `make test` + the TermForge suite via `make test-js`; node 20 via setup-node), and `macos-smoke` (real gameplay on stock macOS bash 3.2). `pages.yml` builds + deploys `web/` on main. `blank-slate-audit.yml` is the weekly agent playtest. Every CI check mirrors a local `make` target; content rules (shebangs/scrolls/unlocks) live in `validate_content_contracts.py`, not inline in workflows. Dependabot owns all dependency updates (`.github/dependabot.yml`).
 - **MCP server**: `playtest.mcp_server`, configured in `.mcp.json` / `.cursor/mcp.json` with
   `PYTHONPATH=src`; smoke-tested via `make test-mcp`.
 - **Logging**: JSONL session logs in `logs/sessions/` (playtest recorder + test log capture).

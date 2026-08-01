@@ -4,6 +4,66 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.2.0] - 2026-08-01 — TermForge: the emulator becomes a framework
+
+The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a
+universal, zero-dependency terminal framework: one environment-agnostic kernel
+(parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game,
+real terminal sessions, a lightweight telnet server, and custom dev/monitoring
+tools. The web game is byte-identical (golden-transcript proven), saves are
+compatible, and the terminal-core bash game is untouched.
+
+### Added
+
+- **`termforge/core/`** — the framework kernel as dual-mode files (classic
+  `<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only
+  **providers** for live-data files), `shell` (hook spine: preExecute /
+  interceptLine / postExecute / observePipeline / beforeCommand / execDispatch
+  / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`,
+  `protocol` (the versioned Line contract,
+  `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi`
+  (one TerminalView replacing the duplicated story/arcade renderers), and
+  `input` (shared history/completion helpers + a LineEditor and byte decoder
+  for stream hosts).
+- **Node hosts** (`termforge/node/`): `host-tty.js` (play in a real terminal —
+  `make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854
+  subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode —
+  `make telnet-demo`; loopback-bound by default, see
+  `docs/termforge/telnet-host.md`).
+- **Apps** (`termforge/apps/`): `bashcrawl.js` (the game as an App descriptor)
+  and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted
+  as read-only VFS provider files, browsable with the ordinary posix toolkit;
+  `demo.html` runs it in a browser from `file://`).
+- **JS test suite** (`make test-js`, `node --test`, zero npm deps): 62 tests —
+  golden transcripts recorded against the pre-refactor emulator and replayed
+  byte-identically under a pinned vm clock/rng, save-shape + legacy-save
+  round-trips, kernel/pack/view/input units, telnet codec units and a real
+  loopback integration. CI runs it (setup-node 20) plus `make lint-js`
+  (`node --check` over every tracked JS file).
+- **Vendor pipeline**: `termforge/core/` is mirrored file-for-file into
+  `web/assets/js/vendor/termforge/` by `make web-build`
+  (`scripts/vendor_termforge.py`), byte-verified bidirectionally by
+  `validate_static_web.py`, pytest, and `make web-test`.
+
+### Changed
+
+- `web/assets/js/runtime.js` (1852 → ~930 lines) is now the **game assembly**:
+  `class Runtime extends TermForge.Shell` with the full 74-entry handlers
+  literal (still the `validate_runtime_commands.py` contract — the validator
+  is untouched) and `installGameHooks()` for quests, achievements, daily,
+  trainer, pathfind, and encounters.
+- `game.js`/`arcade.js` share one TerminalView + DomSink (the twin log
+  renderers and four `escapeHtml` copies collapse into one);
+  `arcade.js` passes `{ bare: true }` instead of poking the instance.
+- `defaultState()` now declares two previously-implicit fields (`prevCwd`,
+  `stats.lastPipedIn`); persisted-save key order shifts accordingly (additive;
+  legacy saves load unchanged — fixture-proven).
+
+### Fixed
+
+- Committed `web/data/world.json` was stale after the #75 markdown unwrap
+  (freshness test red from a clean checkout).
+
 ## [3.1.0] - 2026-07-06 — The Great Reduction + Web Flagship
 
 The repo is reduced to **two player surfaces plus one harness**: the pure-bash

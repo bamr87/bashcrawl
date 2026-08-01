@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bashcrawl"
-version = "3.0.0"
+version = "3.2.0"
 description = "Terminal adventure game for learning shell fundamentals (terminal-core + web)"
 readme = "README.md"
 requires-python = ">=3.10"
