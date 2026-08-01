@@ -63,7 +63,16 @@ function main() {
         });
     }
     outputs.push({ file: path.join(SAVE_DIR, "defaults-current.json"), content: recordDefaults() });
-    outputs.push({ file: path.join(SAVE_DIR, "save-v1-legacy.json"), content: recordLegacySave() });
+    // The legacy save is a WRITE-ONCE archaeological artifact: it was captured
+    // from the pre-TermForge emulator and exists to prove old browser saves
+    // keep loading. Never modernize it — delete the file manually if you truly
+    // mean to re-capture.
+    const legacyFile = path.join(SAVE_DIR, "save-v1-legacy.json");
+    if (!fs.existsSync(legacyFile)) {
+        outputs.push({ file: legacyFile, content: recordLegacySave() });
+    } else {
+        console.log("  frozen     " + path.relative(process.cwd(), legacyFile));
+    }
 
     let changed = 0;
     for (const { file, content } of outputs) {

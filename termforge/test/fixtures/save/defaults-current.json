@@ -1,5 +1,6 @@
 {
   "cwd": "/entrance",
+  "prevCwd": null,
   "hp": 100,
   "xp": 0,
   "inventory": [],
@@ -30,6 +31,7 @@
   "stats": {
     "commands": {},
     "catScrollCount": 0,
+    "lastPipedIn": false,
     "initialized": false
   }
 }

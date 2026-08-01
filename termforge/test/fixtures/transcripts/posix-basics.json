@@ -354,6 +354,7 @@
   ],
   "finalState": {
     "cwd": "/entrance/cellar",
+    "prevCwd": "/entrance",
     "hp": 100,
     "xp": 340,
     "inventory": [],
@@ -414,9 +415,8 @@
         "frobnicate": 1
       },
       "catScrollCount": 2,
-      "initialized": false,
-      "lastPipedIn": false
-    },
-    "prevCwd": "/entrance"
+      "lastPipedIn": false,
+      "initialized": false
+    }
   }
 }

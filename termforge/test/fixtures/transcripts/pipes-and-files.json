@@ -464,6 +464,7 @@
   ],
   "finalState": {
     "cwd": "/entrance",
+    "prevCwd": null,
     "hp": 100,
     "xp": 10,
     "inventory": [],
@@ -541,8 +542,8 @@
         "clear": 1
       },
       "catScrollCount": 8,
-      "initialized": false,
-      "lastPipedIn": false
+      "lastPipedIn": false,
+      "initialized": false
     }
   }
 }
