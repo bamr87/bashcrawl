@@ -70,6 +70,23 @@ def test_committed_web_data_is_fresh(tmp_path: Path) -> None:
     )
 
 
+def test_vendored_termforge_is_fresh() -> None:
+    """web/assets/js/vendor/termforge must byte-match termforge/core.
+
+    The framework source of truth is termforge/core/; the web bundle ships a
+    committed mirror. If this fails, run `make web-build` and commit.
+    """
+    root = Path(__file__).resolve().parents[2]
+    check = subprocess.run(
+        ["python3", "scripts/vendor_termforge.py", "--check"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert check.returncode == 0, check.stdout + check.stderr
+
+
 def test_web_runtime_declares_handlers_for_demo_commands() -> None:
     root = Path(__file__).resolve().parents[2]
     validate = subprocess.run(

@@ -87,12 +87,12 @@ CI runs ShellCheck, yamllint, markdownlint, and game content validation on every
 
 When implementing a feature, confirm these before opening a PR:
 
-1. **Owner surface chosen first** (bash game content under `entrance/`, static web trainer in `web/`, or playtest harness in `src/playtest/`).
-2. **Boundary tests updated** at the layer where behavior changed (unit/integration).
+1. **Owner surface chosen first** (bash game content under `entrance/`, static web trainer in `web/`, playtest harness in `src/playtest/`, or the terminal framework in `termforge/` — framework changes go in `termforge/core/`, never in the vendored `web/assets/js/vendor/termforge/` mirror).
+2. **Boundary tests updated** at the layer where behavior changed (unit/integration for Python, `make test-js` suites for the framework; a golden-fixture diff is a claimed behavior change).
 3. **Contract data checked** by running:
    - `python3 scripts/validate_content_contracts.py`
    - `python3 scripts/validate_walkthrough_fs.py`
-4. **Data contracts kept in sync** (`src/help/data/*.yaml`, `test/datasets/walkthrough.json`), and the web bundle rebuilt (`make web-build`) when game content changes.
+4. **Data contracts kept in sync** (`src/help/data/*.yaml`, `test/datasets/walkthrough.json`), and the web bundle rebuilt (`make web-build`) when game content or `termforge/core/` changes — the rebuild also refreshes the vendored framework mirror, which `make web-test` verifies byte-for-byte.
 
 ## Pull Request Process
 

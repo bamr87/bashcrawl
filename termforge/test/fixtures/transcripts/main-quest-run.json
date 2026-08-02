@@ -1,0 +1,956 @@
+{
+  "name": "main-quest-run",
+  "seed": 303,
+  "clockStart": 1768478400000,
+  "steps": [
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance"
+        },
+        {
+          "kind": "success",
+          "text": "🧭 Achievement unlocked: First Steps — Found your place with pwd.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Apprentice of the Shell!"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar  README.md  scroll"
+        },
+        {
+          "kind": "success",
+          "text": "🔥 Daily challenge complete!  +25 XP  ·  Streak: 1 day"
+        },
+        {
+          "kind": "dim",
+          "text": "Come back tomorrow to keep the streak alive."
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Terminal Master!"
+        }
+      ]
+    },
+    {
+      "line": "cd cellar",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar"
+        },
+        {
+          "kind": "success",
+          "text": "🔥 Achievement unlocked: Seasoned Adventurer — Earned 150 XP.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Archmage of the Command Line!"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "\n################################################################################\n#                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #\n################################################################################\n\n🔮 ANCIENT WISDOM: Seeing Beyond the Veil\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n*The air grows thick with mystical energy as you descend into the cellar...*\n*Here, ancient magic teaches adventurers to distinguish reality from illusion.*\n\n**Illusions are strong here.** It is difficult to tell what is a doorway and what is an object.\nThe untrained eye sees only a simple list of names, but the wise terminal mage learns to\nperceive the **true nature** of all things in the catacombs.\n\n--------------------------------------------------------------------------------\n⚡ THE ENHANCED SIGHT SPELL: ls -F\n--------------------------------------------------------------------------------\n\nThe magic spell you use to look can be **augmented** with powerful enchantments.\n\n*Master this incantation to pierce through the veils of confusion...*\n\n┌─ ENHANCED SIGHT INCANTATION ───────────────────────────────────────────────┐\n│                                                                             │\n│ $ ls -F                           # Cast enhanced sight spell              │\n│                                                                             │\n│ Expected Manifestation:                                                     │\n│ scroll  treasure*  armoury/  README.md                                     │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎯 What the Mystical Symbols Reveal\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you cast `ls -F`, the mystical energies reveal secrets through their symbols:\n\n┌─────────────────┬────────────────────────────┬──────────────────────────────┐\n│ SYMBOL          │ TYPE                       │ DESCRIPTION                  │\n├─────────────────┼────────────────────────────┼──────────────────────────────┤\n│ /               │ Directory (Chamber)        │ Rooms you can enter          │\n│ *               │ Executable (Encounter)     │ Interactive adventures       │\n│ @               │ Symbolic Link (Portal)     │ Magickal doorways            │\n│ |               │ Named Pipe (Channel)       │ Communication pathways       │\n│ =               │ Socket (Connection)        │ Network junction points      │\n│ (none)          │ Regular File (Scroll)      │ Documents and knowledge      │\n└─────────────────┴────────────────────────────┴──────────────────────────────┘\n\n################################################################################\n#              🪄 THE ALIAS ENCHANTMENT: Permanent Spell Enhancement          #\n################################################################################\n\nYou can avoid having to type `ls -F` every time by weaving a **command alias** -\na permanent enchantment that enhances your basic spells:\n\n╭─ PERMANENT ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F'                # Weave the permanent enchantment        │\n│                                                                             │\n│ Effect: Your basic 'ls' spell now carries enhanced sight                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎓 Understanding Shell Aliases\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThis is known as a **shell alias** or **command alias**. With this alias active:\n\n• Typing simply `ls` by itself will automatically run `ls -F`\n• Your spell becomes permanently enhanced for this terminal session  \n• The magic persists until you close your terminal or create a new alias\n\n--------------------------------------------------------------------------------\n🔄 Try It Out! - Interactive Learning Path\n--------------------------------------------------------------------------------\n\nPRACTICE PATH: Discovery → Understanding → Mastery\n\n    1. FIRST STEP: Cast the enhanced spell manually\n       $ ls -F\n\n    2. SECOND STEP: Create the permanent enchantment  \n       $ alias ls='ls -F'\n\n    3. THIRD STEP: Test your enhanced spell\n       $ ls\n\n    4. FOURTH STEP: Verify the magic worked\n       $ alias ls\n       (This reveals your current alias definition)\n\n################################################################################\n#                  🏆 ADVANCED SIGHT TECHNIQUES: Master's Methods             #\n################################################################################\n\n⚡ COLOR-ENHANCED VISION: Advanced Sight Magic\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nFor terminals that support color magic, enhance your sight even further:\n\n╭─ CHROMATIC ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F --color=auto'   # Weave color into your sight            │\n│                                                                             │\n│ Color Manifestations:                                                       │\n│ • Blue: Directories (chambers)                                             │\n│ • Green: Executables (encounters)                                          │\n│ • Cyan: Symbolic links (portals)                                           │\n│ • White: Regular files (scrolls)                                           │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n⚡ DETAILED INSPECTION: The Master's Eye\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you need to examine items more thoroughly:\n\n╭─ COMPREHENSIVE SIGHT SPELL ────────────────────────────────────────────────╮\n│                                                                             │\n│ $ ls -laF                         # Master-level inspection spell          │\n│                                                                             │\n│ This reveals hidden knowledge:                                              │\n│ • -l: Long format (permissions, size, modification time)                   │\n│ • -a: Hidden files (starting with '.')                                     │\n│ • -F: Your familiar file type indicators                                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n################################################################################\n#          🎯 CELLAR CHALLENGE: Master the Enhanced Sight Spells              #\n################################################################################\n\nBefore you may claim the **emerald amulet** that awaits in this chamber,\nprove your mastery of the ancient sight arts:\n\nREQUIRED TASKS:\n~~~~~~~~~~~~~~~\n✅ Cast Enhanced Sight: Use ls -F to see the true nature of this cellar\n✅ Create Permanent Enhancement: Set up the alias ls='ls -F' enchantment  \n✅ Test Your Magic: Verify that plain ls now shows file type indicators\n✅ Explore Thoroughly: Use enhanced sight to identify all chambers and encounters\n✅ Find the Treasure: Locate and examine the treasure file in this room\n\nEXPECTED DISCOVERIES:\n~~~~~~~~~~~~~~~~~~~~\nIn this cellar, your enhanced sight should reveal:\n\n┌─ CHAMBER CONTENTS ──────────────────────────────────────────────────────────┐\n│                                                                             │\n│ 🏰 Directories ending with / (chambers you can enter)                      │\n│ 🗡️ Executables ending with * (encounters you can experience)               │\n│ 📜 Regular files with no suffix (scrolls to read)                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n################################################################################\n#               💡 PATH TO MASTERY: Building Terminal Intuition               #\n################################################################################\n\n🧠 WHY THIS KNOWLEDGE MATTERS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nUnderstanding file types is **fundamental** to terminal mastery:\n\n• **Safety**: Know if something is executable before running it\n• **Navigation**: Quickly identify which items are directories\n• **Efficiency**: Understand your environment at a glance\n• **Problem-solving**: Debug issues by understanding file types\n\n🚀 REAL-WORLD APPLICATIONS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n╭─ PROFESSIONAL CONTEXTS ────────────────────────────────────────────────────╮\n│                                                                             │\n│ • System Administration: Quickly assess directory contents                 │\n│ • Development: Identify scripts, configs, and executables                  │\n│ • Debugging: Understand file permissions and types                         │\n│ • Automation: Write scripts that handle different file types               │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n💰 TREASURE VAULT: The Emerald Amulet Awaits\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nOnce you've mastered the enhanced sight spell and understand the true nature\nof files in the terminal realm, seek out the **treasure** in this chamber.\n\nThe emerald amulet you'll find here is more than decoration - it unlocks\n**new pathways** deeper into the catacombs, revealing hidden chambers that\nwere previously concealed from untrained eyes.\n\n################################################################################\n#                        🗺️ NEXT STEPS IN YOUR JOURNEY                       #\n################################################################################\n\nWith mastery of enhanced sight spells, new mystical pathways reveal themselves:\n\nAVAILABLE PATHS:\n┌─────────────────────────────────────────────────────────────────────────────┐\n│ 🗡️ The Armoury: Weapon Mastery Training                                    │\n│    Access: cd armoury                                                       │\n│    Focus: Combat skills and file manipulation                              │\n│    Rewards: Executable permissions and advanced file operations            │\n│                                                                             │\n│ ⛪ Hidden Chapel: Sacred Knowledge Vault                                    │\n│    Access: [unlock condition - collect 3 treasures]                        │\n│    Focus: Secret commands and advanced techniques                           │\n│    Skills: Hidden file manipulation and system secrets                     │\n│                                                                             │\n│ 💰 The Vault: Master's Inventory Domain                                     │\n│    Access: [requires emerald amulet from this chamber]                     │\n│    Focus: Environment variables and inventory management                    │\n│    Rewards: Variable manipulation and state management                      │\n│                                                                             │\n│ 🔧 The Scrap: System Information Sanctum                                   │\n│    Access: [requires completion of armoury trials]                         │\n│    Focus: System information and debugging techniques                       │\n│    Skills: Process monitoring and system analysis                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\nVISUAL PATHWAY MAP:\n    Entrance → Cellar → Armoury → Chamber → Hidden Realms\n       ⭐        ⚡        🗡️        🏆         🎖️\n\nEach path teaches **different aspects** of terminal mastery. Choose based on\nyour interests and learning goals, or explore them all to become a true\ncommand-line champion!\n\n================================================================================\n*\"In the depths of the cellar, sight becomes insight, and knowledge becomes power.\"*\n*~ Ancient Terminal Wisdom*\n\n**The magic grows stronger within you, brave adventurer. Press onward!**\n================================================================================\n"
+        }
+      ]
+    },
+    {
+      "line": "./treasure",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ______________\n     /\\             \\\n    /  )=============)\n   /  /  .--------.  \\\n  (  (  / ()  ()()  \\ )\n   \\  \\ '----------' / )\n    \\  )============( /\n     \\/____________\\/\n      jewels gleam within..."
+        },
+        {
+          "kind": "magic",
+          "text": "💰 Collect the emerald amulet"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: amulet"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 A new passage opens: chapel/"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 A new passage opens: vault/"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 A new passage opens: scrap/"
+        },
+        {
+          "kind": "success",
+          "text": "💰 Achievement unlocked: Treasure Hunter — Claimed your first loot.  (+5 XP)"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 Achievement unlocked: Key-Master — Unlocked a hidden room.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "inventory",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "amulet"
+        }
+      ]
+    },
+    {
+      "line": "echo $I",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "amulet"
+        }
+      ]
+    },
+    {
+      "line": "./treasure",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ______________\n     /\\             \\\n    /  )=============)\n   /  /  .--------.  \\\n  (  (  / ()  ()()  \\ )\n   \\  \\ '----------' / )\n    \\  )============( /\n     \\/____________\\/\n      jewels gleam within..."
+        },
+        {
+          "kind": "magic",
+          "text": "💰 Collect the emerald amulet"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: amulet"
+        }
+      ]
+    },
+    {
+      "line": "cd armoury",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar/armoury"
+        }
+      ]
+    },
+    {
+      "line": "./treasure",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ______________\n     /\\             \\\n    /  )=============)\n   /  /  .--------.  \\\n  (  (  / ()  ()()  \\ )\n   \\  \\ '----------' / )\n    \\  )============( /\n     \\/____________\\/\n      jewels gleam within..."
+        },
+        {
+          "kind": "magic",
+          "text": "🗡️ Claim the sword"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: sword"
+        }
+      ]
+    },
+    {
+      "line": "./potion",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "          .-=-.\n          | _ |\n          |( )|\n         .'   '.\n        / ~ ~ ~ \\\n       | ~ ~ ~ ~ |\n       | ~ ~ ~ ~ |\n        '._____.'\n     a glowing brew bubbles"
+        },
+        {
+          "kind": "magic",
+          "text": "🧪 Restore health"
+        },
+        {
+          "kind": "success",
+          "text": "HP restored to 100."
+        }
+      ]
+    },
+    {
+      "line": "grep sword scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "(no matches for 'sword')"
+        }
+      ]
+    },
+    {
+      "line": "cd chamber",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar/armoury/chamber"
+        }
+      ]
+    },
+    {
+      "line": "./treasure",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ______________\n     /\\             \\\n    /  )=============)\n   /  /  .--------.  \\\n  (  (  / ()  ()()  \\ )\n   \\  \\ '----------' / )\n    \\  )============( /\n     \\/____________\\/\n      jewels gleam within..."
+        },
+        {
+          "kind": "magic",
+          "text": "💎 Collect coins or diamonds"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: coins"
+        }
+      ]
+    },
+    {
+      "line": "./statue",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "        .------.\n       | .----. |\n       | | OO | |\n       | | <> | |\n       | '----' |\n      _|        |_\n     /   stone    \\\n    /______________\\\n     the guardian wakes"
+        },
+        {
+          "kind": "magic",
+          "text": "🗿 Stone guardian"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: diamonds"
+        },
+        {
+          "kind": "error",
+          "text": "You took 5 damage."
+        }
+      ]
+    },
+    {
+      "line": "health",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "HP=95"
+        }
+      ]
+    },
+    {
+      "line": "status",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Location: /entrance/cellar/armoury/chamber\nHP: 95\nXP: 345\nInventory: amulet, sword, coins, diamonds"
+        }
+      ]
+    },
+    {
+      "line": "mkdir workshop",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Created directory workshop"
+        },
+        {
+          "kind": "success",
+          "text": "⚡ Achievement unlocked: World-Builder — Conjured a room with mkdir.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "touch workshop/anvil",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Touched workshop/anvil"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar  chapel  README.md  scrap  scroll  vault"
+        }
+      ]
+    },
+    {
+      "line": "map",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "/entrance  ← you are here\n  ├── cellar/\n  │   └── armoury/\n  │       └── chamber/\n  │           └── workshop/\n  ├── chapel/\n  │   ├── courtyard/\n  │   │   └── aviary/\n  │   │       └── hall/\n  │   │           └── library/\n  │   └── graveyard/\n  │       ├── columbarium/\n  │       ├── lower-quadrant/\n  │       └── royal-tombs/\n  ├── scrap/\n  └── vault/\n      └── stronghold/\n          └── nursery/\n              └── lab/"
+        },
+        {
+          "kind": "dim",
+          "text": "Some passages stay hidden until unlocked — try `ls -la` and read the scrolls."
+        },
+        {
+          "kind": "success",
+          "text": "✨ Achievement unlocked: Cartographer — Charted the dungeon with map or tree.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "cd chapel",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/chapel"
+        }
+      ]
+    },
+    {
+      "line": "ls -F",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "altar*  courtyard/  graveyard/  scroll"
+        }
+      ]
+    },
+    {
+      "line": "look",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "⛪ THE CHAPEL\nChapel path: Discover hidden commands and the ancient library tome."
+        },
+        {
+          "kind": "output",
+          "text": "  altar*\n  courtyard/\n  graveyard/\n  scroll"
+        }
+      ]
+    },
+    {
+      "line": "cd graveyard",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/chapel/graveyard"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "columbarium  lower-quadrant  padlock  royal-tombs  scroll"
+        }
+      ]
+    },
+    {
+      "line": "./padlock",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "No runnable script: ./padlock"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "columbarium  lower-quadrant  padlock  royal-tombs  scroll"
+        }
+      ]
+    },
+    {
+      "line": "cd mausoleum",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Not a directory: mausoleum"
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance/chapel/graveyard"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance/vault",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/vault"
+        }
+      ]
+    },
+    {
+      "line": "ls -F",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "glass*  scroll  stronghold/"
+        }
+      ]
+    },
+    {
+      "line": "cd stronghold",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/vault/stronghold"
+        }
+      ]
+    },
+    {
+      "line": "./goblet",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "No runnable script: ./goblet"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar  chapel  README.md  scrap  scroll  vault"
+        }
+      ]
+    },
+    {
+      "line": "cd rift",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Not a directory: rift"
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "cd cellar",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar"
+        }
+      ]
+    },
+    {
+      "line": "grep amulet scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "Before you may claim the **emerald amulet** that awaits in this chamber,\nThe emerald amulet you'll find here is more than decoration - it unlocks\n│    Access: [requires emerald amulet from this chamber]                     │"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "mkdir study",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Created directory study"
+        }
+      ]
+    },
+    {
+      "line": "cd study",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/study"
+        }
+      ]
+    },
+    {
+      "line": "touch grimoire",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Touched grimoire"
+        }
+      ]
+    },
+    {
+      "line": "source grimoire",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "📕 The grimoire's knowledge merges with your shell."
+        },
+        {
+          "kind": "success",
+          "text": "Defined `bc` as a quick demo (output: 42). Scriptorium quest ready."
+        }
+      ]
+    },
+    {
+      "line": "bc",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "42"
+        }
+      ]
+    },
+    {
+      "line": "cd /entrance",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "quest",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "All quests complete."
+        }
+      ]
+    },
+    {
+      "line": "hint",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "No quests left. Try `map`, `tree`, `cowsay hi`, or the `train` / `speedrun` / `pathfind` mini-games."
+        }
+      ]
+    },
+    {
+      "line": "xp",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "Level 5  █████░░░░░  105/200 to next level  (total 905 XP)"
+        }
+      ]
+    },
+    {
+      "line": "profile",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "  .-----------------------------.\n  |      C H A R A C T E R      |\n  |          S H E E T          |\n  '-----------------------------'"
+        },
+        {
+          "kind": "magic",
+          "text": "  Rank:  Archmage of the Command Line"
+        },
+        {
+          "kind": "output",
+          "text": "  XP:               905        HP: 95/100"
+        },
+        {
+          "kind": "output",
+          "text": "  Quests:           8/8 complete"
+        },
+        {
+          "kind": "output",
+          "text": "  Badges:           6/11 earned"
+        },
+        {
+          "kind": "output",
+          "text": "  Scrolls read:     1"
+        },
+        {
+          "kind": "output",
+          "text": "  Commands:         23 distinct (53 cast)"
+        },
+        {
+          "kind": "output",
+          "text": "  Hidden rooms:     3 unlocked"
+        },
+        {
+          "kind": "output",
+          "text": "  Best speed run:   —"
+        },
+        {
+          "kind": "output",
+          "text": "  Inventory:        amulet, sword, coins, diamonds, grimoire"
+        },
+        {
+          "kind": "dim",
+          "text": "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow"
+        }
+      ]
+    },
+    {
+      "line": "achievements",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "🏅 Achievements — 6/11 unlocked"
+        },
+        {
+          "kind": "success",
+          "text": "🧭 First Steps — Found your place with pwd."
+        },
+        {
+          "kind": "success",
+          "text": "✨ Cartographer — Charted the dungeon with map or tree."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Scholar — Read three ancient scrolls."
+        },
+        {
+          "kind": "success",
+          "text": "⚡ World-Builder — Conjured a room with mkdir."
+        },
+        {
+          "kind": "success",
+          "text": "💰 Treasure Hunter — Claimed your first loot."
+        },
+        {
+          "kind": "success",
+          "text": "🔓 Key-Master — Unlocked a hidden room."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Arena Graduate — Cleared a Training Arena run."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Speed Demon — Finished a timed Speed Run."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Trailblazer — Completed a Path-Finder journey."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Naturalist — Catalogued 5 creatures in the bestiary."
+        },
+        {
+          "kind": "success",
+          "text": "🔥 Seasoned Adventurer — Earned 150 XP."
+        }
+      ]
+    },
+    {
+      "line": "bestiary",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "✨ Bestiary — 3/11 catalogued"
+        },
+        {
+          "kind": "success",
+          "text": "  ✅ Treasure Chest — Spills jewels for the bold."
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "success",
+          "text": "  ✅ Glowing Potion — Restores a weary hero's vigor."
+        },
+        {
+          "kind": "success",
+          "text": "  ✅ Stone Guardian — Wakes when you draw near."
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  🔒 ??? — undiscovered"
+        },
+        {
+          "kind": "dim",
+          "text": "  Run an encounter (e.g. ./treasure) to catalogue it.  'bestiary <name>' to view one."
+        }
+      ]
+    },
+    {
+      "line": "bestiary treasure",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "      ______________\n     /\\             \\\n    /  )=============)\n   /  /  .--------.  \\\n  (  (  / ()  ()()  \\ )\n   \\  \\ '----------' / )\n    \\  )============( /\n     \\/____________\\/\n      jewels gleam within..."
+        },
+        {
+          "kind": "magic",
+          "text": "  Treasure Chest"
+        },
+        {
+          "kind": "output",
+          "text": "  Spills jewels for the bold."
+        }
+      ]
+    },
+    {
+      "line": "daily",
+      "outputs": [
+        {
+          "kind": "magic",
+          "text": "✨ Daily Challenge — 2026-01-15"
+        },
+        {
+          "kind": "output",
+          "text": "   Goal:     earn 60 XP today"
+        },
+        {
+          "kind": "output",
+          "text": "   Progress: ✅ complete"
+        },
+        {
+          "kind": "output",
+          "text": "   Streak:   1 day"
+        },
+        {
+          "kind": "dim",
+          "text": "   Done! Return tomorrow to extend your streak."
+        }
+      ]
+    },
+    {
+      "line": "save",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Progress is saved automatically in this browser."
+        }
+      ]
+    },
+    {
+      "line": "save export",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "eyJjd2QiOiIvZW50cmFuY2UiLCJwcmV2Q3dkIjoiL2VudHJhbmNlL3N0dWR5IiwiaHAiOjk1LCJ4cCI6OTA1LCJpbnZlbnRvcnkiOlsiYW11bGV0Iiwic3dvcmQiLCJjb2lucyIsImRpYW1vbmRzIiwiZ3JpbW9pcmUiXSwiYWxpYXNlcyI6eyJiYyI6ImVjaG8gNDIifSwiZW52VmFycyI6e30sInVzZXJOb2RlcyI6eyIvZW50cmFuY2UvY2VsbGFyL2FybW91cnkvY2hhbWJlci93b3Jrc2hvcCI6eyJ0eXBlIjoiZGlyIn0sIi9lbnRyYW5jZS9jZWxsYXIvYXJtb3VyeS9jaGFtYmVyL3dvcmtzaG9wL2FudmlsIjp7InR5cGUiOiJmaWxlIiwiY29udGVudCI6IiJ9LCIvZW50cmFuY2Uvc3R1ZHkiOnsidHlwZSI6ImRpciJ9LCIvZW50cmFuY2Uvc3R1ZHkvZ3JpbW9pcmUiOnsidHlwZSI6ImZpbGUiLCJjb250ZW50IjoiIn19LCJjb21wbGV0ZWRRdWVzdElkcyI6WzAsMSwyLDMsNCw1LDYsN10sImN1cnJlbnRRdWVzdElkIjo4LCJ2aXNpdGVkIjpbXSwiaGlzdG9yeSI6W10sImhpc3RvcnlJbmRleCI6LTEsImZsYWdzIjp7InRyZWFzdXJlX2NlbGxhciI6dHJ1ZSwidHJlYXN1cmVfYXJtb3VyeSI6dHJ1ZSwicG90aW9uIjp0cnVlLCJ0cmVhc3VyZV9jaGFtYmVyIjp0cnVlLCJzdGF0dWUiOnRydWV9LCJyZXZlYWxzIjp7Ii9lbnRyYW5jZS9jaGFwZWwiOiIvZW50cmFuY2UvLmNoYXBlbCIsIi9lbnRyYW5jZS92YXVsdCI6Ii9lbnRyYW5jZS8udmF1bHQiLCIvZW50cmFuY2Uvc2NyYXAiOiIvZW50cmFuY2UvLnNjcmFwIn0sInRyYWluZXIiOm51bGwsInBhdGhmaW5kIjpudWxsLCJzcGVlZHJ1bkJlc3QiOm51bGwsImFjaGlldmVtZW50cyI6WyJmaXJzdF9zdGVwcyIsInNlYXNvbmVkIiwidHJlYXN1cmVfaHVudGVyIiwia2V5X21hc3RlciIsIndvcmxkX2J1aWxkZXIiLCJjYXJ0b2dyYXBoZXIiXSwiYmVzdGlhcnkiOlsidHJlYXN1cmUiLCJwb3Rpb24iLCJzdGF0dWUiXSwiZGFpbHkiOnsiZGF0ZSI6IjIwMjYtMDEtMTUiLCJiYXNlbGluZVhwIjowLCJnb2FsIjo2MCwiY29tcGxldGVkIjp0cnVlLCJzdHJlYWsiOjEsImxhc3REYXRlIjoiMjAyNi0wMS0xNSJ9LCJyYW5rSW5kZXgiOjQsInN0YXRzIjp7ImNvbW1hbmRzIjp7InB3ZCI6MywibHMiOjcsImNkIjoxNiwiY2F0IjoxLCIuL3RyZWFzdXJlIjo0LCJpbnZlbnRvcnkiOjEsImVjaG8iOjIsIi4vcG90aW9uIjoxLCJncmVwIjoyLCIuL3N0YXR1ZSI6MSwiaGVhbHRoIjoxLCJzdGF0dXMiOjEsIm1rZGlyIjoyLCJ0b3VjaCI6MiwibWFwIjoxLCJsb29rIjoxLCIuL3BhZGxvY2siOjEsIi4vZ29ibGV0IjoxLCJzb3VyY2UiOjEsInF1ZXN0IjoxLCJoaW50IjoxLCJ4cCI6MSwicHJvZmlsZSI6MSwiYWNoaWV2ZW1lbnRzIjoxLCJiZXN0aWFyeSI6MiwiZGFpbHkiOjEsInNhdmUiOjJ9LCJjYXRTY3JvbGxDb3VudCI6MSwibGFzdFBpcGVkSW4iOmZhbHNlLCJpbml0aWFsaXplZCI6ZmFsc2V9fQ=="
+        }
+      ]
+    }
+  ],
+  "finalState": {
+    "cwd": "/entrance",
+    "prevCwd": "/entrance/study",
+    "hp": 95,
+    "xp": 905,
+    "inventory": [
+      "amulet",
+      "sword",
+      "coins",
+      "diamonds",
+      "grimoire"
+    ],
+    "aliases": {
+      "bc": "echo 42"
+    },
+    "envVars": {},
+    "userNodes": {
+      "/entrance/cellar/armoury/chamber/workshop": {
+        "type": "dir"
+      },
+      "/entrance/cellar/armoury/chamber/workshop/anvil": {
+        "type": "file",
+        "content": ""
+      },
+      "/entrance/study": {
+        "type": "dir"
+      },
+      "/entrance/study/grimoire": {
+        "type": "file",
+        "content": ""
+      }
+    },
+    "completedQuestIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "currentQuestId": 8,
+    "visited": [],
+    "history": [],
+    "historyIndex": -1,
+    "flags": {
+      "treasure_cellar": true,
+      "treasure_armoury": true,
+      "potion": true,
+      "treasure_chamber": true,
+      "statue": true
+    },
+    "reveals": {
+      "/entrance/chapel": "/entrance/.chapel",
+      "/entrance/vault": "/entrance/.vault",
+      "/entrance/scrap": "/entrance/.scrap"
+    },
+    "trainer": null,
+    "pathfind": null,
+    "speedrunBest": null,
+    "achievements": [
+      "first_steps",
+      "seasoned",
+      "treasure_hunter",
+      "key_master",
+      "world_builder",
+      "cartographer"
+    ],
+    "bestiary": [
+      "treasure",
+      "potion",
+      "statue"
+    ],
+    "daily": {
+      "date": "2026-01-15",
+      "baselineXp": 0,
+      "goal": 60,
+      "completed": true,
+      "streak": 1,
+      "lastDate": "2026-01-15"
+    },
+    "rankIndex": 4,
+    "stats": {
+      "commands": {
+        "pwd": 3,
+        "ls": 7,
+        "cd": 16,
+        "cat": 1,
+        "./treasure": 4,
+        "inventory": 1,
+        "echo": 2,
+        "./potion": 1,
+        "grep": 2,
+        "./statue": 1,
+        "health": 1,
+        "status": 1,
+        "mkdir": 2,
+        "touch": 2,
+        "map": 1,
+        "look": 1,
+        "./padlock": 1,
+        "./goblet": 1,
+        "source": 1,
+        "quest": 1,
+        "hint": 1,
+        "xp": 1,
+        "profile": 1,
+        "achievements": 1,
+        "bestiary": 2,
+        "daily": 1,
+        "save": 2
+      },
+      "catScrollCount": 1,
+      "lastPipedIn": false,
+      "initialized": false
+    }
+  }
+}

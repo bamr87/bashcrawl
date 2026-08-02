@@ -1,0 +1,118 @@
+{
+  "cwd": "/entrance",
+  "hp": 95,
+  "xp": 905,
+  "inventory": [
+    "amulet",
+    "sword",
+    "coins",
+    "diamonds",
+    "grimoire"
+  ],
+  "aliases": {
+    "bc": "echo 42"
+  },
+  "envVars": {},
+  "userNodes": {
+    "/entrance/cellar/armoury/chamber/workshop": {
+      "type": "dir"
+    },
+    "/entrance/cellar/armoury/chamber/workshop/anvil": {
+      "type": "file",
+      "content": ""
+    },
+    "/entrance/study": {
+      "type": "dir"
+    },
+    "/entrance/study/grimoire": {
+      "type": "file",
+      "content": ""
+    }
+  },
+  "completedQuestIds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "currentQuestId": 8,
+  "visited": [],
+  "history": [],
+  "historyIndex": -1,
+  "flags": {
+    "treasure_cellar": true,
+    "treasure_armoury": true,
+    "potion": true,
+    "treasure_chamber": true,
+    "statue": true
+  },
+  "reveals": {
+    "/entrance/chapel": "/entrance/.chapel",
+    "/entrance/vault": "/entrance/.vault",
+    "/entrance/scrap": "/entrance/.scrap"
+  },
+  "trainer": null,
+  "pathfind": null,
+  "speedrunBest": null,
+  "achievements": [
+    "first_steps",
+    "seasoned",
+    "treasure_hunter",
+    "key_master",
+    "world_builder",
+    "cartographer"
+  ],
+  "bestiary": [
+    "treasure",
+    "potion",
+    "statue"
+  ],
+  "daily": {
+    "date": "2026-01-15",
+    "baselineXp": 0,
+    "goal": 60,
+    "completed": true,
+    "streak": 1,
+    "lastDate": "2026-01-15"
+  },
+  "rankIndex": 4,
+  "stats": {
+    "commands": {
+      "pwd": 3,
+      "ls": 7,
+      "cd": 16,
+      "cat": 1,
+      "./treasure": 4,
+      "inventory": 1,
+      "echo": 2,
+      "./potion": 1,
+      "grep": 2,
+      "./statue": 1,
+      "health": 1,
+      "status": 1,
+      "mkdir": 2,
+      "touch": 2,
+      "map": 1,
+      "look": 1,
+      "./padlock": 1,
+      "./goblet": 1,
+      "source": 1,
+      "quest": 1,
+      "hint": 1,
+      "xp": 1,
+      "profile": 1,
+      "achievements": 1,
+      "bestiary": 2,
+      "daily": 1,
+      "save": 2
+    },
+    "catScrollCount": 1,
+    "initialized": false,
+    "lastPipedIn": false
+  },
+  "prevCwd": "/entrance/study"
+}

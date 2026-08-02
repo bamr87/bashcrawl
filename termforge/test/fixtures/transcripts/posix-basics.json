@@ -1,0 +1,422 @@
+{
+  "name": "posix-basics",
+  "seed": 101,
+  "clockStart": 1768478400000,
+  "steps": [
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance"
+        },
+        {
+          "kind": "success",
+          "text": "🧭 Achievement unlocked: First Steps — Found your place with pwd.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Apprentice of the Shell!"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar  README.md  scroll"
+        },
+        {
+          "kind": "success",
+          "text": "🔥 Daily challenge complete!  +25 XP  ·  Streak: 1 day"
+        },
+        {
+          "kind": "dim",
+          "text": "Come back tomorrow to keep the streak alive."
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Terminal Master!"
+        }
+      ]
+    },
+    {
+      "line": "ls -a",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": ".chapel  .functions  .rift  .scrap  .vault  cellar  README.md  scroll"
+        }
+      ]
+    },
+    {
+      "line": "ls -F",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar/  README.md  scroll"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "\n================================================================================\n                           ANCIENT SCROLL OF SIGHT\n================================================================================\n\nIt is pitch black in these catacombs.\nYou have magickal spells that reveal the world around you.\n\n================================================================================\n                      BASIC MOVEMENT INCANTATIONS\n================================================================================\n\nCOMMAND            PURPOSE                      DESCRIPTION\n--------           --------                     -----------\nls                 See room contents            List all items in current room\ncd directory       Move to a room               Enter a directory (room)\ncd ..              Go back                      Return to the previous room\npwd                Where am I?                  Print your current location\n\n================================================================================\n                         MAGICKAL VIEWING SPELLS\n================================================================================\n\nCOMMAND            PURPOSE                      DESCRIPTION\n--------           --------                     -----------\ncat filename       View scrolls fully           Display entire scroll content\nless filename      Read long scrolls            Page through text (q to quit)\nhead filename      Peek at scroll start         See first 10 lines only\ntail filename      Check scroll ending          See last 10 lines only\nwc filename        Count scroll contents        Count lines, words, characters\n\nTry looking around this room, then move into one of the next rooms.\n\n================================================================================\n                          EXAMPLE INCANTATIONS\n================================================================================\n\n    $ pwd                    # Where am I?\n    $ ls                     # What is in this room?\n    $ cat scroll             # Read a scroll (you are doing this now!)\n    $ less scroll            # Page through a long scroll (press q to quit)\n    $ head scroll            # See just the beginning\n    $ tail scroll            # See just the ending\n    $ wc scroll              # How long is this scroll?\n    $ cd cellar              # Move into the cellar\n    $ cd ..                  # Come back to where you were\n\nRemember to cast these spells when you discover new scrolls and treasures!\n\n================================================================================\n                           THE FIRST CHALLENGE\n================================================================================\n\nBefore you venture deeper into the catacombs, you must prove your mastery\nof the viewing spells. Practice reading this very scroll with different\ncommands to understand their power.\n\nSIDE PATH -- BUILD YOUR OWN WORKSHOP:\nThe workshop does not exist yet -- a true mage does not merely explore\nrooms, they CONJURE them. Build your first room with your bare hands:\n\n    mkdir workshop           # Conjure a new room from the void\n    cd workshop              # Step inside the room you just made\n    pwd                      # Confirm the room is real\n    touch hammer             # Forge your first artifact\n    ls                       # Behold your creation\n    cd ..                    # Return here to the entrance\n\nYou have just bent the dungeon to your will. mkdir, touch, ls, and cd\nare the foundation of all creation magick.\n\nNEXT DESTINATION:\nWhen you are ready, seek the CELLAR -- a chamber that lies beneath this\nentrance. The cellar holds ancient secrets about seeing through illusions\nand distinguishing between doorways and objects.\n\n    cd cellar\n\nLOST? Remember these two spells:\n    pwd                      Shows exactly where you are\n    cd ..                    Takes you back one room\n\nMay your terminal skills grow strong, brave adventurer!\n\n================================================================================\n"
+        }
+      ]
+    },
+    {
+      "line": "file scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "scroll: text file"
+        }
+      ]
+    },
+    {
+      "line": "cd cellar",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar"
+        },
+        {
+          "kind": "success",
+          "text": "🔥 Achievement unlocked: Seasoned Adventurer — Earned 150 XP.  (+5 XP)"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "    .  *  .       *   .    *  .\n   *   L E V E L   U P !   *\n    *  .   *       .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Archmage of the Command Line!"
+        }
+      ]
+    },
+    {
+      "line": "ls -F",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "armoury/  README.md  scroll  treasure*"
+        }
+      ]
+    },
+    {
+      "line": "cat scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "\n################################################################################\n#                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #\n################################################################################\n\n🔮 ANCIENT WISDOM: Seeing Beyond the Veil\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n*The air grows thick with mystical energy as you descend into the cellar...*\n*Here, ancient magic teaches adventurers to distinguish reality from illusion.*\n\n**Illusions are strong here.** It is difficult to tell what is a doorway and what is an object.\nThe untrained eye sees only a simple list of names, but the wise terminal mage learns to\nperceive the **true nature** of all things in the catacombs.\n\n--------------------------------------------------------------------------------\n⚡ THE ENHANCED SIGHT SPELL: ls -F\n--------------------------------------------------------------------------------\n\nThe magic spell you use to look can be **augmented** with powerful enchantments.\n\n*Master this incantation to pierce through the veils of confusion...*\n\n┌─ ENHANCED SIGHT INCANTATION ───────────────────────────────────────────────┐\n│                                                                             │\n│ $ ls -F                           # Cast enhanced sight spell              │\n│                                                                             │\n│ Expected Manifestation:                                                     │\n│ scroll  treasure*  armoury/  README.md                                     │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎯 What the Mystical Symbols Reveal\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you cast `ls -F`, the mystical energies reveal secrets through their symbols:\n\n┌─────────────────┬────────────────────────────┬──────────────────────────────┐\n│ SYMBOL          │ TYPE                       │ DESCRIPTION                  │\n├─────────────────┼────────────────────────────┼──────────────────────────────┤\n│ /               │ Directory (Chamber)        │ Rooms you can enter          │\n│ *               │ Executable (Encounter)     │ Interactive adventures       │\n│ @               │ Symbolic Link (Portal)     │ Magickal doorways            │\n│ |               │ Named Pipe (Channel)       │ Communication pathways       │\n│ =               │ Socket (Connection)        │ Network junction points      │\n│ (none)          │ Regular File (Scroll)      │ Documents and knowledge      │\n└─────────────────┴────────────────────────────┴──────────────────────────────┘\n\n################################################################################\n#              🪄 THE ALIAS ENCHANTMENT: Permanent Spell Enhancement          #\n################################################################################\n\nYou can avoid having to type `ls -F` every time by weaving a **command alias** -\na permanent enchantment that enhances your basic spells:\n\n╭─ PERMANENT ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F'                # Weave the permanent enchantment        │\n│                                                                             │\n│ Effect: Your basic 'ls' spell now carries enhanced sight                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎓 Understanding Shell Aliases\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThis is known as a **shell alias** or **command alias**. With this alias active:\n\n• Typing simply `ls` by itself will automatically run `ls -F`\n• Your spell becomes permanently enhanced for this terminal session  \n• The magic persists until you close your terminal or create a new alias\n\n--------------------------------------------------------------------------------\n🔄 Try It Out! - Interactive Learning Path\n--------------------------------------------------------------------------------\n\nPRACTICE PATH: Discovery → Understanding → Mastery\n\n    1. FIRST STEP: Cast the enhanced spell manually\n       $ ls -F\n\n    2. SECOND STEP: Create the permanent enchantment  \n       $ alias ls='ls -F'\n\n    3. THIRD STEP: Test your enhanced spell\n       $ ls\n\n    4. FOURTH STEP: Verify the magic worked\n       $ alias ls\n       (This reveals your current alias definition)\n\n################################################################################\n#                  🏆 ADVANCED SIGHT TECHNIQUES: Master's Methods             #\n################################################################################\n\n⚡ COLOR-ENHANCED VISION: Advanced Sight Magic\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nFor terminals that support color magic, enhance your sight even further:\n\n╭─ CHROMATIC ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F --color=auto'   # Weave color into your sight            │\n│                                                                             │\n│ Color Manifestations:                                                       │\n│ • Blue: Directories (chambers)                                             │\n│ • Green: Executables (encounters)                                          │\n│ • Cyan: Symbolic links (portals)                                           │\n│ • White: Regular files (scrolls)                                           │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n⚡ DETAILED INSPECTION: The Master's Eye\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you need to examine items more thoroughly:\n\n╭─ COMPREHENSIVE SIGHT SPELL ────────────────────────────────────────────────╮\n│                                                                             │\n│ $ ls -laF                         # Master-level inspection spell          │\n│                                                                             │\n│ This reveals hidden knowledge:                                              │\n│ • -l: Long format (permissions, size, modification time)                   │\n│ • -a: Hidden files (starting with '.')                                     │\n│ • -F: Your familiar file type indicators                                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n################################################################################\n#          🎯 CELLAR CHALLENGE: Master the Enhanced Sight Spells              #\n################################################################################\n\nBefore you may claim the **emerald amulet** that awaits in this chamber,\nprove your mastery of the ancient sight arts:\n\nREQUIRED TASKS:\n~~~~~~~~~~~~~~~\n✅ Cast Enhanced Sight: Use ls -F to see the true nature of this cellar\n✅ Create Permanent Enhancement: Set up the alias ls='ls -F' enchantment  \n✅ Test Your Magic: Verify that plain ls now shows file type indicators\n✅ Explore Thoroughly: Use enhanced sight to identify all chambers and encounters\n✅ Find the Treasure: Locate and examine the treasure file in this room\n\nEXPECTED DISCOVERIES:\n~~~~~~~~~~~~~~~~~~~~\nIn this cellar, your enhanced sight should reveal:\n\n┌─ CHAMBER CONTENTS ──────────────────────────────────────────────────────────┐\n│                                                                             │\n│ 🏰 Directories ending with / (chambers you can enter)                      │\n│ 🗡️ Executables ending with * (encounters you can experience)               │\n│ 📜 Regular files with no suffix (scrolls to read)                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n################################################################################\n#               💡 PATH TO MASTERY: Building Terminal Intuition               #\n################################################################################\n\n🧠 WHY THIS KNOWLEDGE MATTERS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nUnderstanding file types is **fundamental** to terminal mastery:\n\n• **Safety**: Know if something is executable before running it\n• **Navigation**: Quickly identify which items are directories\n• **Efficiency**: Understand your environment at a glance\n• **Problem-solving**: Debug issues by understanding file types\n\n🚀 REAL-WORLD APPLICATIONS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n╭─ PROFESSIONAL CONTEXTS ────────────────────────────────────────────────────╮\n│                                                                             │\n│ • System Administration: Quickly assess directory contents                 │\n│ • Development: Identify scripts, configs, and executables                  │\n│ • Debugging: Understand file permissions and types                         │\n│ • Automation: Write scripts that handle different file types               │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n💰 TREASURE VAULT: The Emerald Amulet Awaits\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nOnce you've mastered the enhanced sight spell and understand the true nature\nof files in the terminal realm, seek out the **treasure** in this chamber.\n\nThe emerald amulet you'll find here is more than decoration - it unlocks\n**new pathways** deeper into the catacombs, revealing hidden chambers that\nwere previously concealed from untrained eyes.\n\n################################################################################\n#                        🗺️ NEXT STEPS IN YOUR JOURNEY                       #\n################################################################################\n\nWith mastery of enhanced sight spells, new mystical pathways reveal themselves:\n\nAVAILABLE PATHS:\n┌─────────────────────────────────────────────────────────────────────────────┐\n│ 🗡️ The Armoury: Weapon Mastery Training                                    │\n│    Access: cd armoury                                                       │\n│    Focus: Combat skills and file manipulation                              │\n│    Rewards: Executable permissions and advanced file operations            │\n│                                                                             │\n│ ⛪ Hidden Chapel: Sacred Knowledge Vault                                    │\n│    Access: [unlock condition - collect 3 treasures]                        │\n│    Focus: Secret commands and advanced techniques                           │\n│    Skills: Hidden file manipulation and system secrets                     │\n│                                                                             │\n│ 💰 The Vault: Master's Inventory Domain                                     │\n│    Access: [requires emerald amulet from this chamber]                     │\n│    Focus: Environment variables and inventory management                    │\n│    Rewards: Variable manipulation and state management                      │\n│                                                                             │\n│ 🔧 The Scrap: System Information Sanctum                                   │\n│    Access: [requires completion of armoury trials]                         │\n│    Focus: System information and debugging techniques                       │\n│    Skills: Process monitoring and system analysis                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\nVISUAL PATHWAY MAP:\n    Entrance → Cellar → Armoury → Chamber → Hidden Realms\n       ⭐        ⚡        🗡️        🏆         🎖️\n\nEach path teaches **different aspects** of terminal mastery. Choose based on\nyour interests and learning goals, or explore them all to become a true\ncommand-line champion!\n\n================================================================================\n*\"In the depths of the cellar, sight becomes insight, and knowledge becomes power.\"*\n*~ Ancient Terminal Wisdom*\n\n**The magic grows stronger within you, brave adventurer. Press onward!**\n================================================================================\n"
+        }
+      ]
+    },
+    {
+      "line": "cd ..",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance"
+        }
+      ]
+    },
+    {
+      "line": "tree",
+      "outputs": [
+        {
+          "kind": "art",
+          "text": "entrance\n├── cellar/\n│   ├── armoury/\n│   │   ├── chamber/\n│   │   │   ├── scroll\n│   │   │   ├── spell*\n│   │   │   ├── statue*\n│   │   │   └── treasure*\n│   │   ├── potion*\n│   │   ├── README.md\n│   │   ├── scroll\n│   │   └── treasure*\n│   ├── README.md\n│   ├── scroll\n│   └── treasure*\n├── README.md\n└── scroll"
+        },
+        {
+          "kind": "success",
+          "text": "✨ Achievement unlocked: Cartographer — Charted the dungeon with map or tree.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "find . -name scroll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "./.chapel/courtyard/aviary/hall/library/.study/scroll\n./.chapel/courtyard/aviary/hall/library/scroll\n./.chapel/courtyard/aviary/hall/scroll\n./.chapel/courtyard/aviary/scroll\n./.chapel/courtyard/scroll\n./.chapel/graveyard/.mausoleum/scroll\n./.chapel/graveyard/columbarium/scroll\n./.chapel/graveyard/lower-quadrant/scroll\n./.chapel/graveyard/royal-tombs/scroll\n./.chapel/graveyard/scroll\n./.chapel/scroll\n./.rift/arena/pit/scroll\n./.rift/arena/scroll\n./.rift/scroll\n./.rift/spire/scroll\n./.scrap/scroll\n./.vault/scroll\n./.vault/stronghold/nursery/lab/scroll\n./.vault/stronghold/nursery/scroll\n./.vault/stronghold/scroll\n./cellar/armoury/chamber/scroll\n./cellar/armoury/scroll\n./cellar/scroll\n./scroll"
+        }
+      ]
+    },
+    {
+      "line": "find . -type d",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "./.chapel\n./.chapel/courtyard\n./.chapel/courtyard/aviary\n./.chapel/courtyard/aviary/hall\n./.chapel/courtyard/aviary/hall/library\n./.chapel/courtyard/aviary/hall/library/.study\n./.chapel/graveyard\n./.chapel/graveyard/.mausoleum\n./.chapel/graveyard/columbarium\n./.chapel/graveyard/lower-quadrant\n./.chapel/graveyard/royal-tombs\n./.rift\n./.rift/arena\n./.rift/arena/pit\n./.rift/spire\n./.rift/spire/mezzanine\n./.rift/spire/mezzanine/.elevator\n./.rift/spire/mezzanine/.elevator/.satellite\n./.scrap\n./.vault\n./.vault/stronghold\n./.vault/stronghold/nursery\n./.vault/stronghold/nursery/lab\n./cellar\n./cellar/armoury\n./cellar/armoury/chamber"
+        }
+      ]
+    },
+    {
+      "line": "grep -r amulet .",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "./.chapel/courtyard/aviary/hall/library/tome:# If the player has progressed far enough (amulet from cellar + coins from\n./.chapel/courtyard/aviary/hall/library/tome:_has_amulet=false\n./.chapel/courtyard/aviary/hall/library/tome:grep --quiet amulet <<< \"$I\" 2>/dev/null && _has_amulet=true\n./.chapel/courtyard/aviary/hall/library/tome:if $_has_amulet && $_has_coins; then\n./.chapel/courtyard/aviary/hall/scroll:    If your inventory shows:  sword,amulet,\n./.chapel/graveyard/padlock:  an amulet\n./cellar/armoury/chamber/scroll:You should see items like:  sword,amulet,\n./cellar/README.md:You have discovered an ancient `treasure` artifact. It is not a chest to be opened, but a magickal item that reveals a powerful **amulet-forging recipe** when activated.\n./cellar/README.md:Your task is to forge this recipe into a runnable script named `forge_amulet.sh`. You must do this with a **single command-line incantation**. This command must:\n./cellar/README.md:3.  **Write** the captured recipe into the new `forge_amulet.sh` file.\n./cellar/README.md:Once you have successfully forged the script, you can claim your reward by running it with the `source` command, which will properly add the amulet to your inventory:\n./cellar/README.md:source ./forge_amulet.sh\n./cellar/README.md:After forging your amulet, new paths will open:\n./cellar/scroll:Before you may claim the **emerald amulet** that awaits in this chamber,\n./cellar/scroll:The emerald amulet you'll find here is more than decoration - it unlocks\n./cellar/scroll:│    Access: [requires emerald amulet from this chamber]                     │\n./cellar/treasure:if ! grep  --only-matching amulet <<< $I &> /dev/null; then\n./cellar/treasure:You have found an emerald **amulet**!\n./cellar/treasure:export I=amulet,\\$I\n./README.md:- **Reward**: Emerald amulet (your first treasure!)"
+        }
+      ]
+    },
+    {
+      "line": "echo hello adventurer",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "hello adventurer"
+        }
+      ]
+    },
+    {
+      "line": "export TORCH=lit",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Exported TORCH=lit"
+        }
+      ]
+    },
+    {
+      "line": "echo $TORCH",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "lit"
+        }
+      ]
+    },
+    {
+      "line": "env",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "I=\nHP=100\nXP=340\nCWD=/entrance\nTORCH=lit"
+        }
+      ]
+    },
+    {
+      "line": "alias ll='ls -F'",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Alias set: ll='ls -F'"
+        }
+      ]
+    },
+    {
+      "line": "ll",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar/  README.md  scroll"
+        }
+      ]
+    },
+    {
+      "line": "alias",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "alias ll='ls -F'"
+        }
+      ]
+    },
+    {
+      "line": "whoami",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "adventurer  (you have walked these halls before...)"
+        }
+      ]
+    },
+    {
+      "line": "man ls",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "NAME\n    ls\n\nDESCRIPTION\n    List files and directories in current location"
+        }
+      ]
+    },
+    {
+      "line": "man map",
+      "outputs": [
+        {
+          "kind": "info",
+          "text": "NAME\n    map\n\nDESCRIPTION\n    Built-in for Bashcrawl Web. Try 'map --help' or open Docs (F1)."
+        }
+      ]
+    },
+    {
+      "line": "man nosuchcmd",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "man: no entry for 'nosuchcmd'"
+        }
+      ]
+    },
+    {
+      "line": "date",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "2026-01-15T12:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "line": "cd -",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance/cellar"
+        },
+        {
+          "kind": "success",
+          "text": "Moved to /entrance/cellar"
+        }
+      ]
+    },
+    {
+      "line": "pwd",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "/entrance/cellar"
+        }
+      ]
+    },
+    {
+      "line": "cd nowhere",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Not a directory: nowhere"
+        }
+      ]
+    },
+    {
+      "line": "cat nofile",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "No such file: nofile"
+        }
+      ]
+    },
+    {
+      "line": "frobnicate",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Unknown command: frobnicate. Try help."
+        }
+      ]
+    }
+  ],
+  "finalState": {
+    "cwd": "/entrance/cellar",
+    "prevCwd": "/entrance",
+    "hp": 100,
+    "xp": 340,
+    "inventory": [],
+    "aliases": {
+      "ll": "ls -F"
+    },
+    "envVars": {
+      "TORCH": "lit"
+    },
+    "userNodes": {},
+    "completedQuestIds": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "currentQuestId": 4,
+    "visited": [],
+    "history": [],
+    "historyIndex": -1,
+    "flags": {},
+    "reveals": {},
+    "trainer": null,
+    "pathfind": null,
+    "speedrunBest": null,
+    "achievements": [
+      "first_steps",
+      "seasoned",
+      "cartographer"
+    ],
+    "bestiary": [],
+    "daily": {
+      "date": "2026-01-15",
+      "baselineXp": 0,
+      "goal": 60,
+      "completed": true,
+      "streak": 1,
+      "lastDate": "2026-01-15"
+    },
+    "rankIndex": 4,
+    "stats": {
+      "commands": {
+        "pwd": 3,
+        "ls": 5,
+        "cat": 3,
+        "file": 1,
+        "cd": 4,
+        "tree": 1,
+        "find": 2,
+        "grep": 1,
+        "echo": 2,
+        "export": 1,
+        "env": 1,
+        "alias": 2,
+        "whoami": 1,
+        "man": 3,
+        "date": 1,
+        "frobnicate": 1
+      },
+      "catScrollCount": 2,
+      "lastPipedIn": false,
+      "initialized": false
+    }
+  }
+}

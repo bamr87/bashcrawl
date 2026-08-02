@@ -80,3 +80,7 @@ screenshots/manifest_*.json
 
 # Local virtualenv
 .venv/
+
+# Node (no packages are installed — zero-dependency policy — but keep
+# accidental installs out of git)
+node_modules/

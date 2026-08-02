@@ -1,0 +1,14 @@
+{
+    "name": "bashcrawl",
+    "version": "3.2.0",
+    "private": true,
+    "description": "Bashcrawl monorepo scripts: TermForge framework tests and JS lint. No runtime dependencies.",
+    "license": "MIT",
+    "engines": {
+        "node": ">=20.16"
+    },
+    "scripts": {
+        "test": "node --test termforge/test/*.test.js",
+        "lint:js": "bash -c 'for f in $(git ls-files \"*.js\"); do node --check \"$f\" || exit 1; done'"
+    }
+}

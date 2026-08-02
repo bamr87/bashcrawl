@@ -10,6 +10,9 @@ Learn terminal commands by exploring a fantasy dungeon. Directories are rooms, f
 - [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, and scroll standards
 - [Contributing](contributing.md) — How to add rooms, write scrolls, and submit changes
 - [Improvement Plan](improvement-plan.md) — Known issues and planned enhancements
+- [TermForge Architecture](termforge/architecture.md) — The universal terminal framework under the web game
+- [Authoring TermForge Apps](termforge/authoring-apps.md) — Build your own terminal tools on the framework
+- [Telnet Host](termforge/telnet-host.md) — Serve the game or your tools over lightweight telnet/TCP
 
 ## Quick Start
 

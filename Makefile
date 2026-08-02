@@ -20,6 +20,7 @@ SHELL := /bin/bash
 
 GAME_ROOT := $(shell pwd)
 PYTHON := python3
+NODE := node
 VENV := .venv
 
 export PYTHONPATH := $(GAME_ROOT)/src:$(GAME_ROOT)/test
@@ -44,6 +45,7 @@ venv: ## Create .venv and install web-build + test dependencies
 .PHONY: web-build
 web-build: ## Build the static web bundle from entrance/ + src/help/data/*.yaml
 	@$(PYTHON) scripts/export_static_web.py
+	@$(PYTHON) scripts/vendor_termforge.py
 
 .PHONY: web-test
 web-test: web-build ## Build + validate the static web bundle
@@ -53,6 +55,20 @@ web-test: web-build ## Build + validate the static web bundle
 .PHONY: web-preview
 web-preview: web-build ## Preview the web app at http://127.0.0.1:8000
 	@cd web && $(PYTHON) -m http.server 8000 --bind 127.0.0.1
+
+# ── TermForge hosts (the same game/tools, off the browser) ─────────────
+
+.PHONY: tty-demo
+tty-demo: web-build ## Play bashcrawl in this terminal (JS emulator on node)
+	@$(NODE) termforge/node/host-tty.js --app bashcrawl
+
+.PHONY: telnet-demo
+telnet-demo: web-build ## Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)
+	@$(NODE) termforge/node/host-telnet.js --app bashcrawl $(ARGS)
+
+.PHONY: agentwatch
+agentwatch: ## AI-agent task dashboard (ARGS="--data-dir logs/sessions" for real playtest logs)
+	@$(NODE) termforge/node/host-tty.js --app agentwatch $(ARGS)
 
 # ── Content contracts ──────────────────────────────────────────────────
 
@@ -81,6 +97,10 @@ test-unit: ## Run unit tests only
 test-integration: ## Run integration tests only
 	@bash scripts/run_tests.sh integration
 
+.PHONY: test-js
+test-js: ## Run the TermForge framework tests (node --test, zero deps)
+	@$(NODE) --test termforge/test/*.test.js
+
 .PHONY: test-mcp
 test-mcp: ## Run the playtest-harness smoke tests in a local .venv
 	@bash scripts/test_mcp.sh
@@ -98,6 +118,11 @@ lint: ## Run all linters (shellcheck, yamllint, markdownlint, ruff)
 .PHONY: lint-shell
 lint-shell: ## Run ShellCheck on all shell scripts
 	@bash scripts/lint.sh shell
+
+.PHONY: lint-js
+lint-js: ## Syntax-check every tracked JS file with node --check
+	@set -e; for f in $$(git ls-files '*.js'); do $(NODE) --check "$$f"; done; \
+		echo "lint-js: OK ($$(git ls-files '*.js' | wc -l | tr -d ' ') files)"
 
 # ── Maintenance ───────────────────────────────────────────────────────
 

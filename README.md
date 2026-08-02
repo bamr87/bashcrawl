@@ -45,10 +45,11 @@ Reset your dungeon after playing: `bash lib/reset.sh` (preview with `--dry`).
 |---|---|
 | `entrance/` | The dungeon itself — rooms, scrolls, encounters. Pure bash. |
 | `web/` | The static browser trainer (story + arcade + reference). No build framework, hosted free on GitHub Pages. |
+| `termforge/` | **TermForge** — the universal terminal framework extracted from the web emulator: one kernel powering the browser game, `make tty-demo` (play in your terminal), `make telnet-demo` (serve over lightweight telnet/TCP), and custom monitoring-style tools. Zero dependencies; node needed only for the framework, never to play the bash game. See [docs/termforge/architecture.md](docs/termforge/architecture.md). |
 | `src/help/` | The bash help engine and the **content registries** (`data/*.yaml`) — the single source of truth for rooms, quests, commands, encounters, tutorials, and arcade content. |
 | `scripts/export_static_web.py` | Generates `web/data/*.json` from `entrance/` + the YAML registries. The web app is always a projection of the real game. |
 | `src/playtest/` | A lean MCP harness: an AI agent plays the *real* dungeon in a sandboxed bash session, and a scorer flags content gaps. |
-| `test/` | Contract + integration tests keeping the registries, the filesystem, and the web runtime in sync. |
+| `test/` | Contract + integration tests keeping the registries, the filesystem, and the web runtime in sync (plus `termforge/test/` — the framework's own `node --test` suite with golden transcripts). |
 
 ## 🔧 For developers
 
