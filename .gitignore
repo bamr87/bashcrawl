@@ -84,3 +84,6 @@ screenshots/manifest_*.json
 # Node (no packages are installed — zero-dependency policy — but keep
 # accidental installs out of git)
 node_modules/
+
+# Local agent run configs (use `make web-preview` instead)
+.claude/launch.json
