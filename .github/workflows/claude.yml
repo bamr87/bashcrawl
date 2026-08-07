@@ -1,5 +1,6 @@
 name: Claude
 
+# kit: agent-context v0.4.0
 # @claude mention handler, seeded from bamr87/bamr87 templates/agent-context/.
 # Mention @claude in an issue or PR comment and Claude Code picks up the task.
 #
@@ -19,6 +20,17 @@ on:
 
 permissions:
   contents: read
+
+# One Claude run at a time per issue/PR thread. Without this, several @claude
+# mentions in quick succession each spin up their own 30-minute agent against
+# the same thread, racing each other on the same branch.
+#
+# Deliberately NOT cancel-in-progress: each mention is a distinct request and
+# the agent commits and pushes, so a superseded run is queued behind the current
+# one rather than killed mid-push.
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   claude:
