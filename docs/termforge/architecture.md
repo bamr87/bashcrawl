@@ -26,7 +26,8 @@ termforge/
     index.js            the framework namespace for require()
     data-loader.js      reads web/data/*.json from disk
     cli.js              argv parsing + app resolution
-    host-tty.js         local terminal host (raw mode or piped line mode)
+    host-tty.js         local terminal host (full-screen HUD, raw mode, or piped line mode)
+    tui.js              TuiScreen: full-screen ANSI compositor (sidebar panels, toast row, input row)
     telnet-codec.js     RFC 854 subset state machine (socket-free)
     host-telnet.js      multi-session telnet/TCP server
   apps/

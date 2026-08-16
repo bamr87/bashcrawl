@@ -25,6 +25,9 @@
     };
 
     const escapeHtml = window.TermForge.sinks.escapeHtml;
+    // The shared presenter: every panel below renders a BashcrawlHud model,
+    // the same models the terminal HUD draws (termforge/node/host-tty.js).
+    const Hud = window.BashcrawlHud;
 
     const data = await loadData();
     let runtime = new window.BashcrawlRuntime.Runtime(data, window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root)));
@@ -39,86 +42,10 @@
     });
     docsPanel.setData(data.docs, runtime);
 
-    // === Room vignettes: box-safe ASCII mascot per area (banner shimmer is pure CSS) ===
-    const ROOM_VIGNETTES = {
-        entrance: [
-            "  (  )      (  )   ",
-            "  )(   /\\   )(     ",
-            "  ||  /  \\  ||     ",
-            " _||_/    \\_||_    ",
-            "[==||      ||==]   ",
-            "   ''      ''      ",
-        ],
-        cellar: [
-            "   (~)        (~)  ",
-            "  .[ ].      .[ ]. ",
-            "  | | |      | | | ",
-            "  | | |      | | | ",
-            " _|_|_|_    _|_|_|_",
-            " '-----'    '-----'",
-        ],
-        graveyard: [
-            " .---.   __   .---.",
-            " | + |  /  \\  | R |",
-            " |   | |    | |   |",
-            " *web* |    | ~~~~ ",
-            "_|___|_|____|_|___|",
-            "  ~~~     ~~~   ~~~",
-        ],
-        vault: [
-            "      /\\          ",
-            "     /  \\   /\\    ",
-            "    / /\\ \\ /  \\   ",
-            "    \\ \\/ / \\  /   ",
-            "     \\  /   \\/    ",
-            "      \\/  *  .    ",
-        ],
-        rift: [
-            "    . * .   .  *   ",
-            "   *  .-~~~-.  .   ",
-            "  .  /  _    \\ *   ",
-            "  * |  ( o )  | .  ",
-            "   . \\  ~-~  / *   ",
-            "    * '-...-'  .   ",
-        ],
-        deep: [
-            "    *  .   *   .   ",
-            "  .   .-~~~~-.  *  ",
-            "  *  / shadow \\ .  ",
-            "   . \\        / *  ",
-            "  .   '------'  .  ",
-        ],
-    };
-
-    function vignetteKeyForRoom(actualPath, cwd) {
-        const p = String(actualPath || cwd || "");
-        if (p.includes("/.rift") || p.includes("/rift")) return "rift";
-        if (p.includes("/.vault") || p.includes("/vault")) return "vault";
-        if (p.includes("/graveyard") || p.includes("/.chapel") || p.includes("/chapel")) return "graveyard";
-        if (p.includes("/cellar") || p.includes("/armoury") || p.includes("/chamber")) return "cellar";
-        if (p === "/entrance" || p.endsWith("/entrance") || p.includes("/workshop")) return "entrance";
-        return "deep";
+    function roomVignetteHtml(vignette) {
+        const safe = vignette.art.map(escapeHtml).join("\n");
+        return `<pre class="room-vignette" data-room-art="${vignette.key}" aria-hidden="true">${safe}</pre>`;
     }
-
-    function roomVignetteHtml() {
-        const actual = (runtime.actual ? runtime.actual(runtime.state.cwd) : runtime.state.cwd);
-        const key = vignetteKeyForRoom(actual, runtime.state.cwd);
-        const art = ROOM_VIGNETTES[key] || ROOM_VIGNETTES.deep;
-        const safe = art.map(escapeHtml).join("\n");
-        return `<pre class="room-vignette" data-room-art="${key}" aria-hidden="true">${safe}</pre>`;
-    }
-
-    // Optional side objectives, grounded in real, checkable state: each hidden
-    // area is "done" once the player has revealed it (reveals map a visible path
-    // like /entrance/chapel to its dotted source). Kept separate from the main
-    // story chain so the quest log can show both tracks. Declared up here so it
-    // is initialized before the first render() during init.
-    const SIDE_QUESTS = [
-        { key: "chapel", name: "The Hidden Chapel", hint: "Search for a dotfile and unlock the chapel with grep." },
-        { key: "vault", name: "The Sealed Vault", hint: "Use variables to breach the vault." },
-        { key: "scrap", name: "The Scrapyard", hint: "Find the scrap and master symbolic links." },
-        { key: "rift", name: "The Rift", hint: "Tear open the rift for advanced trials." },
-    ];
 
     // The story log is a TermForge TerminalView painting into #output-log.
     // Control routing preserves the historical behavior: "levelup" is pure
@@ -139,18 +66,7 @@
         },
     });
     const append = (kind, text) => view.appendLine(kind, text);
-    const BANNER = [
-        "       ╔════════════════════════════════════════════════════╗",
-        "       ║   ____            __                       __      ║",
-        "       ║  / __ )___ ______/ /_  ______________ ___ / /      ║",
-        "       ║ / __  / __ `/ ___/ __ \\/ ___/ ___/ __ `__ \\/ /      ║",
-        "       ║/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / / /__    ║",
-        "       ║\\____/\\__,_/____/_/ /_/\\___/_/  /_/ /_/ /_/____/    ║",
-        "       ║                                                    ║",
-        "       ║       Type  pwd  to begin the descent. F1 for help ║",
-        "       ╚════════════════════════════════════════════════════╝",
-    ].join("\n");
-    append("banner", BANNER);
+    append("banner", runtime.uiText.bannerArt);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
     append("magic", "🕹  Practice Arcade (top nav or Alt+2): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+3.");
@@ -246,13 +162,7 @@
     }
 
     function snapshotState() {
-        return {
-            xp: runtime.state.xp,
-            hp: runtime.state.hp,
-            completed: runtime.state.completedQuestIds.length,
-            currentQuestId: runtime.state.currentQuestId,
-            inventory: runtime.state.inventory.slice(),
-        };
+        return Hud.snapshot(runtime);
     }
 
     function runLine(line) {
@@ -275,25 +185,28 @@
         saveAndRender();
     }
 
+    // Semantic events come from the shared presenter; this maps them onto the
+    // web's CSS effects (the terminal HUD maps the same events onto toasts).
     function triggerEffects(prev, next) {
-        if (next.completed > prev.completed) {
-            appendSparkleArt();
-            flashPanel(dom.quest);
-            applyHeroMood("quest");
-        }
-        if (next.hp < prev.hp) {
-            shakePanel(dom.inventory);
-            applyHeroMood("hurt");
-            screenFlash("damage");
-        }
-        if (next.xp > prev.xp) {
-            popXp();
-            floatXp(next.xp - prev.xp);
-            applyHeroMood("xp");
-        }
-        if (next.inventory.length > prev.inventory.length) {
-            flashPanel(dom.inventory);
-            applyHeroMood("item");
+        for (const event of Hud.diffEvents(prev, next)) {
+            if (event.type === "quest") {
+                appendSparkleArt();
+                flashPanel(dom.quest);
+                applyHeroMood("quest");
+            } else if (event.type === "damage") {
+                shakePanel(dom.inventory);
+                applyHeroMood("hurt");
+                screenFlash("damage");
+            } else if (event.type === "xp") {
+                popXp();
+                floatXp(event.amount);
+                applyHeroMood("xp");
+            } else if (event.type === "item") {
+                flashPanel(dom.inventory);
+                applyHeroMood("item");
+            }
+            // "levelup" is already celebrated via the runtime's control record
+            // (flashLevelUp in this view's onControl).
         }
     }
 
@@ -379,131 +292,66 @@
     // Record the current room (and its ancestors, so the trunk is always solid)
     // into the persisted visited-set that drives the generative map's fog of war.
     function recordVisit() {
-        const visited = runtime.state.visited || (runtime.state.visited = []);
-        const seen = new Set(visited);
-        const parts = runtime.state.cwd.split("/").filter(Boolean);
-        let acc = "";
-        for (const part of parts) {
-            acc += "/" + part;
-            if (!seen.has(acc)) { visited.push(acc); seen.add(acc); }
-        }
-    }
-
-    function sideQuestDone(key) {
-        const reveals = runtime.state.reveals || {};
-        return Object.keys(reveals).some((path) => path.endsWith("/" + key));
-    }
-
-    function questStatus(quest) {
-        if (runtime.state.completedQuestIds.includes(quest.id)) return "done";
-        if (quest.id === runtime.state.currentQuestId) return "active";
-        return "locked";
+        Hud.ensureVisited(runtime);
     }
 
     // Collapsible <details> log: every main-story quest plus the optional side
     // quests, each tagged done / active / locked. Collapsed by default to keep
     // the sidebar compact; the at-a-glance current quest stays above it.
-    function renderQuestLog() {
-        const mainRows = runtime.quests.map((quest) => {
-            const status = questStatus(quest);
-            const icon = status === "done" ? "✅" : status === "active" ? "▶" : "🔒";
-            return `<li class="ql-${status}">${icon} ${escapeHtml(quest.title)}</li>`;
-        }).join("");
-        const sideRows = SIDE_QUESTS.map((side) => {
-            const done = sideQuestDone(side.key);
-            const icon = done ? "✅" : "○";
-            return `<li class="ql-${done ? "done" : "side"}" title="${escapeHtml(side.hint)}">${icon} ${escapeHtml(side.name)}</li>`;
-        }).join("");
-        const mainDone = runtime.state.completedQuestIds.length;
-        const sideDoneCount = SIDE_QUESTS.filter((s) => sideQuestDone(s.key)).length;
+    function renderQuestLog(quest) {
+        const mainRows = quest.rows.map((row) => (
+            `<li class="ql-${row.status}">${row.icon} ${escapeHtml(row.title)}</li>`
+        )).join("");
+        const sideRows = quest.side.map((side) => (
+            `<li class="ql-${side.done ? "done" : "side"}" title="${escapeHtml(side.hint)}">${side.icon} ${escapeHtml(side.name)}</li>`
+        )).join("");
         return `<details class="quest-log">`
-            + `<summary>Quest Log — ${mainDone}/${runtime.quests.length} main · ${sideDoneCount}/${SIDE_QUESTS.length} side</summary>`
+            + `<summary>Quest Log — ${quest.mainDone}/${quest.mainTotal} main · ${quest.sideDone}/${quest.side.length} side</summary>`
             + `<p class="ql-group">Main Quests</p><ul class="ql-list">${mainRows}</ul>`
             + `<p class="ql-group">Side Quests</p><ul class="ql-list">${sideRows}</ul>`
             + `</details>`;
     }
 
     function renderQuest() {
-        const quest = runtime.quests[runtime.state.currentQuestId];
-        const complete = runtime.state.completedQuestIds.length;
-        const summary = quest
-            ? `<p><strong>${escapeHtml(quest.title)}</strong></p><p>${escapeHtml(quest.objective)}</p><p class="kind-dim quest-xp">${complete}/${runtime.quests.length} complete • ${runtime.state.xp} XP</p>`
-            : `<p class="kind-success">All quests complete.</p><p class="quest-xp">${runtime.state.xp} XP earned.</p>`;
-        dom.quest.innerHTML = summary + renderQuestLog();
+        const quest = Hud.questModel(runtime);
+        const summary = quest.current
+            ? `<p><strong>${escapeHtml(quest.current.title)}</strong></p><p>${escapeHtml(quest.current.objective)}</p><p class="kind-dim quest-xp">${quest.mainDone}/${quest.mainTotal} complete • ${quest.xp} XP</p>`
+            : `<p class="kind-success">All quests complete.</p><p class="quest-xp">${quest.xp} XP earned.</p>`;
+        dom.quest.innerHTML = summary + renderQuestLog(quest);
     }
 
     function renderInventory() {
-        const hp = Math.max(0, Math.min(100, runtime.state.hp));
-        const filled = Math.round(hp / 10);
-        const bar = "█".repeat(filled) + "░".repeat(10 - filled);
-        const items = runtime.state.inventory || [];
-        const itemsHtml = items.length
-            ? `<ul class="inv-items">${items.map((item) => `<li>💰 ${escapeHtml(item)}</li>`).join("")}</ul>`
+        const inv = Hud.inventoryModel(runtime);
+        const itemsHtml = inv.items.length
+            ? `<ul class="inv-items">${inv.items.map((item) => `<li>💰 ${escapeHtml(item)}</li>`).join("")}</ul>`
             : `<p class="inv-empty kind-dim">No treasures yet — explore rooms and grab the loot.</p>`;
         dom.inventory.innerHTML =
-            `<p class="inv-hp">HP <span class="${hp > 40 ? "kind-success" : "kind-error"}">${bar}</span> ${hp}/100</p>`
-            + `<p class="inv-heading kind-dim">Items carried (${items.length})</p>`
+            `<p class="inv-hp">HP <span class="${inv.hp > 40 ? "kind-success" : "kind-error"}">${inv.hpBar}</span> ${inv.hp}/${inv.hpMax}</p>`
+            + `<p class="inv-heading kind-dim">Items carried (${inv.items.length})</p>`
             + itemsHtml;
     }
 
     function renderRoom() {
-        const meta = runtime.currentRoomMeta();
-        const entries = runtime.entries(runtime.state.cwd, false).map((entry) => {
-            const marker = entry.type === "dir" ? "/" : entry.type === "exec" ? "*" : "";
-            return `${entry.type === "dir" ? "📁" : entry.type === "exec" ? "⚡" : "📄"} ${escapeHtml(entry.name)}${marker}`;
-        }).join("<br>");
+        const room = Hud.roomModel(runtime);
+        const entries = room.entries.map((entry) => (
+            `${entry.icon} ${escapeHtml(entry.name)}${entry.marker}`
+        )).join("<br>");
         // Vignette sits under the room name (before the scrollable entry list)
         // so the ambient mascot stays visible even when contents are long. The
         // "In this room" label distinguishes room contents from carried items.
-        dom.room.innerHTML = `<p><strong>${escapeHtml(meta.title || runtime.state.cwd)}</strong></p><p class="kind-dim">${escapeHtml(runtime.state.cwd)}</p>${roomVignetteHtml()}<p class="room-contents-label kind-dim">In this room</p><p>${entries || "(empty)"}</p>`;
+        dom.room.innerHTML = `<p><strong>${escapeHtml(room.title)}</strong></p><p class="kind-dim">${escapeHtml(room.path)}</p>${roomVignetteHtml(room.vignette)}<p class="room-contents-label kind-dim">In this room</p><p>${entries || "(empty)"}</p>`;
     }
 
-    // ── Generative dungeon map ───────────────────────────────────────────────
-    // A fog-of-war tree built live from the runtime filesystem. Only rooms the
-    // player has entered (visited) and the visible doors leading off them
-    // (their direct dir-children) are drawn, so the map grows organically as the
-    // player explores and never reveals undiscovered or still-hidden areas.
-    function mapJoin(parent, name) {
-        return (parent === "/" ? "" : parent) + "/" + name;
-    }
-
-    function dirChildren(path) {
-        if (!runtime.isDir(path)) return [];
-        return runtime.entries(path, false)
-            .filter((entry) => entry.type === "dir")
-            .map((entry) => mapJoin(path, entry.name));
-    }
-
-    function mapNodeLabel(path, visited) {
-        const name = runtime.basename(path) || path.replace(/^\//, "");
-        const isHere = path === runtime.state.cwd;
-        const cls = isHere ? "map-here" : visited.has(path) ? "map-seen" : "map-fog";
-        const marker = isHere ? " ←" : "";
-        return `<span class="${cls}">${escapeHtml(name)}/</span>${marker}`;
-    }
-
-    function mapBuild(path, prefix, visited, discovered, out) {
-        const kids = dirChildren(path).filter((child) => discovered.has(child));
-        kids.forEach((child, i) => {
-            const last = i === kids.length - 1;
-            out.push(prefix + (last ? "└── " : "├── ") + mapNodeLabel(child, visited));
-            mapBuild(child, prefix + (last ? "    " : "│   "), visited, discovered, out);
-        });
-    }
-
+    // Fog-of-war dungeon map: the tree itself comes from the shared presenter
+    // (Hud.mapModel); this just wraps each row in the css classes.
     function renderMap() {
         if (!dom.map) return;
-        const root = (runtime.world && runtime.world.root) || "/entrance";
-        const visited = new Set(runtime.state.visited || []);
-        visited.add(runtime.state.cwd);
-        const discovered = new Set([root]);
-        for (const node of visited) {
-            discovered.add(node);
-            for (const child of dirChildren(node)) discovered.add(child);
-        }
-        const out = [mapNodeLabel(root, visited)];
-        mapBuild(root, "", visited, discovered, out);
-        const legend = `<p class="map-legend kind-dim">${visited.size} room${visited.size === 1 ? "" : "s"} explored · ← you are here</p>`;
+        const map = Hud.mapModel(runtime);
+        const out = map.rows.map((row) => {
+            const cls = row.here ? "map-here" : row.seen ? "map-seen" : "map-fog";
+            return `${row.prefix}<span class="${cls}">${escapeHtml(row.name)}</span>${row.here ? " ←" : ""}`;
+        });
+        const legend = `<p class="map-legend kind-dim">${map.explored} room${map.explored === 1 ? "" : "s"} explored · ← you are here</p>`;
         dom.map.innerHTML = `<pre class="map-tree" aria-label="Discovered dungeon map">${out.join("\n")}</pre>${legend}`;
     }
 
