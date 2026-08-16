@@ -59,8 +59,8 @@ web-preview: web-build ## Preview the web app at http://127.0.0.1:8000
 # ── TermForge hosts (the same game/tools, off the browser) ─────────────
 
 .PHONY: tty-demo
-tty-demo: web-build ## Play bashcrawl in this terminal (JS emulator on node)
-	@$(NODE) termforge/node/host-tty.js --app bashcrawl
+tty-demo: web-build ## Play bashcrawl in this terminal (JS emulator on node; ARGS="--no-hud" for the classic stream)
+	@$(NODE) termforge/node/host-tty.js --app bashcrawl $(ARGS)
 
 .PHONY: telnet-demo
 telnet-demo: web-build ## Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)

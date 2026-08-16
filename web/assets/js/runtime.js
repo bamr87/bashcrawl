@@ -954,5 +954,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, tokenize };
+    global.BashcrawlRuntime = { Runtime, defaultState, tokenize, ARENA_RANKS, ACHIEVEMENTS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

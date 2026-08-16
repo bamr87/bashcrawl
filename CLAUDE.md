@@ -37,7 +37,7 @@ make test-mcp          # playtest-harness smoke tests in a local .venv
 make playtest          # blank-slate agent playtest (needs claude CLI + OAuth token)
 make lint              # shellcheck + yamllint + markdownlint + ruff
 make lint-js           # node --check over every tracked JS file
-make tty-demo          # play bashcrawl in this terminal (JS emulator on node)
+make tty-demo          # play bashcrawl in this terminal (full-screen HUD; ARGS="--no-hud" for the classic stream)
 make telnet-demo       # serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc)
 make agentwatch        # AI-agent task dashboard (ARGS="--data-dir logs/sessions" for real logs)
 make clean             # bash lib/reset.sh — reset game state
@@ -87,11 +87,12 @@ Hidden areas (all rooted under `entrance/`) are unlocked by collecting treasures
 | `lib/` | Minimal shared shell libs: `colors.sh`, `log.sh` (JSONL), `yaml_reader.sh`, `reset.sh`. |
 | `setup.sh` | chmods encounter scripts (`--quick` for tooling/tests). |
 | `termforge/core/` | The TermForge kernel (source of truth): `parser`, `vfs` (+ read-only providers), `shell` (hook spine, injectable clock/rng), `packs/{posix,flavour}`, `protocol`, `view`, `sinks/{dom,ansi}`, `input`. Dual-mode files, vendored to `web/assets/js/vendor/termforge/`. |
-| `termforge/node/` | Node hosts: `host-tty.js`, `host-telnet.js` + `telnet-codec.js` (RFC 854 subset), `index.js` (framework namespace for require()). |
+| `termforge/node/` | Node hosts: `host-tty.js` (full-screen HUD via the `session.hud()` contract, or classic stream with `--no-hud`/piped stdio), `tui.js` (TuiScreen: app-agnostic ANSI compositor — sidebar panels, toast row, input row), `host-telnet.js` + `telnet-codec.js` (RFC 854 subset), `index.js` (framework namespace for require()). |
 | `termforge/apps/` | `bashcrawl.js` (the game as an App descriptor for the hosts), `procwatch/` (custom-tool reference: live metrics as provider files), `agentwatch/` (AI-agent task dashboard: TaskSource → board/feed + live files; JSONL adapter for `logs/sessions/`). |
 | `termforge/test/` | `node --test` suites incl. golden transcripts (pixel-identity contract; regenerate only via `record-goldens.js --update`) and the telnet loopback integration. |
 | `web/assets/js/runtime.js` | The **bashcrawl game assembly** over TermForge: `class Runtime extends TermForge.Shell`, the full 74-entry `this.handlers` literal (the `validate_runtime_commands.py` regex contract — one `key: ref,` per line, bare references only), and `installGameHooks()` (quests/achievements/daily/trainer/pathfind/encounters). |
-| `web/assets/js/game.js` | Story mode: quests, XP, map, hero, effects (log via the shared TerminalView). |
+| `web/assets/js/hud.js` | The **shared HUD presenter** (one engine, two renderers): side quests, fog-of-war map model, HP/XP bars, room/quest/hero models, and `diffEvents()` — consumed by both `game.js` (DOM) and the TTY host (`tui.js` panels). Loaded like runtime.js: classic script in the browser, require()'d by `termforge/apps/bashcrawl.js`. |
+| `web/assets/js/game.js` | Story mode DOM renderer over `BashcrawlHud` models + CSS effects (log via the shared TerminalView). |
 | `web/assets/js/arcade.js` | Practice Arcade framework + the 4 mini-games (scoped bare Runtime per game). |
 | `web/assets/js/reference.js` | Cheatsheet library, concept spotlight, inline syntax hints. |
 | `web/assets/js/shell.js` | Mode router (Story·Arcade·Reference), landing overlay, XP bridge, toasts. |
@@ -137,7 +138,7 @@ mv ../../.chapel ../../chapel   # Unlock a hidden room (target may be 2+ levels 
 
 ### Web JS
 - Framework-free app code, IIFE modules, classic scripts. Load order: the 13 vendored
-TermForge core files (`protocol → parser → state → vfs → hooks → registry → shell → packs/posix → packs/flavour → view → sinks/dom → sinks/ansi → input`), then `storage → runtime → docs → reference → arcade → game → shell`. `validate_static_web.py` enforces that every vendor file loads before `runtime.js`. New features plug into `shell.js` (mode router) or an arcade game descriptor.
+TermForge core files (`protocol → parser → state → vfs → hooks → registry → shell → packs/posix → packs/flavour → view → sinks/dom → sinks/ansi → input`), then `storage → runtime → hud → docs → reference → arcade → game → shell`. `validate_static_web.py` enforces that every vendor file loads before `runtime.js`. New features plug into `shell.js` (mode router) or an arcade game descriptor.
 - A mini-game = *(seed world + goal predicate + scoring)* over a scoped bare `Runtime` —
   never reimplement command behavior outside `termforge/core/` + `runtime.js`.
 - Framework changes go in `termforge/core/` (then `make web-build` re-vendors); game-only

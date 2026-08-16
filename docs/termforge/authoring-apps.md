@@ -16,6 +16,7 @@ module.exports = {
                     runtime,            // duck type below
                     banner: [ { kind: "banner", text: "MY TOOL" } ],   // Line[] printed once
                     onControl(action) { /* "reset": rebuild session.runtime */ },
+                    hud() { /* optional: graphical frame, see below */ },
                 };
                 return session;
             },
@@ -25,6 +26,23 @@ module.exports = {
 ```
 
 `runtime` is anything with the Shell surface the hosts use: `execute(line) -> Line[]`, `completions(text) -> string[]`, `promptLabel() -> string`, and `state` (with `history`/`historyIndex` for the editor). A plain `TermForge.Shell` qualifies; so does the bashcrawl `Runtime` subclass.
+
+## The hud() contract (optional)
+
+An app that wants the full-screen treatment implements `session.hud()`. Panel-capable hosts (the TTY host's `TuiScreen`, `termforge/node/tui.js`) call it once at boot and again after every executed line:
+
+```js
+hud() {
+    return {
+        panels: [ { title: "⚙ STATUS", lines: [ { kind: "info", text: "…" } ] } ],
+        strip:  [ { kind: "info", text: "one-line HUD for narrow terminals" } ],
+        events: [ { type: "xp", text: "+25 XP" } ],   // toast queue since last call
+        prompt: runtime.promptLabel(),
+    };
+}
+```
+
+Everything is pre-formatted data — `{kind,text}` lines reuse the AnsiSink palette, so the sidebar matches the log colors. `events` is stateful: the session diffs its own snapshots so hosts never track app state (types `quest`/`damage`/`xp`/`item`/`levelup` map to toast styles). Sessions without `hud()` — and any session under `--no-hud` or piped stdio — run in the classic line-stream mode. Bashcrawl's implementation delegates to the shared presenter `web/assets/js/hud.js`, the same models its browser sidebar renders — one engine, two renderers.
 
 Run it: `node termforge/node/host-tty.js --app ./my-tool.js` or `node termforge/node/host-telnet.js --app ./my-tool.js --raw`.
 
