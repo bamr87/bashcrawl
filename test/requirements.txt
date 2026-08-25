@@ -3,7 +3,7 @@
 # For the full project, use the root requirements.txt + requirements-dev.txt instead.
 
 # Test runner
-pytest>=8.0
+pytest>=9.1.1
 pytest-timeout>=2.3
 
 # Schema validation
