@@ -13,4 +13,4 @@ jsonschema>=4.20
 pyyaml>=6.0
 
 # Playtest-harness smoke tests (playtest.mcp_server)
-mcp>=1.0.0
+mcp>=2.1.1
