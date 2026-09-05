@@ -1,9 +1,24 @@
+
 # Seeded by the bamr87 hub (tools/fanout.sh --kit prose). Enforces the house
-# rule "one paragraph per line" in markdown: fails if any tracked *.md has
-# soft-wrapped prose. This is the Liquid-safe surgical unwrapper — it only joins
+# rule "one paragraph per line" in markdown — and on a pull request it FIXES
+# the file rather than just failing: the job unwraps any soft-wrapped prose and
+# pushes the repair back to the PR branch, so no human round-trip is ever spent
+# on whitespace. This is the Liquid-safe surgical unwrapper — it only joins
 # wrapped prose and leaves Liquid/HTML/tables/code/front-matter untouched.
 #
+# The repair is pushed with GITHUB_TOKEN deliberately: GitHub fires no workflow
+# events for refs pushed with it, so self-healing costs ZERO extra CI runs (the
+# job that pushes the fix is the same job that then reports success). The fleet
+# runs no required status checks, so the new head SHA carrying no check runs
+# cannot strand the PR; if a repo ever adopts them, push with a PAT instead.
+#
+# It cannot self-heal two cases, which still fail with the fix instructions:
+# a fork PR (read-only token) and a direct push to the default branch (never
+# end a workflow in a bare push to a protected branch — a house rule).
+#
 # Fix locally:  python3 tools/unwrap-prose.py --write
+# Or never think about it again: run tools/install-prose-hook.sh from the
+# bamr87 hub once, and a global git pre-commit hook fixes it in every repo.
 name: markdown-oneline
 
 on:
@@ -14,7 +29,7 @@ on:
     paths: ["**/*.md", "**/*.markdown"]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: markdown-oneline-${{ github.ref }}
@@ -26,11 +41,45 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Check out the PR's head BRANCH, not the merge commit, so the repair
+          # can be committed onto it and pushed back.
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       - uses: actions/setup-python@v7
         with:
           python-version: "3.x"
-      - name: Check one paragraph per line
+      - name: Unwrap soft-wrapped prose
+        id: fix
         run: |
-          python3 tools/unwrap-prose.py --check \
-            --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$' \
-          || { echo "::error::Wrapped markdown prose found. Run: python3 tools/unwrap-prose.py --write"; exit 1; }
+          python3 tools/unwrap-prose.py --write \
+            --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$'
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Unwrapped:"; git diff --name-only | sed 's/^/  /'
+          fi
+      - name: Push the repair back to the pull request
+        if: >-
+          steps.fix.outputs.changed == 'true'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name == github.repository
+        # The branch name reaches the script through the environment, never
+        # interpolated into it: a branch is attacker-controllable text.
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -a -m "style: unwrap soft-wrapped markdown prose"
+          git push origin "HEAD:refs/heads/$HEAD_REF"
+          echo "::notice::Unwrapped markdown prose and pushed the fix to this PR."
+      - name: Cannot self-heal here — report instead
+        if: >-
+          steps.fix.outputs.changed == 'true'
+          && (github.event_name != 'pull_request'
+          || github.event.pull_request.head.repo.full_name != github.repository)
+        run: |
+          echo "::error::Wrapped markdown prose found, and this run cannot push the fix (fork PR, or a push to the default branch). Run: python3 tools/unwrap-prose.py --write"
+          exit 1
