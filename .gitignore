@@ -87,3 +87,6 @@ node_modules/
 
 # Local agent run configs (use `make web-preview` instead)
 .claude/launch.json
+
+# Playwright MCP scratch output (console logs, traces)
+.playwright-mcp/

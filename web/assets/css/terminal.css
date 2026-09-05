@@ -118,6 +118,11 @@ a.tui-header-link:focus {
     border-radius: var(--radius-sm);
     background: var(--bg-card);
     padding: 0.75rem;
+    transition: border-color 320ms ease, box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.tui-panel.is-refreshing {
+    opacity: 0.88;
+    border-color: var(--fx-accent, var(--accent-purple));
 }
 
 .tui-panel h2 {
@@ -246,6 +251,16 @@ a.tui-header-link:focus {
     text-shadow: 0 0 8px rgba(251, 191, 36, 0.45);
 }
 
+.tui-log span.kind-banner,
+.tui-log span.kind-art {
+    display: block;
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 @keyframes bc-sparkle {
     0%, 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.0); transform: translateY(0); }
     25%      { box-shadow: 0 0 18px 4px rgba(251, 191, 36, 0.55); transform: translateY(-1px); }
@@ -276,10 +291,10 @@ a.tui-header-link:focus {
 }
 
 @keyframes bc-fadein {
-    from { opacity: 0; transform: translateY(4px); }
+    from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.tui-log span { animation: bc-fadein 140ms ease-out both; }
+.tui-log span { animation: bc-fadein 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* Encounter Creature Gallery: scan-in reveal for freshly-mounted ASCII art.
    renderLog() rebuilds the <pre> on every render, so each art span re-mounts
@@ -291,10 +306,8 @@ a.tui-header-link:focus {
         60%  { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1.25); }
         to   { opacity: 1; transform: translateY(0);   clip-path: inset(0 0 0 0);   filter: brightness(1); }
     }
-    /* display:inline-block is REQUIRED — without it transform/clip-path/filter
-       are ignored on the inline art spans (cf. .fx-pop, which does the same). */
     .tui-log span.kind-art {
-        display: inline-block;
+        display: block;
         animation: bc-art-reveal 420ms ease-out both;
     }
     .tui-log span.kind-art + span.kind-art { animation-delay: 40ms; }
@@ -578,6 +591,8 @@ a.tui-header-link:focus {
 .hero-stage[data-mood="hurt"] .hero-face  { background: var(--accent-red); }
 .hero-stage[data-mood="xp"]   .hero-sprite { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.65)); }
 .hero-stage[data-mood="quest"] .hero-blade { background: var(--accent-yellow); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--accent-yellow); }
+.hero-stage[data-mood="cast"] .hero-blade { background: var(--accent-purple); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--accent-purple); }
+.hero-stage[data-mood="cast"] .hero-sprite { filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.75)); }
 
 /* ---- Motion — only when reduced motion is NOT requested ---- */
 @media (prefers-reduced-motion: no-preference) {
@@ -977,6 +992,133 @@ body[data-crt="on"] .tui-log {
             rgba(248, 113, 113, 0.5) 100%
         );
         animation: bc-damage-flash 600ms ease-out;
+    }
+    @keyframes bc-heal-flash {
+        0%   { opacity: 0; }
+        18%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .bc-screenflash-heal {
+        background: radial-gradient(
+            ellipse at center,
+            rgba(74, 222, 128, 0.35) 0%,
+            rgba(74, 222, 128, 0) 70%
+        );
+        animation: bc-heal-flash 700ms ease-out;
+    }
+    @keyframes bc-unlock-flash {
+        0%   { opacity: 0; }
+        15%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .bc-screenflash-unlock {
+        background: radial-gradient(
+            ellipse at 20% 80%,
+            rgba(251, 191, 36, 0.45) 0%,
+            rgba(251, 191, 36, 0) 55%
+        );
+        animation: bc-unlock-flash 800ms ease-out;
+    }
+    @keyframes bc-magic-flash {
+        0%   { opacity: 0; }
+        20%  { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .bc-screenflash-magic {
+        background: radial-gradient(
+            ellipse at center,
+            rgba(192, 132, 252, 0.32) 0%,
+            rgba(34, 211, 238, 0.12) 40%,
+            rgba(192, 132, 252, 0) 72%
+        );
+        animation: bc-magic-flash 720ms ease-out;
+    }
+    @keyframes bc-poweron {
+        0%   { opacity: 1; transform: scaleY(0.004); filter: brightness(2.4); }
+        18%  { opacity: 1; transform: scaleY(0.03); }
+        42%  { opacity: 0.85; transform: scaleY(1); filter: brightness(1.6); }
+        100% { opacity: 0; transform: scaleY(1); filter: brightness(1); }
+    }
+    .bc-screenflash-poweron {
+        background: linear-gradient(
+            to bottom,
+            rgba(74, 222, 128, 0.15),
+            rgba(226, 255, 230, 0.55) 48%,
+            rgba(74, 222, 128, 0.2)
+        );
+        transform-origin: center;
+        animation: bc-poweron 920ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+}
+
+/* ============================================================
+   Gameplay terminal FX — room warp, casts, glitch, prompt pulse.
+   Motion-gated; reduced-motion leaves the classes inert.
+   ============================================================ */
+.tui-content.fx-warp,
+.tui-content.fx-cast-log {
+    position: relative;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-warp {
+        from { transform: translateY(-110%); opacity: 1; }
+        to   { transform: translateY(110%); opacity: 0; }
+    }
+    .tui-content.fx-warp::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 28%;
+        z-index: 6;
+        pointer-events: none;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            rgba(34, 211, 238, 0.18) 40%,
+            rgba(255, 255, 255, 0.55) 50%,
+            rgba(34, 211, 238, 0.18) 60%,
+            transparent
+        );
+        animation: bc-warp 480ms ease-out;
+    }
+    .tui-content.fx-cast-log {
+        box-shadow: inset 0 0 28px rgba(192, 132, 252, 0.35);
+    }
+    @keyframes bc-glitch {
+        0%, 100% { transform: none; text-shadow: none; }
+        25% { transform: translate(-2px, 1px); text-shadow: -2px 0 var(--accent-red), 2px 0 var(--accent-blue); }
+        50% { transform: translate(2px, -1px); text-shadow: 2px 0 var(--accent-red), -2px 0 var(--accent-cyan, #22d3ee); }
+        75% { transform: translate(-1px, 0); }
+    }
+    .tui-log.fx-glitch {
+        animation: bc-glitch 280ms steps(2, end);
+    }
+    @keyframes bc-phosphor {
+        from { filter: brightness(1.55); text-shadow: 0 0 10px rgba(74, 222, 128, 0.55); }
+        to   { filter: none; }
+    }
+    .tui-log.fx-fresh span:last-of-type {
+        animation: bc-phosphor 400ms ease-out;
+    }
+    #prompt-label.fx-cast {
+        color: var(--accent-purple);
+        text-shadow: 0 0 10px rgba(192, 132, 252, 0.85);
+    }
+    .tui-input-row.fx-submit .tui-input {
+        border-color: var(--accent-green);
+        box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+    }
+    @keyframes bc-arrive {
+        0%   { color: var(--accent-yellow); text-shadow: 0 0 8px rgba(251, 191, 36, 0.7); }
+        100% { color: inherit; text-shadow: none; }
+    }
+    .map-panel.fx-arrive .map-here {
+        animation: bc-arrive 700ms ease-out;
+    }
+    .hero-stage[data-mood="cast"] .hero-spark {
+        animation: hero-twinkle 620ms ease-out 1;
     }
 }
 
@@ -1561,8 +1703,409 @@ body[data-crt="on"] .tui-log {
     .mode-tab,
     .arcade-card,
     .landing-door,
-    #bc-toast {
+    #bc-toast,
+    .tui-panel,
+    .tui-prompt,
+    .tui-input,
+    .tui-log span {
         transition: none;
+        animation: none !important;
+    }
+    .tui-content.fx-play::after,
+    .tui-content.fx-play::before {
+        animation: none !important;
+        opacity: 0;
+    }
+}
+
+/* ============================================================
+   Per-command + per-flag terminal FX.
+   .tui-content.fx-play[data-fx-motion] drives the overlay;
+   flags tint via --fx-hue / attribute selectors. Smooth easings.
+   ============================================================ */
+.tui-content {
+    --fx-accent: var(--accent-blue);
+    --fx-hue: 0;
+    transition: box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tui-content.fx-play {
+    box-shadow: inset 0 0 28px color-mix(in srgb, var(--fx-accent) 28%, transparent);
+}
+.tui-content.fx-play::after,
+.tui-content.fx-play::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+}
+.tui-content.fx-play::before {
+    z-index: 5;
+    mix-blend-mode: screen;
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    #prompt-label,
+    .tui-input,
+    .tui-button,
+    .mode-tab {
+        transition: color 280ms ease, background-color 280ms ease, border-color 280ms ease, box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes fx-scan {
+        from { transform: translateX(-120%); opacity: 0.9; }
+        to   { transform: translateX(120%); opacity: 0; }
+    }
+    @keyframes fx-radar {
+        from { transform: rotate(0deg) scale(0.4); opacity: 0.7; }
+        to   { transform: rotate(220deg) scale(1.4); opacity: 0; }
+    }
+    @keyframes fx-sweep-y {
+        from { transform: translateY(-120%); opacity: 0.85; }
+        to   { transform: translateY(120%); opacity: 0; }
+    }
+    @keyframes fx-sweep-y-rev {
+        from { transform: translateY(120%); opacity: 0.85; }
+        to   { transform: translateY(-120%); opacity: 0; }
+    }
+    @keyframes fx-sweep-x-rev {
+        from { transform: translateX(120%); opacity: 0.85; }
+        to   { transform: translateX(-120%); opacity: 0; }
+    }
+    @keyframes fx-bloom {
+        0%   { opacity: 0; transform: scale(0.6); }
+        35%  { opacity: 0.7; transform: scale(1); }
+        100% { opacity: 0; transform: scale(1.25); }
+    }
+    @keyframes fx-wipe-down {
+        from { clip-path: inset(0 0 100% 0); opacity: 0.8; }
+        to   { clip-path: inset(0 0 0 0); opacity: 0; }
+    }
+    @keyframes fx-wipe-up {
+        from { clip-path: inset(100% 0 0 0); opacity: 0.8; }
+        to   { clip-path: inset(0 0 0 0); opacity: 0; }
+    }
+    @keyframes fx-ripple {
+        0%   { transform: scale(0.2); opacity: 0.65; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+    @keyframes fx-spark {
+        0%   { opacity: 0; filter: brightness(1); }
+        30%  { opacity: 0.8; filter: brightness(1.5); }
+        100% { opacity: 0; filter: brightness(1); }
+    }
+    @keyframes fx-skew {
+        0%   { transform: translateX(0) skewX(0); opacity: 0.7; }
+        40%  { transform: translateX(18px) skewX(-8deg); opacity: 0.5; }
+        100% { transform: translateX(48px) skewX(0); opacity: 0; }
+    }
+    @keyframes fx-mirror {
+        0%   { transform: scaleX(1); opacity: 0.55; }
+        50%  { transform: scaleX(-1); opacity: 0.4; }
+        100% { transform: scaleX(1); opacity: 0; }
+    }
+    @keyframes fx-shake-soft {
+        0%, 100% { transform: translateX(0); opacity: 0.5; }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); opacity: 0; }
+    }
+    @keyframes fx-room-enter {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tui-content.fx-play::after {
+        filter: hue-rotate(calc(var(--fx-hue) * 1deg));
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fx-accent) 45%, white 10%), transparent);
+        animation: fx-scan 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="radar"]::after {
+        inset: 20%;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0 70%, color-mix(in srgb, var(--fx-accent) 55%, transparent) 100%);
+        animation: fx-radar 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="warp"]::after,
+    .tui-content.fx-play[data-fx-motion="steam"]::after {
+        background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fx-accent) 40%, white 20%) 50%, transparent);
+        animation: fx-sweep-y 480ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="climb"]::after {
+        background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fx-accent) 40%, white 20%) 50%, transparent);
+        animation: fx-sweep-y-rev 480ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="rewind"]::after {
+        animation: fx-sweep-x-rev 480ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="home"]::after,
+    .tui-content.fx-play[data-fx-motion="cast"]::after,
+    .tui-content.fx-play[data-fx-motion="spark"]::after,
+    .tui-content.fx-play[data-fx-motion="bloom"]::after,
+    .tui-content.fx-play[data-fx-motion="seal"]::after,
+    .tui-content.fx-play[data-fx-motion="pulse"]::after {
+        background: radial-gradient(ellipse at center, color-mix(in srgb, var(--fx-accent) 50%, transparent), transparent 70%);
+        animation: fx-bloom 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="cat"]::after {
+        background: none;
+        animation: none;
+    }
+    .tui-content.fx-play[data-fx-motion="unroll"]::after,
+    .tui-content.fx-play[data-fx-motion="peek-top"]::after,
+    .tui-content.fx-play[data-fx-motion="lore"]::after,
+    .tui-content.fx-play[data-fx-motion="branch"]::after {
+        background: linear-gradient(to bottom, color-mix(in srgb, var(--fx-accent) 35%, transparent), transparent);
+        animation: fx-wipe-down 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="peek-bottom"]::after,
+    .tui-content.fx-play[data-fx-motion="follow"]::after {
+        background: linear-gradient(to top, color-mix(in srgb, var(--fx-accent) 35%, transparent), transparent);
+        animation: fx-wipe-up 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="hunt"]::after,
+    .tui-content.fx-play[data-fx-motion="identify"]::after,
+    .tui-content.fx-play[data-fx-motion="compass"]::after {
+        inset: 15%;
+        border-radius: 50%;
+        background: radial-gradient(circle, color-mix(in srgb, var(--fx-accent) 55%, transparent), transparent 65%);
+        animation: fx-ripple 620ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="ripple"]::after,
+    .tui-content.fx-play[data-fx-motion="echo"]::after,
+    .tui-content.fx-play[data-fx-motion="absorb"]::after {
+        border-radius: 50%;
+        border: 2px solid var(--fx-accent);
+        background: transparent;
+        animation: fx-ripple 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="forge"]::after,
+    .tui-content.fx-play[data-fx-motion="grant"]::after,
+    .tui-content.fx-play[data-fx-motion="beast"]::after,
+    .tui-content.fx-play[data-fx-motion="streak"]::after {
+        background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--fx-accent) 55%, transparent), transparent 60%);
+        animation: fx-spark 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="copy"]::after,
+    .tui-content.fx-play[data-fx-motion="shift"]::after,
+    .tui-content.fx-play[data-fx-motion="slice"]::after {
+        animation: fx-skew 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tui-content.fx-play[data-fx-motion="mirror"]::after,
+    .tui-content.fx-play[data-fx-motion="invert"]::after,
+    .tui-content.fx-play[data-fx-motion="morph"]::after,
+    .tui-content.fx-play[data-fx-motion="rewrite"]::after {
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fx-accent) 40%, transparent), transparent);
+        animation: fx-mirror 560ms ease-in-out;
+    }
+    .tui-content.fx-play[data-fx-motion="burn"]::after,
+    .tui-content.fx-play[data-fx-motion="revoke"]::after,
+    .tui-content.fx-play[data-fx-motion="error"]::after {
+        background: radial-gradient(ellipse at center, color-mix(in srgb, var(--fx-accent) 40%, transparent), transparent 70%);
+        animation: fx-shake-soft 380ms ease-in-out;
+    }
+    .tui-content.fx-play[data-fx-motion="clear"]::after {
+        background: var(--bg-primary);
+        animation: fx-bloom 500ms ease-out;
+    }
+    .tui-content.fx-play[data-fx-motion="shuffle"]::after,
+    .tui-content.fx-play[data-fx-motion="merge"]::after,
+    .tui-content.fx-play[data-fx-motion="tally"]::after,
+    .tui-content.fx-play[data-fx-motion="numbers"]::after,
+    .tui-content.fx-play[data-fx-motion="tick"]::after,
+    .tui-content.fx-play[data-fx-motion="grid"]::after,
+    .tui-content.fx-play[data-fx-motion="bind"]::after,
+    .tui-content.fx-play[data-fx-motion="scale"]::after,
+    .tui-content.fx-play[data-fx-motion="mark"]::after,
+    .tui-content.fx-play[data-fx-motion="unveil"]::after,
+    .tui-content.fx-play[data-fx-motion="ledger"]::after,
+    .tui-content.fx-play[data-fx-motion="blink"]::after,
+    .tui-content.fx-play[data-fx-motion="soften"]::after {
+        background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--fx-accent) 40%, transparent) 50%, transparent 70%);
+        animation: fx-scan 540ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .tui-content.fx-play[data-fx-flags*="a"]::before {
+        background: radial-gradient(ellipse at 20% 30%, rgba(251, 191, 36, 0.35), transparent 55%);
+        animation: fx-bloom 560ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1;
+    }
+    .tui-content.fx-play[data-fx-flags*="F"]::before {
+        background: repeating-linear-gradient(90deg, transparent 0 12px, color-mix(in srgb, var(--fx-accent) 22%, transparent) 12px 13px);
+        animation: fx-wipe-down 500ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1;
+    }
+    .tui-content.fx-play[data-fx-flags*="l"]::before {
+        background: repeating-linear-gradient(to bottom, transparent 0 1.35em, color-mix(in srgb, var(--fx-accent) 18%, transparent) 1.35em 1.4em);
+        animation: fx-wipe-down 520ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1;
+    }
+    .tui-content.fx-play[data-fx-flags*="r"]::before,
+    .tui-content.fx-play[data-fx-flags*="R"]::before {
+        border-radius: 50%;
+        border: 2px solid color-mix(in srgb, var(--fx-accent) 50%, white);
+        background: transparent;
+        animation: fx-ripple 620ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1;
+    }
+    .tui-content.fx-play[data-fx-pipe="1"] {
+        box-shadow: inset 8px 0 18px color-mix(in srgb, var(--fx-accent) 25%, transparent),
+                    inset -8px 0 18px color-mix(in srgb, var(--accent-green) 20%, transparent);
+    }
+    .tui-content.fx-play[data-fx-redirect="write"] .tui-log,
+    .tui-content.fx-play[data-fx-redirect="append"] .tui-log {
+        text-shadow: 0 0 10px var(--fx-accent);
+    }
+
+    .tui-room-panel.fx-room-enter .room-vignette,
+    .tui-room-panel.fx-room-enter #room-panel {
+        animation: fx-room-enter 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .map-panel.fx-arrive .map-tree {
+        animation: fx-room-enter 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+}
+
+/* Pixel cat — walks in on `cat`/`less` and coughs file text in, pixelated. */
+.px-cat {
+    --cat-px: 5px;
+    position: absolute;
+    left: 1.1rem;
+    bottom: 1.1rem;
+    z-index: 8;
+    width: calc(var(--cat-px) * 14);
+    height: calc(var(--cat-px) * 12);
+    pointer-events: none;
+    opacity: 0;
+}
+.px-cat-sprite {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.px-cat-sprite > span {
+    position: absolute;
+    image-rendering: pixelated;
+}
+.px-cat-ear {
+    width: calc(var(--cat-px) * 2);
+    height: calc(var(--cat-px) * 2);
+    background: #c4843c;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.px-cat-ear-l { left: calc(var(--cat-px) * 3); top: 0; }
+.px-cat-ear-r { left: calc(var(--cat-px) * 8); top: 0; }
+.px-cat-head {
+    left: calc(var(--cat-px) * 3);
+    top: calc(var(--cat-px) * 2);
+    width: calc(var(--cat-px) * 7);
+    height: calc(var(--cat-px) * 5);
+    background: #e8b86d;
+}
+.px-cat-eye {
+    width: var(--cat-px);
+    height: var(--cat-px);
+    background: #1a1423;
+}
+.px-cat-eye-l { left: calc(var(--cat-px) * 4.5); top: calc(var(--cat-px) * 3.5); }
+.px-cat-eye-r { left: calc(var(--cat-px) * 7.5); top: calc(var(--cat-px) * 3.5); }
+.px-cat-nose {
+    left: calc(var(--cat-px) * 6);
+    top: calc(var(--cat-px) * 5);
+    width: var(--cat-px);
+    height: var(--cat-px);
+    background: #f87171;
+}
+.px-cat-body {
+    left: calc(var(--cat-px) * 2);
+    top: calc(var(--cat-px) * 6);
+    width: calc(var(--cat-px) * 8);
+    height: calc(var(--cat-px) * 4);
+    background: #d4a056;
+}
+.px-cat-paw {
+    width: calc(var(--cat-px) * 2);
+    height: calc(var(--cat-px) * 2);
+    background: #c4843c;
+    top: calc(var(--cat-px) * 10);
+}
+.px-cat-paw-f { left: calc(var(--cat-px) * 3); }
+.px-cat-paw-b { left: calc(var(--cat-px) * 7); }
+.px-cat-tail {
+    left: calc(var(--cat-px) * 10);
+    top: calc(var(--cat-px) * 6);
+    width: calc(var(--cat-px) * 4);
+    height: var(--cat-px);
+    background: #c4843c;
+    transform-origin: left center;
+}
+.px-cat-bit {
+    width: var(--cat-px);
+    height: var(--cat-px);
+    background: var(--accent-yellow);
+    opacity: 0;
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
+}
+[data-theme="light"] .px-cat-head { background: #c9954a; }
+[data-theme="light"] .px-cat-body { background: #b07d38; }
+
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes px-cat-walk {
+        0%   { transform: translateX(-96px) translateY(4px); opacity: 0; }
+        10%  { opacity: 1; }
+        42%  { transform: translateX(6px) translateY(0); opacity: 1; }
+        55%  { transform: translateX(16px) translateY(3px); }
+        78%  { transform: translateX(22px) translateY(0); opacity: 1; }
+        100% { transform: translateX(52px) translateY(-8px); opacity: 0; }
+    }
+    @keyframes px-cat-paw {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(calc(var(--cat-px) * -0.8)); }
+    }
+    @keyframes px-cat-tail {
+        0%, 100% { transform: rotate(-18deg); }
+        50%      { transform: rotate(26deg); }
+    }
+    @keyframes px-cat-hack {
+        0%   { opacity: 0; transform: translate(0, 0) scale(1); }
+        18%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(calc(var(--cat-px) * 7), calc(var(--cat-px) * 5)) scale(0.5); }
+    }
+    @keyframes fx-cat-load {
+        0%   { opacity: 0; filter: contrast(8) brightness(1.7) saturate(0); clip-path: inset(0 100% 0 0); }
+        38%  { opacity: 1; filter: contrast(3) brightness(1.25); clip-path: inset(0 52% 0 0); }
+        72%  { filter: contrast(1.3); clip-path: inset(0 10% 0 0); }
+        100% { opacity: 1; filter: none; clip-path: inset(0 0 0 0); }
+    }
+    .px-cat.px-cat-run {
+        animation: px-cat-walk 1.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .px-cat-run .px-cat-paw-f { animation: px-cat-paw 160ms ease-in-out 7; }
+    .px-cat-run .px-cat-paw-b { animation: px-cat-paw 160ms ease-in-out 7; animation-delay: 80ms; }
+    .px-cat-run .px-cat-tail { animation: px-cat-tail 360ms ease-in-out 4; }
+    .px-cat-run .px-cat-bit-1 {
+        left: calc(var(--cat-px) * 9);
+        top: calc(var(--cat-px) * 5);
+        animation: px-cat-hack 640ms ease-out 520ms both;
+    }
+    .px-cat-run .px-cat-bit-2 {
+        left: calc(var(--cat-px) * 8);
+        top: calc(var(--cat-px) * 4);
+        animation: px-cat-hack 640ms ease-out 620ms both;
+    }
+    .px-cat-run .px-cat-bit-3 {
+        left: calc(var(--cat-px) * 10);
+        top: calc(var(--cat-px) * 6);
+        animation: px-cat-hack 640ms ease-out 720ms both;
+    }
+    .tui-content.fx-cat-play .tui-log {
+        background-image:
+            repeating-linear-gradient(0deg, transparent 0 3px, rgba(251, 191, 36, 0.07) 3px 4px),
+            repeating-linear-gradient(90deg, transparent 0 3px, rgba(251, 191, 36, 0.04) 3px 4px);
+    }
+    .tui-log span.fx-cat-text {
+        animation: fx-cat-load 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation-delay: var(--cat-delay, 0ms);
     }
 }
 

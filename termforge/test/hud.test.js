@@ -53,6 +53,32 @@ test("snapshot + diffEvents surface xp/item/quest transitions from real play", (
     assert.ok(item.items.length >= 1);
 });
 
+test("diffEvents reports move, heal, and unlock transitions", () => {
+    const { runtime, hud } = createHudRuntime();
+    const before = hud.snapshot(runtime);
+    assert.equal(before.reveals, 0);
+
+    runtime.execute("cd cellar");
+    const moved = hud.snapshot(runtime);
+    const move = hud.diffEvents(before, moved).find((e) => e.type === "move");
+    assert.ok(move, "cd should emit a move event");
+    assert.equal(move.to, "/entrance/cellar");
+
+    runtime.state.hp = 80;
+    const hurt = hud.snapshot(runtime);
+    runtime.state.hp = 95;
+    const healed = hud.snapshot(runtime);
+    const heal = hud.diffEvents(hurt, healed).find((e) => e.type === "heal");
+    assert.ok(heal);
+    assert.equal(heal.amount, 15);
+
+    runtime.execute("./treasure");
+    const looted = hud.snapshot(runtime);
+    assert.ok(looted.reveals > moved.reveals, "treasure should unlock hidden rooms");
+    const unlock = hud.diffEvents(moved, looted).find((e) => e.type === "unlock");
+    assert.ok(unlock, "unlocking chapel/vault/scrap should emit unlock");
+});
+
 test("diffEvents reports damage and levelup transitions", () => {
     const { runtime, hud } = createHudRuntime();
     const before = hud.snapshot(runtime);

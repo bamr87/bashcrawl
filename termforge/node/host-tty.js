@@ -18,7 +18,16 @@ const TermForge = require("./index.js");
 const { parseArgs, resolveApp } = require("./cli.js");
 const { TuiScreen } = require("./tui.js");
 
-const TOAST_KINDS = { quest: "magic", damage: "error", xp: "success", item: "art", levelup: "magic" };
+const TOAST_KINDS = {
+    quest: "magic",
+    damage: "error",
+    heal: "success",
+    xp: "success",
+    item: "art",
+    levelup: "magic",
+    unlock: "magic",
+};
+const SILENT_EVENTS = new Set(["move"]);
 const TOAST_MS = 2200;
 
 function main() {
@@ -137,6 +146,7 @@ function runHudMode(session, opts) {
     };
     const pushToasts = (events) => {
         for (const ev of events || []) {
+            if (SILENT_EVENTS.has(ev.type)) continue;
             toasts.push({ kind: TOAST_KINDS[ev.type] || "info", text: ev.text });
         }
         if (!toastTimer && toasts.length) nextToast();

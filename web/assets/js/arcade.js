@@ -491,8 +491,21 @@
             }
             this.append("dim", `${this.promptLabel()} ${line}`);
             this.ctx.moves += 1;
+            const prevCwd = this.ctx.rt && this.ctx.rt.state.cwd;
             const result = this.active.input(line, this.ctx);
             this.appendMany(result.outputs || []);
+            const catalog = global.BashcrawlCommandFx;
+            const error = (result.outputs || []).some((out) => out && out.kind === "error");
+            const spec = catalog && catalog.apply(line, {
+                log: this.dom.log,
+                form: document.getElementById("command-form"),
+                prompt: document.getElementById("prompt-label"),
+                error,
+            });
+            const fx = global.BashcrawlFx;
+            if (fx && this.ctx.rt && this.ctx.rt.state.cwd !== prevCwd) {
+                fx.bump(this.dom.log && this.dom.log.closest(".tui-panel"), "fx-arrive", 500);
+            }
             if (result.done) {
                 this.finish(result.success);
             } else {
@@ -500,6 +513,9 @@
                 this.renderSide();
             }
             this.renderLog();
+            if (spec && spec.cmd === "cat" && spec.known) {
+                catalog.playCat(this.dom.log, result.outputs);
+            }
             return true;
         }
 
@@ -524,6 +540,7 @@
                     { kind: "dim", text: "Enter returns to the arcade floor." },
                 ]);
                 this.bridge.awardXp(xp, this.active.title);
+                if (global.BashcrawlFx) global.BashcrawlFx.celebrate();
             } else {
                 this.appendMany([
                     { kind: "info", text: `Trial ended. Score ${score} (${detail}).` },

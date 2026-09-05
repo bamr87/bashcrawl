@@ -136,6 +136,7 @@
             achievements: (s.achievements || []).length,
             rankIndex: s.rankIndex || 0,
             cwd: s.cwd,
+            reveals: Object.keys(s.reveals || {}).length,
         };
     }
 
@@ -149,6 +150,9 @@
         if (next.hp < prev.hp) {
             events.push({ type: "damage", amount: prev.hp - next.hp, text: `−${prev.hp - next.hp} HP` });
         }
+        if (next.hp > prev.hp) {
+            events.push({ type: "heal", amount: next.hp - prev.hp, text: `+${next.hp - prev.hp} HP` });
+        }
         if (next.xp > prev.xp) {
             events.push({ type: "xp", amount: next.xp - prev.xp, text: `+${next.xp - prev.xp} XP` });
         }
@@ -158,6 +162,12 @@
         }
         if (next.rankIndex > prev.rankIndex) {
             events.push({ type: "levelup", text: `★ ${rankFor(next.xp).title}` });
+        }
+        if (next.cwd !== prev.cwd) {
+            events.push({ type: "move", from: prev.cwd, to: next.cwd, text: `→ ${next.cwd}` });
+        }
+        if ((next.reveals || 0) > (prev.reveals || 0)) {
+            events.push({ type: "unlock", text: "New passages have opened." });
         }
         return events;
     }
