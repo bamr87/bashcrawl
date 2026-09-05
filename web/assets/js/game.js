@@ -179,10 +179,27 @@
         runtime.state.historyIndex = runtime.state.history.length;
         const outputs = runtime.execute(line);
         view.appendOutputs(outputs);
+        const spec = playCommandFx(line, outputs);
+        if (spec && spec.exec) {
+            screenFlash("magic");
+            applyHeroMood("cast");
+        }
+        if (spec && spec.motion === "error") bump(dom.log, "fx-glitch", 320);
         const after = snapshotState();
         triggerEffects(prevState, after);
         prevState = after;
         saveAndRender();
+        pingLog();
+        if (spec && spec.cmd === "cat" && spec.known) {
+            window.BashcrawlCommandFx.playCat(dom.log, outputs);
+        }
+    }
+
+    function playCommandFx(line, outputs) {
+        const catalog = window.BashcrawlCommandFx;
+        if (!catalog) return null;
+        const error = (outputs || []).some((out) => out && out.kind === "error");
+        return catalog.apply(line, { log: dom.log, form: dom.form, prompt: dom.prompt, error });
     }
 
     // Semantic events come from the shared presenter; this maps them onto the
@@ -197,6 +214,9 @@
                 shakePanel(dom.inventory);
                 applyHeroMood("hurt");
                 screenFlash("damage");
+            } else if (event.type === "heal") {
+                flashPanel(dom.inventory);
+                screenFlash("heal");
             } else if (event.type === "xp") {
                 popXp();
                 floatXp(event.amount);
@@ -204,6 +224,14 @@
             } else if (event.type === "item") {
                 flashPanel(dom.inventory);
                 applyHeroMood("item");
+            } else if (event.type === "move") {
+                flashPanel(dom.room);
+                bump(dom.room && dom.room.closest(".tui-panel"), "fx-room-enter", 480);
+                bump(dom.map && dom.map.closest(".tui-panel"), "fx-arrive", 700);
+            } else if (event.type === "unlock") {
+                flashPanel(dom.map);
+                shakePanel(dom.map);
+                screenFlash("unlock");
             }
             // "levelup" is already celebrated via the runtime's control record
             // (flashLevelUp in this view's onControl).
@@ -243,22 +271,26 @@
         setTimeout(() => shell.classList.remove("fx-levelup"), 950);
     }
 
+    function bump(el, cls, ms) {
+        if (!el || !cls) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+        setTimeout(() => el.classList.remove(cls), ms || 400);
+    }
+
+    function pingLog() {
+        bump(dom.log, "fx-fresh", 420);
+    }
+
     function flashPanel(el) {
-        if (!el || !el.parentElement) return;
-        const target = el.closest(".tui-panel") || el;
-        target.classList.remove("fx-sparkle");
-        void target.offsetWidth;
-        target.classList.add("fx-sparkle");
-        setTimeout(() => target.classList.remove("fx-sparkle"), 1100);
+        if (!el) return;
+        bump(el.closest(".tui-panel") || el, "fx-sparkle", 1100);
     }
 
     function shakePanel(el) {
-        if (!el || !el.parentElement) return;
-        const target = el.closest(".tui-panel") || el;
-        target.classList.remove("fx-shake");
-        void target.offsetWidth;
-        target.classList.add("fx-shake");
-        setTimeout(() => target.classList.remove("fx-shake"), 360);
+        if (!el) return;
+        bump(el.closest(".tui-panel") || el, "fx-shake", 360);
     }
 
     function popXp() {
@@ -277,6 +309,12 @@
     }
 
     function render() {
+        // Panels dip while they repaint; bump() owns the class lifetime so the
+        // 220ms transition actually runs (add + remove in one frame never paints).
+        [dom.quest, dom.inventory, dom.room, dom.map]
+            .map((el) => el && el.closest(".tui-panel"))
+            .filter(Boolean)
+            .forEach((panel) => bump(panel, "is-refreshing", 220));
         recordVisit();
         renderQuest();
         renderInventory();
@@ -446,13 +484,14 @@
     // "idle" after the reaction. One tracked timer, cleared before re-arming —
     // no setInterval/rAF. Safe if the panel is absent (every access guarded).
     let heroMoodTimer = null;
-    const HERO_MOOD_MS = { hurt: 600, quest: 1500, item: 700, xp: 900, idle: 0 };
+    const HERO_MOOD_MS = { hurt: 600, quest: 1500, item: 700, xp: 900, cast: 800, idle: 0 };
     const HERO_MOOD_LABELS = {
         idle: "Catching their breath.",
         hurt: "Ow! That stung.",
         quest: "Quest cleared! Huzzah!",
         item: "Ooh, shiny loot!",
         xp: "Growing stronger...",
+        cast: "Magick crackles...",
     };
 
     function applyHeroMood(mood) {
@@ -532,12 +571,26 @@
     // award path, plus the loaded data bundle so shell can boot without
     // re-fetching. The ready event covers the load-order race (shell.js loads
     // after this async IIFE finishes fetching data).
+    window.BashcrawlFx = {
+        bump,
+        screenFlash,
+        flashLevelUp,
+        playCommandFx,
+        warp(el) { bump(el && el.closest ? (el.closest(".tui-content") || el) : el, "fx-warp", 520); },
+        glitch(el) { bump(el || dom.log, "fx-glitch", 320); },
+        celebrate() {
+            screenFlash("magic");
+            flashLevelUp();
+        },
+        powerOn() { screenFlash("poweron"); },
+    };
     window.BashcrawlGame = {
         data,
         getRuntime: () => runtime,
         saveAndRender,
         runLine,
     };
+    screenFlash("poweron");
     document.dispatchEvent(new CustomEvent("bashcrawl:ready", { detail: { data } }));
 })().catch((error) => {
     // Boot failed (most commonly: data/*.json fetches blocked under file://).

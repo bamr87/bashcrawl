@@ -35,6 +35,7 @@ def validate() -> dict:
         "assets/js/storage.js",
         "assets/js/runtime.js",
         "assets/js/hud.js",
+        "assets/js/fx.js",
         "assets/js/docs.js",
         "assets/js/reference.js",
         "assets/js/arcade.js",
