@@ -1,4 +1,3 @@
-
 # Seeded by the bamr87 hub (tools/fanout.sh --kit prose). Enforces the house
 # rule "one paragraph per line" in markdown — and on a pull request it FIXES
 # the file rather than just failing: the job unwraps any soft-wrapped prose and
