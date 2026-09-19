@@ -42,7 +42,7 @@ hud() {
 }
 ```
 
-Everything is pre-formatted data — `{kind,text}` lines reuse the AnsiSink palette, so the sidebar matches the log colors. `events` is stateful: the session diffs its own snapshots so hosts never track app state (types `quest`/`damage`/`xp`/`item`/`levelup` map to toast styles). Sessions without `hud()` — and any session under `--no-hud` or piped stdio — run in the classic line-stream mode. Bashcrawl's implementation delegates to the shared presenter `web/assets/js/hud.js`, the same models its browser sidebar renders — one engine, two renderers.
+Everything is pre-formatted data — `{kind,text}` lines reuse the AnsiSink palette, so the sidebar matches the log colors. `events` is stateful: the session diffs its own snapshots so hosts never track app state (types `quest`/`damage`/`xp`/`item`/`levelup` map to toast styles). The TTY HUD is a btop-style dashboard: PgUp/PgDn, mouse wheel, and click-to-focus move the log (or sidebar) independently of the input line. Home/End jump the focused pane. Type `hud` to fold, hide, reorder, or dock panes (`hud hide map`, `hud dock left`, `hud reset`); click a pane title to collapse it. Layout is saved under `~/.bashcrawl/hud.json` (or `BASHCRAWL_HUD_FILE`), not the story save. Sessions without `hud()` — and any session under `--no-hud` or piped stdio — run in the classic line-stream mode. Bashcrawl's implementation delegates to the shared presenter `web/assets/js/hud.js`, the same models its browser sidebar renders — one engine, two renderers.
 
 Run it: `node termforge/node/host-tty.js --app ./my-tool.js` or `node termforge/node/host-telnet.js --app ./my-tool.js --raw`.
 

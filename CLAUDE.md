@@ -34,6 +34,7 @@ make test              # unit + integration (pytest)
 make test-unit / test-integration
 make test-js           # TermForge framework tests (node --test, zero deps)
 make test-mcp          # playtest-harness smoke tests in a local .venv
+                       # (make test also drives host-tty.js on a real PTY: test/integration/test_tty_host.py)
 make playtest          # blank-slate agent playtest (needs claude CLI + OAuth token)
 make lint              # shellcheck + yamllint + markdownlint + ruff
 make lint-js           # node --check over every tracked JS file
@@ -62,6 +63,7 @@ cd entrance && cat scroll          # the game — that's it
 bash help.sh                       # contextual help; also: help.sh commands | map
 bash lib/reset.sh --dry            # preview a game-state reset (always dry-run first)
 PYTHONPATH=src python3 -m playtest.mcp_server   # MCP playtest server (agents)
+PYTHONPATH=src python3 -m playtest.agent        # direct sandbox HUD; --json / --pty / --blind
 ```
 
 ## Architecture
@@ -87,7 +89,7 @@ Hidden areas (all rooted under `entrance/`) are unlocked by collecting treasures
 | `lib/` | Minimal shared shell libs: `colors.sh`, `log.sh` (JSONL), `yaml_reader.sh`, `reset.sh`. |
 | `setup.sh` | chmods encounter scripts (`--quick` for tooling/tests). |
 | `termforge/core/` | The TermForge kernel (source of truth): `parser`, `vfs` (+ read-only providers), `shell` (hook spine, injectable clock/rng), `packs/{posix,flavour}`, `protocol`, `view`, `sinks/{dom,ansi}`, `input`. Dual-mode files, vendored to `web/assets/js/vendor/termforge/`. |
-| `termforge/node/` | Node hosts: `host-tty.js` (full-screen HUD via the `session.hud()` contract, or classic stream with `--no-hud`/piped stdio), `tui.js` (TuiScreen: app-agnostic ANSI compositor — sidebar panels, toast row, input row), `host-telnet.js` + `telnet-codec.js` (RFC 854 subset), `index.js` (framework namespace for require()). |
+| `termforge/node/` | Node hosts: `host-tty.js` (full-screen HUD via the `session.hud()` contract, or classic stream with `--no-hud`/piped stdio; damage events jolt the frame), `tui.js` (TuiScreen: app-agnostic ANSI compositor — sidebar panels, toast row, input row, host-driven jolt offset), `pixels.js` (PixelBuffer + PixelScreen: a cols×(2·rows) truecolor framebuffer painted with half-block cells, pixel font, row-diffed output), `gem.js` (the hidden gem: DAEMON STORM, a pixel shooter — `xyzzy`/`plugh`/Konami in HUD mode; fixed 50 ms tick, seeded RNG, `BASHCRAWL_GEM_SEED` pins a run; zero deps), `host-telnet.js` + `telnet-codec.js` (RFC 854 subset), `index.js` (framework namespace for require()). |
 | `termforge/apps/` | `bashcrawl.js` (the game as an App descriptor for the hosts), `procwatch/` (custom-tool reference: live metrics as provider files), `agentwatch/` (AI-agent task dashboard: TaskSource → board/feed + live files; JSONL adapter for `logs/sessions/`). |
 | `termforge/test/` | `node --test` suites incl. golden transcripts (pixel-identity contract; regenerate only via `record-goldens.js --update`) and the telnet loopback integration. |
 | `web/assets/js/runtime.js` | The **bashcrawl game assembly** over TermForge: `class Runtime extends TermForge.Shell`, the full 74-entry `this.handlers` literal (the `validate_runtime_commands.py` regex contract — one `key: ref,` per line, bare references only), and `installGameHooks()` (quests/achievements/daily/trainer/pathfind/encounters). |

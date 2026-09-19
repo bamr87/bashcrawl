@@ -33,6 +33,24 @@ items:
     combat_bonus: 0
     description: "Sparkling diamonds from the chamber"
 
+  crown:
+    icon: "👑"
+    type: "key"
+    combat_bonus: 0
+    description: "A monster's crown — needed in the royal tombs"
+
+  emerald:
+    icon: "💚"
+    type: "treasure"
+    combat_bonus: 0
+    description: "An emerald taken from the wizard's ghost"
+
+  platinum:
+    icon: "⚪"
+    type: "treasure"
+    combat_bonus: 0
+    description: "A sack of platinum coins from the laboratory"
+
   goblet:
     icon: "🏆"
     type: "key"

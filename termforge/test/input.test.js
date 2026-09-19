@@ -99,6 +99,32 @@ test("byte decoder: line endings, controls, arrows, chunk-spanning escapes", () 
         ["interrupt", "eof", "clearScreen", "complete"]);
     assert.deepStrictEqual(decodeAll(["\u001b[A", "\u001b", "[B"]).map((e) => e.type),
         ["histPrev", "histNext"], "escape sequences survive chunk boundaries");
-    assert.deepStrictEqual(decodeAll(["\u001b[C"]), [], "unhandled CSI sequences are swallowed");
+    assert.deepStrictEqual(decodeAll(["\u001b[C"]), [{ type: "arrow", dir: "right" }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[D"]), [{ type: "arrow", dir: "left" }]);
     assert.deepStrictEqual(decodeAll(["é¥"]).map((e) => e.ch), ["é", "¥"], "non-ASCII passes through");
+});
+
+test("byte decoder: pager keys and SGR mouse, including split CSI", () => {
+    assert.deepStrictEqual(decodeAll(["\u001b[5~"]), [{ type: "page", dir: "up" }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[6~"]), [{ type: "page", dir: "down" }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[5;2~"]), [{ type: "page", dir: "up" }], "shift+pageup");
+    assert.deepStrictEqual(decodeAll(["\u001b[H"]), [{ type: "home" }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[F"]), [{ type: "end" }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[<64;10;5M"]), [{
+        type: "mouse", btn: 64, x: 10, y: 5, down: true, wheel: 1,
+    }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[<65;10;5M"]), [{
+        type: "mouse", btn: 65, x: 10, y: 5, down: true, wheel: -1,
+    }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[<0;4;20M"]), [{
+        type: "mouse", btn: 0, x: 4, y: 20, down: true, wheel: 0,
+    }]);
+    assert.deepStrictEqual(decodeAll(["\u001b[<0;4;20m"]), [{
+        type: "mouse", btn: 0, x: 4, y: 20, down: false, wheel: 0,
+    }]);
+    assert.deepStrictEqual(
+        decodeAll(["\u001b[<64;", "12;8M"]).map((e) => e.wheel),
+        [1],
+        "SGR mouse survives chunk boundaries",
+    );
 });

@@ -119,8 +119,8 @@ quests:
   - id: 5
     title: "Spark of Creation"
     description: "Your workspace yearns for a first artifact."
-    objective: "Use 'touch' to create a new file, for example 'touch notes.md'."
-    hint: "Use 'touch notes.txt' to conjure a new file."
+    objective: "Use 'touch notes.txt' to conjure a new file in your workshop."
+    hint: "From the workshop, run 'touch notes.txt'."
     required_commands:
       - touch
     completion:

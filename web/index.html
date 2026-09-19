@@ -23,6 +23,7 @@
             </nav>
             <div class="tui-header-actions">
                 <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <button id="hud-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="hud-menu">HUD</button>
                 <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer">Docs</button>
                 <button id="theme-toggle" class="tui-button" type="button">Dark</button>
                 <button id="crt-toggle" class="tui-button" type="button" aria-pressed="false">CRT Off</button>
@@ -31,23 +32,32 @@
 
         <section class="tui-main" id="mode-story" aria-label="Bashcrawl story dungeon">
             <aside class="tui-sidebar" aria-label="Game status panels">
-                <section class="tui-panel">
+                <div id="hud-menu" class="hud-menu" hidden>
+                    <p class="kind-dim">Click a pane title to fold it. Uncheck to hide. Layout is saved separately from your run.</p>
+                    <div id="hud-menu-panes"></div>
+                    <p class="hud-menu-actions">
+                        <button type="button" class="tui-button" data-hud="dock-left">Dock left</button>
+                        <button type="button" class="tui-button" data-hud="dock-right">Dock right</button>
+                        <button type="button" class="tui-button" data-hud="reset">Reset HUD</button>
+                    </p>
+                </div>
+                <section class="tui-panel" data-hud-pane="quest">
                     <h2>Active Quest</h2>
                     <div id="quest-panel"></div>
                 </section>
-                <section class="tui-panel">
+                <section class="tui-panel" data-hud-pane="pack">
                     <h2>Inventory</h2>
                     <div id="inventory-panel"></div>
                 </section>
                 <!-- Concept spotlight: what THIS room teaches, with one-line cheats
                      (rendered by reference.js from rooms.yaml `teaches`). -->
-                <section class="tui-panel spotlight">
+                <section class="tui-panel spotlight" data-hud-pane="spotlight">
                     <h2>This Room Teaches</h2>
                     <div id="spotlight-panel"></div>
                 </section>
                 <!-- Pixel Hero Companion: CSS-only layered pixels (no emoji/glyphs),
                      theme-aware, reacts to game events via data-mood. -->
-                <section class="tui-panel hero-panel">
+                <section class="tui-panel hero-panel" data-hud-pane="hero">
                     <h2>Hero</h2>
                     <div id="hero-panel" class="hero-stage" data-mood="idle" role="img" aria-label="Pixel adventurer companion (idle)">
                         <div class="hero-sprite">
@@ -70,7 +80,7 @@
                         <p id="hero-mood-label" class="kind-dim hero-mood-label">Ready for the descent.</p>
                     </div>
                 </section>
-                <section class="tui-panel tui-room-panel">
+                <section class="tui-panel tui-room-panel" data-hud-pane="room">
                     <h2>Location</h2>
                     <div id="room-panel"></div>
                 </section>
@@ -78,7 +88,7 @@
                      player explores. Built live from the runtime filesystem in
                      renderMap() (game.js); only visited rooms and their visible
                      doors are drawn, so it never spoils undiscovered areas. -->
-                <section class="tui-panel map-panel">
+                <section class="tui-panel map-panel" data-hud-pane="map">
                     <h2>Map</h2>
                     <div id="map-panel"></div>
                 </section>

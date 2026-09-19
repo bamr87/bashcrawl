@@ -109,6 +109,14 @@ test-mcp: ## Run the playtest-harness smoke tests in a local .venv
 playtest: ## Blank-slate playtest: Claude Code (OAuth) plays via MCP, then score
 	@bash scripts/playtest.sh
 
+.PHONY: playtest-grok
+playtest-grok: ## Grok plays the sandboxed dungeon (OpenCode xAI OAuth, else XAI_API_KEY)
+	@bash scripts/playtest_grok.sh $(ARGS)
+
+.PHONY: agent-sandbox
+agent-sandbox: ## Clean sandbox for an agent (ARGS="--json|--pty|--blind|--full")
+	@$(PYTHON) -m playtest.agent $(ARGS)
+
 # ── Linting ────────────────────────────────────────────────────────────
 
 .PHONY: lint

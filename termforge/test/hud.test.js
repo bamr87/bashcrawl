@@ -142,6 +142,7 @@ test("roomModel and vignettes describe the current room", () => {
     assert.equal(room.vignette.key, "entrance");
     assert.ok(Array.isArray(room.vignette.art) && room.vignette.art.length > 0);
     assert.ok(room.entries.some((e) => e.name === "scroll"));
+    assert.ok(room.teaches.some((t) => /ls|cd|pwd|cat/i.test(t)));
     const dir = room.entries.find((e) => e.type === "dir");
     assert.ok(dir && dir.marker === "/" && dir.icon.length > 0);
 });
@@ -164,12 +165,38 @@ test("panels() emits the full sidebar spec with kind/text lines", () => {
     const vitals = panels.find((p) => p.title.includes("VITALS"));
     assert.ok(vitals.lines[0].text.includes("HP"));
     assert.ok(vitals.lines[0].text.includes("100/100"));
+    const roomPanel = panels.find((p) => p.title.includes("ROOM"));
+    const roomText = roomPanel.lines.map((l) => l.text).join("\n");
+    assert.ok(roomText.includes("scroll"), "ROOM panel lists the scroll");
+    assert.ok(roomText.includes("cellar"), "ROOM panel lists exits");
+    assert.equal(panels[0].title.includes("ROOM"), true, "ROOM leads so it survives a short sidebar");
 });
 
-test("strip() compresses the HUD into one status line", () => {
+test("hud layout can hide, fold, reorder, dock, and parse commands", () => {
+    const { runtime, hud } = createHudRuntime();
+    hud.ensureVisited(runtime);
+    assert.equal(hud.parseHudLine("ls"), null);
+    hud.applyAction({ op: "toggle", id: "map", field: "visible", value: false });
+    let panels = hud.panels(runtime);
+    assert.ok(!panels.some((p) => p.id === "map"));
+    hud.applyAction({ op: "toggle", id: "quest", field: "collapsed", value: true });
+    const quest = hud.panels(runtime).find((p) => p.id === "quest");
+    assert.equal(quest.collapsed, true);
+    assert.equal(quest.lines.length, 0);
+    hud.applyAction(hud.parseHudLine("hud dock left"));
+    assert.equal(hud.getLayout().dock, "left");
+    hud.applyAction(hud.parseHudLine("hud reset"));
+    panels = hud.panels(runtime);
+    assert.equal(panels[0].id, "room");
+    assert.ok(panels.some((p) => p.id === "map" && p.lines.length > 0));
+});
+
+test("strip() compresses the HUD into status plus a Here listing", () => {
     const { runtime, hud } = createHudRuntime();
     const strip = hud.strip(runtime);
-    assert.equal(strip.length, 1);
+    assert.equal(strip.length, 2);
     assert.ok(strip[0].text.includes("♥"));
     assert.ok(strip[0].text.includes("/entrance"));
+    assert.ok(strip[1].text.includes("Here:"));
+    assert.ok(strip[1].text.includes("scroll"));
 });

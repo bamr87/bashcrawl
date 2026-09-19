@@ -9,7 +9,15 @@
             "command": "make web-preview",
             "group": "none",
             "isBackground": true,
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "web-preview",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "Serving HTTP"
+                }
+            }
         },
         {
             "label": "🌐 Web: Build",
@@ -17,6 +25,41 @@
             "command": "make web-build",
             "group": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "🌐 Web: Serve (local)",
+            "type": "shell",
+            "command": "python3 -m http.server 8000 --bind 127.0.0.1",
+            "options": {
+                "cwd": "${workspaceFolder}/web"
+            },
+            "group": "none",
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "web-serve-local",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "Serving HTTP"
+                }
+            }
+        },
+        {
+            "label": "🌐 Web: Serve (Docker)",
+            "type": "shell",
+            "command": "docker run --rm --init -p 8000:8000 -v \"${workspaceFolder}:/opt/bashcrawl\" -w /opt/bashcrawl/web python:3-alpine python3 -m http.server 8000 --bind 0.0.0.0",
+            "group": "none",
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "web-serve-docker",
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "Serving HTTP"
+                }
+            }
         },
 
         // ── Terminal game ────────────────────────────────────────────────

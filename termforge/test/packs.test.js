@@ -144,7 +144,7 @@ test("flavour pack renders its art deterministically with neutral content", () =
     assert.match(run(s, "echo piped | cowsay"), /< piped >/);
     assert.strictEqual(run(s, "figlet ab"), "A B\n====");
     assert.match(run(s, "figlet"), /^T E R M F O R G E/, "bare figlet uses the neutral default");
-    assert.match(run(s, "banner"), /T {2}E {2}R {2}M {2}F {2}O {2}R {2}G {2}E/);
+    assert.match(run(s, "banner"), /T E R M F O R G E/);
     assert.match(run(s, "sl"), /typos take you for a ride/);
     assert.deepStrictEqual(s.execute("clear"), [{ kind: "control", action: "clear" }]);
 });

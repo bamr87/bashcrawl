@@ -1,0 +1,762 @@
+{
+  "seed": 42,
+  "cols": 100,
+  "rows": 30,
+  "shots": [
+    {
+      "name": "01-title",
+      "file": "01-title.png",
+      "bytes": 7719,
+      "caption": "Title screen: pixel-font logo, a demo formation bobbing, blinking PRESS SPACE.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "title",
+        "tickCount": 6,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 0,
+        "best": 0,
+        "lives": 3,
+        "kills": 0,
+        "shots": 0,
+        "enemies": 5,
+        "free": 0,
+        "bullets": 0,
+        "bolts": 0,
+        "particles": 0,
+        "drops": 0,
+        "shieldPixels": 0,
+        "player": {
+          "x": 47,
+          "y": 50,
+          "alive": true,
+          "invuln": false
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 0,
+          "y": 0,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  a hidden gem  │  best 0"
+    },
+    {
+      "name": "02-wave-banner",
+      "file": "02-wave-banner.png",
+      "bytes": 7755,
+      "caption": "WAVE 1 banner with the signal name; the formation and shields are already in place.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "banner",
+        "tickCount": 14,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 0,
+        "best": 0,
+        "lives": 3,
+        "kills": 0,
+        "shots": 0,
+        "enemies": 24,
+        "free": 0,
+        "bullets": 0,
+        "bolts": 0,
+        "particles": 0,
+        "drops": 0,
+        "shieldPixels": 160,
+        "player": {
+          "x": 47,
+          "y": 50,
+          "alive": true,
+          "invuln": false
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 10,
+          "y": 8,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 0  │  shells $$$"
+    },
+    {
+      "name": "03-first-contact",
+      "file": "03-first-contact.png",
+      "bytes": 6761,
+      "caption": "Early SIGHUP: bullets with trails, an explosion, bolts falling on the shields.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "play",
+        "tickCount": 98,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 200,
+        "best": 200,
+        "lives": 3,
+        "kills": 10,
+        "shots": 15,
+        "enemies": 14,
+        "free": 0,
+        "bullets": 0,
+        "bolts": 0,
+        "particles": 18,
+        "drops": 0,
+        "shieldPixels": 142,
+        "player": {
+          "x": 68,
+          "y": 50,
+          "alive": true,
+          "invuln": false
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 8,
+          "y": 14,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 200  │  shells $$$"
+    },
+    {
+      "name": "04-mid-wave",
+      "file": "04-mid-wave.png",
+      "bytes": 7522,
+      "caption": "Mid-wave: eroded shields, a thinned formation moving faster.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "respawn",
+        "tickCount": 144,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 390,
+        "best": 390,
+        "lives": 2,
+        "kills": 17,
+        "shots": 27,
+        "enemies": 7,
+        "free": 0,
+        "bullets": 1,
+        "bolts": 0,
+        "particles": 58,
+        "drops": 0,
+        "shieldPixels": 135,
+        "player": {
+          "x": 26,
+          "y": 50,
+          "alive": false,
+          "invuln": false
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 12,
+          "y": 20,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 390  │  shells $$."
+    },
+    {
+      "name": "05-segfault",
+      "file": "05-segfault.png",
+      "bytes": 7160,
+      "caption": "Player hit: white flash fading, shake, SEGMENTATION FAULT blinking, one shell lost.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "respawn",
+        "tickCount": 147,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 390,
+        "best": 390,
+        "lives": 2,
+        "kills": 17,
+        "shots": 27,
+        "enemies": 7,
+        "free": 0,
+        "bullets": 1,
+        "bolts": 0,
+        "particles": 54,
+        "drops": 0,
+        "shieldPixels": 135,
+        "player": {
+          "x": 26,
+          "y": 50,
+          "alive": false,
+          "invuln": false
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 12,
+          "y": 20,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 390  │  shells $$."
+    },
+    {
+      "name": "06-sudo",
+      "file": "06-sudo.png",
+      "bytes": 6819,
+      "caption": "sudo picked up: the prompt turns gold and fires three signals at once.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "play",
+        "tickCount": 192,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 460,
+        "best": 460,
+        "lives": 2,
+        "kills": 18,
+        "shots": 29,
+        "enemies": 6,
+        "free": 0,
+        "bullets": 5,
+        "bolts": 0,
+        "particles": 12,
+        "drops": 0,
+        "shieldPixels": 135,
+        "player": {
+          "x": 40,
+          "y": 50,
+          "alive": true,
+          "invuln": true
+        },
+        "power": {
+          "sudo": true,
+          "nice": false
+        },
+        "formation": {
+          "x": 8,
+          "y": 23,
+          "dir": -1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 460  │  shells $$.  │  sudo 7s"
+    },
+    {
+      "name": "07-wave-cleared",
+      "file": "07-wave-cleared.png",
+      "bytes": 7563,
+      "caption": "Wave cleared: bonus pids counted, remaining bullets still flying.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "clear",
+        "tickCount": 194,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 1,
+        "score": 810,
+        "best": 810,
+        "lives": 2,
+        "kills": 24,
+        "shots": 29,
+        "enemies": 0,
+        "free": 0,
+        "bullets": 5,
+        "bolts": 0,
+        "particles": 70,
+        "drops": 0,
+        "shieldPixels": 135,
+        "player": {
+          "x": 37,
+          "y": 50,
+          "alive": true,
+          "invuln": true
+        },
+        "power": {
+          "sudo": true,
+          "nice": false
+        },
+        "formation": {
+          "x": 8,
+          "y": 23,
+          "dir": -1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 810  │  shells $$.  │  sudo 7s"
+    },
+    {
+      "name": "08-fork-bomb",
+      "file": "08-fork-bomb.png",
+      "bytes": 7461,
+      "caption": "A fork killed in SIGINT: two forklets break formation and hunt on their own.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "play",
+        "tickCount": 263,
+        "wave": 1,
+        "waveName": "SIGINT",
+        "wavesCleared": 1,
+        "score": 850,
+        "best": 850,
+        "lives": 2,
+        "kills": 25,
+        "shots": 29,
+        "enemies": 33,
+        "free": 2,
+        "bullets": 0,
+        "bolts": 1,
+        "particles": 22,
+        "drops": 0,
+        "shieldPixels": 129,
+        "player": {
+          "x": 35,
+          "y": 50,
+          "alive": true,
+          "invuln": true
+        },
+        "power": {
+          "sudo": true,
+          "nice": false
+        },
+        "formation": {
+          "x": 14,
+          "y": 8,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 2/3 SIGINT  │  pids 850  │  shells $$.  │  sudo 6s"
+    },
+    {
+      "name": "09-victory",
+      "file": "09-victory.png",
+      "bytes": 7502,
+      "caption": "All three waves cleared: SYSTEM RESTORED with fireworks.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "victory",
+        "tickCount": 367,
+        "wave": 3,
+        "waveName": "SIGKILL",
+        "wavesCleared": 3,
+        "score": 3830,
+        "best": 3830,
+        "lives": 2,
+        "kills": 128,
+        "shots": 29,
+        "enemies": 0,
+        "free": 0,
+        "bullets": 0,
+        "bolts": 0,
+        "particles": 28,
+        "drops": 1,
+        "shieldPixels": 129,
+        "player": {
+          "x": 35,
+          "y": 50,
+          "alive": true,
+          "invuln": true
+        },
+        "power": {
+          "sudo": true,
+          "nice": false
+        },
+        "formation": {
+          "x": 10,
+          "y": 8,
+          "dir": 1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 3/3 SIGKILL  │  pids 3830  │  shells $$.  │  sudo 6s"
+    },
+    {
+      "name": "10-kernel-panic",
+      "file": "10-kernel-panic.png",
+      "bytes": 6946,
+      "caption": "Three shells gone: KERNEL PANIC, then the HUD returns with only the waves you cleared paid out.",
+      "snapshot": {
+        "seed": 42,
+        "cols": 100,
+        "rows": 30,
+        "W": 100,
+        "H": 56,
+        "state": "gameover",
+        "tickCount": 164,
+        "wave": 0,
+        "waveName": "SIGHUP",
+        "wavesCleared": 0,
+        "score": 0,
+        "best": 0,
+        "lives": 0,
+        "kills": 0,
+        "shots": 0,
+        "enemies": 24,
+        "free": 0,
+        "bullets": 0,
+        "bolts": 0,
+        "particles": 0,
+        "drops": 0,
+        "shieldPixels": 160,
+        "player": {
+          "x": 47,
+          "y": 50,
+          "alive": false,
+          "invuln": true
+        },
+        "power": {
+          "sudo": false,
+          "nice": false
+        },
+        "formation": {
+          "x": 17,
+          "y": 11,
+          "dir": -1
+        },
+        "crt": true,
+        "closed": false
+      },
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 0  │  shells ..."
+    },
+    {
+      "name": "11-tty-live",
+      "file": "11-tty-live.png",
+      "bytes": 6784,
+      "caption": "Last frame decoded from a real 100x30 PTY byte stream.",
+      "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 250  │  shells $..  │  nice 5s"
+    }
+  ],
+  "checks": {
+    "xyzzy": true,
+    "plugh": true,
+    "ls": false,
+    "konamiHits": 1,
+    "tokens": {
+      "up": "up",
+      "left": "left"
+    },
+    "gemItem": "kill_switch",
+    "waveXp": 20,
+    "winXp": 40,
+    "pngCount": 11
+  },
+  "midWave": {
+    "seed": 42,
+    "cols": 100,
+    "rows": 30,
+    "W": 100,
+    "H": 56,
+    "state": "respawn",
+    "tickCount": 144,
+    "wave": 0,
+    "waveName": "SIGHUP",
+    "wavesCleared": 0,
+    "score": 390,
+    "best": 390,
+    "lives": 2,
+    "kills": 17,
+    "shots": 27,
+    "enemies": 7,
+    "free": 0,
+    "bullets": 1,
+    "bolts": 0,
+    "particles": 58,
+    "drops": 0,
+    "shieldPixels": 135,
+    "player": {
+      "x": 26,
+      "y": 50,
+      "alive": false,
+      "invuln": false
+    },
+    "power": {
+      "sudo": false,
+      "nice": false
+    },
+    "formation": {
+      "x": 12,
+      "y": 20,
+      "dir": 1
+    },
+    "crt": true,
+    "closed": false
+  },
+  "sudo": {
+    "seed": 42,
+    "cols": 100,
+    "rows": 30,
+    "W": 100,
+    "H": 56,
+    "state": "play",
+    "tickCount": 192,
+    "wave": 0,
+    "waveName": "SIGHUP",
+    "wavesCleared": 0,
+    "score": 460,
+    "best": 460,
+    "lives": 2,
+    "kills": 18,
+    "shots": 29,
+    "enemies": 6,
+    "free": 0,
+    "bullets": 5,
+    "bolts": 0,
+    "particles": 12,
+    "drops": 0,
+    "shieldPixels": 135,
+    "player": {
+      "x": 40,
+      "y": 50,
+      "alive": true,
+      "invuln": true
+    },
+    "power": {
+      "sudo": true,
+      "nice": false
+    },
+    "formation": {
+      "x": 8,
+      "y": 23,
+      "dir": -1
+    },
+    "crt": true,
+    "closed": false
+  },
+  "forkSplit": {
+    "seed": 42,
+    "cols": 100,
+    "rows": 30,
+    "W": 100,
+    "H": 56,
+    "state": "play",
+    "tickCount": 263,
+    "wave": 1,
+    "waveName": "SIGINT",
+    "wavesCleared": 1,
+    "score": 850,
+    "best": 850,
+    "lives": 2,
+    "kills": 25,
+    "shots": 29,
+    "enemies": 33,
+    "free": 2,
+    "bullets": 0,
+    "bolts": 1,
+    "particles": 22,
+    "drops": 0,
+    "shieldPixels": 129,
+    "player": {
+      "x": 35,
+      "y": 50,
+      "alive": true,
+      "invuln": true
+    },
+    "power": {
+      "sudo": true,
+      "nice": false
+    },
+    "formation": {
+      "x": 14,
+      "y": 8,
+      "dir": 1
+    },
+    "crt": true,
+    "closed": false
+  },
+  "wave3": {
+    "seed": 42,
+    "cols": 100,
+    "rows": 30,
+    "W": 100,
+    "H": 56,
+    "state": "play",
+    "tickCount": 328,
+    "wave": 2,
+    "waveName": "SIGKILL",
+    "wavesCleared": 2,
+    "score": 2150,
+    "best": 2150,
+    "lives": 2,
+    "kills": 72,
+    "shots": 29,
+    "enemies": 40,
+    "free": 0,
+    "bullets": 0,
+    "bolts": 0,
+    "particles": 0,
+    "drops": 0,
+    "shieldPixels": 129,
+    "player": {
+      "x": 35,
+      "y": 50,
+      "alive": true,
+      "invuln": true
+    },
+    "power": {
+      "sudo": true,
+      "nice": false
+    },
+    "formation": {
+      "x": 10,
+      "y": 8,
+      "dir": 1
+    },
+    "crt": true,
+    "closed": false
+  },
+  "quit": {
+    "won": true,
+    "waves": 3,
+    "score": 3830,
+    "best": 3830,
+    "kills": 128,
+    "shots": 29,
+    "reason": "win"
+  },
+  "afterVictory": {
+    "seed": 42,
+    "cols": 100,
+    "rows": 30,
+    "W": 100,
+    "H": 56,
+    "state": "victory",
+    "tickCount": 422,
+    "wave": 3,
+    "waveName": "SIGKILL",
+    "wavesCleared": 3,
+    "score": 3830,
+    "best": 3830,
+    "lives": 2,
+    "kills": 128,
+    "shots": 29,
+    "enemies": 0,
+    "free": 0,
+    "bullets": 0,
+    "bolts": 0,
+    "particles": 60,
+    "drops": 1,
+    "shieldPixels": 129,
+    "player": {
+      "x": 35,
+      "y": 50,
+      "alive": true,
+      "invuln": true
+    },
+    "power": {
+      "sudo": true,
+      "nice": false
+    },
+    "formation": {
+      "x": 10,
+      "y": 8,
+      "dir": 1
+    },
+    "crt": true,
+    "closed": true
+  },
+  "lossQuit": {
+    "won": false,
+    "waves": 0,
+    "score": 0,
+    "best": 0,
+    "kills": 0,
+    "shots": 0,
+    "reason": "lost"
+  },
+  "ttyRaw": {
+    "file": "run3.raw",
+    "bytes": 2350604,
+    "cols": 100,
+    "rows": 30,
+    "status": "DAEMON STORM  │  wave 1/3 SIGHUP  │  pids 250  │  shells $..  │  nice 5s"
+  },
+  "reward": {
+    "granted": true,
+    "xp": 100,
+    "item": "kill_switch",
+    "waves": 3,
+    "firstWin": true
+  },
+  "rewardAgain": {
+    "granted": false,
+    "already": true,
+    "waves": 3
+  },
+  "rewardState": {
+    "xp": 112,
+    "inventory": [
+      "amulet",
+      "kill_switch"
+    ],
+    "flags": {
+      "daemon_storm_waves": 3,
+      "daemon_storm": true
+    }
+  },
+  "bytes": 3068481
+}

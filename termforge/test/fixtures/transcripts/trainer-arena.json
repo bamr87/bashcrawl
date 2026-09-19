@@ -8,7 +8,7 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+          "text": "  +--------------------------------------+\n  |          TRAINING  ARENA             |\n  |   __        __     spell drills      |\n  |  /  |      |  \\                      |\n  | | (o)|    |(o) |   prove your craft  |\n  |  \\__/  /\\  \\__/                      |\n  +--------------------------------------+"
         },
         {
           "kind": "info",
@@ -89,7 +89,7 @@
         },
         {
           "kind": "art",
-          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+          "text": "  *  .  *   A R E N A   C L E A R E D   *  .  *\n  ============================================="
         },
         {
           "kind": "info",
@@ -110,7 +110,7 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+          "text": "  +--------------------------------------+\n  |          TRAINING  ARENA             |\n  |   __        __     spell drills      |\n  |  /  |      |  \\                      |\n  | | (o)|    |(o) |   prove your craft  |\n  |  \\__/  /\\  \\__/                      |\n  +--------------------------------------+"
         },
         {
           "kind": "magic",
@@ -269,7 +269,7 @@
         },
         {
           "kind": "art",
-          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+          "text": "  *  .  *   A R E N A   C L E A R E D   *  .  *\n  ============================================="
         },
         {
           "kind": "info",
@@ -307,7 +307,7 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+          "text": "  +--------------------------------------+\n  |          TRAINING  ARENA             |\n  |   __        __     spell drills      |\n  |  /  |      |  \\                      |\n  | | (o)|    |(o) |   prove your craft  |\n  |  \\__/  /\\  \\__/                      |\n  +--------------------------------------+"
         },
         {
           "kind": "magic",
@@ -340,7 +340,7 @@
         },
         {
           "kind": "art",
-          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+          "text": "  *  .  *   A R E N A   C L E A R E D   *  .  *\n  ============================================="
         },
         {
           "kind": "info",
@@ -361,7 +361,7 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "   __        __\n  /  |      |  \\   THE  TRAINING  ARENA\n | (o)|    |(o) |  ~ Spell Drills ~\n  \\__/  /\\  \\__/   prove your craft, adventurer\n  ===================================="
+          "text": "  +--------------------------------------+\n  |          TRAINING  ARENA             |\n  |   __        __     spell drills      |\n  |  /  |      |  \\                      |\n  | | (o)|    |(o) |   prove your craft  |\n  |  \\__/  /\\  \\__/                      |\n  +--------------------------------------+"
         },
         {
           "kind": "info",
@@ -416,7 +416,7 @@
         },
         {
           "kind": "art",
-          "text": "   *  .  ✦   A R E N A   C L E A R E D   ✦  .  *\n  ================================================="
+          "text": "  *  .  *   A R E N A   C L E A R E D   *  .  *\n  ============================================="
         },
         {
           "kind": "info",

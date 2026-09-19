@@ -8,5 +8,5 @@
 # Static web export + content-contract validators
 pyyaml>=6.0
 
-# MCP server for the blank-slate playtest harness (bashcrawl_start/observe/...)
+# MCP server for the playtest harness (bashcrawl_start/observe/command/state/...)
 mcp>=1.0.0

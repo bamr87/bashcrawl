@@ -62,10 +62,12 @@
         execFileKind: "program",
         figletDefault: "TERMFORGE",
         bannerArt: [
-            "   ╔════════════════════════════════════╗",
-            "   ║   T  E  R  M  F  O  R  G  E        ║",
-            "   ║   one kernel, every terminal       ║",
-            "   ╚════════════════════════════════════╝",
+            "   ╔══════════════════════════════╗",
+            "   ║                              ║",
+            "   ║      T E R M F O R G E       ║",
+            "   ║  one kernel, every terminal  ║",
+            "   ║                              ║",
+            "   ╚══════════════════════════════╝",
         ].join("\n"),
         fortunes: [
             "When in doubt, cd .. and try again.",

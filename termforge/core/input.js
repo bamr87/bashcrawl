@@ -17,8 +17,8 @@
     //      mobile keyboards, paste all keep working), and by the LineEditor.
     //   2. LineEditor + createByteDecoder — a full line editor for byte-stream
     //      hosts (TTY, telnet) speaking the small event vocabulary:
-    //      char/submit/backspace/histPrev/histNext/complete/clearScreen/
-    //      interrupt/eof.
+     //      char/submit/backspace/histPrev/histNext/complete/clearScreen/
+     //      interrupt/eof/arrow/page/home/end/mouse.
 
     const ESC = "\u001b";
 
@@ -147,9 +147,38 @@
     /**
      * Byte decoder for TTY/telnet input. Returns feed(text) which translates a
      * decoded string chunk into editor events. Handles CR/LF/CRLF/CR-NUL
-     * submits, both backspace codes, ^C ^D ^L, Tab, and arrow-key escape
-     * sequences (state survives chunk boundaries).
+     * submits, both backspace codes, ^C ^D ^L, Tab, arrow/pager keys, and
+     * SGR mouse (state survives chunk boundaries).
      */
+    function emitCsi(seq, emit) {
+        if (seq === `${ESC}[A`) { emit({ type: "histPrev" }); return; }
+        if (seq === `${ESC}[B`) { emit({ type: "histNext" }); return; }
+        if (seq === `${ESC}[C`) { emit({ type: "arrow", dir: "right" }); return; }
+        if (seq === `${ESC}[D`) { emit({ type: "arrow", dir: "left" }); return; }
+        if (seq === `${ESC}[H`) { emit({ type: "home" }); return; }
+        if (seq === `${ESC}[F`) { emit({ type: "end" }); return; }
+        const body = seq.slice(2);
+        if (body[0] === "<" && /[Mm]$/.test(body)) {
+            const match = /^<(\d+);(\d+);(\d+)([Mm])$/.exec(body);
+            if (!match) return;
+            const btn = Number(match[1]);
+            const x = Number(match[2]);
+            const y = Number(match[3]);
+            let wheel = 0;
+            if (btn === 64) wheel = 1;
+            else if (btn === 65) wheel = -1;
+            emit({ type: "mouse", btn, x, y, down: match[4] === "M", wheel });
+            return;
+        }
+        if (body.endsWith("~")) {
+            const n = parseInt(body, 10);
+            if (n === 5) emit({ type: "page", dir: "up" });
+            else if (n === 6) emit({ type: "page", dir: "down" });
+            else if (n === 1) emit({ type: "home" });
+            else if (n === 4) emit({ type: "end" });
+        }
+    }
+
     function createByteDecoder(emit) {
         let pendingCr = false;   // swallow the LF/NUL of CRLF / CR NUL
         let esc = "";            // in-flight escape sequence
@@ -166,11 +195,10 @@
                     if (esc.length === 2 && ch !== "[") { esc = ""; continue; }
                     // Final byte of a CSI sequence is in @ ... ~
                     if (ch >= "@" && ch <= "~") {
-                        if (esc === `${ESC}[A`) emit({ type: "histPrev" });
-                        else if (esc === `${ESC}[B`) emit({ type: "histNext" });
+                        emitCsi(esc, emit);
                         esc = "";
-                    } else if (esc.length > 12) {
-                        esc = ""; // runaway sequence: bail out
+                    } else if (esc.length > 24) {
+                        esc = "";
                     }
                     continue;
                 }
@@ -183,7 +211,6 @@
                 if (ch === "\u000c") { emit({ type: "clearScreen" }); continue; }
                 if (ch === "\t") { emit({ type: "complete" }); continue; }
                 if (ch >= " " || ch.charCodeAt(0) > 0x7f) { emit({ type: "char", ch }); continue; }
-                // other C0 control bytes: dropped
             }
         };
     }

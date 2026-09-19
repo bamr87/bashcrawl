@@ -34,7 +34,7 @@ encounters:
     requires_items: []
     recommended_items: []
     grants_items: ["sword"]
-    unlocks_rooms: []
+    unlocks_rooms: ["chapel", "vault", "scrap"]
     damage: 0
 
   potion:
@@ -46,7 +46,7 @@ encounters:
     requires_items: []
     recommended_items: []
     grants_items: []
-    unlocks_rooms: []
+    unlocks_rooms: ["chapel", "vault", "scrap"]
     damage: 0
     heals: 15
 
@@ -159,7 +159,7 @@ encounters:
     icon: "👹"
     requires_items: []
     recommended_items: ["sword"]
-    grants_items: []
+    grants_items: ["crown"]
     unlocks_rooms: []
     damage: 10
 
@@ -300,7 +300,7 @@ encounters:
     icon: "👻"
     requires_items: []
     recommended_items: ["crystal"]
-    grants_items: []
+    grants_items: ["emerald", "platinum"]
     unlocks_rooms: []
     damage: 8
 

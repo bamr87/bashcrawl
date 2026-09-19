@@ -126,3 +126,93 @@ test("renderInput repaints only the input row", () => {
     assert.ok(stripAnsi(out).includes("/entrance $ cd cel"));
     assert.ok(!out.includes("[1;1H"), "no full-frame repaint");
 });
+
+test("jolt shifts every row and the cursor; zero settles the frame", () => {
+    const { screen, chunks } = makeScreen();
+    screen.setPanels([{ title: "HERO", lines: [{ kind: "info", text: "Lv 1" }] }]);
+    screen.setPrompt("/entrance $");
+    screen.setInput("ls");
+    screen.start({ cols: 100, rows: 12 });
+    chunks.length = 0;
+    screen.setJolt(2);
+    screen.render();
+    const shaken = chunks.join("");
+    assert.ok(shaken.includes("\u001b[1;1H\u001b[2K  "), "log rows are padded by the jolt");
+    assert.ok(shaken.includes(`\u001b[1;${100 - 30 - 1 + 2}H`), "sidebar column moves with the jolt");
+    assert.ok(shaken.endsWith(`\u001b[12;${"/entrance $".length + 1 + 2 + 1 + 2}H\u001b[?25h`), "cursor moves with the jolt");
+    chunks.length = 0;
+    screen.setJolt(0);
+    screen.render();
+    const settled = chunks.join("");
+    assert.ok(settled.includes("\u001b[1;1H\u001b[2K\u001b["), "no padding once settled");
+    screen.setJolt(99);
+    assert.equal(screen.jolt, 8, "jolt is clamped");
+    screen.setJolt(-3);
+    assert.equal(screen.jolt, 0);
+    screen.setJolt("nope");
+    assert.equal(screen.jolt, 0);
+});
+
+test("log scrollback windows history; appendLog re-pins to the tail", () => {
+    const { screen, frame, reset } = makeScreen();
+    for (let i = 0; i < 40; i += 1) screen.appendLog([{ kind: "output", text: `line-${i}` }]);
+    screen.start({ cols: 100, rows: 12 });
+    reset();
+    screen.render();
+    let painted = frame();
+    assert.ok(painted.includes("line-39"), "tail is visible when pinned");
+    assert.ok(!painted.includes("line-0"), "head is offscreen when pinned");
+    screen.scrollLog(screen.pageSize() * 4);
+    reset();
+    screen.render();
+    painted = frame();
+    assert.ok(painted.includes("line-0"), "PgUp reaches the oldest lines");
+    assert.ok(!painted.includes("line-39"), "tail leaves the window once scrolled");
+    screen.appendLog([{ kind: "output", text: "line-new" }]);
+    reset();
+    screen.render();
+    painted = frame();
+    assert.ok(painted.includes("line-new"), "new output re-pins to the bottom");
+    assert.equal(screen.logOffset, 0);
+});
+
+test("hitTest maps clicks onto log, side, and input panes", () => {
+    const { screen } = makeScreen();
+    screen.setPanels(PANELS);
+    screen.start({ cols: 100, rows: 24 });
+    assert.equal(screen.hitTest(2, 24).zone, "input");
+    assert.equal(screen.hitTest(90, 10).zone, "side");
+    assert.equal(screen.hitTest(10, 10).zone, "log");
+});
+
+test("collapsed panels render title only; dock left still hit-tests the side", () => {
+    const { screen, frame, reset } = makeScreen();
+    screen.setPanels([
+        { id: "room", title: "▾ ROOM", collapsed: false, lines: [{ kind: "info", text: "scroll" }] },
+        { id: "map", title: "▸ MAP", collapsed: true, lines: [{ kind: "info", text: "secret" }] },
+    ]);
+    screen.start({ cols: 100, rows: 24 });
+    reset();
+    screen.render();
+    const painted = frame();
+    assert.ok(painted.includes("ROOM"));
+    assert.ok(painted.includes("scroll"));
+    assert.ok(painted.includes("MAP"));
+    assert.ok(!painted.includes("secret"), "folded pane hides its body");
+    screen.setDock("left");
+    reset();
+    screen.render();
+    assert.equal(screen.hitTest(5, 10).zone, "side");
+    assert.equal(screen.hitTest(80, 10).zone, "log");
+});
+
+test("start enables SGR mouse; stop disables it", () => {
+    const { screen, chunks } = makeScreen();
+    screen.start({ cols: 80, rows: 24 });
+    const boot = chunks.join("");
+    assert.ok(boot.includes("?1000h") && boot.includes("?1006h"), "mouse tracking on");
+    chunks.length = 0;
+    screen.stop();
+    const halt = chunks.join("");
+    assert.ok(halt.includes("?1000l") && halt.includes("?1006l"), "mouse tracking off");
+});

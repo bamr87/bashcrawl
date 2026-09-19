@@ -21,13 +21,15 @@ termforge/
     view.js             TerminalView: buffer, cap, control routing, sink flush
     sinks/dom.js        DomSink (span-per-line innerHTML) + the canonical escapeHtml
     sinks/ansi.js       AnsiSink (kind -> SGR, CRLF, erase-screen clear)
-    input.js            historyStep/applyCompletion + LineEditor + byte decoder
+    input.js            historyStep/applyCompletion + LineEditor + byte decoder (arrows, PgUp, SGR mouse)
   node/                 node-only hosts (never vendored)
     index.js            the framework namespace for require()
     data-loader.js      reads web/data/*.json from disk
     cli.js              argv parsing + app resolution
     host-tty.js         local terminal host (full-screen HUD, raw mode, or piped line mode)
-    tui.js              TuiScreen: full-screen ANSI compositor (sidebar panels, toast row, input row)
+    pixels.js           PixelBuffer + half-block PixelScreen: a cols×(2·rows) 24-bit framebuffer in ANSI
+    gem.js              hidden gem: DAEMON STORM, a pixel shooter overlay (Konami / xyzzy in HUD mode)
+    tui.js              TuiScreen: btop-style compositor (boxed log/hud, mouse+PgUp scroll, toast, input)
     telnet-codec.js     RFC 854 subset state machine (socket-free)
     host-telnet.js      multi-session telnet/TCP server
   apps/

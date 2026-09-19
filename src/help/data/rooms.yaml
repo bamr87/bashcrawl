@@ -48,13 +48,13 @@ rooms:
     description: "This is your starting point - learn basic navigation here"
     teaches:
       - "Basic navigation (cd, ls, pwd)"
-      - "Reading files with cat"
+      - "Reading files with cat, wc, head, tail, and less"
     key_files:
       - name: scroll
         description: "documentation"
       - name: README.md
         description: "overview"
-    next_steps: "Explore the cellar/ directory"
+    next_steps: "Read the scroll, optionally mkdir workshop, then cd cellar. After treasure, return here and ls — new rooms may appear."
     essential_commands:
       - command: "cat scroll"
         description: "Read the area documentation"
@@ -77,13 +77,13 @@ rooms:
     on_exit: null
     description: "Learn file types and basic interaction here"
     teaches:
-      - "File types and type indicators"
-      - "Running executable scripts"
-      - "Inventory management with export"
+      - "File types with ls -F"
+      - "Command aliases"
+      - "Running executables and inventory (export)"
     key_files:
       - name: treasure
         description: "inventory system"
-    next_steps: "Collect your first amulet, then explore armoury/"
+    next_steps: "Run ./treasure, then export I=amulet,$I as it tells you. Then cd armoury"
     essential_commands:
       - command: "./treasure"
         description: "Run the treasure script"
@@ -106,15 +106,16 @@ rooms:
     on_exit: null
     description: "Advanced area focusing on file permissions and combat"
     teaches:
-      - "File permissions (chmod)"
-      - "Running potions and combat scripts"
-      - "Health points and variables"
+      - "File permissions (chmod +x)"
+      - "Inspecting with ls -l"
+      - "Searching with grep"
+      - "Running local scripts with ./"
     key_files:
       - name: potion
         description: "health restoration"
       - name: treasure
         description: "sword collection"
-    next_steps: "Drink the potion, collect the sword, descend to chamber/"
+    next_steps: "Run ./treasure and ./potion, export I and HP as they tell you, then cd chamber"
     essential_commands:
       - command: "chmod +x filename"
         description: "Make files executable"
@@ -137,7 +138,8 @@ rooms:
     on_exit: null
     description: "Advanced challenges and complex interactions"
     teaches:
-      - "Shell variables and arithmetic (let)"
+      - "export and echo $VAR"
+      - "Arithmetic with let"
       - "Combat encounters (statue)"
       - "Symlinks and portals (ln -s)"
     key_files:
@@ -199,24 +201,23 @@ rooms:
     children: [courtyard, graveyard]
     on_enter: null
     on_exit: null
-    description: "A hidden sanctuary unlocked by collecting treasures — learn grep"
+    description: "A hidden sanctuary unlocked by collecting treasures — learn ls -a"
     teaches:
-      - "Searching text with grep"
-      - "Case-insensitive searching"
-      - "Pattern matching basics"
+      - "Hidden files with ls -a"
+      - "Command history"
     key_files:
       - name: scroll
-        description: "grep tutorial"
-      - name: ghost
+        description: "hidden files tutorial"
+      - name: altar
         description: "encounter (executable)"
     next_steps: "Explore the graveyard or continue to the courtyard"
     essential_commands:
-      - command: "grep pattern file"
-        description: "Search for text in a file"
-      - command: "grep -i pattern *"
-        description: "Case-insensitive search"
+      - command: "ls -a"
+        description: "Reveal hidden files and rooms"
       - command: "ls -la"
-        description: "Look for hidden paths forward"
+        description: "Detailed view including hidden files"
+      - command: "./altar"
+        description: "Examine the forgotten altar"
 
   courtyard:
     emoji: "🏛️"
@@ -230,19 +231,23 @@ rooms:
     children: [aviary]
     on_enter: null
     on_exit: null
-    description: "An open area leading deeper into the castle — learn pipes"
+    description: "An open area leading deeper into the castle — learn file"
     teaches:
-      - "Combining commands with pipes"
-      - "Chaining output between programs"
+      - "Identifying objects with file"
+      - "Inspecting files with ls -l"
     key_files:
       - name: scroll
-        description: "pipes tutorial"
+        description: "file tutorial"
+      - name: fountain
+        description: "encounter (executable)"
+      - name: rags
+        description: "encounter (executable)"
     next_steps: "Continue deeper into the aviary"
     essential_commands:
-      - command: "ls | grep pattern"
-        description: "Pipe output to grep"
-      - command: "cat scroll | wc -l"
-        description: "Count lines"
+      - command: "file fountain"
+        description: "Identify an object"
+      - command: "ls -l"
+        description: "Inspect permissions and size"
       - command: "cd aviary"
         description: "Continue deeper"
 
@@ -258,21 +263,24 @@ rooms:
     children: [hall]
     on_enter: null
     on_exit: null
-    description: "A towering room filled with caged birds — learn output redirection"
+    description: "A frost-bitten room of birds — learn tab completion"
     teaches:
-      - "Output redirection with > and >>"
-      - "Creating and appending to files"
+      - "Tab completion"
     key_files:
       - name: scroll
-        description: "redirection tutorial"
+        description: "tab completion tutorial"
+      - name: penguin
+        description: "encounter (executable)"
+      - name: crystal
+        description: "loot (executable)"
     next_steps: "Continue to the great hall"
     essential_commands:
-      - command: "echo 'text' > file"
-        description: "Write to a file"
-      - command: "echo 'more' >> file"
-        description: "Append to a file"
-      - command: "cat file"
-        description: "Verify file contents"
+      - command: "cd h<TAB>"
+        description: "Complete hall with tab"
+      - command: "./penguin"
+        description: "Approach the penguin"
+      - command: "cd hall"
+        description: "Enter the darkened hall"
 
   hall:
     emoji: "🏛️"
@@ -286,21 +294,23 @@ rooms:
     children: [library]
     on_enter: null
     on_exit: null
-    description: "A grand hall connecting to the library — learn sorting and filtering"
+    description: "A grand hall connecting to the library — grep for combat readiness"
     teaches:
-      - "Sorting output with sort"
-      - "Removing duplicates with uniq"
+      - "grep for variables"
+      - "Combat readiness"
     key_files:
       - name: scroll
-        description: "sort/uniq tutorial"
+        description: "combat readiness tutorial"
+      - name: monster
+        description: "encounter (executable)"
     next_steps: "Enter the ancient library"
     essential_commands:
-      - command: "sort file"
-        description: "Sort file contents"
-      - command: "ls | sort -r"
-        description: "Reverse sort listing"
-      - command: "uniq file"
-        description: "Remove duplicates"
+      - command: "echo $I"
+        description: "Check your inventory"
+      - command: "echo $HP"
+        description: "Check your health"
+      - command: "grep sword <<< \"$I\""
+        description: "Test whether you carry a sword"
 
   library:
     emoji: "📚"
@@ -377,21 +387,22 @@ rooms:
     children: [columbarium, lower-quadrant, royal-tombs, mausoleum]
     on_enter: "A cold wind howls through the tombstones..."
     on_exit: null
-    description: "A misty place beyond the chapel — learn find"
+    description: "A misty place beyond the chapel — learn ls -a"
     teaches:
-      - "Locating files with find"
-      - "Finding by name, type, and permissions"
+      - "Hidden files with ls -a"
     key_files:
       - name: scroll
-        description: "find tutorial"
+        description: "hidden files tutorial"
+      - name: padlock
+        description: "gate (executable)"
     next_steps: "Search for hidden files and paths"
     essential_commands:
-      - command: "find . -name 'scroll'"
-        description: "Find all scrolls"
-      - command: "find . -type d"
-        description: "Find directories"
-      - command: "find . -executable"
-        description: "Find runnable files"
+      - command: "ls -a"
+        description: "Reveal the hidden mausoleum"
+      - command: "cd columbarium"
+        description: "Visit the burial niches"
+      - command: "./padlock"
+        description: "Try the graveyard lock"
 
   columbarium:
     emoji: "🏺"
@@ -543,21 +554,22 @@ rooms:
     children: [nursery]
     on_enter: null
     on_exit: null
-    description: "Fortified area within the vault — goblet challenge unlocks the rift"
+    description: "Fortified area within the vault — copy orbs with cp to free the goblet"
     teaches:
-      - "Advanced variable manipulation"
-      - "Inventory-gated challenges"
+      - "Copying files with cp"
     key_files:
       - name: goblet
         description: "checks for orb1, unlocks .rift (executable)"
+      - name: scroll
+        description: "cp tutorial"
     next_steps: "Complete the goblet challenge to unlock the rift"
     essential_commands:
+      - command: "cp orb1 orb2"
+        description: "Copy the missing orb"
+      - command: "cp orb1 orb3"
+        description: "Copy the third orb"
       - command: "./goblet"
         description: "Attempt the goblet challenge"
-      - command: "echo $I"
-        description: "Check inventory for orb1"
-      - command: "set | grep HP"
-        description: "Inspect shell variables"
 
   nursery:
     emoji: "🍼"
@@ -571,21 +583,22 @@ rooms:
     children: [lab]
     on_enter: null
     on_exit: null
-    description: "A quiet room within the vault complex — learn process management"
+    description: "A quiet room within the vault complex — learn find"
     teaches:
-      - "Process management with ps"
-      - "Job control (bg, fg, jobs)"
+      - "Searching in depth with find"
     key_files:
       - name: scroll
-        description: "process tutorial"
+        description: "find tutorial"
+      - name: spell
+        description: "encounter (executable)"
     next_steps: "Continue exploring the vault complex"
     essential_commands:
-      - command: "ps"
-        description: "List running processes"
-      - command: "jobs"
-        description: "List background jobs"
-      - command: "bg / fg"
-        description: "Background/foreground jobs"
+      - command: "find . -name 'scroll'"
+        description: "Find all scrolls below"
+      - command: "find . -type d"
+        description: "Find rooms below"
+      - command: "find . -type f"
+        description: "Find objects below"
 
   lab:
     emoji: "🧪"
@@ -599,22 +612,22 @@ rooms:
     children: []
     on_enter: null
     on_exit: null
-    description: "An alchemist's lab — learn process substitution and advanced piping"
+    description: "An alchemist's lab — learn pipes"
     teaches:
-      - "Process substitution with <()"
-      - "Output duplication with tee"
-      - "Building commands with xargs"
+      - "Chaining commands with pipes"
     key_files:
       - name: scroll
-        description: "process substitution tutorial"
+        description: "pipes tutorial"
+      - name: ghost
+        description: "encounter (executable)"
     next_steps: "Apply your knowledge across the dungeon"
     essential_commands:
-      - command: "diff <(cmd1) <(cmd2)"
-        description: "Process substitution"
-      - command: "tee file"
-        description: "Duplicate output"
-      - command: "command | xargs"
-        description: "Build commands from input"
+      - command: "cat scroll | grep wizard"
+        description: "Pipe output into grep"
+      - command: "ls | wc -l"
+        description: "Count items in the room"
+      - command: "file ghost"
+        description: "Inspect the ghost before fighting"
 
   scrap:
     emoji: "🔗"
@@ -630,8 +643,8 @@ rooms:
     on_exit: null
     description: "A hidden directory teaching symbolic links"
     teaches:
-      - "Creating symbolic links with ln -s"
-      - "Reading link targets"
+      - "Creating symbolic links (symlinks) with ln -s"
+      - "Reading symlink targets"
     key_files:
       - name: scroll
         description: "symlink tutorial"
@@ -656,22 +669,22 @@ rooms:
     children: [arena, spire]
     on_enter: "Reality shimmers and tears apart before you..."
     on_exit: null
-    description: "A dimensional tear — advanced scripting and checksums"
+    description: "A dimensional tear — command chaining with pipes and logic"
     teaches:
-      - "File checksums (sha256sum, md5sum)"
-      - "File comparison with diff"
-      - "Advanced bash scripting"
+      - "Command chaining with |, &&, ;, and ||"
     key_files:
       - name: scroll
-        description: "checksums tutorial"
+        description: "command chaining tutorial"
+      - name: box
+        description: "encounter (executable)"
     next_steps: "Explore the arena or ascend the spire"
     essential_commands:
-      - command: "sha256sum file"
-        description: "Compute file checksum"
-      - command: "md5sum file"
-        description: "Alternative checksum"
-      - command: "diff file1 file2"
-        description: "Compare files"
+      - command: "cat scroll | grep rift"
+        description: "Pipe output into grep"
+      - command: "ls -la && echo Success"
+        description: "Run the next command only on success"
+      - command: "ls | wc -l"
+        description: "Count items in the room"
 
   arena:
     emoji: "⚔️"
@@ -714,22 +727,20 @@ rooms:
     children: []
     on_enter: "The ground gives way beneath your feet..."
     on_exit: null
-    description: "The deepest point of the arena — learn error handling"
+    description: "The deepest point of the arena — check health before battle"
     teaches:
-      - "Exit codes and error checking"
-      - "Error handling with || and &&"
-      - "Traps for cleanup"
+      - "Health readiness"
     key_files:
       - name: scroll
-        description: "error handling tutorial"
-    next_steps: "Emerge victorious with mastery of error handling"
+        description: "combat readiness tutorial"
+    next_steps: "Check echo $HP and echo $I, then face the pit encounters"
     essential_commands:
-      - command: "echo $?"
-        description: "Check last exit code"
-      - command: "command || echo fail"
-        description: "Handle errors"
-      - command: "trap 'cleanup' EXIT"
-        description: "Set exit trap"
+      - command: "echo $HP"
+        description: "Check your health"
+      - command: "echo $I"
+        description: "Check your inventory"
+      - command: "./nyarlathotep"
+        description: "Face the crawling chaos"
 
   spire:
     emoji: "🗼"
@@ -743,22 +754,20 @@ rooms:
     children: [mezzanine]
     on_enter: null
     on_exit: null
-    description: "A tower rising from the rift — learn text processing"
+    description: "A tower rising from the rift — combine ls -a with grep"
     teaches:
-      - "Text processing with awk"
-      - "Text substitution with sed"
-      - "Field extraction with cut"
+      - "Hidden entries with ls -a | grep"
     key_files:
       - name: scroll
-        description: "text processing tutorial"
+        description: "hidden-sight tutorial"
     next_steps: "Climb to the mezzanine"
     essential_commands:
-      - command: "awk '{print $1}' file"
-        description: "Extract columns"
-      - command: "sed 's/old/new/' file"
-        description: "Text substitution"
-      - command: "cut -d',' -f1 file"
-        description: "Cut fields"
+      - command: "ls -a"
+        description: "Reveal hidden rooms"
+      - command: "ls -la | grep '^\\.'"
+        description: "Find hidden entries"
+      - command: "cd mezzanine"
+        description: "Continue ascending"
 
   mezzanine:
     emoji: "🎭"

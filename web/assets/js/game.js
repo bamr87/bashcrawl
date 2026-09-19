@@ -22,12 +22,22 @@
         docsSearch: document.getElementById("docs-search"),
         themeToggle: document.getElementById("theme-toggle"),
         crtToggle: document.getElementById("crt-toggle"),
+        hudToggle: document.getElementById("hud-toggle"),
+        hudMenu: document.getElementById("hud-menu"),
+        hudMenuPanes: document.getElementById("hud-menu-panes"),
+        storyMain: document.getElementById("mode-story"),
     };
 
     const escapeHtml = window.TermForge.sinks.escapeHtml;
     // The shared presenter: every panel below renders a BashcrawlHud model,
     // the same models the terminal HUD draws (termforge/node/host-tty.js).
     const Hud = window.BashcrawlHud;
+    if (Hud && window.BashcrawlStorage && typeof Hud.attachStore === "function") {
+        Hud.attachStore({
+            load() { return window.BashcrawlStorage.loadKey(Hud.LAYOUT_KEY, {}); },
+            save(value) { window.BashcrawlStorage.saveKey(Hud.LAYOUT_KEY, value); },
+        }, { dock: "left" });
+    }
 
     const data = await loadData();
     let runtime = new window.BashcrawlRuntime.Runtime(data, window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root)));
@@ -147,6 +157,39 @@
     dom.docsClose.addEventListener("click", () => docsPanel.close());
     dom.themeToggle.addEventListener("click", toggleTheme);
     dom.crtToggle.addEventListener("click", toggleCrt);
+    if (dom.hudToggle && dom.hudMenu) {
+        dom.hudToggle.addEventListener("click", () => {
+            const open = dom.hudMenu.hasAttribute("hidden");
+            if (open) {
+                dom.hudMenu.removeAttribute("hidden");
+                applyWebLayout();
+            } else {
+                dom.hudMenu.setAttribute("hidden", "");
+            }
+            dom.hudToggle.setAttribute("aria-expanded", String(open));
+        });
+        dom.hudMenu.addEventListener("click", (event) => {
+            const vis = event.target && event.target.getAttribute && event.target.getAttribute("data-hud-vis");
+            if (vis && event.target.tagName === "INPUT") {
+                Hud.applyAction({ op: "toggle", id: vis, field: "visible", value: event.target.checked });
+                applyWebLayout();
+                return;
+            }
+            const act = event.target && event.target.getAttribute && event.target.getAttribute("data-hud");
+            if (act === "reset") Hud.applyAction({ op: "reset" });
+            if (act === "dock-left") Hud.applyAction({ op: "dock", side: "left" });
+            if (act === "dock-right") Hud.applyAction({ op: "dock", side: "right" });
+            if (act) applyWebLayout();
+        });
+    }
+    document.querySelectorAll("#mode-story [data-hud-pane] > h2").forEach((heading) => {
+        heading.addEventListener("click", () => {
+            const pane = heading.parentElement && heading.parentElement.getAttribute("data-hud-pane");
+            if (!pane) return;
+            Hud.applyAction({ op: "toggle", id: pane, field: "collapsed" });
+            applyWebLayout();
+        });
+    });
 
     initTheme();
     initCrt();
@@ -323,8 +366,37 @@
         renderMap();
         renderPrompt();
         renderLog();
+        applyWebLayout();
         // Concept spotlight: surface what the current room teaches (reference.js).
         if (window.BashcrawlShell) window.BashcrawlShell.onStoryRender(runtime);
+    }
+
+    function applyWebLayout() {
+        if (!Hud || typeof Hud.getLayout !== "function") return;
+        const lay = Hud.getLayout();
+        const sidebar = document.querySelector("#mode-story .tui-sidebar");
+        if (dom.storyMain) {
+            dom.storyMain.classList.toggle("hud-dock-right", lay.dock === "right");
+        }
+        const byId = {};
+        (sidebar ? sidebar.querySelectorAll("[data-hud-pane]") : []).forEach((el) => {
+            byId[el.getAttribute("data-hud-pane")] = el;
+        });
+        lay.panes.forEach((pane) => {
+            const el = byId[pane.id];
+            if (!el) return;
+            el.classList.toggle("is-hud-hidden", !pane.visible);
+            el.classList.toggle("is-collapsed", Boolean(pane.collapsed));
+            if (sidebar && pane.visible) sidebar.appendChild(el);
+        });
+        if (dom.hudMenuPanes) {
+            dom.hudMenuPanes.innerHTML = lay.panes
+                .filter((pane) => byId[pane.id])
+                .map((pane) => (
+                    `<label><input type="checkbox" data-hud-vis="${pane.id}" ${pane.visible ? "checked" : ""}>${pane.id}</label>`
+                ))
+                .join("");
+        }
     }
 
     // Record the current room (and its ancestors, so the trunk is always solid)

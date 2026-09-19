@@ -77,6 +77,7 @@ def test_harness_roundtrip(tmp_path, monkeypatch):
     try:
         screen = harness.start(fresh=True)
         assert "Location : entrance" in screen
+        assert "Here     :" not in screen
         moved = harness.command("cd cellar")
         assert "Location : entrance/cellar" in moved
         scroll = harness.command("cat scroll")
@@ -85,6 +86,29 @@ def test_harness_roundtrip(tmp_path, monkeypatch):
     finally:
         harness.close()
     assert list(tmp_path.glob("*.jsonl")), "a session log should have been written"
+
+
+def test_harness_state_and_context_mode(tmp_path, monkeypatch):
+    monkeypatch.setenv("BASHCRAWL_PLAYTEST_LOG_DIR", str(tmp_path))
+    harness = PlaytestHarness()
+    try:
+        screen = harness.start(fresh=True, context=True)
+        assert "Here     :" in screen
+        assert "cellar/" in screen
+        packet = harness.state(include_scroll=True)
+        assert packet["location"] == "entrance"
+        assert packet["scroll_present"] is True
+        assert "cellar" in packet["exits"]
+        assert packet["scroll"] and "ANCIENT SCROLL" in packet["scroll"]
+        harness.command("cd cellar")
+        cellar = harness.state(include_scroll=False)
+        assert cellar["location"] == "entrance/cellar"
+        assert "scroll" not in cellar
+        assert "treasure" in cellar["encounters"]
+        json_text = harness.state_json(include_scroll=True)
+        assert '"location": "entrance/cellar"' in json_text
+    finally:
+        harness.close()
 
 
 def test_sentinel_not_forgeable_via_env(game_session):
@@ -130,3 +154,5 @@ def test_mcp_transport_imports():
 
     assert mcp_server.mcp is not None
     assert callable(mcp_server.main)
+    assert callable(mcp_server.bashcrawl_state)
+    assert callable(mcp_server.bashcrawl_stop)

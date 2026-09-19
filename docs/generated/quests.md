@@ -33,7 +33,7 @@ Generated from `src/help/data/quests.yaml`.
 - Completion location: `None`
 
 ## Quest 5: Spark of Creation
-- Objective: Use 'touch' to create a new file, for example 'touch notes.md'.
+- Objective: Use 'touch notes.txt' to conjure a new file in your workshop.
 - XP: `100`
 - Completion command: `touch`
 - Completion location: `None`

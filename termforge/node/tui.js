@@ -1,20 +1,19 @@
 "use strict";
 // TermForge TUI compositor — a full-screen ANSI frame for byte-stream hosts.
 //
-// Draws the graphical session layout the web app gets from its DOM panels:
+// Draws a btop-style boxed session the web app gets as DOM panels:
 //
-//   ┌ log (scrollback, wrapped) ─────────────┬─ sidebar panels ─┐
-//   │ …                                      │ ─ ⚔ TITLE ────── │
-//   │ …                                      │   pre-formatted  │
-//   │ …                                      │   {kind,text}    │
+//   ┌─ log 12-40/80 · PgUp/wheel ────────────┬─ hud ────────────┐
+//   │ scrollback (independent offset)        │ ─ ⚔ TITLE ────── │
+//   │                                        │   {kind,text}    │
 //   ├─ toast row (transient event) ──────────┴──────────────────┤
 //   └ input row (prompt + line buffer, live cursor) ────────────┘
 //
-// Narrow terminals collapse the sidebar into a one-line status strip above
-// the log. The compositor is app-agnostic: panel/strip/toast content arrives
-// as data (the app's hud() contract, see termforge/apps/bashcrawl.js); kinds
-// reuse the AnsiSink SGR palette so the sidebar matches the log colors.
-// No timers and no clock in here — hosts own toast lifetimes and repaints.
+// Narrow terminals collapse the sidebar into a status strip above the log.
+// PgUp/PgDn, mouse wheel, and click-to-focus scroll the log (or sidebar)
+// without leaving the input line. The compositor is app-agnostic: panel/
+// strip/toast content arrives as data (the app's hud() contract). No timers
+// here — hosts own toast lifetimes, repaints, and the damage jolt.
 
 const { ANSI_STYLES } = require("../core/sinks/ansi.js");
 
@@ -104,7 +103,14 @@ class TuiScreen {
         this.toastLine = null;
         this.prompt = "$";
         this.input = "";
+        this.jolt = 0;
         this.started = false;
+        this.logOffset = 0;
+        this.sideOffset = 0;
+        this.focus = "input";
+        this.dock = "right";
+        this.sideWidth = SIDEBAR_W;
+        this._sideMeta = [];
     }
 
     // ── state feeds ─────────────────────────────────────────────────────────
@@ -119,6 +125,9 @@ class TuiScreen {
 
     setToast(line) { this.toastLine = line || null; }
 
+    /** Horizontal frame offset in cells (host-driven shake FX; 0 = settled). */
+    setJolt(cells) { this.jolt = Math.max(0, Math.min(8, Number(cells) || 0)); }
+
     appendLog(lines) {
         for (const line of lines || []) {
             this.log.push({ kind: line.kind || "output", text: line.text || "" });
@@ -126,23 +135,76 @@ class TuiScreen {
         if (this.log.length > this.logCap) {
             this.log.splice(0, this.log.length - this.logCap);
         }
+        this.logOffset = 0;
     }
 
-    clearLog() { this.log.length = 0; }
+    clearLog() {
+        this.log.length = 0;
+        this.logOffset = 0;
+    }
+
+    setFocus(zone) {
+        if (zone === "log" || zone === "side" || zone === "input") this.focus = zone;
+    }
+
+    setDock(side) {
+        this.dock = side === "left" ? "left" : "right";
+    }
+
+    setSideWidth(width) {
+        const n = Number(width);
+        this.sideWidth = Math.max(20, Math.min(40, Number.isFinite(n) ? Math.round(n) : SIDEBAR_W));
+    }
+
+    pageSize() {
+        return Math.max(1, this._geometry().height - 1);
+    }
+
+    scrollLog(delta) {
+        this.logOffset = this._clampOffset(this.logOffset + (Number(delta) || 0), this._logMaxOffset());
+        return this.logOffset;
+    }
+
+    scrollSide(delta) {
+        this.sideOffset = this._clampOffset(this.sideOffset + (Number(delta) || 0), this._sideMaxOffset());
+        return this.sideOffset;
+    }
+
+    hitTest(x, y) {
+        const g = this._geometry();
+        const col = Number(x) || 0;
+        const row = Number(y) || 0;
+        if (row === g.inputRow) return { zone: "input" };
+        if (g.chrome && row === g.toastRow) return { zone: "toast" };
+        const onSide = g.wide && (
+            g.dock === "left" ? col <= this.sideWidth : col >= g.sepCol
+        );
+        if (g.header && row === g.top - 1) {
+            return onSide ? { zone: "side", kind: "title" } : { zone: "log", kind: "title" };
+        }
+        if (row < g.top || row > g.logBottom) return null;
+        if (onSide) {
+            this._sideAllRows();
+            const idx = (row - g.top) + this.sideOffset;
+            const meta = this._sideMeta[idx] || {};
+            return { zone: "side", id: meta.id || null, kind: meta.kind || "body" };
+        }
+        return { zone: "log" };
+    }
 
     // ── lifecycle ───────────────────────────────────────────────────────────
 
     start(size) {
         this.started = true;
         if (size) { this.cols = size.cols || 80; this.rows = size.rows || 24; }
-        this._write(`${CSI}?1049h${CSI}2J${CSI}H`);
+        this._write(`${CSI}?1049h${CSI}?1000h${CSI}?1006h${CSI}2J${CSI}H`);
         this.render();
     }
 
     stop() {
         if (!this.started) return;
         this.started = false;
-        this._write(`${CSI}?1049l${CSI}?25h`);
+        this._write(`${CSI}?1000l${CSI}?1006l${CSI}?1049l${CSI}?25h`);
     }
 
     resize(cols, rows) {
@@ -163,39 +225,108 @@ class TuiScreen {
     }
 
     _wide() {
-        return Boolean(this.panels) && this.cols >= MIN_WIDE && this.rows >= MIN_ROWS;
+        return Array.isArray(this.panels) && this.panels.length > 0
+            && this.cols >= MIN_WIDE && this.rows >= MIN_ROWS;
     }
 
-    // Flatten panels into sidebar rows: a rule-with-title header per panel,
-    // then its body lines, truncated to the row budget with a dim ellipsis.
-    _sidebarRows(budget) {
+    _clampOffset(value, max) {
+        return Math.max(0, Math.min(max, value));
+    }
+
+    _geometry() {
+        const wide = this._wide();
+        const chrome = this.rows >= MIN_ROWS;
+        const inputRow = this.rows;
+        const toastRow = chrome ? this.rows - 1 : 0;
+        let top = 1;
+        const stripLines = (!wide && chrome && this.strip) ? this.strip.length : 0;
+        if (stripLines) top += stripLines + 1;
+        const header = chrome;
+        if (header) top += 1;
+        const logBottom = (chrome ? toastRow : inputRow) - 1;
+        const height = Math.max(0, logBottom - top + 1);
+        const dock = this.dock === "left" ? "left" : "right";
+        const sideW = this.sideWidth || SIDEBAR_W;
+        const sepCol = wide
+            ? (dock === "left" ? sideW + 1 : this.cols - sideW - 1)
+            : this.cols + 1;
+        const logWidth = wide ? Math.max(10, this.cols - sideW - 2) : this.cols;
+        return {
+            wide, chrome, header, top, logBottom, height, sepCol, logWidth,
+            toastRow, inputRow, stripLines, dock, sideW,
+        };
+    }
+
+    _wrappedLog(width) {
         const rows = [];
-        for (const panel of this.panels || []) {
-            const title = ` ${panel.title} `;
-            const rule = "─".repeat(Math.max(0, SIDEBAR_W - dispWidth(title) - 1));
-            rows.push(this._sgr("2", "─") + this._sgr("1;36", title) + this._sgr("2", rule));
-            for (const line of panel.lines || []) {
-                rows.push(" " + this._kind(line.kind, clip(line.text, SIDEBAR_W - 1)));
+        for (const entry of this.log) {
+            for (const piece of wrap(entry.text, width)) {
+                rows.push({ kind: entry.kind, text: piece });
             }
-        }
-        if (rows.length > budget && budget > 0) {
-            rows.length = budget - 1;
-            rows.push(this._sgr("2", " …"));
         }
         return rows;
     }
 
-    // Wrap the log tail into at most `budget` display rows of `width` cells.
-    _logRows(budget, width) {
+    _logMaxOffset() {
+        const g = this._geometry();
+        return Math.max(0, this._wrappedLog(g.logWidth).length - g.height);
+    }
+
+    _sideAllRows() {
         const rows = [];
-        for (let i = this.log.length - 1; i >= 0 && rows.length < budget; i -= 1) {
-            const entry = this.log[i];
-            const wrapped = wrap(entry.text, width);
-            for (let j = wrapped.length - 1; j >= 0 && rows.length < budget; j -= 1) {
-                rows.push(this._kind(entry.kind, wrapped[j]));
+        const meta = [];
+        const width = this.sideWidth || SIDEBAR_W;
+        for (const panel of this.panels || []) {
+            const title = ` ${panel.title} `;
+            const rule = "─".repeat(Math.max(0, width - dispWidth(title) - 1));
+            rows.push(this._sgr("2", "─") + this._sgr("1;36", title) + this._sgr("2", rule));
+            meta.push({ id: panel.id || null, kind: "title" });
+            if (panel.collapsed) continue;
+            for (const line of panel.lines || []) {
+                rows.push(" " + this._kind(line.kind, clip(line.text, width - 1)));
+                meta.push({ id: panel.id || null, kind: "body" });
             }
         }
-        return rows.reverse();
+        this._sideMeta = meta;
+        return rows;
+    }
+
+    _sideMaxOffset() {
+        const g = this._geometry();
+        if (!g.wide) return 0;
+        return Math.max(0, this._sideAllRows().length - g.height);
+    }
+
+    _sidebarRows(budget) {
+        const all = this._sideAllRows();
+        const maxOff = Math.max(0, all.length - budget);
+        this.sideOffset = this._clampOffset(this.sideOffset, maxOff);
+        const slice = all.slice(this.sideOffset, this.sideOffset + budget);
+        if (this.sideOffset + budget < all.length && slice.length) {
+            slice[slice.length - 1] = this._sgr("2", " …");
+        }
+        return slice;
+    }
+
+    _logRows(budget, width) {
+        const all = this._wrappedLog(width);
+        const maxOff = Math.max(0, all.length - budget);
+        this.logOffset = this._clampOffset(this.logOffset, maxOff);
+        const start = Math.max(0, all.length - budget - this.logOffset);
+        return all.slice(start, start + budget).map((row) => this._kind(row.kind, row.text));
+    }
+
+    _headerTitles(g, logTotal) {
+        const maxOff = Math.max(0, logTotal - g.height);
+        const shownEnd = Math.max(0, logTotal - this.logOffset);
+        const shownStart = Math.max(1, shownEnd - g.height + 1);
+        const mark = this.logOffset > 0 ? "▲" : (maxOff > 0 ? "▼" : " ");
+        const range = logTotal
+            ? `${mark} ${shownStart}-${shownEnd}/${logTotal}`
+            : "log";
+        const logTitle = this.focus === "log" ? ` LOG ${range} ` : ` log ${range} `;
+        const hudTitle = this.focus === "side" ? " HUD " : " hud ";
+        return { logTitle, hudTitle };
     }
 
     _inputCol() {
@@ -206,21 +337,22 @@ class TuiScreen {
     renderInput() {
         if (!this.started) return;
         const row = this.rows;
-        const text = clip(`${this.prompt} ${this.input}`, this.cols - 1);
-        this._write(`${CSI}${row};1H${CSI}2K${text}${CSI}${row};${this._inputCol()}H`);
+        const pad = " ".repeat(this.jolt);
+        const text = clip(`${this.prompt} ${this.input}`, this.cols - 1 - this.jolt);
+        this._write(`${CSI}${row};1H${CSI}2K${pad}${text}${CSI}${row};${this._inputCol() + this.jolt}H`);
     }
 
     /** Full frame repaint. */
     render() {
         if (!this.started) return;
         const parts = [`${CSI}?25l`];
-        const put = (row, text) => parts.push(`${CSI}${row};1H${CSI}2K${text}`);
-        const wide = this._wide();
-        const chrome = this.rows >= MIN_ROWS;
-        const toastRow = chrome ? this.rows - 1 : 0;
+        const jolt = this.jolt;
+        const pad = " ".repeat(jolt);
+        const put = (row, text) => parts.push(`${CSI}${row};1H${CSI}2K${pad}${text}`);
+        const g = this._geometry();
         let logTop = 1;
 
-        if (!wide && chrome && this.strip) {
+        if (g.stripLines) {
             for (const line of this.strip) {
                 put(logTop, this._kind(line.kind, clip(line.text, this.cols)));
                 logTop += 1;
@@ -229,37 +361,60 @@ class TuiScreen {
             logTop += 1;
         }
 
-        const logBottom = (chrome ? toastRow : this.rows) - 1;
-        const budget = Math.max(0, logBottom - logTop + 1);
-        const sepCol = wide ? this.cols - SIDEBAR_W - 1 : this.cols + 1;
-        const logWidth = wide ? sepCol - 2 : this.cols;
-        const logRows = this._logRows(budget, Math.max(10, logWidth));
-        const sideRows = wide ? this._sidebarRows(budget) : [];
+        const allLog = this._wrappedLog(g.logWidth);
+        if (g.header) {
+            const titles = this._headerTitles(g, allLog.length);
+            if (g.wide && g.dock === "left") {
+                const hudRule = "─".repeat(Math.max(0, g.sideW - dispWidth(titles.hudTitle)));
+                const logRule = "─".repeat(Math.max(0, this.cols - g.sepCol - dispWidth(titles.logTitle)));
+                const head = this._sgr("2", "┌") + this._sgr(this.focus === "side" ? "1;36" : "2", titles.hudTitle)
+                    + this._sgr("2", hudRule)
+                    + `${CSI}${logTop};${g.sepCol + jolt}H` + this._sgr("2", "┬")
+                    + this._sgr(this.focus === "log" ? "1;36" : "2", titles.logTitle) + this._sgr("2", logRule);
+                put(logTop, head);
+            } else {
+                const logRule = "─".repeat(Math.max(0, (g.wide ? g.sepCol - 1 : this.cols) - dispWidth(titles.logTitle) - 1));
+                let head = this._sgr("2", "┌") + this._sgr(this.focus === "log" ? "1;36" : "2", titles.logTitle) + this._sgr("2", logRule);
+                if (g.wide) {
+                    const hudRule = "─".repeat(Math.max(0, g.sideW - dispWidth(titles.hudTitle)));
+                    head += `${CSI}${logTop};${g.sepCol + jolt}H` + this._sgr("2", "┬")
+                        + this._sgr(this.focus === "side" ? "1;36" : "2", titles.hudTitle) + this._sgr("2", hudRule);
+                } else {
+                    head += this._sgr("2", "┐");
+                }
+                put(logTop, head);
+            }
+            logTop += 1;
+        }
+
+        const budget = g.height;
+        const logRows = this._logRows(budget, g.logWidth);
+        const sideRows = g.wide ? this._sidebarRows(budget) : [];
 
         for (let i = 0; i < budget; i += 1) {
             const row = logTop + i;
             let text = logRows[i] || "";
-            if (wide) {
-                // The sidebar is positioned absolutely so a stray wide glyph in
-                // the log can never push it out of its column.
-                text += `${CSI}${row};${sepCol}H` + this._sgr("2", "│") + (sideRows[i] || "");
+            if (g.wide && g.dock === "left") {
+                text = (sideRows[i] || "") + `${CSI}${row};${g.sepCol + jolt}H` + this._sgr("2", "│") + (logRows[i] || "");
+            } else if (g.wide) {
+                text += `${CSI}${row};${g.sepCol + jolt}H` + this._sgr("2", "│") + (sideRows[i] || "");
             }
             put(row, text);
         }
 
-        if (chrome) {
+        if (g.chrome) {
             if (this.toastLine) {
                 const toast = ` ${this.toastLine.text} `;
-                const pad = Math.max(0, Math.floor((this.cols - dispWidth(toast)) / 2));
+                const inset = Math.max(0, Math.floor((this.cols - dispWidth(toast)) / 2));
                 const style = ANSI_STYLES[this.toastLine.kind || "info"] || "36";
-                put(toastRow, " ".repeat(pad) + this._sgr(`7;${style}`, clip(toast, this.cols)));
+                put(g.toastRow, " ".repeat(inset) + this._sgr(`7;${style}`, clip(toast, this.cols)));
             } else {
-                put(toastRow, this._sgr("2", "─".repeat(this.cols)));
+                put(g.toastRow, this._sgr("2", "─".repeat(this.cols)));
             }
         }
 
-        put(this.rows, clip(`${this.prompt} ${this.input}`, this.cols - 1));
-        parts.push(`${CSI}${this.rows};${this._inputCol()}H${CSI}?25h`);
+        put(g.inputRow, clip(`${this.prompt} ${this.input}`, this.cols - 1 - jolt));
+        parts.push(`${CSI}${g.inputRow};${this._inputCol() + jolt}H${CSI}?25h`);
         this._write(parts.join(""));
     }
 }

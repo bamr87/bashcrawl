@@ -59,7 +59,7 @@
       "description": "This is your starting point - learn basic navigation here",
       "teaches": [
         "Basic navigation (cd, ls, pwd)",
-        "Reading files with cat"
+        "Reading files with cat, wc, head, tail, and less"
       ],
       "key_files": [
         {
@@ -71,7 +71,7 @@
           "description": "overview"
         }
       ],
-      "next_steps": "Explore the cellar/ directory",
+      "next_steps": "Read the scroll, optionally mkdir workshop, then cd cellar. After treasure, return here and ls — new rooms may appear.",
       "essential_commands": [
         {
           "command": "cat scroll",
@@ -103,9 +103,9 @@
       "on_exit": null,
       "description": "Learn file types and basic interaction here",
       "teaches": [
-        "File types and type indicators",
-        "Running executable scripts",
-        "Inventory management with export"
+        "File types with ls -F",
+        "Command aliases",
+        "Running executables and inventory (export)"
       ],
       "key_files": [
         {
@@ -113,7 +113,7 @@
           "description": "inventory system"
         }
       ],
-      "next_steps": "Collect your first amulet, then explore armoury/",
+      "next_steps": "Run ./treasure, then export I=amulet,$I as it tells you. Then cd armoury",
       "essential_commands": [
         {
           "command": "./treasure",
@@ -145,9 +145,10 @@
       "on_exit": null,
       "description": "Advanced area focusing on file permissions and combat",
       "teaches": [
-        "File permissions (chmod)",
-        "Running potions and combat scripts",
-        "Health points and variables"
+        "File permissions (chmod +x)",
+        "Inspecting with ls -l",
+        "Searching with grep",
+        "Running local scripts with ./"
       ],
       "key_files": [
         {
@@ -159,7 +160,7 @@
           "description": "sword collection"
         }
       ],
-      "next_steps": "Drink the potion, collect the sword, descend to chamber/",
+      "next_steps": "Run ./treasure and ./potion, export I and HP as they tell you, then cd chamber",
       "essential_commands": [
         {
           "command": "chmod +x filename",
@@ -189,7 +190,8 @@
       "on_exit": null,
       "description": "Advanced challenges and complex interactions",
       "teaches": [
-        "Shell variables and arithmetic (let)",
+        "export and echo $VAR",
+        "Arithmetic with let",
         "Combat encounters (statue)",
         "Symlinks and portals (ln -s)"
       ],
@@ -280,35 +282,34 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "A hidden sanctuary unlocked by collecting treasures — learn grep",
+      "description": "A hidden sanctuary unlocked by collecting treasures — learn ls -a",
       "teaches": [
-        "Searching text with grep",
-        "Case-insensitive searching",
-        "Pattern matching basics"
+        "Hidden files with ls -a",
+        "Command history"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "grep tutorial"
+          "description": "hidden files tutorial"
         },
         {
-          "name": "ghost",
+          "name": "altar",
           "description": "encounter (executable)"
         }
       ],
       "next_steps": "Explore the graveyard or continue to the courtyard",
       "essential_commands": [
         {
-          "command": "grep pattern file",
-          "description": "Search for text in a file"
-        },
-        {
-          "command": "grep -i pattern *",
-          "description": "Case-insensitive search"
+          "command": "ls -a",
+          "description": "Reveal hidden files and rooms"
         },
         {
           "command": "ls -la",
-          "description": "Look for hidden paths forward"
+          "description": "Detailed view including hidden files"
+        },
+        {
+          "command": "./altar",
+          "description": "Examine the forgotten altar"
         }
       ]
     },
@@ -326,26 +327,34 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "An open area leading deeper into the castle — learn pipes",
+      "description": "An open area leading deeper into the castle — learn file",
       "teaches": [
-        "Combining commands with pipes",
-        "Chaining output between programs"
+        "Identifying objects with file",
+        "Inspecting files with ls -l"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "pipes tutorial"
+          "description": "file tutorial"
+        },
+        {
+          "name": "fountain",
+          "description": "encounter (executable)"
+        },
+        {
+          "name": "rags",
+          "description": "encounter (executable)"
         }
       ],
       "next_steps": "Continue deeper into the aviary",
       "essential_commands": [
         {
-          "command": "ls | grep pattern",
-          "description": "Pipe output to grep"
+          "command": "file fountain",
+          "description": "Identify an object"
         },
         {
-          "command": "cat scroll | wc -l",
-          "description": "Count lines"
+          "command": "ls -l",
+          "description": "Inspect permissions and size"
         },
         {
           "command": "cd aviary",
@@ -367,30 +376,37 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "A towering room filled with caged birds — learn output redirection",
+      "description": "A frost-bitten room of birds — learn tab completion",
       "teaches": [
-        "Output redirection with > and >>",
-        "Creating and appending to files"
+        "Tab completion"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "redirection tutorial"
+          "description": "tab completion tutorial"
+        },
+        {
+          "name": "penguin",
+          "description": "encounter (executable)"
+        },
+        {
+          "name": "crystal",
+          "description": "loot (executable)"
         }
       ],
       "next_steps": "Continue to the great hall",
       "essential_commands": [
         {
-          "command": "echo 'text' > file",
-          "description": "Write to a file"
+          "command": "cd h<TAB>",
+          "description": "Complete hall with tab"
         },
         {
-          "command": "echo 'more' >> file",
-          "description": "Append to a file"
+          "command": "./penguin",
+          "description": "Approach the penguin"
         },
         {
-          "command": "cat file",
-          "description": "Verify file contents"
+          "command": "cd hall",
+          "description": "Enter the darkened hall"
         }
       ]
     },
@@ -408,30 +424,34 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "A grand hall connecting to the library — learn sorting and filtering",
+      "description": "A grand hall connecting to the library — grep for combat readiness",
       "teaches": [
-        "Sorting output with sort",
-        "Removing duplicates with uniq"
+        "grep for variables",
+        "Combat readiness"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "sort/uniq tutorial"
+          "description": "combat readiness tutorial"
+        },
+        {
+          "name": "monster",
+          "description": "encounter (executable)"
         }
       ],
       "next_steps": "Enter the ancient library",
       "essential_commands": [
         {
-          "command": "sort file",
-          "description": "Sort file contents"
+          "command": "echo $I",
+          "description": "Check your inventory"
         },
         {
-          "command": "ls | sort -r",
-          "description": "Reverse sort listing"
+          "command": "echo $HP",
+          "description": "Check your health"
         },
         {
-          "command": "uniq file",
-          "description": "Remove duplicates"
+          "command": "grep sword <<< \"$I\"",
+          "description": "Test whether you carry a sword"
         }
       ]
     },
@@ -543,30 +563,33 @@
       ],
       "on_enter": "A cold wind howls through the tombstones...",
       "on_exit": null,
-      "description": "A misty place beyond the chapel — learn find",
+      "description": "A misty place beyond the chapel — learn ls -a",
       "teaches": [
-        "Locating files with find",
-        "Finding by name, type, and permissions"
+        "Hidden files with ls -a"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "find tutorial"
+          "description": "hidden files tutorial"
+        },
+        {
+          "name": "padlock",
+          "description": "gate (executable)"
         }
       ],
       "next_steps": "Search for hidden files and paths",
       "essential_commands": [
         {
-          "command": "find . -name 'scroll'",
-          "description": "Find all scrolls"
+          "command": "ls -a",
+          "description": "Reveal the hidden mausoleum"
         },
         {
-          "command": "find . -type d",
-          "description": "Find directories"
+          "command": "cd columbarium",
+          "description": "Visit the burial niches"
         },
         {
-          "command": "find . -executable",
-          "description": "Find runnable files"
+          "command": "./padlock",
+          "description": "Try the graveyard lock"
         }
       ]
     },
@@ -779,30 +802,33 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "Fortified area within the vault — goblet challenge unlocks the rift",
+      "description": "Fortified area within the vault — copy orbs with cp to free the goblet",
       "teaches": [
-        "Advanced variable manipulation",
-        "Inventory-gated challenges"
+        "Copying files with cp"
       ],
       "key_files": [
         {
           "name": "goblet",
           "description": "checks for orb1, unlocks .rift (executable)"
+        },
+        {
+          "name": "scroll",
+          "description": "cp tutorial"
         }
       ],
       "next_steps": "Complete the goblet challenge to unlock the rift",
       "essential_commands": [
         {
+          "command": "cp orb1 orb2",
+          "description": "Copy the missing orb"
+        },
+        {
+          "command": "cp orb1 orb3",
+          "description": "Copy the third orb"
+        },
+        {
           "command": "./goblet",
           "description": "Attempt the goblet challenge"
-        },
-        {
-          "command": "echo $I",
-          "description": "Check inventory for orb1"
-        },
-        {
-          "command": "set | grep HP",
-          "description": "Inspect shell variables"
         }
       ]
     },
@@ -820,30 +846,33 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "A quiet room within the vault complex — learn process management",
+      "description": "A quiet room within the vault complex — learn find",
       "teaches": [
-        "Process management with ps",
-        "Job control (bg, fg, jobs)"
+        "Searching in depth with find"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "process tutorial"
+          "description": "find tutorial"
+        },
+        {
+          "name": "spell",
+          "description": "encounter (executable)"
         }
       ],
       "next_steps": "Continue exploring the vault complex",
       "essential_commands": [
         {
-          "command": "ps",
-          "description": "List running processes"
+          "command": "find . -name 'scroll'",
+          "description": "Find all scrolls below"
         },
         {
-          "command": "jobs",
-          "description": "List background jobs"
+          "command": "find . -type d",
+          "description": "Find rooms below"
         },
         {
-          "command": "bg / fg",
-          "description": "Background/foreground jobs"
+          "command": "find . -type f",
+          "description": "Find objects below"
         }
       ]
     },
@@ -859,31 +888,33 @@
       "children": [],
       "on_enter": null,
       "on_exit": null,
-      "description": "An alchemist's lab — learn process substitution and advanced piping",
+      "description": "An alchemist's lab — learn pipes",
       "teaches": [
-        "Process substitution with <()",
-        "Output duplication with tee",
-        "Building commands with xargs"
+        "Chaining commands with pipes"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "process substitution tutorial"
+          "description": "pipes tutorial"
+        },
+        {
+          "name": "ghost",
+          "description": "encounter (executable)"
         }
       ],
       "next_steps": "Apply your knowledge across the dungeon",
       "essential_commands": [
         {
-          "command": "diff <(cmd1) <(cmd2)",
-          "description": "Process substitution"
+          "command": "cat scroll | grep wizard",
+          "description": "Pipe output into grep"
         },
         {
-          "command": "tee file",
-          "description": "Duplicate output"
+          "command": "ls | wc -l",
+          "description": "Count items in the room"
         },
         {
-          "command": "command | xargs",
-          "description": "Build commands from input"
+          "command": "file ghost",
+          "description": "Inspect the ghost before fighting"
         }
       ]
     },
@@ -901,8 +932,8 @@
       "on_exit": null,
       "description": "A hidden directory teaching symbolic links",
       "teaches": [
-        "Creating symbolic links with ln -s",
-        "Reading link targets"
+        "Creating symbolic links (symlinks) with ln -s",
+        "Reading symlink targets"
       ],
       "key_files": [
         {
@@ -941,31 +972,33 @@
       ],
       "on_enter": "Reality shimmers and tears apart before you...",
       "on_exit": null,
-      "description": "A dimensional tear — advanced scripting and checksums",
+      "description": "A dimensional tear — command chaining with pipes and logic",
       "teaches": [
-        "File checksums (sha256sum, md5sum)",
-        "File comparison with diff",
-        "Advanced bash scripting"
+        "Command chaining with |, &&, ;, and ||"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "checksums tutorial"
+          "description": "command chaining tutorial"
+        },
+        {
+          "name": "box",
+          "description": "encounter (executable)"
         }
       ],
       "next_steps": "Explore the arena or ascend the spire",
       "essential_commands": [
         {
-          "command": "sha256sum file",
-          "description": "Compute file checksum"
+          "command": "cat scroll | grep rift",
+          "description": "Pipe output into grep"
         },
         {
-          "command": "md5sum file",
-          "description": "Alternative checksum"
+          "command": "ls -la && echo Success",
+          "description": "Run the next command only on success"
         },
         {
-          "command": "diff file1 file2",
-          "description": "Compare files"
+          "command": "ls | wc -l",
+          "description": "Count items in the room"
         }
       ]
     },
@@ -1023,31 +1056,29 @@
       "children": [],
       "on_enter": "The ground gives way beneath your feet...",
       "on_exit": null,
-      "description": "The deepest point of the arena — learn error handling",
+      "description": "The deepest point of the arena — check health before battle",
       "teaches": [
-        "Exit codes and error checking",
-        "Error handling with || and &&",
-        "Traps for cleanup"
+        "Health readiness"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "error handling tutorial"
+          "description": "combat readiness tutorial"
         }
       ],
-      "next_steps": "Emerge victorious with mastery of error handling",
+      "next_steps": "Check echo $HP and echo $I, then face the pit encounters",
       "essential_commands": [
         {
-          "command": "echo $?",
-          "description": "Check last exit code"
+          "command": "echo $HP",
+          "description": "Check your health"
         },
         {
-          "command": "command || echo fail",
-          "description": "Handle errors"
+          "command": "echo $I",
+          "description": "Check your inventory"
         },
         {
-          "command": "trap 'cleanup' EXIT",
-          "description": "Set exit trap"
+          "command": "./nyarlathotep",
+          "description": "Face the crawling chaos"
         }
       ]
     },
@@ -1065,31 +1096,29 @@
       ],
       "on_enter": null,
       "on_exit": null,
-      "description": "A tower rising from the rift — learn text processing",
+      "description": "A tower rising from the rift — combine ls -a with grep",
       "teaches": [
-        "Text processing with awk",
-        "Text substitution with sed",
-        "Field extraction with cut"
+        "Hidden entries with ls -a | grep"
       ],
       "key_files": [
         {
           "name": "scroll",
-          "description": "text processing tutorial"
+          "description": "hidden-sight tutorial"
         }
       ],
       "next_steps": "Climb to the mezzanine",
       "essential_commands": [
         {
-          "command": "awk '{print $1}' file",
-          "description": "Extract columns"
+          "command": "ls -a",
+          "description": "Reveal hidden rooms"
         },
         {
-          "command": "sed 's/old/new/' file",
-          "description": "Text substitution"
+          "command": "ls -la | grep '^\\.'",
+          "description": "Find hidden entries"
         },
         {
-          "command": "cut -d',' -f1 file",
-          "description": "Cut fields"
+          "command": "cd mezzanine",
+          "description": "Continue ascending"
         }
       ]
     },
@@ -1929,8 +1958,8 @@
       "id": 5,
       "title": "Spark of Creation",
       "description": "Your workspace yearns for a first artifact.",
-      "objective": "Use 'touch' to create a new file, for example 'touch notes.md'.",
-      "hint": "Use 'touch notes.txt' to conjure a new file.",
+      "objective": "Use 'touch notes.txt' to conjure a new file in your workshop.",
+      "hint": "From the workshop, run 'touch notes.txt'.",
       "required_commands": [
         "touch"
       ],

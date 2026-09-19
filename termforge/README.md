@@ -23,7 +23,7 @@ Browser demo of a custom tool: open `apps/procwatch/demo.html` straight from `fi
 - `apps/` — `bashcrawl.js` (the game as an app), `procwatch/` (live host metrics as provider files), and `agentwatch/` (an AI-agent task dashboard: TaskSource → board/feed commands + live files, with a JSONL adapter for the repo's playtest telemetry).
 - `test/` — `node --test` suites, golden fixtures, and the deterministic vm harness.
 
-Docs: [architecture](../docs/termforge/architecture.md) · [authoring apps](../docs/termforge/authoring-apps.md) · [telnet host](../docs/termforge/telnet-host.md) · [Line protocol](../docs/schemas/terminal-protocol.v1.md).
+Docs: [architecture](../docs/termforge/architecture.md) · [authoring apps](../docs/termforge/authoring-apps.md) · [telnet host](../docs/termforge/telnet-host.md) · [hidden gem](../docs/termforge/hidden-gem.md) · [Line protocol](../docs/schemas/terminal-protocol.v1.md).
 
 ## Golden fixtures
 

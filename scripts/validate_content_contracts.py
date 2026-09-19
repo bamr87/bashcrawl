@@ -174,6 +174,67 @@ def _validate_rooms_and_walkthrough(
         "resolved": resolved_rooms,
     }
 
+    _validate_teaches_alignment(rooms_map, wt_rooms, errors, report)
+
+
+_SKIP_TEACH_TOKENS = {"|", "&&", ";", "||"}
+
+
+def _teach_needles(item: str) -> list[str]:
+    text = str(item or "").lower().strip()
+    if not text or text in _SKIP_TEACH_TOKENS:
+        return []
+    needles = [text]
+    token = text.split()[0]
+    if token and token not in _SKIP_TEACH_TOKENS and token != text:
+        needles.append(token)
+    return needles
+
+
+def _validate_teaches_alignment(
+    rooms_map: dict[str, Any],
+    wt_rooms: dict[str, Any],
+    errors: list[str],
+    report: dict[str, Any],
+) -> None:
+    """rooms.yaml HUD teaches must cover walkthrough scroll_teaches."""
+    yaml_by_norm: dict[str, tuple[str, dict[str, Any]]] = {}
+    for name, spec in rooms_map.items():
+        if not isinstance(spec, dict):
+            continue
+        path = str(spec.get("path") or "").strip()
+        if not path or path == "bashcrawl":
+            continue
+        yaml_by_norm[_normalize_logical(path)] = (name, spec)
+
+    mismatches: list[dict[str, Any]] = []
+    for logical, wt_spec in wt_rooms.items():
+        if not isinstance(wt_spec, dict):
+            continue
+        scroll_teaches = wt_spec.get("scroll_teaches") or []
+        if not scroll_teaches:
+            continue
+        pair = yaml_by_norm.get(_normalize_logical(str(logical)))
+        if pair is None:
+            continue
+        name, spec = pair
+        haystack = " ".join(str(t) for t in (spec.get("teaches") or [])).lower()
+        missing = [
+            item
+            for item in scroll_teaches
+            if _teach_needles(str(item))
+            and not any(needle in haystack for needle in _teach_needles(str(item)))
+        ]
+        if missing:
+            _add_error(
+                errors,
+                f"rooms.yaml '{name}' teaches does not cover walkthrough "
+                f"scroll_teaches {missing}",
+            )
+            mismatches.append({"room": name, "missing": missing})
+
+    report["teaches_alignment"] = {"mismatches": mismatches}
+
 
 def _validate_quests(
     quests_data: dict[str, Any],

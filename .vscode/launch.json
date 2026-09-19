@@ -5,6 +5,144 @@
     "version": "0.2.0",
     "configurations": [
 
+        // ── TermForge TUI (termforge/node/host-tty.js) ──────────────────────
+        // Full-screen HUD in the integrated terminal. F5 debugs; the Run
+        // configs skip the inspector so raw-mode stdin stays clean.
+        // Breakpoints: host-tty.js, tui.js, apps/bashcrawl.js, web/assets/js/runtime.js
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "🖥️ Debug TUI (local)",
+            "program": "${workspaceFolder}/termforge/node/host-tty.js",
+            "args": ["--app", "bashcrawl"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**"],
+            "env": {
+                "TERM": "xterm-256color"
+            },
+            "presentation": {
+                "group": "tui",
+                "order": 1
+            }
+        },
+        {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "🖥️ Run TUI (local)",
+            "command": "node termforge/node/host-tty.js --app bashcrawl",
+            "cwd": "${workspaceFolder}",
+            "presentation": {
+                "group": "tui",
+                "order": 2
+            }
+        },
+
+        // ── Docker TUI ──────────────────────────────────────────────────────
+        // No Dockerfile required: mounts the workspace into node:20-bookworm.
+        // Docker Desktop (or equivalent) must be running. First launch pulls
+        // the image. Debug waits on 9229 (--inspect-brk) then attaches.
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "🐳 Debug TUI (Docker)",
+            "runtimeExecutable": "docker",
+            "runtimeArgs": [
+                "run",
+                "--rm",
+                "-it",
+                "--init",
+                "-p",
+                "9229:9229",
+                "-v",
+                "${workspaceFolder}:/opt/bashcrawl",
+                "-w",
+                "/opt/bashcrawl",
+                "-e",
+                "TERM=xterm-256color",
+                "node:20-bookworm",
+                "node",
+                "--inspect-brk=0.0.0.0:9229",
+                "termforge/node/host-tty.js",
+                "--app",
+                "bashcrawl"
+            ],
+            "attachSimplePort": 9229,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/opt/bashcrawl",
+            "skipFiles": ["<node_internals>/**"],
+            "presentation": {
+                "group": "tui",
+                "order": 3
+            }
+        },
+        {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "🐳 Run TUI (Docker)",
+            "command": "docker run --rm -it --init -v \"${workspaceFolder}:/opt/bashcrawl\" -w /opt/bashcrawl -e TERM=xterm-256color node:20-bookworm node termforge/node/host-tty.js --app bashcrawl",
+            "cwd": "${workspaceFolder}",
+            "presentation": {
+                "group": "tui",
+                "order": 4
+            }
+        },
+
+        // ── Static web trainer (web/) ───────────────────────────────────────
+        // Serves web/ at http://127.0.0.1:8000 (same as make web-preview).
+        // Debug opens Chrome with breakpoints in web/assets/js/*.js.
+        // Run starts the server only — open the URL yourself.
+        // Edit termforge/core/, then make web-build, not the vendor copies.
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🌐 Debug Web (local)",
+            "url": "http://127.0.0.1:8000",
+            "webRoot": "${workspaceFolder}/web",
+            "preLaunchTask": "🌐 Web: Serve (local)",
+            "presentation": {
+                "group": "web",
+                "order": 1
+            }
+        },
+        {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "🌐 Run Web (local)",
+            "command": "python3 -m http.server 8000 --bind 127.0.0.1",
+            "cwd": "${workspaceFolder}/web",
+            "presentation": {
+                "group": "web",
+                "order": 2
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "🐳 Debug Web (Docker)",
+            "url": "http://127.0.0.1:8000",
+            "webRoot": "${workspaceFolder}/web",
+            "preLaunchTask": "🌐 Web: Serve (Docker)",
+            "presentation": {
+                "group": "web",
+                "order": 3
+            }
+        },
+        {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "🐳 Run Web (Docker)",
+            "command": "docker run --rm --init -p 8000:8000 -v \"${workspaceFolder}:/opt/bashcrawl\" -w /opt/bashcrawl/web python:3-alpine python3 -m http.server 8000 --bind 0.0.0.0",
+            "cwd": "${workspaceFolder}",
+            "presentation": {
+                "group": "web",
+                "order": 4
+            }
+        },
+
         // ── Playtest MCP server ─────────────────────────────────────────────
         // Debug the lean MCP playtest harness (src/playtest/).
         {
@@ -18,7 +156,11 @@
                 "BASHCRAWL_ROOT": "${workspaceFolder}"
             },
             "justMyCode": false,
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "presentation": {
+                "group": "python",
+                "order": 1
+            }
         },
 
         // ── All unit tests ──────────────────────────────────────────────────
@@ -34,7 +176,11 @@
                 "BASHCRAWL_ROOT": "${workspaceFolder}"
             },
             "justMyCode": true,
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "presentation": {
+                "group": "python",
+                "order": 2
+            }
         }
     ]
 }

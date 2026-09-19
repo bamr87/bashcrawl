@@ -123,6 +123,16 @@ class TestPotionEncounter:
         )
         assert len(result.stdout) > 0, "Potion with 'n' should still produce output"
 
+    def test_potion_rejects_non_yn(self, sandbox):
+        result = run_game_script(
+            sandbox,
+            "entrance/cellar/armoury/potion",
+            stdin_input="echo $I\ny\n",
+        )
+        stdout = result.stdout.lower()
+        assert "please answer y or n" in stdout
+        assert "15" in result.stdout
+
 
 # ---------------------------------------------------------------------------
 # Combat encounters

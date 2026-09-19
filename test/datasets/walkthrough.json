@@ -43,7 +43,7 @@
     },
     "entrance/cellar/armoury": {
       "path": "entrance/cellar/armoury",
-      "children": ["chamber", "workshop"],
+      "children": ["chamber"],
       "scripts": ["treasure", "potion"],
       "scroll": true,
       "scroll_teaches": ["chmod +x", "ls -l", "permissions", "grep", "./"],

@@ -131,6 +131,67 @@ a.tui-header-link:focus {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    cursor: pointer;
+    user-select: none;
+}
+
+.tui-panel h2::before {
+    content: "▾ ";
+    opacity: 0.7;
+}
+
+.tui-panel.is-collapsed h2 {
+    margin: 0;
+}
+
+.tui-panel.is-collapsed h2::before {
+    content: "▸ ";
+}
+
+.tui-panel.is-collapsed > :not(h2) {
+    display: none;
+}
+
+.tui-panel.is-hud-hidden {
+    display: none;
+}
+
+.tui-main.hud-dock-right {
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.tui-main.hud-dock-right .tui-sidebar {
+    order: 2;
+    border-right: 0;
+    border-left: 1px solid var(--border-color);
+}
+
+.hud-menu {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hud-menu[hidden] {
+    display: none;
+}
+
+.hud-menu label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.hud-menu-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
 }
 
 .tui-room-panel {

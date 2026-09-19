@@ -48,7 +48,7 @@ function createApp(options = {}) {
                     { kind: "banner", text: runtime.uiText.bannerArt },
                     { kind: "info", text: "Welcome to Bashcrawl on the TermForge terminal." },
                     { kind: "dim", text: "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi." },
-                    { kind: "dim", text: "Mini-games: train · speedrun · pathfind. Ctrl+D (or 'exit' in raw mode) leaves the dungeon." },
+                    { kind: "dim", text: "Mini-games: train · speedrun · pathfind. PgUp/wheel scrolls the log. Type 'hud' to fold, hide, or dock panes. Ctrl+D leaves." },
                 ],
                 // Host control routing: "reset" replaces the session runtime
                 // (the control record itself still lands in the log, matching
