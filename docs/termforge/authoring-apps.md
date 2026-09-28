@@ -55,7 +55,7 @@ const pack = {
     name: "greetings",
     commands: {
         // Unbound functions; ALWAYS invoked as fn.call(shell, args, stdin).
-        // Return Line[] (docs/schemas/terminal-protocol.v1.md). Use any public
+        // Return Line[] (docs/schemas/terminal-protocol.v2.md). Use any public
         // Shell member via `this` (resolve, readFile, entries, state, rng, ...).
         hello(args, stdin) {
             const name = args[0] || (stdin ? stdin.trim() : "world");

@@ -17,19 +17,15 @@
 //
 // Hidden gem (HUD only): the Konami sequence or `xyzzy`/`plugh` overlays
 // DAEMON STORM, a pixel shooter drawn with half-block cells (see gem.js and
-// pixels.js). q / ^C returns to the dungeon. Damage events jolt the HUD frame.
+// pixels.js). q / ^C returns to the dungeon. Damage events pulse the HUD header.
 
 const TermForge = require("./index.js");
 const { parseArgs, resolveApp } = require("./cli.js");
 const { TuiScreen } = require("./tui.js");
-const {
-    createGemSession,
-    createKonamiWatcher,
-    tokenFromEvent,
-    isSecretLine,
-    grantGemReward,
-    TICK_MS: GEM_TICK_MS,
-} = require("./gem.js");
+const { presentStage } = require("./motion.js");
+const { fileStore } = require("./file-store.js");
+const { SessionController, Pager } = TermForge.session;
+const { StringDecoder } = require("node:string_decoder");
 
 const TOAST_KINDS = {
     quest: "magic",
@@ -42,8 +38,8 @@ const TOAST_KINDS = {
 };
 const SILENT_EVENTS = new Set(["move"]);
 const TOAST_MS = 2200;
-const JOLT_SEQUENCE = Object.freeze([2, 0, 1, 0]);
-const JOLT_MS = 60;
+const ATTENTION_SEQUENCE = Object.freeze([4, 0, 3, 1, 2, 0, 1, 0]);
+const ATTENTION_MS = 42;
 
 // BASHCRAWL_GEM_SEED pins the storm's RNG (captures, PTY tests); unset = random.
 function gemSeed() {
@@ -59,10 +55,18 @@ function main() {
         color: true,
         hud: true,
         dataDir: "",
+        motion: true,
+        saveFile: "",
     });
     const app = resolveApp(opts.app, opts.dataDir ? { dataDir: opts.dataDir } : {});
-    const session = app.createSession({ width: process.stdout.columns || 80 });
     const interactive = process.stdin.isTTY && process.stdout.isTTY;
+    const saveFile = opts.saveFile || process.env.BASHCRAWL_SAVE_FILE;
+    const persistence = app.id === "bashcrawl" && (saveFile || interactive)
+        ? fileStore(saveFile || require("node:path").join(require("node:os").homedir(), ".bashcrawl", "story.json")) : null;
+    const session = app.createSession({
+        width: process.stdout.columns || 80, surface: "tty",
+        hud: opts.hud && interactive, pager: opts.hud && interactive, persistence,
+    });
     const hudActive = Boolean(opts.hud && interactive && typeof session.hud === "function");
 
     if (hudActive) {
@@ -82,51 +86,58 @@ function runStreamMode(session, opts, interactive) {
     const view = new TermForge.view.TerminalView({
         sink,
         cap: 2000,
-        onControl(action) {
-            session.onControl(action);
-            if (action === "reset" && editor) editor.state = session.runtime.state;
-            return action === "reset"; // match the web app: reset records land in the log
-        },
     });
-
-    const runLine = (line) => {
-        pushHistory(session.runtime.state, line);
-        view.appendOutputs(executeLine(session, line));
-    };
+    const controller = new SessionController(session, { view });
+    const runLine = (line, echo = false) => controller.execute(line, { echo });
 
     view.appendOutputs(session.banner || []);
 
     let editor = null;
     if (interactive) {
+        const cleanup = () => { controller.close(); process.stdin.setRawMode(false); };
+        process.once("exit", cleanup);
+        process.once("SIGTERM", () => process.exit(143));
+        process.once("SIGINT", () => process.exit(130));
         editor = new TermForge.input.LineEditor({
             promptLabel: () => session.runtime.promptLabel(),
             completions: (text) => session.runtime.completions(text),
             state: session.runtime.state,
+            maxLine: session.maxLine,
+            columns: () => process.stdout.columns || 80,
             write: (chunk) => process.stdout.write(chunk),
             onSubmit(line) {
-                runLine(line);
+                runLine(line, !editor.echo);
                 editor.state = session.runtime.state;
                 editor.showPrompt();
             },
             onEof() {
                 process.stdout.write("\r\nFarewell, adventurer.\r\n");
-                process.stdin.setRawMode(false);
+                cleanup();
                 process.exit(0);
             },
         });
         const feed = TermForge.input.createByteDecoder((ev) => editor.feed(ev));
         process.stdin.setRawMode(true);
         process.stdin.resume();
-        process.stdin.on("data", (buf) => feed(buf.toString("utf8")));
+        const decoder = new StringDecoder("utf8");
+        process.stdin.on("data", (buf) => {
+            const text = decoder.write(buf);
+            const echo = editor.echo;
+            if (text.length > 1) editor.echo = false;
+            feed(text);
+            editor.echo = echo;
+            if (text.length > 1 && editor.buffer) editor.redraw();
+        });
         editor.showPrompt();
     } else {
         const readline = require("node:readline");
         const rl = readline.createInterface({ input: process.stdin, terminal: false });
         rl.on("line", (line) => {
-            process.stdout.write(`${session.runtime.promptLabel()} ${line}\n`);
+            const label = session.commandLabel ? session.commandLabel(line) : line;
+            process.stdout.write(`${session.runtime.promptLabel()} ${label}\n`);
             runLine(line);
         });
-        rl.on("close", () => process.exit(0));
+        rl.on("close", () => { controller.close(); process.exit(0); });
     }
 }
 
@@ -146,15 +157,18 @@ function runHudMode(session, opts) {
             clear: () => screen.clearLog(),
         },
         cap: 2000,
-        onControl(action) {
-            session.onControl(action);
-            if (action === "reset") {
-                editor.state = session.runtime.state;
-                refreshHud();
-            }
-            return action === "reset";
+    });
+    let pager = null;
+    const controller = new SessionController(session, {
+        view,
+        onPage(text) {
+            stopMotion();
+            pager = new Pager(text);
+            screen.setPager(pager);
         },
     });
+    const overlay = session.overlay;
+
 
     // Toasts show one at a time; hud() events queue up behind each other.
     const toasts = [];
@@ -182,27 +196,26 @@ function runHudMode(session, opts) {
             toasts.push({ kind: TOAST_KINDS[ev.type] || "info", text: ev.text });
         }
         if (!toastTimer && toasts.length) nextToast();
-        if (hit) jolt();
+        if (hit && opts.motion) pulseAttention();
     };
 
-    // Damage shakes the frame: a few quick horizontal jolts, then settle.
-    // Frame-level FX only — the log text itself is untouched.
-    let joltTimer = null;
-    const jolt = () => {
+    // Pulse the header for damage without moving output or the input cursor.
+    let attentionTimer = null;
+    const pulseAttention = () => {
         if (gem) return;
-        const seq = JOLT_SEQUENCE.slice();
-        if (joltTimer) clearTimeout(joltTimer);
+        const seq = ATTENTION_SEQUENCE.slice();
+        if (attentionTimer) clearTimeout(attentionTimer);
         const step = () => {
             if (gem) {
-                screen.setJolt(0);
-                joltTimer = null;
+                screen.setAttention(false);
+                attentionTimer = null;
                 return;
             }
             const offset = seq.shift();
-            screen.setJolt(offset == null ? 0 : offset);
+            screen.setAttention(Boolean(offset));
             screen.render();
-            joltTimer = seq.length ? setTimeout(step, JOLT_MS) : null;
-            if (joltTimer && joltTimer.unref) joltTimer.unref();
+            attentionTimer = seq.length ? setTimeout(step, ATTENTION_MS) : null;
+            if (attentionTimer && attentionTimer.unref) attentionTimer.unref();
         };
         step();
     };
@@ -216,7 +229,7 @@ function runHudMode(session, opts) {
         pushToasts(frame.events);
     };
 
-    const Hud = globalThis.BashcrawlHud;
+    const Hud = session.hudLayout;
     if (Hud && typeof Hud.attachStore === "function") {
         Hud.attachStore(hudFileStore(), { dock: "right" });
     }
@@ -229,37 +242,51 @@ function runHudMode(session, opts) {
         if (!lay.sidebar) screen.setPanels(null);
     };
 
-    const runHudCommand = (line) => {
-        if (!Hud || typeof Hud.parseHudLine !== "function") return false;
-        const action = Hud.parseHudLine(line);
-        if (!action) return false;
-        const result = Hud.applyAction(action);
-        view.appendLine("dim", `${session.runtime.promptLabel()} ${line}`);
-        view.appendLine("info", result.message || "");
-        refreshHud();
-        screen.setInput("");
-        screen.render();
-        return true;
+    let motionTimer = null;
+    const stopMotion = () => {
+        if (motionTimer) clearTimeout(motionTimer);
+        motionTimer = null;
+        screen.setStage(null);
     };
-
+    const playHudMotion = (line, outputs, events) => {
+        stopMotion();
+        if (pager || typeof session.motion !== "function") return;
+        const error = outputs.some((out) => out && out.kind === "error");
+        const plan = session.motion(line, { error, events, reducedMotion: !opts.motion });
+        if (!plan || !plan.stage) return;
+        let index = 0;
+        const tick = () => {
+            presentStage(screen, plan, index);
+            screen.render();
+            if (index >= plan.frames.length - 1) { motionTimer = null; return; }
+            index += 1;
+            motionTimer = setTimeout(tick, plan.hold || 70);
+            if (motionTimer.unref) motionTimer.unref();
+        };
+        tick();
+    };
     const runLine = (line) => {
-        if (isSecretLine(line)) {
+        stopMotion();
+        if (overlay && overlay.isSecretLine(line)) {
             view.appendLine("magic", "The walls dissolve into starlight...");
             startGem();
             return;
         }
-        if (runHudCommand(line)) return;
-        pushHistory(session.runtime.state, line);
-        view.appendLine("dim", `${session.runtime.promptLabel()} ${line}`);
-        view.appendOutputs(executeLine(session, line));
-        refreshHud();
+        const outputs = controller.execute(line, { echo: true });
+        const frame = session.hud();
+        screen.setPanels(frame.panels);
+        screen.setStrip(frame.strip);
+        screen.setPrompt(frame.prompt);
+        applyHudChrome();
+        pushToasts(frame.events);
         screen.setInput("");
+        playHudMotion(line, outputs, frame.events);
         screen.render();
     };
 
     function startGem() {
-        if (gem) return;
-        editor.buffer = "";
+        if (gem || !overlay) return;
+        editor.reset();
         screen.setInput("");
         // Whatever was queued belongs to the dungeon we are leaving; the log
         // already has it. The return trip toasts the storm's own events.
@@ -269,18 +296,19 @@ function runHudMode(session, opts) {
             clearTimeout(toastTimer);
             toastTimer = null;
         }
-        if (joltTimer) {
-            clearTimeout(joltTimer);
-            joltTimer = null;
+        if (attentionTimer) {
+            clearTimeout(attentionTimer);
+            attentionTimer = null;
         }
-        screen.setJolt(0);
-        gem = createGemSession({
+        screen.setAttention(false);
+        stopMotion();
+        gem = overlay.createGemSession({
             write: (chunk) => process.stdout.write(chunk),
             cols: screen.cols,
             rows: screen.rows,
             color: opts.color,
-            animate: true,
-            intervalMs: GEM_TICK_MS,
+            animate: opts.motion,
+            intervalMs: overlay.TICK_MS,
             seed: gemSeed(),
             best: gemBest,
             onQuit: stopGem,
@@ -295,7 +323,7 @@ function runHudMode(session, opts) {
         const r = result || {};
         gemBest = Math.max(gemBest, r.best || 0, r.score || 0);
         if (r.reason === "win" || r.reason === "lost") {
-            const reward = grantGemReward(session.runtime, r);
+            const reward = overlay.grantGemReward(session.runtime, r);
             const tally = `${r.score} pids reaped, ${r.kills} kills, ${r.shots} signals`;
             if (r.won) {
                 view.appendLine("magic", `SYSTEM RESTORED. The storm breaks over the shell. (${tally})`);
@@ -313,7 +341,8 @@ function runHudMode(session, opts) {
         } else {
             view.appendLine("dim", `The storm fades. The dungeon waits.${r.score ? ` (${r.score} pids reaped, no prize)` : ""}`);
         }
-        screen.setJolt(0);
+        controller.persist();
+        screen.setAttention(false);
         screen.resize(screen.cols, screen.rows); // erase the pixel field before the frame returns
         refreshHud();
         screen.render();
@@ -324,7 +353,12 @@ function runHudMode(session, opts) {
         promptLabel: () => session.runtime.promptLabel(),
         completions: (text) => session.runtime.completions(text),
         state: session.runtime.state,
+        maxLine: session.maxLine,
         echo: false,
+        onOverflow() {
+            view.appendLine("error", "Command too long; discarded. Ctrl+C clears the input.");
+            screen.render();
+        },
         // The frame owns all painting. LineEditor writes are decoded instead of
         // streamed: the Tab-completion candidate list (the one thing the editor
         // says that isn't already in our state) lands in the log; every other
@@ -347,19 +381,22 @@ function runHudMode(session, opts) {
         },
     });
 
-    const konami = createKonamiWatcher(startGem);
+    const konami = overlay ? overlay.createKonamiWatcher(startGem) : null;
 
     const teardown = () => {
         if (gem) {
             gem.stop();
             gem = null;
         }
+        controller.close();
+        stopMotion();
         if (toastTimer) clearTimeout(toastTimer);
-        if (joltTimer) clearTimeout(joltTimer);
+        if (attentionTimer) clearTimeout(attentionTimer);
         screen.stop();
         if (process.stdin.isTTY) process.stdin.setRawMode(false);
     };
-    process.on("exit", () => { if (screen.started) screen.stop(); });
+    process.on("exit", teardown);
+    process.on("SIGTERM", () => { teardown(); process.exit(0); });
 
     const routeHud = (ev) => {
         if (ev.type === "mouse") {
@@ -388,13 +425,13 @@ function runHudMode(session, opts) {
             screen.render();
             return true;
         }
-        if (ev.type === "home") {
+        if (ev.type === "home" && screen.focus !== "input") {
             if (screen.focus === "side") screen.scrollSide(1e9);
             else screen.scrollLog(1e9);
             screen.render();
             return true;
         }
-        if (ev.type === "end") {
+        if (ev.type === "end" && screen.focus !== "input") {
             if (screen.focus === "side") screen.sideOffset = 0;
             else screen.logOffset = 0;
             screen.render();
@@ -409,6 +446,7 @@ function runHudMode(session, opts) {
         return false;
     };
 
+    let batchingInput = false;
     const feed = TermForge.input.createByteDecoder((ev) => {
         if (gem) {
             if (ev.type === "eof") {
@@ -418,25 +456,38 @@ function runHudMode(session, opts) {
             gem.feed(ev);
             return;
         }
-        const tok = tokenFromEvent(ev);
-        if (tok) konami.feed(tok);
+        if (pager) {
+            if (ev.type === "eof") { teardown(); process.exit(0); }
+            if (!pager.feed(ev)) { pager = null; screen.setPager(null); }
+            screen.render();
+            return;
+        }
+        const tok = overlay && overlay.tokenFromEvent(ev);
+        if (tok && konami) konami.feed(tok);
         if (gem) return;
         if (routeHud(ev)) return;
         if (ev.type === "interrupt") view.appendLine("dim", "^C");
         editor.feed(ev);
         if (ev.type === "submit") return;
         if (ev.type === "interrupt" || ev.type === "clearScreen") {
-            screen.setInput(editor.buffer);
+            screen.setInput(editor.buffer, editor.cursor);
             screen.render();
             return;
         }
-        screen.setInput(editor.buffer);
-        screen.renderInput();
+        screen.setInput(editor.buffer, editor.cursor);
+        if (!batchingInput) screen.renderInput();
     });
 
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    process.stdin.on("data", (buf) => feed(buf.toString("utf8")));
+    const decoder = new StringDecoder("utf8");
+    process.stdin.on("data", (buf) => {
+        const text = decoder.write(buf);
+        batchingInput = text.length > 1;
+        feed(text);
+        batchingInput = false;
+        if (!gem && !pager) { screen.setInput(editor.buffer, editor.cursor); screen.renderInput(); }
+    });
     process.stdout.on("resize", () => {
         screen.resize(process.stdout.columns || 80, process.stdout.rows || 24);
         if (gem) gem.resize(screen.cols, screen.rows);
@@ -449,14 +500,6 @@ function runHudMode(session, opts) {
 }
 
 // ── shared helpers ──────────────────────────────────────────────────────────
-
-function pushHistory(state, line) {
-    if (!line.trim()) return;
-    if (!state.history.length || state.history[state.history.length - 1] !== line) {
-        state.history.push(line);
-    }
-    state.historyIndex = state.history.length;
-}
 
 function hudFileStore() {
     const fs = require("node:fs");
@@ -478,12 +521,5 @@ function hudFileStore() {
     };
 }
 
-function executeLine(session, line) {
-    try {
-        return session.runtime.execute(line);
-    } catch (err) {
-        return [{ kind: "error", text: `termforge: internal error: ${err.message}` }];
-    }
-}
-
-main();
+try { main(); }
+catch (err) { process.stderr.write(`TermForge: ${err.message}\n`); process.exitCode = 1; }

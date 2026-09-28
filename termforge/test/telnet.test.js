@@ -163,3 +163,74 @@ test("idle timeout kicks a silent session", async () => {
         await new Promise((resolve) => server.close(resolve));
     }
 });
+
+test("codec: UTF-8 survives every chunk boundary", () => {
+    const { codec, got } = makeCodec();
+    const text = "echo café 界 😀\r\n";
+    for (const byte of Buffer.from(text)) codec.feed(Buffer.from([byte]));
+    assert.equal(got.data, text);
+});
+
+test("codec: oversized escaped subnegotiation is discarded and decoding resumes", () => {
+    const { codec, got } = makeCodec();
+    codec.feed(Buffer.from([IAC, SB, 24]));
+    for (let i = 0; i < 10000; i++) codec.feed(Buffer.from([IAC, IAC]));
+    codec.feed(Buffer.from([IAC, SE, ...Buffer.from("pwd\r\n")]));
+    assert.equal(got.data, "pwd\r\n");
+});
+
+for (const raw of [true, false]) {
+    test(`telnet raw=${raw}: limits unfinished lines and accepts large batches of short commands`, async () => {
+        const { server, port } = await startServer({ raw });
+        const socket = await connect(port);
+        try {
+            const read = collect(socket);
+            await waitFor(read, (buf) => buf.includes("$ "));
+            socket.write("echo batch\r\n".repeat(400) + "echo batch-finished\r\n");
+            await waitFor(read, (buf) => buf.includes("batch-finished"));
+            socket.write("x".repeat(4097));
+            await waitFor(read, (buf) => buf.includes("line too long"));
+            assert.ok(!read().includes("Unknown command: x"));
+        } finally {
+            socket.destroy();
+            await new Promise((resolve) => server.close(resolve));
+        }
+    });
+}
+
+test("codec: interrupt is delivered between preceding and following text", () => {
+    const seen = [];
+    const codec = createTelnetCodec({ onData: (text) => seen.push(text), onInterrupt: () => seen.push("interrupt") });
+    codec.feed(Buffer.from([97, 98, IAC, IP, 99]));
+    assert.deepEqual(seen, ["ab", "interrupt", "c"]);
+});
+
+for (const raw of [true, false]) {
+    test(`bashcrawl raw=${raw}: portable saves cross TCP chunk boundaries`, async () => {
+        const app = require("../apps/bashcrawl.js").createApp();
+        const source = app.createSession();
+        source.runtime.state.envVars.NOTE = "café 界 😀".repeat(1000);
+        const token = source.runtime.execute("save export")[0].text;
+        assert.ok(token.length > 4096);
+        const server = createTelnetServer(app, { ...DEFAULTS, raw });
+        await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+        const socket = await connect(server.address().port);
+        try {
+            const read = collect(socket);
+            await waitFor(read, (buf) => buf.includes("$ "));
+            const line = `save import ${token}\r\n`;
+            for (let offset = 0; offset < line.length; offset += 997) {
+                socket.write(line.slice(offset, offset + 997));
+            }
+            await waitFor(read, (buf) => buf.includes("Progress imported."));
+            socket.write("echo $NOTE | wc -c\r\n");
+            await waitFor(read, (buf) => buf.includes("14000"));
+            socket.write("save\r\n");
+            await waitFor(read, (buf) => buf.includes("This session is temporary."));
+            assert.ok(!read().includes("Saved in your browser"));
+        } finally {
+            socket.destroy();
+            await new Promise((resolve) => server.close(resolve));
+        }
+    });
+}

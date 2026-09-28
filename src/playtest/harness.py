@@ -110,7 +110,9 @@ class PlaytestHarness:
             "to learn will appear on screen when you look around and read what you find. "
             "Use bashcrawl_command to act and bashcrawl_observe to look again."
         )
-        return _render_player(snap, "Type a command to look around (for example: ls).", header=intro)
+        return _render_player(
+            snap, "Type a command to look around (for example: ls).", header=intro
+        )
 
     def close(self) -> None:
         if self.session is not None:

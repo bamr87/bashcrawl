@@ -496,7 +496,7 @@
             this.appendMany(result.outputs || []);
             const catalog = global.BashcrawlCommandFx;
             const error = (result.outputs || []).some((out) => out && out.kind === "error");
-            const spec = catalog && catalog.apply(line, {
+            if (catalog) catalog.apply(line, {
                 log: this.dom.log,
                 form: document.getElementById("command-form"),
                 prompt: document.getElementById("prompt-label"),
@@ -513,9 +513,6 @@
                 this.renderSide();
             }
             this.renderLog();
-            if (spec && spec.cmd === "cat" && spec.known) {
-                catalog.playCat(this.dom.log, result.outputs);
-            }
             return true;
         }
 

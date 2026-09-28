@@ -52,8 +52,12 @@
     }
 
     function setMode(next, { updateHash = true } = {}) {
+        if (global.BashcrawlCommandFx) {
+            document.querySelectorAll(".tui-content").forEach(global.BashcrawlCommandFx.clearStage);
+        }
         if (!MODES.includes(next)) next = "story";
         currentMode = next;
+        if (reference) reference.renderInlineHint();
         if (dom.story) dom.story.hidden = next !== "story";
         if (dom.arcade) dom.arcade.hidden = next !== "arcade";
         if (dom.reference) dom.reference.hidden = next !== "reference";

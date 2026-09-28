@@ -8,7 +8,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "88 455 4198"
+          "text": "86"
         }
       ]
     },
@@ -201,7 +201,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "88 455 4198"
+          "text": "86"
         }
       ]
     },
@@ -219,7 +219,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "88 455 4198"
+          "text": "86"
         }
       ]
     },
@@ -246,7 +246,7 @@
       "outputs": [
         {
           "kind": "dim",
-          "text": "(wrote 88 lines to scroll)"
+          "text": "(wrote 86 lines to scroll)"
         }
       ]
     },
@@ -477,7 +477,7 @@
       },
       "/entrance/count": {
         "type": "file",
-        "content": "88 455 4198"
+        "content": "86"
       },
       "/entrance/camp": {
         "type": "dir"

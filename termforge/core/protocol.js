@@ -13,15 +13,15 @@
     //
     // Every command handler returns an array of Line records; every frontend
     // (DOM log, ANSI stream, test fixture) consumes the same records. The
-    // normative contract lives in docs/schemas/terminal-protocol.v1.md.
+    // normative contract lives in docs/schemas/terminal-protocol.v2.md.
     //
     //   { kind: <display class>, text: "may\ncontain\nnewlines" }
-    //   { kind: "control", action: "clear" | "reset" | "levelup" }
+    //   { kind: "control", action: "clear" | "reset" | "levelup" | "page" }
     //
     // Consumers MUST pass through records whose kind they do not recognise
     // (future-proofing: new kinds are additive).
 
-    const PROTOCOL_VERSION = "1.0";
+    const PROTOCOL_VERSION = "2.0";
 
     /** Display kinds, in rough severity/flavour order. @type {readonly string[]} */
     const KINDS = Object.freeze([
@@ -41,6 +41,7 @@
         "clear",    // clear the visible log
         "reset",    // session state was replaced wholesale; hosts re-sync
         "levelup",  // celebratory fanfare (hosts may animate)
+        "page",     // show text in a host pager without logging it
     ]);
 
     /** @typedef {{kind: string, text?: string, action?: string}} Line */
@@ -84,6 +85,7 @@
             if (!CONTROL_ACTIONS.includes(record.action)) {
                 return { ok: false, reason: `unknown control action: ${record.action}` };
             }
+            if (record.action === "page" && typeof record.text !== "string") return { ok: false, reason: "page requires text" };
             return { ok: true };
         }
         if (record.text != null && typeof record.text !== "string") {

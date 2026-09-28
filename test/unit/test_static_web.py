@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ _DATA_FILES = ("world.json", "quests.json", "commands.json", "docs.json")
 
 def _export_to(root: Path, out_dir: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["python3", "scripts/export_static_web.py", "--output-dir", str(out_dir)],
+        [sys.executable, "scripts/export_static_web.py", "--output-dir", str(out_dir)],
         cwd=root,
         capture_output=True,
         text=True,
@@ -35,7 +36,7 @@ def test_static_web_export_and_bundle_are_valid(tmp_path: Path) -> None:
 
     # Validate the committed bundle in place (validators read web/ as-is).
     validate = subprocess.run(
-        ["python3", "scripts/validate_static_web.py"],
+        [sys.executable, "scripts/validate_static_web.py"],
         cwd=root,
         capture_output=True,
         text=True,
@@ -78,7 +79,7 @@ def test_vendored_termforge_is_fresh() -> None:
     """
     root = Path(__file__).resolve().parents[2]
     check = subprocess.run(
-        ["python3", "scripts/vendor_termforge.py", "--check"],
+        [sys.executable, "scripts/vendor_termforge.py", "--check"],
         cwd=root,
         capture_output=True,
         text=True,
@@ -90,7 +91,7 @@ def test_vendored_termforge_is_fresh() -> None:
 def test_web_runtime_declares_handlers_for_demo_commands() -> None:
     root = Path(__file__).resolve().parents[2]
     validate = subprocess.run(
-        ["python3", "scripts/validate_runtime_commands.py"],
+        [sys.executable, "scripts/validate_runtime_commands.py"],
         cwd=root,
         capture_output=True,
         text=True,

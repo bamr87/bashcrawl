@@ -25,60 +25,47 @@ const { parseArgs, resolveApp } = require("./cli.js");
 const { createTelnetCodec } = require("./telnet-codec.js");
 
 const MAX_LINE = 4096;
+const { SessionController } = TermForge.session;
+const { StringDecoder } = require("node:string_decoder");
 
 function attachSession(socket, app, opts) {
-    const session = app.createSession({ width: opts.width });
+    const session = app.createSession({ width: opts.width, surface: "telnet", hud: false, pager: false });
     const sink = new TermForge.sinks.AnsiSink({ write: (chunk) => socket.write(chunk) });
     let editor = null;
     const view = new TermForge.view.TerminalView({
         sink,
         cap: 2000,
-        onControl(action) {
-            session.onControl(action);
-            if (action === "reset" && editor) editor.state = session.runtime.state;
-            return action === "reset";
-        },
     });
-
-    const runLine = (line) => {
-        if (line.length > MAX_LINE) {
-            view.appendLine("error", `line too long (max ${MAX_LINE} chars)`);
-            return;
-        }
-        const state = session.runtime.state;
-        if (line.trim()) {
-            if (!state.history.length || state.history[state.history.length - 1] !== line) {
-                state.history.push(line);
-            }
-            state.historyIndex = state.history.length;
-        }
-        let outputs;
-        try {
-            outputs = session.runtime.execute(line);
-        } catch (err) {
-            outputs = [{ kind: "error", text: `termforge: internal error: ${err.message}` }];
-        }
-        view.appendOutputs(outputs);
-    };
+    const linePolicy = session.maxLine || MAX_LINE;
+    const inputLimit = (line) => typeof linePolicy === "function" ? linePolicy(line) : linePolicy;
+    const controller = new SessionController(session, { view, maxLine: inputLimit });
+    const runLine = (line) => controller.execute(line, { echo: Boolean(editor && !editor.echo) });
+    socket.on("close", () => controller.close());
 
     if (opts.raw) {
         // Dumb line mode for nc: the client edits and echoes locally.
         view.appendOutputs(session.banner || []);
         const prompt = () => socket.write(`${session.runtime.promptLabel()} `);
         let pending = "";
+        const decoder = new StringDecoder("utf8");
         socket.on("data", (chunk) => {
-            pending += chunk.toString("utf8");
-            if (pending.length > MAX_LINE * 2) {
-                socket.write(`\r\nline too long (max ${MAX_LINE} chars) — goodbye\r\n`);
-                socket.end();
-                return;
-            }
-            let idx;
-            while ((idx = pending.indexOf("\n")) >= 0) {
-                const line = pending.slice(0, idx).replace(/\r$/, "");
-                pending = pending.slice(idx + 1);
-                runLine(line);
-                prompt();
+            // Bound each unfinished line, rather than the size of a TCP batch.
+            const text = decoder.write(chunk);
+            for (const ch of text) {
+                if (controller.closed) return;
+                if (ch === "\n") {
+                    runLine(pending.replace(/\r$/, ""));
+                    pending = "";
+                    prompt();
+                } else {
+                    pending += ch;
+                    const limit = inputLimit(pending);
+                    if (pending.length > limit) {
+                        controller.close();
+                        socket.end(`\r\nline too long (max ${limit} chars) — goodbye\r\n`);
+                        return;
+                    }
+                }
             }
         });
         prompt();
@@ -90,6 +77,12 @@ function attachSession(socket, app, opts) {
         promptLabel: () => session.runtime.promptLabel(),
         completions: (text) => session.runtime.completions(text),
         state: session.runtime.state,
+        maxLine: inputLimit,
+        columns: () => session.width || opts.width,
+        onOverflow(limit) {
+            controller.close();
+            socket.end(`\r\nline too long (max ${limit} chars) — goodbye\r\n`);
+        },
         write: (chunk) => socket.write(chunk),
         onSubmit(line) {
             runLine(line);
@@ -101,10 +94,21 @@ function attachSession(socket, app, opts) {
             socket.end();
         },
     });
-    const feedEditor = TermForge.input.createByteDecoder((ev) => editor.feed(ev));
+    const feedEditor = TermForge.input.createByteDecoder((ev) => { if (!controller.closed) editor.feed(ev); });
     const codec = createTelnetCodec({
-        onData: (text) => feedEditor(text),
-        onNaws: (w) => { session.width = w || opts.width; },
+        onData(text) {
+            // Echo a pasted batch once instead of repainting every character.
+            const echo = editor.echo;
+            if (text.length > 1) editor.echo = false;
+            feedEditor(text);
+            editor.echo = echo;
+            if (text.length > 1 && !controller.closed && editor.buffer) editor.redraw();
+        },
+        onNaws: (w, h) => {
+            session.width = Math.max(20, Math.min(500, w || opts.width));
+            session.height = Math.max(4, Math.min(200, h || 24));
+            if (editor.buffer) editor.redraw();
+        },
         onInterrupt: () => editor.feed({ type: "interrupt" }),
     });
     socket.write(codec.opening());

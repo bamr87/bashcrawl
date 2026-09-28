@@ -42,8 +42,8 @@
     const { tokenizeDetailed, tokenize, splitRedirect, splitPipes, escapeRegExp } = deps.parser;
 
     function defaultEncodeBase64(text) {
-        if (typeof btoa === "function") return btoa(text);
-        return Buffer.from(String(text), "latin1").toString("base64");
+        const binary = encodeURIComponent(String(text)).replace(/%([0-9A-F]{2})/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)));
+        return btoa(binary);
     }
 
     // The framework's neutral copy deck. Every player-facing string a core
@@ -139,6 +139,7 @@
             if (trailingText) return [{ kind: "error", text: "syntax error: unexpected text after > FILE" }];
             const segments = splitPipes(core);
             if (!segments.length) return [];
+            this.inPipeline = segments.length > 1 || Boolean(redirect);
             let stdin = null;
             const collected = [];
             for (let i = 0; i < segments.length; i += 1) {

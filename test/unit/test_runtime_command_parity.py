@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ def test_runtime_command_manifest_parity() -> None:
     root = Path(__file__).resolve().parents[2]
     script = root / "scripts" / "validate_runtime_commands.py"
     proc = subprocess.run(
-        ["python3", str(script)],
+        [sys.executable, str(script)],
         cwd=root,
         capture_output=True,
         text=True,

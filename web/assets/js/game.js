@@ -14,6 +14,7 @@
         log: document.getElementById("output-log"),
         prompt: document.getElementById("prompt-label"),
         input: document.getElementById("command-input"),
+        inlineHint: document.getElementById("inline-hint"),
         form: document.getElementById("command-form"),
         docsToggle: document.getElementById("docs-toggle"),
         docsClose: document.getElementById("docs-close"),
@@ -40,7 +41,20 @@
     }
 
     const data = await loadData();
-    let runtime = new window.BashcrawlRuntime.Runtime(data, window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root)));
+    let initialState = window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root));
+    let saveError = window.BashcrawlStorage.lastError ? `Could not restore progress: ${window.BashcrawlStorage.lastError}` : "";
+    try { initialState = window.BashcrawlRuntime.loadState(data.world, initialState); }
+    catch (err) {
+        window.BashcrawlStorage.backup();
+        saveError = `Could not restore progress: ${err.message}`;
+        initialState = undefined;
+    }
+    let runtime = new window.BashcrawlRuntime.Runtime(data, initialState);
+    const persistence = {
+        description: "Progress is saved in this browser.",
+        save: (state) => window.BashcrawlStorage.save(state),
+    };
+    const capabilities = { surface: "web", pager: true, compactEvents: true };
     const docsPanel = new window.BashcrawlDocs.DocsPanel({
         drawer: dom.docsDrawer,
         content: dom.docsContent,
@@ -52,6 +66,36 @@
     });
     docsPanel.setData(data.docs, runtime);
 
+    function openPager(text) {
+        const dialog = document.createElement("dialog");
+        dialog.className = "terminal-pager";
+        dialog.setAttribute("aria-label", "File reader");
+        const output = document.createElement("pre");
+        output.textContent = text;
+        output.tabIndex = 0;
+        const toolbar = document.createElement("div");
+        const help = document.createElement("span");
+        help.textContent = "Space / PgDn next · b / PgUp back · q / Esc close";
+        const close = document.createElement("button");
+        close.type = "button";
+        close.textContent = "Close reader";
+        toolbar.append(help, close);
+        dialog.append(toolbar, output);
+        document.body.appendChild(dialog);
+        const quit = () => dialog.close();
+        close.addEventListener("click", quit);
+        dialog.addEventListener("close", () => { dialog.remove(); dom.input.focus(); });
+        dialog.addEventListener("keydown", (event) => {
+            if (event.key === "q") { event.preventDefault(); quit(); }
+            else if (event.key === " " || event.key === "b") {
+                event.preventDefault();
+                output.scrollTop += output.clientHeight * (event.key === "b" ? -1 : 1);
+            }
+        });
+        dialog.showModal();
+        output.focus();
+    }
+
     function roomVignetteHtml(vignette) {
         const safe = vignette.art.map(escapeHtml).join("\n");
         return `<pre class="room-vignette" data-room-art="${vignette.key}" aria-hidden="true">${safe}</pre>`;
@@ -59,7 +103,7 @@
 
     // The story log is a TermForge TerminalView painting into #output-log.
     // Control routing preserves the historical behavior: "levelup" is pure
-    // fanfare (swallowed after the flash), "reset" rebuilds the runtime and
+    // fanfare (handled by semantic stage events), "reset" rebuilds the runtime and
     // then falls through to the buffer like any other record.
     const view = new window.TermForge.view.TerminalView({
         sink: new window.TermForge.sinks.DomSink(dom.log),
@@ -71,12 +115,21 @@
                 window.BashcrawlStorage.clear();
                 return true;
             }
-            if (action === "levelup") flashLevelUp();
+            // Semantic events select one shared stage celebration.
             return false;
         },
     });
+    const session = {
+        get runtime() { return runtime; },
+        maxLine: window.BashcrawlRuntime.lineLimit,
+        commandLabel: window.BashcrawlRuntime.commandLabel,
+    };
+    const controller = new window.TermForge.session.SessionController(session, {
+        view, persistence, capabilities, onPage: openPager,
+    });
     const append = (kind, text) => view.appendLine(kind, text);
     append("banner", runtime.uiText.bannerArt);
+    if (saveError) append("error", saveError);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
     append("magic", "🕹  Practice Arcade (top nav or Alt+2): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+3.");
@@ -182,9 +235,9 @@
             if (act) applyWebLayout();
         });
     }
-    document.querySelectorAll("#mode-story [data-hud-pane] > h2").forEach((heading) => {
+    document.querySelectorAll("#mode-story [data-hud-pane] .panel-toggle").forEach((heading) => {
         heading.addEventListener("click", () => {
-            const pane = heading.parentElement && heading.parentElement.getAttribute("data-hud-pane");
+            const pane = heading.closest("[data-hud-pane]").getAttribute("data-hud-pane");
             if (!pane) return;
             Hud.applyAction({ op: "toggle", id: pane, field: "collapsed" });
             applyWebLayout();
@@ -209,40 +262,27 @@
     }
 
     function runLine(line) {
+        if (dom.inlineHint) dom.inlineHint.hidden = true;
         // Mode router: while the Practice Arcade owns the input, lines go there.
         if (window.BashcrawlShell && window.BashcrawlShell.mode() !== "story") {
             window.BashcrawlShell.handleInput(line);
             return;
         }
-        const promptEcho = runtime.promptLabel ? runtime.promptLabel() : `${runtime.state.cwd} $`;
-        append("dim", `${promptEcho} ${line}`);
-        if (!runtime.state.history.length || runtime.state.history[runtime.state.history.length - 1] !== line) {
-            runtime.state.history.push(line);
-        }
-        runtime.state.historyIndex = runtime.state.history.length;
-        const outputs = runtime.execute(line);
-        view.appendOutputs(outputs);
-        const spec = playCommandFx(line, outputs);
-        if (spec && spec.exec) {
-            screenFlash("magic");
-            applyHeroMood("cast");
-        }
-        if (spec && spec.motion === "error") bump(dom.log, "fx-glitch", 320);
+        const outputs = controller.execute(line, { echo: true });
         const after = snapshotState();
+        const events = Hud.diffEvents(prevState, after);
+        playCommandFx(line, outputs, events);
         triggerEffects(prevState, after);
         prevState = after;
-        saveAndRender();
+        render();
         pingLog();
-        if (spec && spec.cmd === "cat" && spec.known) {
-            window.BashcrawlCommandFx.playCat(dom.log, outputs);
-        }
     }
 
-    function playCommandFx(line, outputs) {
+    function playCommandFx(line, outputs, events) {
         const catalog = window.BashcrawlCommandFx;
         if (!catalog) return null;
         const error = (outputs || []).some((out) => out && out.kind === "error");
-        return catalog.apply(line, { log: dom.log, form: dom.form, prompt: dom.prompt, error });
+        return catalog.apply(line, { log: dom.log, form: dom.form, prompt: dom.prompt, error, events });
     }
 
     // Semantic events come from the shared presenter; this maps them onto the
@@ -250,16 +290,15 @@
     function triggerEffects(prev, next) {
         for (const event of Hud.diffEvents(prev, next)) {
             if (event.type === "quest") {
-                appendSparkleArt();
                 flashPanel(dom.quest);
                 applyHeroMood("quest");
             } else if (event.type === "damage") {
                 shakePanel(dom.inventory);
                 applyHeroMood("hurt");
-                screenFlash("damage");
+
             } else if (event.type === "heal") {
                 flashPanel(dom.inventory);
-                screenFlash("heal");
+
             } else if (event.type === "xp") {
                 popXp();
                 floatXp(event.amount);
@@ -274,26 +313,13 @@
             } else if (event.type === "unlock") {
                 flashPanel(dom.map);
                 shakePanel(dom.map);
-                screenFlash("unlock");
+
             }
             // "levelup" is already celebrated via the runtime's control record
             // (flashLevelUp in this view's onControl).
         }
     }
 
-    function appendSparkleArt() {
-        const lines = [
-            "      .   *  .   .  *  .   *",
-            "    *  ✦  .   *  ✧   .  *  ✦   ✧",
-            "      ✦  ✧ ✦  Q U E S T  ✦ ✧ ✦",
-            "    *      C O M P L E T E      *",
-            "      ✧  *   .  ✦   . *  ✧   ✦",
-        ].join("\n");
-        append("art", lines);
-    }
-
-    // Brief full-screen flash via a transient overlay element (no pseudo-element
-    // conflicts with the CRT/level-up layers). Auto-removed; reduced-motion-safe.
     function screenFlash(kind) {
         const el = document.createElement("div");
         el.className = `bc-screenflash bc-screenflash-${kind}`;
@@ -346,7 +372,7 @@
     }
 
     function saveAndRender() {
-        window.BashcrawlStorage.save(runtime.state);
+        controller.persist();
         docsPanel.setData(data.docs, runtime);
         render();
     }
@@ -387,6 +413,8 @@
             if (!el) return;
             el.classList.toggle("is-hud-hidden", !pane.visible);
             el.classList.toggle("is-collapsed", Boolean(pane.collapsed));
+            const toggle = el.querySelector(".panel-toggle");
+            if (toggle) toggle.setAttribute("aria-expanded", String(!pane.collapsed));
             if (sidebar && pane.visible) sidebar.appendChild(el);
         });
         if (dom.hudMenuPanes) {
@@ -648,8 +676,6 @@
         screenFlash,
         flashLevelUp,
         playCommandFx,
-        warp(el) { bump(el && el.closest ? (el.closest(".tui-content") || el) : el, "fx-warp", 520); },
-        glitch(el) { bump(el || dom.log, "fx-glitch", 320); },
         celebrate() {
             screenFlash("magic");
             flashLevelUp();

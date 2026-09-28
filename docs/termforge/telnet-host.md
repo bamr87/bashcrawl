@@ -33,7 +33,7 @@ On connect the server sends exactly four options and nothing else:
 
 Replies: the matching `DO ECHO` / `DO SGA` / `WILL SGA` / `WILL NAWS` are accepted silently; any other `DO x` gets `WONT x`, any other `WILL x` gets `DONT x`; incoming `DONT`/`WONT` are acknowledged silently and never re-negotiated. `IAC SB NAWS w h IAC SE` updates the session width; all other subnegotiations are skipped wholesale. `IAC IAC` is a literal 0xFF; `IAC IP` acts like `^C` (cancels the current line); other two-byte commands are ignored. Both `CR LF` and `CR NUL` submit a line.
 
-With echo and SGA in place the framework `LineEditor` gives telnet clients the full experience: arrow-key history, Tab completion, `^C` line-cancel, `^L` clear, `^D` to disconnect. Output is SGR-colored per the [terminal protocol](../schemas/terminal-protocol.v1.md) kind table with CRLF line endings.
+With echo and SGA in place the framework `LineEditor` gives telnet clients the full experience: left/right insertion, Home/End, Delete, arrow-key history, Tab completion, `^C` line-cancel, `^L` clear, `^D` to disconnect. Output is SGR-colored per the [terminal protocol](../schemas/terminal-protocol.v2.md) kind table with CRLF line endings.
 
 ## Raw mode (`--raw`)
 
@@ -48,7 +48,9 @@ History arrows and Tab completion don't exist here by design; disconnect with `^
 
 ## Session model
 
-One connection = one fully isolated session: its own runtime, state, view, and editor; nothing is shared between sockets. Limits: session cap (`--max-sessions`), idle kick (`--idle-timeout`), 4096-character line cap, 2000-line scrollback cap. A crash inside a command surfaces as an `error` line; the session survives.
+One connection = one fully isolated session: its own runtime, state, view, and editor; nothing is shared between sockets. Limits: session cap (`--max-sessions`), idle kick (`--idle-timeout`), 4096-character line cap, 2000-line scrollback cap. A crash inside a command surfaces as an `error` line; the session survives. Oversized unfinished input disconnects immediately, while batches of short commands are accepted. UTF-8 survives split socket chunks. NAWS controls the horizontal editor window. Subnegotiation payloads are bounded.
+
+Bashcrawl telnet sessions are temporary. `save` explains this; `save export` prints a transferable UTF-8 token and `save import TOKEN` validates and restores it. `less` prints the file in stream mode. The banner advertises only these available capabilities.
 
 ## Security posture
 
@@ -59,3 +61,5 @@ Telnet is **plaintext** — treat it accordingly:
 - Resource bounds: session cap, idle timeout, line-length cap, scrollback cap, per-session isolation.
 
 This is a lab/trusted-network tool in the spirit of classic MUDs and BBSes — not an internet-facing service.
+
+Bashcrawl save-import tokens have a separate 1 MiB line budget. Their contents are masked in command history and log echoes; ordinary commands retain the 4096-character cap.

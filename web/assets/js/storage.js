@@ -7,15 +7,14 @@
             if (!raw) return defaultState();
             const parsed = JSON.parse(raw);
             const base = defaultState();
-            return {
-                ...base,
-                ...parsed,
-                stats: { ...base.stats, ...(parsed.stats || {}) },
-                flags: { ...base.flags, ...(parsed.flags || {}) },
-                envVars: { ...base.envVars, ...(parsed.envVars || {}) },
-                userNodes: { ...base.userNodes, ...(parsed.userNodes || {}) },
-            };
-        } catch (_) {
+            if (global.TermForge && global.TermForge.state) {
+                global.TermForge.state.validateSavedState(base, parsed);
+                return global.TermForge.state.mergeSavedState(base, parsed);
+            }
+            return base;
+        } catch (err) {
+            global.BashcrawlStorage.lastError = err.message;
+            backup();
             return defaultState();
         }
     }
@@ -23,11 +22,21 @@
     function save(state) {
         try {
             global.localStorage.setItem(KEY, JSON.stringify(state));
-        } catch (_) { /* storage full/blocked: progress just doesn't persist */ }
+            return true;
+        } catch (_) { return false; }
+    }
+
+    function backup() {
+        try {
+            const raw = global.localStorage.getItem(KEY);
+            if (raw) global.localStorage.setItem(KEY + "-recovery", raw);
+            return Boolean(raw);
+        } catch (_) { return false; }
     }
 
     function clear() {
-        global.localStorage.removeItem(KEY);
+        try { global.localStorage.removeItem(KEY); return true; }
+        catch (_) { return false; }
     }
 
     // Namespaced side-stores (arcade scores, shell prefs) — additive keys so the
@@ -47,5 +56,5 @@
         } catch (_) { /* storage full/blocked: scores just don't persist */ }
     }
 
-    global.BashcrawlStorage = { load, save, clear, KEY, loadKey, saveKey };
+    global.BashcrawlStorage = { load, save, clear, backup, KEY, loadKey, saveKey, lastError: "" };
 })(window);

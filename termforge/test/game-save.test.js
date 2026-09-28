@@ -74,3 +74,38 @@ test("a legacy v1 save loads through storage.js and plays on", () => {
     // And the state still serializes (what storage.save would persist).
     assert.ok(JSON.stringify(runtime.state).length > 0);
 });
+
+test("malformed browser saves retain a recovery copy and load safe defaults", () => {
+    const raw = '{"history":null,"xp":120}';
+    const { runtime, env } = createGameRuntime({
+        withStorage: true,
+        localStorageData: { [STORAGE_KEY]: raw },
+        stateExpr: "BashcrawlStorage.load(() => BashcrawlRuntime.defaultState(__data.world.root))",
+    });
+    assert.equal(runtime.state.xp, 0);
+    assert.ok(Array.isArray(runtime.state.history));
+    assert.equal(env.run("localStorage.getItem('bashcrawl-web-state-v1-recovery')"), raw);
+    assert.match(env.run("BashcrawlStorage.lastError"), /history/);
+});
+
+test("blocked browser storage reports failure instead of claiming a successful save", () => {
+    const { runtime, env } = createGameRuntime({ withStorage: true, localStorageData: {} });
+    env.run("localStorage.setItem = () => { throw new Error('blocked'); }");
+    assert.equal(env.run("BashcrawlStorage.save({})"), false);
+    assert.equal(env.run("BashcrawlStorage.clear()"), true);
+    runtime.persistence = { save: () => false };
+    assert.ok(runtime.execute("save").some((line) => line.kind === "error"));
+});
+
+for (const name of fs.readdirSync(path.join(FIXTURES_DIR, "transcripts")).filter((file) => file.endsWith(".json"))) {
+    test(`saved scenario restores validated progress: ${name}`, () => {
+        const saved = JSON.parse(fs.readFileSync(path.join(FIXTURES_DIR, "transcripts", name), "utf8")).finalState;
+        const { env, data } = createGameRuntime();
+        env.sandbox.__saved = saved;
+        env.sandbox.__world = data.world;
+        const restored = env.run("BashcrawlRuntime.loadState(__world, __saved)");
+        assert.deepEqual(JSON.parse(JSON.stringify(restored.completedQuestIds)), saved.completedQuestIds);
+        assert.equal(restored.cwd, saved.cwd);
+        assert.equal(restored.xp, saved.xp);
+    });
+}

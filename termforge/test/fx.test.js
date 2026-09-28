@@ -8,6 +8,8 @@ const { WEB_JS, createGameRuntime } = require("./helpers/game-harness.js");
 const { loadClassic } = require("./helpers/load-classic.js");
 
 const PARSER = path.join(WEB_JS, "vendor", "termforge", "parser.js");
+const ASCII_MOTION = path.join(WEB_JS, "vendor", "termforge", "ascii-motion.js");
+const FX_CLIPS = path.join(WEB_JS, "fx-clips.js");
 const FX = path.join(WEB_JS, "fx.js");
 
 // The handler literal in runtime.js is the contract (validate_runtime_commands.py
@@ -17,7 +19,7 @@ function handlerNames() {
 }
 
 function catalog() {
-    const env = loadClassic({ files: [PARSER, FX] });
+    const env = loadClassic({ files: [PARSER, FX_CLIPS, FX] });
     return env.sandbox.BashcrawlCommandFx;
 }
 
@@ -65,5 +67,23 @@ test("cd variants and exec/pipe/redirect specialize the motion", () => {
     assert.equal(fx.describe("ls -laF").flags.join(""), "Fal");
     assert.equal(fx.describe("cat scroll").motion, "cat");
     assert.equal(fx.describe("less scroll").cmd, "cat");
-    assert.equal(fx.outputLineCount([{ kind: "output", text: "a\nb\nc" }]), 3);
+    assert.ok(fx.clipFor("warp"));
+    assert.ok(fx.clipFor(fx.describe("pwd").motion).canvas.width >= 18);
+    assert.equal(fx.clipFor("climb"), fx.clipFor("warp"));
+    assert.equal(fx.clipFor("bogus"), null);
+});
+
+test("command clips parse as ASCII Motion exports", () => {
+    const env = loadClassic({ files: [ASCII_MOTION, FX_CLIPS, FX] });
+    const fx = env.sandbox.BashcrawlCommandFx;
+    const am = env.sandbox.TermForge.asciiMotion;
+    for (const motion of ["radar", "scan", "warp", "spark", "cast", "steam", "burn", "error"]) {
+        const clip = am.parse(fx.clipFor(motion));
+        assert.ok(clip.frames.length >= 3, motion);
+        assert.ok(clip.width >= 7, motion);
+        assert.ok(renderSafe(clip), motion);
+    }
+    function renderSafe(clip) {
+        return am.renderFrame(clip, 0).text.length > 0;
+    }
 });

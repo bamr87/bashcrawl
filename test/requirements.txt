@@ -1,16 +1,3 @@
-# Bashcrawl Testing Framework Dependencies
-# ==========================================
-# For the full project, use the root requirements.txt + requirements-dev.txt instead.
-
-# Test runner
-pytest>=8.0
-pytest-timeout>=2.3
-
-# Schema validation
-jsonschema>=4.20
-
-# Static web export / content contracts
-pyyaml>=6.0
-
-# Playtest-harness smoke tests (playtest.mcp_server)
-mcp>=2.2.0
+# Test environments use the same dependency declarations as CI.
+-r ../requirements.txt
+-r ../requirements-dev.txt

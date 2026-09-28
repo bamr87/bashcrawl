@@ -67,7 +67,7 @@ All effects are pure state read by the painter; the host owns the 50 ms timer.
 | Scanlines | odd pixel rows dimmed to 82 %; `c` toggles them |
 | Banners | pixel-font `WAVE n` / `KILL -HUP INCOMING`, `SEGMENTATION FAULT`, `WAVE n CLEARED`, `SYSTEM RESTORED` (with fireworks), `KERNEL PANIC` |
 
-The dungeon HUD keeps its own FX hook: a **damage** event jolts the whole TUI frame sideways for a few frames (`TuiScreen.setJolt`, stepped `2 → 0 → 1 → 0` by the host).
+The dungeon HUD keeps its own FX hook: a **damage** event pulses the header color (`TuiScreen.setAttention`) without shifting output or the input cursor. `--no-motion` disables attention timers.
 
 ## Determinism
 
@@ -79,7 +79,7 @@ The world runs at a fixed 50 ms tick with a seeded `mulberry32` RNG, so a run is
 |---|---|
 | `termforge/node/pixels.js` | `PixelBuffer`, `PixelScreen`, `encodeRow`, `FONT3x5` |
 | `termforge/node/gem.js` | the game: rules, simulation, painter, unlock helpers, reward |
-| `termforge/node/host-tty.js` | HUD intercept (`xyzzy` / Konami), drops stale toasts, seeds from `BASHCRAWL_GEM_SEED`, tally + reward on return, damage jolt |
+| `termforge/node/host-tty.js` | HUD intercept (`xyzzy` / Konami), drops stale toasts, seeds from `BASHCRAWL_GEM_SEED`, tally + reward on return, header attention |
 | `termforge/node/tui.js` | `setJolt()` horizontal frame offset |
 | `termforge/core/input.js` | CSI `←`/`→` emit `{ type: "arrow", dir }` (up/down stay history) |
 | `termforge/test/pixels.test.js` | canvas, font, encoder, row diffing |

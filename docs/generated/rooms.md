@@ -56,6 +56,11 @@ Generated from `src/help/data/rooms.yaml`.
 - Hidden: `False`
 - Hint: Chapel path: Discover hidden commands and the ancient library tome.
 
+## elevator
+- Title: THE ELEVATOR
+- Path: `entrance/.rift/spire/mezzanine/.elevator`
+- Hidden: `True`
+
 ## entrance
 - Title: THE ENTRANCE HALL
 - Path: `entrance`
@@ -127,6 +132,11 @@ Generated from `src/help/data/rooms.yaml`.
 - Path: `entrance/.chapel/graveyard/royal-tombs`
 - Hidden: `False`
 - Hint: Use grep to search the royals list for the crown placement.
+
+## satellite
+- Title: THE SATELLITE
+- Path: `entrance/.rift/spire/mezzanine/.elevator/.satellite`
+- Hidden: `True`
 
 ## scrap
 - Title: THE SCRAP HEAP

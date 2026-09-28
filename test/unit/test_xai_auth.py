@@ -28,7 +28,16 @@ def test_resolve_prefers_opencode_oauth_over_api_key(tmp_path: Path, monkeypatch
     token = _jwt(time.time() + 3600)
     store = tmp_path / "auth.json"
     store.write_text(
-        json.dumps({"xai": {"type": "oauth", "access": token, "refresh": "r", "expires": int(time.time() * 1000) + 3_600_000}}),
+        json.dumps(
+            {
+                "xai": {
+                    "type": "oauth",
+                    "access": token,
+                    "refresh": "r",
+                    "expires": int(time.time() * 1000) + 3_600_000,
+                }
+            }
+        ),
         encoding="utf-8",
     )
     monkeypatch.setattr(xai_auth, "OPENCODE_AUTH", store)
@@ -56,7 +65,9 @@ def test_refresh_writes_store(tmp_path: Path, monkeypatch):
     old = _jwt(time.time() - 10)
     store = tmp_path / "auth.json"
     store.write_text(
-        json.dumps({"xai": {"type": "oauth", "access": old, "refresh": "refresh-me", "expires": 1}}),
+        json.dumps(
+            {"xai": {"type": "oauth", "access": old, "refresh": "refresh-me", "expires": 1}}
+        ),
         encoding="utf-8",
     )
     new = _jwt(time.time() + 3600)

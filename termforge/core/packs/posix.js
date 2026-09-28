@@ -84,7 +84,19 @@
             if (text === null) return [{ kind: "error", text: "wc requires a readable file or piped input" }];
             const lines = text ? text.split("\n").length : 0;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-            return [{ kind: "output", text: `${lines} ${words} ${text.length}${file ? ` ${file}` : ""}` }];
+            const flags = args.filter((arg) => arg.startsWith("-")).join("").replace(/-/g, "");
+            if (/[^lwcm]/.test(flags)) return [{ kind: "error", text: "wc: supported options are -l, -w, -c, -m" }];
+            const characters = Array.from(text);
+            const bytes = characters.reduce((total, ch) => {
+                const cp = ch.codePointAt(0);
+                return total + (cp <= 0x7f ? 1 : cp <= 0x7ff ? 2 : cp <= 0xffff ? 3 : 4);
+            }, 0);
+            const counts = [];
+            if (!flags || flags.includes("l")) counts.push(lines);
+            if (!flags || flags.includes("w")) counts.push(words);
+            if (flags.includes("m")) counts.push(characters.length);
+            if (!flags || flags.includes("c")) counts.push(bytes);
+            return [{ kind: "output", text: `${counts.join(" ")}${file ? ` ${file}` : ""}` }];
         },
 
         grep(args, stdin) {

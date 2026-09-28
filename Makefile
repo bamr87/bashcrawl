@@ -11,6 +11,7 @@
 #   make test              Run unit + integration tests
 #   make test-mcp          Run the playtest-harness smoke tests in a .venv
 #   make playtest          Blank-slate playtest: Claude Code plays via MCP, then score
+#   make ux-review         Score the terminal stage against the UX rules
 #   make lint              Run shellcheck, yamllint, markdownlint
 #   make clean             Reset game state to defaults
 #   make help              Show this help
@@ -19,12 +20,14 @@
 SHELL := /bin/bash
 
 GAME_ROOT := $(shell pwd)
-PYTHON := python3
+PYTHON := $(shell if [ -x .venv/bin/python ]; then echo "$(GAME_ROOT)/.venv/bin/python"; else echo python3; fi)
 NODE := node
 VENV := .venv
 
 export PYTHONPATH := $(GAME_ROOT)/src:$(GAME_ROOT)/test
 export BASHCRAWL_ROOT := $(GAME_ROOT)
+export PYTHON
+export PATH := $(GAME_ROOT)/.venv/bin:$(PATH)
 
 # ── Setup ──────────────────────────────────────────────────────────────
 
@@ -101,6 +104,10 @@ test-integration: ## Run integration tests only
 test-js: ## Run the TermForge framework tests (node --test, zero deps)
 	@$(NODE) --test termforge/test/*.test.js
 
+.PHONY: ux-review
+ux-review: ## Score the terminal stage: log art, stage hold, wipes, overlap
+	@$(NODE) termforge/node/ux.js
+
 .PHONY: test-mcp
 test-mcp: ## Run the playtest-harness smoke tests in a local .venv
 	@bash scripts/test_mcp.sh
@@ -129,8 +136,8 @@ lint-shell: ## Run ShellCheck on all shell scripts
 
 .PHONY: lint-js
 lint-js: ## Syntax-check every tracked JS file with node --check
-	@set -e; for f in $$(git ls-files '*.js'); do $(NODE) --check "$$f"; done; \
-		echo "lint-js: OK ($$(git ls-files '*.js' | wc -l | tr -d ' ') files)"
+	@set -e; for f in $$(git ls-files --cached --others --exclude-standard '*.js'); do $(NODE) --check "$$f"; done; \
+		echo "lint-js: OK ($$(git ls-files --cached --others --exclude-standard '*.js' | wc -l | tr -d ' ') files)"
 
 # ── Maintenance ───────────────────────────────────────────────────────
 
