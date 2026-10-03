@@ -151,7 +151,11 @@ def test_xyzzy_opens_the_storm_and_q_returns(host: TtyHost) -> None:
     host.send("q")
     text = host.expect("The storm fades")
     assert "starlight" in text, "the unlock line is in the log once the HUD returns"
-    host.expect("/entrance $")
+    # The HUD repaint that carries "The storm fades" usually carries the
+    # prompt too; expect() only scans output that arrives after it is called,
+    # so only wait for the prompt if it was not already in that chunk.
+    if "/entrance $" not in text.split("The storm fades", 1)[1]:
+        host.expect("/entrance $")
 
 
 def test_secret_words_never_reach_the_shell(host: TtyHost) -> None:

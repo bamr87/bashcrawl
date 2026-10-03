@@ -70,7 +70,9 @@ _TOOLS: List[Dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "bashcrawl_state",
-            "description": "JSON snapshot: room listing, scroll, inventory, HP. Does not change the game.",
+            "description": (
+                "JSON snapshot: room listing, scroll, inventory, HP. Does not change the game."
+            ),
             "parameters": {"type": "object", "properties": {}},
         },
     },
@@ -213,8 +215,13 @@ def run_session(
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seeds", type=int, default=int(os.environ.get("BLANK_SLATE_SEEDS", "1")))
-    parser.add_argument("--max-turns", type=int, default=int(os.environ.get("BLANK_SLATE_MAX_TURNS", "80")))
-    parser.add_argument("--model", default=os.environ.get("GROK_MODEL") or os.environ.get("XAI_MODEL") or _DEFAULT_MODEL)
+    parser.add_argument(
+        "--max-turns", type=int, default=int(os.environ.get("BLANK_SLATE_MAX_TURNS", "80"))
+    )
+    parser.add_argument(
+        "--model",
+        default=os.environ.get("GROK_MODEL") or os.environ.get("XAI_MODEL") or _DEFAULT_MODEL,
+    )
     parser.add_argument("--timeout", type=float, default=60.0)
     args = parser.parse_args(argv)
 
