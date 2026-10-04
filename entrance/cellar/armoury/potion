@@ -25,7 +25,15 @@ You have found a potion bottle of swirling
 green liquid. Do you want to drink it?  y/n
 
 EOF
-read RESP
+# Keep asking until the answer is y or n. On end of input, fall through
+# with no answer (treated as "no", as before).
+while read RESP; do
+  case "$RESP" in
+    y|Y|n|N) break ;;
+  esac
+  echo "Please answer y or n."
+  RESP=""
+done
 
 if [ "$RESP" = "y" -o "$RESP" = "Y" ]; then
    cat << EOF
