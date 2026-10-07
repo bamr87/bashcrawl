@@ -59,7 +59,7 @@ test("readers: cat/head/tail/wc/nl/rev", () => {
     assert.strictEqual(run(s, "head -n 1 fruits"), "banana");
     assert.strictEqual(run(s, "tail -1 fruits"), "apple");
     assert.strictEqual(run(s, "wc fruits"), "4 4 25 fruits");
-    assert.strictEqual(run(s, "cat fruits | wc -l"), "4 4 25");
+    assert.strictEqual(run(s, "cat fruits | wc -l"), "4");
     assert.strictEqual(run(s, "cat fruits | nl").split("\n")[0], "     1  banana");
     assert.strictEqual(run(s, "echo abc | rev"), "cba");
 });
@@ -154,4 +154,14 @@ test("history renders from state (hosts own the pushes)", () => {
     assert.strictEqual(run(s, "history"), "(empty)");
     s.state.history.push("pwd", "ls -a");
     assert.strictEqual(run(s, "history"), "1  pwd\n2  ls -a");
+});
+
+test("wc selects logical line, word, UTF-8 byte and character counts", () => {
+    const s = makeShell();
+    assert.strictEqual(run(s, "echo café 界 😀 | wc -c"), "14");
+    assert.strictEqual(run(s, "echo café 界 😀 | wc -m"), "8");
+    assert.strictEqual(run(s, "echo café 界 😀 | wc -cm"), "8 14");
+    assert.strictEqual(run(s, "cat fruits | wc -lw"), "4 4");
+    assert.strictEqual(run(s, "cat fruits | wc -w"), "4");
+    assert.ok(s.execute("wc -z fruits").some((out) => out.kind === "error"));
 });

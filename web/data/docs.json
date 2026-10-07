@@ -1131,7 +1131,9 @@
       "hidden": false,
       "unlocked_by": null,
       "parent": "spire",
-      "children": [],
+      "children": [
+        "elevator"
+      ],
       "on_enter": null,
       "on_exit": null,
       "description": "An elevated platform within the spire — learn advanced regex",
@@ -1159,6 +1161,76 @@
         {
           "command": "grep -P '\\d+' file",
           "description": "Perl regex"
+        }
+      ]
+    },
+    "elevator": {
+      "emoji": "🛗",
+      "title": "THE ELEVATOR",
+      "path": "entrance/.rift/spire/mezzanine/.elevator",
+      "hidden": true,
+      "parent": "mezzanine",
+      "children": [
+        "satellite"
+      ],
+      "description": "A lift leading to the satellite puzzle",
+      "teaches": [
+        "Following navigation clues in files"
+      ],
+      "key_files": [
+        {
+          "name": "direction",
+          "description": "lift instructions"
+        },
+        {
+          "name": "display",
+          "description": "current floor clues"
+        }
+      ],
+      "next_steps": "Read the directions and explore the satellite",
+      "essential_commands": [
+        {
+          "command": "cat direction",
+          "description": "Read the lift instructions"
+        },
+        {
+          "command": "ls -F",
+          "description": "Inspect the lift"
+        }
+      ]
+    },
+    "satellite": {
+      "emoji": "🛰️",
+      "title": "THE SATELLITE",
+      "path": "entrance/.rift/spire/mezzanine/.elevator/.satellite",
+      "hidden": true,
+      "parent": "elevator",
+      "children": [],
+      "description": "A collection of files for a checksum puzzle",
+      "teaches": [
+        "base64",
+        "sha256sum",
+        "cat concatenation"
+      ],
+      "key_files": [
+        {
+          "name": "notebook",
+          "description": "satellite clues"
+        },
+        {
+          "name": "sha256sums",
+          "description": "expected checksums"
+        }
+      ],
+      "next_steps": "Read the notebook and investigate the numbered files",
+      "essential_commands": [
+        {
+          "command": "cat notebook",
+          "description": "Read the satellite clues"
+        },
+        {
+          "command": "cat sha256sums",
+          "description": "Inspect the checksum list"
         }
       ]
     },

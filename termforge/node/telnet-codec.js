@@ -15,6 +15,7 @@ const WONT = 252;
 const WILL = 251;
 const SB = 250;
 const SE = 240;
+const { StringDecoder } = require("node:string_decoder");
 const IP = 244; // interrupt process (client ^C)
 
 const OPT_ECHO = 1;
@@ -46,6 +47,7 @@ function createTelnetCodec(handlers) {
     const onInterrupt = handlers.onInterrupt || (() => {});
 
     // Decoder state survives chunk boundaries.
+    const decoder = new StringDecoder("utf8");
     let mode = "data";          // data | iac | opt | sb | sbIac
     let pendingCmd = 0;         // DO/DONT/WILL/WONT awaiting its option byte
     let sbBytes = [];           // current subnegotiation payload (incl. option)
@@ -53,6 +55,9 @@ function createTelnetCodec(handlers) {
     function feed(buf) {
         const replies = [];
         const data = [];
+        const flushData = () => {
+            if (data.length) { onData(decoder.write(Buffer.from(data))); data.length = 0; }
+        };
         for (const byte of buf) {
             if (mode === "data") {
                 if (byte === IAC) mode = "iac";
@@ -66,7 +71,7 @@ function createTelnetCodec(handlers) {
                     sbBytes = [];
                     mode = "sb";
                 } else {
-                    if (byte === IP) onInterrupt();
+                    if (byte === IP) { flushData(); onInterrupt(); }
                     mode = "data"; // NOP/AYT/other two-byte commands: ignored
                 }
             } else if (mode === "opt") {
@@ -82,25 +87,26 @@ function createTelnetCodec(handlers) {
                 mode = "data";
             } else if (mode === "sb") {
                 if (byte === IAC) mode = "sbIac";
-                else sbBytes.push(byte);
+                else if (sbBytes.length < 64) sbBytes.push(byte);
             } else if (mode === "sbIac") {
                 if (byte === SE) {
                     if (sbBytes[0] === OPT_NAWS && sbBytes.length >= 5) {
                         const w = sbBytes[1] * 256 + sbBytes[2];
                         const h = sbBytes[3] * 256 + sbBytes[4];
+                        flushData();
                         onNaws(w, h);
                     }
                     mode = "data"; // other subnegotiations: skipped wholesale
                 } else if (byte === IAC) {
-                    sbBytes.push(IAC); // escaped 0xFF inside SB
+                    if (sbBytes.length < 64) sbBytes.push(IAC); // escaped 0xFF inside SB
                     mode = "sb";
                 } else {
-                    sbBytes.push(byte);
+                    if (sbBytes.length < 64) sbBytes.push(byte);
                     mode = "sb";
                 }
             }
         }
-        if (data.length) onData(Buffer.from(data).toString("utf8"));
+        flushData();
         return replies.length ? Buffer.from(replies) : null;
     }
 

@@ -208,6 +208,11 @@
             spec.motion = "error";
             spec.known = false;
             spec.accent = "#f87171";
+        } else {
+            const events = options.events || [];
+            if (events.some((ev) => ev.type === "levelup")) spec.motion = "cast";
+            else if (events.some((ev) => ev.type === "quest")) spec.motion = "spark";
+            else if (events.some((ev) => ev.type === "unlock")) spec.motion = "warp";
         }
         const log = options.log;
         const content = (log && log.closest && log.closest(".tui-content")) || options.root;
@@ -223,7 +228,10 @@
         void content.offsetWidth;
         content.classList.add("fx-play");
         const ms = spec.motion === "error" ? 380 : 640;
-        setTimeout(() => content.classList.remove("fx-play"), ms);
+        if (content._fxTimer) clearTimeout(content._fxTimer);
+        content._fxTimer = setTimeout(() => { content.classList.remove("fx-play"); content._fxTimer = null; }, ms);
+        if (clipFor(spec.motion)) playClip(content, spec.motion);
+        else clearStage(content);
         if (options.form) {
             options.form.classList.remove("fx-submit");
             void options.form.offsetWidth;
@@ -239,74 +247,135 @@
         return spec;
     }
 
-    const CAT_MARKUP = '<div class="px-cat-sprite">'
-        + '<span class="px-cat-ear px-cat-ear-l"></span>'
-        + '<span class="px-cat-ear px-cat-ear-r"></span>'
-        + '<span class="px-cat-head"></span>'
-        + '<span class="px-cat-eye px-cat-eye-l"></span>'
-        + '<span class="px-cat-eye px-cat-eye-r"></span>'
-        + '<span class="px-cat-nose"></span>'
-        + '<span class="px-cat-body"></span>'
-        + '<span class="px-cat-paw px-cat-paw-f"></span>'
-        + '<span class="px-cat-paw px-cat-paw-b"></span>'
-        + '<span class="px-cat-tail"></span>'
-        + '<span class="px-cat-bit px-cat-bit-1"></span>'
-        + '<span class="px-cat-bit px-cat-bit-2"></span>'
-        + '<span class="px-cat-bit px-cat-bit-3"></span>'
-        + "</div>";
-
     function motionOk() {
         return !(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
     }
 
-    function outputLineCount(outputs) {
-        let n = 0;
-        for (const out of outputs || []) {
-            if (!out || out.action || out.kind === "error") continue;
-            n += String(out.text ?? "").split("\n").length;
-        }
-        return n;
+    const CLIPS = global.BashcrawlFxClips || {};
+    if (CLIPS.warp) {
+        CLIPS.climb = CLIPS.warp;
+        CLIPS.rewind = CLIPS.warp;
+        CLIPS.home = CLIPS.warp;
     }
 
-    function playCat(log, outputs) {
-        if (!log || !log.querySelectorAll || !motionOk()) return;
-        if (!global.document || !global.document.createElement) return;
-        const host = log.closest(".tui-content") || log.parentElement;
-        if (!host) return;
-        let cat = host.querySelector(".px-cat");
-        if (!cat) {
-            cat = global.document.createElement("div");
-            cat.className = "px-cat";
-            cat.setAttribute("aria-hidden", "true");
-            cat.innerHTML = CAT_MARKUP;
-            host.appendChild(cat);
+    function clipFor(motion) {
+        return CLIPS[motion] || null;
+    }
+
+    function registerClip(motion, source) {
+        if (!motion) return;
+        CLIPS[motion] = source;
+    }
+
+    function cssColor(value) {
+        return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(value || "")) ? value : "";
+    }
+
+    function paintAsciiFrame(node, frame) {
+        const doc = global.document;
+        const map = new Map();
+        for (const item of frame.cells || []) map.set(`${item.x},${item.y}`, item);
+        node.replaceChildren();
+        for (let y = 0; y < frame.height; y += 1) {
+            if (y) node.appendChild(doc.createTextNode("\n"));
+            for (let x = 0; x < frame.width; x += 1) {
+                const item = map.get(`${x},${y}`);
+                const ch = item ? item.char : " ";
+                const fg = item && cssColor(item.color);
+                const bg = item && item.bgColor !== "transparent" && cssColor(item.bgColor);
+                if (fg || bg) {
+                    const span = doc.createElement("span");
+                    if (fg) span.style.color = fg;
+                    if (bg) span.style.backgroundColor = bg;
+                    span.textContent = ch;
+                    node.appendChild(span);
+                } else {
+                    node.appendChild(doc.createTextNode(ch));
+                }
+            }
         }
-        host.classList.remove("fx-cat-play");
-        cat.classList.remove("px-cat-run");
-        void host.offsetWidth;
-        host.classList.add("fx-cat-play");
-        cat.classList.add("px-cat-run");
-        const n = outputLineCount(outputs);
-        const spans = log.querySelectorAll("span");
-        const start = Math.max(0, spans.length - n);
-        for (let i = start; i < spans.length; i += 1) {
-            spans[i].classList.add("fx-cat-text");
-            spans[i].style.setProperty("--cat-delay", `${90 + (i - start) * 48}ms`);
+    }
+
+    function clearStage(host) {
+        if (!host || !host.classList) return;
+        host._amGen = (host._amGen || 0) + 1;
+        if (host._amTimer) clearTimeout(host._amTimer);
+        host._amTimer = null;
+        host.classList.remove("fx-stage");
+        const node = host.querySelector && host.querySelector(".px-am");
+        if (node) node.classList.remove("px-am-run");
+    }
+
+    function playClip(host, motionOrClip, opts) {
+        const am = global.TermForge && global.TermForge.asciiMotion;
+        const source = motionOrClip && typeof motionOrClip === "object" ? motionOrClip : CLIPS[motionOrClip];
+        if (!am || !source || !host || !host.querySelector) return null;
+        if (!global.document || !global.document.createElement) return null;
+        let clip;
+        try {
+            clip = am.parse(source);
+        } catch (_err) {
+            return null;
         }
-        setTimeout(() => {
-            host.classList.remove("fx-cat-play");
-            cat.classList.remove("px-cat-run");
-        }, 1700);
+        const options = opts || {};
+        const effects = (clip.effects || []).concat(options.effects || []);
+        const player = new am.Player({
+            clip,
+            speed: options.speed || 1,
+            effects,
+            looping: options.looping != null ? options.looping : false,
+        });
+        clearStage(host);
+        let node = host.querySelector(".px-am");
+        if (!node) {
+            node = global.document.createElement("pre");
+            node.className = "px-am";
+            node.setAttribute("aria-hidden", "true");
+            host.appendChild(node);
+        }
+        if ((host.clientHeight && host.clientHeight < 420) ||
+            (global.matchMedia && global.matchMedia("(max-width: 900px), (max-height: 700px)").matches)) return null;
+        const gen = (host._amGen || 0) + 1;
+        host._amGen = gen;
+        host.classList.add("fx-stage");
+        node.classList.add("px-am-run");
+        const reduced = !motionOk();
+        if (reduced) player.seek(Math.max(0, player.duration() - 1));
+        const show = () => {
+            if (host._amGen !== gen) return;
+            if (host.clientHeight && host.clientHeight < 420) { clearStage(host); return; }
+            const frame = player.frame();
+            frame.height = clip.height;
+            frame.width = clip.width;
+            paintAsciiFrame(node, frame);
+            if (reduced || frame.done) { host._amTimer = null; return; }
+            host._amTimer = setTimeout(() => {
+                if (host._amGen !== gen) return;
+                player.advance(frame.hold);
+                show();
+            }, Math.max(16, frame.hold || 80));
+        };
+        show();
+        if (global.matchMedia && !host._amMediaBound) {
+            host._amMediaBound = true;
+            for (const query of ["(prefers-reduced-motion: reduce)", "(max-width: 900px), (max-height: 700px)"]) {
+                global.matchMedia(query).addEventListener("change", () => clearStage(host));
+            }
+        }
+        return clip;
     }
 
     global.BashcrawlCommandFx = {
         ALIASES,
         COMMANDS,
         FLAG_FX,
+        commands: COMMANDS,
         describe,
         apply,
         extractFlags,
-        playCat,
-        outputLineCount,
+        playClip,
+        registerClip,
+        clipFor,
+        clearStage,
     };
 })(typeof globalThis !== "undefined" ? globalThis : this);

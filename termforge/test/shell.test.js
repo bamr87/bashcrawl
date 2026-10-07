@@ -51,7 +51,7 @@ test("stdin derivation drops error and control records", () => {
     // `clear` emits a control record; piping it onward contributes no text, so
     // wc sees empty stdin (not null — the pipe still connected).
     const out = shell.execute("clear | wc -l");
-    assert.strictEqual(out[0].text, "0 0 0");
+    assert.strictEqual(out[0].text, "0");
 });
 
 test("redirection writes the overlay, appends, and reports the dim summary", () => {
@@ -100,7 +100,7 @@ test("hook spine: order, interception, appended lines, exec dispatch", () => {
     const shell = makeShell({ hooks });
     const out = shell.execute("pwd | wc -l");
     // observePipeline lines land inside the pipeline result; postExecute after.
-    assert.deepStrictEqual(out.map((o) => o.text), ["1 1 5", "(seen)", "(tick)"]);
+    assert.deepStrictEqual(out.map((o) => o.text), ["1", "(seen)", "(tick)"]);
     assert.deepStrictEqual(calls, [
         "pre:pwd | wc -l",
         "before:pwd", "post:pwd:null",

@@ -25,6 +25,8 @@ const TermForge = {
     view: require("../core/view.js"),
     sinks: { ...dom, ...ansi },
     input: require("../core/input.js"),
+    session: require("../core/session.js"),
+    asciiMotion: require("../core/ascii-motion.js"),
 };
 
 module.exports = TermForge;

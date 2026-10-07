@@ -305,6 +305,57 @@
         ],
     };
 
+    // Save tokens have their own bounded budget; normal commands stay small.
+    function lineLimit(line) { return /^\s*save\s+import(?:\s|$)/.test(line) ? 1048576 : 4096; }
+    function commandLabel(line) { return /^\s*save\s+import\s/.test(line) ? "save import [token]" : line; }
+
+    function loadState(world, parsed) {
+        const base = defaultState(world.root);
+        if (parsed == null) return base;
+        global.TermForge.state.validateSavedState(base, parsed);
+        const next = global.TermForge.state.mergeSavedState(base, parsed);
+        for (const key of ["inventory", "history", "visited", "achievements", "bestiary"]) {
+            if (next[key].some((item) => typeof item !== "string")) throw new Error(`invalid ${key}`);
+        }
+        if (next.completedQuestIds.some((id) => !Number.isInteger(id) || id < 0)) throw new Error("invalid completedQuestIds");
+        for (const key of ["aliases", "envVars", "reveals"]) {
+            if (Object.values(next[key]).some((item) => typeof item !== "string")) throw new Error(`invalid ${key}`);
+        }
+        for (const node of Object.values(next.userNodes)) {
+            if (!node || !["dir", "file", "exec", "deleted"].includes(node.type) ||
+                (node.content != null && typeof node.content !== "string")) throw new Error("invalid userNodes");
+        }
+        for (const key of ["trainer", "pathfind"]) {
+            if (next[key] != null && (typeof next[key] !== "object" || Array.isArray(next[key]))) throw new Error(`invalid ${key}`);
+        }
+        if (next.speedrunBest != null && (!Number.isFinite(next.speedrunBest) || next.speedrunBest < 0)) throw new Error("invalid speedrunBest");
+        if (Object.values(next.stats.commands).some((count) => !Number.isFinite(count) || count < 0)) throw new Error("invalid stats.commands");
+        if (next.trainer != null) {
+            const t = next.trainer;
+            global.TermForge.state.validateSavedState({ queue: [], pos: 0, score: 0, streak: 0, best: 0, tries: 0, active: false, speed: false, startedAt: 0 }, t, "trainer");
+            if (t.active && (!Array.isArray(t.queue) || !t.queue.length ||
+                t.queue.some((id) => !Number.isInteger(id) || id < 0 || id >= TRIALS.length) ||
+                !Number.isInteger(t.pos) || t.pos < 0 || t.pos >= t.queue.length ||
+                [t.score, t.streak, t.best, t.tries, t.startedAt].some((n) => !Number.isFinite(n) || n < 0))) throw new Error("invalid trainer");
+        }
+        if (next.pathfind != null) {
+            const pf = next.pathfind;
+            global.TermForge.state.validateSavedState({ active: false, target: "", targetTitle: "", moves: 0 }, pf, "pathfind");
+            if (pf.active && (typeof pf.target !== "string" || typeof pf.targetTitle !== "string" ||
+                !Number.isInteger(pf.moves) || pf.moves < 0)) throw new Error("invalid pathfind");
+        }
+        if (next.prevCwd != null && typeof next.prevCwd !== "string") throw new Error("invalid prevCwd");
+        for (const key of ["date", "lastDate"]) {
+            if (next.daily[key] != null && typeof next.daily[key] !== "string") throw new Error(`invalid daily.${key}`);
+        }
+        const vfs = global.TermForge.vfs.createVfs(world, { getState: () => next });
+        if (!vfs.node(next.cwd) || vfs.node(next.cwd).type !== "dir") throw new Error("saved location is unavailable");
+        if (next.hp < 0 || next.hp > 100 || next.xp < 0 || next.currentQuestId < 0 || next.rankIndex < 0) throw new Error("invalid progress");
+        if (next.history.length > 1000) next.history = next.history.slice(-1000);
+        next.historyIndex = next.history.length;
+        return next;
+    }
+
     class Runtime extends global.TermForge.Shell {
         constructor(data, state, options) {
             super({
@@ -314,6 +365,8 @@
                 uiText: GAME_UI_TEXT,
                 bare: Boolean(options && options.bare),
             });
+            this.capabilities = (options && options.capabilities) || {};
+            this.persistence = (options && options.persistence) || null;
             this.quests = data.quests.quests || [];
             // The game's full command surface, enumerated in one static
             // literal: P.*/F.* are TermForge pack functions, this.cmd* are
@@ -328,7 +381,7 @@
                 ls: P.ls,
                 cd: P.cd,
                 cat: P.cat,
-                less: P.cat,
+                less: this.cmdLess,
                 head: P.head,
                 tail: P.tail,
                 wc: P.wc,
@@ -463,7 +516,7 @@
             this.state.rankIndex = idx;
             return [
                 { kind: "control", action: "levelup" },
-                { kind: "art", text: LEVELUP_ART },
+                ...(this.capabilities.compactEvents ? [] : [{ kind: "art", text: LEVELUP_ART }]),
                 { kind: "success", text: `★  You are now ${ARENA_RANKS[idx].title}!` },
             ];
         }
@@ -970,14 +1023,31 @@
             return [{ kind: "info", text: `Location: ${this.state.cwd}\nHP: ${this.state.hp}\nXP: ${this.state.xp}\nInventory: ${this.state.inventory.join(", ") || "(empty)"}` }];
         }
 
+        cmdLess(args, stdin) {
+            const outputs = global.TermForge.packs.posix.commands.cat.call(this, args, stdin);
+            if (!this.capabilities.pager || this.inPipeline || stdin != null || outputs.some((out) => out.kind === "error")) return outputs;
+            return [{ kind: "control", action: "page", text: outputs.map((out) => out.text || "").join("\n") }];
+        }
+
         cmdSave(args) {
-            if (args[0] === "export") {
-                return [{ kind: "output", text: this.encodeBase64(JSON.stringify(this.state)) }];
-            }
+            if (args[0] === "export") return [{ kind: "output", text: this.encodeBase64(JSON.stringify(this.state)) }];
             if (args[0] === "import") {
-                return [{ kind: "info", text: "Paste/import UI is planned. For now, localStorage saves automatically." }];
+                if (!args[1]) return [{ kind: "info", text: "Use save import BASE64 with a token from save export." }];
+                try {
+                    const binary = global.atob(args[1]);
+                    const text = decodeURIComponent(Array.from(binary, (ch) => `%${ch.charCodeAt(0).toString(16).padStart(2, "0")}`).join(""));
+                    const parsed = JSON.parse(text);
+                    this.state = loadState(this.world, parsed);
+                    return [{ kind: "success", text: "Progress imported." }];
+                } catch (err) { return [{ kind: "error", text: `Cannot import save: ${err.message}` }]; }
             }
-            return [{ kind: "success", text: "Progress is saved automatically in this browser." }];
+            if (this.persistence) {
+                try {
+                    if (this.persistence.save(this.state) === false) throw new Error("storage unavailable");
+                    return [{ kind: "success", text: this.persistence.description || "Progress saved." }];
+                } catch (err) { return [{ kind: "error", text: `Could not save progress: ${err.message}` }]; }
+            }
+            return [{ kind: "info", text: "This session is temporary. Use save export to keep your progress, then save import TOKEN to restore it." }];
         }
 
         cmdReset() {
@@ -1057,5 +1127,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, tokenize, ARENA_RANKS, ACHIEVEMENTS };
+    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, ARENA_RANKS, ACHIEVEMENTS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

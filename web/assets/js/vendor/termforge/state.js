@@ -57,5 +57,25 @@
         return merged;
     }
 
-    return { defaultShellState, mergeSavedState };
+    // Validate known fields before merging an untrusted saved state. Missing
+    // fields keep defaults, so older saves remain compatible.
+    function validateSavedState(base, parsed, prefix) {
+        const label = prefix || "save";
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error(`invalid ${label}`);
+        for (const [key, value] of Object.entries(base)) {
+            if (!Object.prototype.hasOwnProperty.call(parsed, key) || value === null) continue;
+            const saved = parsed[key];
+            const field = `${label}.${key}`;
+            if (Array.isArray(value)) {
+                if (!Array.isArray(saved)) throw new Error(`invalid ${field}`);
+            } else if (typeof value === "object") {
+                validateSavedState(value, saved, field);
+            } else if (typeof saved !== typeof value || (typeof saved === "number" && !Number.isFinite(saved))) {
+                throw new Error(`invalid ${field}`);
+            }
+        }
+        return parsed;
+    }
+
+    return { defaultShellState, mergeSavedState, validateSavedState };
 });

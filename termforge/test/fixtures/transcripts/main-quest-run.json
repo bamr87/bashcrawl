@@ -820,8 +820,8 @@
       "line": "save",
       "outputs": [
         {
-          "kind": "success",
-          "text": "Progress is saved automatically in this browser."
+          "kind": "info",
+          "text": "This session is temporary. Use save export to keep your progress, then save import TOKEN to restore it."
         }
       ]
     },

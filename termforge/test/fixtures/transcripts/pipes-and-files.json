@@ -8,7 +8,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86 438 4086"
+          "text": "86"
         }
       ]
     },
@@ -201,7 +201,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86 438 4086"
+          "text": "86"
         }
       ]
     },
@@ -219,7 +219,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86 438 4086"
+          "text": "86"
         }
       ]
     },
@@ -477,7 +477,7 @@
       },
       "/entrance/count": {
         "type": "file",
-        "content": "86 438 4086"
+        "content": "86"
       },
       "/entrance/camp": {
         "type": "dir"

@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 # bundle (pyyaml) and to run the lean MCP playtest harness (mcp).
 dependencies = [
   "pyyaml>=6.0",
-  "mcp>=1.0.0",
+  "mcp>=2.2.0",
 ]
 
 [project.optional-dependencies]

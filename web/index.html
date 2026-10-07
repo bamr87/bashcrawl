@@ -42,23 +42,23 @@
                     </p>
                 </div>
                 <section class="tui-panel" data-hud-pane="quest">
-                    <h2>Active Quest</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Active Quest</button></h2>
                     <div id="quest-panel"></div>
                 </section>
                 <section class="tui-panel" data-hud-pane="pack">
-                    <h2>Inventory</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Inventory</button></h2>
                     <div id="inventory-panel"></div>
                 </section>
                 <!-- Concept spotlight: what THIS room teaches, with one-line cheats
                      (rendered by reference.js from rooms.yaml `teaches`). -->
                 <section class="tui-panel spotlight" data-hud-pane="spotlight">
-                    <h2>This Room Teaches</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">This Room Teaches</button></h2>
                     <div id="spotlight-panel"></div>
                 </section>
                 <!-- Pixel Hero Companion: CSS-only layered pixels (no emoji/glyphs),
                      theme-aware, reacts to game events via data-mood. -->
                 <section class="tui-panel hero-panel" data-hud-pane="hero">
-                    <h2>Hero</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Hero</button></h2>
                     <div id="hero-panel" class="hero-stage" data-mood="idle" role="img" aria-label="Pixel adventurer companion (idle)">
                         <div class="hero-sprite">
                             <div class="hero-shadow" aria-hidden="true"></div>
@@ -81,7 +81,7 @@
                     </div>
                 </section>
                 <section class="tui-panel tui-room-panel" data-hud-pane="room">
-                    <h2>Location</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Location</button></h2>
                     <div id="room-panel"></div>
                 </section>
                 <!-- Generative dungeon map: a fog-of-war tree that grows as the
@@ -89,13 +89,13 @@
                      renderMap() (game.js); only visited rooms and their visible
                      doors are drawn, so it never spoils undiscovered areas. -->
                 <section class="tui-panel map-panel" data-hud-pane="map">
-                    <h2>Map</h2>
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Map</button></h2>
                     <div id="map-panel"></div>
                 </section>
             </aside>
 
             <section class="tui-content">
-                <pre id="output-log" class="tui-log" aria-live="polite"></pre>
+                <pre id="output-log" class="tui-log" role="log" aria-live="polite" aria-relevant="additions"></pre>
             </section>
         </section>
 
@@ -121,7 +121,7 @@
             </aside>
             <section class="tui-content">
                 <div id="arcade-home" class="arcade-home"></div>
-                <pre id="arcade-log" class="tui-log" aria-live="polite" hidden></pre>
+                <pre id="arcade-log" class="tui-log" role="log" aria-live="polite" aria-relevant="additions" hidden></pre>
             </section>
         </section>
 
@@ -209,9 +209,12 @@
     <script src="./assets/js/vendor/termforge/sinks/dom.js"></script>
     <script src="./assets/js/vendor/termforge/sinks/ansi.js"></script>
     <script src="./assets/js/vendor/termforge/input.js"></script>
+    <script src="./assets/js/vendor/termforge/session.js"></script>
+    <script src="./assets/js/vendor/termforge/ascii-motion.js"></script>
     <script src="./assets/js/storage.js"></script>
     <script src="./assets/js/runtime.js"></script>
     <script src="./assets/js/hud.js"></script>
+    <script src="./assets/js/fx-clips.js"></script>
     <script src="./assets/js/fx.js"></script>
     <script src="./assets/js/docs.js"></script>
     <script src="./assets/js/reference.js"></script>

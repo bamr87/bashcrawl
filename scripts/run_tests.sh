@@ -17,7 +17,7 @@ run_pytest() {
     shift
     (
         cd "$TEST_DIR"
-        python3 -m pytest "$@" --junitxml="$junit_file"
+        "${PYTHON:-python3}" -m pytest "$@" --junitxml="$junit_file"
     )
 }
 
@@ -35,7 +35,7 @@ case "$SUITE" in
     all)
         (
             cd "$TEST_DIR"
-            python3 -m pytest -v --tb=short --timeout=120 --junitxml=reports/all-results.xml
+            "${PYTHON:-python3}" -m pytest -v --tb=short --timeout=120 --junitxml=reports/all-results.xml
         )
         ;;
     *)

@@ -39,23 +39,40 @@ function createApp(options = {}) {
         id: "bashcrawl",
         name: "Bashcrawl",
 
-        createSession() {
+        createSession(options = {}) {
+            const capabilities = { surface: options.surface || "stream", hud: Boolean(options.hud), pager: Boolean(options.pager), compactEvents: Boolean(options.hud) };
+            const persistence = options.persistence || null;
+            const saved = persistence ? persistence.load() : null;
             let prevSnap = null;
-            const runtime = new BashcrawlRuntime.Runtime(data);
+            const state = BashcrawlRuntime.loadState(data.world, saved);
+            const runtime = new BashcrawlRuntime.Runtime(data, state, { capabilities, persistence });
             const session = {
-                runtime,
+                runtime, capabilities, persistence,
+                maxLine: BashcrawlRuntime.lineLimit,
+                commandLabel: BashcrawlRuntime.commandLabel,
+                hudLayout: Hud,
+                motion: require("./bashcrawl-motion.js").planMotion,
+                overlay: require("../node/gem.js"),
+                handleLine(line) {
+                    const action = capabilities.hud && Hud.parseHudLine(line);
+                    if (action) return [{ kind: "info", text: Hud.applyAction(action).message || "" }];
+                    return session.runtime.execute(line);
+                },
                 banner: [
                     { kind: "banner", text: runtime.uiText.bannerArt },
                     { kind: "info", text: "Welcome to Bashcrawl on the TermForge terminal." },
                     { kind: "dim", text: "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi." },
-                    { kind: "dim", text: "Mini-games: train · speedrun · pathfind. PgUp/wheel scrolls the log. Type 'hud' to fold, hide, or dock panes. Ctrl+D leaves." },
+                    { kind: "dim", text: "Mini-games: train · speedrun · pathfind. Ctrl+D leaves." },
+                    ...(capabilities.hud ? [{ kind: "dim", text: "PgUp/wheel scrolls the log. Type hud to fold, hide, or dock panes." }] : []),
+                    { kind: "dim", text: persistence ? persistence.description : "Temporary session. Use save export / save import TOKEN to keep progress." },
+                    { kind: "dim", text: capabilities.pager ? "less FILE: Space/PgDn next, b/PgUp back, q quit." : "less prints text in this stream; use head/tail for excerpts." },
                 ],
                 // Host control routing: "reset" replaces the session runtime
                 // (the control record itself still lands in the log, matching
                 // the web app); "clear"/"levelup" need no session work.
                 onControl(action) {
                     if (action === "reset") {
-                        session.runtime = new BashcrawlRuntime.Runtime(data);
+                        session.runtime = new BashcrawlRuntime.Runtime(data, undefined, { capabilities, persistence });
                         prevSnap = null;
                     }
                 },

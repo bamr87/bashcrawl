@@ -128,3 +128,43 @@ test("byte decoder: pager keys and SGR mouse, including split CSI", () => {
         "SGR mouse survives chunk boundaries",
     );
 });
+
+test("line editing preserves Unicode around insertion and delete", () => {
+    const { editor, submitted } = makeEditor({ echo: false });
+    for (const ch of "echo A界😀C") editor.feed({ type: "char", ch });
+    editor.feed({ type: "arrow", dir: "left" });
+    editor.feed({ type: "backspace" });
+    editor.feed({ type: "char", ch: "B" });
+    editor.feed({ type: "delete" });
+    editor.feed({ type: "home" });
+    editor.feed({ type: "char", ch: "#" });
+    editor.feed({ type: "end" });
+    editor.feed({ type: "submit" });
+    assert.deepStrictEqual(submitted, ["#echo A界B"]);
+});
+
+test("an overflowing line is bounded and never submitted as a truncated command", () => {
+    let overflows = 0;
+    const { editor, submitted } = makeEditor({ maxLine: 8, onOverflow: () => overflows++ });
+    for (const ch of "echo truncated") editor.feed({ type: "char", ch });
+    assert.equal(editor.buffer.length, 8);
+    assert.equal(overflows, 1);
+    editor.feed({ type: "submit" });
+    assert.deepStrictEqual(submitted, []);
+    for (const ch of "pwd") editor.feed({ type: "char", ch });
+    editor.feed({ type: "submit" });
+    assert.deepStrictEqual(submitted, ["pwd"]);
+});
+
+test("horizontal input scrolling keeps wide glyphs and the cursor in bounds", () => {
+    const { inputWindow, displayWidth } = require("../core/input.js");
+    const text = "echo " + "界😀".repeat(40);
+    for (const columns of [20, 40, 80]) {
+        for (const cursor of [0, 5, text.length]) {
+            const frame = inputWindow("/entrance/cellar/armoury $", text, cursor, columns);
+            assert.ok(displayWidth(frame.text) < columns);
+            assert.ok(frame.column >= 1 && frame.column <= columns);
+            assert.ok(!/[\uD800-\uDBFF]$/.test(frame.text));
+        }
+    }
+});

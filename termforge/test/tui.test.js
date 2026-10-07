@@ -127,30 +127,40 @@ test("renderInput repaints only the input row", () => {
     assert.ok(!out.includes("[1;1H"), "no full-frame repaint");
 });
 
-test("jolt shifts every row and the cursor; zero settles the frame", () => {
+test("damage attention keeps cursor and row geometry stable", () => {
     const { screen, chunks } = makeScreen();
     screen.setPanels([{ title: "HERO", lines: [{ kind: "info", text: "Lv 1" }] }]);
     screen.setPrompt("/entrance $");
     screen.setInput("ls");
     screen.start({ cols: 100, rows: 12 });
     chunks.length = 0;
-    screen.setJolt(2);
     screen.render();
-    const shaken = chunks.join("");
-    assert.ok(shaken.includes("\u001b[1;1H\u001b[2K  "), "log rows are padded by the jolt");
-    assert.ok(shaken.includes(`\u001b[1;${100 - 30 - 1 + 2}H`), "sidebar column moves with the jolt");
-    assert.ok(shaken.endsWith(`\u001b[12;${"/entrance $".length + 1 + 2 + 1 + 2}H\u001b[?25h`), "cursor moves with the jolt");
+    const before = stripAnsi(chunks.join(""));
     chunks.length = 0;
-    screen.setJolt(0);
+    screen.setAttention(true);
     screen.render();
-    const settled = chunks.join("");
-    assert.ok(settled.includes("\u001b[1;1H\u001b[2K\u001b["), "no padding once settled");
-    screen.setJolt(99);
-    assert.equal(screen.jolt, 8, "jolt is clamped");
-    screen.setJolt(-3);
-    assert.equal(screen.jolt, 0);
-    screen.setJolt("nope");
-    assert.equal(screen.jolt, 0);
+    assert.equal(stripAnsi(chunks.join("")), before);
+    assert.ok(chunks.join("").includes("\u001b[1;31m"));
+    const addresses = chunks.join("").match(/\u001b\[(\d+);(\d+)H/g) || [];
+    assert.ok(addresses.every((cup) => { const [row, col] = cup.match(/\d+/g).map(Number); return row >= 1 && row <= 12 && col >= 1 && col <= 100; }));
+});
+
+test("stage is a dedicated sidebar section and does not cover the log", () => {
+    const { screen, chunks, frame, reset } = makeScreen();
+    screen.setPanels([{ title: "HERO", lines: [{ kind: "info", text: "Lv 1" }] }]);
+    screen.appendLog([{ kind: "output", text: "banner-art-stays" }]);
+    screen.start({ cols: 100, rows: 30 });
+    reset();
+    screen.setStage(["  +  ", " RADAR"]);
+    screen.render();
+    const painted = frame();
+    assert.ok(painted.includes("banner-art-stays"), "log art is not covered");
+    assert.ok(painted.includes("stage"), "stage section is labeled");
+    assert.ok(painted.includes("RADAR"), "stage art is painted");
+    const raw = chunks.join("");
+    const stageAt = raw.indexOf("stage");
+    const radarAt = raw.indexOf("RADAR");
+    assert.ok(stageAt >= 0 && radarAt > stageAt, "art sits under the stage header");
 });
 
 test("log scrollback windows history; appendLog re-pins to the tail", () => {

@@ -77,3 +77,32 @@ test("AnsiSink streams SGR-wrapped lines with CRLF; control records paint empty"
     assert.strictEqual(new AnsiSink({ write() {}, color: false }).paint({ kind: "error", text: "x" }), "x");
     assert.strictEqual(Object.keys(ANSI_STYLES).length, 9, "one style per protocol kind");
 });
+
+test("DOM append preserves existing nodes, scrollback, and the bottom pin across stage resizing", () => {
+    let scroll;
+    let replacements = 0;
+    const el = {
+        scrollTop: 0, scrollHeight: 100, clientHeight: 40,
+        set innerHTML(value) { this.html = value; replacements++; },
+        insertAdjacentHTML(_where, value) { this.html = (this.html || "") + value; this.scrollHeight += 20; },
+        addEventListener(_name, callback) { scroll = callback; },
+    };
+    const view = new TerminalView({ sink: new DomSink(el) });
+    view.appendLine("output", "first");
+    view.flush();
+    el.clientHeight = 20; // the dedicated stage opens before the next flush
+    view.appendLine("output", "second");
+    view.flush();
+    assert.equal(el.scrollTop, el.scrollHeight - el.clientHeight);
+    assert.equal(replacements, 0);
+    el.scrollTop = 0;
+    scroll(); // deliberate reader scroll
+    view.appendLine("output", "third");
+    view.flush();
+    assert.equal(el.scrollTop, 0);
+    view.clear();
+    view.appendLine("info", "fresh");
+    view.flush();
+    assert.equal(replacements, 1);
+    assert.ok(!el.html.includes("first"));
+});

@@ -13,6 +13,7 @@ Skipped when ``node`` is not on PATH (the CI ``test`` job installs it).
 from __future__ import annotations
 
 import fcntl
+import json
 import os
 import pty
 import re
@@ -44,16 +45,22 @@ def _strip(raw: bytes) -> str:
 class TtyHost:
     """A host-tty.js process on a PTY with a byte recorder."""
 
-    def __init__(self, env: dict[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        env: dict[str, str] | None = None,
+        args: tuple[str, ...] = (),
+        cols: int = COLS,
+        rows: int = ROWS,
+    ) -> None:
         self.raw = bytearray()
         pid, fd = pty.fork()
         if pid == 0:  # child
             os.environ["TERM"] = "xterm-256color"
             os.environ.update(env or {})
             os.chdir(ROOT)
-            os.execvp("node", ["node", str(HOST), "--app", "bashcrawl"])
+            os.execvp("node", ["node", str(HOST), "--app", "bashcrawl", *args])
         self.pid, self.fd = pid, fd
-        fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", ROWS, COLS, 0, 0))
+        fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
 
     def send(self, text: str) -> None:
         os.write(self.fd, text.encode("utf8"))
@@ -94,9 +101,15 @@ class TtyHost:
     def close(self) -> int | None:
         try:
             pid, status = os.waitpid(self.pid, os.WNOHANG)
-            if pid == 0:  # still running
+            if pid == 0:  # keep draining while the host restores the terminal
                 os.kill(self.pid, signal.SIGTERM)
-                _, status = os.waitpid(self.pid, 0)
+                deadline = time.monotonic() + 2
+                while pid == 0 and time.monotonic() < deadline:
+                    self.drain(0.05)
+                    pid, status = os.waitpid(self.pid, os.WNOHANG)
+                if pid == 0:
+                    os.kill(self.pid, signal.SIGKILL)
+                    _, status = os.waitpid(self.pid, 0)
         except ChildProcessError:
             status = None
         try:
@@ -107,8 +120,14 @@ class TtyHost:
 
 
 @pytest.fixture
-def host():
-    proc = TtyHost(env={"BASHCRAWL_GEM_SEED": "42"})
+def host(tmp_path):
+    proc = TtyHost(
+        env={
+            "BASHCRAWL_GEM_SEED": "42",
+            "BASHCRAWL_SAVE_FILE": str(tmp_path / "story.json"),
+            "BASHCRAWL_HUD_FILE": str(tmp_path / "hud.json"),
+        }
+    )
     try:
         yield proc
     finally:
@@ -125,8 +144,8 @@ def test_hud_boots_full_screen_with_sidebar(host: TtyHost) -> None:
 def test_commands_run_and_repaint(host: TtyHost) -> None:
     host.expect("/entrance $")
     host.send("ls -F\r")
-    text = host.expect("cellar/")
-    assert "scroll" in text
+    text = host.expect("README.md  scroll")
+    assert "cellar/" in text
     host.send("cd cellar\r")
     host.expect("/entrance/cellar $")
 
@@ -178,3 +197,59 @@ def test_ctrl_d_exits_cleanly(host: TtyHost) -> None:
     assert b"\x1b[?1049l" in host.raw, "leaves the alternate screen on exit"
     status = host.close()
     assert status is not None and os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0
+
+
+def test_pager_returns_to_the_command_prompt(host: TtyHost) -> None:
+    host.expect("/entrance $")
+    host.send("less scroll\r")
+    host.expect("q quit")
+    host.send(" ")
+    host.expect("q quit")
+    host.send("q")
+    host.expect("/entrance $")
+    host.send("echo pager-returned\r")
+    host.expect("pager-returned")
+
+
+def test_stream_cursor_editing_and_disk_save(tmp_path) -> None:
+    story = tmp_path / "story.json"
+    proc = TtyHost(env={"BASHCRAWL_SAVE_FILE": str(story)}, args=("--no-hud",))
+    try:
+        proc.expect("/entrance $")
+        proc.send("echo ac\x1b[Db\r")
+        proc.expect("abc")
+        proc.send("cd cellar\r")
+        proc.expect("/entrance/cellar $")
+        assert json.loads(story.read_text())["cwd"] == "/entrance/cellar"
+        proc.send("\x04")
+        proc.expect("Farewell")
+    finally:
+        proc.close()
+
+
+@pytest.mark.parametrize(("cols", "rows"), [(40, 8), (80, 24)])
+def test_small_terminal_and_resize_keep_valid_cursor_addresses(tmp_path, cols, rows) -> None:
+    proc = TtyHost(
+        env={
+            "BASHCRAWL_SAVE_FILE": str(tmp_path / "story.json"),
+            "BASHCRAWL_HUD_FILE": str(tmp_path / "hud.json"),
+        },
+        args=("--no-motion",),
+        cols=cols,
+        rows=rows,
+    )
+    try:
+        proc.expect("/entrance $")
+        start = len(proc.raw)
+        proc.send("pwd\r")
+        proc.drain(0.2)
+        addresses = re.findall(rb"\x1b\[(\d+);(\d+)H", proc.raw[start:])
+        assert addresses
+        assert all(1 <= int(row) <= rows and 1 <= int(col) <= cols for row, col in addresses)
+        fcntl.ioctl(proc.fd, termios.TIOCSWINSZ, struct.pack("HHHH", 30, 100, 0, 0))
+        os.kill(proc.pid, signal.SIGWINCH)
+        proc.expect("┬")
+        proc.send("\x04")
+        proc.expect("Farewell")
+    finally:
+        proc.close()
