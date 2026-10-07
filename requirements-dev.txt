@@ -8,7 +8,7 @@ pytest>=8.0
 pytest-timeout>=2.3
 
 # Schema validation (used in tests)
-jsonschema>=4.20
+jsonschema>=4.26.0
 
 # Python static checks
 ruff>=0.13.0

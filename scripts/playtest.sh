@@ -86,8 +86,13 @@ while [ "$seed" -le "$SEEDS" ]; do
         --max-turns "$MAX_TURNS" \
         --model "$MODEL" \
         --output-format stream-json --verbose \
-        >"$TRANSCRIPT_DIR/seed_${seed}.jsonl" 2>"$TRANSCRIPT_DIR/seed_${seed}.err" ||
+        >"$TRANSCRIPT_DIR/seed_${seed}.jsonl" 2>"$TRANSCRIPT_DIR/seed_${seed}.err" || {
         echo "[playtest] seed $seed exited non-zero (continuing)"
+        # Surface why: stderr and the transcript tail are otherwise only on
+        # disk, and the transcript dir is not uploaded as an artifact.
+        tail -n 20 "$TRANSCRIPT_DIR/seed_${seed}.err" 2>/dev/null | sed 's/^/[playtest]   stderr: /' || true
+        tail -n 5 "$TRANSCRIPT_DIR/seed_${seed}.jsonl" 2>/dev/null | cut -c1-400 | sed 's/^/[playtest]   out: /' || true
+    }
     seed=$((seed + 1))
 done
 
