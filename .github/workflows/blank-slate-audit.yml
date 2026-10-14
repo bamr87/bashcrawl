@@ -13,7 +13,7 @@ name: Blank-Slate Audit
 on:
   schedule:
     # Weekly, Mondays 05:00 UTC.
-    - cron: '0 5 * * 1'
+    - cron: '19 2 * * 1'  # staggered AI cron (bamr87/bamr87#348); was 0 5 * * 1
   workflow_dispatch:
     inputs:
       seeds:
