@@ -1,10 +1,6 @@
 # Motion Clips and Art
 
-Generated from `src/help/data/motion.yaml`. Every file below is an
-[ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) `.asciimtn`
-session: open it at <https://ascii-motion.app>, edit, export a session, and
-replace the file. Workflow:
-[docs/termforge/ascii-motion.md](../termforge/ascii-motion.md).
+Generated from `src/help/data/motion.yaml`. Every file below is an [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) `.asciimtn` session: open it at <https://ascii-motion.app>, edit, export a session, and replace the file. Workflow: [docs/termforge/ascii-motion.md](../termforge/ascii-motion.md).
 
 ## Stage clips
 
@@ -56,5 +52,4 @@ Static one-frame clips drawn with `Shell#art(name)`.
 | `levelup` | Level up | `motion/art/levelup.asciimtn` | Burst printed on a level-up. |
 | `profile` | Character sheet | `motion/art/profile.asciimtn` | Header for `profile`. |
 
-Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`;
-an app's `art` option overrides them by name): `banner`, `cow`, `sl`.
+Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`; an app's `art` option overrides them by name): `banner`, `cow`, `sl`.
