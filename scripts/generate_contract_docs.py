@@ -88,11 +88,12 @@ def _render_motion(data: dict[str, Any]) -> str:
     lines = [
         "# Motion Clips and Art",
         "",
-        "Generated from `src/help/data/motion.yaml`. Every file below is an",
-        "[ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) `.asciimtn`",
-        "session: open it at <https://ascii-motion.app>, edit, export a session, and",
-        "replace the file. Workflow:",
-        "[docs/termforge/ascii-motion.md](../termforge/ascii-motion.md).",
+        # One line per paragraph: the markdown-oneline workflow unwraps prose.
+        "Generated from `src/help/data/motion.yaml`. Every file below is an"
+        " [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) `.asciimtn`"
+        " session: open it at <https://ascii-motion.app>, edit, export a session,"
+        " and replace the file. Workflow:"
+        " [docs/termforge/ascii-motion.md](../termforge/ascii-motion.md).",
         "",
         "## Stage clips",
         "",
@@ -125,8 +126,8 @@ def _render_motion(data: dict[str, Any]) -> str:
     core = sorted(p.stem for p in (ROOT / "termforge/motion").glob("*.asciimtn"))
     lines += [
         "",
-        "Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`;",
-        "an app's `art` option overrides them by name): "
+        "Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`;"
+        " an app's `art` option overrides them by name): "
         + ", ".join(f"`{name}`" for name in core)
         + ".",
     ]
