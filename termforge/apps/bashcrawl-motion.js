@@ -16,8 +16,9 @@
 //   flags     -a -F -l and friends stay washes. They are modifiers, not scenes.
 //   reduced   One static frame, no timer.
 //
-// Clips exist for radar, scan, warp, spark, cast, steam, burn, and error.
-// climb / rewind / home reuse warp. cat leaves the reader quiet.
+// Which motions own a clip, their aliases, and the event overrides all come
+// from src/help/data/motion.yaml (bundled into web/assets/js/fx-clips.js), the
+// same manifest the browser reads. cat leaves the reader quiet.
 
 const path = require("node:path");
 
@@ -25,7 +26,6 @@ const TermForge = require("../node/index.js");
 
 const HOLD_MS = 72;
 const MAX_FRAMES = 6;
-const STAGE = new Set(["radar", "scan", "warp", "spark", "cast", "steam", "burn", "error", "climb", "rewind", "home"]);
 
 function fxCatalog() {
     if (!global.TermForge) global.TermForge = TermForge;
@@ -40,9 +40,8 @@ function fxCatalog() {
 
 function clipNamed(name) {
     const fx = fxCatalog();
-    const source = fx.clipFor(name);
-    if (!source || !STAGE.has(name)) return null;
-    return TermForge.asciiMotion.parse(source);
+    if (!fx.onStage(name)) return null;
+    return fx.library().get(name);
 }
 
 function framesOf(clip) {
@@ -63,15 +62,7 @@ function framesOf(clip) {
 function planMotion(line, options) {
     const opts = options || {};
     const fx = fxCatalog();
-    const spec = fx.describe(line || "");
-    if (opts.error) spec.motion = "error";
-    const events = opts.events || [];
-    let motion = spec.motion;
-    if (!opts.error) {
-        if (events.some((ev) => ev && ev.type === "levelup")) motion = "cast";
-        else if (events.some((ev) => ev && ev.type === "quest")) motion = "spark";
-        else if (events.some((ev) => ev && ev.type === "unlock")) motion = "warp";
-    }
+    const motion = fx.motionFor(line || "", { error: opts.error, events: opts.events }).motion;
     const frames = framesOf(clipNamed(motion));
     if (!frames.length) return null;
     return { motion, frames: opts.reducedMotion ? frames.slice(-1) : frames, hold: HOLD_MS, stage: true };
@@ -85,7 +76,7 @@ function review() {
         rows.push({
             cmd,
             motion,
-            treatment: STAGE.has(motion) ? "stage" : "wash",
+            treatment: fx.onStage(motion) ? "stage" : "wash",
         });
     }
     rows.push({ cmd: "_flags", motion: "*", treatment: "wash" });
@@ -95,4 +86,8 @@ function review() {
     return rows;
 }
 
-module.exports = { planMotion, clipNamed, framesOf, review, STAGE };
+function stageMotions() {
+    return fxCatalog().stageMotions();
+}
+
+module.exports = { planMotion, clipNamed, framesOf, review, stageMotions };

@@ -7,12 +7,14 @@ Checks:
 - walkthrough paths resolve on disk (supports hidden-room logical paths)
 - required room scrolls and encounter scripts exist
 - walkthrough.json stays in sync with the on-disk room/scroll/encounter layout
+- motion.yaml clips point at ASCII Motion exports and real fx.js motion names
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -469,6 +471,204 @@ def _validate_game_scripts(
     }
 
 
+_MOTION_SUFFIXES = (".json", ".asciimtn", ".txt")
+_ART_CALL = re.compile(r'\.art\(\s*["\']([a-z0-9-]+)["\']')
+
+
+def _fx_motions(root: Path) -> set[str]:
+    """Motion names web/assets/js/fx.js can produce (COMMANDS, cd variants, error)."""
+    source = (root / "web/assets/js/fx.js").read_text(encoding="utf-8")
+    names = set(re.findall(r'\bmotion(?::| =) "([a-z][a-z-]*)"', source))
+    names.add("error")
+    return names
+
+
+def _art_calls(folder: Path) -> set[str]:
+    """Literal names passed to Shell#art(...) in the JS under ``folder``."""
+    names: set[str] = set()
+    if not folder.is_dir():
+        return names
+    for path in folder.rglob("*.js"):
+        names.update(_ART_CALL.findall(path.read_text(encoding="utf-8")))
+    return names
+
+
+def _art_wanted(root: Path) -> set[str]:
+    """Every art clip name the game can ask for, literal or derived."""
+    js = root / "web/assets/js"
+    names: set[str] = set()
+    for rel in ("runtime.js", "hud.js", "game.js"):
+        path = js / rel
+        if path.is_file():
+            names.update(_ART_CALL.findall(path.read_text(encoding="utf-8")))
+    names.update(_art_calls(root / "termforge/apps"))
+    index = root / "web/index.html"
+    if index.is_file():
+        names.update(re.findall(r'data-art="([a-z0-9-]+)"', index.read_text(encoding="utf-8")))
+    runtime = js / "runtime.js"
+    if runtime.is_file():
+        source = runtime.read_text(encoding="utf-8")
+        bestiary = re.search(r"const BESTIARY = \[(.*?)\n {4}\];", source, re.S)
+        if bestiary:
+            keys = re.findall(r'key: "([a-z0-9-]+)"', bestiary.group(1))
+            names.update(f"encounter-{key}" for key in keys)
+    hud = js / "hud.js"
+    if hud.is_file():
+        source = hud.read_text(encoding="utf-8")
+        keys = re.search(r"VIGNETTE_KEYS = Object\.freeze\(\[(.*?)\]\)", source)
+        if keys:
+            names.update(f"room-{key}" for key in re.findall(r'"([a-z0-9-]+)"', keys.group(1)))
+    return names
+
+
+def _motion_source_ok(path: Path) -> str | None:
+    """Return a problem string if ``path`` is not a recognizable ASCII Motion export."""
+    raw = path.read_text(encoding="utf-8").lstrip("\ufeff").strip()
+    if not raw:
+        return "is empty"
+    if not raw.startswith(("{", "[")):
+        return None  # text export: frames split on a lone ","
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return f"is not valid JSON ({exc.msg} at line {exc.lineno})"
+    if not isinstance(data, dict):
+        return "must be a JSON object"
+    animation = data.get("animation") if isinstance(data.get("animation"), dict) else {}
+    if isinstance(data.get("layers"), list):
+        return None if data["layers"] else "is a session v2 file with no layers"
+    frames = data.get("frames") or animation.get("frames")
+    if not isinstance(frames, list) or not frames:
+        return "has no frames (expected a JSON export, a session .asciimtn, or a text export)"
+    return None
+
+
+def _validate_motion(
+    root: Path, errors: list[str], warnings: list[str], report: dict[str, Any]
+) -> None:
+    path = root / "src/help/data/motion.yaml"
+    if not path.is_file():
+        _add_error(errors, "Missing required file: src/help/data/motion.yaml")
+        return
+    data = _load_yaml(path)
+    clips = data.get("clips")
+    if data.get("version") != 1:
+        _add_error(errors, "motion.yaml: version must be 1")
+    if not isinstance(clips, dict) or not clips:
+        _add_error(errors, "motion.yaml: clips must be a non-empty mapping")
+        return
+    motions = _fx_motions(root)
+    claimed: dict[str, str] = {}
+    referenced: set[Path] = set()
+    for name, entry in clips.items():
+        where = f"motion.yaml clips.{name}"
+        if not isinstance(entry, dict):
+            _add_error(errors, f"{where}: must be a mapping")
+            continue
+        if name not in motions:
+            _add_error(errors, f"{where}: '{name}' is not a motion web/assets/js/fx.js plays")
+        rel = entry.get("file")
+        if not isinstance(rel, str) or not rel:
+            _add_error(errors, f"{where}: file is required")
+        else:
+            src = root / rel
+            referenced.add(src.resolve())
+            if src.suffix not in _MOTION_SUFFIXES:
+                suffixes = ", ".join(_MOTION_SUFFIXES)
+                _add_error(errors, f"{where}: file must end in one of {suffixes}")
+            elif not src.is_file():
+                _add_error(errors, f"{where}: file not found: {rel}")
+            else:
+                problem = _motion_source_ok(src)
+                if problem:
+                    _add_error(errors, f"{where}: {rel} {problem}")
+        for field in ("title", "description"):
+            if not isinstance(entry.get(field), str) or not entry.get(field):
+                _add_error(errors, f"{where}: {field} must be a non-empty string")
+        if "stage" in entry and not isinstance(entry["stage"], bool):
+            _add_error(errors, f"{where}: stage must be true or false")
+        aliases = entry.get("aliases") or []
+        if not isinstance(aliases, list) or not all(isinstance(a, str) for a in aliases):
+            _add_error(errors, f"{where}: aliases must be a list of motion names")
+            aliases = []
+        for alias in [name, *aliases]:
+            if alias in claimed:
+                owner = claimed[alias]
+                _add_error(errors, f"{where}: '{alias}' is already claimed by clips.{owner}")
+            claimed.setdefault(alias, name)
+        for alias in aliases:
+            if alias not in motions:
+                _add_error(
+                    errors, f"{where}: alias '{alias}' is not a motion web/assets/js/fx.js plays"
+                )
+    seen_events: set[str] = set()
+    for i, rule in enumerate(data.get("events") or []):
+        if not isinstance(rule, dict) or not rule.get("event") or not rule.get("motion"):
+            _add_error(errors, f"motion.yaml events[{i}]: needs event and motion")
+            continue
+        if rule["event"] in seen_events:
+            _add_error(errors, f"motion.yaml events[{i}]: duplicate event '{rule['event']}'")
+        seen_events.add(rule["event"])
+        if rule["motion"] not in claimed:
+            _add_error(errors, f"motion.yaml events[{i}]: motion '{rule['motion']}' has no clip")
+    art = data.get("art") or {}
+    if not isinstance(art, dict):
+        _add_error(errors, "motion.yaml: art must be a mapping")
+        art = {}
+    for name, entry in art.items():
+        where = f"motion.yaml art.{name}"
+        if not isinstance(entry, dict):
+            _add_error(errors, f"{where}: must be a mapping")
+            continue
+        rel = entry.get("file")
+        if not isinstance(rel, str) or not rel:
+            _add_error(errors, f"{where}: file is required")
+        else:
+            src = root / rel
+            referenced.add(src.resolve())
+            if src.suffix not in _MOTION_SUFFIXES or not src.is_file():
+                _add_error(errors, f"{where}: file not found: {rel}")
+            else:
+                problem = _motion_source_ok(src)
+                if problem:
+                    _add_error(errors, f"{where}: {rel} {problem}")
+        for field in ("title", "description"):
+            if not isinstance(entry.get(field), str) or not entry.get(field):
+                _add_error(errors, f"{where}: {field} must be a non-empty string")
+    for name in sorted(_art_wanted(root)):
+        if name not in art:
+            _add_error(errors, f"the game draws art '{name}' but motion.yaml has no art.{name}")
+    core_dir = root / "termforge/motion"
+    core_art = (
+        {p.stem for p in core_dir.iterdir() if p.suffix in _MOTION_SUFFIXES}
+        if core_dir.is_dir()
+        else set()
+    )
+    for name in sorted(_art_calls(root / "termforge/core")):
+        if name not in core_art:
+            _add_error(
+                errors,
+                f"termforge/core draws art '{name}' but "
+                f"termforge/motion/{name}.asciimtn is missing",
+            )
+    for folder in ("motion/clips", "motion/art"):
+        clip_dir = root / folder
+        if not clip_dir.is_dir():
+            continue
+        for orphan in sorted(clip_dir.iterdir()):
+            if orphan.suffix in _MOTION_SUFFIXES and orphan.resolve() not in referenced:
+                _add_warning(
+                    warnings,
+                    f"{folder}/{orphan.name} is not listed in motion.yaml (it will not ship)",
+                )
+    report["motion"] = {
+        "clip_count": len(clips),
+        "alias_count": len(claimed) - len(clips),
+        "event_count": len(seen_events),
+        "art_count": len(art),
+    }
+
+
 def validate(root: Path) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -494,6 +694,7 @@ def validate(root: Path) -> dict[str, Any]:
     _validate_quests(quests_data, walkthrough, errors, warnings, report)
     _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
     _validate_game_scripts(root, errors, warnings, report)
+    _validate_motion(root, errors, warnings, report)
 
     return {
         "ok": not errors,
@@ -523,6 +724,12 @@ def _emit_text(result: dict[str, Any]) -> None:
         "Encounters: "
         f"yaml={enc.get('yaml_count', 0)} "
         f"walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
+    )
+    motion = result.get("motion", {})
+    print(
+        f"Motion: clips={motion.get('clip_count', 0)} "
+        f"aliases={motion.get('alias_count', 0)} events={motion.get('event_count', 0)} "
+        f"art={motion.get('art_count', 0)}"
     )
     print(f"Warnings: {result.get('warning_count', 0)}")
     print("")

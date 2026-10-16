@@ -1,0 +1,60 @@
+{
+  "version": "1.0.0",
+  "name": "room-entrance",
+  "description": "",
+  "canvas": {"width":16,"height":6,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "2,0": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "5,0": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "12,0": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "15,0": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "2,1": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "3,1": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "7,1": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "8,1": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "12,1": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "13,1": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "2,2": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "3,2": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "6,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "9,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "12,2": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "13,2": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "1,3": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "2,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "3,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "4,3": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "5,3": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "10,3": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "11,3": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "12,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "13,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "14,3": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "0,4": {"char":"[","color":"#ffffff","bgColor":"transparent"},
+          "1,4": {"char":"=","color":"#ffffff","bgColor":"transparent"},
+          "2,4": {"char":"=","color":"#ffffff","bgColor":"transparent"},
+          "3,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "4,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "11,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "12,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "13,4": {"char":"=","color":"#ffffff","bgColor":"transparent"},
+          "14,4": {"char":"=","color":"#ffffff","bgColor":"transparent"},
+          "15,4": {"char":"]","color":"#ffffff","bgColor":"transparent"},
+          "3,5": {"char":"'","color":"#ffffff","bgColor":"transparent"},
+          "4,5": {"char":"'","color":"#ffffff","bgColor":"transparent"},
+          "11,5": {"char":"'","color":"#ffffff","bgColor":"transparent"},
+          "12,5": {"char":"'","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

@@ -14,18 +14,19 @@ make agentwatch                     # AI-agent task dashboard (demo fleet)
 make agentwatch ARGS="--data-dir logs/sessions"    # ...over real playtest telemetry
 node termforge/node/host-tty.js --app procwatch    # the monitoring-tool demo
 make test-js                        # the node --test suite
+make motion CLIP=motion/clips/warp.asciimtn   # preview any ASCII Motion file (repo root motion/)
 ```
 
 Browser demo of a custom tool: open `apps/procwatch/demo.html` straight from `file://`.
 
 ## Layout
 
-- `core/` — environment-agnostic framework (dual-mode files: classic `<script>` + CJS), including `ascii-motion.js` (plays [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) JSON/text/session-v1 exports and the cell-grid effects). Vendored file-for-file into `web/assets/js/vendor/termforge/` by `make web-build`; **edit here, never the vendor mirror**. Brand-neutral by contract: app voice arrives via the Shell's `uiText` copy deck (enforced by `test/content-separation.test.js`).
+- `core/` — environment-agnostic framework (dual-mode files: classic `<script>` + CJS), including `ascii-motion.js` (plays every [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) format, session v2 layer timelines included, with the editor's effects) and the generated `art.js` (default art from `motion/*.asciimtn`; all art is ASCII Motion files, drawn via `Shell#art`). Vendored file-for-file into `web/assets/js/vendor/termforge/` by `make web-build`; **edit here, never the vendor mirror**. Brand-neutral by contract: app voice arrives via the Shell's `uiText` copy deck (enforced by `test/content-separation.test.js`).
 - `node/` — TTY host, telnet host + codec, CLI plumbing (argv parsing is node's own `util.parseArgs`).
 - `apps/` — `bashcrawl.js` (the game as an app), `procwatch/` (live host metrics as provider files), and `agentwatch/` (an AI-agent task dashboard: TaskSource → board/feed commands + live files, with a JSONL adapter for the repo's playtest telemetry).
 - `test/` — `node --test` suites, golden fixtures, and the deterministic vm harness.
 
-Docs: [architecture](../docs/termforge/architecture.md) · [authoring apps](../docs/termforge/authoring-apps.md) · [telnet host](../docs/termforge/telnet-host.md) · [hidden gem](../docs/termforge/hidden-gem.md) · [Line protocol](../docs/schemas/terminal-protocol.v2.md).
+Docs: [architecture](../docs/termforge/architecture.md) · [ASCII Motion](../docs/termforge/ascii-motion.md) · [authoring apps](../docs/termforge/authoring-apps.md) · [telnet host](../docs/termforge/telnet-host.md) · [hidden gem](../docs/termforge/hidden-gem.md) · [Line protocol](../docs/schemas/terminal-protocol.v2.md).
 
 ## Input and reading
 

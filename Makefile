@@ -46,8 +46,9 @@ venv: ## Create .venv and install web-build + test dependencies
 # ── Web (the flagship) ─────────────────────────────────────────────────
 
 .PHONY: web-build
-web-build: ## Build the static web bundle from entrance/ + src/help/data/*.yaml
+web-build: ## Build the static web bundle from entrance/ + src/help/data/*.yaml + motion/
 	@$(PYTHON) scripts/export_static_web.py
+	@$(PYTHON) scripts/build_motion.py
 	@$(PYTHON) scripts/vendor_termforge.py
 
 .PHONY: web-test
@@ -103,6 +104,14 @@ test-integration: ## Run integration tests only
 .PHONY: test-js
 test-js: ## Run the TermForge framework tests (node --test, zero deps)
 	@$(NODE) --test termforge/test/*.test.js
+
+.PHONY: motion
+motion: ## Preview an ASCII Motion file in this terminal (CLIP=motion/clips/warp.asciimtn; ARGS="--loop")
+	@$(NODE) termforge/node/motion-cli.js play $(or $(CLIP),motion/clips/warp.asciimtn) $(ARGS)
+
+.PHONY: motion-info
+motion-info: ## Summarize every ASCII Motion file (size, frames, duration, warnings)
+	@$(NODE) termforge/node/motion-cli.js info termforge/motion/*.asciimtn motion/clips/* motion/art/*
 
 .PHONY: ux-review
 ux-review: ## Score the terminal stage: log art, stage hold, wipes, overlap

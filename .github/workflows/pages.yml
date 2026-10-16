@@ -13,6 +13,8 @@ on:
       - 'entrance/**'
       - 'src/help/data/**'
       - 'termforge/**'
+      - 'motion/**'
+      - 'scripts/build_motion.py'
       - 'scripts/export_static_web.py'
       - 'scripts/validate_static_web.py'
       - 'scripts/validate_runtime_commands.py'

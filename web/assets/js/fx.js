@@ -201,19 +201,30 @@
         };
     }
 
-    function apply(line, opts) {
+    // The motion a finished command plays: a failure is always `error`; a game
+    // event (levelup, quest, unlock — order from motion.yaml) beats the command.
+    function motionFor(line, opts) {
         const options = opts || {};
         const spec = describe(line);
         if (options.error) {
             spec.motion = "error";
             spec.known = false;
             spec.accent = "#f87171";
-        } else {
-            const events = options.events || [];
-            if (events.some((ev) => ev.type === "levelup")) spec.motion = "cast";
-            else if (events.some((ev) => ev.type === "quest")) spec.motion = "spark";
-            else if (events.some((ev) => ev.type === "unlock")) spec.motion = "warp";
+            return spec;
         }
+        const events = options.events || [];
+        for (const rule of EVENT_MOTIONS) {
+            if (events.some((ev) => ev && ev.type === rule.event)) {
+                spec.motion = rule.motion;
+                break;
+            }
+        }
+        return spec;
+    }
+
+    function apply(line, opts) {
+        const options = opts || {};
+        const spec = motionFor(line, options);
         const log = options.log;
         const content = (log && log.closest && log.closest(".tui-content")) || options.root;
         if (!content || !content.setAttribute) return spec;
@@ -230,7 +241,7 @@
         const ms = spec.motion === "error" ? 380 : 640;
         if (content._fxTimer) clearTimeout(content._fxTimer);
         content._fxTimer = setTimeout(() => { content.classList.remove("fx-play"); content._fxTimer = null; }, ms);
-        if (clipFor(spec.motion)) playClip(content, spec.motion);
+        if (onStage(spec.motion)) playClip(content, spec.motion);
         else clearStage(content);
         if (options.form) {
             options.form.classList.remove("fx-submit");
@@ -251,20 +262,50 @@
         return !(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
     }
 
+    // ASCII Motion clips + manifest, generated from src/help/data/motion.yaml
+    // into fx-clips.js by `make web-build`.
     const CLIPS = global.BashcrawlFxClips || {};
-    if (CLIPS.warp) {
-        CLIPS.climb = CLIPS.warp;
-        CLIPS.rewind = CLIPS.warp;
-        CLIPS.home = CLIPS.warp;
+    const MANIFEST = global.BashcrawlFxClipManifest || {};
+    const CLIP_ALIASES = { ...(MANIFEST.aliases || {}) };
+    const STAGE = new Set(MANIFEST.stage || Object.keys(CLIPS));
+    const EVENT_MOTIONS = (MANIFEST.events || []).filter((rule) => rule && rule.event && rule.motion);
+    let clipLibrary = null;
+
+    function clipName(motion) {
+        if (!motion) return null;
+        if (CLIPS[motion]) return motion;
+        const target = CLIP_ALIASES[motion];
+        return target && CLIPS[target] ? target : null;
     }
 
     function clipFor(motion) {
-        return CLIPS[motion] || null;
+        const name = clipName(motion);
+        return name ? CLIPS[name] : null;
     }
 
-    function registerClip(motion, source) {
-        if (!motion) return;
+    function onStage(motion) {
+        return STAGE.has(motion) && clipName(motion) !== null;
+    }
+
+    // Parsed clips, shared by every play (TermForge.asciiMotion.Library).
+    function library() {
+        const am = global.TermForge && global.TermForge.asciiMotion;
+        if (!am || !am.Library) return null;
+        if (!clipLibrary) clipLibrary = new am.Library(CLIPS, { aliases: CLIP_ALIASES });
+        return clipLibrary;
+    }
+
+    function registerClip(motion, source, opts) {
+        if (!motion || source == null) return;
         CLIPS[motion] = source;
+        delete CLIP_ALIASES[motion];
+        if (!opts || opts.stage !== false) STAGE.add(motion);
+        else STAGE.delete(motion);
+        if (clipLibrary) clipLibrary.add(motion, source);
+    }
+
+    function stageMotions() {
+        return [...STAGE].filter((motion) => clipName(motion) !== null).sort();
     }
 
     function cssColor(value) {
@@ -308,12 +349,13 @@
 
     function playClip(host, motionOrClip, opts) {
         const am = global.TermForge && global.TermForge.asciiMotion;
-        const source = motionOrClip && typeof motionOrClip === "object" ? motionOrClip : CLIPS[motionOrClip];
-        if (!am || !source || !host || !host.querySelector) return null;
+        const inline = motionOrClip && typeof motionOrClip === "object";
+        if (!am || !host || !host.querySelector) return null;
+        if (!inline && !clipName(motionOrClip)) return null;
         if (!global.document || !global.document.createElement) return null;
         let clip;
         try {
-            clip = am.parse(source);
+            clip = inline ? am.parse(motionOrClip) : library().get(motionOrClip);
         } catch (_err) {
             return null;
         }
@@ -371,11 +413,16 @@
         FLAG_FX,
         commands: COMMANDS,
         describe,
+        motionFor,
         apply,
         extractFlags,
         playClip,
         registerClip,
         clipFor,
+        clipName,
+        onStage,
+        stageMotions,
+        library,
         clearStage,
     };
 })(typeof globalThis !== "undefined" ? globalThis : this);
