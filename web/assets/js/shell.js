@@ -141,9 +141,28 @@
         toast(`+${amount} XP — ${label}`);
     }
 
+    // ── page art ────────────────────────────────────────────────────────
+    // Art in the page shell (<pre data-art="name">) is drawn from the same
+    // ASCII Motion clips as the game (motion/art/, bundled in art-clips.js).
+    function paintArt(root) {
+        const am = global.TermForge && global.TermForge.asciiMotion;
+        const clips = global.BashcrawlArtClips || {};
+        if (!am || !root) return;
+        root.querySelectorAll("[data-art]").forEach((node) => {
+            const source = clips[node.dataset.art];
+            if (!source) return;
+            try {
+                node.textContent = am.renderFrame(am.parse(source), 0).text;
+            } catch (_err) {
+                node.textContent = "";
+            }
+        });
+    }
+
     // ── landing overlay ─────────────────────────────────────────────────
     function showLanding() {
         if (!dom.landing) return;
+        paintArt(dom.landing);
         dom.landing.hidden = false;
         const choose = (launch) => {
             prefs.onboarded = true;

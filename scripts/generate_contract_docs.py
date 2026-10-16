@@ -84,12 +84,62 @@ def _render_runtime_commands(data: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _render_motion(data: dict[str, Any]) -> str:
+    lines = [
+        "# Motion Clips and Art",
+        "",
+        "Generated from `src/help/data/motion.yaml`. Every file below is an",
+        "[ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) `.asciimtn`",
+        "session: open it at <https://ascii-motion.app>, edit, export a session, and",
+        "replace the file. Workflow:",
+        "[docs/termforge/ascii-motion.md](../termforge/ascii-motion.md).",
+        "",
+        "## Stage clips",
+        "",
+        "| Motion | Title | Aliases | File | Plays on |",
+        "|---|---|---|---|---|",
+    ]
+    for name, entry in (data.get("clips") or {}).items():
+        aliases = ", ".join(f"`{a}`" for a in entry.get("aliases") or []) or "—"
+        lines.append(
+            f"| `{name}` | {entry.get('title', '')} | {aliases} | `{entry.get('file', '')}` "
+            f"| {entry.get('description', '')} |"
+        )
+    lines += ["", "Game events that replace the command's motion (first match wins):", ""]
+    for rule in data.get("events") or []:
+        lines.append(f"- `{rule.get('event')}` → `{rule.get('motion')}`")
+    lines += [
+        "",
+        "## Art",
+        "",
+        "Static one-frame clips drawn with `Shell#art(name)`.",
+        "",
+        "| Name | Title | File | Used for |",
+        "|---|---|---|---|",
+    ]
+    for name, entry in (data.get("art") or {}).items():
+        lines.append(
+            f"| `{name}` | {entry.get('title', '')} | `{entry.get('file', '')}` "
+            f"| {entry.get('description', '')} |"
+        )
+    core = sorted(p.stem for p in (ROOT / "termforge/motion").glob("*.asciimtn"))
+    lines += [
+        "",
+        "Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`;",
+        "an app's `art` option overrides them by name): "
+        + ", ".join(f"`{name}`" for name in core)
+        + ".",
+    ]
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     rooms = _load_yaml("rooms.yaml")
     quests = _load_yaml("quests.yaml")
     runtime_commands = _load_yaml("runtime_commands.yaml")
+    motion = _load_yaml("motion.yaml")
 
     (OUT_DIR / "rooms.md").write_text(_render_rooms(rooms), encoding="utf-8")
     (OUT_DIR / "quests.md").write_text(_render_quests(quests), encoding="utf-8")
@@ -98,10 +148,13 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    (OUT_DIR / "motion.md").write_text(_render_motion(motion), encoding="utf-8")
+
     print("✅ Generated docs:")
     print("- docs/generated/rooms.md")
     print("- docs/generated/quests.md")
     print("- docs/generated/runtime-commands.md")
+    print("- docs/generated/motion.md")
     return 0
 
 

@@ -12,41 +12,17 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
     "use strict";
     // TermForge flavour pack — the classic terminal toys. The mechanics live
-    // here; the brandable content (fortune deck, banner art, figlet default)
-    // comes from the Shell's uiText copy deck, so apps ship their own voice
-    // while the framework stays neutral. Randomness goes through this.rng so
+    // here; the brandable content comes from the app: words from the Shell's
+    // uiText copy deck (fortune deck, figlet default), pictures from its ASCII
+    // Motion art clips (banner, cow, sl — core/art.js holds neutral defaults),
+    // so apps ship their own voice while the framework stays neutral. Randomness goes through this.rng so
     // sessions can be deterministic.
 
-    const ART = {
-        cow: (msg) => {
-            const m = String(msg || "Moo.");
-            const top = " " + "_".repeat(m.length + 2);
-            const mid = "< " + m + " >";
-            const bot = " " + "-".repeat(m.length + 2);
-            return [
-                top,
-                mid,
-                bot,
-                "        \\   ^__^",
-                "         \\  (oo)\\_______",
-                "            (__)\\       )\\/\\",
-                "                ||----w |",
-                "                ||     ||",
-            ].join("\n");
-        },
-        sl: [
-            "      ====        ________                ___________",
-            "  _D _|  |_______/        \\__I_I_____===__|_________|",
-            "   |(_)---  |   H\\________/ |   |        =|___ ___|",
-            "   /     |  |   H  |  |     |   |         ||_| |_||",
-            "  |      |  |   H  |__--------------------| [___] |",
-            "  | ________|___H__/__|_____/[][]~\\_______|       |",
-            "  |/ |   |-----------I_____I [][] []  D   |=======|__",
-            "__/ =| o |=-O=====O=====O=====O \\ ____Y___________|__|",
-            " |/-=|___|=    ||    ||    ||    |_____/~\\___/   ",
-            "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/         ",
-        ].join("\n"),
-    };
+    // Speech bubble for cowsay; the cow itself is the `cow` art clip.
+    function bubble(msg) {
+        const m = String(msg || "Moo.");
+        return [" " + "_".repeat(m.length + 2), "< " + m + " >", " " + "-".repeat(m.length + 2)].join("\n");
+    }
 
     const commands = {
         fortune() {
@@ -58,7 +34,7 @@
 
         cowsay(args, stdin) {
             const msg = (args.length ? args.join(" ") : stdin) || "Moo.";
-            return [{ kind: "art", text: ART.cow(msg) }];
+            return [{ kind: "art", text: `${bubble(msg)}\n${this.art("cow")}` }];
         },
 
         figlet(args) {
@@ -68,11 +44,11 @@
         },
 
         banner() {
-            return [{ kind: "art", text: this.text("bannerArt") }];
+            return [{ kind: "art", text: this.art("banner") }];
         },
 
         sl() {
-            return [{ kind: "art", text: ART.sl + "\n     (Sometimes typos take you for a ride. Try `ls`.)" }];
+            return [{ kind: "art", text: this.art("sl") + "\n     (Sometimes typos take you for a ride. Try `ls`.)" }];
         },
     };
 
@@ -84,5 +60,5 @@
         sl: { summary: "a train rolls by", usage: "sl" },
     };
 
-    return { name: "flavour", commands, meta, ART };
+    return { name: "flavour", commands, meta };
 });

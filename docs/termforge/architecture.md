@@ -23,13 +23,15 @@ termforge/
     sinks/ansi.js       AnsiSink (kind -> SGR, CRLF, erase-screen clear)
     input.js            historyStep/applyCompletion + LineEditor + byte decoder (arrows, PgUp, SGR mouse)
     session.js          shared command lifecycle, host capabilities, persistence, pager
-    ascii-motion.js     ASCII Motion export player + cell-grid effects (no DOM)
+    ascii-motion.js     ASCII Motion player: every export + session v1/v2, effects, Library (no DOM)
+    art.js              GENERATED from termforge/motion/*.asciimtn: default art (banner, cow, sl)
   node/                 node-only hosts (never vendored)
     index.js            the framework namespace for require()
     data-loader.js      reads web/data/*.json from disk
     cli.js              argv parsing + app resolution
     file-store.js       atomic JSON persistence for local sessions
     motion.js           generic stage presentation (apps supply the plan)
+    motion-cli.js       inspect / preview / convert ASCII Motion files (info, play, session, from-text)
     host-tty.js         local terminal host (full-screen HUD, raw mode, or piped line mode)
     pixels.js           PixelBuffer + half-block PixelScreen: a cols×(2·rows) 24-bit framebuffer in ANSI
     gem.js              hidden gem: DAEMON STORM, a pixel shooter overlay (Konami / xyzzy in HUD mode)
@@ -40,6 +42,7 @@ termforge/
     bashcrawl.js        the game as an App descriptor for the node hosts
     bashcrawl-motion.js game-specific FX catalog and stage planning
     procwatch/          demo monitoring tool: live metrics as VFS provider files
+  motion/               the framework's default art as .asciimtn sessions (-> core/art.js)
   test/                 node --test suites + golden fixtures + vm harness
 ```
 
@@ -71,7 +74,11 @@ Files with dependencies resolve them per environment (`require("./parser.js")` u
 
 ## ASCII Motion
 
-`core/ascii-motion.js` (`TermForge.asciiMotion`) plays exports from [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion): JSON (`frames[].content` plus color maps), text (frames split on a lone `,`), HTML frame grids (`characters` / `colors` / `backgrounds`), and session v1 (`.asciimtn`, `animation.frames[].data`). `parse` returns a clip; `Player` steps it; `renderFrame` returns cells, plain text, 24-bit ANSI, and Line-protocol `art` records. Live effects match the editor's cell processors (`levels`, `hue-saturation`, `remap-colors`, `remap-characters`, `scatter`) plus playback-only `wave-warp`, `wiggle`, and `motion-trails`. Session v2 layer timelines are not flattened — export JSON or text. The browser and `apps/bashcrawl-motion.js` use the same game FX catalog. `node/motion.js` only presents an app-supplied plan. On a wide terminal the clip plays in a labeled `stage` section at the bottom of the sidebar, not in the log. Color washes, header attention, toasts, and HUD layout options stay separate. At small sizes the stage is suppressed to preserve reading space; reduced motion holds one static frame. Stream hosts have no animated cursor effects. The kernel stays free of those clips.
+All art is [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) files. Nothing is drawn from string literals in code. `core/ascii-motion.js` (`TermForge.asciiMotion`) plays every format the editor writes: JSON and text exports, HTML frame grids, session v1, and session v2 layer timelines. For v2 it flattens layers, groups, keyframed transforms with the editor's easing, and effect tracks. The cell effects use the editor's own settings: `levels`, `hue-saturation`, `remap-colors`, `remap-characters`, `scatter`, `wave-warp`, `wiggle`, and `motion-trails`. `Library` names clips for an app. The Shell owns one, holding `core/art.js` defaults under the app's `art` option, and `Shell#art(name)` renders a clip as text. That is how the flavour pack draws `banner`/`cowsay`/`sl` and how the game draws portraits, vignettes, and banners.
+
+The command stage uses the same files. `motion/clips/` is registered in `src/help/data/motion.yaml`, along with aliases, the stage set, and event overrides, and is bundled into `fx-clips.js`. The browser (`fx.js`) and `apps/bashcrawl-motion.js` read that one manifest. `node/motion.js` only presents an app-supplied plan. On a wide terminal the clip plays in a labeled `stage` section at the bottom of the sidebar, not in the log. Color washes, header attention, toasts, and HUD layout options stay separate. At small sizes the stage is suppressed to preserve reading space, and reduced motion holds one static frame. Stream hosts have no animated cursor effects.
+
+Authoring workflow, CLI, and what is and isn't rendered: [ascii-motion.md](ascii-motion.md).
 
 ## The Shell and its hook spine
 

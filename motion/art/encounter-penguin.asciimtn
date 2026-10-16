@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "name": "encounter-penguin",
+  "description": "",
+  "canvas": {"width":21,"height":8,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "8,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "9,0": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "10,0": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "11,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "7,1": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "8,1": {"char":"o","color":"#ffffff","bgColor":"transparent"},
+          "11,1": {"char":"o","color":"#ffffff","bgColor":"transparent"},
+          "12,1": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "7,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "9,2": {"char":"<","color":"#ffffff","bgColor":"transparent"},
+          "10,2": {"char":">","color":"#ffffff","bgColor":"transparent"},
+          "12,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "6,3": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "7,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "12,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "13,3": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "5,4": {"char":"`","color":"#ffffff","bgColor":"transparent"},
+          "7,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "12,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "14,4": {"char":"`","color":"#ffffff","bgColor":"transparent"},
+          "7,5": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "8,5": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "9,5": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "10,5": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "11,5": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "12,5": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "7,6": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "12,6": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "5,7": {"char":"a","color":"#ffffff","bgColor":"transparent"},
+          "7,7": {"char":"d","color":"#ffffff","bgColor":"transparent"},
+          "8,7": {"char":"a","color":"#ffffff","bgColor":"transparent"},
+          "9,7": {"char":"p","color":"#ffffff","bgColor":"transparent"},
+          "10,7": {"char":"p","color":"#ffffff","bgColor":"transparent"},
+          "11,7": {"char":"e","color":"#ffffff","bgColor":"transparent"},
+          "12,7": {"char":"r","color":"#ffffff","bgColor":"transparent"},
+          "14,7": {"char":"p","color":"#ffffff","bgColor":"transparent"},
+          "15,7": {"char":"e","color":"#ffffff","bgColor":"transparent"},
+          "16,7": {"char":"n","color":"#ffffff","bgColor":"transparent"},
+          "17,7": {"char":"g","color":"#ffffff","bgColor":"transparent"},
+          "18,7": {"char":"u","color":"#ffffff","bgColor":"transparent"},
+          "19,7": {"char":"i","color":"#ffffff","bgColor":"transparent"},
+          "20,7": {"char":"n","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

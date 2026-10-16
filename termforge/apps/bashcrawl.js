@@ -22,6 +22,8 @@ const { loadWebData } = require("../node/data-loader.js");
 function loadGameRuntime() {
     if (!globalThis.BashcrawlRuntime) {
         globalThis.TermForge = globalThis.TermForge || require("../node/index.js");
+        // The game's ASCII Motion art (generated from motion/art/ by make web-build).
+        require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "art-clips.js"));
         require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "runtime.js"));
     }
     if (!globalThis.BashcrawlHud) {
@@ -59,7 +61,7 @@ function createApp(options = {}) {
                     return session.runtime.execute(line);
                 },
                 banner: [
-                    { kind: "banner", text: runtime.uiText.bannerArt },
+                    { kind: "banner", text: runtime.art("banner") },
                     { kind: "info", text: "Welcome to Bashcrawl on the TermForge terminal." },
                     { kind: "dim", text: "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi." },
                     { kind: "dim", text: "Mini-games: train · speedrun · pathfind. Ctrl+D leaves." },

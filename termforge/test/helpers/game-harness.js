@@ -36,6 +36,8 @@ const RUNTIME_FILES = [
     path.join(VENDOR_JS, "input.js"),
     path.join(VENDOR_JS, "session.js"),
     path.join(VENDOR_JS, "ascii-motion.js"),
+    path.join(VENDOR_JS, "art.js"),
+    path.join(WEB_JS, "art-clips.js"),
     path.join(WEB_JS, "runtime.js"),
 ];
 

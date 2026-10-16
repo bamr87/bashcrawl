@@ -11,13 +11,15 @@
     "use strict";
     // ASCII Motion playback for TermForge.
     //
-    // Loads the open export formats from https://github.com/cameronfoxly/Ascii-Motion
-    // (JSON export, text export, HTML frame grids, session v1 .asciimtn) and steps
-    // them as cell grids. Timeline effects that ASCII Motion bakes at export time
-    // can also be applied live: levels, hue-saturation, remap-colors,
-    // remap-characters, scatter, plus playback effects wave-warp, wiggle, and
-    // motion-trails. No DOM, no node:*. Session v2 layer timelines are not
-    // flattened here — export JSON or text for playback.
+    // Loads every open file format from https://github.com/cameronfoxly/Ascii-Motion
+    // (MIT): JSON export, text export, HTML frame grids, session v1 .asciimtn, and
+    // session v2 .asciimtn layer timelines (flattened: layers, groups, keyframed
+    // transforms with the editor's easing, effect tracks). Clips step as cell
+    // grids. The editor's cell effects run live with its own settings: levels,
+    // hue-saturation, remap-colors, remap-characters, scatter, wave-warp, wiggle,
+    // motion-trails. Library names clips for an app; toSession/toText write files
+    // the editor opens. No DOM, no node:*. Generator layers and WebGL post effects
+    // are not rendered (flattenSession lists them in clip.warnings).
 
     const FORMAT = "ascii-motion-json-1";
     const EFFECT_TYPES = Object.freeze([
@@ -256,6 +258,7 @@
         const kept = frames.length ? frames : [frameFromContent({ content: [""], duration: 100 }, 1, 1, 0)];
         const size = bounds(kept, 0, 0);
         return finish({
+            source: "text",
             title: "",
             width: size.width,
             height: size.height,
@@ -279,16 +282,18 @@
 
     function parse(input) {
         if (typeof input === "string") {
-            const raw = input.replace(/^\uFEFF/, "").trim();
-            if (!raw) throw new Error("empty ASCII Motion export");
-            if (raw[0] === "{" || raw[0] === "[") return parse(JSON.parse(raw));
+            const raw = input.replace(/^\uFEFF/, "");
+            const head = raw.trim();
+            if (!head) throw new Error("empty ASCII Motion export");
+            if (head[0] === "{" || head[0] === "[") return parse(JSON.parse(head));
+            // Untrimmed: the first line's indentation is part of the art.
             return parseText(raw);
         }
         if (!input || typeof input !== "object") {
             throw new Error("ASCII Motion clip must be an object or export string");
         }
         if (Array.isArray(input.layers) && !input.frames && !(input.animation && input.animation.frames)) {
-            throw new Error("ASCII Motion session v2 is not flattened; export JSON or text");
+            return flattenSession(input);
         }
         if (input.format === FORMAT && Array.isArray(input.frames) && input.frames[0] && Array.isArray(input.frames[0].cells)) {
             const frames = input.frames.map((frame) => frameFromCells(frame, input.frameRate));
@@ -303,6 +308,8 @@
                 currentFrame: Number(input.currentFrame) || 0,
                 frames,
                 effects: effectsOf(input),
+                warnings: Array.isArray(input.warnings) ? input.warnings.slice() : [],
+                source: input.source || "clip",
             });
         }
         const sessionFrames = input.animation && Array.isArray(input.animation.frames)
@@ -323,14 +330,19 @@
             || input.name
             || "";
         let frames;
+        let source;
         if (sessionFrames && sessionFrames[0] && sessionFrames[0].data && !sessionFrames[0].content) {
             frames = sessionFrames.map((frame) => frameFromMap(frame, frameRate));
+            source = "session-v1";
         } else if (Array.isArray(input.frames) && input.frames[0] && input.frames[0].characters) {
             frames = input.frames.map((frame) => frameFromGrid(frame, frameRate));
+            source = "html-grid";
         } else if (Array.isArray(input.frames) && input.frames[0] && Array.isArray(input.frames[0].cells)) {
             frames = input.frames.map((frame) => frameFromCells(frame, frameRate));
+            source = "json-cells";
         } else if (Array.isArray(input.frames) && input.frames[0] && (input.frames[0].content != null || input.frames[0].contentString != null)) {
             frames = input.frames.map((frame) => frameFromContent(frame, width, height, frameRate));
+            source = "json";
         } else if (typeof input.text === "string") {
             return parseText(input.text);
         } else {
@@ -338,6 +350,7 @@
         }
         const size = bounds(frames, width, height);
         return finish({
+            source,
             title,
             width: size.width,
             height: size.height,
@@ -553,53 +566,143 @@
         return [...out.values()];
     }
 
+    // Time effects use the editor's settings and math (timeEffectsProcessing.ts):
+    // time is the elapsed playback in ms, and cells pushed off the canvas drop.
+    function elapsedOf(ctx) {
+        if (!ctx) return 0;
+        if (ctx.elapsed != null) return Number(ctx.elapsed) || 0;
+        const fps = Number(ctx.frameRate) || 12;
+        return ((Number(ctx.frame) || 0) / fps) * 1000;
+    }
+
+    function placeShifted(cells, ctx, shift) {
+        const w = ctx && ctx.width;
+        const h = ctx && ctx.height;
+        const out = new Map();
+        for (const item of cells) {
+            const next = shift(item);
+            if (w && h && (next.x < 0 || next.y < 0 || next.x >= w || next.y >= h)) continue;
+            out.set(`${next.x},${next.y}`, next);
+        }
+        return [...out.values()];
+    }
+
     function effectWave(cells, settings, ctx) {
         const amplitude = Number(settings.amplitude) || 0;
-        if (!amplitude) return copyCells(cells);
-        const wavelength = Number(settings.wavelength) || 8;
-        const speed = settings.speed == null ? 1 : Number(settings.speed);
-        const phase = ((ctx && ctx.elapsed) || 0) / 1000 * speed * Math.PI * 2;
-        const axis = settings.axis === "y" ? "y" : "x";
-        return cells.map((item) => {
-            const along = axis === "y" ? item.x : item.y;
-            const shift = Math.round(Math.sin((along / wavelength) * Math.PI * 2 + phase) * amplitude);
-            return axis === "y"
-                ? { ...item, y: item.y + shift }
-                : { ...item, x: item.x + shift };
+        const frequency = Number(settings.frequency) || 0;
+        const speed = Number(settings.speed) || 0;
+        const phase = (elapsedOf(ctx) * speed / 1000) + ((Number(settings.phase) || 0) * Math.PI / 180);
+        const vertical = settings.axis === "vertical";
+        return placeShifted(cells, ctx, (item) => {
+            const along = vertical ? item.y : item.x;
+            const shift = Math.round(amplitude * Math.sin((along * frequency * Math.PI / 10) + phase));
+            return vertical ? { ...item, x: item.x + shift } : { ...item, y: item.y + shift };
         });
+    }
+
+    // 2D simplex noise, ported from simplex-noise 4.0.3 (MIT, Jonas Wagner) so the
+    // wiggle "noise" mode lands on the same offsets as the editor.
+    const SQRT3 = Math.sqrt(3);
+    const F2 = 0.5 * (SQRT3 - 1);
+    const G2 = (3 - SQRT3) / 6;
+    const GRAD2 = [1, 1, -1, 1, 1, -1, -1, -1, 1, 0, -1, 0, 1, 0, -1, 0, 0, 1, 0, -1, 0, 1, 0, -1];
+    const noiseCache = new Map();
+
+    function createNoise2D(random) {
+        const perm = new Uint8Array(512);
+        for (let i = 0; i < 256; i += 1) perm[i] = i;
+        for (let i = 0; i < 255; i += 1) {
+            const r = i + ~~(random() * (256 - i));
+            const aux = perm[i];
+            perm[i] = perm[r];
+            perm[r] = aux;
+        }
+        for (let i = 256; i < 512; i += 1) perm[i] = perm[i - 256];
+        const gx = Array.from(perm, (v) => GRAD2[(v % 12) * 2]);
+        const gy = Array.from(perm, (v) => GRAD2[(v % 12) * 2 + 1]);
+        const corner = (t, gi, x, y) => {
+            if (t < 0) return 0;
+            const tt = t * t;
+            return tt * tt * (gx[gi] * x + gy[gi] * y);
+        };
+        return function noise2D(x, y) {
+            const s = (x + y) * F2;
+            const i = Math.floor(x + s) | 0;
+            const j = Math.floor(y + s) | 0;
+            const t = (i + j) * G2;
+            const x0 = x - (i - t);
+            const y0 = y - (j - t);
+            const i1 = x0 > y0 ? 1 : 0;
+            const j1 = x0 > y0 ? 0 : 1;
+            const x1 = x0 - i1 + G2;
+            const y1 = y0 - j1 + G2;
+            const x2 = x0 - 1 + 2 * G2;
+            const y2 = y0 - 1 + 2 * G2;
+            const ii = i & 255;
+            const jj = j & 255;
+            return 70 * (
+                corner(0.5 - x0 * x0 - y0 * y0, ii + perm[jj], x0, y0) +
+                corner(0.5 - x1 * x1 - y1 * y1, ii + i1 + perm[jj + j1], x1, y1) +
+                corner(0.5 - x2 * x2 - y2 * y2, ii + 1 + perm[jj + 1], x2, y2)
+            );
+        };
+    }
+
+    function noiseFor(seed) {
+        const key = Number(seed) || 0;
+        if (!noiseCache.has(key)) noiseCache.set(key, createNoise2D(() => key / 9999));
+        return noiseCache.get(key);
     }
 
     function effectWiggle(cells, settings, ctx) {
-        const amount = Number(settings.amount) || 0;
-        if (!amount) return copyCells(cells);
-        const speed = settings.speed == null ? 4 : Number(settings.speed);
-        const bucket = Math.floor((((ctx && ctx.elapsed) || 0) / 1000) * speed);
-        const rng = seededRng((Number(settings.seed) || 1) + bucket * 997);
-        return cells.map((item) => {
-            const dx = rng.nextInt(-amount, amount);
-            const dy = rng.nextInt(-amount, amount);
-            return { ...item, x: item.x + dx, y: item.y + dy };
-        });
+        const time = elapsedOf(ctx);
+        let dx = 0;
+        let dy = 0;
+        if (settings.mode === "horizontal-wave" || settings.mode === "vertical-wave") {
+            const offset = Math.round((Number(settings.waveAmplitude) || 0) *
+                Math.sin(time * (Number(settings.waveFrequency) || 0) / 1000));
+            if (settings.mode === "horizontal-wave") dx = offset;
+            else dy = offset;
+        } else if (settings.mode === "noise") {
+            const noise = noiseFor(settings.noiseSeed);
+            const scale = time / 1000;
+            const octaves = Math.max(0, Number(settings.noiseOctaves) || 0);
+            for (let octave = 0; octave < octaves; octave += 1) {
+                const k = Math.pow(2, octave);
+                dx += ((Number(settings.noiseHAmplitude) || 0) / k) *
+                    noise(scale * (Number(settings.noiseHFrequency) || 0) * k, 0);
+                dy += ((Number(settings.noiseVAmplitude) || 0) / k) *
+                    noise(0, scale * (Number(settings.noiseVFrequency) || 0) * k);
+            }
+            dx = Math.round(dx);
+            dy = Math.round(dy);
+        }
+        return placeShifted(cells, ctx, (item) => ({ ...item, x: item.x + dx, y: item.y + dy }));
     }
 
-    function effectTrails(cells, _settings, ctx) {
-        const clip = ctx && ctx.clip;
-        const index = ctx && ctx.index;
-        if (!clip || index == null) return copyCells(cells);
-        const length = Math.max(0, Number(_settings.length) || 2);
-        const decay = _settings.decay == null ? 0.45 : Number(_settings.decay);
-        const bg = clip.backgroundColor === "transparent" ? "#000000" : clip.backgroundColor;
+    const TRAIL_COLORS = Object.freeze([
+        "#aaaaaa", "#999999", "#888888", "#777777", "#666666",
+        "#555555", "#444444", "#333333", "#282828", "#222222",
+    ]);
+
+    // Screen-space: trails read earlier frames through ctx.composite(frame) on a
+    // flattened session, or the clip's own frames for a flat export.
+    function effectTrails(cells, settings, ctx) {
+        const count = Math.round(Math.max(1, Math.min(10, settings.trailCount == null ? 3 : Number(settings.trailCount))));
+        const delay = Math.round(Math.max(1, Math.min(30, settings.frameDelay == null ? 2 : Number(settings.frameDelay))));
+        let lookup = ctx && ctx.composite;
+        if (!lookup && ctx && ctx.clip) {
+            lookup = (index) => (ctx.clip.frames[index] ? ctx.clip.frames[index].cells : []);
+        }
+        const current = ctx && (ctx.frame != null ? ctx.frame : ctx.index);
+        if (!lookup || current == null) return copyCells(cells);
         const layered = new Map();
-        for (let step = length; step >= 1; step -= 1) {
-            const prev = clip.frames[index - step];
-            if (!prev) continue;
-            const opacity = Math.pow(decay, step);
-            for (const item of prev.cells) {
-                layered.set(`${item.x},${item.y}`, {
-                    ...item,
-                    color: mixHex(bg, item.color, opacity),
-                    bgColor: item.bgColor === "transparent" ? "transparent" : mixHex(bg, item.bgColor, opacity),
-                });
+        for (let i = count; i >= 1; i -= 1) {
+            const at = current - i * delay;
+            if (at < 0) continue;
+            const color = normalizeColor(settings[`trailColor${i}`], TRAIL_COLORS[i - 1]);
+            for (const item of lookup(at) || []) {
+                if (item.char && item.char !== " ") layered.set(`${item.x},${item.y}`, { ...item, color });
             }
         }
         for (const item of cells) layered.set(`${item.x},${item.y}`, { ...item });
@@ -617,19 +720,430 @@
         "motion-trails": effectTrails,
     };
 
+    // The editor's defaultSettings per effect (src/registry/effects/*.ts).
+    const EFFECT_DEFAULTS = Object.freeze({
+        levels: { shadowsInput: 0, midtonesInput: 50, highlightsInput: 255, outputMin: 0, outputMax: 255 },
+        "hue-saturation": { hue: 0, saturation: 0, lightness: 0 },
+        "remap-colors": { colorMappings: {}, matchExact: true },
+        "remap-characters": { characterMappings: {} },
+        scatter: { strength: 50, scatterType: "noise", seed: 0, blendColors: false },
+        "wave-warp": { axis: "horizontal", frequency: 1, amplitude: 5, speed: 5, phase: 0 },
+        wiggle: {
+            mode: "horizontal-wave", waveFrequency: 1, waveAmplitude: 3, noiseOctaves: 3,
+            noiseHFrequency: 1, noiseHAmplitude: 10, noiseVFrequency: 1, noiseVAmplitude: 10, noiseSeed: 0,
+        },
+        "motion-trails": { trailCount: 3, frameDelay: 2 },
+    });
+    const SCREEN_SPACE = new Set(["motion-trails"]);
+
     function applyEffect(type, cells, settings, ctx) {
         const fn = EFFECTS[type];
         if (!fn) throw new Error(`unknown ASCII Motion effect: ${type}`);
-        return fn(cells || [], settings || {}, ctx || {});
+        return fn(cells || [], { ...EFFECT_DEFAULTS[type], ...(settings || {}) }, ctx || {});
     }
 
     function applyEffects(cells, effects, ctx) {
         let current = cells || [];
         for (const effect of effects || []) {
             if (!effect || !EFFECTS[effect.type]) continue;
-            current = EFFECTS[effect.type](current, effect, ctx || {});
+            current = EFFECTS[effect.type](current, { ...EFFECT_DEFAULTS[effect.type], ...effect }, ctx || {});
         }
         return current;
+    }
+
+    // ── Session v2: layer timelines ──────────────────────────────────────
+    // Mirrors the editor's compositor (layerCompositing.ts + easing.ts): content
+    // frames per layer, keyframed transforms with cubic-bezier easing, layer
+    // groups, solo/visibility, and effect tracks at layer, group, and global
+    // scope. Each timeline frame is composited, then identical neighbours merge.
+
+    const CELL_ASPECT_RATIO = 0.6;
+    const EASING_PRESETS = Object.freeze({
+        linear: [0, 0, 1, 1],
+        hold: [0, 0, 0, 0],
+        "ease-in": [0.42, 0, 1, 1],
+        "ease-out": [0, 0, 0.58, 1],
+        "ease-in-out": [0.42, 0, 0.58, 1],
+        "ease-out-back": [0.34, 1.56, 0.64, 1],
+        "ease-in-back": [0.36, 0, 0.66, -0.56],
+        bounce: [0.34, 1.4, 0.64, 1],
+    });
+    const TRANSFORM_DEFAULTS = Object.freeze({
+        "transform.position.x": 0,
+        "transform.position.y": 0,
+        "transform.scale.x": 1,
+        "transform.scale.y": 1,
+        "transform.rotation": 0,
+        "transform.anchorPoint.x": 0,
+        "transform.anchorPoint.y": 0,
+    });
+
+    function bezier(t, p1, p2) {
+        const mt = 1 - t;
+        return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
+    }
+
+    function solveBezierX(x, x1, x2) {
+        let t = x;
+        for (let i = 0; i < 8; i += 1) {
+            const err = bezier(t, x1, x2) - x;
+            if (Math.abs(err) < 1e-7) return t;
+            const mt = 1 - t;
+            const slope = 3 * mt * mt * x1 + 6 * mt * t * (x2 - x1) + 3 * t * t * (1 - x2);
+            if (Math.abs(slope) < 1e-12) break;
+            t -= err / slope;
+        }
+        let lo = 0;
+        let hi = 1;
+        t = x;
+        for (let i = 0; i < 10; i += 1) {
+            const err = bezier(t, x1, x2) - x;
+            if (Math.abs(err) < 1e-7) return t;
+            if (err > 0) hi = t;
+            else lo = t;
+            t = (lo + hi) / 2;
+        }
+        return t;
+    }
+
+    function evaluateEasing(progress, easing) {
+        if (progress <= 0) return 0;
+        if (progress >= 1) return 1;
+        const curve = easing || { type: "linear" };
+        if (curve.type === "hold") return 0;
+        if (curve.type === "linear" || (!EASING_PRESETS[curve.type] && curve.type !== "custom")) return progress;
+        const pts = curve.type === "custom"
+            ? [curve.x1 == null ? 0 : curve.x1, curve.y1 == null ? 0 : curve.y1, curve.x2 == null ? 1 : curve.x2, curve.y2 == null ? 1 : curve.y2]
+            : EASING_PRESETS[curve.type];
+        return bezier(solveBezierX(progress, pts[0], pts[2]), pts[1], pts[3]);
+    }
+
+    function interpolateKeyframes(keyframes, frame, loop) {
+        const sorted = (keyframes || []).slice().sort((a, b) => a.frame - b.frame);
+        if (!sorted.length) return undefined;
+        if (sorted.length === 1) return sorted[0].value;
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+        let f = frame;
+        const span = last.frame - first.frame;
+        if (loop && span > 0) f = first.frame + (((frame - first.frame) % span) + span) % span;
+        if (f <= first.frame) return first.value;
+        if (f >= last.frame) return last.value;
+        for (let i = 0; i < sorted.length - 1; i += 1) {
+            const a = sorted[i];
+            const b = sorted[i + 1];
+            if (f < a.frame || f > b.frame) continue;
+            if (typeof a.value !== "number" || typeof b.value !== "number") {
+                return f >= b.frame ? b.value : a.value;
+            }
+            if (a.frame === b.frame) return a.value;
+            return a.value + (b.value - a.value) * evaluateEasing((f - a.frame) / (b.frame - a.frame), a.easing);
+        }
+        return last.value;
+    }
+
+    function propertyAt(owner, path, frame) {
+        const track = (owner.propertyTracks || []).find((t) => t && t.propertyPath === path);
+        if (track && track.keyframes && track.keyframes.length) {
+            const value = Number(interpolateKeyframes(track.keyframes, frame, track.loopKeyframes));
+            if (Number.isFinite(value)) return value;
+        }
+        const fixed = owner.staticProperties && owner.staticProperties[path];
+        if (fixed != null && Number.isFinite(Number(fixed))) return Number(fixed);
+        return TRANSFORM_DEFAULTS[path] || 0;
+    }
+
+    function transformAt(owner, frame) {
+        return {
+            x: propertyAt(owner, "transform.position.x", frame),
+            y: propertyAt(owner, "transform.position.y", frame),
+            sx: propertyAt(owner, "transform.scale.x", frame),
+            sy: propertyAt(owner, "transform.scale.y", frame),
+            rot: propertyAt(owner, "transform.rotation", frame),
+            ax: propertyAt(owner, "transform.anchorPoint.x", frame),
+            ay: propertyAt(owner, "transform.anchorPoint.y", frame),
+        };
+    }
+
+    function rotate(x, y, degrees) {
+        if (!degrees) return { x, y };
+        const rad = (degrees * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        const sx = x * CELL_ASPECT_RATIO;
+        return {
+            x: Math.round((sx * cos - y * sin) / CELL_ASPECT_RATIO),
+            y: Math.round(sx * sin + y * cos),
+        };
+    }
+
+    function visibleCell(item) {
+        return Boolean(item && ((item.char && item.char !== " ") || (item.bgColor && item.bgColor !== "transparent")));
+    }
+
+    // Place a layer's local cells on the canvas: identity is a straight copy;
+    // anything else inverse-maps each destination cell (no gaps on scale/rotate).
+    function placeCells(source, t, width, height) {
+        const out = new Map();
+        const identity = !t.x && !t.y && t.sx === 1 && t.sy === 1 && !t.rot;
+        if (identity) {
+            for (const [key, item] of source) {
+                if (!visibleCell(item)) continue;
+                if (item.x < 0 || item.y < 0 || item.x >= width || item.y >= height) continue;
+                out.set(key, item);
+            }
+            return out;
+        }
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const item of source.values()) {
+            minX = Math.min(minX, item.x);
+            maxX = Math.max(maxX, item.x);
+            minY = Math.min(minY, item.y);
+            maxY = Math.max(maxY, item.y);
+        }
+        if (minX === Infinity) return out;
+        const forward = (x, y) => {
+            const r = rotate((x - t.ax) * t.sx, (y - t.ay) * t.sy, t.rot);
+            return { x: Math.round(r.x + t.ax + t.x), y: Math.round(r.y + t.ay + t.y) };
+        };
+        const corners = [forward(minX, minY), forward(maxX + 1, minY), forward(minX, maxY + 1), forward(maxX + 1, maxY + 1)];
+        const x0 = Math.max(0, Math.min(...corners.map((c) => c.x)) - 1);
+        const x1 = Math.min(width - 1, Math.max(...corners.map((c) => c.x)) + 1);
+        const y0 = Math.max(0, Math.min(...corners.map((c) => c.y)) - 1);
+        const y1 = Math.min(height - 1, Math.max(...corners.map((c) => c.y)) + 1);
+        for (let sy = y0; sy <= y1; sy += 1) {
+            for (let sx = x0; sx <= x1; sx += 1) {
+                const r = rotate(sx - t.x - t.ax, sy - t.y - t.ay, -t.rot);
+                const lx = t.sx !== 0 ? Math.round(r.x / t.sx + t.ax) : t.ax;
+                const ly = t.sy !== 0 ? Math.round(r.y / t.sy + t.ay) : t.ay;
+                const item = source.get(`${lx},${ly}`);
+                if (visibleCell(item)) out.set(`${sx},${sy}`, { ...item, x: sx, y: sy });
+            }
+        }
+        return out;
+    }
+
+    function cellMapOf(data) {
+        const out = new Map();
+        for (const key of Object.keys(data || {})) {
+            const parts = key.split(",");
+            const x = Number(parts[0]);
+            const y = Number(parts[1]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const item = data[key] || {};
+            out.set(`${x},${y}`, cell(x, y, item.char, item.color, item.bgColor));
+        }
+        return out;
+    }
+
+    function blockSettings(block, frame) {
+        const settings = { ...EFFECT_DEFAULTS[block.effectType], ...(block.settings || {}) };
+        for (const track of block.propertyTracks || []) {
+            if (!track || !track.propertyPath || !track.keyframes || !track.keyframes.length) continue;
+            settings[track.propertyPath] = interpolateKeyframes(track.keyframes, frame, track.loopKeyframes);
+        }
+        return settings;
+    }
+
+    function activeBlocks(tracks, frame, screen) {
+        const out = [];
+        for (const track of tracks || []) {
+            const block = track && (track.effectBlock || track);
+            if (!block || !EFFECTS[block.effectType] || block.enabled === false) continue;
+            if (SCREEN_SPACE.has(block.effectType) !== screen) continue;
+            const start = Number(block.startFrame) || 0;
+            const span = block.durationFrames == null ? Infinity : Number(block.durationFrames);
+            if (frame < start || frame >= start + span) continue;
+            out.push(block);
+        }
+        return out;
+    }
+
+    function runBlocks(cellsMap, blocks, ctx) {
+        if (!blocks.length) return cellsMap;
+        let list = [...cellsMap.values()];
+        for (const block of blocks) {
+            list = EFFECTS[block.effectType](list, blockSettings(block, ctx.frame), ctx);
+        }
+        const out = new Map();
+        for (const item of list) out.set(`${item.x},${item.y}`, item);
+        return out;
+    }
+
+    function contentFrameAt(layer, frame) {
+        for (const cf of layer.contentFrames || []) {
+            const start = Number(cf.startFrame) || 0;
+            const span = cf.durationFrames == null ? 1 : Number(cf.durationFrames);
+            if (frame >= start && frame < start + span) return cf.hidden ? null : cf;
+        }
+        return null;
+    }
+
+    function sessionModel(input) {
+        const canvas = input.canvas || {};
+        const timeline = input.timeline || {};
+        const frameRate = Number(timeline.frameRate) || 12;
+        const layers = (input.layers || []).filter(Boolean).map((layer) => ({
+            ...layer,
+            contentFrames: (layer.contentFrames || []).filter(Boolean).map((cf) => ({ ...cf, cells: cellMapOf(cf.data) })),
+        }));
+        let span = Number(timeline.durationFrames) || 0;
+        if (!span) {
+            for (const layer of layers) {
+                for (const cf of layer.contentFrames) {
+                    span = Math.max(span, (Number(cf.startFrame) || 0) + (cf.durationFrames == null ? 1 : Number(cf.durationFrames)));
+                }
+            }
+        }
+        const groups = new Map();
+        for (const group of input.layerGroups || []) if (group && group.id) groups.set(group.id, group);
+        const warnings = [];
+        for (const layer of layers) {
+            if (layer.kind === "generator") {
+                warnings.push(`generator layer "${layer.name || layer.id}" is not rendered; bake it or export JSON`);
+            }
+        }
+        if (Array.isArray(input.postEffectTracks) && input.postEffectTracks.length) {
+            warnings.push("post effects (WebGL shaders) are not rendered in a terminal");
+        }
+        return {
+            title: input.name || (input.metadata && input.metadata.title) || "",
+            width: Number(canvas.width) || 1,
+            height: Number(canvas.height) || 1,
+            backgroundColor: normalizeColor(canvas.canvasBackgroundColor || canvas.backgroundColor, "#000000"),
+            frameRate,
+            looping: timeline.looping != null ? Boolean(timeline.looping) : Boolean(input.looping),
+            span: Math.max(1, span),
+            layers,
+            groups,
+            globalEffects: input.globalEffects || [],
+            warnings,
+        };
+    }
+
+    function compositeSession(model, frame, opts) {
+        const options = opts || {};
+        const cache = options.cache || new Map();
+        const memoKey = `${options.scope || "all"}@${frame}`;
+        if (cache.has(memoKey)) return cache.get(memoKey);
+        const layers = options.layers || model.layers;
+        const ctxBase = {
+            frame,
+            frameRate: model.frameRate,
+            width: model.width,
+            height: model.height,
+            backgroundColor: model.backgroundColor,
+        };
+        const groupOf = (layer) => (layer.parentGroupId ? model.groups.get(layer.parentGroupId) : null);
+        const shown = (layer) => {
+            const group = groupOf(layer);
+            return layer.visible !== false && !(group && group.visible === false);
+        };
+        const soloed = (layer) => Boolean(layer.solo || (groupOf(layer) && groupOf(layer).solo));
+        const anySolo = layers.some((layer) => shown(layer) && soloed(layer));
+        const result = new Map();
+        const groupBuckets = new Map();
+        for (const layer of layers) {
+            if (!shown(layer) || (anySolo && !soloed(layer))) continue;
+            const cf = layer.kind === "generator" ? null : contentFrameAt(layer, frame);
+            if (!cf) continue;
+            const group = groupOf(layer);
+            let cellsMap = runBlocks(cf.cells, activeBlocks(layer.effectTracks, frame, false), ctxBase);
+            if (group) cellsMap = runBlocks(cellsMap, activeBlocks(group.effectTracks, frame, false), ctxBase);
+            const t = transformAt(layer, frame);
+            if (group) {
+                const g = transformAt(group, frame);
+                t.x += g.x;
+                t.y += g.y;
+                t.sx *= g.sx;
+                t.sy *= g.sy;
+                t.rot += g.rot;
+            }
+            let placed = placeCells(cellsMap, t, model.width, model.height);
+            const screen = options.noScreen ? [] : activeBlocks(layer.effectTracks, frame, true);
+            if (screen.length) {
+                const scope = `layer:${layer.id}`;
+                placed = runBlocks(placed, screen, {
+                    ...ctxBase,
+                    composite: (at) => [...compositeSession(model, at, { cache, scope, layers: [layer], noScreen: true, noGlobal: true }).values()],
+                });
+            }
+            let target = result;
+            if (group && !options.noScreen && activeBlocks(group.effectTracks, frame, true).length) {
+                if (!groupBuckets.has(group.id)) groupBuckets.set(group.id, new Map());
+                target = groupBuckets.get(group.id);
+            }
+            for (const [key, item] of placed) target.set(key, item);
+        }
+        for (const [id, bucket] of groupBuckets) {
+            const group = model.groups.get(id);
+            const scope = `group:${id}`;
+            const members = model.layers.filter((layer) => layer.parentGroupId === id);
+            const done = runBlocks(bucket, activeBlocks(group.effectTracks, frame, true), {
+                ...ctxBase,
+                composite: (at) => [...compositeSession(model, at, { cache, scope, layers: members, noScreen: true, noGlobal: true }).values()],
+            });
+            for (const [key, item] of done) result.set(key, item);
+        }
+        let out = result;
+        if (!options.noGlobal) {
+            out = runBlocks(out, activeBlocks(model.globalEffects, frame, false), ctxBase);
+            const screen = options.noScreen ? [] : activeBlocks(model.globalEffects, frame, true);
+            if (screen.length) {
+                out = runBlocks(out, screen, {
+                    ...ctxBase,
+                    composite: (at) => [...compositeSession(model, at, { cache, scope: "global", noScreen: true }).values()],
+                });
+            }
+        }
+        cache.set(memoKey, out);
+        return out;
+    }
+
+    function frameKey(cells) {
+        return cells.map((item) => `${item.x},${item.y},${item.char},${item.color},${item.bgColor}`).sort().join("|");
+    }
+
+    // Flatten a session v2 timeline into a playable clip. Options: maxFrames
+    // (default 2400) caps the timeline walk; merge:false keeps one clip frame per
+    // timeline frame.
+    function flattenSession(input, opts) {
+        const options = opts || {};
+        const model = sessionModel(input);
+        const limit = Math.max(1, Number(options.maxFrames) || 2400);
+        const steps = Math.min(model.span, limit);
+        if (model.span > limit) model.warnings.push(`timeline truncated to ${limit} of ${model.span} frames`);
+        const step = 1000 / model.frameRate;
+        const cache = new Map();
+        const frames = [];
+        let lastKey = null;
+        for (let f = 0; f < steps; f += 1) {
+            const cells = [...compositeSession(model, f, { cache }).values()];
+            const key = options.merge === false ? null : frameKey(cells);
+            if (key !== null && key === lastKey) {
+                frames[frames.length - 1].duration += step;
+                continue;
+            }
+            frames.push({ duration: step, cells, spanW: model.width, spanH: model.height });
+            lastKey = key;
+        }
+        const clip = finish({
+            source: "session-v2",
+            title: model.title,
+            width: model.width,
+            height: model.height,
+            backgroundColor: model.backgroundColor,
+            frameRate: model.frameRate,
+            looping: model.looping,
+            currentFrame: 0,
+            frames,
+            effects: [],
+        });
+        clip.warnings = model.warnings;
+        return clip;
     }
 
     function renderText(cells, width, height) {
@@ -745,15 +1259,145 @@
         }
     }
 
+    // A named set of clips for an app: sources stay as authored (any format
+    // parse() takes) and are parsed once on first use. Aliases point a motion
+    // name at another clip, e.g. "climb" -> "warp".
+    class Library {
+        constructor(sources, options) {
+            const opts = options || {};
+            this._sources = new Map();
+            this._aliases = new Map();
+            this._parsed = new Map();
+            for (const [name, source] of Object.entries(sources || {})) this.add(name, source);
+            for (const [name, target] of Object.entries(opts.aliases || {})) this.alias(name, target);
+        }
+
+        add(name, source) {
+            if (!name || source == null) return this;
+            this._sources.set(String(name), source);
+            this._aliases.delete(String(name));
+            this._parsed.delete(String(name));
+            return this;
+        }
+
+        alias(name, target) {
+            if (!name || !target || String(name) === String(target)) return this;
+            this._aliases.set(String(name), String(target));
+            return this;
+        }
+
+        resolve(name) {
+            let key = String(name || "");
+            const seen = new Set();
+            while (this._aliases.has(key) && !seen.has(key)) {
+                seen.add(key);
+                key = this._aliases.get(key);
+            }
+            return this._sources.has(key) ? key : null;
+        }
+
+        has(name) {
+            return this.resolve(name) !== null;
+        }
+
+        names() {
+            return [...this._sources.keys()].sort();
+        }
+
+        aliases() {
+            return Object.fromEntries([...this._aliases.entries()].sort());
+        }
+
+        source(name) {
+            const key = this.resolve(name);
+            return key === null ? null : this._sources.get(key);
+        }
+
+        get(name) {
+            const key = this.resolve(name);
+            if (key === null) return null;
+            if (!this._parsed.has(key)) this._parsed.set(key, parse(this._sources.get(key)));
+            return this._parsed.get(key);
+        }
+
+        player(name, options) {
+            const clip = this.get(name);
+            return clip ? new Player({ ...(options || {}), clip }) : null;
+        }
+    }
+
+    // Writers: a parsed clip back out as files the editor opens. Session v1 is
+    // what ASCII Motion's importer migrates into a layer timeline; the text
+    // export is the plain frames-split-on-"," format.
+    function toSession(input, meta) {
+        const clip = parse(input);
+        const info = meta || {};
+        return {
+            version: "1.0.0",
+            name: info.name || clip.title || "Untitled Project",
+            description: info.description || "",
+            canvas: {
+                width: clip.width,
+                height: clip.height,
+                canvasBackgroundColor: clip.backgroundColor,
+                showGrid: true,
+            },
+            animation: {
+                frames: clip.frames.map((frame, i) => ({
+                    id: `frame-${i + 1}`,
+                    name: `Frame ${i + 1}`,
+                    duration: Math.round(frame.duration),
+                    data: Object.fromEntries(frame.cells.map((item) => [
+                        `${item.x},${item.y}`,
+                        { char: item.char, color: item.color, bgColor: item.bgColor },
+                    ])),
+                })),
+                currentFrameIndex: 0,
+                frameRate: clip.frameRate,
+                looping: clip.looping,
+            },
+        };
+    }
+
+    function toText(input) {
+        const clip = parse(input);
+        return clip.frames.map((_frame, i) => renderFrame(clip, i, { effects: [] }).text).join("\n\n,\n\n") + "\n";
+    }
+
+    function describe(input) {
+        const clip = parse(input);
+        return {
+            title: clip.title,
+            source: clip.source,
+            width: clip.width,
+            height: clip.height,
+            frames: clip.frames.length,
+            durationMs: Math.round(totalDuration(clip)),
+            frameRate: clip.frameRate,
+            looping: clip.looping,
+            effects: (clip.effects || []).map((effect) => effect.type),
+            warnings: clip.warnings || [],
+        };
+    }
+
     return {
         FORMAT,
         EFFECT_TYPES,
+        EFFECT_DEFAULTS,
+        EASING_PRESETS,
         parse,
+        flattenSession,
         frameIndex,
         totalDuration,
+        evaluateEasing,
+        interpolateKeyframes,
         applyEffect,
         applyEffects,
         renderFrame,
+        describe,
+        toSession,
+        toText,
         Player,
+        Library,
     };
 });
