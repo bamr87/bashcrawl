@@ -4,6 +4,20 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
+  the cellar amulet opening `chapel/`), `file <encounter>` reported
+  `ASCII art / scroll` and `./<encounter>` failed with `No runnable script`
+  for every encounter under `chapel/`, `vault/` and `rift/`. The encounter
+  lookups in `runtime.js` (`execDispatch`, `runScript`) and the `file` command
+  in `termforge/core/packs/posix.js` now translate the visible path through
+  the VFS's `actual()` before indexing `world.encounters`. The
+  `main-quest-run` golden transcript is re-recorded: `./padlock` and
+  `./goblet` now succeed (#96).
+
 ## [3.2.0] - 2026-08-01 — TermForge: the emulator becomes a framework
 
 The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a

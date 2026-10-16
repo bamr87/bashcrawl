@@ -388,7 +388,7 @@
             const path = this.resolve(args[0]);
             const node = this.node(path);
             if (!node) return [{ kind: "error", text: `${args[0]}: no such file` }];
-            const meta = (this.world.encounters || {})[path];
+            const meta = (this.world.encounters || {})[this.actual(path)];
             if (this.isDir(path)) return [{ kind: "output", text: `${args[0]}: directory` }];
             if (meta) return [{ kind: "output", text: `${args[0]}: executable script (${meta.type || this.text("execFileKind")})` }];
             const text = this.readFile(path) || "";
