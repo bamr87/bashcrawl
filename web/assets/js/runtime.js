@@ -314,9 +314,10 @@
                 this.bump(cmd);
                 this.state.stats.lastPipedIn = stdin != null;
             });
-            // `./script` resolves against the world's encounter table.
+            // `./script` resolves against the world's encounter table, which is
+            // keyed by stored (dotted) paths — translate revealed rooms first.
             this.hooks.on("execDispatch", (name) => {
-                const path = `${this.state.cwd}/${name}`.replace(/\/+/g, "/");
+                const path = this.actual(`${this.state.cwd}/${name}`.replace(/\/+/g, "/"));
                 return this.world.encounters[path] ? this.runScript(name) : null;
             });
             this.hooks.on("postCommand", (cmd, args, stdin, outputs) => {
@@ -899,7 +900,7 @@
         }
 
         runScript(script) {
-            const path = `${this.state.cwd}/${script}`.replace(/\/+/g, "/");
+            const path = this.actual(`${this.state.cwd}/${script}`.replace(/\/+/g, "/"));
             const encounter = this.world.encounters[path];
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];

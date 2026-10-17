@@ -390,8 +390,12 @@
       "line": "./padlock",
       "outputs": [
         {
-          "kind": "error",
-          "text": "No runnable script: ./padlock"
+          "kind": "magic",
+          "text": "🔒 Three-number combination lock"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 A new passage opens: mausoleum/"
         }
       ]
     },
@@ -453,8 +457,20 @@
       "line": "./goblet",
       "outputs": [
         {
-          "kind": "error",
-          "text": "No runnable script: ./goblet"
+          "kind": "art",
+          "text": "        \\        /\n         \\.----./\n          \\    /\n           \\  /\n            )(\n           /  \\\n          /____\\\n   a jeweled goblet stands"
+        },
+        {
+          "kind": "magic",
+          "text": "🏆 Copy orbs to unlock the rift"
+        },
+        {
+          "kind": "success",
+          "text": "Inventory gained: goblet"
+        },
+        {
+          "kind": "success",
+          "text": "🔓 A new passage opens: rift/"
         }
       ]
     },
@@ -472,7 +488,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "cellar  chapel  README.md  scrap  scroll  vault"
+          "text": "cellar  chapel  README.md  rift  scrap  scroll  vault"
         }
       ]
     },
@@ -480,8 +496,8 @@
       "line": "cd rift",
       "outputs": [
         {
-          "kind": "error",
-          "text": "Not a directory: rift"
+          "kind": "success",
+          "text": "Moved to /entrance/rift"
         }
       ]
     },
@@ -490,7 +506,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "/entrance"
+          "text": "/entrance/rift"
         }
       ]
     },
@@ -648,7 +664,7 @@
         },
         {
           "kind": "output",
-          "text": "  Hidden rooms:     3 unlocked"
+          "text": "  Hidden rooms:     5 unlocked"
         },
         {
           "kind": "output",
@@ -656,7 +672,7 @@
         },
         {
           "kind": "output",
-          "text": "  Inventory:        amulet, sword, coins, diamonds, grimoire"
+          "text": "  Inventory:        amulet, sword, coins, diamonds, goblet, grimoire"
         },
         {
           "kind": "dim",
@@ -722,7 +738,7 @@
       "outputs": [
         {
           "kind": "magic",
-          "text": "✨ Bestiary — 3/11 catalogued"
+          "text": "✨ Bestiary — 4/11 catalogued"
         },
         {
           "kind": "success",
@@ -745,8 +761,8 @@
           "text": "  ✅ Stone Guardian — Wakes when you draw near."
         },
         {
-          "kind": "dim",
-          "text": "  🔒 ??? — undiscovered"
+          "kind": "success",
+          "text": "  ✅ Jeweled Goblet — A prize of the deep vaults."
         },
         {
           "kind": "dim",
@@ -830,7 +846,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "eyJjd2QiOiIvZW50cmFuY2UiLCJwcmV2Q3dkIjoiL2VudHJhbmNlL3N0dWR5IiwiaHAiOjk1LCJ4cCI6OTA1LCJpbnZlbnRvcnkiOlsiYW11bGV0Iiwic3dvcmQiLCJjb2lucyIsImRpYW1vbmRzIiwiZ3JpbW9pcmUiXSwiYWxpYXNlcyI6eyJiYyI6ImVjaG8gNDIifSwiZW52VmFycyI6e30sInVzZXJOb2RlcyI6eyIvZW50cmFuY2UvY2VsbGFyL2FybW91cnkvY2hhbWJlci93b3Jrc2hvcCI6eyJ0eXBlIjoiZGlyIn0sIi9lbnRyYW5jZS9jZWxsYXIvYXJtb3VyeS9jaGFtYmVyL3dvcmtzaG9wL2FudmlsIjp7InR5cGUiOiJmaWxlIiwiY29udGVudCI6IiJ9LCIvZW50cmFuY2Uvc3R1ZHkiOnsidHlwZSI6ImRpciJ9LCIvZW50cmFuY2Uvc3R1ZHkvZ3JpbW9pcmUiOnsidHlwZSI6ImZpbGUiLCJjb250ZW50IjoiIn19LCJjb21wbGV0ZWRRdWVzdElkcyI6WzAsMSwyLDMsNCw1LDYsN10sImN1cnJlbnRRdWVzdElkIjo4LCJ2aXNpdGVkIjpbXSwiaGlzdG9yeSI6W10sImhpc3RvcnlJbmRleCI6LTEsImZsYWdzIjp7InRyZWFzdXJlX2NlbGxhciI6dHJ1ZSwidHJlYXN1cmVfYXJtb3VyeSI6dHJ1ZSwicG90aW9uIjp0cnVlLCJ0cmVhc3VyZV9jaGFtYmVyIjp0cnVlLCJzdGF0dWUiOnRydWV9LCJyZXZlYWxzIjp7Ii9lbnRyYW5jZS9jaGFwZWwiOiIvZW50cmFuY2UvLmNoYXBlbCIsIi9lbnRyYW5jZS92YXVsdCI6Ii9lbnRyYW5jZS8udmF1bHQiLCIvZW50cmFuY2Uvc2NyYXAiOiIvZW50cmFuY2UvLnNjcmFwIn0sInRyYWluZXIiOm51bGwsInBhdGhmaW5kIjpudWxsLCJzcGVlZHJ1bkJlc3QiOm51bGwsImFjaGlldmVtZW50cyI6WyJmaXJzdF9zdGVwcyIsInNlYXNvbmVkIiwidHJlYXN1cmVfaHVudGVyIiwia2V5X21hc3RlciIsIndvcmxkX2J1aWxkZXIiLCJjYXJ0b2dyYXBoZXIiXSwiYmVzdGlhcnkiOlsidHJlYXN1cmUiLCJwb3Rpb24iLCJzdGF0dWUiXSwiZGFpbHkiOnsiZGF0ZSI6IjIwMjYtMDEtMTUiLCJiYXNlbGluZVhwIjowLCJnb2FsIjo2MCwiY29tcGxldGVkIjp0cnVlLCJzdHJlYWsiOjEsImxhc3REYXRlIjoiMjAyNi0wMS0xNSJ9LCJyYW5rSW5kZXgiOjQsInN0YXRzIjp7ImNvbW1hbmRzIjp7InB3ZCI6MywibHMiOjcsImNkIjoxNiwiY2F0IjoxLCIuL3RyZWFzdXJlIjo0LCJpbnZlbnRvcnkiOjEsImVjaG8iOjIsIi4vcG90aW9uIjoxLCJncmVwIjoyLCIuL3N0YXR1ZSI6MSwiaGVhbHRoIjoxLCJzdGF0dXMiOjEsIm1rZGlyIjoyLCJ0b3VjaCI6MiwibWFwIjoxLCJsb29rIjoxLCIuL3BhZGxvY2siOjEsIi4vZ29ibGV0IjoxLCJzb3VyY2UiOjEsInF1ZXN0IjoxLCJoaW50IjoxLCJ4cCI6MSwicHJvZmlsZSI6MSwiYWNoaWV2ZW1lbnRzIjoxLCJiZXN0aWFyeSI6MiwiZGFpbHkiOjEsInNhdmUiOjJ9LCJjYXRTY3JvbGxDb3VudCI6MSwibGFzdFBpcGVkSW4iOmZhbHNlLCJpbml0aWFsaXplZCI6ZmFsc2V9fQ=="
+          "text": "eyJjd2QiOiIvZW50cmFuY2UiLCJwcmV2Q3dkIjoiL2VudHJhbmNlL3N0dWR5IiwiaHAiOjk1LCJ4cCI6OTA1LCJpbnZlbnRvcnkiOlsiYW11bGV0Iiwic3dvcmQiLCJjb2lucyIsImRpYW1vbmRzIiwiZ29ibGV0IiwiZ3JpbW9pcmUiXSwiYWxpYXNlcyI6eyJiYyI6ImVjaG8gNDIifSwiZW52VmFycyI6e30sInVzZXJOb2RlcyI6eyIvZW50cmFuY2UvY2VsbGFyL2FybW91cnkvY2hhbWJlci93b3Jrc2hvcCI6eyJ0eXBlIjoiZGlyIn0sIi9lbnRyYW5jZS9jZWxsYXIvYXJtb3VyeS9jaGFtYmVyL3dvcmtzaG9wL2FudmlsIjp7InR5cGUiOiJmaWxlIiwiY29udGVudCI6IiJ9LCIvZW50cmFuY2Uvc3R1ZHkiOnsidHlwZSI6ImRpciJ9LCIvZW50cmFuY2Uvc3R1ZHkvZ3JpbW9pcmUiOnsidHlwZSI6ImZpbGUiLCJjb250ZW50IjoiIn19LCJjb21wbGV0ZWRRdWVzdElkcyI6WzAsMSwyLDMsNCw1LDYsN10sImN1cnJlbnRRdWVzdElkIjo4LCJ2aXNpdGVkIjpbXSwiaGlzdG9yeSI6W10sImhpc3RvcnlJbmRleCI6LTEsImZsYWdzIjp7InRyZWFzdXJlX2NlbGxhciI6dHJ1ZSwidHJlYXN1cmVfYXJtb3VyeSI6dHJ1ZSwicG90aW9uIjp0cnVlLCJ0cmVhc3VyZV9jaGFtYmVyIjp0cnVlLCJzdGF0dWUiOnRydWUsInBhZGxvY2siOnRydWUsImdvYmxldCI6dHJ1ZX0sInJldmVhbHMiOnsiL2VudHJhbmNlL2NoYXBlbCI6Ii9lbnRyYW5jZS8uY2hhcGVsIiwiL2VudHJhbmNlL3ZhdWx0IjoiL2VudHJhbmNlLy52YXVsdCIsIi9lbnRyYW5jZS9zY3JhcCI6Ii9lbnRyYW5jZS8uc2NyYXAiLCIvZW50cmFuY2UvLmNoYXBlbC9ncmF2ZXlhcmQvbWF1c29sZXVtIjoiL2VudHJhbmNlLy5jaGFwZWwvZ3JhdmV5YXJkLy5tYXVzb2xldW0iLCIvZW50cmFuY2UvcmlmdCI6Ii9lbnRyYW5jZS8ucmlmdCJ9LCJ0cmFpbmVyIjpudWxsLCJwYXRoZmluZCI6bnVsbCwic3BlZWRydW5CZXN0IjpudWxsLCJhY2hpZXZlbWVudHMiOlsiZmlyc3Rfc3RlcHMiLCJzZWFzb25lZCIsInRyZWFzdXJlX2h1bnRlciIsImtleV9tYXN0ZXIiLCJ3b3JsZF9idWlsZGVyIiwiY2FydG9ncmFwaGVyIl0sImJlc3RpYXJ5IjpbInRyZWFzdXJlIiwicG90aW9uIiwic3RhdHVlIiwiZ29ibGV0Il0sImRhaWx5Ijp7ImRhdGUiOiIyMDI2LTAxLTE1IiwiYmFzZWxpbmVYcCI6MCwiZ29hbCI6NjAsImNvbXBsZXRlZCI6dHJ1ZSwic3RyZWFrIjoxLCJsYXN0RGF0ZSI6IjIwMjYtMDEtMTUifSwicmFua0luZGV4Ijo0LCJzdGF0cyI6eyJjb21tYW5kcyI6eyJwd2QiOjMsImxzIjo3LCJjZCI6MTYsImNhdCI6MSwiLi90cmVhc3VyZSI6NCwiaW52ZW50b3J5IjoxLCJlY2hvIjoyLCIuL3BvdGlvbiI6MSwiZ3JlcCI6MiwiLi9zdGF0dWUiOjEsImhlYWx0aCI6MSwic3RhdHVzIjoxLCJta2RpciI6MiwidG91Y2giOjIsIm1hcCI6MSwibG9vayI6MSwiLi9wYWRsb2NrIjoxLCIuL2dvYmxldCI6MSwic291cmNlIjoxLCJxdWVzdCI6MSwiaGludCI6MSwieHAiOjEsInByb2ZpbGUiOjEsImFjaGlldmVtZW50cyI6MSwiYmVzdGlhcnkiOjIsImRhaWx5IjoxLCJzYXZlIjoyfSwiY2F0U2Nyb2xsQ291bnQiOjEsImxhc3RQaXBlZEluIjpmYWxzZSwiaW5pdGlhbGl6ZWQiOmZhbHNlfX0="
         }
       ]
     }
@@ -845,6 +861,7 @@
       "sword",
       "coins",
       "diamonds",
+      "goblet",
       "grimoire"
     ],
     "aliases": {
@@ -886,12 +903,16 @@
       "treasure_armoury": true,
       "potion": true,
       "treasure_chamber": true,
-      "statue": true
+      "statue": true,
+      "padlock": true,
+      "goblet": true
     },
     "reveals": {
       "/entrance/chapel": "/entrance/.chapel",
       "/entrance/vault": "/entrance/.vault",
-      "/entrance/scrap": "/entrance/.scrap"
+      "/entrance/scrap": "/entrance/.scrap",
+      "/entrance/.chapel/graveyard/mausoleum": "/entrance/.chapel/graveyard/.mausoleum",
+      "/entrance/rift": "/entrance/.rift"
     },
     "trainer": null,
     "pathfind": null,
@@ -907,7 +928,8 @@
     "bestiary": [
       "treasure",
       "potion",
-      "statue"
+      "statue",
+      "goblet"
     ],
     "daily": {
       "date": "2026-01-15",

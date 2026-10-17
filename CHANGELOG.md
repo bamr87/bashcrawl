@@ -6,6 +6,170 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
+  the cellar amulet opening `chapel/`), `file <encounter>` reported
+  `ASCII art / scroll` and `./<encounter>` failed with `No runnable script`
+  for every encounter under `chapel/`, `vault/` and `rift/`. The encounter
+  lookups in `runtime.js` (`execDispatch`, `runScript`) and the `file` command
+  in `termforge/core/packs/posix.js` now translate the visible path through
+  the VFS's `actual()` before indexing `world.encounters`. The
+  `main-quest-run` golden transcript is re-recorded: `./padlock` and
+  `./goblet` now succeed (#96).
+
+## [3.2.0] - 2026-08-01 — TermForge: the emulator becomes a framework
+
+The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a
+universal, zero-dependency terminal framework: one environment-agnostic kernel
+(parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game,
+real terminal sessions, a lightweight telnet server, and custom dev/monitoring
+tools. The web game is byte-identical (golden-transcript proven), saves are
+compatible, and the terminal-core bash game is untouched.
+
+### Added
+
+- **`termforge/core/`** — the framework kernel as dual-mode files (classic
+  `<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only
+  **providers** for live-data files), `shell` (hook spine: preExecute /
+  interceptLine / postExecute / observePipeline / beforeCommand / execDispatch
+  / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`,
+  `protocol` (the versioned Line contract,
+  `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi`
+  (one TerminalView replacing the duplicated story/arcade renderers), and
+  `input` (shared history/completion helpers + a LineEditor and byte decoder
+  for stream hosts).
+- **Node hosts** (`termforge/node/`): `host-tty.js` (play in a real terminal —
+  `make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854
+  subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode —
+  `make telnet-demo`; loopback-bound by default, see
+  `docs/termforge/telnet-host.md`).
+- **Apps** (`termforge/apps/`): `bashcrawl.js` (the game as an App descriptor)
+  and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted
+  as read-only VFS provider files, browsable with the ordinary posix toolkit;
+  `demo.html` runs it in a browser from `file://`).
+- **JS test suite** (`make test-js`, `node --test`, zero npm deps): 62 tests —
+  golden transcripts recorded against the pre-refactor emulator and replayed
+  byte-identically under a pinned vm clock/rng, save-shape + legacy-save
+  round-trips, kernel/pack/view/input units, telnet codec units and a real
+  loopback integration. CI runs it (setup-node 20) plus `make lint-js`
+  (`node --check` over every tracked JS file).
+- **Vendor pipeline**: `termforge/core/` is mirrored file-for-file into
+  `web/assets/js/vendor/termforge/` by `make web-build`
+  (`scripts/vendor_termforge.py`), byte-verified bidirectionally by
+  `validate_static_web.py`, pytest, and `make web-test`.
+- **`agentwatch`** (`termforge/apps/agentwatch/`, `make agentwatch`) — an
+  AI-agent task dashboard on the framework: a TaskSource interface projected
+  as `board`/`agent <id>`/`feed` commands AND live read-only VFS files
+  (`cat agents/forge`, `grep -r failed .`), over any host. Ships a
+  deterministic demo fleet (state ticks once per read — no clock/randomness)
+  and a JSONL adapter that turns the repo's real agent-playtest telemetry
+  (`logs/sessions/**`) into a live board
+  (`make agentwatch ARGS="--data-dir logs/sessions"`).
+- **uiText copy deck** — the framework/content boundary made mechanical:
+  every brandable string a core pack emits routes through
+  `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire
+  voice (legacy error strings, fortune deck, banner art, figlet default)
+  moved into `GAME_UI_TEXT` in `runtime.js`. A new
+  `content-separation.test.js` fails the build if game vocabulary appears
+  anywhere under `termforge/core/`.
+
+### Changed
+
+- `web/assets/js/runtime.js` (1852 → ~930 lines) is now the **game assembly**:
+  `class Runtime extends TermForge.Shell` with the full 74-entry handlers
+  literal (still the `validate_runtime_commands.py` contract — the validator
+  is untouched) and `installGameHooks()` for quests, achievements, daily,
+  trainer, pathfind, and encounters.
+- `game.js`/`arcade.js` share one TerminalView + DomSink (the twin log
+  renderers and four `escapeHtml` copies collapse into one);
+  `arcade.js` passes `{ bare: true }` instead of poking the instance.
+- `defaultState()` now declares two previously-implicit fields (`prevCwd`,
+  `stats.lastPipedIn`); persisted-save key order shifts accordingly (additive;
+  legacy saves load unchanged — fixture-proven).
+- Host CLI parsing now uses node's standard `util.parseArgs`
+  (`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS
+  provider mounts now list in their parent directory as file or directory
+  according to the mount root's own type.
+
+### Fixed
+
+- Committed `web/data/world.json` was stale after the #75 markdown unwrap
+  (freshness test red from a clean checkout).
+
+## [3.1.0] - 2026-07-06 — The Great Reduction + Web Flagship
+
+The repo is reduced to **two player surfaces plus one harness**: the pure-bash
+terminal game (played with real `cd`/`cat` — no launcher) and a static browser
+trainer generated from the same content, plus a lean MCP playtest harness that
+drives the *real* bash game. Net: ~350 files and ~75k lines removed.
+
+### Added
+
+- **Web mode router** (`web/assets/js/shell.js`): top-nav **Story · Arcade ·
+  Reference**, first-visit landing overlay, hash routing (`#/story` …),
+  Alt+1/2/3 shortcuts, XP bridge, toasts.
+- **Practice Arcade** (`web/assets/js/arcade.js`): mini-game framework over the
+  shared bash emulator — each game is *(seed world + goal predicate + scoring)*
+  on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real
+  dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle**
+  (transform INPUT into TARGET), **Command Flash** (drill decks generated from
+  `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed
+  story XP.
+- **Reference mode + concept spotlight** (`web/assets/js/reference.js`):
+  searchable cheatsheet library from the command registries, a story-sidebar
+  card showing what the current room teaches, and inline syntax hints while
+  typing.
+- **Bash-emulator kernel upgrades** (`web/assets/js/runtime.js`): output
+  redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file +
+  `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new
+  `cut`, `tr`, `sed`, `nl`, `rev` commands.
+- **Arcade content registry** (`src/help/data/arcade.yaml`) exported to
+  `web/data/arcade.json` by `export_static_web.py` (validated by
+  `validate_static_web.py`).
+- **Lean playtest harness** (`src/playtest/`): FastMCP server
+  (`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash
+  session in a sandbox copy of the dungeon; JSONL recorder; scorer with
+  rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
+
+### Removed
+
+- Python Textual TUI + old MCP/agent harness (`src/terminal-illness/`),
+  Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh`
+  launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only
+  `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …).
+  `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
+- TUI/agent/viewer test suites (`test/ai/`, `test/demo/`, `test/analysis/`,
+  and the `ti.*` unit/integration tests) and their CI workflows
+  (`test-framework`, `code-quality`, `release`).
+
+### Changed
+
+- **CI/CD redesigned** (5 workflows → 3): `ci.yml` is now the single PR/push gate
+  with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/
+  markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a
+  gap where 175 tests ran nowhere, plus `make validate-contracts` and junit
+  artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing
+  the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted —
+  its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth)
+  moved into `validate_content_contracts.py` so they run locally too.
+  `dependency-update.yml` deleted — redundant with Dependabot, and its
+  `pip freeze` rewrite would have destroyed the commented requirements files.
+  `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml`
+  now writes the scorer verdict to the run summary. `make validate-contracts`
+  additionally runs the content-index check.
+- Terminal play is launcher-free: `./setup.sh && cd entrance && cat scroll`.
+- Python deps reduced to `pyyaml` + `mcp` (dev: `pytest`, `pytest-timeout`,
+  `jsonschema`, `ruff`).
+- `validate_runtime_commands.py` validates the single remaining runtime (the
+  web emulator) against `runtime_commands.yaml`.
+- `scripts/playtest.sh` targets `playtest.mcp_server` and gates on median
+  rooms-visited / scrolls-read (`BLANK_SLATE_GATE_ROOMS` / `_SCROLLS`).
+- Makefile, CI workflows, `.mcp.json`, `.vscode/`, docs, README, and CLAUDE.md
+  rewritten for the two-surface architecture.
+
+## [Unreleased] - 2026-03-04
+
 ### Added
 
 - **Walkthrough-driven test model** (`test/datasets/walkthrough.json`, `test/fixtures/walkthrough.py`)
