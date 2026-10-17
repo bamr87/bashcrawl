@@ -87,3 +87,31 @@ test("command clips parse as ASCII Motion exports", () => {
         return am.renderFrame(clip, 0).text.length > 0;
     }
 });
+
+test("the clip manifest drives aliases, the stage set, and event overrides", () => {
+    const env = loadClassic({ files: [PARSER, ASCII_MOTION, FX_CLIPS, FX] });
+    const fx = env.sandbox.BashcrawlCommandFx;
+    const manifest = env.sandbox.BashcrawlFxClipManifest;
+    // Arrays from the sandbox realm: compare as JSON.
+    const same = (a, b) => assert.equal(JSON.stringify(a), JSON.stringify(b));
+    same(Object.keys(manifest.clips).sort(), Object.keys(env.sandbox.BashcrawlFxClips).sort());
+    for (const [alias, target] of Object.entries(manifest.aliases)) {
+        assert.equal(fx.clipName(alias), target, alias);
+        assert.equal(fx.onStage(alias), true, alias);
+    }
+    same(fx.stageMotions(), [...manifest.stage].sort());
+    assert.equal(fx.onStage("cat"), false);
+
+    assert.equal(fx.motionFor("ls", { events: [{ type: "levelup" }, { type: "quest" }] }).motion, "cast");
+    assert.equal(fx.motionFor("ls", { events: [{ type: "unlock" }, { type: "quest" }] }).motion, "spark");
+    assert.equal(fx.motionFor("ls", { events: [{ type: "move" }] }).motion, "scan");
+    assert.equal(fx.motionFor("ls", { error: true, events: [{ type: "levelup" }] }).motion, "error");
+
+    const lib = fx.library();
+    assert.equal(lib.get("home"), lib.get("warp"));
+    assert.equal(lib.get("warp").title, "warp");
+    fx.registerClip("tally", "1\n\n,\n\n2", { stage: false });
+    assert.equal(fx.clipName("tally"), "tally");
+    assert.equal(fx.onStage("tally"), false);
+    assert.equal(lib.get("tally").frames.length, 2);
+});

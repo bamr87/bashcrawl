@@ -128,7 +128,7 @@
         view, persistence, capabilities, onPage: openPager,
     });
     const append = (kind, text) => view.appendLine(kind, text);
-    append("banner", runtime.uiText.bannerArt);
+    append("banner", runtime.art("banner"));
     if (saveError) append("error", saveError);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");

@@ -1,0 +1,220 @@
+# ============================================================================
+# Bashcrawl motion clips — src/help/data/motion.yaml
+#
+# Content registry for every piece of art the game draws: the ASCII Motion
+# (https://github.com/cameronfoxly/Ascii-Motion) clips that play on the command
+# "stage" in the web trainer and the TTY/telnet HUD, and the static art.
+# Consumed by scripts/build_motion.py (make web-build), which bundles the
+# clips into web/assets/js/fx-clips.js (BashcrawlFxClips +
+# BashcrawlFxClipManifest) and the art into web/assets/js/art-clips.js.
+# Validated by scripts/validate_content_contracts.py; documented in
+# docs/generated/motion.md.
+#
+# Fields:
+#   clips.<motion>.file         ASCII Motion export, relative to the repo root.
+#                               Any format the editor writes works: JSON export,
+#                               text export, session v1 or v2 (.asciimtn).
+#   clips.<motion>.title        Short human name (docs, `make motion`).
+#   clips.<motion>.description  What it shows and when it plays.
+#   clips.<motion>.stage        false keeps the clip out of the stage band
+#                               (bundled, but only playable on request).
+#   clips.<motion>.aliases      Other motion names that reuse this clip.
+#   art.<name>.file/title/description
+#                               Static art the game renders by name
+#                               (encounter-<script>, room-<area>, banner, ...).
+#   events                      Game events that replace the command's motion,
+#                               highest priority first.
+#
+# The <motion> key must be a motion name from web/assets/js/fx.js (COMMANDS,
+# the cd variants, or `error`). Workflow: docs/termforge/ascii-motion.md.
+# ============================================================================
+
+version: 1
+
+clips:
+  radar:
+    file: motion/clips/radar.asciimtn
+    title: Radar sweep
+    description: A sweep arm rotates around the player's position — pwd, whoami.
+    stage: true
+    aliases: []
+
+  scan:
+    file: motion/clips/scan.asciimtn
+    title: Room manifest
+    description: A scanline runs down a manifest of the room's exits and items — ls.
+    stage: true
+    aliases: []
+
+  warp:
+    file: motion/clips/warp.asciimtn
+    title: Warp ring
+    description: A portal ring opens and collapses — cd, and unlocking a hidden room.
+    stage: true
+    aliases: [climb, rewind, home]
+
+  spark:
+    file: motion/clips/spark.asciimtn
+    title: Spark burst
+    description: Particles scatter outward — quest progress, inventory, xp.
+    stage: true
+    aliases: []
+
+  cast:
+    file: motion/clips/cast.asciimtn
+    title: Casting circle
+    description: A rune circle charges around a sigil — running ./scripts, and level-ups.
+    stage: true
+    aliases: []
+
+  steam:
+    file: motion/clips/steam.asciimtn
+    title: Steam engine
+    description: The train puffs across the stage — sl.
+    stage: true
+    aliases: []
+
+  burn:
+    file: motion/clips/burn.asciimtn
+    title: Burning crate
+    description: A crate catches fire and burns down — rm.
+    stage: true
+    aliases: []
+
+  error:
+    file: motion/clips/error.asciimtn
+    title: Warning sign
+    description: A flashing "do not enter" sign — unknown commands and failures.
+    stage: true
+    aliases: []
+
+# Static art: one-frame clips the game prints as `art` lines or draws in
+# its panels (rendered with Shell#art). Same file formats as clips.
+art:
+  banner:
+    file: motion/art/banner.asciimtn
+    title: Title banner
+    description: The BASHCRAWL logo the session opens with (and `banner`).
+
+  landing-brand:
+    file: motion/art/landing-brand.asciimtn
+    title: Landing logo
+    description: The logo on the first-visit landing card (web/index.html data-art).
+
+  encounter-treasure:
+    file: motion/art/encounter-treasure.asciimtn
+    title: Treasure chest
+    description: Portrait for ./treasure.
+
+  encounter-monster:
+    file: motion/art/encounter-monster.asciimtn
+    title: Coiled serpent
+    description: Portrait for ./monster.
+
+  encounter-ghost:
+    file: motion/art/encounter-ghost.asciimtn
+    title: Restless ghost
+    description: Portrait for ./ghost.
+
+  encounter-potion:
+    file: motion/art/encounter-potion.asciimtn
+    title: Glowing potion
+    description: Portrait for ./potion.
+
+  encounter-statue:
+    file: motion/art/encounter-statue.asciimtn
+    title: Stone guardian
+    description: Portrait for ./statue.
+
+  encounter-goblet:
+    file: motion/art/encounter-goblet.asciimtn
+    title: Jeweled goblet
+    description: Portrait for ./goblet.
+
+  encounter-spell:
+    file: motion/art/encounter-spell.asciimtn
+    title: Igniting rune
+    description: Portrait for ./spell.
+
+  encounter-crystal:
+    file: motion/art/encounter-crystal.asciimtn
+    title: Murmuring crystal
+    description: Portrait for ./crystal.
+
+  encounter-penguin:
+    file: motion/art/encounter-penguin.asciimtn
+    title: Dapper penguin
+    description: Portrait for ./penguin.
+
+  encounter-nyarlathotep:
+    file: motion/art/encounter-nyarlathotep.asciimtn
+    title: The crawling chaos
+    description: Portrait for ./nyarlathotep.
+
+  encounter-fountain:
+    file: motion/art/encounter-fountain.asciimtn
+    title: Wishing fountain
+    description: Portrait for ./fountain.
+
+  room-entrance:
+    file: motion/art/room-entrance.asciimtn
+    title: Entrance vignette
+    description: Room panel art for the entrance and workshop.
+
+  room-cellar:
+    file: motion/art/room-cellar.asciimtn
+    title: Cellar vignette
+    description: Room panel art for the cellar, armoury, and chamber.
+
+  room-graveyard:
+    file: motion/art/room-graveyard.asciimtn
+    title: Graveyard vignette
+    description: Room panel art for the chapel and graveyard.
+
+  room-vault:
+    file: motion/art/room-vault.asciimtn
+    title: Vault vignette
+    description: Room panel art for the vault and stronghold.
+
+  room-rift:
+    file: motion/art/room-rift.asciimtn
+    title: Rift vignette
+    description: Room panel art for the rift.
+
+  room-deep:
+    file: motion/art/room-deep.asciimtn
+    title: Deep vignette
+    description: Room panel art for every other room.
+
+  arena-open:
+    file: motion/art/arena-open.asciimtn
+    title: Training arena
+    description: Header for the `train` drills.
+
+  arena-done:
+    file: motion/art/arena-done.asciimtn
+    title: Arena cleared
+    description: Footer when a `train` run ends.
+
+  pathfind:
+    file: motion/art/pathfind.asciimtn
+    title: Compass rose
+    description: Header for `pathfind` journeys.
+
+  levelup:
+    file: motion/art/levelup.asciimtn
+    title: Level up
+    description: Burst printed on a level-up.
+
+  profile:
+    file: motion/art/profile.asciimtn
+    title: Character sheet
+    description: Header for `profile`.
+
+events:
+  - event: levelup
+    motion: cast
+  - event: quest
+    motion: spark
+  - event: unlock
+    motion: warp

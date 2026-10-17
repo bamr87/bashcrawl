@@ -8,6 +8,10 @@
             state: require("./state.js"),
             hooks: require("./hooks.js"),
             registry: require("./registry.js"),
+            // Art is resolved lazily: classic hosts load ascii-motion.js/art.js
+            // after shell.js, so both are looked up on first use.
+            motion: () => require("./ascii-motion.js"),
+            art: () => require("./art.js"),
         }
         : {
             parser: global.TermForge.parser,
@@ -15,6 +19,8 @@
             state: global.TermForge.state,
             hooks: global.TermForge.hooks,
             registry: global.TermForge.registry,
+            motion: () => global.TermForge.asciiMotion,
+            art: () => global.TermForge.art,
         };
     const api = factory(deps);
     if (hasCjs) {
@@ -61,14 +67,6 @@
         rmSessionOnly: "rm only removes files created in this session.",
         execFileKind: "program",
         figletDefault: "TERMFORGE",
-        bannerArt: [
-            "   ╔══════════════════════════════╗",
-            "   ║                              ║",
-            "   ║      T E R M F O R G E       ║",
-            "   ║  one kernel, every terminal  ║",
-            "   ║                              ║",
-            "   ╚══════════════════════════════╝",
-        ].join("\n"),
         fortunes: [
             "When in doubt, cd .. and try again.",
             "If you can name it, you can grep it.",
@@ -91,6 +89,8 @@
          * @param {(s: string) => string} [options.encodeBase64]
          * @param {object} [options.uiText]   app copy overriding DEFAULT_UI_TEXT
          *                                    entries (branding lives in apps)
+         * @param {object} [options.art]      name -> ASCII Motion source (any format
+         *                                    asciiMotion.parse takes) over core/art.js
          * @param {boolean} [options.bare]    skip ALL hooks in execute() (scoped
          *                                    sandboxes; also settable post-hoc)
          */
@@ -105,6 +105,9 @@
             this.rng = opts.rng || Math.random;
             this.encodeBase64 = opts.encodeBase64 || defaultEncodeBase64;
             this.uiText = { ...DEFAULT_UI_TEXT, ...(opts.uiText || {}) };
+            this.artSources = { ...(opts.art || {}) };
+            this._artLibrary = null;
+            this._artText = new Map();
             this.bare = Boolean(opts.bare);
             this.vfs = deps.vfs.createVfs(this.world, { getState: () => this.state });
             this.handlers = opts.handlers || deps.registry.buildHandlers(...(opts.packs || []));
@@ -114,6 +117,31 @@
         text(key, ...args) {
             const entry = this.uiText[key];
             return typeof entry === "function" ? entry(...args) : entry;
+        }
+
+        /**
+         * The named ASCII Motion clips this shell draws with: the framework's
+         * defaults (core/art.js: banner, cow, sl) under the app's `art` option.
+         * Null when the ascii-motion module is not loaded.
+         */
+        artLibrary() {
+            if (this._artLibrary) return this._artLibrary;
+            const motion = deps.motion && deps.motion();
+            if (!motion || !motion.Library) return null;
+            const core = deps.art && deps.art();
+            this._artLibrary = new motion.Library({ ...((core && core.DEFAULT_ART) || {}), ...this.artSources });
+            return this._artLibrary;
+        }
+
+        /** Render frame `index` (default 0) of the named art clip as plain text; "" if unknown. */
+        art(name, index) {
+            const key = `${name}#${index || 0}`;
+            if (this._artText.has(key)) return this._artText.get(key);
+            const lib = this.artLibrary();
+            const clip = lib && lib.get(name);
+            const text = clip ? deps.motion().renderFrame(clip, index || 0).text : "";
+            if (lib) this._artText.set(key, text);
+            return text;
         }
 
         // ── Execution spine ──────────────────────────────────────────────────

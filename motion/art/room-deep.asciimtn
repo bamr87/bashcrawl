@@ -1,0 +1,52 @@
+{
+  "version": "1.0.0",
+  "name": "room-deep",
+  "description": "",
+  "canvas": {"width":17,"height":5,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "4,0": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "7,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "11,0": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "15,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "2,1": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "6,1": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "7,1": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "8,1": {"char":"~","color":"#ffffff","bgColor":"transparent"},
+          "9,1": {"char":"~","color":"#ffffff","bgColor":"transparent"},
+          "10,1": {"char":"~","color":"#ffffff","bgColor":"transparent"},
+          "11,1": {"char":"~","color":"#ffffff","bgColor":"transparent"},
+          "12,1": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "13,1": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "16,1": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "2,2": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "5,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "14,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "16,2": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "3,3": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "5,3": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "14,3": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "16,3": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "2,4": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "6,4": {"char":"'","color":"#ffffff","bgColor":"transparent"},
+          "7,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "8,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "9,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "10,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "11,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "12,4": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "13,4": {"char":"'","color":"#ffffff","bgColor":"transparent"},
+          "16,4": {"char":".","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

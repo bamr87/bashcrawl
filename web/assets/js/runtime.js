@@ -20,125 +20,10 @@
     }
 
     // ── Encounter Creature Gallery ──────────────────────────────────────
-    // Monospace-safe ASCII portraits keyed by encounter SCRIPT BASENAME
-    // (runScript receives cmd.slice(2)). Pure ASCII only — no variation-
-    // selector emoji. Keys MUST match a real encounter basename in world.json
-    // or the line is never emitted. Color + glow come from the .kind-art rule.
-    const ENCOUNTER_ART = {
-        treasure: [
-            "      ______________    ",
-            "     /\\             \\   ",
-            "    /  )=============)  ",
-            "   /  /  .--------.  \\  ",
-            "  (  (  / ()  ()()  \\ ) ",
-            "   \\  \\ '----------' / )",
-            "    \\  )============( / ",
-            "     \\/______________/  ",
-            "    jewels gleam within",
-        ].join("\n"),
-        monster: [
-            "        .--.   .--.     ",
-            "       (    `.'    )    ",
-            "        )       O (     ",
-            "       (  .-\"\"\"-.  )    ",
-            "        \\/  ^ ^  \\/     ",
-            "        (|  (_)  |)     ",
-            "         \\  '-'  /      ",
-            "      .---'.___.'---.   ",
-            "     the serpent coils  ",
-        ].join("\n"),
-        ghost: [
-            "       .-=========-.    ",
-            "      / .-\"\"\"\"\"\"-. \\    ",
-            "     / /  o    o  \\ \\   ",
-            "     | |    ..    | |   ",
-            "     | |   '--'   | |   ",
-            "      \\ \\        / /    ",
-            "       '-\\_/\\/\\_/-'     ",
-            "        )  (  )  (      ",
-            "      boo... it drifts  ",
-        ].join("\n"),
-        potion: [
-            "          .-=-.         ",
-            "          | _ |         ",
-            "          |( )|         ",
-            "         .'   '.        ",
-            "        / ~ ~ ~ \\       ",
-            "       | ~ ~ ~ ~ |      ",
-            "       | ~ ~ ~ ~ |      ",
-            "        '._____.'       ",
-            "   a glowing brew bubbles",
-        ].join("\n"),
-        statue: [
-            "        .------.        ",
-            "       | .----. |       ",
-            "       | | OO | |       ",
-            "       | | <> | |       ",
-            "       | '----' |       ",
-            "      _|        |_      ",
-            "     /   stone    \\     ",
-            "    /______________\\    ",
-            "    the guardian wakes  ",
-        ].join("\n"),
-        goblet: [
-            "        \\        /      ",
-            "         \\.----./       ",
-            "          \\    /        ",
-            "           \\  /         ",
-            "            )(          ",
-            "           /  \\         ",
-            "          /____\\        ",
-            "   a jeweled goblet stands",
-        ].join("\n"),
-        spell: [
-            "          *  .  +       ",
-            "        .  _||_  .      ",
-            "      +   /    \\   *    ",
-            "     .   | rune |   .   ",
-            "      *   \\____/   +    ",
-            "        '  |  |  '      ",
-            "     ~ the glyph ignites ~",
-        ].join("\n"),
-        crystal: [
-            "           /\\           ",
-            "          /  \\          ",
-            "         /_/\\_\\         ",
-            "         \\    /         ",
-            "          \\  /          ",
-            "           \\/           ",
-            "    the crystal murmurs ",
-        ].join("\n"),
-        penguin: [
-            "        .--.            ",
-            "       /o  o\\           ",
-            "       \\ <> /           ",
-            "      /|    |\\          ",
-            "     ` |    | `         ",
-            "       |____|           ",
-            "       /    \\           ",
-            "     a dapper penguin   ",
-        ].join("\n"),
-        nyarlathotep: [
-            "      .-~~~-.           ",
-            "     / .   . \\          ",
-            "    |  (o o)  |         ",
-            "     \\  \\_/  /          ",
-            "    .-/.   .\\-.         ",
-            "    ) (|   |) (         ",
-            "     ~~ \\___/ ~~        ",
-            "    the crawling chaos  ",
-        ].join("\n"),
-        fountain: [
-            "       .  .  .          ",
-            "        \\ | /           ",
-            "       .-=^=-.          ",
-            "      (   :   )         ",
-            "       \\ ~~~ /          ",
-            "        |___|           ",
-            "       /_____\\          ",
-            "    a wishing fountain  ",
-        ].join("\n"),
-    };
+    // Portraits are ASCII Motion art clips named encounter-<SCRIPT BASENAME>
+    // (motion/art/*.asciimtn, registered in src/help/data/motion.yaml and
+    // bundled into art-clips.js, which loads before this file). Color + glow
+    // come from the .kind-art rule.
 
     // Bestiary metadata (display name + blurb) for each catalogued encounter,
     // in the order shown by the `bestiary` command.
@@ -155,12 +40,6 @@
         { key: "nyarlathotep", name: "The Crawling Chaos", blurb: "Best left uncatalogued." },
         { key: "fountain", name: "Wishing Fountain", blurb: "Bubbles with possibility." },
     ];
-
-    // Return the {kind:'art'} portrait for a script basename, or null. O(1), pure.
-    function encounterArtLine(script) {
-        const art = ENCOUNTER_ART[script];
-        return art ? { kind: "art", text: art } : null;
-    }
 
     // ── The Training Arena mini-game ──────────────────────────────────────
     // Riddle -> the real command(s) that answer it. Players practice by
@@ -182,19 +61,6 @@
         { cat: "magic", riddle: "Run the 'treasure' encounter waiting in this room.", answers: ["./treasure"], hint: "Execute it with a leading ./", teaches: "./<script> runs an executable in the current room." },
         { cat: "magic", riddle: "Draw the map of the whole dungeon.", answers: ["map", "tree"], hint: "One short word — or the branching 'tree'.", teaches: "map / tree reveal the dungeon's layout." },
     ];
-    const ARENA_OPEN = [
-        "  +--------------------------------------+",
-        "  |          TRAINING  ARENA             |",
-        "  |   __        __     spell drills      |",
-        "  |  /  |      |  \\                      |",
-        "  | | (o)|    |(o) |   prove your craft  |",
-        "  |  \\__/  /\\  \\__/                      |",
-        "  +--------------------------------------+",
-    ].join("\n");
-    const ARENA_DONE = [
-        "  *  .  *   A R E N A   C L E A R E D   *  .  *",
-        "  =============================================",
-    ].join("\n");
     const ARENA_RANKS = [
         { min: 0, title: "Novice Whisperer" },
         { min: 40, title: "Apprentice of the Shell" },
@@ -218,25 +84,6 @@
         { id: "seasoned", icon: "🔥", title: "Seasoned Adventurer", desc: "Earned 150 XP.", test: (s) => (s.xp || 0) >= 150 },
     ];
 
-    // Compass rose for the Path-Finder mini-game (box-safe ASCII).
-    const PATHFIND_ART = [
-        "         .  N  .        ",
-        "      .   \\ | /   .     ",
-        "     W ----(+)---- E    ",
-        "      '   / | \\   '     ",
-        "         '  S  '        ",
-    ].join("\n");
-    const LEVELUP_ART = [
-        "     .  *  .     *   .    *  .     ",
-        "    *    L E V E L   U P !    *    ",
-        "     *  .   *     .   *  .  *      ",
-    ].join("\n");
-    const PROFILE_ART = [
-        "  .-----------------------------.",
-        "  |      C H A R A C T E R      |",
-        "  |          S H E E T          |",
-        "  '-----------------------------'",
-    ].join("\n");
 
     function defaultState(root) {
         return {
@@ -267,7 +114,8 @@
     }
 
     // The game's voice, layered over the framework's neutral copy deck: the
-    // exact historical Bashcrawl Web strings, fortune deck, and banner art.
+    // exact historical Bashcrawl Web strings and fortune deck. Pictures are
+    // ASCII Motion clips (motion/art/), passed as the Shell's `art` option.
     // Content lives here with the app; termforge/core stays brand-neutral
     // (enforced by termforge/test/content-separation.test.js).
     const GAME_UI_TEXT = {
@@ -279,18 +127,6 @@
         rmSessionOnly: "Only session-created files can be removed in Web Bashcrawl.",
         execFileKind: "encounter",
         figletDefault: "BASHCRAWL",
-        bannerArt: [
-            "      ╔═══════════════════════════════════════════════════════╗",
-            "      ║                                                       ║",
-            "      ║      ____             __                          __  ║",
-            "      ║     / __ )____ ______/ /_  _________ _________  _/ /  ║",
-            "      ║    / __  / __ `/ ___/ __ \\/ ___/ __ `/ ___/ _ \\/ /    ║",
-            "      ║   / /_/ / /_/ (__  ) / / / /__/ /_/ / /  /  __/ /     ║",
-            "      ║  /_____/\\__,_/____/_/ /_/\\___/\\__,_/_/   \\___/_/      ║",
-            "      ║                                                       ║",
-            "      ║           Type  pwd  to begin the descent.            ║",
-            "      ╚═══════════════════════════════════════════════════════╝",
-        ].join("\n"),
         fortunes: [
             "In the catacombs, you have ZERO bytes of fear.",
             "chmod 777 your dreams. Permissions matter.",
@@ -363,6 +199,7 @@
                 commands: data.commands,
                 state: state || defaultState(data.world.root),
                 uiText: GAME_UI_TEXT,
+                art: global.BashcrawlArtClips || {},
                 bare: Boolean(options && options.bare),
             });
             this.capabilities = (options && options.capabilities) || {};
@@ -517,7 +354,7 @@
             this.state.rankIndex = idx;
             return [
                 { kind: "control", action: "levelup" },
-                ...(this.capabilities.compactEvents ? [] : [{ kind: "art", text: LEVELUP_ART }]),
+                ...(this.capabilities.compactEvents ? [] : [{ kind: "art", text: this.art("levelup") }]),
                 { kind: "success", text: `★  You are now ${ARENA_RANKS[idx].title}!` },
             ];
         }
@@ -584,7 +421,7 @@
             const targetTitle = (this.world.rooms[target] || {}).title || target;
             this.state.pathfind = { active: true, target, targetTitle, moves: 0 };
             return [
-                { kind: "art", text: PATHFIND_ART },
+                { kind: "art", text: this.art("pathfind") },
                 { kind: "info", text: `Find your way to ${targetTitle}.` },
                 { kind: "dim", text: "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon." },
             ];
@@ -639,7 +476,7 @@
             const best = s.speedrunBest != null ? `${s.speedrunBest.toFixed(1)}s` : "—";
             const label = (text) => `  ${(text + ":").padEnd(18)}`;
             return [
-                { kind: "art", text: PROFILE_ART },
+                { kind: "art", text: this.art("profile") },
                 { kind: "magic", text: `  Rank:  ${rank}` },
                 { kind: "output", text: `${label("XP")}${s.xp}        HP: ${s.hp}/100` },
                 { kind: "output", text: `${label("Quests")}${s.completedQuestIds.length}/${this.quests.length} complete` },
@@ -709,7 +546,7 @@
                 if (!entry) return [{ kind: "error", text: `No such creature: ${want}` }];
                 if (!seen.includes(want)) return [{ kind: "dim", text: `You haven't encountered the ${entry.name} yet.` }];
                 return [
-                    { kind: "art", text: ENCOUNTER_ART[want] || "" },
+                    { kind: "art", text: this.art(`encounter-${want}`) },
                     { kind: "magic", text: `  ${entry.name}` },
                     { kind: "output", text: `  ${entry.blurb}` },
                 ];
@@ -832,7 +669,7 @@
             if (speed) {
                 const best = this.state.speedrunBest;
                 return [
-                    { kind: "art", text: ARENA_OPEN },
+                    { kind: "art", text: this.art("arena-open") },
                     { kind: "magic", text: `SPEED RUN — clear ${count} trials against the clock!` },
                     { kind: "dim", text: best != null ? `Your best: ${best.toFixed(1)}s. Beat it!` : "No record yet — set the first time!" },
                     { kind: "dim", text: "Answer fast.  skip = pass · quit = leave" },
@@ -840,7 +677,7 @@
                 ];
             }
             return [
-                { kind: "art", text: ARENA_OPEN },
+                { kind: "art", text: this.art("arena-open") },
                 { kind: "info", text: `${count} trials await. Answer each by casting the real spell.` },
                 { kind: "dim", text: "Commands:  hint = clue · skip = pass · quit = leave the arena" },
                 ...this.trainerChallenge(),
@@ -898,7 +735,7 @@
             this.state.trainer = null;
             const lines = [];
             if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
-            lines.push({ kind: "art", text: ARENA_DONE });
+            lines.push({ kind: "art", text: this.art("arena-done") });
             lines.push({ kind: "info", text: `Trials answered: ${answered}/${t.queue.length}   ·   Earned: ${t.score} XP   ·   Best streak: ${t.best}` });
             // Speed Run: record elapsed time and best, only on a full clear.
             if (t.speed && completed && t.startedAt) {
@@ -1056,12 +893,18 @@
             return [{ kind: "control", action: "reset" }, { kind: "info", text: "Session reset. Start with pwd." }];
         }
 
+        // The {kind:'art'} portrait for a script basename, or null.
+        encounterArtLine(script) {
+            const text = this.art(`encounter-${script}`);
+            return text ? { kind: "art", text } : null;
+        }
+
         runScript(script) {
             const path = this.actual(`${this.state.cwd}/${script}`.replace(/\/+/g, "/"));
             const encounter = this.world.encounters[path];
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];
-            const portrait = encounterArtLine(script);
+            const portrait = this.encounterArtLine(script);
             if (portrait) {
                 messages.unshift(portrait);
                 if (!Array.isArray(this.state.bestiary)) this.state.bestiary = [];
