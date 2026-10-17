@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "name": "encounter-crystal",
+  "description": "",
+  "canvas": {"width":23,"height":7,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "11,0": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "12,0": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "10,1": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "13,1": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "9,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "10,2": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "11,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "12,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "13,2": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "14,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "9,3": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "14,3": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "10,4": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "13,4": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "11,5": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "12,5": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "4,6": {"char":"t","color":"#ffffff","bgColor":"transparent"},
+          "5,6": {"char":"h","color":"#ffffff","bgColor":"transparent"},
+          "6,6": {"char":"e","color":"#ffffff","bgColor":"transparent"},
+          "8,6": {"char":"c","color":"#ffffff","bgColor":"transparent"},
+          "9,6": {"char":"r","color":"#ffffff","bgColor":"transparent"},
+          "10,6": {"char":"y","color":"#ffffff","bgColor":"transparent"},
+          "11,6": {"char":"s","color":"#ffffff","bgColor":"transparent"},
+          "12,6": {"char":"t","color":"#ffffff","bgColor":"transparent"},
+          "13,6": {"char":"a","color":"#ffffff","bgColor":"transparent"},
+          "14,6": {"char":"l","color":"#ffffff","bgColor":"transparent"},
+          "16,6": {"char":"m","color":"#ffffff","bgColor":"transparent"},
+          "17,6": {"char":"u","color":"#ffffff","bgColor":"transparent"},
+          "18,6": {"char":"r","color":"#ffffff","bgColor":"transparent"},
+          "19,6": {"char":"m","color":"#ffffff","bgColor":"transparent"},
+          "20,6": {"char":"u","color":"#ffffff","bgColor":"transparent"},
+          "21,6": {"char":"r","color":"#ffffff","bgColor":"transparent"},
+          "22,6": {"char":"s","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

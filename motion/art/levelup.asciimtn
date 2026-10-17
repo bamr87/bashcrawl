@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "name": "levelup",
+  "description": "",
+  "canvas": {"width":31,"height":3,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "5,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "8,0": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "11,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "17,0": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "21,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "26,0": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "29,0": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "4,1": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "9,1": {"char":"L","color":"#ffffff","bgColor":"transparent"},
+          "11,1": {"char":"E","color":"#ffffff","bgColor":"transparent"},
+          "13,1": {"char":"V","color":"#ffffff","bgColor":"transparent"},
+          "15,1": {"char":"E","color":"#ffffff","bgColor":"transparent"},
+          "17,1": {"char":"L","color":"#ffffff","bgColor":"transparent"},
+          "21,1": {"char":"U","color":"#ffffff","bgColor":"transparent"},
+          "23,1": {"char":"P","color":"#ffffff","bgColor":"transparent"},
+          "25,1": {"char":"!","color":"#ffffff","bgColor":"transparent"},
+          "30,1": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "5,2": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "8,2": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "12,2": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "18,2": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "22,2": {"char":"*","color":"#ffffff","bgColor":"transparent"},
+          "25,2": {"char":".","color":"#ffffff","bgColor":"transparent"},
+          "28,2": {"char":"*","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

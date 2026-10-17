@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "name": "cow",
+  "description": "",
+  "canvas": {"width":28,"height":5,"canvasBackgroundColor":"#000000","showGrid":true},
+  "animation": {
+    "frames": [
+      {
+        "id": "frame-1",
+        "name": "Frame 1",
+        "duration": 1000,
+        "data": {
+          "8,0": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "12,0": {"char":"^","color":"#ffffff","bgColor":"transparent"},
+          "13,0": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "14,0": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "15,0": {"char":"^","color":"#ffffff","bgColor":"transparent"},
+          "9,1": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "12,1": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "13,1": {"char":"o","color":"#ffffff","bgColor":"transparent"},
+          "14,1": {"char":"o","color":"#ffffff","bgColor":"transparent"},
+          "15,1": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "16,1": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "17,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "18,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "19,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "20,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "21,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "22,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "23,1": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "12,2": {"char":"(","color":"#ffffff","bgColor":"transparent"},
+          "13,2": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "14,2": {"char":"_","color":"#ffffff","bgColor":"transparent"},
+          "15,2": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "16,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "24,2": {"char":")","color":"#ffffff","bgColor":"transparent"},
+          "25,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "26,2": {"char":"/","color":"#ffffff","bgColor":"transparent"},
+          "27,2": {"char":"\\","color":"#ffffff","bgColor":"transparent"},
+          "16,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "17,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "18,3": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "19,3": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "20,3": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "21,3": {"char":"-","color":"#ffffff","bgColor":"transparent"},
+          "22,3": {"char":"w","color":"#ffffff","bgColor":"transparent"},
+          "24,3": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "16,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "17,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "23,4": {"char":"|","color":"#ffffff","bgColor":"transparent"},
+          "24,4": {"char":"|","color":"#ffffff","bgColor":"transparent"}
+        }
+      }
+    ],
+    "currentFrameIndex": 0,
+    "frameRate": 12,
+    "looping": false
+  }
+}

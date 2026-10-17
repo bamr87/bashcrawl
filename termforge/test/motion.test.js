@@ -49,3 +49,16 @@ test("every command option is classified by the review", () => {
     assert.ok(rows.filter((row) => row.treatment === "stage").length >= 8);
     assert.ok(rows.filter((row) => row.treatment === "wash").length >= 20);
 });
+
+test("the TTY stage set and event overrides come from the shared clip manifest", () => {
+    const { stageMotions } = require("../apps/bashcrawl-motion.js");
+    const stage = stageMotions();
+    for (const motion of ["radar", "scan", "warp", "climb", "rewind", "home", "error"]) {
+        assert.ok(stage.includes(motion), motion);
+    }
+    assert.equal(planMotion("ls", { events: [{ type: "quest" }] }).motion, "spark");
+    assert.equal(planMotion("ls", { events: [{ type: "unlock" }] }).motion, "warp");
+    assert.equal(planMotion("cd ..").motion, "climb");
+    assert.equal(planMotion("echo hi", { reducedMotion: true }), null);
+    assert.equal(planMotion("pwd", { reducedMotion: true }).frames.length, 1);
+});

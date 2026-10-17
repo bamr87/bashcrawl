@@ -24,57 +24,10 @@
         { key: "rift", name: "The Rift", hint: "Tear open the rift for advanced trials." },
     ];
 
-    // Box-safe ASCII mascot per area (shared ambience: web room panel and the
-    // terminal sidebar draw the same vignette).
-    const ROOM_VIGNETTES = {
-        entrance: [
-            "  (  )      (  )  ",
-            "  )(   /\\   )(    ",
-            "  ||  /  \\  ||    ",
-            " _||_/    \\_||_   ",
-            "[==||      ||==]  ",
-            "   ''      ''     ",
-        ],
-        cellar: [
-            "   (~)        (~)  ",
-            "  .[ ].      .[ ]. ",
-            "  | | |      | | | ",
-            "  | | |      | | | ",
-            " _|_|_|_    _|_|_|_",
-            " '-----'    '-----'",
-        ],
-        graveyard: [
-            " .---.  ._.  .---. ",
-            " | + |  /_\\  | R | ",
-            " |   | |   | |   | ",
-            " |   | |   | |   | ",
-            "_|___|_|___|_|___| ",
-            " ~~~    ~~~   ~~~  ",
-        ],
-        vault: [
-            "       /\\     /\\   ",
-            "      /  \\   /  \\  ",
-            "     / /\\ \\ / /\\ \\ ",
-            "     \\ \\/ / \\ \\/ / ",
-            "      \\  /   \\  /  ",
-            "       \\/  *  \\/   ",
-        ],
-        rift: [
-            "    . * .   .  *   ",
-            "   *  .-~~~-.  .   ",
-            "  .  /  _    \\ *   ",
-            "  * |  ( o )  | .  ",
-            "   . \\  ~-~  / *   ",
-            "    * '-...-'  .   ",
-        ],
-        deep: [
-            "    *  .   *   .   ",
-            "  .   .-~~~~-.  *  ",
-            "  *  /        \\ .  ",
-            "   . \\        / *  ",
-            "  .   '------'  .  ",
-        ],
-    };
+    // Ambient vignette per area (shared: the web room panel and the terminal
+    // sidebar draw the same one). The pictures are ASCII Motion art clips named
+    // room-<key> (motion/art/room-*.asciimtn), rendered by Shell#art.
+    const VIGNETTE_KEYS = Object.freeze(["entrance", "cellar", "graveyard", "vault", "rift", "deep"]);
 
     function vignetteKeyForRoom(actualPath, cwd) {
         const p = String(actualPath || cwd || "");
@@ -89,7 +42,8 @@
     function roomVignette(runtime) {
         const actual = runtime.actual ? runtime.actual(runtime.state.cwd) : runtime.state.cwd;
         const key = vignetteKeyForRoom(actual, runtime.state.cwd);
-        return { key, art: ROOM_VIGNETTES[key] || ROOM_VIGNETTES.deep };
+        const text = runtime.art(`room-${key}`) || runtime.art("room-deep");
+        return { key, art: text ? text.split("\n") : [] };
     }
 
     function bar(value, max, width) {
@@ -602,7 +556,7 @@
         layoutHelp,
         decoratePanels,
         SIDE_QUESTS,
-        ROOM_VIGNETTES,
+        VIGNETTE_KEYS,
         vignetteKeyForRoom,
         roomVignette,
         bar,

@@ -164,12 +164,7 @@
     <!-- First-visit landing: pick a door. Dismisses permanently (shell.js). -->
     <div id="landing-overlay" class="landing-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Bashcrawl" hidden>
         <div class="landing-card">
-            <pre class="landing-brand" aria-hidden="true">
-  ____            __                       __
- / __ )___ ______/ /_  ______________ ___ / /
-/ __  / __ `/ ___/ __ \/ ___/ ___/ __ `__ \/ /
-/ /_/ / /_/ (__  ) / / / /__/ /  / / / / / /__
-\____/\__,_/____/_/ /_/\___/_/  /_/ /_/ /____/</pre>
+            <pre class="landing-brand" data-art="landing-brand" aria-hidden="true"></pre>
             <h1>Learn the terminal by playing.</h1>
             <p class="kind-dim">Real bash commands. A dungeon that is the filesystem. Free, in your browser.</p>
             <div class="landing-doors">
@@ -211,7 +206,9 @@
     <script src="./assets/js/vendor/termforge/input.js"></script>
     <script src="./assets/js/vendor/termforge/session.js"></script>
     <script src="./assets/js/vendor/termforge/ascii-motion.js"></script>
+    <script src="./assets/js/vendor/termforge/art.js"></script>
     <script src="./assets/js/storage.js"></script>
+    <script src="./assets/js/art-clips.js"></script>
     <script src="./assets/js/runtime.js"></script>
     <script src="./assets/js/hud.js"></script>
     <script src="./assets/js/fx-clips.js"></script>

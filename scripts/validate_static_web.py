@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_motion  # noqa: E402  (sibling script, pyyaml only)
 import vendor_termforge  # noqa: E402  (sibling script, stdlib only)
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,7 +36,9 @@ def validate() -> dict:
         "assets/js/storage.js",
         "assets/js/runtime.js",
         "assets/js/hud.js",
+        "assets/js/fx-clips.js",
         "assets/js/fx.js",
+        "assets/js/art-clips.js",
         "assets/js/docs.js",
         "assets/js/reference.js",
         "assets/js/arcade.js",
@@ -61,6 +64,9 @@ def validate() -> dict:
     # Vendor mirror freshness: web/assets/js/vendor/termforge/** must be a
     # byte-identical copy of termforge/core/** (both directions).
     errors.extend(vendor_termforge.check())
+    # ASCII Motion bundles (core/art.js, art-clips.js, fx-clips.js) must match
+    # the .asciimtn sources they are generated from.
+    errors.extend(build_motion.check())
 
     index = _read(WEB / "index.html") if (WEB / "index.html").is_file() else ""
     if "url_for(" in index or "{{" in index:
@@ -77,6 +83,11 @@ def validate() -> dict:
     script_srcs = re.findall(r'<script src="\./([^"]+)"></script>', index)
     runtime_src = "assets/js/runtime.js"
     runtime_idx = script_srcs.index(runtime_src) if runtime_src in script_srcs else -1
+    art_src = "assets/js/art-clips.js"
+    if art_src not in script_srcs:
+        errors.append(f"index.html does not load {art_src}")
+    elif runtime_idx >= 0 and script_srcs.index(art_src) > runtime_idx:
+        errors.append(f"index.html must load {art_src} before {runtime_src}")
     for rel in vendor_files:
         if rel not in script_srcs:
             errors.append(f"index.html does not load vendored core file: {rel}")
