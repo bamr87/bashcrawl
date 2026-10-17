@@ -458,7 +458,7 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "        \\        /      \n         \\.----./       \n          \\    /        \n           \\  /         \n            )(          \n           /  \\         \n          /____\\        \n   a jeweled goblet stands"
+          "text": "        \\        /\n         \\.----./\n          \\    /\n           \\  /\n            )(\n           /  \\\n          /____\\\n   a jeweled goblet stands"
         },
         {
           "kind": "magic",
