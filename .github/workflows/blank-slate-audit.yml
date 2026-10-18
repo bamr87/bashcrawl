@@ -23,7 +23,7 @@ on:
       model:
         description: 'Model id for the playing agent'
         required: false
-        default: 'claude-sonnet-4-6'
+        default: 'claude-sonnet-5-5'
       gate_rooms:
         description: 'Median rooms visited the agent must reach (gate)'
         required: false
@@ -106,7 +106,7 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           PYTHONPATH: src
-          BLANK_SLATE_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-4-6' }}
+          BLANK_SLATE_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-5-5' }}
           BLANK_SLATE_GATE_ROOMS: ${{ github.event.inputs.gate_rooms || '3' }}
           BLANK_SLATE_GATE_SCROLLS: ${{ github.event.inputs.gate_scrolls || '1' }}
         run: bash scripts/playtest.sh "${{ github.event.inputs.seeds || '3' }}"
