@@ -276,3 +276,27 @@ class TestScrollFiles:
         assert scroll.exists(), f"Scroll missing at {room_path}/scroll"
         content = scroll.read_text()
         assert len(content) > 10, f"Scroll at {room_path} too short ({len(content)} chars)"
+
+
+# ---------------------------------------------------------------------------
+# Library tome: hidden-study gate (#103)
+# ---------------------------------------------------------------------------
+
+_TOME = "entrance/.chapel/courtyard/aviary/hall/library/tome"
+
+
+class TestTomeStudyGate:
+    """The tome names missing items instead of failing silently."""
+
+    def test_tome_without_coins_names_coins(self, sandbox):
+        result = run_game_script(sandbox, _TOME, {"I": "amulet,sword"})
+        assert "coins" in result.stdout
+        assert "cellar/armoury/chamber" in result.stdout
+        assert (sandbox / _TOME).parent.joinpath(".study").is_dir()
+
+    def test_tome_with_amulet_and_coins_opens_study(self, sandbox):
+        result = run_game_script(sandbox, _TOME, {"I": "amulet,coins"})
+        library = (sandbox / _TOME).parent
+        assert "cd study" in result.stdout
+        assert "You still need" not in result.stdout
+        assert library.joinpath("study").is_dir()

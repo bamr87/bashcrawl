@@ -93,16 +93,20 @@ def build_world() -> dict[str, Any]:
             continue
         full_path = "/" + path.strip("/")
         slug_to_path[slug] = full_path
+        # web_* keys override terminal-only guidance (e.g. the study's
+        # `cd portal`, which the browser VFS cannot provide).
         room_meta_by_path[full_path] = {
             "slug": slug,
             "title": meta.get("title", slug),
             "emoji": meta.get("emoji", ""),
-            "hint": meta.get("context_hint", ""),
+            "hint": meta.get("web_context_hint", meta.get("context_hint", "")),
             "description": meta.get("description", ""),
             "teaches": meta.get("teaches", []),
             "hidden": bool(meta.get("hidden", False)),
-            "next_steps": meta.get("next_steps", ""),
-            "essential_commands": meta.get("essential_commands", []),
+            "next_steps": meta.get("web_next_steps", meta.get("next_steps", "")),
+            "essential_commands": meta.get(
+                "web_essential_commands", meta.get("essential_commands", [])
+            ),
         }
 
     encounters_by_path: dict[str, dict[str, Any]] = {}

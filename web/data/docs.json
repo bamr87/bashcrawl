@@ -544,6 +544,22 @@
           "command": "source init_help.sh",
           "description": "Activate the help system"
         }
+      ],
+      "web_context_hint": "The study holds the grimoire. Run ./grimoire, then source grimoire to define bc.",
+      "web_next_steps": "Run ./grimoire, then source grimoire to define the bc command (you need the amulet and the coins)",
+      "web_essential_commands": [
+        {
+          "command": "./grimoire",
+          "description": "Open the grimoire"
+        },
+        {
+          "command": "source grimoire",
+          "description": "Define the bc command and finish the quest"
+        },
+        {
+          "command": "bc",
+          "description": "Try the new command"
+        }
       ]
     },
     "graveyard": {
@@ -2075,8 +2091,8 @@
       "id": 7,
       "title": "The Bashcrawl Grimoire",
       "description": "Deep in the chapel library, a tome of forgotten spells guards a secret.",
-      "objective": "Find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.",
-      "hint": "Find the library, read the tome, then source the grimoire.",
+      "objective": "Carry the amulet and the coins, find the hidden study behind the library bookshelf, run the grimoire, and define the 'bc' command.",
+      "hint": "You need the amulet (cellar treasure) and the coins (treasure in cellar/armoury/chamber). Then read the tome in the library, enter the study, and source the grimoire.",
       "required_commands": [
         "source"
       ],
