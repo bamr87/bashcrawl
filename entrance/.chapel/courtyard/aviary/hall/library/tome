@@ -367,6 +367,21 @@ bookshelf.
 
 EOF
     fi
+elif [ -d .study ]; then
+    # Tell the player what is missing instead of failing silently (#103).
+    _missing=""
+    $_has_amulet || _missing="the amulet (cellar treasure)"
+    if ! $_has_coins; then
+        [ -n "$_missing" ] && _missing="$_missing and "
+        _missing="${_missing}the coins (treasure in cellar/armoury/chamber)"
+    fi
+    cat << EOF
+
+As you close the tome, one of the bookshelves creaks, but it
+will not move.  Something you carry is missing.  You still
+need $_missing.
+
+EOF
 fi
 
 
