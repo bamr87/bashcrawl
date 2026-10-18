@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Relicensed from MIT to GPL-3.0-only.** Bashcrawl is a derivative of [Seth Kenlon's original bashcrawl](https://gitlab.com/slackermedia/bashcrawl), which is distributed under the GNU GPL v3 (no "or later" grant), so the whole repository now uses the same terms. `LICENSE` is the unmodified GPLv3 text from gnu.org; a new `NOTICE` file credits the upstream author and contributors, records the derivation, and reproduces the MIT notices of the bundled third-party code (simplex-noise, ASCII Motion). `package.json`, `pyproject.toml` and the README badge/sections now say `GPL-3.0-only`.
+
 ### Fixed
 
 - **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
