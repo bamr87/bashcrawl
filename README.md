@@ -3,7 +3,9 @@
 > **v3.1** — one game, two doors: the classic filesystem dungeon in your terminal,
 > and a free browser trainer with mini-games and cheatsheets built from the same content.
 
-[![CI](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/bamr87/bashcrawl)](LICENSE) [![Live site](https://img.shields.io/badge/live-bamr87.github.io%2Fbashcrawl-2ea44f)](https://bamr87.github.io/bashcrawl/)
+[![CI](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml) [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE) [![Live site](https://img.shields.io/badge/live-bamr87.github.io%2Fbashcrawl-2ea44f)](https://bamr87.github.io/bashcrawl/)
+
+> Based on [**bashcrawl** by Seth Kenlon](https://gitlab.com/slackermedia/bashcrawl) (GPLv3). This project is a derivative of the original and is distributed under the same license, GPL-3.0-only. See [Lineage](#-lineage) and [NOTICE](NOTICE).
 
 ## Overview
 
@@ -90,7 +92,7 @@ bash scripts/playtest.sh                        # full loop: N blind runs + gap 
 
 ## 🙏 Lineage
 
-Bashcrawl was created by [Seth Kenlon](https://gitlab.com/slackermedia/bashcrawl) as a pure-filesystem game for teaching GNU/Linux basics. This fork keeps that soul — the terminal game is still just directories, scrolls, and bash — and adds the browser trainer generated from the same content.
+Bashcrawl was created by [Seth Kenlon](https://gitlab.com/slackermedia/bashcrawl) (with many upstream contributors) as a pure-filesystem game for teaching GNU/Linux basics, released under the GNU GPL v3. This project is a derivative of that original: it keeps that soul — the terminal game is still just directories, scrolls, and bash — and adds the browser trainer generated from the same content.
 
 Contributions welcome — read [docs/contributing.md](docs/contributing.md) first.
 
@@ -104,7 +106,9 @@ Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Copyright (C) 2019-2026 Seth Kenlon and the upstream bashcrawl contributors (original game). Copyright (C) 2025-2026 Amr Abdel-Motaleb (modifications).
+
+Bashcrawl is a derivative of [the original bashcrawl](https://gitlab.com/slackermedia/bashcrawl) and, like it, is free software released under the [GNU General Public License v3.0](LICENSE) (`GPL-3.0-only`). See [NOTICE](NOTICE) for full attribution and the third-party components it includes. Contributions are accepted under the same license.
 
 ---
 

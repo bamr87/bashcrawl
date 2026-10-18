@@ -1,0 +1,78 @@
+Bashcrawl
+=========
+
+SPDX-License-Identifier: GPL-3.0-only
+
+Bashcrawl is a derivative work of the original "bashcrawl" by Seth Kenlon:
+
+    https://gitlab.com/slackermedia/bashcrawl
+
+The upstream project is distributed under the GNU General Public License,
+version 3 (its LICENSE file is the unmodified GPLv3 text, with no "or any
+later version" grant). This repository therefore uses the same terms:
+GPL-3.0-only. The full license text is in the LICENSE file.
+
+Copyright (C) 2019-2026 Seth Kenlon and the upstream bashcrawl contributors
+    (the original bashcrawl game: the dungeon layout, scrolls and
+    encounter scripts under entrance/, from which this work is derived)
+
+Copyright (C) 2025-2026 Amr Abdel-Motaleb
+    (modifications and additions: the reworked and extended dungeon, the
+    help system, the browser trainer under web/, the TermForge framework
+    under termforge/, the playtest harness, tooling, tests and docs)
+
+Upstream ships no explicit copyright line; the years above for the
+original follow the upstream git history (first commit 2019-07-24).
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, version 3.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
+Third-party components
+----------------------
+
+The following MIT-licensed material is included. The MIT License is
+compatible with the GPL; its notices are reproduced here as it requires.
+
+1. simplex-noise 4.0.3 (2D simplex noise, ported in
+   termforge/core/ascii-motion.js and its mirror
+   web/assets/js/vendor/termforge/ascii-motion.js)
+   https://github.com/jwagner/simplex-noise.js
+
+2. ASCII Motion file formats and effect semantics (format readers/writers
+   and effect behaviour in termforge/core/ascii-motion.js, written to be
+   compatible with the editor)
+   https://github.com/cameronfoxly/Ascii-Motion
+
+   MIT License
+
+   Copyright (c) 2018 Jonas Wagner   (simplex-noise)
+   Copyright (c) 2025 ASCII Motion   (Ascii-Motion)
+
+   Permission is hereby granted, free of charge, to any person obtaining a
+   copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to
+   permit persons to whom the Software is furnished to do so, subject to
+   the following conditions:
+
+   The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
