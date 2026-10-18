@@ -25,9 +25,11 @@ permissions:
 # mentions in quick succession each spin up their own 30-minute agent against
 # the same thread, racing each other on the same branch.
 #
-# Deliberately NOT cancel-in-progress: each mention is a distinct request and
-# the agent commits and pushes, so a superseded run is queued behind the current
-# one rather than killed mid-push.
+# Deliberately NOT cancel-in-progress: each mention is a distinct request, so a
+# newer run is queued behind the current one rather than killing it mid-task.
+# The job's token is read-only (contents/pull-requests/issues: read), so the
+# agent cannot commit or push from here; it reports back via the action's own
+# comment, and any code change still lands through a PR.
 concurrency:
   group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
   cancel-in-progress: false

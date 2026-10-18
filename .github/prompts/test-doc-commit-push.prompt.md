@@ -1,11 +1,13 @@
 ---
 name: test-doc-commit-push
-description: Review open changes, run tests, update documentation and changelog, then commit and push for the bashcrawl repository.
+description: Review open changes, run tests, update documentation and changelog, then commit on a branch, push the branch, and open a pull request for the bashcrawl repository.
 ---
 
 # Commit & Publish Workflow for Bashcrawl
 
-Review open changes, run appropriate tests, create/update documentation, update the changelog, and push to main (or open a pull request) for the bashcrawl educational shell adventure game.
+Review open changes, run appropriate tests, create/update documentation, update the changelog, then push a branch and open a pull request for the bashcrawl educational shell adventure game.
+
+> **Never push to `main`.** `main` is protected: changes land only through a pull request with passing CI (`Lint`, `Contracts + Tests`, `macOS bash 3.2 smoke`). Never run `git push origin main`, never force-push, and do not merge the PR yourself unless the maintainer asks.
 
 ## Task Overview
 
@@ -133,14 +135,19 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
 
 3. **Reference Issues/PRs** if applicable
 
-## Step 5: Prepare Commit and Push
+## Step 5: Commit on a Branch, Push the Branch, Open a PR
 
-1. **Stage All Changes**:
+1. **Create a Branch** (skip if you are already on a feature branch):
+   ```bash
+   git switch -c <type>/<short-description> origin/main
+   ```
+
+2. **Stage All Changes**:
    ```bash
    git add -A
    ```
 
-2. **Create Semantic Commit Message**:
+3. **Create Semantic Commit Message**:
    Format: `<type>(<scope>): <description>`
 
    Types:
@@ -163,7 +170,7 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    - `test`: Test suite (`test/`)
    - `ci`: GitHub Actions workflows
 
-3. **Commit Changes**:
+4. **Commit Changes**:
    ```bash
    git commit -m "<type>(<scope>): <description>
 
@@ -176,12 +183,12 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    Closes #<issue-number> (if applicable)"
    ```
 
-4. **Push to Main Branch**:
+5. **Push the Branch** (never `main`):
    ```bash
-   git push origin main
+   git push -u origin <branch>
    ```
 
-5. **Open a Pull Request** (if working on a feature branch):
+6. **Open a Pull Request**:
    ```bash
    gh pr create --base main --head <branch> \
      --title "<type>(<scope>): <description>" \
@@ -212,7 +219,7 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
 - [ ] No git-tracked files are modified by game executables (only `export` instructions to player)
 - [ ] CHANGELOG.md updated with new entry
 - [ ] Git commit follows semantic commit format
-- [ ] Changes pushed to main (or PR opened)
+- [ ] Branch pushed and pull request opened (nothing pushed to `main`)
 
 ## Output Format
 
@@ -250,10 +257,10 @@ After completing all steps, provide a summary:
 ### Commit Information
 - Hash: <commit-hash>
 - Message: <commit-message>
-- Branch: main
+- Branch: <branch>
 
 ### Publication Status
-- Pull Request: https://github.com/bamr87/bashcrawl/pull/<pr-number> (if applicable)
+- Pull Request: https://github.com/bamr87/bashcrawl/pull/<pr-number>
 - CI Status: Pending / Passed
 ```
 
@@ -261,10 +268,9 @@ After completing all steps, provide a summary:
 
 If issues are discovered after pushing:
 
-1. **Revert the Commit**:
+1. **Before merge**: push a fix commit to the same branch, or close the PR:
    ```bash
-   git revert <commit-hash>
-   git push origin main
+   gh pr close <pr-number>
    ```
 
 2. **Reset Game State** (if room structure changed):
@@ -272,12 +278,12 @@ If issues are discovered after pushing:
    bash lib/reset.sh       # Restore hidden dirs and permissions
    ```
 
-3. **Close/Revert a Pull Request** (if using PR workflow):
+3. **After merge**: revert through a new PR, not a direct push:
    ```bash
-   gh pr close <pr-number>
-   # or after merge:
+   git switch -c revert/<short-description> origin/main
    git revert <merge-commit-hash>
-   git push origin main
+   git push -u origin revert/<short-description>
+   gh pr create --base main --title "revert: <description>"
    ```
 
 4. **Create a Fix Release**:
@@ -317,8 +323,9 @@ make web-preview                        # Serve web/ at http://127.0.0.1:8000
 
 # Git workflow
 git add -A                              # Stage all changes
+git switch -c feat/workshop-room origin/main   # Work on a branch
 git commit -m "feat(game): add workshop room"  # Semantic commit
-git push origin main                    # Push to main
+git push -u origin feat/workshop-room   # Push the branch (never main)
 
 # Pull request
 gh pr create --base main --head <branch> --title "feat(game): add workshop room"
@@ -326,4 +333,4 @@ gh pr create --base main --head <branch> --title "feat(game): add workshop room"
 
 ---
 
-**Note**: Game executables must never modify git-tracked files. All player state changes are done via `export` commands printed to the player. Always run shellcheck and the unit+integration test suite before pushing.
+**Note**: Game executables must never modify git-tracked files. All player state changes are done via `export` commands printed to the player. Always run shellcheck and the unit+integration test suite before pushing, and never push directly to `main`: every change goes through a pull request.
