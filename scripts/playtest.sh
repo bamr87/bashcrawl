@@ -10,7 +10,7 @@
 #
 # Usage:   bash scripts/playtest.sh [seeds]
 # Env:     CLAUDE_CODE_OAUTH_TOKEN   subscription token (`claude setup-token`)
-#          BLANK_SLATE_MODEL         model id (default claude-sonnet-4-6)
+#          BLANK_SLATE_MODEL         model id (default claude-sonnet-5-5)
 #          BLANK_SLATE_MAX_TURNS     per-session turn cap (default 80)
 #          BLANK_SLATE_GATE_ROOMS    median rooms visited must be >= this (default 3)
 #          BLANK_SLATE_GATE_SCROLLS  median scrolls read must be >= this (default 1)
