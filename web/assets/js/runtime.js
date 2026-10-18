@@ -808,10 +808,25 @@
             return [{ kind: "info", text: out.join("\n") }, { kind: "output", text: entries.join("\n") || "(empty)" }];
         }
 
+        // Items a quest's completion.item_check still needs (in order), so the
+        // player is told what is missing instead of silently stalling (#103).
+        missingQuestItems(q) {
+            const comp = (q && q.completion) || {};
+            if (!comp.item_check) return [];
+            return String(comp.item_check).split(",").map((v) => v.trim()).filter(Boolean)
+                .filter((item) => !this.state.inventory.includes(item));
+        }
+
+        missingItemsLine(q) {
+            const missing = this.missingQuestItems(q);
+            return missing.length ? `You still need: ${missing.join(", ")}` : "";
+        }
+
         cmdHint() {
             const q = this.quests[this.state.currentQuestId];
             if (!q) return [{ kind: "success", text: "No quests left. Try `map`, `tree`, `cowsay hi`, or the `train` / `speedrun` / `pathfind` mini-games." }];
-            return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}` }];
+            const missing = this.missingItemsLine(q);
+            return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}${missing ? `\n   ${missing}` : ""}` }];
         }
 
         cmdXp() {
@@ -833,10 +848,19 @@
                 if (this.readFile(path) === null) return [{ kind: "error", text: `No such file: ${raw}` }];
                 if (!this.state.inventory.includes("grimoire")) this.state.inventory.push("grimoire");
                 this.state.aliases.bc = "echo 42";
-                return [
+                // Only promise the quest when its item check will pass; quest
+                // advancement itself runs in postCommand (#103).
+                const q = this.quests[this.state.currentQuestId];
+                const pending = q && (q.completion || {}).command === "source";
+                const missing = pending ? this.missingQuestItems(q) : [];
+                const out = [
                     { kind: "magic", text: "📕 The grimoire's knowledge merges with your shell." },
-                    { kind: "success", text: "Defined `bc` as a quick demo (output: 42). Scriptorium quest ready." },
+                    { kind: "success", text: pending && !missing.length ? "Defined `bc` as a quick demo (output: 42). Scriptorium quest ready." : "Defined `bc` as a quick demo (output: 42)." },
                 ];
+                if (missing.length) {
+                    out.push({ kind: "error", text: `The Scriptorium stays sealed. You still need: ${missing.join(", ")}. Type \`hint\` for where to look, then \`source grimoire\` again.` });
+                }
+                return out;
             }
             if (this.readFile(path) !== null) {
                 return [{ kind: "info", text: `Sourced ${raw} (no extra definitions in the web port).` }];
@@ -846,7 +870,8 @@
 
         cmdQuest() {
             const q = this.quests[this.state.currentQuestId];
-            return [{ kind: "info", text: q ? `${q.title}\n${q.objective}\nHint: ${q.hint || "Explore and read scrolls."}` : "All quests complete." }];
+            const missing = this.missingItemsLine(q);
+            return [{ kind: "info", text: q ? `${q.title}\n${q.objective}\nHint: ${q.hint || "Explore and read scrolls."}${missing ? `\n${missing}` : ""}` : "All quests complete." }];
         }
 
         cmdInventory() {

@@ -99,6 +99,25 @@
             return best ? reveals[best] + path.slice(best.length) : path;
         }
 
+        // Inverse of actual(): translate a stored world path (e.g.
+        // /base/.secret/inner) into the path the player sees and types once
+        // the enclosing hidden directories have been revealed
+        // (/base/secret/inner). Longest stored prefix wins.
+        function visible(path) {
+            const reveals = getState().reveals || {};
+            let bestVisible = null;
+            let bestReal = null;
+            for (const [vis, real] of Object.entries(reveals)) {
+                if (path === real || path.startsWith(real + "/")) {
+                    if (bestReal === null || real.length > bestReal.length) {
+                        bestReal = real;
+                        bestVisible = vis;
+                    }
+                }
+            }
+            return bestReal !== null ? bestVisible + path.slice(bestReal.length) : path;
+        }
+
         function basename(path) {
             return path.split("/").filter(Boolean).pop() || "";
         }
@@ -187,13 +206,15 @@
         // Locate a hidden directory by logical name (e.g. "secret"): returns
         // { visiblePath, realPath } for the first world directory containing a
         // hidden `.name` entry, or null. Pure — recording the reveal is the
-        // caller's job (it lives in state).
+        // caller's job (it lives in state). visiblePath is built from the
+        // parent's *visible* form so a room nested inside an already-revealed
+        // room is keyed by the path the player actually types (#104).
         function findHiddenDir(name) {
             const dotName = `.${name}`;
             for (const [dirPath, list] of Object.entries(world.directories)) {
                 if (!Array.isArray(list) || !list.some((e) => e.name === dotName && e.hidden)) continue;
                 return {
-                    visiblePath: `${dirPath}/${name}`.replace(/\/+/g, "/"),
+                    visiblePath: `${visible(dirPath)}/${name}`.replace(/\/+/g, "/"),
                     realPath: `${dirPath}/${dotName}`.replace(/\/+/g, "/"),
                 };
             }
@@ -205,6 +226,7 @@
             resolve,
             parentPath,
             actual,
+            visible,
             basename,
             node,
             isDir,

@@ -374,6 +374,17 @@ rooms:
         description: "Step through the portal"
       - command: "source init_help.sh"
         description: "Activate the help system"
+    # The browser port has no portal/ or init_help.sh; it exports these
+    # web_* overrides instead of the terminal-only steps above (#103).
+    web_context_hint: "The study holds the grimoire. Run ./grimoire, then source grimoire to define bc."
+    web_next_steps: "Run ./grimoire, then source grimoire to define the bc command (you need the amulet and the coins)"
+    web_essential_commands:
+      - command: "./grimoire"
+        description: "Open the grimoire"
+      - command: "source grimoire"
+        description: "Define the bc command and finish the quest"
+      - command: "bc"
+        description: "Try the new command"
 
   graveyard:
     emoji: "🪦"
