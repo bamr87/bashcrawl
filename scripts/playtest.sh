@@ -21,7 +21,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 SEEDS="${1:-${BLANK_SLATE_SEEDS:-3}}"
-MODEL="${BLANK_SLATE_MODEL:-claude-sonnet-4-6}"
+MODEL="${BLANK_SLATE_MODEL:-claude-sonnet-5-5}"
 MAX_TURNS="${BLANK_SLATE_MAX_TURNS:-80}"
 PERMISSION_MODE="${BLANK_SLATE_PERMISSION_MODE:-bypassPermissions}"
 GATE_ROOMS="${BLANK_SLATE_GATE_ROOMS:-3}"
