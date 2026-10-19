@@ -1376,7 +1376,7 @@
           "spells"
         ],
         "files": {
-          "grimoire.md": "# The Grimoire of Words of Power\n\nVariables remember. Aliases shorten. Globs multiply.\nQuotes protect. History never forgets.\n",
+          "grimoire.md": "# The Grimoire of Words of Power\n\nVariables remember. Aliases shorten. Globs multiply. Quotes protect. History never forgets.\n",
           "spells/fire.txt": "Ignis: a spell of warmth and light.\n",
           "spells/ice.txt": "Glacies: a spell that slows the world down.\n",
           "spells/wind.log": "2026-03-01 wind spell cast 3 times\n"
