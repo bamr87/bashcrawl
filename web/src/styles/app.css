@@ -1,0 +1,468 @@
+/* Bashcrawl web — Tailwind 4 over the fleet tokens, base styles, and the
+ * app shell's chrome (header, tabs, buttons, toasts, dialogs). Everything
+ * reads tokens from tokens.css; no colour or z-index literals here. */
+@import "./tokens.css";
+@import "tailwindcss";
+
+/* Utilities name the ROLE, the role resolves to the skin (UPS-FE-08). */
+@theme inline {
+    --color-surface: var(--fleet-color-bg);
+    --color-panel: var(--fleet-color-bg-elevated);
+    --color-muted: var(--fleet-color-bg-muted);
+    --color-ink: var(--fleet-color-ink);
+    --color-ink-muted: var(--fleet-color-ink-muted);
+    --color-line: var(--fleet-color-border);
+    --color-gold: var(--fleet-color-primary);
+    --color-ember: var(--fleet-color-secondary);
+    --color-arcane: var(--fleet-color-accent);
+    --color-verdant: var(--fleet-color-success);
+    --color-rune: var(--fleet-color-info);
+    --color-amber: var(--fleet-color-warning);
+    --color-blood: var(--fleet-color-danger);
+    --color-link: var(--fleet-color-link);
+    --color-code-bg: var(--fleet-color-code-bg);
+    --color-code-ink: var(--fleet-color-code-ink);
+    --font-sans: var(--fleet-font-sans);
+    --font-mono: var(--fleet-font-mono);
+    --radius-sm: var(--fleet-radius-sm);
+    --radius-md: var(--fleet-radius-base);
+    --radius-lg: var(--fleet-radius-lg);
+    --radius-xl: var(--fleet-radius-xl);
+    --shadow-focus: var(--fleet-shadow-focus);
+    --ease-fleet: var(--fleet-ease);
+}
+
+@layer base {
+    html,
+    body {
+        height: 100%;
+    }
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: var(--fleet-color-bg);
+        color: var(--fleet-color-ink);
+        font-family: var(--fleet-font-sans);
+        font-size: var(--fleet-text-base);
+        line-height: var(--fleet-leading-normal);
+        -webkit-font-smoothing: antialiased;
+    }
+    code,
+    kbd,
+    pre {
+        font-family: var(--fleet-font-mono);
+    }
+    button,
+    input,
+    select {
+        font: inherit;
+        color: inherit;
+    }
+    a {
+        color: var(--fleet-color-link);
+    }
+    a:hover {
+        color: var(--fleet-color-link-hover);
+    }
+    :focus-visible {
+        outline: 2px solid var(--fleet-color-primary);
+        outline-offset: 2px;
+    }
+    [hidden] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* ── pixel chrome primitives ── */
+    .bc-display {
+        font-family: var(--fleet-font-mono);
+        font-weight: var(--fleet-font-weight-bold);
+        letter-spacing: var(--bc-display-tracking);
+        text-transform: uppercase;
+    }
+    /* A bevelled, corner-notched panel: the 9-slice window of a 16-bit HUD,
+       drawn with shadows and a clip so it follows the theme. */
+    .bc-frame {
+        position: relative;
+        background: var(--fleet-color-bg-elevated);
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
+            inset -2px -2px 0 0 var(--bc-color-bevel-lo);
+        clip-path: polygon(
+            3px 0, calc(100% - 3px) 0, 100% 3px,
+            100% calc(100% - 3px), calc(100% - 3px) 100%,
+            3px 100%, 0 calc(100% - 3px), 0 3px
+        );
+    }
+    .bc-frame-sunken {
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
+            inset -2px -2px 0 0 var(--bc-color-bevel-hi);
+    }
+    .bc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+        padding: 0.3rem 0.7rem;
+        border: 0;
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-ink);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.3;
+        cursor: pointer;
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
+            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
+            var(--fleet-shadow-xs);
+        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+        transition: transform var(--fleet-motion-fast) var(--fleet-ease), color var(--fleet-motion-fast) var(--fleet-ease);
+        white-space: nowrap;
+    }
+    .bc-btn:hover {
+        color: var(--fleet-color-primary);
+    }
+    .bc-btn:active,
+    .bc-btn[aria-pressed="true"] {
+        transform: translate(1px, 1px);
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
+            inset -2px -2px 0 0 var(--bc-color-bevel-hi);
+    }
+    .bc-btn[aria-pressed="true"] {
+        color: var(--fleet-color-primary);
+    }
+    .bc-btn-primary {
+        background: color-mix(in srgb, var(--fleet-color-primary) 22%, var(--fleet-color-bg-muted));
+        color: var(--fleet-color-primary);
+    }
+    .bc-kbd {
+        display: inline-block;
+        min-width: 1.6em;
+        padding: 0 0.35em;
+        text-align: center;
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-code-ink);
+        background: var(--fleet-color-code-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border), var(--fleet-shadow-xs);
+        border-radius: var(--fleet-radius-sm);
+    }
+
+    /* ── app shell ── */
+    .bc-skip {
+        position: absolute;
+        left: var(--fleet-space-3);
+        top: -100%;
+        z-index: var(--fleet-layer-skip-link);
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        background: var(--fleet-color-primary);
+        color: var(--fleet-color-bg);
+        font-weight: var(--fleet-font-weight-bold);
+        text-decoration: none;
+    }
+    .bc-skip:focus {
+        top: var(--fleet-space-2);
+    }
+    .bc-shell {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+        height: 100vh;
+        height: 100dvh;
+        width: min(1480px, 100vw);
+        margin: 0 auto;
+        background:
+            radial-gradient(1200px 500px at 50% -10%, color-mix(in srgb, var(--bc-color-torch) 14%, transparent), transparent 70%),
+            var(--fleet-color-bg);
+        overflow: hidden;
+    }
+    .bc-header {
+        position: relative;
+        z-index: var(--fleet-layer-header);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fleet-space-3);
+        min-height: 54px;
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        background: var(--fleet-color-bg-elevated);
+        box-shadow:
+            inset 0 -2px 0 0 var(--bc-color-bevel-lo),
+            inset 0 1px 0 0 var(--bc-color-bevel-hi);
+    }
+    .bc-brand {
+        display: flex;
+        align-items: baseline;
+        gap: var(--fleet-space-2);
+        color: var(--fleet-color-primary);
+        text-shadow: 0 2px 0 var(--bc-color-bevel-lo);
+        white-space: nowrap;
+    }
+    .bc-brand strong {
+        font-size: 1.05rem;
+    }
+    .bc-brand-sub {
+        color: var(--fleet-color-ink-muted);
+        font-size: var(--fleet-text-sm);
+        letter-spacing: 0.04em;
+        text-shadow: none;
+    }
+    .bc-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+    }
+    .bc-main {
+        position: relative;
+        min-height: 0;
+        display: grid;
+    }
+    .bc-main:focus {
+        outline: none;
+    }
+    /* The shake target: an inner wrapper, never the shell itself — a
+       transformed ancestor would re-parent position:fixed overlays. */
+    .bc-stage {
+        min-height: 0;
+        display: grid;
+        transform: translate3d(var(--shake-x, 0px), var(--shake-y, 0px), 0) rotate(var(--shake-rot, 0deg));
+        will-change: transform;
+    }
+    .bc-footer {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-3);
+        padding: 0.4rem var(--fleet-space-3);
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+        background: var(--fleet-color-bg-elevated);
+        box-shadow: inset 0 1px 0 0 var(--bc-color-bevel-hi);
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .bc-footer-hint {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--fleet-color-accent);
+    }
+    .bc-footer a {
+        text-decoration: none;
+    }
+
+    /* ── mode tabs ── */
+    .bc-modes [role="tablist"] {
+        display: flex;
+        gap: var(--fleet-space-1);
+    }
+    .bc-tab {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.85rem;
+        border: 0;
+        background: transparent;
+        color: var(--fleet-color-ink-muted);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-tab:hover {
+        color: var(--fleet-color-ink);
+    }
+    .bc-tab::after {
+        content: "";
+        position: absolute;
+        left: 0.6rem;
+        right: 0.6rem;
+        bottom: 0;
+        height: 3px;
+        background: var(--fleet-color-primary);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform var(--fleet-motion-base) var(--fleet-ease);
+    }
+    .bc-tab[aria-selected="true"] {
+        color: var(--fleet-color-primary);
+        text-shadow: var(--bc-glow-gold);
+    }
+    .bc-tab[aria-selected="true"]::after {
+        transform: scaleX(1);
+    }
+
+    /* ── toasts (one announcer, UPS-FE-18) ── */
+    .bc-toasts {
+        position: fixed;
+        right: var(--fleet-space-3);
+        bottom: calc(var(--fleet-space-5) + env(safe-area-inset-bottom, 0px));
+        z-index: var(--fleet-layer-toast);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+        max-width: min(360px, calc(100vw - 2 * var(--fleet-space-3)));
+        pointer-events: none;
+    }
+    .bc-toast {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink);
+        pointer-events: auto;
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
+            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
+            var(--fleet-shadow-md);
+    }
+    .bc-toast[data-variant="success"] { color: var(--fleet-color-success); }
+    .bc-toast[data-variant="error"] { color: var(--fleet-color-danger); }
+    .bc-toast[data-variant="magic"] { color: var(--fleet-color-primary); }
+    .bc-toast button {
+        margin-left: auto;
+        border: 0;
+        background: transparent;
+        color: var(--fleet-color-ink-muted);
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    /* ── dialogs ── */
+    .bc-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: var(--fleet-layer-modal);
+        display: grid;
+        place-items: center;
+        padding: var(--fleet-space-3);
+        background: color-mix(in srgb, var(--bc-color-overlay) 72%, transparent);
+        backdrop-filter: blur(2px);
+    }
+    .bc-dialog {
+        width: min(640px, 100%);
+        max-height: min(85dvh, 720px);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-3);
+        padding: var(--fleet-space-4);
+        overflow: auto;
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 3px 3px 0 0 var(--bc-color-bevel-hi),
+            inset -3px -3px 0 0 var(--bc-color-bevel-lo),
+            var(--fleet-shadow-lg);
+    }
+    .bc-dialog h2 {
+        margin: 0;
+        color: var(--fleet-color-primary);
+        font-size: var(--fleet-text-h2);
+    }
+    .bc-dialog-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fleet-space-3);
+    }
+    .bc-shortcuts {
+        margin: 0;
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: var(--fleet-space-2) var(--fleet-space-3);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-shortcuts dt {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+    }
+    .bc-shortcuts dd {
+        margin: 0;
+        color: var(--fleet-color-ink-muted);
+    }
+
+    /* ── plain content pages (404, error) ── */
+    .bc-page {
+        align-self: center;
+        justify-self: center;
+        width: min(640px, 100%);
+        padding: var(--fleet-space-4);
+        margin: var(--fleet-space-4);
+        text-align: center;
+    }
+    .bc-page h1 {
+        margin: 0 0 var(--fleet-space-2);
+        color: var(--fleet-color-primary);
+        font-size: var(--fleet-text-h1);
+    }
+    .bc-page p {
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-page pre {
+        text-align: left;
+        max-height: 12rem;
+        overflow: auto;
+        padding: var(--fleet-space-2);
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-code-ink);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-doors {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--fleet-space-2);
+        margin-top: var(--fleet-space-3);
+    }
+}
+
+/* ── small screens ── */
+@media (max-width: 900px) {
+    .bc-header {
+        flex-wrap: wrap;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-2);
+    }
+    .bc-modes {
+        order: 3;
+        width: 100%;
+    }
+    .bc-modes [role="tablist"] {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .bc-tab {
+        justify-content: center;
+        padding: 0.35rem 0.2rem;
+        font-size: var(--fleet-text-xs);
+    }
+}
+@media (max-width: 600px) {
+    .bc-brand-sub,
+    .bc-footer a {
+        display: none;
+    }
+    .bc-actions .bc-btn {
+        padding: 0.25rem 0.45rem;
+        font-size: var(--fleet-text-xs);
+    }
+}
+@media (max-width: 440px) {
+    .bc-tab-text {
+        display: none;
+    }
+    .bc-tab {
+        font-size: var(--fleet-text-base);
+    }
+}

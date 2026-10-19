@@ -1,274 +1,80 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-resolved="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Bashcrawl — learn the terminal by playing</title>
     <meta name="description" content="A free browser dungeon crawl that teaches real bash: take guided courses in a practice lab, explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#0b0a14">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bashcrawl — learn the terminal by playing">
+    <meta property="og:description" content="Real bash commands. A dungeon that is the filesystem. Free, in your browser.">
+    <meta property="og:url" content="https://bamr87.github.io/bashcrawl/">
+    <meta name="twitter:card" content="summary">
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-    <link rel="stylesheet" href="./assets/css/theme.css">
-    <link rel="stylesheet" href="./assets/css/terminal.css">
+    <!-- Colour mode before first paint (UPS-FE-06): the saved preference,
+         with "auto" resolved against the OS. theme-store.ts takes over. -->
+    <script>
+        (function () {
+            try {
+                var pref = localStorage.getItem("bashcrawl-web-theme");
+                if (pref !== "light" && pref !== "dark" && pref !== "auto") pref = "dark";
+                var light = pref === "light" || (pref === "auto" && matchMedia("(prefers-color-scheme: light)").matches);
+                document.documentElement.setAttribute("data-theme", pref);
+                document.documentElement.setAttribute("data-resolved", light ? "light" : "dark");
+            } catch (e) { /* storage blocked: stay dark */ }
+        })();
+    </script>
 </head>
 <body>
-    <main class="web-shell" id="app">
-        <header class="tui-header">
-            <div>
-                <strong>BASHCRAWL</strong>
-                <span class="tui-header-subtitle">Terminal Dungeon Web</span>
-            </div>
-            <nav class="mode-nav" id="mode-nav" role="tablist" aria-label="Game modes">
-                <button type="button" class="mode-tab mode-tab-on" data-mode="story" role="tab" aria-selected="true" title="Story dungeon (Alt+1)"><span class="mode-tab-icon" aria-hidden="true">⚔</span> <span class="mode-tab-text">Story</span></button>
-                <button type="button" class="mode-tab" data-mode="learn" role="tab" aria-selected="false" title="Guided courses with a lab (Alt+2)"><span class="mode-tab-icon" aria-hidden="true">🎓</span> <span class="mode-tab-text">Learn</span></button>
-                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+3)"><span class="mode-tab-icon" aria-hidden="true">🕹</span> <span class="mode-tab-text">Arcade</span></button>
-                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+4)"><span class="mode-tab-icon" aria-hidden="true">📖</span> <span class="mode-tab-text">Reference</span></button>
-            </nav>
-            <div class="tui-header-actions">
-                <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer" title="Source on GitHub">GitHub</a>
-                <button id="hud-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="hud-menu" title="Sidebar panels: fold, hide, dock left or right">HUD</button>
-                <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer" title="Documentation drawer (F1)">Docs</button>
-                <button id="theme-toggle" class="tui-button" type="button" title="Switch to light theme">Dark</button>
-                <button id="crt-toggle" class="tui-button" type="button" aria-pressed="false" title="Enable retro CRT overlay">CRT Off</button>
-            </div>
-        </header>
-
-        <!-- Hero status strip: rank → next rank, vitals, quests, badges,
-             streak (Hud.statusModel, painted by game.js). On small screens
-             it also carries the toggle that opens the sidebar panels. -->
-        <div class="status-bar" id="status-bar">
-            <div id="status-strip" class="status-strip" role="group" aria-label="Hero status"></div>
-            <button id="panels-toggle" class="tui-button panels-toggle" type="button" aria-expanded="false" aria-controls="story-sidebar">☰ Panels</button>
-        </div>
-
-        <section class="tui-main" id="mode-story" aria-label="Bashcrawl story dungeon">
-            <aside class="tui-sidebar" id="story-sidebar" aria-label="Game status panels">
-                <div id="hud-menu" class="hud-menu" hidden>
-                    <p class="kind-dim">Click a pane title to fold it. Uncheck to hide. Layout is saved separately from your run.</p>
-                    <div id="hud-menu-panes"></div>
-                    <p class="hud-menu-actions">
-                        <button type="button" class="tui-button" data-hud="dock-left">Dock left</button>
-                        <button type="button" class="tui-button" data-hud="dock-right">Dock right</button>
-                        <button type="button" class="tui-button" data-hud="reset">Reset HUD</button>
-                    </p>
-                </div>
-                <section class="tui-panel" data-hud-pane="quest">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Active Quest</button></h2>
-                    <div id="quest-panel"></div>
-                </section>
-                <!-- Learning platform: the active lesson's checklist (Hud.lessonModel). -->
-                <section class="tui-panel lesson-panel" data-hud-pane="lesson">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Lesson</button></h2>
-                    <div id="lesson-panel"></div>
-                </section>
-                <section class="tui-panel" data-hud-pane="pack">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Inventory</button></h2>
-                    <div id="inventory-panel"></div>
-                </section>
-                <!-- Concept spotlight: what THIS room teaches, with one-line cheats
-                     (rendered by reference.js from rooms.yaml `teaches`). -->
-                <section class="tui-panel spotlight" data-hud-pane="spotlight">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">This Room Teaches</button></h2>
-                    <div id="spotlight-panel"></div>
-                </section>
-                <!-- Pixel Hero Companion: CSS-only layered pixels (no emoji/glyphs),
-                     theme-aware, reacts to game events via data-mood. -->
-                <section class="tui-panel hero-panel" data-hud-pane="hero">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Hero</button></h2>
-                    <div id="hero-panel" class="hero-stage" data-mood="idle" role="img" aria-label="Pixel adventurer companion (idle)">
-                        <div class="hero-sprite">
-                            <div class="hero-shadow" aria-hidden="true"></div>
-                            <div class="hero-body" aria-hidden="true">
-                                <span class="hero-px hero-helm"></span>
-                                <span class="hero-px hero-face"></span>
-                                <span class="hero-px hero-torso"></span>
-                                <span class="hero-px hero-arm hero-arm-l"></span>
-                                <span class="hero-px hero-arm hero-arm-r"></span>
-                                <span class="hero-px hero-legs"></span>
-                                <span class="hero-px hero-blade"></span>
-                            </div>
-                            <div class="hero-fx" aria-hidden="true">
-                                <span class="hero-spark hero-spark-1"></span>
-                                <span class="hero-spark hero-spark-2"></span>
-                                <span class="hero-spark hero-spark-3"></span>
-                            </div>
-                        </div>
-                        <p id="hero-mood-label" class="kind-dim hero-mood-label">Ready for the descent.</p>
-                    </div>
-                </section>
-                <!-- Skill map summary: mastery grown by real use (Hud.skillsModel). -->
-                <section class="tui-panel skills-panel" data-hud-pane="skills">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Skills</button></h2>
-                    <div id="skills-panel"></div>
-                </section>
-                <section class="tui-panel tui-room-panel" data-hud-pane="room">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Location</button></h2>
-                    <div id="room-panel"></div>
-                </section>
-                <!-- Generative dungeon map: a fog-of-war tree that grows as the
-                     player explores. Built live from the runtime filesystem in
-                     renderMap() (game.js); only visited rooms and their visible
-                     doors are drawn, so it never spoils undiscovered areas. -->
-                <section class="tui-panel map-panel" data-hud-pane="map">
-                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Map</button></h2>
-                    <div id="map-panel"></div>
-                </section>
-            </aside>
-
-            <section class="tui-content">
-                <!-- Learn mode: the lesson reader (learn.js) beside the same
-                     story terminal. Hidden outside the learn layout. -->
-                <div id="learn-reader" class="learn-reader" aria-label="Lesson reader" hidden></div>
-                <pre id="output-log" class="tui-log" role="log" aria-live="polite" aria-relevant="additions"></pre>
-            </section>
-        </section>
-
-        <!-- Practice Arcade: mini-games on the same bash kernel (arcade.js). -->
-        <section class="tui-main" id="mode-arcade" aria-label="Practice Arcade" hidden>
-            <aside class="tui-sidebar" aria-label="Arcade status panels">
-                <section class="tui-panel">
-                    <h2>Objective</h2>
-                    <div id="arcade-objective"></div>
-                </section>
-                <section class="tui-panel">
-                    <h2>This Run</h2>
-                    <div id="arcade-stats"></div>
-                </section>
-                <section class="tui-panel">
-                    <h2>Concept Cheats</h2>
-                    <div id="arcade-cheats"></div>
-                </section>
-                <section class="tui-panel">
-                    <h2>Best Scores</h2>
-                    <div id="arcade-best"></div>
-                </section>
-            </aside>
-            <section class="tui-content">
-                <div id="arcade-home" class="arcade-home"></div>
-                <pre id="arcade-log" class="tui-log" role="log" aria-live="polite" aria-relevant="additions" hidden></pre>
-            </section>
-        </section>
-
-        <!-- Reference: searchable cheatsheet library (reference.js). -->
-        <section class="ref-main" id="mode-reference" aria-label="Command reference and cheatsheets" hidden>
-            <div class="ref-controls">
-                <input id="ref-search" class="docs-search ref-search" type="search"
-                       placeholder="Search commands, flags, concepts… " aria-label="Search the reference">
-            </div>
-            <div id="reference-content" class="ref-content"></div>
-        </section>
-
-        <!-- The one shared prompt. Above it, next-step suggestions for the
-             story (Hud.suggestionsModel): tapping one fills the prompt — the
-             learner still presses Enter. -->
-        <div class="tui-input-dock" id="input-dock">
-            <div id="suggest-row" class="suggest-row" role="group" aria-label="Suggested next commands" hidden></div>
-            <form class="tui-input-row" id="command-form">
-                <label id="prompt-label" class="tui-prompt" for="command-input">/entrance $</label>
-                <input id="command-input" class="tui-input" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="go" placeholder="Type a command…">
-            </form>
-            <p id="inline-hint" class="inline-hint" aria-live="polite" hidden></p>
-        </div>
-
-        <footer class="tui-footer">
-            <span>Enter=run</span>
-            <span>Tab=complete</span>
-            <span>↑/↓=history</span>
-            <span>Alt+1/2/3/4=mode</span>
-            <span>F1=docs</span>
-            <span>Ctrl+L=clear</span>
-            <span id="footer-mode-hint" class="footer-mode-hint"></span>
-            <a class="tui-footer-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">github.com/bamr87/bashcrawl</a>
-        </footer>
-    </main>
-
-    <aside id="docs-drawer" class="docs-drawer" aria-label="Bashcrawl documentation" aria-hidden="true" hidden>
-        <div class="docs-header">
-            <h2>Documentation</h2>
-            <button id="docs-close" class="tui-button" type="button">Close</button>
-        </div>
-        <input id="docs-search" class="docs-search" type="search" placeholder="Search commands, rooms, quests">
-        <div id="docs-content" class="docs-content"></div>
-    </aside>
-
-    <!-- First-visit landing: pick a door. Dismisses permanently (shell.js). -->
-    <div id="landing-overlay" class="landing-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Bashcrawl" hidden>
-        <div class="landing-card">
-            <pre class="landing-brand" data-art="landing-brand" aria-hidden="true"></pre>
-            <h1>Learn the terminal by playing.</h1>
-            <p class="kind-dim">Real bash commands. A dungeon that is the filesystem. Free, in your browser.</p>
-            <div class="landing-doors">
-                <button type="button" class="landing-door landing-door-learn" data-launch="learn">
-                    <span class="landing-door-icon">🎓</span>
-                    <strong>Learn</strong>
-                    <span>Guided courses with a practice lab. Start here if the terminal is new to you.</span>
-                </button>
-                <button type="button" class="landing-door" data-launch="story">
-                    <span class="landing-door-icon">⚔</span>
-                    <strong>Story</strong>
-                    <span>Descend the dungeon — quests teach you pwd → ls → cd → pipes.</span>
-                </button>
-                <button type="button" class="landing-door" data-launch="arcade">
-                    <span class="landing-door-icon">🕹</span>
-                    <strong>Practice Arcade</strong>
-                    <span>Timed mini-games: navigation, grep/find, pipelines, flashcards.</span>
-                </button>
-                <button type="button" class="landing-door" data-launch="reference">
-                    <span class="landing-door-icon">📖</span>
-                    <strong>Reference</strong>
-                    <span>Searchable cheatsheets for every command the dungeon teaches.</span>
-                </button>
-            </div>
-            <p class="kind-dim landing-tip">Tip: every door shares one prompt. Type <code>pwd</code> anywhere to begin.</p>
-        </div>
-    </div>
-
-    <!-- TermForge framework core (vendored from termforge/core/ by `make
-         web-build`) loads before every app script. Edit termforge/core/,
-         never these copies. -->
-    <script src="./assets/js/vendor/termforge/protocol.js"></script>
-    <script src="./assets/js/vendor/termforge/parser.js"></script>
-    <script src="./assets/js/vendor/termforge/state.js"></script>
-    <script src="./assets/js/vendor/termforge/vfs.js"></script>
-    <script src="./assets/js/vendor/termforge/hooks.js"></script>
-    <script src="./assets/js/vendor/termforge/registry.js"></script>
-    <script src="./assets/js/vendor/termforge/events.js"></script>
-    <script src="./assets/js/vendor/termforge/rules.js"></script>
-    <script src="./assets/js/vendor/termforge/plugin.js"></script>
-    <script src="./assets/js/vendor/termforge/curriculum.js"></script>
-    <script src="./assets/js/vendor/termforge/mastery.js"></script>
-    <script src="./assets/js/vendor/termforge/explain.js"></script>
-    <script src="./assets/js/vendor/termforge/shell.js"></script>
-    <script src="./assets/js/vendor/termforge/packs/posix.js"></script>
-    <script src="./assets/js/vendor/termforge/packs/flavour.js"></script>
-    <script src="./assets/js/vendor/termforge/view.js"></script>
-    <script src="./assets/js/vendor/termforge/sinks/dom.js"></script>
-    <script src="./assets/js/vendor/termforge/sinks/ansi.js"></script>
-    <script src="./assets/js/vendor/termforge/input.js"></script>
-    <script src="./assets/js/vendor/termforge/session.js"></script>
-    <script src="./assets/js/vendor/termforge/ascii-motion.js"></script>
-    <script src="./assets/js/vendor/termforge/art.js"></script>
-    <script src="./assets/js/storage.js"></script>
-    <script src="./assets/js/art-clips.js"></script>
-    <script src="./assets/js/plugins/achievements.js"></script>
-    <script src="./assets/js/plugins/daily.js"></script>
-    <script src="./assets/js/plugins/progress.js"></script>
-    <script src="./assets/js/plugins/arena.js"></script>
-    <script src="./assets/js/plugins/pathfind.js"></script>
-    <script src="./assets/js/plugins/bestiary.js"></script>
-    <script src="./assets/js/runtime.js"></script>
-    <script src="./assets/js/hud.js"></script>
-    <script src="./assets/js/learn.js"></script>
-    <script src="./assets/js/fx-clips.js"></script>
-    <script src="./assets/js/fx.js"></script>
-    <script src="./assets/js/ambient.js"></script>
-    <script src="./assets/js/docs.js"></script>
-    <script src="./assets/js/reference.js"></script>
-    <script src="./assets/js/arcade.js"></script>
-    <script src="./assets/js/game.js"></script>
-    <script src="./assets/js/shell.js"></script>
+    <!-- The game ENGINE, as classic scripts in a fixed order: the TermForge
+         core (vendored from termforge/core/ by `make web-build` — edit the
+         source, never these copies), then the game runtime, its plugins and
+         the presenters. The order is a contract: scripts/validate_static_web.py
+         checks it, the node test harness mirrors it. `vite-ignore` keeps the
+         bundler's hands off them; vite.config.mts ships them into dist. -->
+    <script src="./assets/js/vendor/termforge/protocol.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/parser.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/state.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/vfs.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/hooks.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/registry.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/events.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/rules.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/plugin.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/curriculum.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/mastery.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/explain.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/shell.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/packs/posix.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/packs/flavour.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/view.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/sinks/dom.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/sinks/ansi.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/input.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/session.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/ascii-motion.js" vite-ignore></script>
+    <script src="./assets/js/vendor/termforge/art.js" vite-ignore></script>
+    <script src="./assets/js/storage.js" vite-ignore></script>
+    <script src="./assets/js/art-clips.js" vite-ignore></script>
+    <script src="./assets/js/plugins/achievements.js" vite-ignore></script>
+    <script src="./assets/js/plugins/daily.js" vite-ignore></script>
+    <script src="./assets/js/plugins/progress.js" vite-ignore></script>
+    <script src="./assets/js/plugins/arena.js" vite-ignore></script>
+    <script src="./assets/js/plugins/pathfind.js" vite-ignore></script>
+    <script src="./assets/js/plugins/bestiary.js" vite-ignore></script>
+    <script src="./assets/js/runtime.js" vite-ignore></script>
+    <script src="./assets/js/hud.js" vite-ignore></script>
+    <script src="./assets/js/learn.js" vite-ignore></script>
+    <script src="./assets/js/fx-clips.js" vite-ignore></script>
+    <script src="./assets/js/fx.js" vite-ignore></script>
+    <script src="./assets/js/ambient.js" vite-ignore></script>
+    <script src="./assets/js/arcade.js" vite-ignore></script>
 
     <!-- The React app (web/src, built by Vite). A module script runs after
          every classic script above, so the engine globals are ready. -->
-    <div id="root" hidden></div>
+    <div id="root"></div>
     <script type="module" src="./src/main.tsx"></script>
 </body>
 </html>

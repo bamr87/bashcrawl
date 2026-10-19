@@ -1,4 +1,34 @@
-// Vitest setup: jest-dom matchers. Browser polyfills and the engine loader
-// (the classic game scripts evaluated into jsdom's window) arrive with the
-// store in a later step.
+// Vitest setup: jest-dom matchers plus the browser APIs jsdom lacks that the
+// app touches at module load (matchMedia for the theme and motion, a
+// ResizeObserver, scrollTo). The engine loader (the classic game scripts
+// evaluated into jsdom's window) is imported by the tests that need it.
 import "@testing-library/jest-dom/vitest";
+
+if (typeof window !== "undefined") {
+    if (typeof window.matchMedia !== "function") {
+        window.matchMedia = (query: string): MediaQueryList => ({
+            matches: false,
+            media: query,
+            onchange: null,
+            addEventListener() {},
+            removeEventListener() {},
+            addListener() {},
+            removeListener() {},
+            dispatchEvent() { return false; },
+        });
+    }
+    if (typeof window.ResizeObserver !== "function") {
+        class ResizeObserverStub {
+            observe() {}
+            unobserve() {}
+            disconnect() {}
+        }
+        window.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
+    }
+    if (typeof window.scrollTo !== "function") {
+        window.scrollTo = () => {};
+    }
+    if (typeof Element.prototype.scrollIntoView !== "function") {
+        Element.prototype.scrollIntoView = () => {};
+    }
+}

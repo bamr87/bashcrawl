@@ -82,7 +82,8 @@ def validate() -> dict:
     # Script order: every vendored TermForge core file must be loaded by
     # index.html, and all of them before the game runtime (which reads
     # global.TermForge at load time).
-    script_srcs = re.findall(r'<script src="\./([^"]+)"></script>', index)
+    # Classic engine scripts (a `vite-ignore` attribute keeps Vite's hands off them).
+    script_srcs = re.findall(r'<script src="\./([^"]+)"[^>]*></script>', index)
     runtime_src = "assets/js/runtime.js"
     runtime_idx = script_srcs.index(runtime_src) if runtime_src in script_srcs else -1
     art_src = "assets/js/art-clips.js"
