@@ -109,11 +109,15 @@ cmd_serve() { need_node; exec node "$ROOT/termforge/node/host-telnet.js" --app b
 cmd_hub() { cmd_serve --hub "$@"; }
 
 cmd_web() {
-  need python3 "web needs python3 (or serve web/ with any static file server)"
+  need python3 "web needs python3 (or serve web/dist with any static file server)"
   local port="${1:-8000}"
   [[ "$port" =~ ^[0-9]+$ ]] || die "web PORT must be a number"
+  # The browser trainer is a Vite build: web/dist holds the compiled app with
+  # the engine and data copied beside it (make web-bundle).
+  [[ -f "$ROOT/web/dist/index.html" ]] \
+    || die "the web app is not built yet. Run: make web-bundle   (node >= 22.22 + npm; or: npm install && npm run build). For hot reload: make web-dev"
   printf 'Serving the browser trainer at http://127.0.0.1:%s  (Ctrl+C stops)\n' "$port"
-  exec python3 -m http.server "$port" --bind 127.0.0.1 --directory "$ROOT/web"
+  exec python3 -m http.server "$port" --bind 127.0.0.1 --directory "$ROOT/web/dist"
 }
 
 # Rows of "order<TAB>id<TAB>level<TAB>lessons<TAB>title<TAB>summary", sorted.

@@ -5,7 +5,7 @@
 # playtest harness. Usage:
 #   make setup             One-time game setup (make encounters executable)
 #   make web-build         Build the static web bundle (web/data/*.json)
-#   make web-preview       Serve the web app at http://127.0.0.1:8000
+#   make web-dev           The web app with hot reload at http://127.0.0.1:5173 (make web-install first)
 #   make web-test          Build + validate the web bundle
 #   make validate-contracts  Validate YAML registries against the filesystem
 #   make test              Run unit + integration tests
@@ -49,20 +49,35 @@ venv: ## Create .venv and install web-build + test dependencies
 
 # ── Web (the flagship) ─────────────────────────────────────────────────
 
+.PHONY: web-install
+web-install: ## Install the web app's toolchain (npm, always-latest ranges, no lockfile)
+	@npm install --no-audit --no-fund
+
 .PHONY: web-build
-web-build: ## Build the static web bundle from entrance/ + src/help/data/*.yaml + motion/
+web-build: ## Regenerate the engine's data bundles, motion clips and vendored core (python only)
 	@$(PYTHON) scripts/export_static_web.py
 	@$(PYTHON) scripts/build_motion.py
 	@$(PYTHON) scripts/vendor_termforge.py
 
-.PHONY: web-test
-web-test: web-build ## Build + validate the static web bundle
-	@$(PYTHON) scripts/validate_static_web.py
-	@$(PYTHON) scripts/validate_runtime_commands.py
+.PHONY: web-bundle
+web-bundle: web-build ## web-build, then compile the React app into web/dist (node >= 22.22)
+	@npm run build
+
+.PHONY: web-dev
+web-dev: web-build ## Vite dev server with hot reload at http://127.0.0.1:5173
+	@npm run dev
 
 .PHONY: web-preview
-web-preview: web-build ## Preview the web app at http://127.0.0.1:8000
-	@cd web && $(PYTHON) -m http.server 8000 --bind 127.0.0.1
+web-preview: web-bundle ## Serve the production build at http://127.0.0.1:4173
+	@npm run preview
+
+.PHONY: web-test
+web-test: web-build ## Validate the bundle, then lint, test and build the React app
+	@$(PYTHON) scripts/validate_static_web.py
+	@$(PYTHON) scripts/validate_runtime_commands.py
+	@npm run lint
+	@npm run test:web
+	@npm run build
 
 # ── TermForge hosts (the same game/tools, off the browser) ─────────────
 

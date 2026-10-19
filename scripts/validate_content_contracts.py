@@ -497,15 +497,25 @@ def _art_calls(folder: Path) -> set[str]:
     return names
 
 
+_ART_CLIP_PROP = re.compile(r'<ArtClip\s[^>]*?name=["\']([a-z0-9-]+)["\']')
+
+
 def _art_wanted(root: Path) -> set[str]:
     """Every art clip name the game can ask for, literal or derived."""
     js = root / "web/assets/js"
     names: set[str] = set()
-    for rel in ("runtime.js", "hud.js", "game.js"):
+    for rel in ("runtime.js", "hud.js"):
         path = js / rel
         if path.is_file():
             names.update(_ART_CALL.findall(path.read_text(encoding="utf-8")))
     names.update(_art_calls(root / "termforge/apps"))
+    # The React app draws art through <ArtClip name="…"> or runtime.art("…").
+    src = root / "web/src"
+    if src.is_dir():
+        for path in list(src.rglob("*.ts")) + list(src.rglob("*.tsx")):
+            text = path.read_text(encoding="utf-8")
+            names.update(_ART_CALL.findall(text))
+            names.update(_ART_CLIP_PROP.findall(text))
     index = root / "web/index.html"
     if index.is_file():
         names.update(re.findall(r'data-art="([a-z0-9-]+)"', index.read_text(encoding="utf-8")))

@@ -60,14 +60,14 @@ test("every piece of game art resolves to its ASCII Motion clip", () => {
 // picture in code. Move it to an .asciimtn (termforge/node/motion-cli.js
 // from-text) and draw it with Shell#art. gem.js's pixel masks are bitmaps for
 // the PixelBuffer, not text art, so they are exempt.
-test("no hardcoded multi-line ASCII art in the JS sources", () => {
-    const roots = ["web/assets/js", "termforge/core", "termforge/node", "termforge/apps"].map((r) => path.join(REPO, r));
-    const skip = /vendor[\\/]|fx-clips\.js$|art-clips\.js$|core[\\/]art\.js$|node[\\/]gem\.js$/;
+test("no hardcoded multi-line ASCII art in the JS and TSX sources", () => {
+    const roots = ["web/assets/js", "web/src", "termforge/core", "termforge/node", "termforge/apps"].map((r) => path.join(REPO, r));
+    const skip = /vendor[\\/]|fx-clips\.js$|art-clips\.js$|core[\\/]art\.js$|node[\\/]gem\.js$|web[\\/]dist[\\/]|node_modules[\\/]/;
     const artLine = /^\s*["'`][^"'`]*[\\/|_=*~^()<>[\]{}#.+-]{2,}[^"'`]*["'`],?\s*$/;
     const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) return walk(full);
-        return entry.name.endsWith(".js") ? [full] : [];
+        return /\.(js|ts|tsx)$/.test(entry.name) ? [full] : [];
     });
     const offences = [];
     for (const file of roots.flatMap(walk)) {
