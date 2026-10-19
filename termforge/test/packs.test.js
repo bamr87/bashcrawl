@@ -165,3 +165,54 @@ test("wc selects logical line, word, UTF-8 byte and character counts", () => {
     assert.strictEqual(run(s, "cat fruits | wc -w"), "4");
     assert.ok(s.execute("wc -z fruits").some((out) => out.kind === "error"));
 });
+
+// ── POSIX accuracy: what a real shell would print ──────────────────────────
+
+function newlineShell() {
+    return new Shell({
+        world: {
+            root: "/r",
+            directories: { "/r": [{ name: "names", type: "file", hidden: false }, { name: "box", type: "dir", hidden: false }], "/r/box": [] },
+            // A real file: every line, including the last, ends with "\n".
+            files: { "/r/names": "cara\nalice\nbob\nalice\n" },
+        },
+        packs: [posix],
+    });
+}
+
+test("a final newline ends the last line instead of adding an empty one", () => {
+    const shell = newlineShell();
+    assert.strictEqual(run(shell, "wc -l names"), "4 names");
+    assert.strictEqual(run(shell, "cat names | wc -l"), "4");
+    assert.strictEqual(run(shell, "sort names"), "alice\nalice\nbob\ncara");
+    assert.strictEqual(run(shell, "sort names | uniq -c"), "      2 alice\n      1 bob\n      1 cara");
+    assert.strictEqual(run(shell, "tail -n 2 names"), "bob\nalice");
+    assert.strictEqual(run(shell, "nl names").split("\n").length, 4);
+    assert.strictEqual(run(shell, "grep -vc zzz names"), "4");
+    assert.strictEqual(run(shell, "cat names | rev | head -n 1"), "arac");
+});
+
+test("cp and mv into a directory keep the file name; mv carries a directory's contents", () => {
+    const shell = newlineShell();
+    shell.execute("echo note > memo");
+    assert.match(run(shell, "cp memo box"), /Copied/);
+    assert.strictEqual(run(shell, "cat box/memo"), "note");
+    assert.ok(shell.isDir("/r/box"), "cp into a directory must not replace it");
+    shell.execute("mkdir crate");
+    shell.execute("touch crate/a");
+    shell.execute("mv crate box");
+    assert.strictEqual(run(shell, "ls box/crate"), "a");
+    assert.strictEqual(shell.node("/r/crate"), null);
+    assert.match(run(shell, "mv box/crate box/crate/inner"), /into itself/);
+    assert.match(run(shell, "cp memo nowhere/memo"), /no such directory/);
+    assert.match(run(shell, "mv memo nowhere/memo"), /no such directory/);
+});
+
+test("find spells results from the start argument as typed", () => {
+    const shell = newlineShell();
+    shell.execute("touch box/x");
+    assert.strictEqual(run(shell, "find . -name x"), "./box/x");
+    assert.strictEqual(run(shell, "find /r -name x"), "/r/box/x");
+    assert.strictEqual(run(shell, "find box -name x"), "box/x");
+    assert.strictEqual(run(shell, "find box/ -name x"), "box/x");
+});
