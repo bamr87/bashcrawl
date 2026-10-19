@@ -127,6 +127,11 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           /bin/bash help.sh > /dev/null
           /bin/bash lib/reset.sh --dry
+          # The launcher is promised to run on stock bash 3.2 too.
+          /bin/bash bin/bashcrawl courses | grep -q navigator
+          /bin/bash bin/bashcrawl lab navigator "$RUNNER_TEMP/lab"
+          test -f "$RUNNER_TEMP/lab/south/.cave/gem.txt"
+          /bin/bash bin/bashcrawl doctor || [ $? -eq 1 ]
           echo "macOS smoke: OK"
 
   # Shared fleet gate (UPS-QA-20), pinned per UPS-WORK-10. It runs beside the

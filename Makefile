@@ -35,6 +35,10 @@ export PATH := $(GAME_ROOT)/.venv/bin:$(PATH)
 setup: ## Make encounters executable and print how to start
 	@bash setup.sh
 
+.PHONY: doctor
+doctor: ## Check this machine for every surface: [ OK ]/[WARN]/[CRIT] (bin/bashcrawl doctor)
+	@bash bin/bashcrawl doctor
+
 .PHONY: venv
 venv: ## Create .venv and install web-build + test dependencies
 	$(PYTHON) -m venv $(VENV)

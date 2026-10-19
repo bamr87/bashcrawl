@@ -63,3 +63,21 @@ test("bashcrawl app: the real game runtime plays under node", () => {
     assert.notStrictEqual(session.runtime, before);
     assert.strictEqual(session.runtime.state.xp, 0);
 });
+
+// ── the app registry (termforge/apps/registry.js) ─────────────────────────
+
+test("every registered app builds through the registry and cli.resolveApp", () => {
+    const registry = require("../apps/registry.js");
+    const { resolveApp, listAppsIfAsked } = require("../node/cli.js");
+    assert.deepStrictEqual(registry.list().map((a) => a.id), ["bashcrawl", "procwatch", "agentwatch"]);
+    for (const spec of registry.list()) {
+        const app = resolveApp(spec.id, spec.id === "procwatch" ? { source: require("../apps/procwatch/index.js").MOCK_SOURCE } : {});
+        assert.strictEqual(typeof app.createSession, "function", `${spec.id} has no createSession`);
+        assert.ok(spec.description.length > 10);
+    }
+    assert.throws(() => registry.createApp("nope"), /unknown app: nope \(registered: bashcrawl, procwatch, agentwatch\)/);
+    let printed = "";
+    assert.strictEqual(listAppsIfAsked("list", (t) => { printed += t; }), true);
+    assert.match(printed, /bashcrawl +the dungeon \+ learning platform/);
+    assert.strictEqual(listAppsIfAsked("bashcrawl"), false);
+});

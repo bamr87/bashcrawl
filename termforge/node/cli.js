@@ -1,9 +1,11 @@
 "use strict";
 // Host CLI plumbing: node's standard util.parseArgs (with --no-* negation)
-// against a defaults object, plus the app registry. Zero deps.
+// against a defaults object, plus app resolution through the registry
+// (termforge/apps/registry.js). Zero deps.
 
 const path = require("node:path");
 const { parseArgs: nodeParseArgs } = require("node:util");
+const registry = require("../apps/registry.js");
 
 const kebab = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
@@ -30,14 +32,12 @@ function parseArgs(argv, defaults) {
 }
 
 /**
- * Resolve an app id or module path to its createApp factory.
- * Built-ins: "bashcrawl", "procwatch", "agentwatch". Anything else is
- * required as a path to a module exporting createApp(options).
+ * Resolve an app id (termforge/apps/registry.js) or a module path to a
+ * built app. Anything that is not a registered id is required as a path to a
+ * module exporting createApp(options).
  */
 function resolveApp(name, options = {}) {
-    if (name === "bashcrawl") return require("../apps/bashcrawl.js").createApp(options);
-    if (name === "procwatch") return require("../apps/procwatch/index.js").createApp(options);
-    if (name === "agentwatch") return require("../apps/agentwatch/index.js").createApp(options);
+    if (registry.get(name)) return registry.createApp(name, options);
     const mod = require(path.resolve(process.cwd(), name));
     if (typeof mod.createApp !== "function") {
         throw new Error(`${name} does not export createApp(options)`);
@@ -45,4 +45,11 @@ function resolveApp(name, options = {}) {
     return mod.createApp(options);
 }
 
-module.exports = { parseArgs, resolveApp };
+/** `--app list`: print the registry and report that the host should exit. */
+function listAppsIfAsked(appName, write = (text) => process.stdout.write(text)) {
+    if (appName !== "list") return false;
+    write(`TermForge apps (--app ID, or --app ./path/to/app.js):\n${registry.describe()}\n`);
+    return true;
+}
+
+module.exports = { parseArgs, resolveApp, listAppsIfAsked };

@@ -10,6 +10,9 @@ run_shellcheck() {
     find . -name "*.sh" -not -path "./.git/*" -not -path "./.venv/*" \
         -exec shellcheck {} +
 
+    echo "=== ShellCheck: launchers (bin/) ==="
+    shellcheck bin/*
+
     echo "=== ShellCheck: game executables ==="
     while IFS= read -r f; do
         if [[ -f "$f" ]] && [[ "$(sed -n '1p' "$f")" == *bash* ]]; then

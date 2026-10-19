@@ -24,7 +24,7 @@
 
 const net = require("node:net");
 const TermForge = require("./index.js");
-const { parseArgs, resolveApp } = require("./cli.js");
+const { parseArgs, resolveApp, listAppsIfAsked } = require("./cli.js");
 const { createTelnetCodec } = require("./telnet-codec.js");
 const { Hub } = require("./hub.js");
 
@@ -198,6 +198,7 @@ function createTelnetServer(app, opts) {
 
 function main() {
     const opts = parseArgs(process.argv.slice(2), DEFAULTS);
+    if (listAppsIfAsked(opts.app)) return null;
     const app = resolveApp(opts.app, opts.dataDir ? { dataDir: opts.dataDir } : {});
     const server = createTelnetServer(app, opts);
     const sessions = server.termforgeSessions;
