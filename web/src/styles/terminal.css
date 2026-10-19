@@ -1,0 +1,281 @@
+/* The terminal: the dungeon log in its dialogue-box frame, the line kinds,
+ * command blocks, the prompt dock with its chips, and the pager. */
+@layer components {
+    /* ── story layout ── */
+    .bc-story {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+    }
+    .bc-sidebar {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-2);
+        overflow: auto;
+        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 55%, var(--fleet-color-bg));
+        box-shadow: inset -1px 0 0 var(--fleet-color-border);
+    }
+
+    /* The dialogue box: a sunken, corner-notched window the log scrolls in. */
+    .bc-stage-log {
+        position: relative;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr);
+        margin: var(--fleet-space-2);
+        background: var(--fleet-color-bg);
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
+            inset -2px -2px 0 0 var(--bc-color-bevel-hi),
+            inset 0 0 60px color-mix(in srgb, var(--bc-color-overlay) 50%, transparent);
+        clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+        --fx-accent: var(--fleet-color-info);
+    }
+    .bc-stage-log.fx-stage {
+        grid-template-rows: minmax(0, 1fr) 9rem;
+    }
+
+    /* ── the log ── */
+    .bc-log {
+        min-height: 0;
+        margin: 0;
+        padding: var(--fleet-space-3) var(--fleet-space-4);
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.5;
+        color: var(--fleet-color-ink);
+        scrollbar-width: thin;
+        scrollbar-color: var(--fleet-color-border) transparent;
+    }
+    .bc-log:focus-visible {
+        outline-offset: -2px;
+    }
+    .kind-error { color: var(--fleet-color-danger); }
+    .kind-success { color: var(--fleet-color-success); text-shadow: 0 0 6px color-mix(in srgb, currentColor 35%, transparent); }
+    .kind-info { color: var(--fleet-color-info); }
+    .kind-magic { color: var(--fleet-color-primary); text-shadow: 0 0 6px color-mix(in srgb, currentColor 35%, transparent); }
+    .kind-dim { color: var(--fleet-color-ink-muted); }
+    .kind-output { color: var(--fleet-color-ink); }
+    .kind-control { display: none; }
+    .kind-art,
+    .kind-banner {
+        display: inline;
+        white-space: pre;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+    .kind-art {
+        color: var(--fleet-color-accent);
+        text-shadow: 0 0 8px color-mix(in srgb, var(--fleet-color-accent) 30%, transparent);
+    }
+    .kind-banner {
+        color: var(--fleet-color-primary);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--fleet-color-primary) 40%, transparent);
+    }
+    [data-resolved="light"] .kind-success,
+    [data-resolved="light"] .kind-magic,
+    [data-resolved="light"] .kind-art,
+    [data-resolved="light"] .kind-banner {
+        text-shadow: none;
+    }
+
+    /* Command blocks: a rule above each echoed command. */
+    .bc-log .kind-dim.is-cmd {
+        display: inline-block;
+        width: 100%;
+        margin-top: 0.7rem;
+        padding-top: 0.45rem;
+        border-top: 1px solid color-mix(in srgb, var(--fleet-color-border) 75%, transparent);
+    }
+    .bc-log .kind-dim.is-cmd:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+    .bc-log .cmd-prompt { color: var(--fleet-color-info); font-weight: var(--fleet-font-weight-bold); }
+    .bc-log .cmd-text { color: var(--fleet-color-ink); }
+
+    /* The command-clip stage band (fx.js paints frames into .px-am). */
+    .px-am {
+        display: none;
+        min-height: 0;
+        margin: 0;
+        padding: var(--fleet-space-1) var(--fleet-space-3);
+        overflow: hidden;
+        pointer-events: none;
+        white-space: pre;
+        font: 11px/1.05 var(--fleet-font-mono);
+        color: var(--fx-accent, var(--fleet-color-info));
+        border-top: 1px solid var(--fleet-color-border);
+    }
+    .px-am.px-am-run { display: block; }
+
+    /* ── prompt dock ── */
+    .bc-dock {
+        display: flex;
+        flex-direction: column;
+        background: var(--fleet-color-bg-elevated);
+        box-shadow: inset 0 2px 0 0 var(--bc-color-bevel-hi), inset 0 1px 0 0 var(--fleet-color-border);
+    }
+    .bc-suggest {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-2) var(--fleet-space-3) 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .bc-suggest::-webkit-scrollbar { display: none; }
+    .bc-suggest-label {
+        flex: 0 0 auto;
+        font-size: var(--fleet-text-xs);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-chip {
+        flex: 0 0 auto;
+        padding: 0.18rem 0.6rem;
+        border: 0;
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-code-ink);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.3;
+        cursor: pointer;
+        white-space: nowrap;
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 1px 1px 0 0 var(--bc-color-bevel-hi),
+            inset -1px -1px 0 0 var(--bc-color-bevel-lo);
+        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+        transition: color var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-chip:hover,
+    .bc-chip:focus-visible {
+        color: var(--fleet-color-primary);
+    }
+    .bc-chip-quest {
+        color: var(--fleet-color-success);
+        background: color-mix(in srgb, var(--fleet-color-success) 14%, var(--fleet-color-bg-muted));
+    }
+    .bc-chip-lesson {
+        color: var(--fleet-color-info);
+    }
+    .bc-prompt {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+        min-height: 50px;
+        margin: 0;
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+    }
+    .bc-prompt-label {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: min(50vw, 22rem);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: var(--fleet-font-mono);
+        font-weight: var(--fleet-font-weight-bold);
+        color: var(--fleet-color-info);
+    }
+    .bc-prompt-label::after {
+        content: "";
+        display: inline-block;
+        width: 0.6ch;
+        height: 1em;
+        margin-left: 0.2ch;
+        vertical-align: -0.12em;
+        background: var(--fleet-color-success);
+    }
+    .bc-prompt-short { display: none; }
+    .bc-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.5rem 0.7rem;
+        border: 0;
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-ink);
+        font-family: var(--fleet-font-mono);
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
+            inset -1px -1px 0 0 var(--bc-color-bevel-hi);
+    }
+    .bc-input::placeholder {
+        color: var(--fleet-color-ink-muted);
+        opacity: 0.8;
+    }
+    .bc-input:focus {
+        outline: 2px solid var(--fleet-color-primary);
+        outline-offset: 0;
+    }
+
+    /* ── pager ── */
+    .bc-pager-help {
+        margin: 0;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-pager-text {
+        min-height: 0;
+        flex: 1 1 auto;
+        margin: 0;
+        padding: var(--fleet-space-3);
+        overflow: auto;
+        white-space: pre-wrap;
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.5;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-caret-blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+    }
+    .bc-prompt-label::after {
+        animation: bc-caret-blink 1.05s steps(1, end) infinite;
+    }
+}
+
+@media (max-width: 900px) {
+    .bc-story {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .bc-sidebar {
+        display: none;
+    }
+    .bc-stage-log.fx-stage {
+        grid-template-rows: minmax(0, 1fr);
+    }
+    .px-am.px-am-run {
+        display: none;
+    }
+}
+@media (max-width: 600px) {
+    .bc-prompt {
+        padding: var(--fleet-space-2);
+    }
+    .bc-prompt-label {
+        max-width: 40%;
+    }
+    .bc-prompt-full { display: none; }
+    .bc-prompt-short { display: inline; }
+    .bc-stage-log {
+        margin: var(--fleet-space-1);
+    }
+    .bc-log {
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+    }
+}

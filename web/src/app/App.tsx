@@ -1,6 +1,5 @@
-// Root of the web trainer: providers, the route → screen switch, and the
-// app-wide keys (Alt+1–4 doors, `?` help). Screens arrive door by door;
-// until then a door shows its placeholder.
+// Root of the web trainer: providers, the route → screen switch, the
+// app-wide keys (Alt+1–4 doors, `?` help), and the boot of the game store.
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
@@ -10,10 +9,14 @@ import { ThemeToggle } from "../chrome/ThemeToggle";
 import { Toaster } from "../chrome/Toaster";
 import { getPrefs, setPrefs, usePrefs } from "../chrome/prefs-store";
 import { setUi, toggleHelp } from "../chrome/ui-store";
+import { game, useGame } from "../engine/game-store";
 import { NotFound } from "../screens/NotFound";
+import { StoryScreen } from "../screens/StoryScreen";
+import { Pager } from "../terminal/Pager";
+import { PromptDock } from "../terminal/PromptDock";
 import { initTheme } from "../theme/theme-store";
 import { AppShell } from "./AppShell";
-import { MODES, type Mode } from "./modes";
+import { MODES, storyOwnsInput, type Mode } from "./modes";
 import { navigate, useRoute } from "./useHashRoute";
 
 initTheme();
@@ -30,9 +33,30 @@ function Placeholder({ mode }: { mode: Mode }) {
     );
 }
 
+function Booting({ error }: { error: string | null }) {
+    return (
+        <section className="bc-page bc-frame" aria-live="polite" aria-label="Loading">
+            {error ? (
+                <>
+                    <h1 className="bc-display">The torches would not light</h1>
+                    <p>{error}</p>
+                </>
+            ) : (
+                <p className="bc-display">Lighting the torches…</p>
+            )}
+        </section>
+    );
+}
+
 export function App() {
     const route = useRoute();
     const prefs = usePrefs();
+    const phase = useGame((snap) => snap.phase);
+    const bootError = useGame((snap) => snap.error);
+
+    useEffect(() => {
+        void game.boot();
+    }, []);
 
     // No hash: open the last door, or the entrance.
     useEffect(() => {
@@ -66,6 +90,7 @@ export function App() {
     }, []);
 
     const mode: Mode | null = route.kind === "mode" ? route.mode : null;
+    const ready = phase === "ready";
     const actions = (
         <>
             <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
@@ -73,14 +98,23 @@ export function App() {
         </>
     );
 
+    let screen = null;
+    if (route.kind === "notfound") screen = <NotFound path={route.path} />;
+    else if (!ready) screen = <Booting error={bootError} />;
+    else if (mode === "story" || mode === "learn") screen = <StoryScreen />;
+    else if (mode) screen = <Placeholder mode={mode} />;
+
+    const dock = ready && storyOwnsInput(mode) ? <PromptDock /> : null;
+
     return (
         <MotionConfig reducedMotion="user">
             <ErrorBoundary>
-                <AppShell mode={mode} actions={actions}>
-                    {route.kind === "notfound" ? <NotFound path={route.path} /> : mode ? <Placeholder mode={mode} /> : null}
+                <AppShell mode={mode} actions={actions} dock={dock}>
+                    {screen}
                 </AppShell>
                 <Toaster />
                 <ShortcutsHelp />
+                {ready && <Pager />}
             </ErrorBoundary>
         </MotionConfig>
     );

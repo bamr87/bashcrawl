@@ -2,6 +2,7 @@
 // window by the time this module runs: index.html loads it as classic
 // scripts ahead of this one, and module scripts execute after them.
 import "./styles/app.css";
+import "./styles/terminal.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
