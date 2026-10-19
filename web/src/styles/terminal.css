@@ -278,4 +278,10 @@
     .bc-log {
         padding: var(--fleet-space-2) var(--fleet-space-3);
     }
+    /* Banners and art are 60–80 columns: shrink them rather than scroll. */
+    .kind-banner,
+    .kind-art {
+        font-size: 0.58rem;
+        line-height: 1.2;
+    }
 }

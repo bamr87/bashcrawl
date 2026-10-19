@@ -10,6 +10,9 @@ import { Toaster } from "../chrome/Toaster";
 import { getPrefs, setPrefs, usePrefs } from "../chrome/prefs-store";
 import { setUi, toggleHelp } from "../chrome/ui-store";
 import { game, useGame } from "../engine/game-store";
+import { installEffects } from "../fx/effects";
+import { HudMenu } from "../hud/HudMenu";
+import { StatusStrip } from "../hud/StatusStrip";
 import { NotFound } from "../screens/NotFound";
 import { StoryScreen } from "../screens/StoryScreen";
 import { Pager } from "../terminal/Pager";
@@ -56,6 +59,16 @@ export function App() {
 
     useEffect(() => {
         void game.boot();
+        return installEffects();
+    }, []);
+
+    // Escape closes the small-screen panels overlay from anywhere.
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setUi({ panelsOpen: false });
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
     }, []);
 
     // No hash: open the last door, or the entrance.
@@ -93,6 +106,9 @@ export function App() {
     const ready = phase === "ready";
     const actions = (
         <>
+            {ready && storyOwnsInput(mode) && (
+                <button type="button" className="bc-btn" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock">HUD</button>
+            )}
             <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
             <ThemeToggle />
         </>
@@ -104,17 +120,20 @@ export function App() {
     else if (mode === "story" || mode === "learn") screen = <StoryScreen />;
     else if (mode) screen = <Placeholder mode={mode} />;
 
-    const dock = ready && storyOwnsInput(mode) ? <PromptDock /> : null;
+    const storyChrome = ready && storyOwnsInput(mode);
+    const dock = storyChrome ? <PromptDock /> : null;
+    const status = storyChrome ? <StatusStrip /> : null;
 
     return (
         <MotionConfig reducedMotion="user">
             <ErrorBoundary>
-                <AppShell mode={mode} actions={actions} dock={dock}>
+                <AppShell mode={mode} actions={actions} status={status} dock={dock}>
                     {screen}
                 </AppShell>
                 <Toaster />
                 <ShortcutsHelp />
                 {ready && <Pager />}
+                {ready && <HudMenu />}
             </ErrorBoundary>
         </MotionConfig>
     );

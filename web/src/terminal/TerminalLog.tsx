@@ -5,19 +5,23 @@
 import { useEffect, useRef } from "react";
 
 import { game, type GameStore } from "../engine/game-store";
+import { registerAnchor } from "../fx/anchors";
 
 export interface TerminalLogProps {
     store?: GameStore;
     label: string;
     className?: string;
+    /** The effects anchor name; the story log is "log". */
+    anchor?: string;
 }
 
-export function TerminalLog({ store = game, label, className }: TerminalLogProps) {
+export function TerminalLog({ store = game, label, className, anchor = "log" }: TerminalLogProps) {
     const ref = useRef<HTMLPreElement>(null);
     useEffect(() => {
         store.attachLog(ref.current);
         return () => store.attachLog(null);
     }, [store]);
+    useEffect(() => registerAnchor(anchor, ref.current), [anchor]);
     return (
         <pre
             ref={ref}

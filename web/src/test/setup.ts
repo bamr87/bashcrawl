@@ -4,6 +4,13 @@
 // evaluated into jsdom's window) is imported by the tests that need it.
 import "@testing-library/jest-dom/vitest";
 
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+// Testing Library only auto-registers its cleanup when `afterEach` is a
+// global; vitest globals are off here, so unmount after every test ourselves.
+afterEach(() => cleanup());
+
 if (typeof window !== "undefined") {
     if (typeof window.matchMedia !== "function") {
         window.matchMedia = (query: string): MediaQueryList => ({

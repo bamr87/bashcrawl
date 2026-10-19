@@ -510,17 +510,24 @@
         if (!raw || typeof raw !== "object") return base;
         const byId = new Map();
         for (const pane of Array.isArray(raw.panes) ? raw.panes : []) {
-            if (pane && PANE_IDS.indexOf(pane.id) >= 0) byId.set(pane.id, pane);
+            if (pane && PANE_IDS.indexOf(pane.id) >= 0 && !byId.has(pane.id)) byId.set(pane.id, pane);
         }
+        // A complete layout (every pane present) keeps the order it was saved
+        // in — that is what `hud move` and the web's reorder persist. A partial
+        // one (an older save, before a pane existed) takes the surface's order.
+        const complete = byId.size === PANE_IDS.length;
+        const order = complete ? Array.from(byId.keys()) : base.panes.map((pane) => pane.id);
+        const defaults = new Map(base.panes.map((pane) => [pane.id, pane]));
         return {
             version: 1,
             dock: raw.dock === "left" || raw.dock === "right" ? raw.dock : base.dock,
             sidebar: raw.sidebar !== false,
             width: clampWidth(raw.width == null ? base.width : raw.width),
-            panes: base.panes.map((def) => {
-                const prev = byId.get(def.id);
+            panes: order.map((id) => {
+                const def = defaults.get(id);
+                const prev = byId.get(id);
                 return {
-                    id: def.id,
+                    id,
                     visible: prev && prev.visible === false ? false : true,
                     collapsed: prev ? Boolean(prev.collapsed) : def.collapsed,
                 };

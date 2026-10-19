@@ -3,6 +3,7 @@
 // scripts ahead of this one, and module scripts execute after them.
 import "./styles/app.css";
 import "./styles/terminal.css";
+import "./styles/hud.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

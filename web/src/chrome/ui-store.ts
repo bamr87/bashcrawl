@@ -4,9 +4,12 @@ import { createStore, useStore } from "../lib/store";
 export interface UiState {
     helpOpen: boolean;
     docsOpen: boolean;
+    hudOpen: boolean;
+    /** Small screens: the sidebar shown as an overlay. */
+    panelsOpen: boolean;
 }
 
-const store = createStore<UiState>({ helpOpen: false, docsOpen: false });
+const store = createStore<UiState>({ helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false });
 
 export function setUi(patch: Partial<UiState>): void {
     store.set({ ...store.get(), ...patch });

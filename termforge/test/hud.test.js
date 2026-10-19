@@ -185,6 +185,9 @@ test("hud layout can hide, fold, reorder, dock, and parse commands", () => {
     assert.equal(quest.lines.length, 0);
     hud.applyAction(hud.parseHudLine("hud dock left"));
     assert.equal(hud.getLayout().dock, "left");
+    hud.applyAction(hud.parseHudLine("hud move quest up"));
+    // Array.from: the layout lives in the sandbox realm, so its arrays have another prototype.
+    assert.deepEqual(Array.from(hud.getLayout().panes.slice(0, 2), (p) => p.id), ["quest", "room"], "a move survives the commit");
     hud.applyAction(hud.parseHudLine("hud reset"));
     panels = hud.panels(runtime);
     assert.equal(panels[0].id, "room");
