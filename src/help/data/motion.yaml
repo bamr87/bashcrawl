@@ -88,8 +88,23 @@ clips:
     stage: true
     aliases: []
 
-# Static art: one-frame clips the game prints as `art` lines or draws in
-# its panels (rendered with Shell#art). Same file formats as clips.
+  unroll:
+    file: motion/clips/unroll.asciimtn
+    title: Unrolling scroll
+    description: A scroll unrolls line by line — lesson, banner, figlet.
+    stage: true
+    aliases: []
+
+  lore:
+    file: motion/clips/lore.asciimtn
+    title: Open book
+    description: An open book whose page turns — help, man, hint, learn, commands.
+    stage: true
+    aliases: []
+
+# Art: clips the game prints as `art` lines (frame 0) or draws in its panels
+# (rendered with Shell#art; the web plays multi-frame art as an ambient loop
+# via web/assets/js/ambient.js). Same file formats as clips.
 art:
   banner:
     file: motion/art/banner.asciimtn
@@ -99,7 +114,7 @@ art:
   landing-brand:
     file: motion/art/landing-brand.asciimtn
     title: Landing logo
-    description: The logo on the first-visit landing card (web/index.html data-art).
+    description: The first-visit landing logo (web/index.html data-art); it materialises out of static.
 
   encounter-treasure:
     file: motion/art/encounter-treasure.asciimtn
@@ -159,32 +174,32 @@ art:
   room-entrance:
     file: motion/art/room-entrance.asciimtn
     title: Entrance vignette
-    description: Room panel art for the entrance and workshop.
+    description: Room panel art for the entrance and workshop — the gate, torches flickering (loop).
 
   room-cellar:
     file: motion/art/room-cellar.asciimtn
     title: Cellar vignette
-    description: Room panel art for the cellar, armoury, and chamber.
+    description: Room panel art for the cellar, armoury, and chamber — barrels, a drip into a puddle (loop).
 
   room-graveyard:
     file: motion/art/room-graveyard.asciimtn
     title: Graveyard vignette
-    description: Room panel art for the chapel and graveyard.
+    description: Room panel art for the chapel and graveyard — headstones in mist, a ghost rising (loop).
 
   room-vault:
     file: motion/art/room-vault.asciimtn
     title: Vault vignette
-    description: Room panel art for the vault and stronghold.
+    description: Room panel art for the vault and stronghold — two gems, a glint crossing the facets (loop).
 
   room-rift:
     file: motion/art/room-rift.asciimtn
     title: Rift vignette
-    description: Room panel art for the rift.
+    description: Room panel art for the rift — a breathing portal with an eye, stars wheeling (loop).
 
   room-deep:
     file: motion/art/room-deep.asciimtn
     title: Deep vignette
-    description: Room panel art for every other room.
+    description: Room panel art for every other room — a cave mouth under the stars, a bat crossing (loop).
 
   arena-open:
     file: motion/art/arena-open.asciimtn
@@ -218,3 +233,5 @@ events:
     motion: spark
   - event: unlock
     motion: warp
+  - event: lesson
+    motion: unroll

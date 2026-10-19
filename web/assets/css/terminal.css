@@ -27,6 +27,7 @@ body {
 .tui-header {
     position: relative;
     z-index: 20;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -895,9 +896,17 @@ body[data-crt="on"] .tui-log {
     to   { background-position: 0% 0; }
 }
 
-/* (2) ROOM VIGNETTE — small ASCII mascot below the Location panel. */
-.room-vignette {
+/* (2) ROOM VIGNETTE — an ambient ASCII Motion loop below the room name
+   (ambient.js paints the frames; the slot keeps its height so a room change
+   crossfades instead of jumping). The colour per area below is what the
+   clip's inherited cells take; highlights carry their own colours. */
+.room-vignette-slot {
+    position: relative;
     margin: 0.5rem 0;
+    min-height: calc(7 * 0.78rem * 1.15);
+}
+.room-vignette {
+    margin: 0;
     padding: 0;
     border: 0;
     background: transparent;
@@ -910,6 +919,11 @@ body[data-crt="on"] .tui-log {
     color: var(--accent-purple);
     opacity: 0.92;
     text-shadow: 0 0 6px rgba(192, 132, 252, 0.22);
+}
+.room-vignette.is-leaving {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }
 .room-vignette[data-room-art="entrance"],
 .room-vignette[data-room-art="cellar"] {
@@ -928,39 +942,16 @@ body[data-crt="on"] .tui-log {
     color: var(--accent-purple);
     text-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
 }
+/* The frames carry the motion; CSS only crossfades one scene into the next. */
 @media (prefers-reduced-motion: no-preference) {
-    .room-vignette[data-room-art="entrance"],
-    .room-vignette[data-room-art="cellar"] {
-        animation: bc-vignette-flicker 2.4s ease-in-out infinite;
+    @keyframes bc-vignette-out {
+        to { opacity: 0; transform: translateY(-3px); filter: blur(1.5px); }
     }
-    .room-vignette[data-room-art="vault"] {
-        animation: bc-vignette-shimmer 3.6s ease-in-out infinite;
+    @keyframes bc-vignette-in {
+        from { opacity: 0; transform: translateY(3px); }
     }
-    .room-vignette[data-room-art="graveyard"] {
-        animation: bc-vignette-drift 5s ease-in-out infinite;
-    }
-    .room-vignette[data-room-art="rift"] {
-        animation: bc-vignette-swirl 4s ease-in-out infinite;
-    }
-}
-@keyframes bc-vignette-flicker {
-    0%, 100% { opacity: 0.9;  filter: brightness(1); }
-    18%      { opacity: 1;    filter: brightness(1.18); }
-    32%      { opacity: 0.82; filter: brightness(0.92); }
-    54%      { opacity: 0.97; filter: brightness(1.1); }
-    71%      { opacity: 0.86; filter: brightness(0.96); }
-}
-@keyframes bc-vignette-shimmer {
-    0%, 100% { opacity: 0.85; text-shadow: 0 0 5px rgba(34, 211, 238, 0.25); }
-    50%      { opacity: 1;    text-shadow: 0 0 11px rgba(34, 211, 238, 0.6); }
-}
-@keyframes bc-vignette-drift {
-    0%, 100% { opacity: 0.78; }
-    50%      { opacity: 0.95; }
-}
-@keyframes bc-vignette-swirl {
-    0%, 100% { opacity: 0.85; filter: brightness(0.95); text-shadow: 0 0 6px rgba(192, 132, 252, 0.3); }
-    50%      { opacity: 1;    filter: brightness(1.15); text-shadow: 0 0 13px rgba(192, 132, 252, 0.6); }
+    .room-vignette.is-leaving { animation: bc-vignette-out 380ms ease forwards; }
+    .room-vignette.is-entering { animation: bc-vignette-in 460ms ease; }
 }
 
 /* ============================================================
@@ -1577,7 +1568,7 @@ body[data-crt="on"] .tui-log {
 
 .landing-doors {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.8rem;
     margin-bottom: 1rem;
 }
@@ -1786,4 +1777,417 @@ body[data-crt="on"] .tui-log {
     font-family: var(--font-mono);
     color: var(--accent-purple);
     letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Learn mode — the lesson reader beside the story terminal.
+   #mode-story.layout-learn is the story section with a second
+   column (reader | log). Dungeon panes step aside while a course
+   runs; the lab's files (Location), Skills and the Hero stay.
+   ============================================================ */
+.learn-reader {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    padding: 1.1rem 1.35rem 2.2rem;
+    border-right: 1px solid var(--border-color);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 70%, var(--bg-primary)), var(--bg-primary) 60%);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    scroll-behavior: smooth;
+}
+.layout-learn .tui-content { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); }
+.layout-learn .tui-log {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 0.86rem;
+}
+.layout-learn .px-am { grid-column: 1 / -1; }
+.layout-learn [data-hud-pane="quest"],
+.layout-learn [data-hud-pane="pack"],
+.layout-learn [data-hud-pane="map"],
+.layout-learn [data-hud-pane="spotlight"],
+.layout-learn [data-hud-pane="lesson"] {
+    display: none;
+}
+.layout-learn [data-hud-pane="room"] { order: -3; }
+.layout-learn [data-hud-pane="skills"] { order: -2; }
+.layout-learn [data-hud-pane="hero"] { order: -1; }
+
+.learn-head { margin-bottom: 1rem; }
+.learn-crumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.learn-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-blue);
+    font: inherit;
+    cursor: pointer;
+}
+.learn-link:hover,
+.learn-link:focus-visible {
+    text-decoration: underline;
+    outline: none;
+}
+.learn-reader h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: var(--text-heading);
+}
+.learn-hero h2 { font-size: 1.6rem; }
+.learn-reader h3 {
+    margin: 1rem 0 0.4rem;
+    font-size: 1.05rem;
+    color: var(--text-heading);
+}
+.learn-reader h4 {
+    margin: 0.8rem 0 0.3rem;
+    font-size: 0.95rem;
+    color: var(--accent-blue);
+}
+.learn-sub {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.learn-sub code,
+.learn-card-skills code,
+.learn-foot code,
+.learn-reader section > p code {
+    padding: 0.05rem 0.35rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--accent-blue);
+    font-size: 0.82em;
+}
+.learn-foot code,
+.learn-reader section > p code { cursor: pointer; }
+.learn-level {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.learn-level-beginner { color: var(--accent-green); }
+.learn-level-intermediate { color: var(--accent-yellow); }
+.learn-level-advanced { color: var(--accent-purple); }
+
+.learn-outline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+.learn-outline li span {
+    display: inline-flex;
+    width: 1.6rem;
+    height: 1.6rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: background 240ms ease, color 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
+}
+.learn-outline .is-done span {
+    background: color-mix(in srgb, var(--accent-green) 22%, transparent);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+.learn-outline .is-current span {
+    border-color: var(--accent-blue);
+    color: var(--text-heading);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 25%, transparent);
+}
+
+.learn-body p { margin: 0.55rem 0; }
+.learn-body ul {
+    margin: 0.4rem 0;
+    padding-left: 1.2rem;
+}
+.learn-body li { margin: 0.2rem 0; }
+.learn-body a { color: var(--accent-blue); }
+.learn-code {
+    margin: 0.7rem 0;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-blue);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    overflow-x: auto;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    white-space: pre;
+}
+.learn-code code { font-family: var(--font-mono); }
+.learn-code-line {
+    display: inline-block;
+    min-width: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 120ms ease;
+}
+.learn-code-line:hover { background: color-mix(in srgb, var(--accent-blue) 14%, transparent); }
+.learn-code-inline {
+    padding: 0.05rem 0.35rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--accent-yellow);
+    font-size: 0.88em;
+    cursor: pointer;
+    transition: border-color 120ms ease;
+}
+.learn-code-inline:hover { border-color: var(--accent-yellow); }
+.learn-callout {
+    margin: 0.8rem 0 0;
+    padding: 0.55rem 0.75rem;
+    border-left: 3px solid var(--accent-purple);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: color-mix(in srgb, var(--accent-purple) 8%, transparent);
+    font-size: 0.9rem;
+}
+.learn-callout strong { color: var(--accent-purple); }
+
+.learn-objectives {
+    margin-top: 1.1rem;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+.learn-objectives h3 {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.learn-count {
+    font-family: var(--font-mono);
+    color: var(--accent-blue);
+}
+.learn-objectives ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.learn-objectives li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    transition: color 240ms ease;
+}
+.obj-mark {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+}
+.obj-met { color: var(--accent-green); }
+.obj-met .learn-code-inline { color: var(--accent-green); }
+.learn-next {
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
+}
+.learn-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.8rem 0 0;
+}
+.learn-actions .cmd-chip {
+    padding: 0.28rem 0.65rem;
+    font-size: 0.78rem;
+}
+.cmd-chip-primary {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.learn-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+}
+.learn-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.9rem 0.95rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.learn-card:hover,
+.learn-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-blue) 18%, transparent);
+    outline: none;
+}
+.learn-card.is-active { border-color: var(--accent-blue); }
+.learn-card strong {
+    font-size: 1.02rem;
+    color: var(--text-heading);
+}
+.learn-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+.learn-card-summary {
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.learn-card-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+.learn-progress {
+    display: block;
+    height: 5px;
+    margin-top: 0.2rem;
+    border-radius: 999px;
+    background: var(--border-color);
+    overflow: hidden;
+}
+.learn-progress > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+    transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.learn-card-meta { font-size: 0.75rem; }
+.learn-card-cta {
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-blue);
+}
+.learn-card-done .learn-card-cta { color: var(--accent-green); }
+.learn-foot {
+    margin-top: 1.2rem;
+    font-size: 0.82rem;
+}
+.landing-door-learn { border-color: color-mix(in srgb, var(--accent-blue) 55%, var(--border-color)); }
+
+/* ── Transitions: modes, the reader, objectives, the landing ── */
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-mode-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: none; }
+    }
+    .mode-enter { animation: bc-mode-in 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes bc-reader-in {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: none; }
+    }
+    .learn-reader.is-entering > * { animation: bc-reader-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .learn-reader.is-entering > :nth-child(2) { animation-delay: 70ms; }
+    .learn-reader.is-entering > :nth-child(3) { animation-delay: 140ms; }
+    .learn-reader.is-entering > :nth-child(n+4) { animation-delay: 200ms; }
+    @keyframes bc-obj-met {
+        0% { background: color-mix(in srgb, var(--accent-green) 35%, transparent); transform: translateX(4px); }
+        100% { background: transparent; transform: none; }
+    }
+    .learn-objectives li.is-new { animation: bc-obj-met 900ms ease-out; }
+    @keyframes bc-landing-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes bc-landing-card-in {
+        from { opacity: 0; transform: translateY(10px) scale(0.985); }
+        to { opacity: 1; transform: none; }
+    }
+    .landing-overlay { animation: bc-landing-in 320ms ease-out; }
+    .landing-card { animation: bc-landing-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes bc-landing-out {
+        to { opacity: 0; }
+    }
+    .landing-overlay.is-leaving {
+        animation: bc-landing-out 260ms ease-in forwards;
+        pointer-events: none;
+    }
+}
+
+/* ── Small screens: a pinned, compact header; reader above the log ── */
+@media (max-width: 900px) {
+    .mode-nav {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.3rem;
+    }
+    .mode-tab {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    /* The reader and the terminal are the lesson; the panes can wait. */
+    .layout-learn .tui-sidebar { display: none; }
+    .layout-learn .tui-content {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 54%) minmax(0, 1fr);
+    }
+    .layout-learn .learn-reader {
+        grid-column: 1;
+        grid-row: 1;
+        padding: 0.8rem 0.9rem 1.2rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .layout-learn .tui-log {
+        grid-column: 1;
+        grid-row: 2;
+    }
+}
+@media (max-width: 600px) {
+    .tui-header {
+        gap: 0.3rem;
+        padding: 0.5rem 0.6rem;
+    }
+    .tui-header-subtitle,
+    .tui-header-link { display: none; }
+    .tui-header-actions { gap: 0.3rem; }
+    .tui-header-actions .tui-button {
+        padding: 0.25rem 0.45rem;
+        font-size: 0.78rem;
+    }
+    .learn-cards { grid-template-columns: 1fr; }
+    .learn-reader h2 { font-size: 1.2rem; }
 }

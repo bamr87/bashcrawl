@@ -17,8 +17,9 @@ Bashcrawl teaches real POSIX terminal skills through a fantasy dungeon crawl. Th
 
 Open the **[web app](https://bamr87.github.io/bashcrawl/)** — no install, free, works on mobile.
 
-Three doors:
+Four doors:
 
+- **🎓 Learn** — guided courses beside a real terminal: the lesson on one side (click any `command` to drop it into the prompt), the shell on the other, every objective checked as you type. Each course seeds a lab of real files to practise on. Start here if the terminal is new to you.
 - **⚔ Story** — descend the dungeon. Quests guide you from `pwd` to pipes; hidden
 rooms reward `grep`, `find`, environment variables, and symbolic links. XP, achievements, a fog-of-war map, and a pixel hero cheer you on.
 - **🕹 Practice Arcade** — timed mini-games on the same bash emulator:

@@ -14,12 +14,15 @@ Generated from `src/help/data/motion.yaml`. Every file below is an [ASCII Motion
 | `steam` | Steam engine | — | `motion/clips/steam.asciimtn` | The train puffs across the stage — sl. |
 | `burn` | Burning crate | — | `motion/clips/burn.asciimtn` | A crate catches fire and burns down — rm. |
 | `error` | Warning sign | — | `motion/clips/error.asciimtn` | A flashing "do not enter" sign — unknown commands and failures. |
+| `unroll` | Unrolling scroll | — | `motion/clips/unroll.asciimtn` | A scroll unrolls line by line — lesson, banner, figlet. |
+| `lore` | Open book | — | `motion/clips/lore.asciimtn` | An open book whose page turns — help, man, hint, learn, commands. |
 
 Game events that replace the command's motion (first match wins):
 
 - `levelup` → `cast`
 - `quest` → `spark`
 - `unlock` → `warp`
+- `lesson` → `unroll`
 
 ## Art
 
@@ -28,7 +31,7 @@ Static one-frame clips drawn with `Shell#art(name)`.
 | Name | Title | File | Used for |
 |---|---|---|---|
 | `banner` | Title banner | `motion/art/banner.asciimtn` | The BASHCRAWL logo the session opens with (and `banner`). |
-| `landing-brand` | Landing logo | `motion/art/landing-brand.asciimtn` | The logo on the first-visit landing card (web/index.html data-art). |
+| `landing-brand` | Landing logo | `motion/art/landing-brand.asciimtn` | The first-visit landing logo (web/index.html data-art); it materialises out of static. |
 | `encounter-treasure` | Treasure chest | `motion/art/encounter-treasure.asciimtn` | Portrait for ./treasure. |
 | `encounter-monster` | Coiled serpent | `motion/art/encounter-monster.asciimtn` | Portrait for ./monster. |
 | `encounter-ghost` | Restless ghost | `motion/art/encounter-ghost.asciimtn` | Portrait for ./ghost. |
@@ -40,12 +43,12 @@ Static one-frame clips drawn with `Shell#art(name)`.
 | `encounter-penguin` | Dapper penguin | `motion/art/encounter-penguin.asciimtn` | Portrait for ./penguin. |
 | `encounter-nyarlathotep` | The crawling chaos | `motion/art/encounter-nyarlathotep.asciimtn` | Portrait for ./nyarlathotep. |
 | `encounter-fountain` | Wishing fountain | `motion/art/encounter-fountain.asciimtn` | Portrait for ./fountain. |
-| `room-entrance` | Entrance vignette | `motion/art/room-entrance.asciimtn` | Room panel art for the entrance and workshop. |
-| `room-cellar` | Cellar vignette | `motion/art/room-cellar.asciimtn` | Room panel art for the cellar, armoury, and chamber. |
-| `room-graveyard` | Graveyard vignette | `motion/art/room-graveyard.asciimtn` | Room panel art for the chapel and graveyard. |
-| `room-vault` | Vault vignette | `motion/art/room-vault.asciimtn` | Room panel art for the vault and stronghold. |
-| `room-rift` | Rift vignette | `motion/art/room-rift.asciimtn` | Room panel art for the rift. |
-| `room-deep` | Deep vignette | `motion/art/room-deep.asciimtn` | Room panel art for every other room. |
+| `room-entrance` | Entrance vignette | `motion/art/room-entrance.asciimtn` | Room panel art for the entrance and workshop — the gate, torches flickering (loop). |
+| `room-cellar` | Cellar vignette | `motion/art/room-cellar.asciimtn` | Room panel art for the cellar, armoury, and chamber — barrels, a drip into a puddle (loop). |
+| `room-graveyard` | Graveyard vignette | `motion/art/room-graveyard.asciimtn` | Room panel art for the chapel and graveyard — headstones in mist, a ghost rising (loop). |
+| `room-vault` | Vault vignette | `motion/art/room-vault.asciimtn` | Room panel art for the vault and stronghold — two gems, a glint crossing the facets (loop). |
+| `room-rift` | Rift vignette | `motion/art/room-rift.asciimtn` | Room panel art for the rift — a breathing portal with an eye, stars wheeling (loop). |
+| `room-deep` | Deep vignette | `motion/art/room-deep.asciimtn` | Room panel art for every other room — a cave mouth under the stars, a bat crossing (loop). |
 | `arena-open` | Training arena | `motion/art/arena-open.asciimtn` | Header for the `train` drills. |
 | `arena-done` | Arena cleared | `motion/art/arena-done.asciimtn` | Footer when a `train` run ends. |
 | `pathfind` | Compass rose | `motion/art/pathfind.asciimtn` | Header for `pathfind` journeys. |

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bashcrawl — learn the terminal by playing</title>
-    <meta name="description" content="A free browser dungeon crawl that teaches real bash: explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
+    <meta name="description" content="A free browser dungeon crawl that teaches real bash: take guided courses in a practice lab, explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
     <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
     <link rel="stylesheet" href="./assets/css/theme.css">
     <link rel="stylesheet" href="./assets/css/terminal.css">
@@ -18,8 +18,9 @@
             </div>
             <nav class="mode-nav" id="mode-nav" role="tablist" aria-label="Game modes">
                 <button type="button" class="mode-tab mode-tab-on" data-mode="story" role="tab" aria-selected="true" title="Story dungeon (Alt+1)">⚔ Story</button>
-                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+2)">🕹 Arcade</button>
-                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+3)">📖 Reference</button>
+                <button type="button" class="mode-tab" data-mode="learn" role="tab" aria-selected="false" title="Guided courses with a lab (Alt+2)">🎓 Learn</button>
+                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+3)">🕹 Arcade</button>
+                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+4)">📖 Reference</button>
             </nav>
             <div class="tui-header-actions">
                 <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -105,6 +106,9 @@
             </aside>
 
             <section class="tui-content">
+                <!-- Learn mode: the lesson reader (learn.js) beside the same
+                     story terminal. Hidden outside the learn layout. -->
+                <div id="learn-reader" class="learn-reader" aria-label="Lesson reader" hidden></div>
                 <pre id="output-log" class="tui-log" role="log" aria-live="polite" aria-relevant="additions"></pre>
             </section>
         </section>
@@ -154,7 +158,7 @@
             <span>Enter=run</span>
             <span>Tab=complete</span>
             <span>↑/↓=history</span>
-            <span>Alt+1/2/3=mode</span>
+            <span>Alt+1/2/3/4=mode</span>
             <span>F1=docs</span>
             <span>Ctrl+L=clear</span>
             <span id="footer-mode-hint" class="footer-mode-hint"></span>
@@ -178,6 +182,11 @@
             <h1>Learn the terminal by playing.</h1>
             <p class="kind-dim">Real bash commands. A dungeon that is the filesystem. Free, in your browser.</p>
             <div class="landing-doors">
+                <button type="button" class="landing-door landing-door-learn" data-launch="learn">
+                    <span class="landing-door-icon">🎓</span>
+                    <strong>Learn</strong>
+                    <span>Guided courses with a practice lab. Start here if the terminal is new to you.</span>
+                </button>
                 <button type="button" class="landing-door" data-launch="story">
                     <span class="landing-door-icon">⚔</span>
                     <strong>Story</strong>
@@ -194,7 +203,7 @@
                     <span>Searchable cheatsheets for every command the dungeon teaches.</span>
                 </button>
             </div>
-            <p class="kind-dim landing-tip">Tip: never used a terminal? Take the Story door and type <code>pwd</code>.</p>
+            <p class="kind-dim landing-tip">Tip: every door shares one prompt. Type <code>pwd</code> anywhere to begin.</p>
         </div>
     </div>
 
@@ -233,8 +242,10 @@
     <script src="./assets/js/plugins/bestiary.js"></script>
     <script src="./assets/js/runtime.js"></script>
     <script src="./assets/js/hud.js"></script>
+    <script src="./assets/js/learn.js"></script>
     <script src="./assets/js/fx-clips.js"></script>
     <script src="./assets/js/fx.js"></script>
+    <script src="./assets/js/ambient.js"></script>
     <script src="./assets/js/docs.js"></script>
     <script src="./assets/js/reference.js"></script>
     <script src="./assets/js/arcade.js"></script>

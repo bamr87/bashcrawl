@@ -40,7 +40,8 @@ def test_bundle_carries_every_registry_clip_alias_and_art() -> None:
         for alias in entry.get("aliases") or []:
             assert manifest["aliases"][alias] == name
             assert alias in manifest["stage"]
-    assert [rule["event"] for rule in manifest["events"]] == ["levelup", "quest", "unlock"]
+    events = [rule["event"] for rule in manifest["events"]]
+    assert events == ["levelup", "quest", "unlock", "lesson"]
     art = json.loads(
         re.search(r"BashcrawlArtClips = (\{.*?\});\n", rendered[build_motion.GAME_ART_OUT]).group(1)
     )

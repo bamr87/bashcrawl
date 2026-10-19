@@ -24,12 +24,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **App registry** (`termforge/apps/registry.js`): hosts resolve `--app` through it, and `--app list` prints it.
 - **HUD `lesson` and `skills` panes** on the web and terminal sidebars, with `lesson`/`objective`/named `skill` events (toasts in the terminal, panel flashes on the web) and command chips on the web.
 - Four learning badges: Student, Polymath, Keeper of Cards and Graduate.
+- **Learn mode in the browser** (🎓 tab, `Alt+2`, a door on the landing card): a lesson reader beside the same story terminal. The lesson renders from Markdown (any `code` drops into the prompt on click), the objectives tick off as you type, a hint and lab chips sit under them, and the course catalogue shows every course as a card with its progress. The sidebar keeps the lab's files, your skills and the hero; the dungeon panes step aside while a course runs. `web/assets/js/learn.js`.
+- **Ambient ASCII Motion** (`web/assets/js/ambient.js`): the six room vignettes are now multi-frame `.asciimtn` loops that play in the Location panel (torches flicker, the cellar drips, mist drifts, gems glint, the rift breathes, a bat crosses the deep) and crossfade on a room change; the landing logo materialises out of static. Clips inherit the theme colour and carry only their highlights; a hidden tab pauses them and `prefers-reduced-motion` gets a still.
+- Two stage clips: `unroll` (a scroll unrolls — `lesson`, `banner`, `figlet`, and a completed lesson) and `lore` (an open book, a page turns — `help`, `man`, `hint`, `learn`, `commands`).
+- Mode switches, the landing card, the reader and met objectives animate (all gated on `prefers-reduced-motion`).
 
 ### Changed
 
 - **The game runtime is now plugins over data.** The arena, pathfind, daily, achievements, progress and bestiary moved from the `runtime.js` monolith into `web/assets/js/plugins/`. Ranks, achievements (now rules instead of lambdas), the bestiary, the arena trials, the skill map and review cards live in `src/help/data/progression.yaml`, which the content contracts validate. The golden transcripts were unchanged by the split itself.
 - The save shape gains `learn` and `mastery` slices at the end. The change is additive: older saves load with defaults, and the plugins sanitize both slices on load.
 - `help` and the `commands` deck advertise the learning platform.
+- Mode shortcuts are `Alt+1` Story, `Alt+2` Learn, `Alt+3` Arcade, `Alt+4` Reference; the web welcome text points new players at Learn.
+- Lesson text in the terminal drops `*emphasis*` markers (outside code spans; `*.txt` in backticks stays as typed).
 
 - **Relicensed from MIT to GPL-3.0-only.** Bashcrawl is a derivative of [Seth Kenlon's original bashcrawl](https://gitlab.com/slackermedia/bashcrawl), which is distributed under the GNU GPL v3 (no "or later" grant), so the whole repository now uses the same terms. `LICENSE` is the unmodified GPLv3 text from gnu.org; a new `NOTICE` file credits the upstream author and contributors, records the derivation, and reproduces the MIT notices of the bundled third-party code (simplex-noise, ASCII Motion). `package.json`, `pyproject.toml` and the README badge/sections now say `GPL-3.0-only`.
 
@@ -38,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **The emulator now counts lines like real tools.** A file's final newline used to count as an extra empty line, so `wc -l` was off by one, `sort` emitted a blank first line, and `tail -n 2` lost a real line. These commands now match bash: `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `cut`, `sed`, `nl` and `rev`.
 - `cp file dir` and `mv x dir` now land inside the directory (cp used to replace the directory with a file), a moved directory takes its contents with it, and `find /abs` and `find sub` print paths from the start argument like `find(1)`.
 - The arena no longer crashes when no trials are loaded. A save whose arena run points past the loaded trials is dropped.
+- On phones the header no longer overlaps the sidebar: it is pinned, the mode tabs take a row of their own, and the actions shrink.
 - `.gitignore` no longer ignores every `workshop/` directory, only the dungeon's player-created ones.
 - **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
   the cellar amulet opening `chapel/`), `file <encounter>` reported

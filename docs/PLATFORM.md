@@ -47,6 +47,7 @@ Each layer only depends on the ones below it. The kernel and platform are **bran
 | `review` | a Leitner-box drill of your weakest, most-due skills, rescheduled at 1, 2, 4, 8 and 16 days | `core/mastery.js` |
 | `explain LINE` | breaks any line into stages, flags, arguments, pipes and redirects, with no model call | `core/explain.js` |
 | `bashcrawl lab ID` | copies the same lab into `~/.bashcrawl/labs/ID` for practice in a real shell | `bin/bashcrawl` |
+| the 🎓 **Learn** tab (browser) | a lesson reader beside the same terminal: the lesson rendered from Markdown, click-to-type code, the objective checklist and hints, and the course catalogue as cards | `web/assets/js/learn.js` |
 
 Five courses ship today:
 
@@ -100,7 +101,7 @@ After content or core changes, run `make web-build` and commit the regenerated `
 | Surface | Start it | Needs |
 |---|---|---|
 | real bash | `bashcrawl play`, or `cd entrance && cat scroll` | bash (3.2+) |
-| browser | <https://bamr87.github.io/bashcrawl/> or `bashcrawl web` | a browser (python3 to serve locally) |
+| browser | <https://bamr87.github.io/bashcrawl/> or `bashcrawl web` — Story, Learn, Arcade and Reference modes (`Alt+1`–`4`) | a browser (python3 to serve locally) |
 | terminal HUD | `bashcrawl tty` (`make tty-demo`) | Node 20.16+ |
 | telnet | `bashcrawl serve` (`make telnet-demo`) | Node 20.16+ |
 | telnet hub (MUD mode) | `bashcrawl hub` (`make telnet-hub`) | Node 20.16+ |

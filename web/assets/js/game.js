@@ -100,9 +100,53 @@
         output.focus();
     }
 
-    function roomVignetteHtml(vignette) {
-        const safe = vignette.art.map(escapeHtml).join("\n");
-        return `<pre class="room-vignette" data-room-art="${vignette.key}" aria-hidden="true">${safe}</pre>`;
+    // The room vignette is an ambient ASCII Motion loop (ambient.js) in a
+    // slot that outlives re-renders: the picture only changes when the area
+    // does, and then the old one fades out as the new one fades in.
+    let roomDom = null;
+    let vignetteKey = null;
+
+    function ensureRoomDom() {
+        if (roomDom && roomDom.root === dom.room && dom.room.contains(roomDom.slot)) return roomDom;
+        dom.room.innerHTML = '<p class="room-title"><strong></strong></p><p class="kind-dim room-path"></p>'
+            + '<div class="room-vignette-slot" aria-hidden="true"></div>'
+            + '<p class="room-contents-label kind-dim">In this room</p><p class="room-entries"></p>';
+        roomDom = {
+            root: dom.room,
+            title: dom.room.querySelector(".room-title strong"),
+            path: dom.room.querySelector(".room-path"),
+            slot: dom.room.querySelector(".room-vignette-slot"),
+            entries: dom.room.querySelector(".room-entries"),
+        };
+        vignetteKey = null;
+        return roomDom;
+    }
+
+    function renderVignette(slot, vignette) {
+        if (vignette.key === vignetteKey) return;
+        const ambient = window.BashcrawlAmbient;
+        const library = typeof runtime.artLibrary === "function" ? runtime.artLibrary() : null;
+        const clip = library ? (library.get(`room-${vignette.key}`) || library.get("room-deep")) : null;
+        const previous = slot.querySelector(".room-vignette");
+        const pre = document.createElement("pre");
+        pre.className = "room-vignette";
+        pre.dataset.roomArt = vignette.key;
+        slot.appendChild(pre);
+        if (!(ambient && clip && ambient.loop(pre, clip))) pre.textContent = vignette.art.join("\n");
+        vignetteKey = vignette.key;
+        if (previous) {
+            if (ambient) ambient.stop(previous);
+            const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduced) {
+                previous.remove();
+            } else {
+                previous.classList.add("is-leaving");
+                const drop = () => previous.remove();
+                previous.addEventListener("animationend", drop, { once: true });
+                setTimeout(drop, 600);
+                pre.classList.add("is-entering");
+            }
+        }
     }
 
     // The story log is a TermForge TerminalView painting into #output-log.
@@ -136,8 +180,9 @@
     if (saveError) append("error", saveError);
     append("info", "Welcome to Bashcrawl Web.");
     append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
-    append("magic", "🕹  Practice Arcade (top nav or Alt+2): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+3.");
-    append("dim", "In-story drills still work too:  train · speedrun · pathfind. Everything earns XP.");
+    append("magic", "🎓  New to the terminal? The Learn tab (Alt+2) has guided courses with a practice lab — or type: learn");
+    append("magic", "🕹  Practice Arcade (Alt+3): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+4.");
+    append("dim", "In-story drills still work too:  train · speedrun · pathfind · explain. Everything earns XP.");
     if (runtime.state.trainer && runtime.state.trainer.active) {
         for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
     }
@@ -145,9 +190,10 @@
     let prevState = snapshotState();
 
     // Outside story mode even an empty Enter routes (the arcade uses it to
-    // return to the floor after a finished trial).
+    // return to the floor after a finished trial). Learn mode is story mode
+    // with a reader: the same runtime owns the prompt.
     function nonStoryMode() {
-        return window.BashcrawlShell && window.BashcrawlShell.mode() !== "story";
+        return Boolean(window.BashcrawlShell) && !window.BashcrawlShell.storyOwnsInput();
     }
 
     dom.form.addEventListener("submit", (event) => {
@@ -158,15 +204,31 @@
         runLine(line);
     });
 
-    // Command chips in the sidebar run their command as if typed (story
-    // mode only), then hand focus back to the prompt.
-    const storySidebar = document.querySelector("#mode-story .tui-sidebar");
-    if (storySidebar) {
-        storySidebar.addEventListener("click", (event) => {
-            const button = event.target.closest("[data-run]");
-            if (!button || nonStoryMode()) return;
-            runLine(button.getAttribute("data-run"));
-            dom.input.focus();
+    // Chips anywhere in the story section (sidebar panes, the lesson reader)
+    // run their command as if typed (data-run), drop a command into the prompt
+    // for the learner to press Enter on (data-fill), or switch modes
+    // (data-goto). Story and Learn only; focus always returns to the prompt.
+    if (dom.storyMain) {
+        dom.storyMain.addEventListener("click", (event) => {
+            if (nonStoryMode()) return;
+            const goto = event.target.closest("[data-goto]");
+            if (goto && window.BashcrawlShell) {
+                window.BashcrawlShell.setMode(goto.getAttribute("data-goto"));
+                return;
+            }
+            const run = event.target.closest("[data-run]");
+            if (run) {
+                runLine(run.getAttribute("data-run"));
+                dom.input.focus();
+                return;
+            }
+            const fill = event.target.closest("[data-fill]");
+            if (fill) {
+                dom.input.value = fill.getAttribute("data-fill") || "";
+                dom.input.focus();
+                dom.input.setSelectionRange(dom.input.value.length, dom.input.value.length);
+                bump(dom.form, "fx-submit", 320);
+            }
         });
     }
 
@@ -280,7 +342,7 @@
     function runLine(line) {
         if (dom.inlineHint) dom.inlineHint.hidden = true;
         // Mode router: while the Practice Arcade owns the input, lines go there.
-        if (window.BashcrawlShell && window.BashcrawlShell.mode() !== "story") {
+        if (nonStoryMode()) {
             window.BashcrawlShell.handleInput(line);
             return;
         }
@@ -483,9 +545,13 @@
         dom.quest.innerHTML = summary + renderQuestLog(quest);
     }
 
-    // Command chips: buttons that type a command for you (data-run).
+    // Command chips: buttons that type a command for you (data-run), or
+    // open another mode (data-goto — the lesson reader lives in Learn).
     function chip(command, label) {
         return `<button type="button" class="tui-button cmd-chip" data-run="${escapeHtml(command)}">${escapeHtml(label || command)}</button>`;
+    }
+    function gotoChip(mode, label) {
+        return `<button type="button" class="tui-button cmd-chip cmd-chip-primary" data-goto="${escapeHtml(mode)}">${escapeHtml(label)}</button>`;
     }
 
     function renderLesson() {
@@ -493,12 +559,12 @@
         const lesson = Hud.lessonModel(runtime);
         if (!lesson.active) {
             dom.lesson.innerHTML = `<p>${lesson.courses} courses, each with its own lab of real files to practise on.</p>`
-                + `<p class="cmd-chips">${chip("learn", "Browse courses")}${chip("learn navigator", "Start: Finding Your Way")}</p>`;
+                + `<p class="cmd-chips">${gotoChip("learn", "🎓 Open Learn")}${chip("learn navigator", "Start: Finding Your Way")}</p>`;
             return;
         }
         if (lesson.complete) {
             dom.lesson.innerHTML = `<p class="kind-success"><strong>${escapeHtml(lesson.course)}</strong> ✅ complete</p>`
-                + `<p class="cmd-chips">${chip("learn", "Pick the next course")}</p>`;
+                + `<p class="cmd-chips">${gotoChip("learn", "🎓 Pick the next course")}</p>`;
             return;
         }
         const rows = lesson.objectives.map((obj) => (
@@ -507,7 +573,7 @@
         dom.lesson.innerHTML = `<p><strong>${escapeHtml(lesson.course)}</strong></p>`
             + `<p class="kind-dim">Lesson ${lesson.n}/${lesson.total}: ${escapeHtml(lesson.title)} · ${lesson.met}/${lesson.objectives.length}</p>`
             + `<ul class="ql-list">${rows}</ul>`
-            + `<p class="cmd-chips">${chip("lesson", "Read")}${chip("lesson hint", "Hint")}${chip(`cd ${lesson.lab}`, "Go to lab")}</p>`;
+            + `<p class="cmd-chips">${gotoChip("learn", "📖 Reader")}${chip("lesson hint", "Hint")}${chip(`cd ${lesson.lab}`, "Go to lab")}</p>`;
     }
 
     function renderSkills() {
@@ -538,9 +604,13 @@
             `${entry.icon} ${escapeHtml(entry.name)}${entry.marker}`
         )).join("<br>");
         // Vignette sits under the room name (before the scrollable entry list)
-        // so the ambient mascot stays visible even when contents are long. The
+        // so the ambient scene stays visible even when contents are long. The
         // "In this room" label distinguishes room contents from carried items.
-        dom.room.innerHTML = `<p><strong>${escapeHtml(room.title)}</strong></p><p class="kind-dim">${escapeHtml(room.path)}</p>${roomVignetteHtml(room.vignette)}<p class="room-contents-label kind-dim">In this room</p><p>${entries || "(empty)"}</p>`;
+        const r = ensureRoomDom();
+        r.title.textContent = room.title;
+        r.path.textContent = room.path;
+        r.entries.innerHTML = entries || "(empty)";
+        renderVignette(r.slot, room.vignette);
     }
 
     // Fog-of-war dungeon map: the tree itself comes from the shared presenter
@@ -563,7 +633,7 @@
         if (window.BashcrawlShell) {
             window.BashcrawlShell.setPrompt(p, { fromStory: true });
             // Mirror the textContent guard: only story owns the tooltip too.
-            if (window.BashcrawlShell.mode() === "story") {
+            if (window.BashcrawlShell.storyOwnsInput()) {
                 dom.prompt.setAttribute("title", `Full path: ${runtime.state.cwd}`);
             }
         } else {

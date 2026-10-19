@@ -38,6 +38,19 @@
     // Markdown -> Line records for a terminal: headings stand out, fenced
     // code is indented, emphasis markers drop, `inline code` keeps its ticks
     // (they are how a terminal shows "type this").
+    const EMPHASIS = [
+        [/\*\*([^*]+)\*\*/g, "$1"],
+        [/(^|[^*\w])\*([^*\s](?:[^*]*?[^*\s])?)\*(?=[^*\w]|$)/g, "$1$2"],
+        [/(^|\W)_([^_]+)_(?=\W|$)/g, "$1$2"],
+        [/\[([^\]]+)\]\([^)]+\)/g, "$1"],
+    ];
+    // Emphasis is stripped outside code spans only: `*.txt` is a glob.
+    function inlineText(s) {
+        return String(s).split(/(`[^`]*`)/).map((part, i) => (
+            i % 2 ? part : EMPHASIS.reduce((acc, [re, to]) => acc.replace(re, to), part)
+        )).join("");
+    }
+
     function markdownLines(md) {
         const out = [];
         const lines = String(md || "").replace(/\r\n/g, "\n").split("\n");
@@ -47,7 +60,7 @@
             if (para.length) out.push({ kind: "output", text: para.join("\n") });
             para = [];
         };
-        const inline = (s) => s.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/(^|\W)_([^_]+)_(?=\W|$)/g, "$1$2").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        const inline = inlineText;
         for (const raw of lines) {
             if (code) {
                 if (/^\s*```/.test(raw)) {
@@ -441,5 +454,5 @@
         };
     }
 
-    return { plugin, validateCourses, markdownLines, LEVELS, DEFAULT_TEXT };
+    return { plugin, validateCourses, markdownLines, inlineText, LEVELS, DEFAULT_TEXT };
 });
