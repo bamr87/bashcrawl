@@ -21,6 +21,9 @@ from typing import Any
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import course_loader  # noqa: E402
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _TEST_ROOT = _REPO_ROOT / "test"
 if str(_TEST_ROOT) not in sys.path:
@@ -549,7 +552,7 @@ def _motion_source_ok(path: Path) -> str | None:
 # full JS validator over every authored rule.
 RULE_HEADS = (
     "all", "any", "not",
-    "command", "arg", "args_contains", "option", "piped", "ok", "output_includes",
+    "command", "arg", "args_contains", "option", "piped", "ok", "output_includes", "line_includes",
     "cwd", "cwd_includes",
     "state", "count", "has", "flag", "exists",
     "file_exists", "dir_exists", "file_contains",
@@ -667,12 +670,69 @@ def _validate_progression(
                 _add_error(
                     errors, f"{where}: answer {answer!r} must be lowercase with single spaces"
                 )
+    tracked: dict[str, str] = {}
+    for i, group in enumerate(data.get("skills") or []):
+        where = f"progression.yaml: skills[{i}]"
+        name = group.get("group") if isinstance(group, dict) else None
+        commands = group.get("commands") if isinstance(group, dict) else None
+        if not isinstance(name, str) or not name:
+            _add_error(errors, f"{where}: needs a group name")
+        if not isinstance(commands, list) or not commands:
+            _add_error(errors, f"{where}: needs a non-empty commands list")
+            continue
+        for cmd in commands:
+            if cmd in tracked:
+                _add_error(errors, f"{where}: '{cmd}' is already in group '{tracked[cmd]}'")
+            tracked[str(cmd)] = str(name)
+    cards = data.get("cards") or []
+    for i, card in enumerate(cards):
+        where = f"progression.yaml: cards[{i}]"
+        if not isinstance(card, dict):
+            _add_error(errors, f"{where} must be a mapping")
+            continue
+        if card.get("skill") not in tracked:
+            _add_error(errors, f"{where}: skill '{card.get('skill')}' is not in the skills map")
+        if not isinstance(card.get("q"), str) or not card["q"]:
+            _add_error(errors, f"{where}: needs q")
+        answers = card.get("a")
+        if not isinstance(answers, list) or not answers or not all(
+            isinstance(a, str) and a.strip() for a in answers
+        ):
+            _add_error(errors, f"{where}: a must be a non-empty list of command lines")
     report["progression"] = {
         "ranks": len(ranks),
         "achievements": len(seen_ids),
         "bestiary": len(seen_keys),
         "trials": len(trials),
+        "skills": len(tracked),
+        "cards": len(cards),
     }
+    report["_tracked_skills"] = sorted(tracked)
+
+
+def _validate_courses(
+    root: Path, errors: list[str], warnings: list[str], report: dict[str, Any]
+) -> None:
+    """courses/**: frontmatter, ids, objectives (TermForge rules + a solution)."""
+    courses, problems = course_loader.load_courses(root)
+    for problem in problems:
+        _add_error(errors, problem)
+    tracked = set(report.pop("_tracked_skills", []))
+    lessons = objectives = 0
+    for course in courses:
+        for skill in course["skills"]:
+            if tracked and skill not in tracked:
+                _add_warning(
+                    warnings, f"courses/{course['id']}: skill '{skill}' is not in the skills map"
+                )
+        for lesson in course["lessons"]:
+            lessons += 1
+            for i, obj in enumerate(lesson["objectives"]):
+                objectives += 1
+                where = f"courses/{course['id']} lesson {lesson['id']} objective {i + 1}.when"
+                for problem in rule_errors(obj.get("when"), where):
+                    _add_error(errors, problem)
+    report["courses"] = {"courses": len(courses), "lessons": lessons, "objectives": objectives}
 
 
 def _validate_motion(
@@ -827,6 +887,7 @@ def validate(root: Path) -> dict[str, Any]:
     _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
     _validate_game_scripts(root, errors, warnings, report)
     _validate_progression(root, errors, warnings, report)
+    _validate_courses(root, errors, warnings, report)
     _validate_motion(root, errors, warnings, report)
 
     return {
@@ -857,6 +918,11 @@ def _emit_text(result: dict[str, Any]) -> None:
         "Encounters: "
         f"yaml={enc.get('yaml_count', 0)} "
         f"walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
+    )
+    courses = result.get("courses", {})
+    print(
+        f"Courses: courses={courses.get('courses', 0)} lessons={courses.get('lessons', 0)} "
+        f"objectives={courses.get('objectives', 0)}"
     )
     progression = result.get("progression", {})
     print(

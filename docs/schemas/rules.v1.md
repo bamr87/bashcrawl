@@ -25,6 +25,7 @@ A rule is a mapping with exactly **one head key**. Some heads take companion key
 | | `piped: true` | the command received non-empty stdin |
 | | `ok: true` | the command produced no `error` record |
 | | `output_includes: "text"` | some output record's text contains it |
+| | `line_includes: grep` or `[…]` | the whole input line contains one of these (checks a pipeline's other stages) |
 | location | `cwd: /abs/path` or `[…]` | the working directory is one of these |
 | | `cwd_includes: part` or `[…]` | the working directory contains one of these |
 | state | `state: a.b.c` (+ comparator) | the value compares true (truthy with no comparator) |
@@ -49,6 +50,7 @@ Numeric comparisons read a **missing value as 0**, so `{state: stats.commands.pw
 { state,                 // the session state (required for state/location heads)
   cmd, args, stdin,      // present when checked right after a command ran
   outputs,               // that command's Line records
+  line,                  // the whole input line the command was part of
   shell }                // anything with resolve/isDir/readFile, for filesystem heads
 ```
 

@@ -147,6 +147,49 @@
         "state": "xp",
         "gte": 150
       }
+    },
+    {
+      "id": "student",
+      "icon": "🎓",
+      "title": "Student",
+      "desc": "Enrolled in a course with learn.",
+      "xp": 5,
+      "when": {
+        "exists": "learn.active"
+      }
+    },
+    {
+      "id": "polymath",
+      "icon": "🧠",
+      "title": "Polymath",
+      "desc": "Practised ten different skills.",
+      "xp": 10,
+      "when": {
+        "count": "mastery.skills",
+        "gte": 10
+      }
+    },
+    {
+      "id": "keeper_of_cards",
+      "icon": "🃏",
+      "title": "Keeper of Cards",
+      "desc": "Finished a spaced-repetition review.",
+      "xp": 10,
+      "when": {
+        "state": "mastery.reviews",
+        "gte": 1
+      }
+    },
+    {
+      "id": "graduate",
+      "icon": "📜",
+      "title": "Graduate",
+      "desc": "Completed a whole course.",
+      "xp": 25,
+      "when": {
+        "count": "learn.completed",
+        "gte": 1
+      }
     }
   ],
   "bestiary": [
@@ -347,6 +390,544 @@
       ],
       "hint": "One short word — or the branching 'tree'.",
       "teaches": "map / tree reveal the dungeon's layout."
+    }
+  ],
+  "skills": [
+    {
+      "group": "Navigation",
+      "commands": [
+        "pwd",
+        "ls",
+        "cd",
+        "tree",
+        "find"
+      ]
+    },
+    {
+      "group": "Reading",
+      "commands": [
+        "cat",
+        "less",
+        "head",
+        "tail",
+        "wc",
+        "nl",
+        "file"
+      ]
+    },
+    {
+      "group": "Searching & text",
+      "commands": [
+        "grep",
+        "sort",
+        "uniq",
+        "cut",
+        "tr",
+        "sed",
+        "rev"
+      ]
+    },
+    {
+      "group": "Files",
+      "commands": [
+        "mkdir",
+        "touch",
+        "cp",
+        "mv",
+        "rm",
+        "chmod"
+      ]
+    },
+    {
+      "group": "The shell",
+      "commands": [
+        "echo",
+        "export",
+        "let",
+        "alias",
+        "env",
+        "history",
+        "source",
+        "man"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "skill": "sort",
+      "q": "Sort names.txt in reverse order.",
+      "a": [
+        "sort -r names.txt"
+      ],
+      "why": "-r reverses the order."
+    },
+    {
+      "skill": "sort",
+      "q": "Sort numbers.txt numerically, so 10 comes after 9.",
+      "a": [
+        "sort -n numbers.txt"
+      ],
+      "why": "-n compares numbers, not text."
+    },
+    {
+      "skill": "sort",
+      "q": "Sort names.txt and drop duplicate lines, in one command.",
+      "a": [
+        "sort -u names.txt"
+      ],
+      "why": "-u keeps one copy of each line."
+    },
+    {
+      "skill": "sort",
+      "q": "Rank the lines of counts.txt from the largest number to the smallest.",
+      "a": [
+        "sort -rn counts.txt",
+        "sort -nr counts.txt",
+        "sort -n -r counts.txt",
+        "sort -r -n counts.txt"
+      ],
+      "why": "-n numeric plus -r reverse: biggest first."
+    },
+    {
+      "skill": "uniq",
+      "q": "Collapse repeated lines of piped input and count each one.",
+      "a": [
+        "uniq -c"
+      ],
+      "why": "uniq -c prefixes each line with its count."
+    },
+    {
+      "skill": "uniq",
+      "q": "Print only the lines of list.txt that are repeated.",
+      "a": [
+        "uniq -d list.txt"
+      ],
+      "why": "-d shows duplicated lines only."
+    },
+    {
+      "skill": "cut",
+      "q": "From data.csv, keep only the 2nd comma-separated field.",
+      "a": [
+        "cut -d, -f2 data.csv",
+        "cut -d , -f 2 data.csv",
+        "cut -d, -f 2 data.csv",
+        "cut -d , -f2 data.csv"
+      ],
+      "why": "-d, sets the delimiter, -f2 picks field 2."
+    },
+    {
+      "skill": "cut",
+      "q": "Keep characters 1 to 3 of every line of codes.txt.",
+      "a": [
+        "cut -c1-3 codes.txt",
+        "cut -c 1-3 codes.txt"
+      ],
+      "why": "-c selects character positions."
+    },
+    {
+      "skill": "tr",
+      "q": "Turn every lowercase letter of piped input into uppercase.",
+      "a": [
+        "tr a-z A-Z"
+      ],
+      "why": "tr maps SET1 onto SET2 character by character."
+    },
+    {
+      "skill": "tr",
+      "q": "Delete every digit from piped input.",
+      "a": [
+        "tr -d 0-9"
+      ],
+      "why": "-d deletes the characters in SET1."
+    },
+    {
+      "skill": "sed",
+      "q": "Replace every 'cat' with 'dog' on every line of pets.txt.",
+      "a": [
+        "sed 's/cat/dog/g' pets.txt",
+        "sed s/cat/dog/g pets.txt",
+        "sed \"s/cat/dog/g\" pets.txt"
+      ],
+      "why": "s/old/new/ substitutes; the trailing g means every match on a line."
+    },
+    {
+      "skill": "rev",
+      "q": "Reverse the characters of each line of word.txt.",
+      "a": [
+        "rev word.txt"
+      ],
+      "why": "rev mirrors each line."
+    },
+    {
+      "skill": "cp",
+      "q": "Make a backup copy of config.txt named config.txt.bak.",
+      "a": [
+        "cp config.txt config.txt.bak"
+      ],
+      "why": "cp SOURCE DEST keeps the original."
+    },
+    {
+      "skill": "mv",
+      "q": "Rename draft.txt to final.txt.",
+      "a": [
+        "mv draft.txt final.txt"
+      ],
+      "why": "Renaming is moving to a new name."
+    },
+    {
+      "skill": "rm",
+      "q": "Delete the file junk.tmp.",
+      "a": [
+        "rm junk.tmp"
+      ],
+      "why": "rm is permanent: look before you delete."
+    },
+    {
+      "skill": "chmod",
+      "q": "Make deploy.sh executable.",
+      "a": [
+        "chmod +x deploy.sh"
+      ],
+      "why": "+x adds the execute permission."
+    },
+    {
+      "skill": "chmod",
+      "q": "Take the execute permission away from deploy.sh.",
+      "a": [
+        "chmod -x deploy.sh"
+      ],
+      "why": "-x removes it."
+    },
+    {
+      "skill": "export",
+      "q": "Set the variable COLOR to blue.",
+      "a": [
+        "export COLOR=blue"
+      ],
+      "why": "No spaces around the =."
+    },
+    {
+      "skill": "let",
+      "q": "Add 5 to the number held in MANA.",
+      "a": [
+        "let MANA=MANA+5",
+        "let MANA+=5"
+      ],
+      "why": "Inside let, names are numbers: no $ needed."
+    },
+    {
+      "skill": "alias",
+      "q": "Make ll a shortcut for ls -F.",
+      "a": [
+        "alias ll='ls -F'",
+        "alias ll=\"ls -F\""
+      ],
+      "why": "Quote the command so its space stays inside."
+    },
+    {
+      "skill": "env",
+      "q": "Print every exported variable.",
+      "a": [
+        "env"
+      ],
+      "why": "env lists NAME=value pairs."
+    },
+    {
+      "skill": "less",
+      "q": "Page through big.log one screen at a time.",
+      "a": [
+        "less big.log"
+      ],
+      "why": "Space pages forward, b back, q quits."
+    },
+    {
+      "skill": "nl",
+      "q": "Print poem.txt with its lines numbered.",
+      "a": [
+        "nl poem.txt"
+      ],
+      "why": "nl numbers lines."
+    },
+    {
+      "skill": "file",
+      "q": "Ask what kind of thing 'mystery' is before opening it.",
+      "a": [
+        "file mystery"
+      ],
+      "why": "file identifies text, directories and programs."
+    },
+    {
+      "skill": "tree",
+      "q": "Draw the directory tree under where you stand.",
+      "a": [
+        "tree",
+        "tree ."
+      ],
+      "why": "tree shows the whole structure at once."
+    },
+    {
+      "skill": "source",
+      "q": "Load the definitions in setup.sh into the current shell.",
+      "a": [
+        "source setup.sh",
+        ". setup.sh"
+      ],
+      "why": "source runs a file in THIS shell, so its variables stay."
+    },
+    {
+      "skill": "man",
+      "q": "Open the manual page for grep.",
+      "a": [
+        "man grep"
+      ],
+      "why": "man is the built-in documentation."
+    },
+    {
+      "skill": "history",
+      "q": "List the command lines you typed recently.",
+      "a": [
+        "history"
+      ],
+      "why": "history remembers every line."
+    },
+    {
+      "skill": "echo",
+      "q": "Print the value of the variable HOME.",
+      "a": [
+        "echo $HOME"
+      ],
+      "why": "$NAME expands to the variable's value."
+    },
+    {
+      "skill": "pwd",
+      "q": "Print Working Directory - shows your exact location",
+      "a": [
+        "pwd"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "ls",
+      "q": "List files and directories in current location",
+      "a": [
+        "ls"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "ls",
+      "q": "List with type indicators: * = executable, / = directory, @ = link",
+      "a": [
+        "ls -F"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "ls",
+      "q": "List ALL files including hidden (.), with permissions and details",
+      "a": [
+        "ls -la",
+        "ls -al"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "ls",
+      "q": "List with human-readable file sizes",
+      "a": [
+        "ls -lh",
+        "ls -hl"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "cd",
+      "q": "Move up one directory level",
+      "a": [
+        "cd .."
+      ],
+      "why": ""
+    },
+    {
+      "skill": "cd",
+      "q": "Go back to previous directory",
+      "a": [
+        "cd -"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "find",
+      "q": "Find files/directories by name pattern",
+      "a": [
+        "find . -name \"*pattern*\""
+      ],
+      "why": ""
+    },
+    {
+      "skill": "find",
+      "q": "Find only files",
+      "a": [
+        "find . -type f"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "find",
+      "q": "Find only directories",
+      "a": [
+        "find . -type d"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "grep",
+      "q": "Search for pattern in all files recursively",
+      "a": [
+        "grep -r \"pattern\" ."
+      ],
+      "why": ""
+    },
+    {
+      "skill": "history",
+      "q": "Show command history",
+      "a": [
+        "history"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "echo",
+      "q": "Check your inventory",
+      "a": [
+        "echo $I"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "echo",
+      "q": "Check your health points",
+      "a": [
+        "echo $HP"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "cat",
+      "q": "Read area documentation",
+      "a": [
+        "cat scroll"
+      ],
+      "why": ""
+    },
+    {
+      "skill": "ls",
+      "q": "Reveal everything standing in your current room.",
+      "a": [
+        "ls"
+      ],
+      "why": "ls lists the contents of a room (directory)."
+    },
+    {
+      "skill": "ls",
+      "q": "Reveal even the HIDDEN passages here (names that begin with a dot).",
+      "a": [
+        "ls -a",
+        "ls -la",
+        "ls -al",
+        "ls -a ."
+      ],
+      "why": "ls -a shows hidden entries whose names start with a dot."
+    },
+    {
+      "skill": "pwd",
+      "q": "Cast the spell that tells you exactly where you stand.",
+      "a": [
+        "pwd"
+      ],
+      "why": "pwd prints your current location."
+    },
+    {
+      "skill": "cd",
+      "q": "Descend into the room named 'cellar'.",
+      "a": [
+        "cd cellar"
+      ],
+      "why": "cd <room> walks you into another directory."
+    },
+    {
+      "skill": "cd",
+      "q": "Climb back to the room you came from.",
+      "a": [
+        "cd .."
+      ],
+      "why": "cd .. moves up one directory."
+    },
+    {
+      "skill": "cat",
+      "q": "Read the entire scroll lying in this room.",
+      "a": [
+        "cat scroll"
+      ],
+      "why": "cat <file> prints a file's full contents."
+    },
+    {
+      "skill": "head",
+      "q": "Peek at only the FIRST lines of the scroll.",
+      "a": [
+        "head scroll"
+      ],
+      "why": "head shows the first lines of a file."
+    },
+    {
+      "skill": "tail",
+      "q": "Glimpse only the LAST lines of the scroll.",
+      "a": [
+        "tail scroll"
+      ],
+      "why": "tail shows the last lines of a file."
+    },
+    {
+      "skill": "grep",
+      "q": "Hunt the scroll for the word 'amulet'.",
+      "a": [
+        "grep amulet scroll"
+      ],
+      "why": "grep finds lines matching a pattern inside a file."
+    },
+    {
+      "skill": "wc",
+      "q": "Count how many lines the scroll holds.",
+      "a": [
+        "wc -l scroll",
+        "wc scroll"
+      ],
+      "why": "wc -l counts the lines in a file."
+    },
+    {
+      "skill": "mkdir",
+      "q": "Conjure a brand-new room called 'workshop'.",
+      "a": [
+        "mkdir workshop"
+      ],
+      "why": "mkdir creates a new directory (room)."
+    },
+    {
+      "skill": "touch",
+      "q": "Forge an empty artifact named 'torch'.",
+      "a": [
+        "touch torch"
+      ],
+      "why": "touch creates an empty file."
+    },
+    {
+      "skill": "echo",
+      "q": "Summon your inventory by echoing the $I treasure-rune.",
+      "a": [
+        "echo $i",
+        "echo \"$i\""
+      ],
+      "why": "echo prints text; $I holds your inventory."
     }
   ]
 }

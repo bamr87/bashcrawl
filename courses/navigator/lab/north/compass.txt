@@ -1,0 +1,4 @@
+The needle points north.
+
+You read this through an ABSOLUTE path: one that starts with / and means
+the same thing no matter where you stand.

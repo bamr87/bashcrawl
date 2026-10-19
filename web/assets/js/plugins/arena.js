@@ -21,6 +21,8 @@
     }
 
     function startArena(speed) {
+        const review = this.state.mastery && this.state.mastery.review;
+        if (review) return [{ kind: "error", text: "Finish or quit your review first (type 'quit')." }];
         const trials = this.catalog.trials;
         if (!trials.length) return [{ kind: "dim", text: "The arena stands empty: no trials are loaded." }];
         const count = Math.min(8, trials.length);

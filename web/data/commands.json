@@ -1030,6 +1030,48 @@
       "runtimes": {
         "demo": true
       }
+    },
+    {
+      "name": "learn",
+      "help": "Browse the courses; learn NAME starts or resumes one (with its own lab)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "lesson",
+      "help": "Read the current lesson and its objectives (lesson hint | list | skip | N)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "lab",
+      "help": "Show the active course's lab directory (lab reset restores it)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "skills",
+      "help": "Your skill map, grown by every command you run (skills NAME for one)",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "review",
+      "help": "Spaced-repetition drill of your weakest, most-due skills",
+      "runtimes": {
+        "demo": true
+      }
+    },
+    {
+      "name": "explain",
+      "help": "Take any command line apart — stages, flags, arguments, pipes — offline",
+      "runtimes": {
+        "demo": true
+      }
     }
   ]
 }

@@ -32,6 +32,9 @@ const RUNTIME_FILES = [
     path.join(VENDOR_JS, "events.js"),
     path.join(VENDOR_JS, "rules.js"),
     path.join(VENDOR_JS, "plugin.js"),
+    path.join(VENDOR_JS, "curriculum.js"),
+    path.join(VENDOR_JS, "mastery.js"),
+    path.join(VENDOR_JS, "explain.js"),
     path.join(VENDOR_JS, "shell.js"),
     path.join(VENDOR_JS, "packs", "posix.js"),
     path.join(VENDOR_JS, "packs", "flavour.js"),
@@ -57,6 +60,7 @@ function loadGameData() {
         quests: read("quests.json"),
         commands: read("commands.json"),
         progression: read("progression.json"),
+        courses: read("courses.json"),
     };
 }
 

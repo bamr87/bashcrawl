@@ -188,6 +188,30 @@
         },
         {
           "kind": "magic",
+          "text": "🎓 Learning platform"
+        },
+        {
+          "kind": "output",
+          "text": "  learn           Courses with a lab and checked objectives — learn NAME to start"
+        },
+        {
+          "kind": "output",
+          "text": "  lesson          Read the current lesson; lesson hint for a nudge"
+        },
+        {
+          "kind": "output",
+          "text": "  skills          Your skill map, grown by every command you run"
+        },
+        {
+          "kind": "output",
+          "text": "  review          Spaced-repetition drill of your weakest skills"
+        },
+        {
+          "kind": "output",
+          "text": "  explain <line>  Take any command line apart — flags, args, pipes"
+        },
+        {
+          "kind": "magic",
           "text": "📊 Progress & collection"
         },
         {
@@ -196,7 +220,7 @@
         },
         {
           "kind": "output",
-          "text": "  achievements    Badge catalogue — 0/11 unlocked"
+          "text": "  achievements    Badge catalogue — 0/15 unlocked"
         },
         {
           "kind": "output",
@@ -449,6 +473,10 @@
           "text": "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge."
         },
         {
+          "kind": "magic",
+          "text": "Learn:  'learn' opens the courses (each with a lab)  ·  'skills' maps your mastery  ·  'review' drills weak spots  ·  'explain <line>' takes any command apart."
+        },
+        {
           "kind": "info",
           "text": "New here? Type 'commands' for the full command deck of web-exclusive features."
         }
@@ -571,6 +599,24 @@
       "catScrollCount": 0,
       "lastPipedIn": false,
       "initialized": false
+    },
+    "learn": {
+      "active": null,
+      "progress": {},
+      "completed": []
+    },
+    "mastery": {
+      "skills": {
+        "pwd": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        }
+      },
+      "review": null,
+      "reviews": 0
     }
   }
 }

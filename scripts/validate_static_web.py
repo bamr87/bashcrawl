@@ -47,6 +47,7 @@ def validate() -> dict:
         "data/world.json",
         "data/quests.json",
         "data/progression.json",
+        "data/courses.json",
         "data/commands.json",
         "data/docs.json",
         "data/arcade.json",

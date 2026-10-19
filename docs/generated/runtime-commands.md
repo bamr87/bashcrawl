@@ -41,3 +41,9 @@ Generated from `src/help/data/runtime_commands.yaml`.
 | sed | no | no | no | yes |
 | nl | no | no | no | yes |
 | rev | no | no | no | yes |
+| learn | no | no | no | yes |
+| lesson | no | no | no | yes |
+| lab | no | no | no | yes |
+| skills | no | no | no | yes |
+| review | no | no | no | yes |
+| explain | no | no | no | yes |

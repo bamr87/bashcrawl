@@ -411,8 +411,11 @@
 
         // ── UX surface ───────────────────────────────────────────────────────
 
+        // A plugin capturing input (a quiz, a review) may claim the prompt via
+        // the promptLabel hook; first non-null wins.
         promptLabel() {
-            return `${this.state.cwd} $`;
+            const custom = this.hooks.first("promptLabel");
+            return custom != null ? custom : `${this.state.cwd} $`;
         }
 
         // `man` fallback text for handler-backed commands with no docs entry;

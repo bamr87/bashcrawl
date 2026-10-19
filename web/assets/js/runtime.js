@@ -31,6 +31,8 @@
             achievements: list(p.achievements),
             bestiary: list(p.bestiary),
             trials: list(p.trials),
+            skills: list(p.skills),
+            cards: list(p.cards),
         };
     }
 
@@ -59,6 +61,10 @@
             daily: { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null },
             rankIndex: 0,
             stats: { commands: {}, catScrollCount: 0, lastPipedIn: false, initialized: false },
+            // Learning platform slices (TermForge curriculum + mastery plugins;
+            // each plugin sanitizes its own slice on load).
+            learn: { active: null, progress: {}, completed: [] },
+            mastery: { skills: {}, review: null, reviews: 0 },
         };
     }
 
@@ -174,6 +180,16 @@
             const Achievements = gamePlugin("achievements");
             const Progress = gamePlugin("progress");
             const Bestiary = gamePlugin("bestiary");
+            // The learning platform: brand-neutral TermForge plugins fed with
+            // the game's data (courses/ -> courses.json, progression.yaml).
+            const TF = global.TermForge;
+            const Learn = TF.curriculum.plugin({ courses: (data.courses && data.courses.courses) || [] });
+            const Mastery = TF.mastery.plugin({
+                skills: this.catalog.skills,
+                cards: this.catalog.cards,
+                busy: (rt) => (rt.state.trainer && rt.state.trainer.active ? "Finish or quit the Training Arena first (type 'quit')." : null),
+            });
+            const Explain = TF.explain.plugin({ docs: { meta: { ...TF.packs.flavour.meta, ...TF.packs.posix.meta } } });
             this.handlers = {
                 help: this.cmdHelp,
                 pwd: P.pwd,
@@ -249,9 +265,22 @@
                 cmds: this.cmdCommands,
                 menu: this.cmdCommands,
                 features: this.cmdCommands,
+                learn: Learn.commands.learn,
+                courses: Learn.commands.learn,
+                lesson: Learn.commands.lesson,
+                lab: Learn.commands.lab,
+                skills: Mastery.commands.skills,
+                review: Mastery.commands.review,
+                explain: Explain.commands.explain,
             };
             this.installGameHooks();
+            // Install order is hook order. Curriculum first: lesson XP lands
+            // before achievements, the daily goal and rank-up read it. Mastery
+            // and explain last: an active arena run keeps first claim on input.
+            this.use(Learn);
             for (const id of GAME_PLUGINS) this.use(gamePlugin(id).plugin);
+            this.use(Mastery);
+            this.use(Explain);
         }
 
         // Wire the story core onto the TermForge hook spine (the game
@@ -337,6 +366,7 @@
                 { kind: "dim", text: "Try:  pwd | ls -F | cat scroll | cd cellar | tree | map | hint | cowsay hi | ./treasure" },
                 { kind: "magic", text: "Mini-games:  'train' drills spells (or 'speedrun' against the clock);  'pathfind' quests to a target room. All grant XP." },
                 { kind: "dim", text: "Type 'achievements' for badges, 'profile' for your sheet, 'bestiary' to catalogue encounters, or 'daily' for today's challenge." },
+                { kind: "magic", text: "Learn:  'learn' opens the courses (each with a lab)  ·  'skills' maps your mastery  ·  'review' drills weak spots  ·  'explain <line>' takes any command apart." },
                 { kind: "info", text: "New here? Type 'commands' for the full command deck of web-exclusive features." },
             ];
         }
@@ -357,6 +387,16 @@
                         ["train", "Drill spells from memory in the Training Arena"],
                         ["speedrun", "Same trials, against the clock — beat your best time"],
                         ["pathfind", "Navigate to a target room in the fewest cd moves"],
+                    ],
+                },
+                {
+                    title: "🎓 Learning platform",
+                    items: [
+                        ["learn", "Courses with a lab and checked objectives — learn NAME to start"],
+                        ["lesson", "Read the current lesson; lesson hint for a nudge"],
+                        ["skills", "Your skill map, grown by every command you run"],
+                        ["review", "Spaced-repetition drill of your weakest skills"],
+                        ["explain <line>", "Take any command line apart — flags, args, pipes"],
                     ],
                 },
                 {
@@ -404,6 +444,9 @@
 
         // Prompt shown in the input row; the Arena swaps in a battle prompt.
         promptLabel() {
+            // A plugin capturing input (a review session) claims the prompt.
+            const custom = this.hooks.first("promptLabel");
+            if (custom != null) return custom;
             const t = this.state.trainer;
             if (t && t.active) {
                 return `${t.speed ? "speed" : "arena"} ${Math.min(t.pos + 1, t.queue.length)}/${t.queue.length} ❯`;

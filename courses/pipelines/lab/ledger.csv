@@ -1,0 +1,12 @@
+date,member,action,gold
+2026-03-01,alice,deposit,40
+2026-03-01,bob,withdraw,15
+2026-03-01,cara,deposit,120
+2026-03-01,dmitri,deposit,75
+2026-03-01,bob,deposit,10
+2026-03-01,cara,withdraw,30
+2026-03-01,alice,deposit,25
+2026-03-02,cara,deposit,60
+2026-03-02,alice,deposit,15
+2026-03-02,dmitri,withdraw,20
+2026-03-02,alice,deposit,30

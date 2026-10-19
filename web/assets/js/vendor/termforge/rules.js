@@ -28,6 +28,8 @@
     //                 { piped: true }                       ran with non-empty stdin
     //                 { ok: true }                          produced no error record
     //                 { output_includes: "text" }           some output contains text
+    //                 { line_includes: "grep" | [...] }     the whole input line contains
+    //                                                       one of these (pipelines)
     //   location      { cwd: "/abs" | [...] }   { cwd_includes: "room" | [...] }
     //   state         { state: "a.b", <cmp>? }   value (truthy without a comparator)
     //                 { count: "a.b", <cmp> }    array length / object key count
@@ -42,14 +44,14 @@
     // Numeric comparisons read a missing value as 0, so `{ state:
     // "stats.commands.pwd", gt: 0 }` is false (not an error) on a fresh save.
     //
-    // ctx = { state, cmd?, args?, stdin?, outputs?, shell? } — the command
+    // ctx = { state, cmd?, args?, stdin?, outputs?, line?, shell? } — the command
     // fields are present when a rule is checked after a command ran; `shell`
     // (anything with resolve/isDir/readFile) backs the filesystem heads.
 
     const COMBINATORS = ["all", "any", "not"];
     const HEADS = [
         ...COMBINATORS,
-        "command", "arg", "args_contains", "option", "piped", "ok", "output_includes",
+        "command", "arg", "args_contains", "option", "piped", "ok", "output_includes", "line_includes",
         "cwd", "cwd_includes",
         "state", "count", "has", "flag", "exists",
         "file_exists", "dir_exists", "file_contains",
@@ -162,6 +164,7 @@
             case "ok": return !outputs.some((o) => o && o.kind === "error") === Boolean(rule.ok);
             case "output_includes":
                 return outputs.some((o) => o && typeof o.text === "string" && o.text.includes(rule.output_includes));
+            case "line_includes": return asList(rule.line_includes).some((part) => String(c.line || "").includes(part));
             case "cwd": return asList(rule.cwd).includes(state.cwd);
             case "cwd_includes": return asList(rule.cwd_includes).some((part) => String(state.cwd || "").includes(part));
             case "state": return compare(lookup(state, rule.state), rule);

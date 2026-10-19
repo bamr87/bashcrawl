@@ -28,7 +28,7 @@
     //     events: { "progress.xp"(event, shell) {} },         // bus sinks
     //     providers: [provider] | (shell) => [provider],      // read-only mounts
     //     uiText: { key: "default copy" },    // under the app's own deck
-    //     state: { key: "slice", defaults: () => ({}) },      // shell.pluginState(id)
+    //     state: { key, defaults: () => ({}), sanitize? },    // shell.pluginState(id)
     //     setup(shell, options) { return teardown?; },
     //   }
     //
@@ -68,6 +68,8 @@
             const s = plugin.state;
             if (!s || typeof s.key !== "string" || !s.key || typeof s.defaults !== "function") {
                 errors.push(`${at}: state needs { key, defaults() }`);
+            } else if (s.sanitize != null && typeof s.sanitize !== "function") {
+                errors.push(`${at}: state.sanitize must be a function`);
             }
         }
         if (plugin.setup != null && typeof plugin.setup !== "function") errors.push(`${at}: setup must be a function`);
@@ -144,6 +146,8 @@
      * A plugin's state slice, created (or topped up with fields added since a
      * save was written) from its defaults on first use. Works across a state
      * swap (reset, save import) because it re-reads shell.state every call.
+     * `sanitize(slice)` runs once per slice object, so an imported save is
+     * cleaned before the plugin trusts it, without resetting live fields.
      */
     function pluginState(shell, id) {
         const record = shell.plugins && shell.plugins.get(id);
@@ -151,15 +155,22 @@
         if (!spec) return null;
         const state = shell.state;
         const current = state[spec.key];
-        const defaults = spec.defaults();
         if (!current || typeof current !== "object" || Array.isArray(current)) {
-            state[spec.key] = defaults;
+            state[spec.key] = spec.defaults();
         } else {
-            for (const [field, value] of Object.entries(defaults)) {
+            for (const [field, value] of Object.entries(spec.defaults())) {
                 if (!Object.prototype.hasOwnProperty.call(current, field)) current[field] = value;
             }
         }
-        return state[spec.key];
+        const slice = state[spec.key];
+        if (spec.sanitize) {
+            if (!record.sanitized) record.sanitized = new WeakSet();
+            if (!record.sanitized.has(slice)) {
+                spec.sanitize(slice);
+                record.sanitized.add(slice);
+            }
+        }
+        return slice;
     }
 
     /** Rows for a `plugins` listing: [{ id, name, version, description, commands }]. */

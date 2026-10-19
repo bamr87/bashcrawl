@@ -3,6 +3,7 @@
         world: "./data/world.json",
         quests: "./data/quests.json",
         progression: "./data/progression.json",
+        courses: "./data/courses.json",
         commands: "./data/commands.json",
         docs: "./data/docs.json",
     };

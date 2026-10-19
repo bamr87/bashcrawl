@@ -209,6 +209,10 @@
         {
           "kind": "success",
           "text": "Exported TORCH=lit"
+        },
+        {
+          "kind": "success",
+          "text": "🧠 Achievement unlocked: Polymath — Practised ten different skills.  (+10 XP)"
         }
       ]
     },
@@ -226,7 +230,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "I=\nHP=100\nXP=340\nCWD=/entrance\nTORCH=lit"
+          "text": "I=\nHP=100\nXP=350\nCWD=/entrance\nTORCH=lit"
         }
       ]
     },
@@ -356,7 +360,7 @@
     "cwd": "/entrance/cellar",
     "prevCwd": "/entrance",
     "hp": 100,
-    "xp": 340,
+    "xp": 350,
     "inventory": [],
     "aliases": {
       "ll": "ls -F"
@@ -383,7 +387,8 @@
     "achievements": [
       "first_steps",
       "seasoned",
-      "cartographer"
+      "cartographer",
+      "polymath"
     ],
     "bestiary": [],
     "daily": {
@@ -417,6 +422,121 @@
       "catScrollCount": 2,
       "lastPipedIn": false,
       "initialized": false
+    },
+    "learn": {
+      "active": null,
+      "progress": {},
+      "completed": []
+    },
+    "mastery": {
+      "skills": {
+        "pwd": {
+          "uses": 3,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "ls": {
+          "uses": 5,
+          "fails": 0,
+          "flags": [
+            "a",
+            "F"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "cat": {
+          "uses": 2,
+          "fails": 1,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "file": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "cd": {
+          "uses": 3,
+          "fails": 1,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "tree": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "find": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [
+            "n",
+            "a",
+            "m",
+            "e",
+            "t",
+            "y",
+            "p"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "grep": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [
+            "r"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "echo": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "export": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "env": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "alias": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "man": {
+          "uses": 2,
+          "fails": 1,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        }
+      },
+      "review": null,
+      "reviews": 0
     }
   }
 }
