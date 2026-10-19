@@ -1,14 +1,20 @@
 // Root of the web trainer: providers, the route → screen switch, the
-// app-wide keys (Alt+1–4 doors, `?` help), and the boot of the game store.
+// app-wide keys (Alt+1–4 doors, `?` help, Escape), and the boot of the
+// game store.
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
+import { getArcade } from "../arcade/arcade-store";
 import { bindUnlock } from "../audio/synth";
+import { CrtToggle } from "../chrome/CrtToggle";
+import { DocsDrawer } from "../chrome/DocsDrawer";
 import { ErrorBoundary } from "../chrome/ErrorBoundary";
+import { Landing } from "../chrome/Landing";
 import { ShortcutsHelp } from "../chrome/ShortcutsHelp";
 import { SoundToggle } from "../chrome/SoundToggle";
 import { ThemeToggle } from "../chrome/ThemeToggle";
 import { Toaster } from "../chrome/Toaster";
+import { initCrt } from "../chrome/crt-store";
 import { getPrefs, setPrefs, usePrefs } from "../chrome/prefs-store";
 import { setUi, toggleHelp } from "../chrome/ui-store";
 import { fxBus } from "../engine/fx-bus";
@@ -18,10 +24,10 @@ import { ScreenFlash } from "../fx/ScreenFlash";
 import { installEffects } from "../fx/effects";
 import { HudMenu } from "../hud/HudMenu";
 import { StatusStrip } from "../hud/StatusStrip";
-import { getArcade } from "../arcade/arcade-store";
 import { ArcadeScreen } from "../screens/ArcadeScreen";
 import { LearnScreen } from "../screens/LearnScreen";
 import { NotFound } from "../screens/NotFound";
+import { ReferenceScreen } from "../screens/ReferenceScreen";
 import { StoryScreen } from "../screens/StoryScreen";
 import { Pager } from "../terminal/Pager";
 import { PromptDock } from "../terminal/PromptDock";
@@ -31,17 +37,10 @@ import { MODES, storyOwnsInput, type Mode } from "./modes";
 import { navigate, useRoute } from "./useHashRoute";
 
 initTheme();
+initCrt();
 
 function isTypingTarget(target: EventTarget | null): boolean {
     return target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
-}
-
-function Placeholder({ mode }: { mode: Mode }) {
-    return (
-        <section className="bc-page" aria-label={`${mode} door`}>
-            <p>The {mode} door is being carved.</p>
-        </section>
-    );
 }
 
 function Booting({ error }: { error: string | null }) {
@@ -72,32 +71,21 @@ export function App() {
         return off;
     }, []);
 
-    // A door change is a beat too.
-    useEffect(() => {
-        if (route.kind === "mode") fxBus.publish({ type: "mode", mode: route.mode });
-    }, [route]);
-
-    // Escape closes the small-screen panels overlay from anywhere.
-    useEffect(() => {
-        const onKey = (event: KeyboardEvent) => {
-            if (event.key === "Escape") setUi({ panelsOpen: false });
-        };
-        document.addEventListener("keydown", onKey);
-        return () => document.removeEventListener("keydown", onKey);
-    }, []);
-
     // No hash: open the last door, or the entrance.
     useEffect(() => {
         if (route.kind === "none") navigate(getPrefs().mode ?? "story");
     }, [route]);
 
-    // Remember the door for next time.
+    // Remember the door for next time; a door change is a beat too.
     useEffect(() => {
-        if (route.kind === "mode" && prefs.mode !== route.mode) setPrefs({ mode: route.mode });
+        if (route.kind !== "mode") return;
+        if (prefs.mode !== route.mode) setPrefs({ mode: route.mode });
+        fxBus.publish({ type: "mode", mode: route.mode });
     }, [route, prefs.mode]);
 
     // Alt+1–4 switch doors (the physical key, since macOS types a symbol for
-    // Alt+digit); `?` outside an input opens the shortcuts list.
+    // Alt+digit); `?` outside an input opens the shortcuts; F1 the docs;
+    // Escape closes the small-screen panels overlay.
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
             if (event.altKey && !event.ctrlKey && !event.metaKey) {
@@ -108,9 +96,14 @@ export function App() {
                 }
                 return;
             }
-            if (event.key === "?" && !event.ctrlKey && !event.metaKey && !isTypingTarget(event.target)) {
+            if (event.key === "F1") {
+                event.preventDefault();
+                setUi({ docsOpen: !document.querySelector(".bc-docs") });
+            } else if (event.key === "?" && !event.ctrlKey && !event.metaKey && !isTypingTarget(event.target)) {
                 event.preventDefault();
                 toggleHelp();
+            } else if (event.key === "Escape") {
+                setUi({ panelsOpen: false });
             }
         };
         document.addEventListener("keydown", onKey);
@@ -119,27 +112,32 @@ export function App() {
 
     const mode: Mode | null = route.kind === "mode" ? route.mode : null;
     const ready = phase === "ready";
+    const arcade = ready ? getArcade() : null;
+    const storyChrome = ready && storyOwnsInput(mode);
+
     const actions = (
         <>
-            {ready && storyOwnsInput(mode) && (
+            {storyChrome && (
                 <button type="button" className="bc-btn" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock">HUD</button>
+            )}
+            {ready && mode !== "reference" && (
+                <button type="button" className="bc-btn" onClick={() => setUi({ docsOpen: true })} title="Documentation drawer (F1)" aria-label="Documentation">Docs</button>
             )}
             <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
             <SoundToggle />
+            <CrtToggle />
             <ThemeToggle />
         </>
     );
 
-    const arcade = ready ? getArcade() : null;
     let screen = null;
     if (route.kind === "notfound") screen = <NotFound path={route.path} />;
     else if (!ready) screen = <Booting error={bootError} />;
     else if (mode === "story") screen = <StoryScreen />;
     else if (mode === "learn") screen = <LearnScreen />;
     else if (mode === "arcade" && arcade) screen = <ArcadeScreen store={arcade} />;
-    else if (mode) screen = <Placeholder mode={mode} />;
+    else if (mode === "reference") screen = <ReferenceScreen />;
 
-    const storyChrome = ready && storyOwnsInput(mode);
     const dock = storyChrome ? <PromptDock /> : mode === "arcade" && arcade ? <PromptDock target={arcade} suggestions={false} /> : null;
     const status = ready && mode !== null && mode !== "reference" ? <StatusStrip /> : null;
 
@@ -155,6 +153,8 @@ export function App() {
                 <ShortcutsHelp />
                 {ready && <Pager />}
                 {ready && <HudMenu />}
+                {ready && <DocsDrawer />}
+                {ready && <Landing />}
             </ErrorBoundary>
         </MotionConfig>
     );

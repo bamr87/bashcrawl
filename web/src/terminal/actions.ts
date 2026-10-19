@@ -27,6 +27,18 @@ export function gotoMode(mode: Mode): void {
     setUi({ panelsOpen: false });
 }
 
+// A command from the Reference lands in the Story prompt, ready for Enter.
+// Angle-bracket placeholders like `cat <file>` are trimmed so the learner
+// types the real argument.
+export function tryCommand(command: string): void {
+    const text = String(command ?? "").trim();
+    const trimmed = text.replace(/\s*<[^>]+>/g, "").trim();
+    const filled = trimmed + (trimmed !== text ? " " : "");
+    navigate("story");
+    setUi({ docsOpen: false, panelsOpen: false });
+    fillPrompt(filled);
+}
+
 /** Delegated handler for rendered HTML carrying data-run / data-fill / data-goto. */
 export function handleChipClick(event: MouseEvent<HTMLElement>, store: GameStore = game): boolean {
     const target = (event.target as HTMLElement).closest<HTMLElement>("[data-run],[data-fill],[data-goto]");

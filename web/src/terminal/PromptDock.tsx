@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 
 import { game, useGame, type GameStore } from "../engine/game-store";
 import type { Store } from "../lib/store";
+import { InlineHint } from "./InlineHint";
 import type { InputTarget } from "./input-target";
 import { PromptBar } from "./PromptBar";
 import { SuggestionChips } from "./SuggestionChips";
@@ -31,6 +32,7 @@ export function PromptDock({ target, store = game, suggestions = true }: PromptD
         <div className="bc-dock">
             {suggestions && <SuggestionChips store={store} />}
             <PromptBar target={owner} label={owner.promptLabel()} placeholder={owner.placeholder()} />
+            {suggestions && <InlineHint />}
         </div>
     );
 }

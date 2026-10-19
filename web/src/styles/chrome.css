@@ -1,0 +1,285 @@
+/* The rest of the chrome: the Reference door, the docs drawer, the inline
+ * hint, the title screen and the CRT overlay. */
+@layer components {
+    /* ── reference ── */
+    .bc-reference {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .bc-ref-controls {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-3) var(--fleet-space-4) var(--fleet-space-2);
+    }
+    .bc-ref-search { max-width: 480px; }
+    .bc-chip-on {
+        color: var(--fleet-color-primary);
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-primary),
+            inset 1px 1px 0 0 var(--bc-color-bevel-lo),
+            inset -1px -1px 0 0 var(--bc-color-bevel-hi);
+    }
+    .bc-ref-content {
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: var(--fleet-space-2) var(--fleet-space-4) var(--fleet-space-5);
+    }
+    .bc-ref-card {
+        margin: 0 0 var(--fleet-space-3);
+        padding: var(--fleet-space-3) var(--fleet-space-4);
+    }
+    .bc-ref-card h3 {
+        margin: 0 0 var(--fleet-space-2);
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-primary);
+    }
+    .bc-ref-card h4 {
+        margin: var(--fleet-space-3) 0 0.3rem;
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-xs);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-ref-table-wrap { overflow-x: auto; }
+    .bc-ref-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-ref-table td {
+        padding: 0.3rem 0.75rem 0.3rem 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--fleet-color-border) 55%, transparent);
+        vertical-align: top;
+    }
+    .bc-ref-table tr:last-child td { border-bottom: 0; }
+    .bc-ref-cmd-cell { white-space: nowrap; }
+    .bc-ref-cmd {
+        padding: 0.1rem 0.45rem;
+        border: 0;
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-code-ink);
+        font: inherit;
+        cursor: copy;
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        transition: box-shadow var(--fleet-motion-fast) var(--fleet-ease), color var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-ref-cmd code { font-family: var(--fleet-font-mono); }
+    .bc-ref-cmd:hover { box-shadow: inset 0 0 0 1px var(--fleet-color-primary); }
+    .bc-ref-cmd[data-copied] { color: var(--fleet-color-success); box-shadow: inset 0 0 0 1px var(--fleet-color-success); }
+    .bc-ref-try {
+        margin-left: 0.3rem;
+        padding: 0.05rem 0.4rem;
+        border: 0;
+        background: transparent;
+        color: var(--fleet-color-ink-muted);
+        font-size: var(--fleet-text-xs);
+        line-height: 1.4;
+        cursor: pointer;
+        vertical-align: middle;
+        box-shadow: inset 0 0 0 1px transparent;
+        transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-ref-try:hover,
+    .bc-ref-try:focus-visible {
+        color: var(--fleet-color-success);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-success);
+        outline: none;
+    }
+    .bc-ref-glossary {
+        margin: 0;
+        display: grid;
+        gap: var(--fleet-space-2);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-ref-glossary dt { font-weight: var(--fleet-font-weight-bold); color: var(--fleet-color-ink); }
+    .bc-ref-glossary dd { margin: 0; color: var(--fleet-color-ink-muted); }
+    .bc-ref-where li {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--fleet-space-2);
+    }
+    .bc-ref-empty { padding: var(--fleet-space-3) 0; }
+
+    /* ── inline hint ── */
+    .bc-inline-hint {
+        margin: 0;
+        padding: 0.15rem var(--fleet-space-3) 0.4rem;
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-ink-muted);
+        border-top: 1px dashed var(--fleet-color-border);
+    }
+    .bc-inline-hint code { color: var(--fleet-color-code-ink); }
+
+    /* ── docs drawer ── */
+    .bc-docs {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: var(--fleet-layer-offcanvas);
+        width: min(480px, 100vw);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-3);
+        box-shadow: var(--fleet-shadow-lg);
+    }
+    .bc-docs h2 { margin: 0; font-size: var(--fleet-text-lg); color: var(--fleet-color-primary); }
+    .bc-docs-content {
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+    }
+    .bc-docs-card {
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-docs-card h3 {
+        margin: 0 0 0.4rem;
+        font-size: var(--fleet-text-xs);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fleet-color-primary);
+    }
+    .bc-docs-card ol { margin: 0; padding-left: 1.2rem; }
+    .bc-docs-card p { margin: 0 0 0.3rem; }
+    .bc-docs-block { margin-top: var(--fleet-space-2); }
+    .bc-docs-block h4 {
+        margin: 0 0 0.3rem;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink);
+    }
+    .bc-docs-block li { margin: 0.15rem 0; }
+    .bc-docs-desc { color: var(--fleet-color-ink-muted); }
+
+    /* ── the title screen ── */
+    .bc-landing {
+        position: fixed;
+        inset: 0;
+        z-index: var(--fleet-layer-modal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--fleet-space-3);
+        background:
+            radial-gradient(900px 500px at 50% 0%, color-mix(in srgb, var(--bc-color-torch) 18%, transparent), transparent 70%),
+            color-mix(in srgb, var(--fleet-color-bg) 90%, var(--bc-color-overlay));
+        backdrop-filter: blur(3px);
+    }
+    .bc-landing-card {
+        width: min(760px, 100%);
+        max-height: 92dvh;
+        overflow-y: auto;
+        padding: var(--fleet-space-4) var(--fleet-space-4) var(--fleet-space-3);
+        text-align: center;
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-border),
+            inset 3px 3px 0 0 var(--bc-color-bevel-hi),
+            inset -3px -3px 0 0 var(--bc-color-bevel-lo),
+            var(--fleet-shadow-lg);
+    }
+    .bc-landing-brand {
+        display: inline-block;
+        margin: 0 auto var(--fleet-space-2);
+        overflow-x: auto;
+        text-align: left;
+        color: var(--fleet-color-primary);
+        font-family: var(--fleet-font-mono);
+        font-size: clamp(0.42rem, 1.5vw, 0.72rem);
+        line-height: 1.25;
+        text-shadow: 0 0 12px color-mix(in srgb, var(--fleet-color-primary) 45%, transparent);
+    }
+    .bc-landing h1 {
+        margin: 0 0 0.25rem;
+        font-size: var(--fleet-text-h2);
+        color: var(--fleet-color-ink);
+    }
+    .bc-landing-card > p { margin: 0 0 var(--fleet-space-3); }
+    .bc-landing-doors {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--fleet-space-2);
+        margin-bottom: var(--fleet-space-3);
+    }
+    .bc-door {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: var(--fleet-space-3);
+        border: 0;
+        color: var(--fleet-color-ink-muted);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .bc-door:hover,
+    .bc-door:focus-visible {
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-primary),
+            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
+            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
+            0 4px 18px color-mix(in srgb, var(--fleet-color-primary) 22%, transparent);
+        outline: none;
+    }
+    .bc-door-learn:hover,
+    .bc-door-learn:focus-visible { box-shadow: inset 0 0 0 1px var(--fleet-color-info), inset 2px 2px 0 0 var(--bc-color-bevel-hi), inset -2px -2px 0 0 var(--bc-color-bevel-lo), 0 4px 18px color-mix(in srgb, var(--fleet-color-info) 22%, transparent); }
+    .bc-door strong { font-size: var(--fleet-text-sm); color: var(--fleet-color-ink); }
+    .bc-door-icon { font-size: 1.5rem; line-height: 1; }
+    .bc-door-blurb { font-size: var(--fleet-text-sm); line-height: 1.4; }
+    .bc-landing-tip { margin: 0; font-size: var(--fleet-text-sm); }
+    .bc-landing-tip code { color: var(--fleet-color-code-ink); }
+}
+
+/* ── CRT overlay ── */
+html[data-crt="on"] .bc-shell { position: relative; }
+html[data-crt="on"] .bc-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: var(--fleet-layer-sticky);
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at center, transparent 55%, color-mix(in srgb, var(--bc-color-scanline) 28%, transparent) 100%),
+        repeating-linear-gradient(to bottom, color-mix(in srgb, var(--bc-color-scanline) 16%, transparent) 0, color-mix(in srgb, var(--bc-color-scanline) 16%, transparent) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: multiply;
+}
+html[data-crt="on"][data-resolved="light"] .bc-shell::after {
+    background:
+        radial-gradient(ellipse at center, transparent 60%, color-mix(in srgb, var(--bc-color-scanline) 14%, transparent) 100%),
+        repeating-linear-gradient(to bottom, color-mix(in srgb, var(--bc-color-scanline) 7%, transparent) 0, color-mix(in srgb, var(--bc-color-scanline) 7%, transparent) 1px, transparent 1px, transparent 3px);
+}
+html[data-crt="on"] .bc-log {
+    text-shadow:
+        0 0 1px color-mix(in srgb, var(--fleet-color-success) 35%, transparent),
+        0 0 6px color-mix(in srgb, var(--fleet-color-success) 12%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes bc-crt-flicker {
+        0%, 100% { opacity: 1; }
+        48% { opacity: 0.97; }
+        50% { opacity: 0.93; }
+        52% { opacity: 0.985; }
+        70% { opacity: 0.96; }
+    }
+    html[data-crt="on"] .bc-shell::after {
+        animation: bc-crt-flicker 4.5s steps(1, end) infinite;
+        will-change: opacity;
+    }
+}
+
+@media (max-width: 600px) {
+    .bc-landing-doors { grid-template-columns: 1fr; }
+    .bc-ref-controls,
+    .bc-ref-content { padding-left: var(--fleet-space-3); padding-right: var(--fleet-space-3); }
+}

@@ -47,7 +47,7 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
             event.preventDefault();
             const next = target.complete(value);
             if (next != null) setPromptValue(next);
-        } else if (event.key === "F1" || (event.key === "/" && (event.ctrlKey || event.metaKey))) {
+        } else if (event.key === "/" && (event.ctrlKey || event.metaKey)) {
             event.preventDefault();
             toggleDocs();
         } else if (event.key === "?" && !value.trim() && !event.ctrlKey && !event.metaKey) {
