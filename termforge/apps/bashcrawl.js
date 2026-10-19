@@ -25,6 +25,11 @@ function loadGameRuntime() {
         // The game's ASCII Motion art (generated from motion/art/ by make web-build).
         require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "art-clips.js"));
         require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "runtime.js"));
+        // The game's features are plugins (web/assets/js/plugins/<id>.js);
+        // the runtime names them in install order.
+        for (const id of globalThis.BashcrawlRuntime.GAME_PLUGINS) {
+            require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "plugins", `${id}.js`));
+        }
     }
     if (!globalThis.BashcrawlHud) {
         require(path.resolve(__dirname, "..", "..", "web", "assets", "js", "hud.js"));
@@ -46,7 +51,7 @@ function createApp(options = {}) {
             const persistence = options.persistence || null;
             const saved = persistence ? persistence.load() : null;
             let prevSnap = null;
-            const state = BashcrawlRuntime.loadState(data.world, saved);
+            const state = BashcrawlRuntime.loadState(data.world, saved, data.progression);
             const runtime = new BashcrawlRuntime.Runtime(data, state, { capabilities, persistence });
             const session = {
                 runtime, capabilities, persistence,

@@ -1,0 +1,18 @@
+2026-03-01 08:02 alice login
+2026-03-01 08:05 alice deposit 40
+2026-03-01 08:11 bob login
+2026-03-01 08:13 bob withdraw 15
+2026-03-01 08:30 cara login
+2026-03-01 08:31 cara deposit 120
+2026-03-01 09:00 alice logout
+2026-03-01 09:12 dmitri login
+2026-03-01 09:14 dmitri deposit 75
+2026-03-01 09:40 bob deposit 10
+2026-03-01 09:41 bob logout
+2026-03-01 10:05 cara withdraw 30
+2026-03-01 10:06 cara logout
+2026-03-01 11:20 alice login
+2026-03-01 11:21 alice deposit 25
+2026-03-01 11:45 alice logout
+2026-03-01 23:58 dmitri logout
+2026-03-01 23:59 dmitri ALERT vault door left open

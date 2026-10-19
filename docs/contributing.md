@@ -27,15 +27,16 @@ PYTHONPATH=src python3 -m playtest.mcp_server
 PYTHONPATH=src python3 -m playtest.scorer
 ```
 
-Static web workflow:
+Web app workflow:
 
 ```bash
-make web-build
-make web-test
-make web-preview
+make web-install   # once: npm install (node 22.22+; ranges are "*", no lockfile is committed)
+make web-build     # regenerate web/data/*.json, the motion bundles and the vendored core
+make web-dev       # Vite dev server with hot reload
+make web-test      # validators + eslint + vitest + vite build (what CI and Pages run)
 ```
 
-The static web app lives in `web/` and is rebuilt from `entrance/` plus `src/help/data/*.yaml`; do not hand-edit generated files under `web/data/`.
+The web app is React + TypeScript in `web/src/` over the classic-script engine in `web/assets/js/`; `web/data/` and `web/assets/js/vendor/` are generated from `entrance/`, `src/help/data/*.yaml`, `motion/` and `termforge/core/` — do not hand-edit them. Design values go in `web/src/styles/tokens.css` only; a new reaction to a game event goes in `web/src/fx/effects.ts`.
 
 ## Adding Game Content
 

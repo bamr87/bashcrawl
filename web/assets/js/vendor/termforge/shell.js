@@ -8,6 +8,10 @@
             state: require("./state.js"),
             hooks: require("./hooks.js"),
             registry: require("./registry.js"),
+            // Events and plugins are resolved lazily for the same reason as
+            // art: minimal classic hosts (procwatch's demo.html) may omit them.
+            events: () => require("./events.js"),
+            plugin: () => require("./plugin.js"),
             // Art is resolved lazily: classic hosts load ascii-motion.js/art.js
             // after shell.js, so both are looked up on first use.
             motion: () => require("./ascii-motion.js"),
@@ -19,6 +23,8 @@
             state: global.TermForge.state,
             hooks: global.TermForge.hooks,
             registry: global.TermForge.registry,
+            events: () => global.TermForge.events,
+            plugin: () => global.TermForge.plugin,
             motion: () => global.TermForge.asciiMotion,
             art: () => global.TermForge.art,
         };
@@ -44,6 +50,12 @@
     // Determinism: the ambient sources (wall clock, randomness, base64) are
     // injectable so hosts/tests can pin them; defaults fall back to the
     // environment's own.
+    //
+    // Two side channels ride beside the Line records a command prints:
+    // `this.events` (core/events.js) carries typed facts — what happened —
+    // to HUDs, trackers and hubs; `this.use(plugin)` (core/plugin.js) installs
+    // whole features (commands + hooks + sinks + mounts) in one call. Bare
+    // shells emit no events, exactly as they run no hooks.
 
     const { tokenizeDetailed, tokenize, splitRedirect, splitPipes, escapeRegExp } = deps.parser;
 
@@ -93,6 +105,11 @@
          *                                    asciiMotion.parse takes) over core/art.js
          * @param {boolean} [options.bare]    skip ALL hooks in execute() (scoped
          *                                    sandboxes; also settable post-hoc)
+         * @param {object} [options.events]   an EventBus (default: a fresh bus)
+         * @param {string} [options.session]  session id stamped on events
+         * @param {Array}  [options.plugins]  plugins installed after construction
+         *                                    (subclasses that replace handlers
+         *                                    call use() themselves)
          */
         constructor(options) {
             const opts = options || {};
@@ -111,6 +128,32 @@
             this.bare = Boolean(opts.bare);
             this.vfs = deps.vfs.createVfs(this.world, { getState: () => this.state });
             this.handlers = opts.handlers || deps.registry.buildHandlers(...(opts.packs || []));
+            const events = deps.events && deps.events();
+            this.events = opts.events || (events ? new events.EventBus({ session: opts.session }) : null);
+            this.plugins = new Map();
+            this.commandMeta = {};
+            for (const plugin of opts.plugins || []) this.use(plugin);
+        }
+
+        // ── Platform: plugins + typed events ──────────────────────────────────
+
+        /** Install a feature plugin (core/plugin.js); returns { id, uninstall }. */
+        use(plugin, options) {
+            const lib = deps.plugin && deps.plugin();
+            if (!lib) throw new Error("plugin support is not loaded (core/plugin.js)");
+            return lib.installPlugin(this, plugin, options);
+        }
+
+        /** A plugin's persisted state slice (created from its defaults). */
+        pluginState(id) {
+            const lib = deps.plugin && deps.plugin();
+            return lib ? lib.pluginState(this, id) : null;
+        }
+
+        /** Emit a typed event (no-op on bare shells or without a bus). */
+        emit(type, payload) {
+            if (this.bare || !this.events) return null;
+            return this.events.emit(type, payload);
         }
 
         /** Resolve a uiText entry; function entries are templates. */
@@ -150,13 +193,19 @@
             // Bare/scoped mode (mini-game sandboxes): no app hooks — just the
             // pipeline.
             if (this.bare) return this.runPipeline(line);
+            const from = this.state.cwd;
             this.hooks.run("preExecute", line);
             // An interceptor (e.g. an active quiz) consumes the whole line
             // instead of the shell parser.
             const intercepted = this.hooks.first("interceptLine", line);
             const out = intercepted != null ? intercepted : this.runPipeline(line);
             const extra = this.hooks.collect("postExecute", line, out);
-            return extra.length ? out.concat(extra) : out;
+            const all = extra.length ? out.concat(extra) : out;
+            if (this.events) {
+                if (this.state.cwd !== from) this.emit("location.changed", { from, to: this.state.cwd });
+                this.emit("line.executed", { line, ok: !all.some((o) => o && o.kind === "error") });
+            }
+            return all;
         }
 
         runPipeline(line) {
@@ -227,15 +276,26 @@
             if (cmd.startsWith("./")) {
                 const output = this.runExecutable(cmd.slice(2));
                 this.hooks.run("postCommand", cmd, args, undefined, output);
+                this.emitCommand(cmd, args, null, output);
                 return output;
             }
             const handler = this.handlers[cmd];
             if (!handler) {
-                return [{ kind: "error", text: `Unknown command: ${cmd}. Try help.` }];
+                const unknown = [{ kind: "error", text: `Unknown command: ${cmd}. Try help.` }];
+                this.emitCommand(cmd, args, stdin, unknown, true);
+                return unknown;
             }
             const output = handler.call(this, args, stdin);
             this.hooks.run("postCommand", cmd, args, stdin, output);
+            this.emitCommand(cmd, args, stdin, output);
             return output;
+        }
+
+        emitCommand(cmd, args, stdin, output, unknown) {
+            if (this.bare || !this.events) return;
+            const event = { cmd, args: args.slice(), piped: stdin != null, ok: !output.some((o) => o && o.kind === "error") };
+            if (unknown) event.unknown = true;
+            this.emit("command.run", event);
         }
 
         // `./name`: apps register execDispatch subscribers (encounter engines,
@@ -351,8 +411,11 @@
 
         // ── UX surface ───────────────────────────────────────────────────────
 
+        // A plugin capturing input (a quiz, a review) may claim the prompt via
+        // the promptLabel hook; first non-null wins.
         promptLabel() {
-            return `${this.state.cwd} $`;
+            const custom = this.hooks.first("promptLabel");
+            return custom != null ? custom : `${this.state.cwd} $`;
         }
 
         // `man` fallback text for handler-backed commands with no docs entry;

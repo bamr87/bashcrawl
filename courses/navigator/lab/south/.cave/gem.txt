@@ -1,0 +1,4 @@
+You found the hidden gem!
+
+Names that start with a dot are hidden from a plain ls. ls -a shows them,
+and find walks into them without being asked.

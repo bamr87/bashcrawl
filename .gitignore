@@ -26,9 +26,11 @@ entrance/vault/
 entrance/scrap/
 entrance/rift/
 
-# Tutorial / player-created directories
+# Tutorial / player-created directories (anchored: a `workshop/` anywhere in
+# the dungeon is player state, but courses/workshop/ is shipped content)
 entrance/workshop/
-workshop/
+entrance/**/workshop/
+/workshop/
 
 # ============================================================
 # Generated combat / loot artifacts inside entrance/
@@ -81,9 +83,17 @@ screenshots/manifest_*.json
 # Local virtualenv
 .venv/
 
-# Node (no packages are installed — zero-dependency policy — but keep
-# accidental installs out of git)
+# Node: the web app's toolchain. Fleet policy is always-latest with no
+# committed lockfile (docs/DEPENDENCIES.md in bamr87/bamr87); the game
+# engine itself has no runtime dependencies.
 node_modules/
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+yarn.lock
+
+# Vite build output (GitHub Pages deploys this; never committed)
+web/dist/
 
 # Local agent run configs (use `make web-preview` instead)
 .claude/launch.json

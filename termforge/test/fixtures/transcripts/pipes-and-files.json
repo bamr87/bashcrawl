@@ -8,7 +8,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86"
+          "text": "85"
         }
       ]
     },
@@ -48,7 +48,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "================================================================================\n"
+          "text": "\n================================================================================"
         }
       ]
     },
@@ -157,6 +157,10 @@
         {
           "kind": "output",
           "text": "CHERRY\nAPPLE\nBANANA\nAPPLE"
+        },
+        {
+          "kind": "success",
+          "text": "🧠 Achievement unlocked: Polymath — Practised ten different skills.  (+10 XP)"
         }
       ]
     },
@@ -201,7 +205,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86"
+          "text": "85"
         }
       ]
     },
@@ -219,7 +223,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "86"
+          "text": "85"
         }
       ]
     },
@@ -466,7 +470,7 @@
     "cwd": "/entrance",
     "prevCwd": null,
     "hp": 100,
-    "xp": 10,
+    "xp": 20,
     "inventory": [],
     "aliases": {},
     "envVars": {},
@@ -477,7 +481,7 @@
       },
       "/entrance/count": {
         "type": "file",
-        "content": "86"
+        "content": "85"
       },
       "/entrance/camp": {
         "type": "dir"
@@ -505,6 +509,7 @@
     "speedrunBest": null,
     "achievements": [
       "scholar",
+      "polymath",
       "world_builder"
     ],
     "bestiary": [],
@@ -544,6 +549,179 @@
       "catScrollCount": 8,
       "lastPipedIn": false,
       "initialized": false
+    },
+    "learn": {
+      "active": null,
+      "progress": {},
+      "completed": []
+    },
+    "mastery": {
+      "skills": {
+        "cat": {
+          "uses": 14,
+          "fails": 1,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "wc": {
+          "uses": 3,
+          "fails": 0,
+          "flags": [
+            "l"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "head": {
+          "uses": 5,
+          "fails": 0,
+          "flags": [
+            "3",
+            "n",
+            "1"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "tail": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [
+            "1",
+            "2"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "echo": {
+          "uses": 7,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "sort": {
+          "uses": 4,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "uniq": {
+          "uses": 3,
+          "fails": 0,
+          "flags": [
+            "c",
+            "d"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "rev": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "nl": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "tr": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "sed": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "cut": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [
+            "f",
+            "2"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "rm": {
+          "uses": 2,
+          "fails": 1,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "mkdir": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "touch": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "cp": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "mv": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "ls": {
+          "uses": 4,
+          "fails": 0,
+          "flags": [
+            "F"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "chmod": {
+          "uses": 3,
+          "fails": 1,
+          "flags": [
+            "x"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "grep": {
+          "uses": 3,
+          "fails": 0,
+          "flags": [
+            "c",
+            "n"
+          ],
+          "box": 0,
+          "due": 0
+        }
+      },
+      "review": null,
+      "reviews": 0
     }
   }
 }

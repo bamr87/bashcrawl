@@ -4,7 +4,7 @@
 //
 //   node termforge/node/host-telnet.js [--app bashcrawl|procwatch|<module.js>]
 //       [--port 2323] [--host 127.0.0.1] [--raw] [--max-sessions 16]
-//       [--idle-timeout 600] [--width 80] [--data-dir DIR]
+//       [--idle-timeout 600] [--width 80] [--data-dir DIR] [--hub]
 //
 // Default (negotiated) mode speaks a minimal telnet subset: WILL ECHO + SGA
 // (character-at-a-time with server echo, so history arrows and Tab completion
@@ -17,19 +17,32 @@
 // no real filesystem are reachable: sessions run the TermForge emulator over
 // an in-memory world; providers are read-only; nothing derived from client
 // bytes is evaluated or spawned. Sessions are capped, idle-kicked,
-// line-length-limited and fully isolated from each other.
+// line-length-limited and fully isolated from each other — unless the
+// operator opts into --hub (MUD mode, termforge/node/hub.js): then players
+// see each other's names, locations and XP, and can chat. Chat text is
+// sanitized of control characters and escape sequences, and rate-limited.
 
 const net = require("node:net");
 const TermForge = require("./index.js");
-const { parseArgs, resolveApp } = require("./cli.js");
+const { parseArgs, resolveApp, listAppsIfAsked } = require("./cli.js");
 const { createTelnetCodec } = require("./telnet-codec.js");
+const { Hub } = require("./hub.js");
 
 const MAX_LINE = 4096;
 const { SessionController } = TermForge.session;
 const { StringDecoder } = require("node:string_decoder");
 
-function attachSession(socket, app, opts) {
+function attachSession(socket, app, opts, hub) {
     const session = app.createSession({ width: opts.width, surface: "telnet", hud: false, pager: false });
+    let member = null;
+    if (hub) {
+        // A reset replaces the session runtime: move the hub plugin with it.
+        const onControl = session.onControl;
+        session.onControl = (action, record) => {
+            if (typeof onControl === "function") onControl.call(session, action, record);
+            if (action === "reset" && member) member.bind(session.runtime);
+        };
+    }
     const sink = new TermForge.sinks.AnsiSink({ write: (chunk) => socket.write(chunk) });
     let editor = null;
     const view = new TermForge.view.TerminalView({
@@ -40,12 +53,31 @@ function attachSession(socket, app, opts) {
     const inputLimit = (line) => typeof linePolicy === "function" ? linePolicy(line) : linePolicy;
     const controller = new SessionController(session, { view, maxLine: inputLimit });
     const runLine = (line) => controller.execute(line, { echo: Boolean(editor && !editor.echo) });
-    socket.on("close", () => controller.close());
+    socket.on("close", () => {
+        controller.close();
+        if (member) hub.leave(member);
+    });
+    // Hub delivery: lines from other players land above this player's
+    // prompt, and whatever they were typing is redrawn intact.
+    const joinHub = (redrawPrompt) => {
+        if (!hub) return;
+        member = hub.join({
+            shell: session.runtime,
+            deliver(lines) {
+                if (controller.closed) return;
+                socket.write("\r\x1b[2K");
+                view.appendOutputs(lines);
+                redrawPrompt();
+            },
+        });
+        view.appendOutputs([{ kind: "magic", text: `👥 Hub mode — you are ${member.name}. who · say · emote · shout · name · top` }]);
+    };
 
     if (opts.raw) {
         // Dumb line mode for nc: the client edits and echoes locally.
         view.appendOutputs(session.banner || []);
         const prompt = () => socket.write(`${session.runtime.promptLabel()} `);
+        joinHub(prompt);
         let pending = "";
         const decoder = new StringDecoder("utf8");
         socket.on("data", (chunk) => {
@@ -113,6 +145,7 @@ function attachSession(socket, app, opts) {
     });
     socket.write(codec.opening());
     view.appendOutputs(session.banner || []);
+    joinHub(() => editor.redraw());
     editor.showPrompt();
     socket.on("data", (chunk) => {
         const replies = codec.feed(chunk);
@@ -129,11 +162,13 @@ const DEFAULTS = {
     idleTimeout: 600,
     width: 80,
     dataDir: "",
+    hub: false,
 };
 
 /** Build the (not yet listening) server for an already-resolved app. */
 function createTelnetServer(app, opts) {
     const sessions = new Set();
+    const hub = opts.hub ? new Hub() : null;
     const server = net.createServer((socket) => {
         if (sessions.size >= opts.maxSessions) {
             socket.write("termforge: server full, try again later\r\n");
@@ -150,25 +185,27 @@ function createTelnetServer(app, opts) {
             });
         }
         try {
-            attachSession(socket, app, opts);
+            attachSession(socket, app, opts, hub);
         } catch (err) {
             socket.write(`termforge: failed to start session: ${err.message}\r\n`);
             socket.destroy();
         }
     });
     server.termforgeSessions = sessions;
+    server.termforgeHub = hub;
     return server;
 }
 
 function main() {
     const opts = parseArgs(process.argv.slice(2), DEFAULTS);
+    if (listAppsIfAsked(opts.app)) return null;
     const app = resolveApp(opts.app, opts.dataDir ? { dataDir: opts.dataDir } : {});
     const server = createTelnetServer(app, opts);
     const sessions = server.termforgeSessions;
 
     server.listen(opts.port, opts.host, () => {
         const { address, port } = server.address();
-        const mode = opts.raw ? "raw TCP (nc-friendly)" : "telnet (negotiated)";
+        const mode = `${opts.raw ? "raw TCP (nc-friendly)" : "telnet (negotiated)"}${opts.hub ? " · hub (shared chat + presence)" : ""}`;
         console.log(`termforge: serving ${app.name} on ${address}:${port} — ${mode}`);
         console.log(opts.raw
             ? `  connect with:  nc ${address} ${port}`

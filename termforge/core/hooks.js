@@ -22,6 +22,7 @@
     //   beforeCommand(cmd, args, stdin)         per-segment, pre-dispatch
     //   execDispatch(name) -> Line[]|null       `./name` — first non-null handles it
     //   postCommand(cmd, args, stdin, outputs)  per-segment, post-dispatch
+    //   promptLabel() -> string|null            first non-null replaces the prompt
     //     (the `./` branch passes stdin === undefined, matching the
     //      historical emulator call shape)
 

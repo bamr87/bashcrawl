@@ -4,7 +4,7 @@
         speed: "speedrun", seek: "pathfind", journey: "pathfind",
         badges: "achievements", stats: "profile", sheet: "profile",
         codex: "bestiary", challenge: "daily", cmds: "commands",
-        menu: "commands", features: "commands",
+        menu: "commands", features: "commands", courses: "learn",
     };
 
     const COMMANDS = {
@@ -63,6 +63,12 @@
         bestiary: { family: "game", motion: "beast", accent: "#c084fc" },
         daily: { family: "game", motion: "tick", accent: "#38bdf8" },
         commands: { family: "lore", motion: "lore", accent: "#94a3b8" },
+        learn: { family: "learn", motion: "lore", accent: "#38bdf8" },
+        lesson: { family: "learn", motion: "unroll", accent: "#7dd3fc" },
+        lab: { family: "learn", motion: "forge", accent: "#2dd4bf" },
+        skills: { family: "learn", motion: "grid", accent: "#a78bfa" },
+        review: { family: "learn", motion: "streak", accent: "#f472b6" },
+        explain: { family: "learn", motion: "identify", accent: "#facc15" },
         fortune: { family: "flavour", motion: "lore", accent: "#fbbf24" },
         cowsay: { family: "flavour", motion: "echo", accent: "#86efac" },
         figlet: { family: "flavour", motion: "unroll", accent: "#fde68a" },

@@ -1,0 +1,3 @@
+Hoo. You are two levels below the lab now.
+
+Type cd .. to climb one level, or cd - to jump back to where you were.

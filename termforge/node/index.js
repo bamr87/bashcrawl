@@ -16,6 +16,12 @@ const TermForge = {
     vfs: require("../core/vfs.js"),
     hooks: require("../core/hooks.js"),
     registry: require("../core/registry.js"),
+    events: require("../core/events.js"),
+    rules: require("../core/rules.js"),
+    plugin: require("../core/plugin.js"),
+    curriculum: require("../core/curriculum.js"),
+    mastery: require("../core/mastery.js"),
+    explain: require("../core/explain.js"),
     shell,
     Shell: shell.Shell,
     packs: {

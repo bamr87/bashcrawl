@@ -20,7 +20,7 @@
 // pixels.js). q / ^C returns to the dungeon. Damage events pulse the HUD header.
 
 const TermForge = require("./index.js");
-const { parseArgs, resolveApp } = require("./cli.js");
+const { parseArgs, resolveApp, listAppsIfAsked } = require("./cli.js");
 const { TuiScreen } = require("./tui.js");
 const { presentStage } = require("./motion.js");
 const { fileStore } = require("./file-store.js");
@@ -35,6 +35,9 @@ const TOAST_KINDS = {
     item: "art",
     levelup: "magic",
     unlock: "magic",
+    lesson: "magic",
+    objective: "success",
+    skill: "info",
 };
 const SILENT_EVENTS = new Set(["move"]);
 const TOAST_MS = 2200;
@@ -58,6 +61,7 @@ function main() {
         motion: true,
         saveFile: "",
     });
+    if (listAppsIfAsked(opts.app)) return;
     const app = resolveApp(opts.app, opts.dataDir ? { dataDir: opts.dataDir } : {});
     const interactive = process.stdin.isTTY && process.stdout.isTTY;
     const saveFile = opts.saveFile || process.env.BASHCRAWL_SAVE_FILE;

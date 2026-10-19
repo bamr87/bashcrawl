@@ -1,0 +1,1654 @@
+{
+  "version": 1,
+  "courses": [
+    {
+      "id": "navigator",
+      "title": "Finding Your Way",
+      "summary": "pwd, ls, cd and paths: move through any filesystem with confidence.",
+      "level": "beginner",
+      "order": 1,
+      "requires": [],
+      "skills": [
+        "pwd",
+        "ls",
+        "cd",
+        "cat",
+        "tree",
+        "find"
+      ],
+      "xp": 50,
+      "intro": "Every terminal session starts *somewhere*. Before you can read, search or change anything, you need to know where you are and how to get where you want to go. This course is a small map of a filesystem with four directions and one hidden gem.",
+      "lab": {
+        "dirs": [
+          "east",
+          "north",
+          "north/forest",
+          "south",
+          "south/.cave",
+          "west"
+        ],
+        "files": {
+          "README": "Welcome, traveller.\n\nThis lab is a tiny map of a filesystem. North, south, east and west are\ndirectories; inside them are files and more directories. Somewhere a gem is\nhidden. Walk it with cd, look with ls, and read with cat.\n",
+          "east/sunrise.txt": "The sun rises in the east. Nothing else to see here, but you got here.\n",
+          "north/compass.txt": "The needle points north.\n\nYou read this through an ABSOLUTE path: one that starts with / and means\nthe same thing no matter where you stand.\n",
+          "north/forest/owl.txt": "Hoo. You are two levels below the lab now.\n\nType cd .. to climb one level, or cd - to jump back to where you were.\n",
+          "south/.cave/gem.txt": "You found the hidden gem!\n\nNames that start with a dot are hidden from a plain ls. ls -a shows them,\nand find walks into them without being asked.\n",
+          "south/river.txt": "The river runs south.\n\nIf you are reading this from the forest, you used a RELATIVE path: ..\nclimbs one level, and every / goes one step deeper.\n",
+          "west/sunset.txt": "The sun sets in the west. Every direction is just a directory.\n"
+        }
+      },
+      "lessons": [
+        {
+          "id": "where-am-i",
+          "title": "Where am I?",
+          "teaches": [
+            "pwd",
+            "cd",
+            "absolute paths"
+          ],
+          "xp": 20,
+          "body": "A shell always has a **current working directory**: the directory your commands act on unless you name another one.\n\n- `pwd` (*print working directory*) tells you where that is.\n- `cd PATH` (*change directory*) moves you there.\n\nA path that starts with `/` is **absolute**. It begins at the very top of the filesystem (the *root*), so it means the same thing wherever you stand.\n\n```\ncd /lab/navigator\npwd\n```\n\nReal world: the first thing a sysadmin types after logging into an unfamiliar server is often `pwd`. Commands like `rm` act on \"here\", so knowing where \"here\" is matters.",
+          "objectives": [
+            {
+              "text": "Walk into the lab by its absolute path: cd /lab/navigator",
+              "when": {
+                "all": [
+                  {
+                    "command": "cd"
+                  },
+                  {
+                    "cwd": "/lab/navigator"
+                  }
+                ]
+              },
+              "hint": "Type exactly: cd /lab/navigator",
+              "solution": "cd /lab/navigator"
+            },
+            {
+              "text": "Ask the shell where you are with pwd",
+              "when": {
+                "all": [
+                  {
+                    "command": "pwd"
+                  },
+                  {
+                    "cwd_includes": "/lab/navigator"
+                  }
+                ]
+              },
+              "hint": "pwd takes no arguments: just type pwd",
+              "solution": "pwd"
+            }
+          ]
+        },
+        {
+          "id": "look-around",
+          "title": "Look around",
+          "teaches": [
+            "ls",
+            "ls -a",
+            "ls -F",
+            "hidden files"
+          ],
+          "xp": 20,
+          "body": "`ls` lists a directory: the current one by default, or any directory you name (`ls south`).\n\n**Flags** change what a command does. They start with a dash:\n\n- `ls -a` shows **all** entries, including hidden ones. A name that starts with `.` is hidden from a plain `ls`. That's how config files like `.bashrc` stay out of your way.\n- `ls -F` adds a marker after each name: `/` for a directory, `*` for an executable.\n\nFlags combine: `ls -aF` is the same as `ls -a -F`.\n\n```\nls\nls -a south\nls -F\n```\n\nReal world: `ls -la` is probably the most-typed command on Earth. It's the first look inside any directory, hidden files and all.",
+          "objectives": [
+            {
+              "text": "List what is in the lab with ls",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "cwd": "/lab/navigator"
+                  },
+                  {
+                    "output_includes": "north"
+                  }
+                ]
+              },
+              "hint": "From /lab/navigator, type ls",
+              "solution": "ls"
+            },
+            {
+              "text": "Reveal the hidden entries in south: ls -a south",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "option": "a"
+                  },
+                  {
+                    "output_includes": ".cave"
+                  }
+                ]
+              },
+              "hint": "The -a flag means all, including names that start with a dot",
+              "solution": "ls -a south"
+            },
+            {
+              "text": "Tell directories from files with ls -F",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "option": "F"
+                  },
+                  {
+                    "output_includes": "north/"
+                  }
+                ]
+              },
+              "hint": "-F adds a / after every directory",
+              "solution": "ls -F"
+            }
+          ]
+        },
+        {
+          "id": "moving",
+          "title": "Moving around",
+          "teaches": [
+            "cd",
+            "relative paths",
+            "..",
+            "cd -"
+          ],
+          "xp": 25,
+          "body": "A path that does **not** start with `/` is **relative**: it starts from where you are now.\n\n- `cd north/forest` goes into `north`, then into `forest`, in one step.\n- `..` is the **parent** directory: `cd ..` climbs one level.\n- `.` is the current directory itself.\n- `cd -` jumps back to the previous directory, which is handy when you bounce between two places.\n\n```\ncd north/forest\npwd\ncd ..\ncd -\n```\n\nReal world: shells keep the previous directory in the variable `OLDPWD`, and `cd -` reads it. Two keystrokes save typing a long path twice.",
+          "objectives": [
+            {
+              "text": "Walk two levels deep in one command: cd north/forest",
+              "when": {
+                "all": [
+                  {
+                    "command": "cd"
+                  },
+                  {
+                    "cwd": "/lab/navigator/north/forest"
+                  }
+                ]
+              },
+              "hint": "From the lab root: cd north/forest",
+              "solution": "cd north/forest"
+            },
+            {
+              "text": "Climb up one level with cd ..",
+              "when": {
+                "all": [
+                  {
+                    "command": "cd"
+                  },
+                  {
+                    "arg": ".."
+                  },
+                  {
+                    "cwd": "/lab/navigator/north"
+                  }
+                ]
+              },
+              "hint": ".. always means the parent directory",
+              "solution": "cd .."
+            },
+            {
+              "text": "Jump straight back to where you just were with cd -",
+              "when": {
+                "all": [
+                  {
+                    "command": "cd"
+                  },
+                  {
+                    "arg": "-"
+                  },
+                  {
+                    "cwd": "/lab/navigator/north/forest"
+                  }
+                ]
+              },
+              "hint": "cd - toggles between your last two directories",
+              "solution": "cd -"
+            }
+          ]
+        },
+        {
+          "id": "paths",
+          "title": "Reading from afar",
+          "teaches": [
+            "relative paths",
+            "absolute paths",
+            "cat"
+          ],
+          "xp": 25,
+          "body": "You don't have to walk somewhere to read a file there. A path can point at it from anywhere:\n\n- **Relative:** `../../south/river.txt` climbs two levels, then goes down into `south`.\n- **Absolute:** `/lab/navigator/north/compass.txt` works from any directory.\n\n`cat FILE` prints a file's contents.\n\n```\ncat ../../south/river.txt\ncat /lab/navigator/north/compass.txt\n```\n\nWhich one should you use? Relative paths are short and work wherever you copy the whole tree. Absolute paths are unambiguous, which is why scripts and config files prefer them.",
+          "objectives": [
+            {
+              "text": "From the forest, read the river note without moving: cat ../../south/river.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "cat"
+                  },
+                  {
+                    "args_contains": "../"
+                  },
+                  {
+                    "output_includes": "river runs south"
+                  }
+                ]
+              },
+              "hint": "From north/forest, two .. climb to the lab root; then go into south",
+              "solution": "cat ../../south/river.txt"
+            },
+            {
+              "text": "Read the compass by its absolute path",
+              "when": {
+                "all": [
+                  {
+                    "command": "cat"
+                  },
+                  {
+                    "arg": "/lab/navigator/north/compass.txt"
+                  }
+                ]
+              },
+              "hint": "cat /lab/navigator/north/compass.txt",
+              "solution": "cat /lab/navigator/north/compass.txt"
+            },
+            {
+              "text": "Go back to the lab root in a single cd",
+              "when": {
+                "all": [
+                  {
+                    "command": "cd"
+                  },
+                  {
+                    "cwd": "/lab/navigator"
+                  }
+                ]
+              },
+              "hint": "Either cd ../.. or cd /lab/navigator works",
+              "solution": "cd /lab/navigator"
+            }
+          ]
+        },
+        {
+          "id": "big-picture",
+          "title": "The big picture",
+          "teaches": [
+            "tree",
+            "find"
+          ],
+          "xp": 30,
+          "body": "Moving around with `cd` and `ls` is fine for a few directories. For a whole tree you want the overview:\n\n- `tree DIR` draws the structure under `DIR`.\n- `find DIR -name NAME` searches every directory under `DIR`, hidden ones included, and prints the path of each match.\n- `find DIR -type d` lists only directories, and `-type f` lists only files.\n\n```\ntree /lab/navigator\nfind /lab/navigator -name gem.txt\n```\n\nReal world: `find / -name nginx.conf` is how you locate a config file on a machine you have never seen before. Pipe the result into other tools, and that comes in a later course.",
+          "objectives": [
+            {
+              "text": "Draw the whole lab as a tree: tree /lab/navigator",
+              "when": {
+                "all": [
+                  {
+                    "command": "tree"
+                  },
+                  {
+                    "output_includes": "forest"
+                  }
+                ]
+              },
+              "hint": "tree DIR draws every directory under DIR",
+              "solution": "tree /lab/navigator"
+            },
+            {
+              "text": "Hunt the gem by name: find /lab/navigator -name gem.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "find"
+                  },
+                  {
+                    "output_includes": "gem.txt"
+                  }
+                ]
+              },
+              "hint": "find walks every directory, hidden ones too, and -name filters by file name",
+              "solution": "find /lab/navigator -name gem.txt"
+            },
+            {
+              "text": "Read the gem's message",
+              "when": {
+                "all": [
+                  {
+                    "command": "cat"
+                  },
+                  {
+                    "output_includes": "hidden gem"
+                  }
+                ]
+              },
+              "hint": "Use the path find printed: cat /lab/navigator/south/.cave/gem.txt",
+              "solution": "cat /lab/navigator/south/.cave/gem.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "title": "Reading the Runes",
+      "summary": "cat, head, tail, wc, nl and less: read any file without opening an editor.",
+      "level": "beginner",
+      "order": 2,
+      "requires": [
+        "navigator"
+      ],
+      "skills": [
+        "cat",
+        "file",
+        "head",
+        "tail",
+        "wc",
+        "nl",
+        "less"
+      ],
+      "xp": 50,
+      "intro": "Most of what a terminal shows you is text: logs, configs, notes, output. This course is about *reading* it well: all of it, the start, the end, or just how big it is. Your lab holds a ballad and a couple of notes.",
+      "lab": {
+        "dirs": [
+          "notes"
+        ],
+        "files": {
+          "ballad.txt": "There once was a shell in the deep,\nWhose prompt never fell fast asleep.\nIt would cat and would grep,\nNever missing a step,\nAnd its pipes ran a hundred lines steep.\n\nThe novice would type and would stare,\nAt commands that went who-knows-where.\nBut with man at their side,\nAnd a head held with pride,\nThey read every last line with care.\n\nSo read before running, my friend,\nFrom the head of a file to its end.\n",
+          "notes/done.txt": "opened the lab\n",
+          "notes/todo.txt": "read the ballad\ncount its lines\nnumber the verses\n"
+        }
+      },
+      "lessons": [
+        {
+          "id": "cat-and-file",
+          "title": "Open the scroll",
+          "teaches": [
+            "cat",
+            "file"
+          ],
+          "xp": 20,
+          "body": "Start in your lab: `cd /lab/reading`.\n\n- `cat FILE` prints a file from top to bottom. The name comes from *concatenate*, because `cat` can join files together.\n- `file PATH` tells you **what** something is before you open it: text, a directory, a program.\n\n```\ncat ballad.txt\nfile ballad.txt\nfile notes\n```\n\nReal world: run `file` on anything you downloaded before you `cat` it. Printing a binary file sprays garbage characters into your terminal.",
+          "objectives": [
+            {
+              "text": "Print the whole ballad with cat",
+              "when": {
+                "all": [
+                  {
+                    "command": "cat"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "From /lab/reading: cat ballad.txt",
+              "solution": "cat ballad.txt"
+            },
+            {
+              "text": "Ask what kind of thing ballad.txt is with file",
+              "when": {
+                "all": [
+                  {
+                    "command": "file"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "file ballad.txt",
+              "solution": "file ballad.txt"
+            },
+            {
+              "text": "Ask the same about notes",
+              "when": {
+                "all": [
+                  {
+                    "command": "file"
+                  },
+                  {
+                    "args_contains": "notes"
+                  }
+                ]
+              },
+              "hint": "file notes",
+              "solution": "file notes"
+            }
+          ]
+        },
+        {
+          "id": "head-and-tail",
+          "title": "Just the beginning, just the end",
+          "teaches": [
+            "head",
+            "tail",
+            "-n"
+          ],
+          "xp": 20,
+          "body": "Long files don't fit on one screen. You rarely need all of them anyway:\n\n- `head FILE` shows the first 10 lines, and `head -n 3 FILE` shows the first 3.\n- `tail FILE` shows the last 10, and `tail -n 2 FILE` shows the last 2.\n\n```\nhead -n 3 ballad.txt\ntail -n 2 ballad.txt\n```\n\nReal world: a log file grows at the bottom, so `tail` is where the news is. On a real system, `tail -f app.log` *follows* the file and prints new lines the moment they're written. That's how people watch a server live.",
+          "objectives": [
+            {
+              "text": "Show only the first 3 lines: head -n 3 ballad.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "head"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  },
+                  {
+                    "any": [
+                      {
+                        "arg": "3"
+                      },
+                      {
+                        "arg": "-3"
+                      },
+                      {
+                        "arg": "-n3"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "hint": "head -n 3 ballad.txt",
+              "solution": "head -n 3 ballad.txt"
+            },
+            {
+              "text": "Show only the last 2 lines with tail",
+              "when": {
+                "all": [
+                  {
+                    "command": "tail"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  },
+                  {
+                    "any": [
+                      {
+                        "arg": "2"
+                      },
+                      {
+                        "arg": "-2"
+                      },
+                      {
+                        "arg": "-n2"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "hint": "tail -n 2 ballad.txt",
+              "solution": "tail -n 2 ballad.txt"
+            }
+          ]
+        },
+        {
+          "id": "counting",
+          "title": "How big is it?",
+          "teaches": [
+            "wc",
+            "wc -l",
+            "wc -w"
+          ],
+          "xp": 20,
+          "body": "`wc` (*word count*) measures text:\n\n- `wc -l` counts **lines**.\n- `wc -w` counts **words**.\n- `wc -c` counts **bytes**.\n- a plain `wc` prints lines, words and bytes together.\n\n```\nwc -l ballad.txt\nwc ballad.txt\n```\n\nReal world: \"how many?\" is the most common question you'll ask a terminal: how many errors, users, or files. `wc -l` is the usual answer, especially at the end of a pipeline, which is a later course.",
+          "objectives": [
+            {
+              "text": "Count the ballad's lines: wc -l ballad.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "wc"
+                  },
+                  {
+                    "option": "l"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "-l counts lines",
+              "solution": "wc -l ballad.txt"
+            },
+            {
+              "text": "Count its words with wc -w",
+              "when": {
+                "all": [
+                  {
+                    "command": "wc"
+                  },
+                  {
+                    "option": "w"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "-w counts words",
+              "solution": "wc -w ballad.txt"
+            },
+            {
+              "text": "Get lines, words and bytes at once with a plain wc",
+              "when": {
+                "all": [
+                  {
+                    "command": "wc"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  },
+                  {
+                    "not": {
+                      "args_contains": "-"
+                    }
+                  }
+                ]
+              },
+              "hint": "wc with no flags prints all three counts",
+              "solution": "wc ballad.txt"
+            }
+          ]
+        },
+        {
+          "id": "numbers-and-pages",
+          "title": "Numbered lines and paging",
+          "teaches": [
+            "nl",
+            "less"
+          ],
+          "xp": 25,
+          "body": "- `nl FILE` prints a file with **line numbers**, which helps when someone says \"look at line 7\".\n- `less FILE` is a **pager**. It shows one screen at a time: Space or PgDn goes forward, b or PgUp goes back, q quits. It never loads the whole file at once, so it opens huge logs instantly.\n\n```\nnl ballad.txt\nless ballad.txt\n```\n\nReal world: `man` pages open in `less`. Anything you learn here (Space, b, q, and `/word` to search on a real system) works there too.",
+          "objectives": [
+            {
+              "text": "Number every line of the ballad with nl",
+              "when": {
+                "all": [
+                  {
+                    "command": "nl"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "nl ballad.txt",
+              "solution": "nl ballad.txt"
+            },
+            {
+              "text": "Open the ballad in the pager: less ballad.txt (q quits)",
+              "when": {
+                "all": [
+                  {
+                    "command": "less"
+                  },
+                  {
+                    "args_contains": "ballad.txt"
+                  }
+                ]
+              },
+              "hint": "less ballad.txt, then Space for the next page, b to go back, q to quit",
+              "solution": "less ballad.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pipelines",
+      "title": "The Pipeline Forge",
+      "summary": "grep, sort, uniq, cut and the | that joins them: answer real questions about real data.",
+      "level": "intermediate",
+      "order": 3,
+      "requires": [
+        "reading"
+      ],
+      "skills": [
+        "grep",
+        "sort",
+        "uniq",
+        "cut",
+        "wc",
+        "head"
+      ],
+      "xp": 75,
+      "intro": "The Unix idea fits in one sentence: **small tools, each doing one thing well, joined by pipes.** In this course you'll interrogate a guild's activity log and ledger, the same way you'd interrogate a web server's access log at work. Your lab holds `guild.log`, `ledger.csv` and `names.txt`.",
+      "lab": {
+        "dirs": [],
+        "files": {
+          "guild.log": "2026-03-01 08:02 alice login\n2026-03-01 08:05 alice deposit 40\n2026-03-01 08:11 bob login\n2026-03-01 08:13 bob withdraw 15\n2026-03-01 08:30 cara login\n2026-03-01 08:31 cara deposit 120\n2026-03-01 09:00 alice logout\n2026-03-01 09:12 dmitri login\n2026-03-01 09:14 dmitri deposit 75\n2026-03-01 09:40 bob deposit 10\n2026-03-01 09:41 bob logout\n2026-03-01 10:05 cara withdraw 30\n2026-03-01 10:06 cara logout\n2026-03-01 11:20 alice login\n2026-03-01 11:21 alice deposit 25\n2026-03-01 11:45 alice logout\n2026-03-01 23:58 dmitri logout\n2026-03-01 23:59 dmitri ALERT vault door left open\n",
+          "ledger.csv": "date,member,action,gold\n2026-03-01,alice,deposit,40\n2026-03-01,bob,withdraw,15\n2026-03-01,cara,deposit,120\n2026-03-01,dmitri,deposit,75\n2026-03-01,bob,deposit,10\n2026-03-01,cara,withdraw,30\n2026-03-01,alice,deposit,25\n2026-03-02,cara,deposit,60\n2026-03-02,alice,deposit,15\n2026-03-02,dmitri,withdraw,20\n2026-03-02,alice,deposit,30\n",
+          "names.txt": "cara\nalice\nbob\nalice\ndmitri\ncara\nalice\nbob\neve\n"
+        }
+      },
+      "lessons": [
+        {
+          "id": "grep",
+          "title": "Searching with grep",
+          "teaches": [
+            "grep",
+            "grep -c",
+            "grep -v",
+            "grep -i"
+          ],
+          "xp": 25,
+          "body": "Start in your lab: `cd /lab/pipelines`.\n\n`grep PATTERN FILE` prints every line of FILE that contains PATTERN. Its flags reshape the question:\n\n- `-c`: *how many* lines match?\n- `-v`: show the lines that *don't* match.\n- `-i`: ignore case, so `alert` finds `ALERT`.\n- `-n`: prefix each match with its line number.\n\n```\ngrep alice guild.log\ngrep -c bob guild.log\ngrep -v login guild.log\n```\n\nReal world: `grep -i error /var/log/syslog` is step one of nearly every investigation. The pattern is a *regular expression*, so `grep '^2026-03-01 23'` finds everything from 23:00 on.",
+          "objectives": [
+            {
+              "text": "Find every line about alice: grep alice guild.log",
+              "when": {
+                "all": [
+                  {
+                    "command": "grep"
+                  },
+                  {
+                    "arg": "alice"
+                  },
+                  {
+                    "args_contains": "guild.log"
+                  }
+                ]
+              },
+              "hint": "grep PATTERN FILE, from /lab/pipelines",
+              "solution": "grep alice guild.log"
+            },
+            {
+              "text": "Count bob's lines instead of printing them: grep -c bob guild.log",
+              "when": {
+                "all": [
+                  {
+                    "command": "grep"
+                  },
+                  {
+                    "option": "c"
+                  },
+                  {
+                    "arg": "bob"
+                  }
+                ]
+              },
+              "hint": "-c prints only the number of matching lines",
+              "solution": "grep -c bob guild.log"
+            },
+            {
+              "text": "Show every line that is NOT a login: grep -v login guild.log",
+              "when": {
+                "all": [
+                  {
+                    "command": "grep"
+                  },
+                  {
+                    "option": "v"
+                  },
+                  {
+                    "arg": "login"
+                  }
+                ]
+              },
+              "hint": "-v inverts the match",
+              "solution": "grep -v login guild.log"
+            },
+            {
+              "text": "Catch the alert whatever its case: grep -i alert guild.log",
+              "when": {
+                "all": [
+                  {
+                    "command": "grep"
+                  },
+                  {
+                    "option": "i"
+                  },
+                  {
+                    "output_includes": "ALERT"
+                  }
+                ]
+              },
+              "hint": "-i ignores upper and lower case",
+              "solution": "grep -i alert guild.log"
+            }
+          ]
+        },
+        {
+          "id": "first-pipe",
+          "title": "Your first pipe",
+          "teaches": [
+            "pipes",
+            "|",
+            "wc -l",
+            "head"
+          ],
+          "xp": 30,
+          "body": "The `|` (pipe) takes everything the command on its left **prints** and feeds it to the command on its right as **input**. Neither command knows the other exists.\n\n```\ncat guild.log | wc -l\ngrep deposit guild.log | wc -l\n```\n\nThe second line asks *how many deposits were there?* `grep` answers \"which lines?\", `wc -l` answers \"how many?\", and the pipe composes them into a question neither tool can answer alone.\n\nReal world: `ps aux | grep python | wc -l` counts how many Python processes are running. Same shape, different data.",
+          "objectives": [
+            {
+              "text": "Count the log's lines through a pipe: cat guild.log | wc -l",
+              "when": {
+                "all": [
+                  {
+                    "command": "wc"
+                  },
+                  {
+                    "option": "l"
+                  },
+                  {
+                    "piped": true
+                  }
+                ]
+              },
+              "hint": "The | sends cat's output into wc -l",
+              "solution": "cat guild.log | wc -l"
+            },
+            {
+              "text": "Count only the deposits: grep deposit guild.log | wc -l",
+              "when": {
+                "all": [
+                  {
+                    "command": "wc"
+                  },
+                  {
+                    "piped": true
+                  },
+                  {
+                    "line_includes": "grep"
+                  },
+                  {
+                    "line_includes": "deposit"
+                  }
+                ]
+              },
+              "hint": "grep picks the deposit lines; wc -l counts them",
+              "solution": "grep deposit guild.log | wc -l"
+            },
+            {
+              "text": "Keep just the first 5 lines of the log: cat guild.log | head -n 5",
+              "when": {
+                "all": [
+                  {
+                    "command": "head"
+                  },
+                  {
+                    "piped": true
+                  }
+                ]
+              },
+              "hint": "head works on piped input too",
+              "solution": "cat guild.log | head -n 5"
+            }
+          ]
+        },
+        {
+          "id": "sort-and-uniq",
+          "title": "Sorting and counting",
+          "teaches": [
+            "sort",
+            "uniq",
+            "uniq -c"
+          ],
+          "xp": 30,
+          "body": "- `sort` puts lines in order: `-r` reverses it, and `-n` sorts by number instead of by text.\n- `uniq` collapses **adjacent** duplicate lines, and `-c` counts them.\n\nThat word *adjacent* matters. `uniq` only compares each line with the one right before it, so you nearly always `sort` first:\n\n```\nuniq names.txt\nsort names.txt | uniq\nsort names.txt | uniq -c\n```\n\nReal world: `sort | uniq -c` is the shell's GROUP BY. It's how you count visitors per IP, errors per type, or commits per author.",
+          "objectives": [
+            {
+              "text": "Sort names.txt alphabetically",
+              "when": {
+                "all": [
+                  {
+                    "command": "sort"
+                  },
+                  {
+                    "args_contains": "names.txt"
+                  }
+                ]
+              },
+              "hint": "sort names.txt",
+              "solution": "sort names.txt"
+            },
+            {
+              "text": "See why order matters: uniq names.txt (without sorting first)",
+              "when": {
+                "all": [
+                  {
+                    "command": "uniq"
+                  },
+                  {
+                    "args_contains": "names.txt"
+                  },
+                  {
+                    "piped": false
+                  }
+                ]
+              },
+              "hint": "Run uniq straight on the file and compare with the sorted version",
+              "solution": "uniq names.txt"
+            },
+            {
+              "text": "List each name once: sort names.txt | uniq",
+              "when": {
+                "all": [
+                  {
+                    "command": "uniq"
+                  },
+                  {
+                    "piped": true
+                  },
+                  {
+                    "line_includes": "sort"
+                  }
+                ]
+              },
+              "hint": "Sort first, so duplicates sit next to each other",
+              "solution": "sort names.txt | uniq"
+            },
+            {
+              "text": "Count each name: sort names.txt | uniq -c",
+              "when": {
+                "all": [
+                  {
+                    "command": "uniq"
+                  },
+                  {
+                    "option": "c"
+                  },
+                  {
+                    "piped": true
+                  }
+                ]
+              },
+              "hint": "-c prefixes each line with how many times it appeared",
+              "solution": "sort names.txt | uniq -c"
+            }
+          ]
+        },
+        {
+          "id": "cut",
+          "title": "Columns with cut",
+          "teaches": [
+            "cut",
+            "-d",
+            "-f",
+            "CSV"
+          ],
+          "xp": 30,
+          "body": "`ledger.csv` is **comma-separated values**: one record per line, with fields split by `,`. The first line is a header that names the fields: `date,member,action,gold`.\n\n`cut` slices columns out of each line:\n\n- `-d,` sets the field delimiter to a comma.\n- `-f2` keeps the second field, `-f2,4` keeps fields two and four, and `-f2-` keeps everything from two on.\n\n```\ncut -d, -f2 ledger.csv\ncut -d, -f2 ledger.csv | sort | uniq -c\n```\n\nNotice `member` in the count: the header row came along for the ride. `grep -v member` removes it.\n\nReal world: exports from spreadsheets, databases and cloud consoles are almost always CSV. `cut` gives you answers in seconds, without opening a spreadsheet.",
+          "objectives": [
+            {
+              "text": "Pull out the member column: cut -d, -f2 ledger.csv",
+              "when": {
+                "all": [
+                  {
+                    "command": "cut"
+                  },
+                  {
+                    "args_contains": "-d"
+                  },
+                  {
+                    "any": [
+                      {
+                        "args_contains": "-f2"
+                      },
+                      {
+                        "args_contains": "-f 2"
+                      }
+                    ]
+                  },
+                  {
+                    "output_includes": "alice"
+                  }
+                ]
+              },
+              "hint": "-d, says fields are separated by commas; -f2 keeps field 2",
+              "solution": "cut -d, -f2 ledger.csv"
+            },
+            {
+              "text": "Count rows per member: cut -d, -f2 ledger.csv | sort | uniq -c",
+              "when": {
+                "all": [
+                  {
+                    "command": "uniq"
+                  },
+                  {
+                    "option": "c"
+                  },
+                  {
+                    "piped": true
+                  },
+                  {
+                    "line_includes": "cut"
+                  }
+                ]
+              },
+              "hint": "Three tools: cut picks the column, sort groups, uniq -c counts",
+              "solution": "cut -d, -f2 ledger.csv | sort | uniq -c"
+            },
+            {
+              "text": "Drop the header row with grep -v member ledger.csv",
+              "when": {
+                "all": [
+                  {
+                    "command": "grep"
+                  },
+                  {
+                    "option": "v"
+                  },
+                  {
+                    "arg": "member"
+                  },
+                  {
+                    "args_contains": "ledger.csv"
+                  }
+                ]
+              },
+              "hint": "The header is the only line containing the word member",
+              "solution": "grep -v member ledger.csv"
+            }
+          ]
+        },
+        {
+          "id": "redirect",
+          "title": "Saving your work",
+          "teaches": [
+            ">",
+            ">>",
+            "redirection"
+          ],
+          "xp": 30,
+          "body": "Output doesn't have to go to the screen:\n\n- `cmd > FILE` writes the output into FILE, **replacing** whatever was there.\n- `cmd >> FILE` **appends** to the end of FILE.\n\nThe redirect applies to the end of the whole pipeline:\n\n```\ngrep alice guild.log > alice.txt\ngrep bob guild.log >> alice.txt\nsort names.txt | uniq > roster.txt\ncat roster.txt\n```\n\nCareful: `>` doesn't ask before it overwrites. `sort names.txt > names.txt` empties the file before `sort` even reads it. (Your lab is safe to break, and `lab reset` restores it.)\n\nReal world: `command > output.txt 2>&1` saves both normal output and errors, which is how cron jobs keep their logs.",
+          "objectives": [
+            {
+              "text": "Save alice's lines to a file: grep alice guild.log > alice.txt",
+              "when": {
+                "file_contains": "/lab/pipelines/alice.txt",
+                "text": "alice"
+              },
+              "hint": "> sends the output into a file instead of the screen",
+              "solution": "grep alice guild.log > alice.txt"
+            },
+            {
+              "text": "Append bob's lines to the same file: grep bob guild.log >> alice.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_contains": "/lab/pipelines/alice.txt",
+                    "text": "alice"
+                  },
+                  {
+                    "file_contains": "/lab/pipelines/alice.txt",
+                    "text": "bob"
+                  }
+                ]
+              },
+              "hint": ">> adds to the end; a single > would replace alice's lines",
+              "solution": "grep bob guild.log >> alice.txt"
+            },
+            {
+              "text": "Write a clean roster: sort names.txt | uniq > roster.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_contains": "/lab/pipelines/roster.txt",
+                    "text": "dmitri"
+                  },
+                  {
+                    "line_includes": "uniq"
+                  }
+                ]
+              },
+              "hint": "Redirect the end of a whole pipeline",
+              "solution": "sort names.txt | uniq > roster.txt"
+            }
+          ]
+        },
+        {
+          "id": "the-guild-report",
+          "title": "Capstone: the guild report",
+          "teaches": [
+            "pipelines",
+            "sort -rn",
+            "head -n 1"
+          ],
+          "xp": 50,
+          "body": "Time to put the whole forge to work. The question: **which member made the most deposits?**\n\nBuild the answer one stage at a time. Run each line before adding the next stage:\n\n```\ngrep deposit ledger.csv\ngrep deposit ledger.csv | cut -d, -f2\ngrep deposit ledger.csv | cut -d, -f2 | sort | uniq -c\ngrep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn\ngrep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn | head -n 1\n```\n\n`sort -rn` sorts by the count (`-n`, numerically) from biggest to smallest (`-r`), so `head -n 1` is the winner.\n\nThat six-stage pipeline is a real analytics query, written without a database. Swap `ledger.csv` for an access log and `-f2` for the IP column, and you've built \"top 10 visitors\" for a web server.\n\nTip: type `explain` right after running a pipeline, and each stage is broken down for you.",
+          "objectives": [
+            {
+              "text": "Find the member with the most deposits: grep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn | head -n 1",
+              "when": {
+                "all": [
+                  {
+                    "command": "head"
+                  },
+                  {
+                    "piped": true
+                  },
+                  {
+                    "line_includes": "uniq -c"
+                  },
+                  {
+                    "line_includes": "sort -rn"
+                  },
+                  {
+                    "output_includes": "alice"
+                  }
+                ]
+              },
+              "hint": "Build it one stage at a time and run it after each |",
+              "solution": "grep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn | head -n 1"
+            },
+            {
+              "text": "Save the full ranking: grep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn > report.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_contains": "/lab/pipelines/report.txt",
+                    "text": "cara"
+                  },
+                  {
+                    "line_includes": "sort -rn"
+                  }
+                ]
+              },
+              "hint": "Same pipeline, minus head, plus > report.txt",
+              "solution": "grep deposit ledger.csv | cut -d, -f2 | sort | uniq -c | sort -rn > report.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workshop",
+      "title": "The Artificer's Workshop",
+      "summary": "mkdir, touch, cp, mv, rm and chmod: create, organise and protect files.",
+      "level": "intermediate",
+      "order": 4,
+      "requires": [
+        "navigator"
+      ],
+      "skills": [
+        "mkdir",
+        "touch",
+        "cp",
+        "mv",
+        "rm",
+        "chmod",
+        "ls",
+        "echo",
+        "cat"
+      ],
+      "xp": 75,
+      "intro": "Reading is half the job. The other half is changing things: making directories, moving files where they belong, deleting what you don't need, and marking scripts runnable. Your lab has an `inbox` that needs organising. It's a sandbox, so if something breaks, `lab reset` puts it back.",
+      "lab": {
+        "dirs": [
+          "inbox"
+        ],
+        "files": {
+          "inbox/junk.old": "temporary scratch data; safe to delete\n",
+          "inbox/notes.txt": "Remember: copy before you change, and look before you delete.\n",
+          "inbox/report-draft.txt": "Quarterly report (draft)\n- forge output up 12%\n- two apprentices promoted\n",
+          "inbox/spell.sh": "#!/usr/bin/env bash\n# A tiny script. It cannot run until it is marked executable.\necho \"The forge roars to life.\"\n"
+        }
+      },
+      "lessons": [
+        {
+          "id": "make",
+          "title": "Making things",
+          "teaches": [
+            "mkdir",
+            "touch"
+          ],
+          "xp": 20,
+          "body": "Start in your lab: `cd /lab/workshop`.\n\n- `mkdir NAME` makes a directory. On a real system, `mkdir -p a/b/c` makes the whole chain at once.\n- `touch FILE` creates an empty file, or, if the file exists, updates its modification time and leaves the content alone.\n\n```\nmkdir archive\ntouch archive/index.txt\nls archive\n```\n\nReal world: `touch` is how you create a placeholder (`.gitkeep`) or a marker that a script checks for, like the `.statue_defeated` flag in this very game.",
+          "objectives": [
+            {
+              "text": "Build a new directory: mkdir archive",
+              "when": {
+                "dir_exists": "/lab/workshop/archive"
+              },
+              "hint": "From /lab/workshop: mkdir archive",
+              "solution": "mkdir archive"
+            },
+            {
+              "text": "Create an empty file inside it: touch archive/index.txt",
+              "when": {
+                "file_exists": "/lab/workshop/archive/index.txt"
+              },
+              "hint": "touch makes an empty file if none exists",
+              "solution": "touch archive/index.txt"
+            },
+            {
+              "text": "Check your work: ls archive",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "output_includes": "index.txt"
+                  }
+                ]
+              },
+              "hint": "ls archive",
+              "solution": "ls archive"
+            }
+          ]
+        },
+        {
+          "id": "copy-and-move",
+          "title": "Copying and moving",
+          "teaches": [
+            "cp",
+            "mv",
+            "renaming"
+          ],
+          "xp": 25,
+          "body": "- `cp SOURCE DEST` **copies**, so the original stays.\n- `mv SOURCE DEST` **moves**, so the original is gone. There's no separate rename command: renaming is just moving to a new name.\n\nIf DEST is an existing directory, the file goes *inside* it and keeps its name.\n\n```\ncp inbox/notes.txt archive\nmv inbox/report-draft.txt archive/report.txt\nls archive\n```\n\nReal world: before editing a config, copy it first. `cp nginx.conf nginx.conf.bak` is cheap insurance.",
+          "objectives": [
+            {
+              "text": "Copy inbox/notes.txt into archive: cp inbox/notes.txt archive",
+              "when": {
+                "file_exists": "/lab/workshop/archive/notes.txt"
+              },
+              "hint": "When the destination is a directory, the copy keeps its name",
+              "solution": "cp inbox/notes.txt archive"
+            },
+            {
+              "text": "Move and rename the draft in one step: mv inbox/report-draft.txt archive/report.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_exists": "/lab/workshop/archive/report.txt"
+                  },
+                  {
+                    "not": {
+                      "file_exists": "/lab/workshop/inbox/report-draft.txt"
+                    }
+                  }
+                ]
+              },
+              "hint": "mv SOURCE NEW-PATH both moves and renames",
+              "solution": "mv inbox/report-draft.txt archive/report.txt"
+            }
+          ]
+        },
+        {
+          "id": "remove",
+          "title": "Removing things",
+          "teaches": [
+            "rm"
+          ],
+          "xp": 20,
+          "body": "`rm FILE` deletes a file. **There is no trash can.** A shell `rm` is final.\n\nThat's why the habit is: **look, then delete.** Run `ls` (or `echo` the same glob) first, read what it would touch, and only then `rm`.\n\n```\nls inbox\nrm inbox/junk.old\nls inbox\n```\n\nType `explain rm inbox/junk.old` before running it. `explain` flags dangerous commands.\n\nReal world: `rm -rf` (recursive, force) on the wrong path is the classic career-ending typo. Many admins alias `rm` to `rm -i`, which asks before each deletion.",
+          "objectives": [
+            {
+              "text": "Delete the junk file: rm inbox/junk.old",
+              "when": {
+                "all": [
+                  {
+                    "command": "rm"
+                  },
+                  {
+                    "not": {
+                      "file_exists": "/lab/workshop/inbox/junk.old"
+                    }
+                  }
+                ]
+              },
+              "hint": "rm inbox/junk.old",
+              "solution": "rm inbox/junk.old"
+            },
+            {
+              "text": "Confirm it's gone: ls inbox",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "args_contains": "inbox"
+                  },
+                  {
+                    "not": {
+                      "output_includes": "junk"
+                    }
+                  }
+                ]
+              },
+              "hint": "ls inbox",
+              "solution": "ls inbox"
+            }
+          ]
+        },
+        {
+          "id": "permissions",
+          "title": "Making it executable",
+          "teaches": [
+            "chmod",
+            "chmod +x",
+            "ls -F",
+            "permissions"
+          ],
+          "xp": 30,
+          "body": "Every file carries **permissions**: who may **r**ead, **w**rite and e**x**ecute it. A script is only text until it has the execute permission:\n\n- `chmod +x FILE` adds execute, and `chmod -x FILE` removes it.\n- `ls -F` marks executables with `*`, and `ls -l` (on a real system) shows the full `rwxr-xr-x` string.\n\n```\nls -F inbox\nchmod +x inbox/spell.sh\nls -F inbox\n```\n\nReal world: \"Permission denied\" when you run `./deploy.sh` almost always means a missing `chmod +x`. The numeric form, `chmod 755 FILE`, sets all three permission groups at once.",
+          "objectives": [
+            {
+              "text": "Look at the scripts first: ls -F inbox",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "option": "F"
+                  },
+                  {
+                    "output_includes": "spell.sh"
+                  }
+                ]
+              },
+              "hint": "ls -F marks executables with a *",
+              "solution": "ls -F inbox"
+            },
+            {
+              "text": "Make the spell executable: chmod +x inbox/spell.sh",
+              "when": {
+                "all": [
+                  {
+                    "command": "chmod"
+                  },
+                  {
+                    "arg": "+x"
+                  },
+                  {
+                    "args_contains": "spell.sh"
+                  }
+                ]
+              },
+              "hint": "+x adds the execute permission",
+              "solution": "chmod +x inbox/spell.sh"
+            },
+            {
+              "text": "Look again: ls -F inbox now shows spell.sh*",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "option": "F"
+                  },
+                  {
+                    "output_includes": "spell.sh*"
+                  }
+                ]
+              },
+              "hint": "The * after the name means executable",
+              "solution": "ls -F inbox"
+            }
+          ]
+        },
+        {
+          "id": "write",
+          "title": "Writing files from the shell",
+          "teaches": [
+            "echo",
+            ">",
+            ">>",
+            "cat"
+          ],
+          "xp": 25,
+          "body": "You don't need an editor for small files. `echo` plus a redirect is enough:\n\n```\necho hello forge > note.txt\necho second line >> note.txt\ncat note.txt\n```\n\nThe rule from the pipelines course still holds: `>` replaces, `>>` appends.\n\nReal world: `echo \"export PATH=$HOME/bin:$PATH\" >> ~/.bashrc` is how a lot of install instructions add a line to your shell config. Now you know why it's `>>`.",
+          "objectives": [
+            {
+              "text": "Write a note: echo hello forge > note.txt",
+              "when": {
+                "file_contains": "/lab/workshop/note.txt",
+                "text": "hello"
+              },
+              "hint": "echo prints text; > sends it into a file",
+              "solution": "echo hello forge > note.txt"
+            },
+            {
+              "text": "Add a second line: echo second line >> note.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_contains": "/lab/workshop/note.txt",
+                    "text": "hello"
+                  },
+                  {
+                    "file_contains": "/lab/workshop/note.txt",
+                    "text": "second"
+                  }
+                ]
+              },
+              "hint": ">> appends instead of replacing",
+              "solution": "echo second line >> note.txt"
+            },
+            {
+              "text": "Read it back: cat note.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "cat"
+                  },
+                  {
+                    "output_includes": "second"
+                  }
+                ]
+              },
+              "hint": "cat note.txt",
+              "solution": "cat note.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shell-craft",
+      "title": "Words of Power",
+      "summary": "Variables, arithmetic, aliases, globs, quoting and history: make the shell work for you.",
+      "level": "advanced",
+      "order": 5,
+      "requires": [
+        "pipelines",
+        "workshop"
+      ],
+      "skills": [
+        "export",
+        "echo",
+        "env",
+        "let",
+        "alias",
+        "history",
+        "find"
+      ],
+      "xp": 100,
+      "intro": "So far you've used the shell's commands. This course is about the shell *itself*: the features that make every command shorter, safer and repeatable. Your lab holds a few `spells/` and a grimoire.",
+      "lab": {
+        "dirs": [
+          "spells"
+        ],
+        "files": {
+          "grimoire.md": "# The Grimoire of Words of Power\n\nVariables remember. Aliases shorten. Globs multiply. Quotes protect. History never forgets.\n",
+          "spells/fire.txt": "Ignis: a spell of warmth and light.\n",
+          "spells/ice.txt": "Glacies: a spell that slows the world down.\n",
+          "spells/wind.log": "2026-03-01 wind spell cast 3 times\n"
+        }
+      },
+      "lessons": [
+        {
+          "id": "variables",
+          "title": "Variables",
+          "teaches": [
+            "export",
+            "$VAR",
+            "env"
+          ],
+          "xp": 25,
+          "body": "A **variable** is a name for a value. `export NAME=value` creates one, and `$NAME` uses it anywhere in a command line.\n\n```\nexport GUILD=forge\necho $GUILD\nenv\n```\n\nTwo rules trip everyone up once:\n\n- There are **no spaces around `=`**. `export GUILD = forge` is three separate words.\n- Names are case-sensitive, so `$GUILD` and `$guild` are different variables.\n\nReal world: `$HOME`, `$PATH` and `$USER` are variables your system set for you. Programs read `$PATH` to decide where commands live.",
+          "objectives": [
+            {
+              "text": "Create a variable: export GUILD=forge",
+              "when": {
+                "exists": "envVars.GUILD"
+              },
+              "hint": "No spaces around the =: export GUILD=forge",
+              "solution": "export GUILD=forge"
+            },
+            {
+              "text": "Read it back: echo $GUILD",
+              "when": {
+                "all": [
+                  {
+                    "command": "echo"
+                  },
+                  {
+                    "arg": "$GUILD"
+                  },
+                  {
+                    "output_includes": "forge"
+                  }
+                ]
+              },
+              "hint": "The $ asks the shell for the variable's value",
+              "solution": "echo $GUILD"
+            },
+            {
+              "text": "See every variable at once with env",
+              "when": {
+                "all": [
+                  {
+                    "command": "env"
+                  },
+                  {
+                    "output_includes": "GUILD="
+                  }
+                ]
+              },
+              "hint": "env prints NAME=value for every exported variable",
+              "solution": "env"
+            }
+          ]
+        },
+        {
+          "id": "arithmetic",
+          "title": "Arithmetic",
+          "teaches": [
+            "let",
+            "numbers"
+          ],
+          "xp": 25,
+          "body": "Shell variables hold **text**. To do arithmetic, you have to ask for it:\n\n```\nexport MANA=10\nlet MANA=MANA+5\necho $MANA\n```\n\nInside `let`, names are read as numbers, so no `$` is needed. Bash also has `$(( MANA + 5 ))`, which you'll meet in real scripts.\n\nThis game uses the same trick: your health lives in `$HP`, and `let HP=HP-5` is how a monster hurts you.",
+          "objectives": [
+            {
+              "text": "Store a number: export MANA=10",
+              "when": {
+                "exists": "envVars.MANA"
+              },
+              "hint": "export MANA=10",
+              "solution": "export MANA=10"
+            },
+            {
+              "text": "Add to it with let: let MANA=MANA+5",
+              "when": {
+                "all": [
+                  {
+                    "command": "let"
+                  },
+                  {
+                    "args_contains": "MANA"
+                  }
+                ]
+              },
+              "hint": "Inside let you write MANA without the $",
+              "solution": "let MANA=MANA+5"
+            },
+            {
+              "text": "Check the result: echo $MANA",
+              "when": {
+                "all": [
+                  {
+                    "command": "echo"
+                  },
+                  {
+                    "arg": "$MANA"
+                  }
+                ]
+              },
+              "hint": "echo $MANA",
+              "solution": "echo $MANA"
+            }
+          ]
+        },
+        {
+          "id": "aliases",
+          "title": "Aliases",
+          "teaches": [
+            "alias",
+            "shortcuts"
+          ],
+          "xp": 25,
+          "body": "An **alias** is a nickname for a longer command line. The shell swaps it in before running anything.\n\n```\nalias ll='ls -F'\nll\nalias\n```\n\nThe quotes matter: without them, `alias ll=ls -F` gives the alias only `ls`, and `-F` becomes a separate argument.\n\nReal world: aliases live in `~/.bashrc` or `~/.zshrc`, so they load in every new shell. Common ones are `ll`, `la`, `..='cd ..'`, and `gs='git status'`.",
+          "objectives": [
+            {
+              "text": "Make a shortcut: alias ll='ls -F'",
+              "when": {
+                "exists": "aliases.ll"
+              },
+              "hint": "Quote the command so the space stays inside it",
+              "solution": "alias ll='ls -F'"
+            },
+            {
+              "text": "Use it: type ll",
+              "when": {
+                "all": [
+                  {
+                    "command": "ls"
+                  },
+                  {
+                    "option": "F"
+                  },
+                  {
+                    "exists": "aliases.ll"
+                  },
+                  {
+                    "not": {
+                      "line_includes": "ls"
+                    }
+                  }
+                ]
+              },
+              "hint": "Just ll, and the shell expands it to ls -F",
+              "solution": "ll"
+            },
+            {
+              "text": "List your aliases: alias",
+              "when": {
+                "all": [
+                  {
+                    "command": "alias"
+                  },
+                  {
+                    "output_includes": "alias ll="
+                  }
+                ]
+              },
+              "hint": "alias with no arguments lists them all",
+              "solution": "alias"
+            }
+          ]
+        },
+        {
+          "id": "globs-and-quotes",
+          "title": "Globs and quotes",
+          "teaches": [
+            "globbing",
+            "*",
+            "quoting",
+            "find -name"
+          ],
+          "xp": 30,
+          "body": "Start in your lab: `cd /lab/shell-craft`.\n\nA **glob** is a filename pattern: `*` matches any run of characters, and `?` matches exactly one character. The **shell** expands a glob into matching names *before* the command runs. `echo` never sees the `*`.\n\n```\necho spells/*.txt\necho 'spells/*.txt'\nfind . -name '*.log'\n```\n\n**Quotes** stop the expansion. That's why `find -name '*.log'` is quoted: you want `find` to receive the pattern and match it in every directory, not have the shell replace it with whatever matches *here*.\n\nType `explain echo spells/*.txt` to see what the glob expands to.",
+          "objectives": [
+            {
+              "text": "Let the shell expand a glob: echo spells/*.txt",
+              "when": {
+                "all": [
+                  {
+                    "command": "echo"
+                  },
+                  {
+                    "output_includes": "fire.txt"
+                  },
+                  {
+                    "not": {
+                      "output_includes": "wind.log"
+                    }
+                  }
+                ]
+              },
+              "hint": "* matches any run of characters within one name",
+              "solution": "echo spells/*.txt"
+            },
+            {
+              "text": "Quote it and the shell leaves it alone: echo 'spells/*.txt'",
+              "when": {
+                "all": [
+                  {
+                    "command": "echo"
+                  },
+                  {
+                    "output_includes": "*.txt"
+                  }
+                ]
+              },
+              "hint": "Single quotes stop expansion",
+              "solution": "echo 'spells/*.txt'"
+            },
+            {
+              "text": "Hand the pattern to find instead: find . -name '*.log'",
+              "when": {
+                "all": [
+                  {
+                    "command": "find"
+                  },
+                  {
+                    "output_includes": "wind.log"
+                  }
+                ]
+              },
+              "hint": "Quoted, so find (not the shell) does the matching, in every subdirectory",
+              "solution": "find . -name '*.log'"
+            }
+          ]
+        },
+        {
+          "id": "history",
+          "title": "History never forgets",
+          "teaches": [
+            "history",
+            "redirection"
+          ],
+          "xp": 30,
+          "body": "Every line you type is remembered. `history` lists them, and the Up and Down arrows walk back through them.\n\n```\nhistory\nhistory > history.txt\n```\n\nOn a real bash shell you also get:\n\n- `!!`: run the last command again (`sudo !!` is a classic).\n- `Ctrl+R`: search your history as you type.\n- `~/.bash_history`: where it all persists between sessions.\n\nThat's the whole course: variables remember, aliases shorten, globs multiply, quotes protect, and history never forgets. You now have the vocabulary to read almost any shell script you come across.",
+          "objectives": [
+            {
+              "text": "Review what you've typed: history",
+              "when": {
+                "all": [
+                  {
+                    "command": "history"
+                  }
+                ]
+              },
+              "hint": "history lists your recent command lines",
+              "solution": "history"
+            },
+            {
+              "text": "Keep a record: history > history.txt",
+              "when": {
+                "all": [
+                  {
+                    "file_exists": "/lab/shell-craft/history.txt"
+                  },
+                  {
+                    "line_includes": "history"
+                  }
+                ]
+              },
+              "hint": "Redirect history into a file like any other output",
+              "solution": "history > history.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

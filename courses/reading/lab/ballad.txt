@@ -1,0 +1,14 @@
+There once was a shell in the deep,
+Whose prompt never fell fast asleep.
+It would cat and would grep,
+Never missing a step,
+And its pipes ran a hundred lines steep.
+
+The novice would type and would stare,
+At commands that went who-knows-where.
+But with man at their side,
+And a head held with pride,
+They read every last line with care.
+
+So read before running, my friend,
+From the head of a file to its end.

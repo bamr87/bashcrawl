@@ -486,6 +486,16 @@
       "catScrollCount": 0,
       "lastPipedIn": false,
       "initialized": false
+    },
+    "learn": {
+      "active": null,
+      "progress": {},
+      "completed": []
+    },
+    "mastery": {
+      "skills": {},
+      "review": null,
+      "reviews": 0
     }
   }
 }

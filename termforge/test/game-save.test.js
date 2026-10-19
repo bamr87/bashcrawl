@@ -52,11 +52,13 @@ test("a legacy v1 save loads through storage.js and plays on", () => {
     assert.deepStrictEqual(JSON.parse(JSON.stringify(runtime.state.reveals)), legacy.reveals);
     assert.strictEqual(runtime.state.cwd, legacy.cwd);
 
-    // Read-only commands must not disturb loaded progress (stats counters are
-    // the one thing every dispatch legitimately bumps, so compare without them).
+    // Read-only commands must not disturb loaded progress. Practice telemetry
+    // legitimately records every dispatch — the stats counters and the skill
+    // model (mastery) — so compare without them.
     const stripStats = (state) => {
         const copy = JSON.parse(JSON.stringify(state));
         delete copy.stats;
+        delete copy.mastery;
         return copy;
     };
     const before = JSON.stringify(stripStats(runtime.state));

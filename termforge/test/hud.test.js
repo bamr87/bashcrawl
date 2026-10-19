@@ -185,6 +185,9 @@ test("hud layout can hide, fold, reorder, dock, and parse commands", () => {
     assert.equal(quest.lines.length, 0);
     hud.applyAction(hud.parseHudLine("hud dock left"));
     assert.equal(hud.getLayout().dock, "left");
+    hud.applyAction(hud.parseHudLine("hud move quest up"));
+    // Array.from: the layout lives in the sandbox realm, so its arrays have another prototype.
+    assert.deepEqual(Array.from(hud.getLayout().panes.slice(0, 2), (p) => p.id), ["quest", "room"], "a move survives the commit");
     hud.applyAction(hud.parseHudLine("hud reset"));
     panels = hud.panels(runtime);
     assert.equal(panels[0].id, "room");
@@ -199,4 +202,134 @@ test("strip() compresses the HUD into status plus a Here listing", () => {
     assert.ok(strip[0].text.includes("/entrance"));
     assert.ok(strip[1].text.includes("Here:"));
     assert.ok(strip[1].text.includes("scroll"));
+});
+
+// ── learning platform: lesson + skills panes and events ───────────────────
+
+test("lessonModel and skillsModel follow a course, and diffEvents names what grew", () => {
+    const { runtime, hud } = createHudRuntime();
+    assert.deepEqual({ ...hud.lessonModel(runtime) }, { active: false, courses: runtime.courses.length, completed: 0 });
+    const s0 = hud.snapshot(runtime);
+    runtime.execute("learn navigator");
+    runtime.execute("cd /lab/navigator");
+    const s1 = hud.snapshot(runtime);
+    const objective = hud.diffEvents(s0, s1).find((e) => e.type === "objective");
+    assert.ok(objective, "meeting an objective emits an objective event");
+    const skill = hud.diffEvents(s0, s1).find((e) => e.type === "skill");
+    assert.equal(skill.text, "⬆ cd · Novice");
+    runtime.execute("pwd");
+    const s2 = hud.snapshot(runtime);
+    assert.ok(hud.diffEvents(s1, s2).some((e) => e.type === "lesson"), "finishing a lesson emits a lesson event");
+    const lesson = hud.lessonModel(runtime);
+    assert.equal(lesson.course, "Finding Your Way");
+    assert.equal(lesson.n, 2);
+    assert.equal(lesson.met, 0);
+    assert.equal(lesson.lab, "/lab/navigator");
+    const skills = hud.skillsModel(runtime);
+    assert.ok(skills.practised >= 2 && skills.total >= 30);
+    const panes = hud.panels(runtime, { width: 30 }).map((p) => p.id);
+    assert.ok(panes.includes("lesson") && panes.includes("skills"));
+});
+
+test("a saved layout from before the learning panes gains them, visible, in definition order", () => {
+    const { hud } = createHudRuntime();
+    const old = { version: 1, dock: "left", sidebar: true, width: 28, panes: [{ id: "map", visible: false, collapsed: false }] };
+    const layout = hud.normalizeLayout(old);
+    assert.deepEqual(layout.panes.map((p) => p.id), hud.PANE_DEFS.map((d) => d.id));
+    assert.equal(layout.panes.find((p) => p.id === "lesson").visible, true);
+    assert.equal(layout.panes.find((p) => p.id === "map").visible, false);
+});
+
+// ── status strip + next-step suggestions ──────────────────────────────────
+
+test("statusModel reports rank progress, vitals, quests and only a live streak", () => {
+    const { runtime, hud } = createHudRuntime();
+    const ranks = runtime.catalog.ranks;
+    const fresh = hud.statusModel(runtime);
+    assert.equal(fresh.xp, 0);
+    assert.equal(fresh.rank, ranks[0].title);
+    assert.equal(fresh.rankIndex, 0);
+    // Spread: the model is built in the sandbox realm, so its prototype differs.
+    assert.deepEqual({ ...fresh.nextRank }, { title: ranks[1].title, min: ranks[1].min, remaining: ranks[1].min });
+    assert.equal(fresh.pct, 0);
+    assert.equal(fresh.hp, 100);
+    assert.equal(fresh.hpMax, 100);
+    assert.equal(fresh.questsDone, 0);
+    assert.equal(fresh.questsTotal, runtime.quests.length);
+    assert.equal(fresh.streak, 0);
+    assert.equal(fresh.badgeTotal, runtime.catalog.achievements.length);
+    runtime.execute("pwd");
+    const after = hud.statusModel(runtime);
+    assert.ok(after.xp > 0, "pwd earns XP");
+    assert.equal(after.questsDone, 1);
+    assert.ok(after.pct > 0 || after.rankIndex > 0, "progress toward the next rank moves");
+    // A streak shows while it is alive (done today, or yesterday with today open).
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-18", streak: 3, completed: true };
+    assert.equal(hud.statusModel(runtime).streak, 3);
+    assert.equal(hud.statusModel(runtime).dailyDone, true);
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-17", streak: 3, completed: false };
+    assert.equal(hud.statusModel(runtime).streak, 3, "yesterday's streak is still alive");
+    assert.equal(hud.statusModel(runtime).dailyDone, false);
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-01", streak: 3, completed: false };
+    assert.equal(hud.statusModel(runtime).streak, 0, "a lapsed streak is not shown");
+    runtime.state.xp = 100000;
+    const top = hud.statusModel(runtime);
+    assert.equal(top.rank, ranks[ranks.length - 1].title);
+    assert.equal(top.nextRank, null);
+    assert.equal(top.pct, 100);
+});
+
+test("suggestionsModel leads with the quest's own command when it can run from here", () => {
+    const { runtime, hud } = createHudRuntime();
+    let rows = hud.suggestionsModel(runtime);
+    assert.equal(rows[0].kind, "quest");
+    assert.equal(rows[0].cmd, "pwd");
+    assert.ok(rows.some((r) => r.cmd === "cat scroll" && r.kind === "room"), "the room's essentials follow");
+    assert.ok(rows.length <= 6);
+    assert.equal(new Set(rows.map((r) => r.cmd)).size, rows.length, "no duplicate chips");
+    runtime.execute("pwd");
+    runtime.execute("ls");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "cd cellar");
+    runtime.execute("cd cellar");
+    rows = hud.suggestionsModel(runtime);
+    assert.equal(rows[0].cmd, "cat scroll");
+    assert.ok(rows.some((r) => r.cmd === "./treasure" && r.kind === "room"), "encounters in the room are offered");
+    runtime.execute("cat scroll");
+    // "Return to the entrance with 'cd ..', then use 'mkdir workshop'": the
+    // first step that can run from here leads, then the next one.
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "cd ..");
+    runtime.execute("cd ..");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "mkdir workshop");
+    runtime.execute("mkdir workshop");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "touch notes.txt");
+});
+
+test("suggestionsModel skips a quest command that cannot land here and adds the lesson's chips", () => {
+    const { runtime, hud } = createHudRuntime();
+    for (const line of ["pwd", "ls", "cd cellar", "cat scroll", "cd ..", "mkdir workshop", "touch notes.txt"]) runtime.execute(line);
+    // The grep quest is scoped to the cellar/armoury: at the entrance it is not offered.
+    assert.ok(!hud.suggestionsModel(runtime).some((r) => r.kind === "quest"), "grep is not suggested outside its rooms");
+    runtime.execute("cd cellar");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "grep magic scroll");
+    runtime.execute("learn navigator");
+    const rows = hud.suggestionsModel(runtime);
+    assert.ok(rows.some((r) => r.cmd === "cd /lab/navigator" && r.kind === "lesson"), "a lab elsewhere is one chip away");
+    assert.ok(rows.some((r) => r.cmd === "lesson hint" && r.kind === "lesson"));
+    assert.equal(rows[0].kind, "quest", "the quest still leads");
+});
+
+test("defaultLayout honours a surface's pane order and folded panes; saved flags survive", () => {
+    const { hud } = createHudRuntime();
+    const web = hud.defaultLayout({ dock: "left", order: ["quest", "room", "bogus", "quest"], collapsed: ["hero"] });
+    assert.deepEqual(web.panes.slice(0, 2).map((p) => p.id), ["quest", "room"]);
+    assert.equal(web.panes.length, hud.PANE_DEFS.length, "every pane is present exactly once");
+    assert.equal(web.panes.find((p) => p.id === "hero").collapsed, true);
+    assert.equal(web.panes.find((p) => p.id === "quest").collapsed, false);
+    const saved = { version: 1, dock: "left", panes: [{ id: "hero", visible: true, collapsed: false }, { id: "map", visible: false, collapsed: true }] };
+    const merged = hud.normalizeLayout(saved, { order: ["quest", "room"], collapsed: ["hero", "skills"] });
+    assert.deepEqual(merged.panes.slice(0, 2).map((p) => p.id), ["quest", "room"], "the surface's order applies to a saved layout");
+    assert.equal(merged.panes.find((p) => p.id === "hero").collapsed, false, "a saved fold flag wins");
+    assert.equal(merged.panes.find((p) => p.id === "skills").collapsed, true, "an unsaved pane takes the surface default");
+    assert.equal(merged.panes.find((p) => p.id === "map").visible, false);
+    assert.deepEqual(hud.defaultLayout().panes.map((p) => p.id), hud.PANE_DEFS.map((d) => d.id), "no overrides: definition order");
 });

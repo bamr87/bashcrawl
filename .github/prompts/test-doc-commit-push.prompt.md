@@ -319,7 +319,7 @@ bash help.sh commands                   # Command reference
 
 # Static web trainer
 make web-build                          # Rebuild web/ data from the registries
-make web-preview                        # Serve web/ at http://127.0.0.1:8000
+make web-dev                            # The web app with hot reload at http://127.0.0.1:5173
 
 # Git workflow
 git add -A                              # Stage all changes

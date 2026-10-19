@@ -19,6 +19,7 @@ node termforge/node/host-telnet.js --app procwatch --raw        # plain nc clien
 | `--idle-timeout` | `600` | seconds of silence before a session is kicked (0 disables) |
 | `--width` | `80` | assumed terminal width until NAWS reports one |
 | `--data-dir` | repo `web/data` | game data directory for the bashcrawl app |
+| `--hub` | off | shared hub (MUD mode): presence, chat and a leaderboard across sessions; see below |
 
 ## Negotiated mode (default)
 
@@ -51,6 +52,30 @@ History arrows and Tab completion don't exist here by design; disconnect with `^
 One connection = one fully isolated session: its own runtime, state, view, and editor; nothing is shared between sockets. Limits: session cap (`--max-sessions`), idle kick (`--idle-timeout`), 4096-character line cap, 2000-line scrollback cap. A crash inside a command surfaces as an `error` line; the session survives. Oversized unfinished input disconnects immediately, while batches of short commands are accepted. UTF-8 survives split socket chunks. NAWS controls the horizontal editor window. Subnegotiation payloads are bounded.
 
 Bashcrawl telnet sessions are temporary. `save` explains this; `save export` prints a transferable UTF-8 token and `save import TOKEN` validates and restores it. `less` prints the file in stream mode. The banner advertises only these available capabilities.
+
+## Hub mode (`--hub`)
+
+By default every connection is a sealed world. `--hub` (or `make telnet-hub`) turns the server into a small MUD. Every session joins one shared `Hub` (`termforge/node/hub.js`) and gets six commands:
+
+| Command | Effect |
+|---|---|
+| `who` | everyone online, their current directory and XP |
+| `say MESSAGE` | speak to players in the same directory |
+| `emote ACTION` | act something out for the room (`emote waves`) |
+| `shout MESSAGE` | speak to everyone online |
+| `name [NEW]` | show or change your display name (players start as `guestN`) |
+| `top` | the live leaderboard, by XP |
+
+The hub also announces moments from each player's [typed event bus](../schemas/events.v1.md): badges, finished lessons and courses, rank-ups, unlocked rooms, and players arriving in or leaving your directory. Incoming lines print above your prompt, and whatever you were typing is redrawn intact.
+
+What changes in the posture: players see each other's **names, current directories and XP**, and **chat text crosses sessions**. That text is sanitized before it is stored or delivered:
+
+- C0 and C1 control characters, ESC (so no injected escape sequences), bidi overrides and zero-width characters are removed.
+- Whitespace collapses and messages are capped at 240 characters.
+- Names must match `[A-Za-z][A-Za-z0-9_-]{1,15}` and be unique, ignoring case.
+- Each player has a token-bucket rate limit (a burst of 5, then one message every 2 seconds).
+
+Everything else in the posture below still holds. Game state, files and saves stay per-session.
 
 ## Security posture
 

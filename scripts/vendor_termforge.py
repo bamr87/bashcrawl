@@ -2,7 +2,8 @@
 """Vendor TermForge core files into the static web bundle.
 
 `termforge/core/` is the single source of truth for the browser-loadable
-framework files. The web app is deployed verbatim from `web/`, so `make
+framework files. The web build copies `web/assets/js/` into `web/dist`
+verbatim (and the node test harness loads the vendor copies), so `make
 web-build` mirrors the core tree into `web/assets/js/vendor/termforge/`
 (committed, like `web/data/*.json`).
 

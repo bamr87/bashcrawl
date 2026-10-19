@@ -98,7 +98,7 @@ if ! $QUIET; then
   Read every scroll you find, and let the dungeon teach you bash.
   Stuck? Run:  bash help.sh
 
-  Prefer a browser? Open web/index.html, or run:  make web-preview
+  Prefer a browser? https://bamr87.github.io/bashcrawl/  — or locally:  make web-dev
 
 EOF
 fi

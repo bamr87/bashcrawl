@@ -20,6 +20,8 @@ const FIXTURES_DIR = path.resolve(__dirname, "..", "fixtures");
 // what the browser actually ships; the vendor freshness check guarantees the
 // two trees are byte-identical.
 const VENDOR_JS = path.join(WEB_JS, "vendor", "termforge");
+// Mirrors GAME_PLUGINS in runtime.js (asserted by platform-game.test.js).
+const GAME_PLUGIN_IDS = ["achievements", "daily", "progress", "arena", "pathfind", "bestiary"];
 const RUNTIME_FILES = [
     path.join(VENDOR_JS, "protocol.js"),
     path.join(VENDOR_JS, "parser.js"),
@@ -27,6 +29,12 @@ const RUNTIME_FILES = [
     path.join(VENDOR_JS, "vfs.js"),
     path.join(VENDOR_JS, "hooks.js"),
     path.join(VENDOR_JS, "registry.js"),
+    path.join(VENDOR_JS, "events.js"),
+    path.join(VENDOR_JS, "rules.js"),
+    path.join(VENDOR_JS, "plugin.js"),
+    path.join(VENDOR_JS, "curriculum.js"),
+    path.join(VENDOR_JS, "mastery.js"),
+    path.join(VENDOR_JS, "explain.js"),
     path.join(VENDOR_JS, "shell.js"),
     path.join(VENDOR_JS, "packs", "posix.js"),
     path.join(VENDOR_JS, "packs", "flavour.js"),
@@ -38,6 +46,8 @@ const RUNTIME_FILES = [
     path.join(VENDOR_JS, "ascii-motion.js"),
     path.join(VENDOR_JS, "art.js"),
     path.join(WEB_JS, "art-clips.js"),
+    // The game's feature plugins, in the runtime's install order.
+    ...GAME_PLUGIN_IDS.map((id) => path.join(WEB_JS, "plugins", `${id}.js`)),
     path.join(WEB_JS, "runtime.js"),
 ];
 
@@ -45,7 +55,13 @@ const STORAGE_FILE = path.join(WEB_JS, "storage.js");
 
 function loadGameData() {
     const read = (name) => JSON.parse(fs.readFileSync(path.join(DATA_DIR, name), "utf8"));
-    return { world: read("world.json"), quests: read("quests.json"), commands: read("commands.json") };
+    return {
+        world: read("world.json"),
+        quests: read("quests.json"),
+        commands: read("commands.json"),
+        progression: read("progression.json"),
+        courses: read("courses.json"),
+    };
 }
 
 // Build a Runtime inside a fresh deterministic sandbox. Options:

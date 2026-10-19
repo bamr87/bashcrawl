@@ -6,95 +6,112 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A first run like a game's.** A **title screen** (Continue with hero · rank · room, New game / New hero behind a confirm, How to play, Options; ↑↓/Enter/Esc and a menu cursor), **hero creation** in five steps (a name with a ⚄ roll, a path — Wanderer, Scribe, Rogue or Sage — that picks the starting door, a look in four palettes, the preferences, a summary), a three-page **intro**, and a **guided tour** of the live page (coach marks over the prompt, the quest, the room, the status bar and the doors; stops that are off screen are skipped; the last one types `pwd` for you). The brand reopens the title screen; the header gains the hero (name · rank → the **profile**: rename, look, path, the sheet of rank/XP/health/quests/badges/rooms/spells, a confirmed new game) and ⚙ **Options** (theme, sound, effects, screen shake, text speed, text size, CRT, replay the intro, take the tour, reset the HUD). The hero lives under `bashcrawl-web-hero-v1` and the options under `bashcrawl-web-settings-v1`, both apart from the save; a save from before heroes existed continues as Adventurer.
+- **A story to follow, and a Journal to keep it.** The dungeon now has a **Chronicle**: a prologue when the hero is made, a chapter for each of the eight main quests, a chapter for every hidden hall the first time it is entered, and an epilogue when the main road is walked — told in an RPG **dialogue box** under the log (the hero's portrait, a typewriter at the text-speed option, Enter or a click turns the page) and kept in the **Journal** (`Alt+J`, the 📖 button, or typing `journal`): Chronicle · Quests (with objectives and hints) · Lore (every scroll read, with *Read again*; every hall found, with *Go there*) · Bestiary · Badges. An **objective tracker** sits in the stage's corner with the active quest and its spell. Escape with nothing open is a **pause menu** (Continue · Journal · Hero · Options · How to play · Title screen); `Alt+H/O/M` and the prompt words `hero`, `options`, `menu`, `title` open the same screens. The party bar leads with the hero's portrait, name, level and rank; things in the Location pane are clickable (a door is walked through, a scroll read, an encounter run).
+- **Smoother everywhere.** Doors slide in behind the pixel wipe instead of swapping; panels fold through an animated track; the party bar and the prompt dock slide in; the Arcade's floor and trials slide. Every `title` is now a styled **tooltip** that appears after a short hover (at once while moving between controls, and on keyboard focus) instead of the browser's slow bubble.
+- **The hero at 2×.** The sprite is drawn through an edge-aware upscale (EPX), so diagonals slope and corners round while one-pixel details such as the eyes stay square; the face gains a nose and a mouth; the HUD figure is a size larger.
+- **A real pixel-art hero.** The seven coloured blocks are replaced by a 16×28 character with outline and shading, composed from layered parts — six skin tones, four eye colours, six hair styles in eight colours, seven kinds of headgear, five outfits in ten dyes with six trims, seven weapons, a cape in any dye, and six companions (cat, bat, slime, owl, frog). The eyes blink, the weapon thrusts on a quest clear, a companion shifts its weight; the mood tints and sparkles carry over. Creation gains a **wardrobe** step (every part as a row of swatches and chips, ⚄ Random, and a preset per path — picking a path dresses the hero until you touch the wardrobe) and the profile opens the same wardrobe later; the summary reads the look back ("copper-haired, in a linen tunic, tome in hand, a slime at heel"). The header shows the hero's bust. A hero saved with one of the four old palettes keeps its dye.
+- **Title cards** for the big moments: a room entered for the first time, a quest cleared (with its name and the XP), a rank gained, a passage opened, a lesson done — queued one at a time; a click skips.
+- **The reader layer.** `cat`/`less`/`head`/`tail` output cascades in line by line and a scroll taller than the log opens at its *title* instead of landing you at its end. The scrolls' own conventions render as structure and syntax colour — rules, titles, labels, `$ cmd  # comment` examples, command/purpose tables, box panels, *atmosphere*, **emphasis**, `code`, Markdown READMEs, shell scripts — without rewriting a byte of them (markers are kept, hidden by CSS; the test round-trips every scroll). Every recognised command is castable by a click, in the log and in the `less` pager; a "▼ more" cue shows while unread lines sit below; the clip band glides open and closed instead of snapping the log shorter.
+- **The web trainer is rewritten in React 19 + Vite + TypeScript** (`web/src/`) in a 16-bit dungeon-RPG skin, over the same classic-script engine the terminal hosts run — `web/index.html` still loads the vendored TermForge core, `runtime.js`, the plugins and the presenters as classic scripts in their fixed order, then the app module; the engine is never bundled, so the files the browser runs are the ones `termforge/test` and the node hosts load. The app is strict TypeScript, Tailwind 4 over `--fleet-*` design tokens (`web/src/styles/tokens.css`, the only file allowed a colour literal), state in small `useSyncExternalStore` stores, and components over `BashcrawlHud`'s models. It ships the fleet's core components: a skip link and one `<main id="main-content">`, labelled landmarks, light/dark/auto theme with a pre-paint script, one toast region, a `?` shortcuts dialog, an error boundary and a real 404 route. Keys and saves are unchanged, so progress carries over. Tests: vitest + Testing Library (`npm run test:web`), with `web/src/test/engine.ts` loading the real engine into jsdom so component tests play the actual game.
+- **A game-feel effects layer** (`web/src/fx/`): one event → effect table turns what a command changed into XP orbs flying from the log to the gauge, sparks and a ring on a cleared quest, confetti and a golden bloom on a rank-up, a red edge flash and trauma-model screen shake on damage, embers on a heal, glints on loot, a pixel-dissolve wipe of the stage on a room change, pane pulses, hero moods, and the engine's ASCII Motion command clips in the band under the log. Particles are a typed-array pool on one canvas whose loop runs only while something is alive; everything is gated on `prefers-reduced-motion`.
+- **Chiptune sound effects** synthesized on the Web Audio API (no files; `web/src/audio/`): a phrase per event and a key click per command, off by default with a header toggle that is also the unlocking gesture, remembered under `bashcrawl-web-sound-v1`.
+- **A 16-bit HUD**: a party status bar (rank with a segmented XP gauge toward the next rank and a rolling number, HP gauge, quests, badges, live streak — each a button that runs its command), bevelled corner-notched panels with nameplates, the pixel hero with moods, a title screen whose logo materialises out of static, and a Panels overlay on small screens.
+- `make web-install`, `make web-dev`, `make web-bundle`; `make web-preview` now serves the production build; `make web-test` also runs ESLint, vitest and the Vite build. `bin/bashcrawl web` serves `web/dist`. CI runs the web gates on Node 24 (vitest and jsdom need ≥ 22); `pages.yml` deploys `web/dist`. The hub's reusable `standard-ci` job is called with Node 24 too: its default Node 20 ships npm 10, which crashes resolving the always-latest ranges (`Cannot read properties of null (reading 'edgesOut')`) where npm 11 resolves them.
+- **A learning platform on every surface** (browser, `tty`, telnet). It's three brand-neutral TermForge plugins, and any TermForge app can install them:
+  - `learn` / `lesson` / `lab` (`termforge/core/curriculum.js`): courses of lessons whose objectives the game checks as you type real commands, each course with a writable lab under `/lab/<id>/`.
+  - `skills` / `review` (`termforge/core/mastery.js`): a skill map grown by every command you run (uses, distinct flags, failures), plus a Leitner-box spaced-repetition review of your weakest, most-due skills.
+  - `explain LINE` (`termforge/core/explain.js`): an offline, deterministic breakdown of any command line covering stages, decoded flags, what each argument resolves to, pipes, redirects, typo suggestions and destructive-command warnings. Plain `explain` explains the line you just ran.
+- **Five courses** in `courses/` (25 lessons, 70 objectives): Finding Your Way, Reading the Runes, The Pipeline Forge, The Artificer's Workshop, and Words of Power. Lessons are Markdown files with YAML frontmatter (`docs/authoring-courses.md`), compiled by `scripts/course_loader.py` into `web/data/courses.json`. `termforge/test/courses.test.js` plays every course from a fresh lab using only the authored solutions.
+- **Platform services in TermForge core:**
+  - typed events (`core/events.js`, the bashOS `events.py` contract)
+  - declarative rules (`core/rules.js`)
+  - feature plugins (`core/plugin.js`, `shell.use(plugin)`)
+  - a `promptLabel` hook
+  - schemas in `docs/schemas/{events,rules,plugin}.v1.md`
+- **`bin/bashcrawl`**: one dispatch table for `play`, `tty`, `serve`, `hub`, `web`, `courses`, `lab`, `doctor` and `reset`. It's plain bash and compatible with macOS bash 3.2. `doctor` (also `make doctor`) prints a verdict-style `[ OK ]`/`[WARN]`/`[CRIT]` line per check. `lab ID` copies a course's lab to `~/.bashcrawl/labs/ID` and never deletes learner work.
+- **Telnet hub mode** (`--hub`, `make telnet-hub`, `bashcrawl hub`) adds `who`, `say`, `emote`, `shout`, `name` and `top` across sessions, plus announcements of badges, lessons, ranks and room arrivals. Chat is sanitized of control and escape characters and rate-limited. It's opt-in, and the default server stays isolated.
+- **App registry** (`termforge/apps/registry.js`): hosts resolve `--app` through it, and `--app list` prints it.
+- **HUD `lesson` and `skills` panes** on the web and terminal sidebars, with `lesson`/`objective`/named `skill` events (toasts in the terminal, panel flashes on the web) and command chips on the web.
+- Four learning badges: Student, Polymath, Keeper of Cards and Graduate.
+- **Learn mode in the browser** (🎓 tab, `Alt+2`, a door on the landing card): a lesson reader beside the same story terminal. The lesson renders from Markdown (any `code` drops into the prompt on click), the objectives tick off as you type, a hint and lab chips sit under them, and the course catalogue shows every course as a card with its progress. The sidebar keeps the lab's files, your skills and the hero; the dungeon panes step aside while a course runs. `web/src/learn/LessonReader.tsx` over the Markdown renderer in `web/assets/js/learn.js`.
+- **Ambient ASCII Motion** (`web/assets/js/ambient.js`): the six room vignettes are now multi-frame `.asciimtn` loops that play in the Location panel (torches flicker, the cellar drips, mist drifts, gems glint, the rift breathes, a bat crosses the deep) and crossfade on a room change; the landing logo materialises out of static. Clips inherit the theme colour and carry only their highlights; a hidden tab pauses them and `prefers-reduced-motion` gets a still.
+- Two stage clips: `unroll` (a scroll unrolls — `lesson`, `banner`, `figlet`, and a completed lesson) and `lore` (an open book, a page turns — `help`, `man`, `hint`, `learn`, `commands`).
+- Mode switches, the landing card, the reader and met objectives animate (all gated on `prefers-reduced-motion`).
+- **Web: a hero status strip** under the header — rank with a bar toward the *next* rank on the `progression.yaml` ladder (and the XP still needed), health, main quests, badges and a live daily streak — each a button that runs the command behind it (`profile`, `xp`, `status`, `quest`, `achievements`, `daily`). The rank used to appear nowhere in the page except `profile`. `Hud.statusModel` in `web/assets/js/hud.js`, so the terminal HUD can draw the same line.
+- **Web: next-step chips** above the prompt (`Hud.suggestionsModel`): the active quest's own command when it can run from the current room (the objective's quoted command, checked against the room's files and the quest's `location`), the room's encounters (`./treasure`), its `essential_commands`, and a running lesson's lab and hint. Tapping a chip fills the prompt rather than running it, so the learner still types Enter; the leading suggestion is also the input's placeholder. Both models are covered by `termforge/test/hud.test.js`.
+- **Web: Reference ▶ buttons** drop any cheatsheet command into the Story prompt (`tryCommand` in `web/src/terminal/actions.ts`, placeholders like `<file>` trimmed); the sidebar's concept-spotlight cheats do the same on click. The docs drawer now follows the game: its room and quest cards update as you play.
+- **Web: a Panels overlay on small screens.** Under 900px the story sidebar no longer eats a third of the screen: it opens from a ☰ Panels button in the status strip as an overlay over the log, closes on Escape or when a chip is used, and the prompt label shortens to the room's name (`cellar $`) so the input keeps its width.
+
 ### Changed
+
+- **The game runtime is now plugins over data.** The arena, pathfind, daily, achievements, progress and bestiary moved from the `runtime.js` monolith into `web/assets/js/plugins/`. Ranks, achievements (now rules instead of lambdas), the bestiary, the arena trials, the skill map and review cards live in `src/help/data/progression.yaml`, which the content contracts validate. The golden transcripts were unchanged by the split itself.
+- The save shape gains `learn` and `mastery` slices at the end. The change is additive: older saves load with defaults, and the plugins sanitize both slices on load.
+- `help` and the `commands` deck advertise the learning platform.
+- Mode shortcuts are `Alt+1` Story, `Alt+2` Learn, `Alt+3` Arcade, `Alt+4` Reference; the web welcome text points new players at Learn.
+- Lesson text in the terminal drops `*emphasis*` markers (outside code spans; `*.txt` in backticks stays as typed).
+- **Web sidebar order and defaults.** The quest leads, then the room, pack, lesson and map; Skills, Hero and This Room Teaches start folded so the first screen is not eight open panels. `Hud.defaultLayout` takes a surface's `order` and `collapsed` overrides; a saved layout keeps its own fold and visibility flags, and the terminal HUD's defaults are unchanged.
+- **Web log: command blocks.** Each echoed `/path $ command` line is marked after paint, so CSS draws a rule above every command and colours the prompt and the command — a long scroll reads as blocks instead of one unbroken column. No change to the terminal protocol or the golden transcripts.
+- The web welcome text is three lines instead of five; the `title` tooltips on the header buttons say what HUD, Docs and CRT do.
+- **Light theme accents** are darker: the dark palette's neon green/blue/purple/amber sat at roughly 1.6:1 on parchment, which made the prompt, footer links, mode tabs and `kind-info` output hard to read. Each hue now clears WCAG AA for text, and the glows are dropped in light mode (`web/src/styles/tokens.css`).
+- `web/assets/js/learn.js` is trimmed to the Markdown renderer (`renderMarkdown`, `inlineHtml`); the reader is `web/src/learn/LessonReader.tsx`. `web/assets/js/arcade.js` keeps the games (`GAMES`, `CHEAT_LINES`, `BLOCKED_IN_GAME`, `scopedRuntime`); the flow is `web/src/arcade/arcade-store.ts`.
+- `hud.js`: a complete saved HUD layout keeps its pane order, so `hud move` and the menu's reorder survive the commit.
+- The root `package.json` carries the web app's dependencies (`"*"` ranges, no lockfile, `engines.node >= 22.22`) beside the engine's `node --test` script; `vite.config.mts` and `eslint.config.mjs` are ESM by extension because the manifest must never declare `"type": "module"`.
+
+- The header's Theme and CRT buttons moved into ⚙ Options; the Hero pane shows the hero's name, path and look.
+
+### Removed
+
+- The framework-free web renderers `web/assets/js/{game,shell,reference,docs}.js` and `web/assets/css/{theme,terminal}.css`, replaced by `web/src/`. `ArcadeManager` and `LearnView` go with them (their behaviour lives in the React stores and components, their tests in vitest).
+- The first-visit landing card (`Landing.tsx`); the title screen, hero creation and the intro take its place.
 
 - **Relicensed from MIT to GPL-3.0-only.** Bashcrawl is a derivative of [Seth Kenlon's original bashcrawl](https://gitlab.com/slackermedia/bashcrawl), which is distributed under the GNU GPL v3 (no "or later" grant), so the whole repository now uses the same terms. `LICENSE` is the unmodified GPLv3 text from gnu.org; a new `NOTICE` file credits the upstream author and contributors, records the derivation, and reproduces the MIT notices of the bundled third-party code (simplex-noise, ASCII Motion). `package.json`, `pyproject.toml` and the README badge/sections now say `GPL-3.0-only`.
 
 ### Fixed
 
+- **The emulator now counts lines like real tools.** A file's final newline used to count as an extra empty line, so `wc -l` was off by one, `sort` emitted a blank first line, and `tail -n 2` lost a real line. These commands now match bash: `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `cut`, `sed`, `nl` and `rev`.
+- `cp file dir` and `mv x dir` now land inside the directory (cp used to replace the directory with a file), a moved directory takes its contents with it, and `find /abs` and `find sub` print paths from the start argument like `find(1)`.
+- The arena no longer crashes when no trials are loaded. A save whose arena run points past the loaded trials is dropped.
+- On phones the header no longer overlaps the sidebar: it is pinned, the mode tabs take a row of their own, and the actions shrink.
+- `Alt+1`–`4` mode shortcuts now work on macOS, where Alt+digit types a symbol (`¡`): the handler reads the physical key.
+- The title banner and the landing logo spelled *Bashcarel* / *Bashcrml*; both ASCII Motion clips are regenerated from figlet's `slant` face (`motion/art/banner.asciimtn`, `motion/art/landing-brand.asciimtn`), and the one golden transcript that recorded the banner is re-recorded.
+- `.gitignore` no longer ignores every `workshop/` directory, only the dungeon's player-created ones.
 - **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
-  the cellar amulet opening `chapel/`), `file <encounter>` reported
-  `ASCII art / scroll` and `./<encounter>` failed with `No runnable script`
-  for every encounter under `chapel/`, `vault/` and `rift/`. The encounter
-  lookups in `runtime.js` (`execDispatch`, `runScript`) and the `file` command
-  in `termforge/core/packs/posix.js` now translate the visible path through
-  the VFS's `actual()` before indexing `world.encounters`. The
-  `main-quest-run` golden transcript is re-recorded: `./padlock` and
-  `./goblet` now succeed (#96).
+the cellar amulet opening `chapel/`), `file <encounter>` reported `ASCII art / scroll` and `./<encounter>` failed with `No runnable script` for every encounter under `chapel/`, `vault/` and `rift/`. The encounter lookups in `runtime.js` (`execDispatch`, `runScript`) and the `file` command in `termforge/core/packs/posix.js` now translate the visible path through the VFS's `actual()` before indexing `world.encounters`. The `main-quest-run` golden transcript is re-recorded: `./padlock` and `./goblet` now succeed (#96).
 
 ## [3.2.0] - 2026-08-01 — TermForge: the emulator becomes a framework
 
-The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a
-universal, zero-dependency terminal framework: one environment-agnostic kernel
-(parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game,
-real terminal sessions, a lightweight telnet server, and custom dev/monitoring
-tools. The web game is byte-identical (golden-transcript proven), saves are
-compatible, and the terminal-core bash game is untouched.
+The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a universal, zero-dependency terminal framework: one environment-agnostic kernel (parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game, real terminal sessions, a lightweight telnet server, and custom dev/monitoring tools. The web game is byte-identical (golden-transcript proven), saves are compatible, and the terminal-core bash game is untouched.
 
 ### Added
 
 - **`termforge/core/`** — the framework kernel as dual-mode files (classic
-  `<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only
-  **providers** for live-data files), `shell` (hook spine: preExecute /
-  interceptLine / postExecute / observePipeline / beforeCommand / execDispatch
-  / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`,
-  `protocol` (the versioned Line contract,
-  `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi`
-  (one TerminalView replacing the duplicated story/arcade renderers), and
-  `input` (shared history/completion helpers + a LineEditor and byte decoder
-  for stream hosts).
+`<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only **providers** for live-data files), `shell` (hook spine: preExecute / interceptLine / postExecute / observePipeline / beforeCommand / execDispatch / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`, `protocol` (the versioned Line contract, `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi` (one TerminalView replacing the duplicated story/arcade renderers), and `input` (shared history/completion helpers + a LineEditor and byte decoder for stream hosts).
 - **Node hosts** (`termforge/node/`): `host-tty.js` (play in a real terminal —
-  `make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854
-  subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode —
-  `make telnet-demo`; loopback-bound by default, see
-  `docs/termforge/telnet-host.md`).
+`make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854 subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode — `make telnet-demo`; loopback-bound by default, see `docs/termforge/telnet-host.md`).
 - **Apps** (`termforge/apps/`): `bashcrawl.js` (the game as an App descriptor)
-  and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted
-  as read-only VFS provider files, browsable with the ordinary posix toolkit;
-  `demo.html` runs it in a browser from `file://`).
+and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted as read-only VFS provider files, browsable with the ordinary posix toolkit; `demo.html` runs it in a browser from `file://`).
 - **JS test suite** (`make test-js`, `node --test`, zero npm deps): 62 tests —
-  golden transcripts recorded against the pre-refactor emulator and replayed
-  byte-identically under a pinned vm clock/rng, save-shape + legacy-save
-  round-trips, kernel/pack/view/input units, telnet codec units and a real
-  loopback integration. CI runs it (setup-node 20) plus `make lint-js`
-  (`node --check` over every tracked JS file).
+golden transcripts recorded against the pre-refactor emulator and replayed byte-identically under a pinned vm clock/rng, save-shape + legacy-save round-trips, kernel/pack/view/input units, telnet codec units and a real loopback integration. CI runs it (setup-node 20) plus `make lint-js` (`node --check` over every tracked JS file).
 - **Vendor pipeline**: `termforge/core/` is mirrored file-for-file into
-  `web/assets/js/vendor/termforge/` by `make web-build`
-  (`scripts/vendor_termforge.py`), byte-verified bidirectionally by
-  `validate_static_web.py`, pytest, and `make web-test`.
+`web/assets/js/vendor/termforge/` by `make web-build` (`scripts/vendor_termforge.py`), byte-verified bidirectionally by `validate_static_web.py`, pytest, and `make web-test`.
 - **`agentwatch`** (`termforge/apps/agentwatch/`, `make agentwatch`) — an
-  AI-agent task dashboard on the framework: a TaskSource interface projected
-  as `board`/`agent <id>`/`feed` commands AND live read-only VFS files
-  (`cat agents/forge`, `grep -r failed .`), over any host. Ships a
-  deterministic demo fleet (state ticks once per read — no clock/randomness)
-  and a JSONL adapter that turns the repo's real agent-playtest telemetry
-  (`logs/sessions/**`) into a live board
-  (`make agentwatch ARGS="--data-dir logs/sessions"`).
+AI-agent task dashboard on the framework: a TaskSource interface projected as `board`/`agent <id>`/`feed` commands AND live read-only VFS files (`cat agents/forge`, `grep -r failed .`), over any host. Ships a deterministic demo fleet (state ticks once per read — no clock/randomness) and a JSONL adapter that turns the repo's real agent-playtest telemetry (`logs/sessions/**`) into a live board (`make agentwatch ARGS="--data-dir logs/sessions"`).
 - **uiText copy deck** — the framework/content boundary made mechanical:
-  every brandable string a core pack emits routes through
-  `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire
-  voice (legacy error strings, fortune deck, banner art, figlet default)
-  moved into `GAME_UI_TEXT` in `runtime.js`. A new
-  `content-separation.test.js` fails the build if game vocabulary appears
-  anywhere under `termforge/core/`.
+every brandable string a core pack emits routes through `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire voice (legacy error strings, fortune deck, banner art, figlet default) moved into `GAME_UI_TEXT` in `runtime.js`. A new `content-separation.test.js` fails the build if game vocabulary appears anywhere under `termforge/core/`.
 
 ### Changed
 
 - `web/assets/js/runtime.js` (1852 → ~930 lines) is now the **game assembly**:
-  `class Runtime extends TermForge.Shell` with the full 74-entry handlers
-  literal (still the `validate_runtime_commands.py` contract — the validator
-  is untouched) and `installGameHooks()` for quests, achievements, daily,
-  trainer, pathfind, and encounters.
+`class Runtime extends TermForge.Shell` with the full 74-entry handlers literal (still the `validate_runtime_commands.py` contract — the validator is untouched) and `installGameHooks()` for quests, achievements, daily, trainer, pathfind, and encounters.
 - `game.js`/`arcade.js` share one TerminalView + DomSink (the twin log
-  renderers and four `escapeHtml` copies collapse into one);
-  `arcade.js` passes `{ bare: true }` instead of poking the instance.
+renderers and four `escapeHtml` copies collapse into one); `arcade.js` passes `{ bare: true }` instead of poking the instance.
 - `defaultState()` now declares two previously-implicit fields (`prevCwd`,
-  `stats.lastPipedIn`); persisted-save key order shifts accordingly (additive;
-  legacy saves load unchanged — fixture-proven).
+`stats.lastPipedIn`); persisted-save key order shifts accordingly (additive; legacy saves load unchanged — fixture-proven).
 - Host CLI parsing now uses node's standard `util.parseArgs`
-  (`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS
-  provider mounts now list in their parent directory as file or directory
-  according to the mount root's own type.
+(`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS provider mounts now list in their parent directory as file or directory according to the mount root's own type.
 
 ### Fixed
 
@@ -103,65 +120,34 @@ compatible, and the terminal-core bash game is untouched.
 
 ## [3.1.0] - 2026-07-06 — The Great Reduction + Web Flagship
 
-The repo is reduced to **two player surfaces plus one harness**: the pure-bash
-terminal game (played with real `cd`/`cat` — no launcher) and a static browser
-trainer generated from the same content, plus a lean MCP playtest harness that
-drives the *real* bash game. Net: ~350 files and ~75k lines removed.
+The repo is reduced to **two player surfaces plus one harness**: the pure-bash terminal game (played with real `cd`/`cat` — no launcher) and a static browser trainer generated from the same content, plus a lean MCP playtest harness that drives the *real* bash game. Net: ~350 files and ~75k lines removed.
 
 ### Added
 
 - **Web mode router** (`web/assets/js/shell.js`): top-nav **Story · Arcade ·
-  Reference**, first-visit landing overlay, hash routing (`#/story` …),
-  Alt+1/2/3 shortcuts, XP bridge, toasts.
+Reference**, first-visit landing overlay, hash routing (`#/story` …), Alt+1/2/3 shortcuts, XP bridge, toasts.
 - **Practice Arcade** (`web/assets/js/arcade.js`): mini-game framework over the
-  shared bash emulator — each game is *(seed world + goal predicate + scoring)*
-  on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real
-  dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle**
-  (transform INPUT into TARGET), **Command Flash** (drill decks generated from
-  `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed
-  story XP.
+shared bash emulator — each game is *(seed world + goal predicate + scoring)* on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle** (transform INPUT into TARGET), **Command Flash** (drill decks generated from `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed story XP.
 - **Reference mode + concept spotlight** (`web/assets/js/reference.js`):
-  searchable cheatsheet library from the command registries, a story-sidebar
-  card showing what the current room teaches, and inline syntax hints while
-  typing.
+searchable cheatsheet library from the command registries, a story-sidebar card showing what the current room teaches, and inline syntax hints while typing.
 - **Bash-emulator kernel upgrades** (`web/assets/js/runtime.js`): output
-  redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file +
-  `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new
-  `cut`, `tr`, `sed`, `nl`, `rev` commands.
+redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file + `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new `cut`, `tr`, `sed`, `nl`, `rev` commands.
 - **Arcade content registry** (`src/help/data/arcade.yaml`) exported to
-  `web/data/arcade.json` by `export_static_web.py` (validated by
-  `validate_static_web.py`).
+`web/data/arcade.json` by `export_static_web.py` (validated by `validate_static_web.py`).
 - **Lean playtest harness** (`src/playtest/`): FastMCP server
-  (`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash
-  session in a sandbox copy of the dungeon; JSONL recorder; scorer with
-  rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
+(`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash session in a sandbox copy of the dungeon; JSONL recorder; scorer with rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
 
 ### Removed
 
 - Python Textual TUI + old MCP/agent harness (`src/terminal-illness/`),
-  Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh`
-  launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only
-  `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …).
-  `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
+Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh` launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …). `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
 - TUI/agent/viewer test suites (`test/ai/`, `test/demo/`, `test/analysis/`,
-  and the `ti.*` unit/integration tests) and their CI workflows
-  (`test-framework`, `code-quality`, `release`).
+and the `ti.*` unit/integration tests) and their CI workflows (`test-framework`, `code-quality`, `release`).
 
 ### Changed
 
 - **CI/CD redesigned** (5 workflows → 3): `ci.yml` is now the single PR/push gate
-  with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/
-  markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a
-  gap where 175 tests ran nowhere, plus `make validate-contracts` and junit
-  artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing
-  the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted —
-  its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth)
-  moved into `validate_content_contracts.py` so they run locally too.
-  `dependency-update.yml` deleted — redundant with Dependabot, and its
-  `pip freeze` rewrite would have destroyed the commented requirements files.
-  `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml`
-  now writes the scorer verdict to the run summary. `make validate-contracts`
-  additionally runs the content-index check.
+with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/ markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a gap where 175 tests ran nowhere, plus `make validate-contracts` and junit artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted — its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth) moved into `validate_content_contracts.py` so they run locally too. `dependency-update.yml` deleted — redundant with Dependabot, and its `pip freeze` rewrite would have destroyed the commented requirements files. `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml` now writes the scorer verdict to the run summary. `make validate-contracts` additionally runs the content-index check.
 - Terminal play is launcher-free: `./setup.sh && cd entrance && cat scroll`.
 - Python deps reduced to `pyyaml` + `mcp` (dev: `pytest`, `pytest-timeout`,
   `jsonschema`, `ruff`).
@@ -442,77 +428,35 @@ drives the *real* bash game. Net: ~350 files and ~75k lines removed.
 
 ## [3.2.0] - 2026-08-01 — TermForge: the emulator becomes a framework
 
-The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a
-universal, zero-dependency terminal framework: one environment-agnostic kernel
-(parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game,
-real terminal sessions, a lightweight telnet server, and custom dev/monitoring
-tools. The web game is byte-identical (golden-transcript proven), saves are
-compatible, and the terminal-core bash game is untouched.
+The in-browser bash emulator is extracted into **TermForge** (`termforge/`), a universal, zero-dependency terminal framework: one environment-agnostic kernel (parser, VFS, Shell, Line protocol, TerminalView) now powers the browser game, real terminal sessions, a lightweight telnet server, and custom dev/monitoring tools. The web game is byte-identical (golden-transcript proven), saves are compatible, and the terminal-core bash game is untouched.
 
 ### Added
 
 - **`termforge/core/`** — the framework kernel as dual-mode files (classic
-  `<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only
-  **providers** for live-data files), `shell` (hook spine: preExecute /
-  interceptLine / postExecute / observePipeline / beforeCommand / execDispatch
-  / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`,
-  `protocol` (the versioned Line contract,
-  `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi`
-  (one TerminalView replacing the duplicated story/arcade renderers), and
-  `input` (shared history/completion helpers + a LineEditor and byte decoder
-  for stream hosts).
+`<script>` + CJS, no build step): `parser`, `vfs` (with NEW read-only **providers** for live-data files), `shell` (hook spine: preExecute / interceptLine / postExecute / observePipeline / beforeCommand / execDispatch / postCommand; injectable clock/rng/base64), `packs/posix` + `packs/flavour`, `protocol` (the versioned Line contract, `docs/schemas/terminal-protocol.v1.md`), `view` + `sinks/dom` + `sinks/ansi` (one TerminalView replacing the duplicated story/arcade renderers), and `input` (shared history/completion helpers + a LineEditor and byte decoder for stream hosts).
 - **Node hosts** (`termforge/node/`): `host-tty.js` (play in a real terminal —
-  `make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854
-  subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode —
-  `make telnet-demo`; loopback-bound by default, see
-  `docs/termforge/telnet-host.md`).
+`make tty-demo`) and `host-telnet.js` + `telnet-codec.js` (a minimal RFC 854 subset with NAWS, session caps, idle kick, and an nc-friendly `--raw` mode — `make telnet-demo`; loopback-bound by default, see `docs/termforge/telnet-host.md`).
 - **Apps** (`termforge/apps/`): `bashcrawl.js` (the game as an App descriptor)
-  and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted
-  as read-only VFS provider files, browsable with the ordinary posix toolkit;
-  `demo.html` runs it in a browser from `file://`).
+and `procwatch/` (the custom-tool reference: live `node:os` metrics mounted as read-only VFS provider files, browsable with the ordinary posix toolkit; `demo.html` runs it in a browser from `file://`).
 - **JS test suite** (`make test-js`, `node --test`, zero npm deps): 62 tests —
-  golden transcripts recorded against the pre-refactor emulator and replayed
-  byte-identically under a pinned vm clock/rng, save-shape + legacy-save
-  round-trips, kernel/pack/view/input units, telnet codec units and a real
-  loopback integration. CI runs it (setup-node 20) plus `make lint-js`
-  (`node --check` over every tracked JS file).
+golden transcripts recorded against the pre-refactor emulator and replayed byte-identically under a pinned vm clock/rng, save-shape + legacy-save round-trips, kernel/pack/view/input units, telnet codec units and a real loopback integration. CI runs it (setup-node 20) plus `make lint-js` (`node --check` over every tracked JS file).
 - **Vendor pipeline**: `termforge/core/` is mirrored file-for-file into
-  `web/assets/js/vendor/termforge/` by `make web-build`
-  (`scripts/vendor_termforge.py`), byte-verified bidirectionally by
-  `validate_static_web.py`, pytest, and `make web-test`.
+`web/assets/js/vendor/termforge/` by `make web-build` (`scripts/vendor_termforge.py`), byte-verified bidirectionally by `validate_static_web.py`, pytest, and `make web-test`.
 - **`agentwatch`** (`termforge/apps/agentwatch/`, `make agentwatch`) — an
-  AI-agent task dashboard on the framework: a TaskSource interface projected
-  as `board`/`agent <id>`/`feed` commands AND live read-only VFS files
-  (`cat agents/forge`, `grep -r failed .`), over any host. Ships a
-  deterministic demo fleet (state ticks once per read — no clock/randomness)
-  and a JSONL adapter that turns the repo's real agent-playtest telemetry
-  (`logs/sessions/**`) into a live board
-  (`make agentwatch ARGS="--data-dir logs/sessions"`).
+AI-agent task dashboard on the framework: a TaskSource interface projected as `board`/`agent <id>`/`feed` commands AND live read-only VFS files (`cat agents/forge`, `grep -r failed .`), over any host. Ships a deterministic demo fleet (state ticks once per read — no clock/randomness) and a JSONL adapter that turns the repo's real agent-playtest telemetry (`logs/sessions/**`) into a live board (`make agentwatch ARGS="--data-dir logs/sessions"`).
 - **uiText copy deck** — the framework/content boundary made mechanical:
-  every brandable string a core pack emits routes through
-  `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire
-  voice (legacy error strings, fortune deck, banner art, figlet default)
-  moved into `GAME_UI_TEXT` in `runtime.js`. A new
-  `content-separation.test.js` fails the build if game vocabulary appears
-  anywhere under `termforge/core/`.
+every brandable string a core pack emits routes through `Shell#text()`/`DEFAULT_UI_TEXT` with neutral defaults; the game's entire voice (legacy error strings, fortune deck, banner art, figlet default) moved into `GAME_UI_TEXT` in `runtime.js`. A new `content-separation.test.js` fails the build if game vocabulary appears anywhere under `termforge/core/`.
 
 ### Changed
 
 - `web/assets/js/runtime.js` (1852 → ~930 lines) is now the **game assembly**:
-  `class Runtime extends TermForge.Shell` with the full 74-entry handlers
-  literal (still the `validate_runtime_commands.py` contract — the validator
-  is untouched) and `installGameHooks()` for quests, achievements, daily,
-  trainer, pathfind, and encounters.
+`class Runtime extends TermForge.Shell` with the full 74-entry handlers literal (still the `validate_runtime_commands.py` contract — the validator is untouched) and `installGameHooks()` for quests, achievements, daily, trainer, pathfind, and encounters.
 - `game.js`/`arcade.js` share one TerminalView + DomSink (the twin log
-  renderers and four `escapeHtml` copies collapse into one);
-  `arcade.js` passes `{ bare: true }` instead of poking the instance.
+renderers and four `escapeHtml` copies collapse into one); `arcade.js` passes `{ bare: true }` instead of poking the instance.
 - `defaultState()` now declares two previously-implicit fields (`prevCwd`,
-  `stats.lastPipedIn`); persisted-save key order shifts accordingly (additive;
-  legacy saves load unchanged — fixture-proven).
+`stats.lastPipedIn`); persisted-save key order shifts accordingly (additive; legacy saves load unchanged — fixture-proven).
 - Host CLI parsing now uses node's standard `util.parseArgs`
-  (`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS
-  provider mounts now list in their parent directory as file or directory
-  according to the mount root's own type.
+(`allowNegative` for `--no-color`; engines floor is node >= 20.16); VFS provider mounts now list in their parent directory as file or directory according to the mount root's own type.
 
 ### Fixed
 
@@ -521,65 +465,34 @@ compatible, and the terminal-core bash game is untouched.
 
 ## [3.1.0] - 2026-07-06 — The Great Reduction + Web Flagship
 
-The repo is reduced to **two player surfaces plus one harness**: the pure-bash
-terminal game (played with real `cd`/`cat` — no launcher) and a static browser
-trainer generated from the same content, plus a lean MCP playtest harness that
-drives the *real* bash game. Net: ~350 files and ~75k lines removed.
+The repo is reduced to **two player surfaces plus one harness**: the pure-bash terminal game (played with real `cd`/`cat` — no launcher) and a static browser trainer generated from the same content, plus a lean MCP playtest harness that drives the *real* bash game. Net: ~350 files and ~75k lines removed.
 
 ### Added
 
 - **Web mode router** (`web/assets/js/shell.js`): top-nav **Story · Arcade ·
-  Reference**, first-visit landing overlay, hash routing (`#/story` …),
-  Alt+1/2/3 shortcuts, XP bridge, toasts.
+Reference**, first-visit landing overlay, hash routing (`#/story` …), Alt+1/2/3 shortcuts, XP bridge, toasts.
 - **Practice Arcade** (`web/assets/js/arcade.js`): mini-game framework over the
-  shared bash emulator — each game is *(seed world + goal predicate + scoring)*
-  on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real
-  dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle**
-  (transform INPUT into TARGET), **Command Flash** (drill decks generated from
-  `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed
-  story XP.
+shared bash emulator — each game is *(seed world + goal predicate + scoring)* on a scoped `Runtime`. Four games: **Path Navigator** (navigate the real dungeon), **grep/find Hunt** (find the sigil-bearing file), **Pipe Puzzle** (transform INPUT into TARGET), **Command Flash** (drill decks generated from `commands.yaml`/`tutorials.yaml` + curated decks). Scores persist; wins feed story XP.
 - **Reference mode + concept spotlight** (`web/assets/js/reference.js`):
-  searchable cheatsheet library from the command registries, a story-sidebar
-  card showing what the current room teaches, and inline syntax hints while
-  typing.
+searchable cheatsheet library from the command registries, a story-sidebar card showing what the current room teaches, and inline syntax hints while typing.
 - **Bash-emulator kernel upgrades** (`web/assets/js/runtime.js`): output
-  redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file +
-  `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new
-  `cut`, `tr`, `sed`, `nl`, `rev` commands.
+redirection (`>`, `>>`), glob expansion (`*`, `?`, quote-aware), multi-file + `-r/-l/-n/-c/-w` and real-regex `grep`, `sort -u`, `uniq -c/-d`, and new `cut`, `tr`, `sed`, `nl`, `rev` commands.
 - **Arcade content registry** (`src/help/data/arcade.yaml`) exported to
-  `web/data/arcade.json` by `export_static_web.py` (validated by
-  `validate_static_web.py`).
+`web/data/arcade.json` by `export_static_web.py` (validated by `validate_static_web.py`).
 - **Lean playtest harness** (`src/playtest/`): FastMCP server
-  (`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash
-  session in a sandbox copy of the dungeon; JSONL recorder; scorer with
-  rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
+(`bashcrawl_start/observe/command/report_gap`) driving a persistent PTY bash session in a sandbox copy of the dungeon; JSONL recorder; scorer with rooms/scrolls gates. Smoke-tested by `test/integration/test_mcp_server.py`.
 
 ### Removed
 
 - Python Textual TUI + old MCP/agent harness (`src/terminal-illness/`),
-  Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh`
-  launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only
-  `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …).
-  `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
+Flask log viewer (`src/viewer/`), `screenshots/` (167 SVGs), `main.sh` launcher, Docker/devcontainer tooling, `.archives/`, and the launcher-only `lib/` scripts (`emulator`, `state`, `ui`, `quests`, `room_loader`, …). `lib/` retains `colors.sh`, `log.sh`, `yaml_reader.sh`, `reset.sh`.
 - TUI/agent/viewer test suites (`test/ai/`, `test/demo/`, `test/analysis/`,
-  and the `ti.*` unit/integration tests) and their CI workflows
-  (`test-framework`, `code-quality`, `release`).
+and the `ti.*` unit/integration tests) and their CI workflows (`test-framework`, `code-quality`, `release`).
 
 ### Changed
 
 - **CI/CD redesigned** (5 workflows → 3): `ci.yml` is now the single PR/push gate
-  with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/
-  markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a
-  gap where 175 tests ran nowhere, plus `make validate-contracts` and junit
-  artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing
-  the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted —
-  its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth)
-  moved into `validate_content_contracts.py` so they run locally too.
-  `dependency-update.yml` deleted — redundant with Dependabot, and its
-  `pip freeze` rewrite would have destroyed the commented requirements files.
-  `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml`
-  now writes the scorer verdict to the run summary. `make validate-contracts`
-  additionally runs the content-index check.
+with three jobs — consolidated `lint` (one runner for shellcheck/yamllint/ markdownlint/ruff), `test` (**the full pytest suite now runs in CI**, closing a gap where 175 tests ran nowhere, plus `make validate-contracts` and junit artifacts), and `macos-smoke` (real gameplay on stock macOS bash 3.2, replacing the Windows matrix the unix-only suite couldn't run). `game-tests.yml` deleted — its unique checks (shebangs, boilerplate, unlock targets, main-path scroll depth) moved into `validate_content_contracts.py` so they run locally too. `dependency-update.yml` deleted — redundant with Dependabot, and its `pip freeze` rewrite would have destroyed the commented requirements files. `pages.yml` gains pip caching and uses `make web-test`; `blank-slate-audit.yml` now writes the scorer verdict to the run summary. `make validate-contracts` additionally runs the content-index check.
 - Terminal play is launcher-free: `./setup.sh && cd entrance && cat scroll`.
 - Python deps reduced to `pyyaml` + `mcp` (dev: `pytest`, `pytest-timeout`,
   `jsonschema`, `ruff`).

@@ -1,0 +1,4 @@
+The river runs south.
+
+If you are reading this from the forest, you used a RELATIVE path: ..
+climbs one level, and every / goes one step deeper.

@@ -1,0 +1,281 @@
+#!/usr/bin/env bash
+# bashcrawl — one dispatch table for every way to play, learn and run it.
+#
+# The game itself needs no launcher (cd entrance && cat scroll is still the
+# whole game); this is the front door to the rest of the platform, in the
+# shape of bashOS's bin/bashos and chui's tui.sh. Plain bash, compatible with
+# macOS /bin/bash 3.2. Each subcommand checks only what its own surface
+# needs, so `play`, `courses`, `lab`, `doctor` and `reset` work on a machine
+# with nothing but bash.
+#
+#   bashcrawl                 same as: bashcrawl help
+#   bashcrawl play            the classic dungeon: a bash subshell in entrance/
+#   bashcrawl tty [ARGS]      the full-screen HUD in this terminal   (Node >= 20.16)
+#   bashcrawl serve [ARGS]    telnet server on 127.0.0.1:2323        (Node >= 20.16)
+#   bashcrawl hub [ARGS]      telnet server in hub mode: who/say/shout/top
+#   bashcrawl web [PORT]      the browser trainer on 127.0.0.1:8000   (python3)
+#   bashcrawl courses         list the courses (courses/*/course.md)
+#   bashcrawl lab ID [DIR]    copy a course's lab to ~/.bashcrawl/labs/ID for real-bash practice
+#   bashcrawl doctor          [ OK ]/[WARN]/[CRIT] per check; exit 0 / 1 / 2
+#   bashcrawl reset [--dry]   restore the dungeon to a fresh game (lib/reset.sh)
+set -Eeuo pipefail
+
+# Resolve the checkout through symlinks, so `ln -s …/bin/bashcrawl ~/.local/bin/` works.
+_src="${BASH_SOURCE[0]}"
+while [[ -L "$_src" ]]; do
+  _dir="$(cd "$(dirname "$_src")" && pwd)"
+  _src="$(readlink "$_src")"
+  [[ "$_src" == /* ]] || _src="$_dir/$_src"
+done
+ROOT="$(cd "$(dirname "$_src")/.." && pwd)"
+unset _src _dir
+export BASHCRAWL_ROOT="$ROOT"
+
+LABS_HOME="${BASHCRAWL_LABS:-${HOME}/.bashcrawl/labs}"
+SAVE_FILE="${BASHCRAWL_SAVE_FILE:-${HOME}/.bashcrawl/story.json}"
+NODE_MIN_MAJOR=20
+NODE_MIN_MINOR=16
+
+die() { printf 'bashcrawl: %s\n' "$*" >&2; exit 2; }
+
+need() { # need <command> <why>
+  command -v "$1" >/dev/null 2>&1 || die "$2"
+}
+
+# Node >= 20.16, or a clear message (prints the version on success).
+node_version_ok() {
+  local version major minor
+  command -v node >/dev/null 2>&1 || return 1
+  version="$(node --version 2>/dev/null | sed 's/^v//')"
+  major="${version%%.*}"
+  minor="${version#*.}"
+  minor="${minor%%.*}"
+  [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ ]] || return 1
+  if (( major > NODE_MIN_MAJOR || (major == NODE_MIN_MAJOR && minor >= NODE_MIN_MINOR) )); then
+    printf '%s' "$version"
+    return 0
+  fi
+  return 1
+}
+
+need_node() {
+  node_version_ok >/dev/null || die "this needs Node.js >= ${NODE_MIN_MAJOR}.${NODE_MIN_MINOR} (https://nodejs.org); the classic game needs only bash: bashcrawl play"
+}
+
+# One frontmatter value (`key: value`, quotes stripped) from a course.md.
+front() { # front <file> <key>
+  awk -v key="$2" '
+    NR == 1 && $0 != "---" { exit }
+    NR > 1 && $0 == "---" { exit }
+    index($0, key ":") == 1 {
+      sub("^" key ":[ ]*", "")
+      gsub(/^"|"$/, "")
+      print
+      exit
+    }' "$1"
+}
+
+usage() {
+  cat <<EOF
+bashcrawl — learn the terminal by playing
+
+  play             the classic dungeon: a bash subshell in entrance/ (bash only)
+  tty [ARGS]       the full-screen HUD in this terminal          (Node >= ${NODE_MIN_MAJOR}.${NODE_MIN_MINOR})
+  serve [ARGS]     telnet server on 127.0.0.1:2323 (--raw for nc) (Node)
+  hub [ARGS]       telnet server in hub mode: who / say / shout / top
+  web [PORT]       the browser trainer on 127.0.0.1:8000          (python3)
+  courses          list the courses
+  lab ID [DIR]     copy a course's lab to ~/.bashcrawl/labs/ID (--fresh moves an old one aside)
+  doctor           check this machine: [ OK ] / [WARN] / [CRIT]
+  reset [--dry]    restore the dungeon to a fresh game
+
+Inside any surface: learn · lesson · skills · review · explain · help
+EOF
+}
+
+cmd_play() {
+  bash "$ROOT/setup.sh" --quick
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    printf 'The dungeon lives in %s/entrance. Start with:\n  cd %s/entrance && cat scroll\n' "$ROOT" "$ROOT"
+    return 0
+  fi
+  printf '\n  Entering the dungeon. Read the scroll:  cat scroll\n  Lost? bash %s/help.sh   ·   Leave: exit\n\n' "$ROOT"
+  cd "$ROOT/entrance"
+  exec bash --rcfile "$ROOT/lib/playrc.sh" -i
+}
+
+cmd_tty() { need_node; exec node "$ROOT/termforge/node/host-tty.js" --app bashcrawl "$@"; }
+cmd_serve() { need_node; exec node "$ROOT/termforge/node/host-telnet.js" --app bashcrawl "$@"; }
+cmd_hub() { cmd_serve --hub "$@"; }
+
+cmd_web() {
+  need python3 "web needs python3 (or serve web/dist with any static file server)"
+  local port="${1:-8000}"
+  [[ "$port" =~ ^[0-9]+$ ]] || die "web PORT must be a number"
+  # The browser trainer is a Vite build: web/dist holds the compiled app with
+  # the engine and data copied beside it (make web-bundle).
+  [[ -f "$ROOT/web/dist/index.html" ]] \
+    || die "the web app is not built yet. Run: make web-bundle   (node >= 22.22 + npm; or: npm install && npm run build). For hot reload: make web-dev"
+  printf 'Serving the browser trainer at http://127.0.0.1:%s  (Ctrl+C stops)\n' "$port"
+  exec python3 -m http.server "$port" --bind 127.0.0.1 --directory "$ROOT/web/dist"
+}
+
+# Rows of "order<TAB>id<TAB>level<TAB>lessons<TAB>title<TAB>summary", sorted.
+course_rows() {
+  local dir id lessons file
+  for dir in "$ROOT"/courses/*/; do
+    file="${dir}course.md"
+    [[ -f "$file" ]] || continue
+    id="$(basename "$dir")"
+    lessons="$(find "$dir" -maxdepth 1 -name '[0-9][0-9]-*.md' | wc -l | tr -d ' ')"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(front "$file" order)" "$id" "$(front "$file" level)" \
+      "$lessons" "$(front "$file" title)" "$(front "$file" summary)"
+  done | sort -n
+}
+
+cmd_courses() {
+  local order id level lessons title summary
+  printf 'Courses — start one in any surface with: learn ID\n\n'
+  while IFS="$(printf '\t')" read -r order id level lessons title summary; do
+    printf '  %-12s %-13s %2s lessons  %s\n' "$id" "$level" "$lessons" "$title"
+    printf '  %-12s %s\n' "" "$summary"
+  done < <(course_rows)
+  printf '\nPractise in real bash too:  bashcrawl lab ID\n'
+}
+
+cmd_lab() {
+  local fresh=false id="" dest="" src stamp
+  while (( $# )); do
+    case "$1" in
+      --fresh) fresh=true ;;
+      -*) die "lab: unknown option $1" ;;
+      *) if [[ -z "$id" ]]; then id="$1"; else dest="$1"; fi ;;
+    esac
+    shift
+  done
+  [[ -n "$id" ]] || die "usage: bashcrawl lab ID [DIR] [--fresh]   (see: bashcrawl courses)"
+  [[ "$id" =~ ^[a-z][a-z0-9-]*$ ]] || die "lab: '$id' is not a course id"
+  src="$ROOT/courses/$id/lab"
+  [[ -d "$src" ]] || die "lab: no course '$id' with a lab (see: bashcrawl courses)"
+  dest="${dest:-$LABS_HOME/$id}"
+  if [[ -e "$dest" ]]; then
+    $fresh || die "lab: $dest already exists — keep practising there, or pass --fresh to move it aside"
+    # Never delete what a learner made: move it aside instead.
+    stamp="$(date '+%Y%m%d%H%M%S')"
+    mv "$dest" "$dest.bak-$stamp"
+    printf 'Moved your old lab aside: %s.bak-%s\n' "$dest" "$stamp"
+  fi
+  mkdir -p "$dest"
+  cp -R "$src/." "$dest/"
+  printf 'Lab ready: %s\n  cd %s\n  The lessons: %s/courses/%s/*.md  (or learn %s in bashcrawl tty / web)\n' \
+    "$dest" "$dest" "$ROOT" "$id" "$id"
+}
+
+# ── doctor: the bin/os-health pattern ───────────────────────────────────────
+STATUS=0
+verdict() { # verdict <LEVEL> <name> <detail>
+  printf '[%s] %-11s %s\n' "$1" "$2" "$3"
+  if [[ "$1" == "CRIT" ]]; then
+    STATUS=2
+  elif [[ "$1" == "WARN" && "$STATUS" -lt 1 ]]; then
+    STATUS=1
+  fi
+}
+ok() { verdict " OK " "$1" "$2"; }
+warn() { verdict "WARN" "$1" "$2"; }
+crit() { verdict "CRIT" "$1" "$2"; }
+
+cmd_doctor() {
+  local total=0 runnable=0 f version bundle missing="" n_courses=0 n_lessons=0 dir unlocked="" room
+  printf 'bashcrawl doctor · %s · %s\n\n' "$(date '+%Y-%m-%d %H:%M')" "$(uname -sr)"
+
+  ok bash "${BASH_VERSION} (the game needs any bash; macOS /bin/bash 3.2 works)"
+
+  while IFS= read -r f; do
+    if [[ "$(head -n 1 "$f" 2>/dev/null)" == '#!'*bash* ]]; then
+      total=$((total + 1))
+      [[ -x "$f" ]] && runnable=$((runnable + 1))
+    fi
+  done < <(find "$ROOT/entrance" -type f ! -name scroll 2>/dev/null)
+  if (( total > 0 && runnable == total )); then
+    ok encounters "${runnable}/${total} executable"
+  else
+    warn encounters "${runnable}/${total} executable — run ./setup.sh"
+  fi
+
+  if version="$(node_version_ok)"; then
+    ok node "${version} (bashcrawl tty / serve / hub, make test-js)"
+  elif command -v node >/dev/null 2>&1; then
+    warn node "$(node --version) is older than ${NODE_MIN_MAJOR}.${NODE_MIN_MINOR} — tty/serve need a newer Node"
+  else
+    warn node "not found — only bashcrawl tty / serve / hub need it"
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    if python3 -c 'import yaml' >/dev/null 2>&1; then
+      ok python "$(python3 --version 2>&1 | cut -d' ' -f2) with PyYAML (web/data rebuilds, validators)"
+    else
+      warn python "$(python3 --version 2>&1 | cut -d' ' -f2) without PyYAML — pip install -r requirements.txt to rebuild web/data"
+    fi
+  else
+    warn python "not found — only rebuilding web/data and bashcrawl web need it"
+  fi
+
+  for bundle in world quests progression commands docs arcade courses; do
+    [[ -s "$ROOT/web/data/$bundle.json" ]] || missing="$missing $bundle"
+  done
+  if [[ -z "$missing" ]]; then
+    ok web-data "7 bundles in web/data (the browser, tty and telnet surfaces read them)"
+  else
+    crit web-data "missing:$missing — run make web-build"
+  fi
+
+  for dir in "$ROOT"/courses/*/; do
+    [[ -f "${dir}course.md" ]] || continue
+    n_courses=$((n_courses + 1))
+    n_lessons=$((n_lessons + $(find "$dir" -maxdepth 1 -name '[0-9][0-9]-*.md' | wc -l)))
+  done
+  if (( n_courses > 0 )); then
+    ok courses "${n_courses} courses, ${n_lessons} lessons (bashcrawl courses)"
+  else
+    warn courses "none found under courses/"
+  fi
+
+  for room in chapel vault scrap rift workshop; do
+    [[ -d "$ROOT/entrance/$room" ]] && unlocked="$unlocked $room"
+  done
+  if [[ -z "$unlocked" ]]; then
+    ok game "fresh dungeon — start with: bashcrawl play"
+  else
+    ok game "in progress, unlocked:$unlocked (bashcrawl reset --dry to preview a fresh start)"
+  fi
+
+  if [[ -f "$SAVE_FILE" ]]; then
+    ok save "$SAVE_FILE ($(wc -c < "$SAVE_FILE" | tr -d ' ') bytes, used by bashcrawl tty)"
+  else
+    ok save "none yet — bashcrawl tty saves to $SAVE_FILE"
+  fi
+  return "$STATUS"
+}
+
+cmd_reset() { exec bash "$ROOT/lib/reset.sh" "$@"; }
+
+main() {
+  local sub="${1:-help}"
+  (( $# )) && shift
+  case "$sub" in
+    play) cmd_play "$@" ;;
+    tty) cmd_tty "$@" ;;
+    serve | telnet) cmd_serve "$@" ;;
+    hub) cmd_hub "$@" ;;
+    web) cmd_web "$@" ;;
+    courses | learn) cmd_courses "$@" ;;
+    lab) cmd_lab "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    reset) cmd_reset "$@" ;;
+    help | -h | --help) usage ;;
+    *) usage >&2; die "unknown command: $sub" ;;
+  esac
+}
+
+main "$@"

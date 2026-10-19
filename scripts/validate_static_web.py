@@ -27,25 +27,79 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _relative_urls(html: str, label: str) -> list[str]:
+    """Every src/href must be relative (GitHub Pages project path), bar the repo link."""
+    problems = []
+    for src in re.findall(r'(?:src|href)="([^"]+)"', html):
+        if src in ALLOWED_INDEX_ABSOLUTE_HREFS:
+            continue
+        if src.startswith("/") or src.startswith("http://") or src.startswith("https://"):
+            problems.append(f"{label}: static asset URL must be relative: {src}")
+    return problems
+
+
+def _engine_script_order(html: str, vendor_files: list[str], label: str) -> list[str]:
+    """Script order: every vendored TermForge core file and every game plugin
+    must be loaded as a classic script, all of them before the game runtime
+    (which reads global.TermForge at load time). A `vite-ignore` attribute
+    keeps Vite's hands off these tags, hence the tolerant regex."""
+    problems = []
+    script_srcs = re.findall(r'<script src="\./([^"]+)"[^>]*></script>', html)
+    runtime_src = "assets/js/runtime.js"
+    runtime_idx = script_srcs.index(runtime_src) if runtime_src in script_srcs else -1
+    if runtime_idx < 0:
+        problems.append(f"{label} does not load {runtime_src}")
+    art_src = "assets/js/art-clips.js"
+    if art_src not in script_srcs:
+        problems.append(f"{label} does not load {art_src}")
+    elif runtime_idx >= 0 and script_srcs.index(art_src) > runtime_idx:
+        problems.append(f"{label} must load {art_src} before {runtime_src}")
+    for rel in vendor_files:
+        if rel not in script_srcs:
+            problems.append(f"{label} does not load vendored core file: {rel}")
+        elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
+            problems.append(f"{label} must load {rel} before assets/js/runtime.js")
+    # Game feature plugins (web/assets/js/plugins/*.js): dropping a file in
+    # is half the registration — the page must load it, before the runtime.
+    plugin_files = sorted(
+        p.relative_to(WEB).as_posix() for p in (WEB / "assets/js/plugins").glob("*.js")
+    )
+    if not plugin_files:
+        problems.append("web/assets/js/plugins/ has no game plugins")
+    for rel in plugin_files:
+        if rel not in script_srcs:
+            problems.append(f"{label} does not load game plugin: {rel}")
+        elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
+            problems.append(f"{label} must load {rel} before assets/js/runtime.js")
+    return problems
+
+
 def validate() -> dict:
     errors: list[str] = []
     required = [
+        # The Vite entry and the React app's roots (web/src is compiled; the
+        # token file is the one place design values live).
         "index.html",
-        "assets/css/theme.css",
-        "assets/css/terminal.css",
+        "src/main.tsx",
+        "src/app/App.tsx",
+        "src/styles/tokens.css",
+        "src/styles/app.css",
+        "public/favicon.svg",
+        "public/.nojekyll",
+        # The ENGINE: classic scripts index.html loads before the app module.
         "assets/js/storage.js",
         "assets/js/runtime.js",
         "assets/js/hud.js",
+        "assets/js/learn.js",
         "assets/js/fx-clips.js",
         "assets/js/fx.js",
         "assets/js/art-clips.js",
-        "assets/js/docs.js",
-        "assets/js/reference.js",
+        "assets/js/ambient.js",
         "assets/js/arcade.js",
-        "assets/js/game.js",
-        "assets/js/shell.js",
         "data/world.json",
         "data/quests.json",
+        "data/progression.json",
+        "data/courses.json",
         "data/commands.json",
         "data/docs.json",
         "data/arcade.json",
@@ -71,28 +125,39 @@ def validate() -> dict:
     index = _read(WEB / "index.html") if (WEB / "index.html").is_file() else ""
     if "url_for(" in index or "{{" in index:
         errors.append("web/index.html must not contain Jinja syntax")
-    for src in re.findall(r'(?:src|href)="([^"]+)"', index):
-        if src in ALLOWED_INDEX_ABSOLUTE_HREFS:
-            continue
-        if src.startswith("/") or src.startswith("http://") or src.startswith("https://"):
-            errors.append(f"Static asset URL must be relative: {src}")
+    errors.extend(_relative_urls(index, "index.html"))
 
-    # Script order: every vendored TermForge core file must be loaded by
-    # index.html, and all of them before the game runtime (which reads
-    # global.TermForge at load time).
-    script_srcs = re.findall(r'<script src="\./([^"]+)"></script>', index)
-    runtime_src = "assets/js/runtime.js"
-    runtime_idx = script_srcs.index(runtime_src) if runtime_src in script_srcs else -1
-    art_src = "assets/js/art-clips.js"
-    if art_src not in script_srcs:
-        errors.append(f"index.html does not load {art_src}")
-    elif runtime_idx >= 0 and script_srcs.index(art_src) > runtime_idx:
-        errors.append(f"index.html must load {art_src} before {runtime_src}")
-    for rel in vendor_files:
-        if rel not in script_srcs:
-            errors.append(f"index.html does not load vendored core file: {rel}")
-        elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
-            errors.append(f"index.html must load {rel} before assets/js/runtime.js")
+    # The React app mounts after the engine: one module entry, one root.
+    if 'id="root"' not in index:
+        errors.append('index.html must contain the app root <div id="root">')
+    modules = re.findall(r'<script type="module" src="([^"]+)"', index)
+    if modules != ["./src/main.tsx"]:
+        errors.append(
+            f"index.html must load exactly one module entry ./src/main.tsx (found {modules})"
+        )
+    if "<link rel=\"stylesheet\"" in index:
+        errors.append(
+            "index.html must not link stylesheets: the app imports its CSS (web/src/styles)"
+        )
+
+    errors.extend(_engine_script_order(index, vendor_files, "index.html"))
+    # The built site, when present (make web-bundle): the copy step must have
+    # shipped the engine beside the bundle, in the same order, still relative.
+    dist_index = WEB / "dist" / "index.html"
+    if dist_index.is_file():
+        dist = _read(dist_index)
+        errors.extend(_engine_script_order(dist, vendor_files, "dist/index.html"))
+        errors.extend(_relative_urls(dist, "dist/index.html"))
+        shipped = (
+            "assets/js/runtime.js",
+            "data/world.json",
+            "assets/js/vendor/termforge/protocol.js",
+        )
+        for rel in shipped:
+            if not (WEB / "dist" / rel).is_file():
+                errors.append(
+                    f"web/dist is missing the engine file {rel} (vite.config.mts copyEngine)"
+                )
 
     if (WEB / "data/world.json").is_file():
         world = json.loads(_read(WEB / "data/world.json"))

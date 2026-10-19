@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from course_loader import build_bundle as build_courses
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = ROOT / "web" / "data"
@@ -182,6 +183,57 @@ def build_quests() -> dict[str, Any]:
     return {"quests": data.get("quests", [])}
 
 
+def _review_cards(
+    skills: list[dict[str, Any]], trials: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Spaced-review cards for the skill map: the typable commands.yaml
+    entries (description -> command) and the arena trials, each tagged with
+    the skill (its first word) — only skills the map tracks are kept."""
+    tracked = {cmd for group in skills for cmd in group.get("commands") or []}
+    reference = _load_yaml(ROOT / "src/help/data/commands.yaml")
+    cards: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for category in (reference.get("categories") or {}).values():
+        for spec in category.get("commands", []):
+            command = str(spec.get("command", "")).strip()
+            description = str(spec.get("description", "")).strip()
+            if not command or not description or "<" in command:
+                continue
+            if any(token in command for token in _UNTYPABLE_TOKENS):
+                continue
+            if not _TYPABLE_RE.match(command):
+                continue
+            skill = command.split()[0]
+            if skill not in tracked or (skill, description) in seen:
+                continue
+            seen.add((skill, description))
+            cards.append({"skill": skill, "q": description, "a": _card_answers(command), "why": ""})
+    for trial in trials:
+        answers = [str(a) for a in trial.get("answers") or []]
+        skill = answers[0].split()[0] if answers else ""
+        if skill in tracked:
+            question = trial.get("riddle", "")
+            why = trial.get("teaches", "")
+            cards.append({"skill": skill, "q": question, "a": answers, "why": why})
+    return cards
+
+
+def build_progression() -> dict[str, Any]:
+    """Ranks, achievements (TermForge rules), bestiary, arena trials, the skill
+    map, and the review cards generated for it."""
+    data = _load_yaml(ROOT / "src/help/data/progression.yaml")
+    skills = data.get("skills") or []
+    trials = data.get("trials") or []
+    return {
+        "ranks": data.get("ranks") or [],
+        "achievements": data.get("achievements") or [],
+        "bestiary": data.get("bestiary") or [],
+        "trials": trials,
+        "skills": skills,
+        "cards": [*(data.get("cards") or []), *_review_cards(skills, trials)],
+    }
+
+
 def build_commands() -> dict[str, Any]:
     reference = _load_yaml(ROOT / "src/help/data/commands.yaml")
     runtime = _load_yaml(ROOT / "src/help/data/runtime_commands.yaml")
@@ -346,6 +398,8 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     write_json(out / "world.json", build_world())
     write_json(out / "quests.json", build_quests())
+    write_json(out / "progression.json", build_progression())
+    write_json(out / "courses.json", build_courses())
     write_json(out / "commands.json", build_commands())
     write_json(out / "docs.json", build_docs())
     write_json(out / "arcade.json", build_arcade())

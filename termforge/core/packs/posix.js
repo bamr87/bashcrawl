@@ -19,6 +19,14 @@
 
     const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet } = deps.parser;
 
+    // A file's lines, the way POSIX tools see them: a final newline ends the
+    // last line rather than starting an empty one ("a\nb\n" is 2 lines).
+    function linesOf(text) {
+        const parts = String(text).split("\n");
+        if (parts.length > 1 && parts[parts.length - 1] === "") parts.pop();
+        return parts;
+    }
+
     const commands = {
         pwd() {
             return [{ kind: "output", text: this.state.cwd }];
@@ -68,21 +76,21 @@
             const { count, file } = parseLineCount(args);
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "head requires a readable file or piped input" }];
-            return [{ kind: "output", text: text.split("\n").slice(0, count).join("\n") }];
+            return [{ kind: "output", text: linesOf(text).slice(0, count).join("\n") }];
         },
 
         tail(args, stdin) {
             const { count, file } = parseLineCount(args);
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "tail requires a readable file or piped input" }];
-            return [{ kind: "output", text: count > 0 ? text.split("\n").slice(-count).join("\n") : "" }];
+            return [{ kind: "output", text: count > 0 ? linesOf(text).slice(-count).join("\n") : "" }];
         },
 
         wc(args, stdin) {
             const file = args.find((arg) => !arg.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "wc requires a readable file or piped input" }];
-            const lines = text ? text.split("\n").length : 0;
+            const lines = text ? linesOf(text).length : 0;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
             const flags = args.filter((arg) => arg.startsWith("-")).join("").replace(/-/g, "");
             if (/[^lwcm]/.test(flags)) return [{ kind: "error", text: "wc: supported options are -l, -w, -c, -m" }];
@@ -143,7 +151,7 @@
             const scan = (text, label) => {
                 let count = 0;
                 const lines = [];
-                text.split("\n").forEach((lineText, idx) => {
+                linesOf(text).forEach((lineText, idx) => {
                     const hit = re.test(lineText);
                     if (invert ? !hit : hit) {
                         count += 1;
@@ -192,7 +200,7 @@
             const file = args.find((a) => !a.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "sort requires a file or piped input" }];
-            let lines = text.split("\n");
+            let lines = linesOf(text);
             // -n keys off the leading number like real sort(1); non-numeric = 0.
             const numKey = (s) => { const n = parseFloat(s.trimStart()); return Number.isNaN(n) ? 0 : n; };
             lines.sort((a, b) => (flags.includes("n") ? numKey(a) - numKey(b) : a.localeCompare(b)));
@@ -212,7 +220,7 @@
             const counting = flags.includes("c");
             const dupesOnly = flags.includes("d");
             const groups = [];
-            for (const line of text.split("\n")) {
+            for (const line of linesOf(text)) {
                 const last = groups[groups.length - 1];
                 if (last && last.line === line) last.count += 1;
                 else groups.push({ line, count: 1 });
@@ -246,7 +254,7 @@
             if (text === null) return [{ kind: "error", text: "cut requires a file or piped input" }];
             const wants = parseRangeList(fieldSpec || charSpec);
             if (!wants) return [{ kind: "error", text: `cut: invalid list: ${fieldSpec || charSpec}` }];
-            const out = text.split("\n").map((line) => {
+            const out = linesOf(text).map((line) => {
                 if (charSpec) {
                     return wants.map(([lo, hi]) => line.slice(lo - 1, hi === Infinity ? undefined : hi)).join("");
                 }
@@ -308,7 +316,7 @@
             const global = m[4].includes("g");
             // Escape `$` so JS replace metacharacters ($&, $1) stay literal like sed.
             const replacement = m[3].replace(/\\(.)/g, "$1").replace(/\$/g, "$$$$");
-            const out = text.split("\n").map((line) => (
+            const out = linesOf(text).map((line) => (
                 global
                     ? line.replace(new RegExp(re.source, re.flags + "g"), replacement)
                     : line.replace(re, replacement)
@@ -321,7 +329,7 @@
             const file = args.find((a) => !a.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "nl requires a file or piped input" }];
-            const out = text.split("\n").map((line, i) => `${String(i + 1).padStart(6)}  ${line}`);
+            const out = linesOf(text).map((line, i) => `${String(i + 1).padStart(6)}  ${line}`);
             return [{ kind: "output", text: out.join("\n") }];
         },
 
@@ -330,7 +338,7 @@
             const file = args.find((a) => !a.startsWith("-"));
             const text = file ? this.readFile(this.resolve(file)) : (stdin != null ? stdin : null);
             if (text === null) return [{ kind: "error", text: "rev requires a file or piped input" }];
-            const out = text.split("\n").map((line) => [...line].reverse().join(""));
+            const out = linesOf(text).map((line) => [...line].reverse().join(""));
             return [{ kind: "output", text: out.join("\n") }];
         },
 
@@ -351,7 +359,10 @@
                 const name = this.basename(path) || "/";
                 const typeMatch = !filterType || (filterType === "d" && isDir) || (filterType === "f" && !isDir);
                 const nameMatch = !re || re.test(name);
-                if (typeMatch && nameMatch && path !== startPath) matches.push(path.replace(startPath, "."));
+                // Like find(1), results are spelled from the start argument as
+                // typed: `find .` -> ./x, `find /abs` -> /abs/x, `find sub` -> sub/x.
+                const prefix = startArg === "." ? "." : startArg.replace(/\/+$/, "") || "/";
+                if (typeMatch && nameMatch && path !== startPath) matches.push(prefix + path.slice(startPath.length));
                 if (!isDir) return;
                 for (const entry of this.entries(path, true)) {
                     visit((path === "/" ? "" : path) + "/" + entry.name);
@@ -422,6 +433,12 @@
                 if (found) {
                     return [{ kind: "info", text: `NAME\n    ${found.command}\n\nDESCRIPTION\n    ${found.description}` }];
                 }
+            }
+            // Plugin-installed commands carry their own metadata (core/plugin.js).
+            const meta = this.handlers[cmd] && this.commandMeta && this.commandMeta[cmd];
+            if (meta && meta.summary) {
+                const synopsis = meta.usage ? `\n\nSYNOPSIS\n    ${meta.usage}` : "";
+                return [{ kind: "info", text: `NAME\n    ${cmd}${synopsis}\n\nDESCRIPTION\n    ${meta.summary}` }];
             }
             if (this.handlers[cmd]) return [{ kind: "info", text: `NAME\n    ${cmd}\n\nDESCRIPTION\n    ${this.manBuiltinNote(cmd)}` }];
             return [{ kind: "error", text: `man: no entry for '${cmd}'` }];
@@ -507,9 +524,13 @@
             if (eff.length < 2) return [{ kind: "error", text: "cp requires source and destination" }];
             if (eff.length > 2) return [{ kind: "error", text: "cp: too many arguments (glob matched several files?)" }];
             const src = this.resolve(eff[0]);
-            const dst = this.resolve(eff[1]);
+            let dst = this.resolve(eff[1]);
             const text = this.readFile(src);
             if (text === null) return [{ kind: "error", text: `No such file: ${eff[0]}` }];
+            // `cp file dir` copies INTO the directory, like cp(1).
+            if (this.isDir(dst)) dst = `${dst === "/" ? "" : dst}/${this.basename(src)}`;
+            if (!this.isDir(this.parentPath(dst))) return [{ kind: "error", text: `cp: no such directory for ${eff[1]}` }];
+            if (this.vfs.providerFor(dst)) return [{ kind: "error", text: `cp: cannot write to ${eff[1]}: read-only filesystem` }];
             this.state.userNodes[dst] = { type: "file", content: text };
             return [{ kind: "success", text: `Copied ${eff[0]} to ${eff[1]}` }];
         },
@@ -517,11 +538,23 @@
         mv(args) {
             if (args.length < 2) return [{ kind: "error", text: "mv requires source and destination" }];
             const src = this.resolve(args[0]);
-            const dst = this.resolve(args[1]);
-            const node = this.state.userNodes[src];
+            let dst = this.resolve(args[1]);
+            const nodes = this.state.userNodes;
+            const node = nodes[src];
             if (!node) return [{ kind: "error", text: this.text("mvSessionOnly") }];
-            this.state.userNodes[dst] = node;
-            delete this.state.userNodes[src];
+            // `mv x dir` moves INTO an existing directory, like mv(1).
+            if (this.isDir(dst) && dst !== src) dst = `${dst === "/" ? "" : dst}/${this.basename(src)}`;
+            if (dst === src || dst.startsWith(`${src}/`)) return [{ kind: "error", text: `mv: cannot move ${args[0]} into itself` }];
+            if (!this.isDir(this.parentPath(dst))) return [{ kind: "error", text: `mv: no such directory for ${args[1]}` }];
+            nodes[dst] = node;
+            delete nodes[src];
+            // A moved directory takes its contents with it.
+            for (const path of Object.keys(nodes)) {
+                if (path.startsWith(`${src}/`)) {
+                    nodes[dst + path.slice(src.length)] = nodes[path];
+                    delete nodes[path];
+                }
+            }
             return [{ kind: "success", text: `Moved ${args[0]} to ${args[1]}` }];
         },
 

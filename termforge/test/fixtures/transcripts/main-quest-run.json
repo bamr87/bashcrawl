@@ -652,7 +652,7 @@
         },
         {
           "kind": "output",
-          "text": "  Badges:           6/11 earned"
+          "text": "  Badges:           6/15 earned"
         },
         {
           "kind": "output",
@@ -685,7 +685,7 @@
       "outputs": [
         {
           "kind": "magic",
-          "text": "🏅 Achievements — 6/11 unlocked"
+          "text": "🏅 Achievements — 6/15 unlocked"
         },
         {
           "kind": "success",
@@ -730,6 +730,22 @@
         {
           "kind": "success",
           "text": "🔥 Seasoned Adventurer — Earned 150 XP."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Student — Enrolled in a course with learn."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Polymath — Practised ten different skills."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Keeper of Cards — Finished a spaced-repetition review."
+        },
+        {
+          "kind": "dim",
+          "text": "🔒 Graduate — Completed a whole course."
         }
       ]
     },
@@ -846,7 +862,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "eyJjd2QiOiIvZW50cmFuY2UiLCJwcmV2Q3dkIjoiL2VudHJhbmNlL3N0dWR5IiwiaHAiOjk1LCJ4cCI6OTA1LCJpbnZlbnRvcnkiOlsiYW11bGV0Iiwic3dvcmQiLCJjb2lucyIsImRpYW1vbmRzIiwiZ29ibGV0IiwiZ3JpbW9pcmUiXSwiYWxpYXNlcyI6eyJiYyI6ImVjaG8gNDIifSwiZW52VmFycyI6e30sInVzZXJOb2RlcyI6eyIvZW50cmFuY2UvY2VsbGFyL2FybW91cnkvY2hhbWJlci93b3Jrc2hvcCI6eyJ0eXBlIjoiZGlyIn0sIi9lbnRyYW5jZS9jZWxsYXIvYXJtb3VyeS9jaGFtYmVyL3dvcmtzaG9wL2FudmlsIjp7InR5cGUiOiJmaWxlIiwiY29udGVudCI6IiJ9LCIvZW50cmFuY2Uvc3R1ZHkiOnsidHlwZSI6ImRpciJ9LCIvZW50cmFuY2Uvc3R1ZHkvZ3JpbW9pcmUiOnsidHlwZSI6ImZpbGUiLCJjb250ZW50IjoiIn19LCJjb21wbGV0ZWRRdWVzdElkcyI6WzAsMSwyLDMsNCw1LDYsN10sImN1cnJlbnRRdWVzdElkIjo4LCJ2aXNpdGVkIjpbXSwiaGlzdG9yeSI6W10sImhpc3RvcnlJbmRleCI6LTEsImZsYWdzIjp7InRyZWFzdXJlX2NlbGxhciI6dHJ1ZSwidHJlYXN1cmVfYXJtb3VyeSI6dHJ1ZSwicG90aW9uIjp0cnVlLCJ0cmVhc3VyZV9jaGFtYmVyIjp0cnVlLCJzdGF0dWUiOnRydWUsInBhZGxvY2siOnRydWUsImdvYmxldCI6dHJ1ZX0sInJldmVhbHMiOnsiL2VudHJhbmNlL2NoYXBlbCI6Ii9lbnRyYW5jZS8uY2hhcGVsIiwiL2VudHJhbmNlL3ZhdWx0IjoiL2VudHJhbmNlLy52YXVsdCIsIi9lbnRyYW5jZS9zY3JhcCI6Ii9lbnRyYW5jZS8uc2NyYXAiLCIvZW50cmFuY2UvY2hhcGVsL2dyYXZleWFyZC9tYXVzb2xldW0iOiIvZW50cmFuY2UvLmNoYXBlbC9ncmF2ZXlhcmQvLm1hdXNvbGV1bSIsIi9lbnRyYW5jZS9yaWZ0IjoiL2VudHJhbmNlLy5yaWZ0In0sInRyYWluZXIiOm51bGwsInBhdGhmaW5kIjpudWxsLCJzcGVlZHJ1bkJlc3QiOm51bGwsImFjaGlldmVtZW50cyI6WyJmaXJzdF9zdGVwcyIsInNlYXNvbmVkIiwidHJlYXN1cmVfaHVudGVyIiwia2V5X21hc3RlciIsIndvcmxkX2J1aWxkZXIiLCJjYXJ0b2dyYXBoZXIiXSwiYmVzdGlhcnkiOlsidHJlYXN1cmUiLCJwb3Rpb24iLCJzdGF0dWUiLCJnb2JsZXQiXSwiZGFpbHkiOnsiZGF0ZSI6IjIwMjYtMDEtMTUiLCJiYXNlbGluZVhwIjowLCJnb2FsIjo2MCwiY29tcGxldGVkIjp0cnVlLCJzdHJlYWsiOjEsImxhc3REYXRlIjoiMjAyNi0wMS0xNSJ9LCJyYW5rSW5kZXgiOjQsInN0YXRzIjp7ImNvbW1hbmRzIjp7InB3ZCI6MywibHMiOjcsImNkIjoxNiwiY2F0IjoxLCIuL3RyZWFzdXJlIjo0LCJpbnZlbnRvcnkiOjEsImVjaG8iOjIsIi4vcG90aW9uIjoxLCJncmVwIjoyLCIuL3N0YXR1ZSI6MSwiaGVhbHRoIjoxLCJzdGF0dXMiOjEsIm1rZGlyIjoyLCJ0b3VjaCI6MiwibWFwIjoxLCJsb29rIjoxLCIuL3BhZGxvY2siOjEsIi4vZ29ibGV0IjoxLCJzb3VyY2UiOjEsInF1ZXN0IjoxLCJoaW50IjoxLCJ4cCI6MSwicHJvZmlsZSI6MSwiYWNoaWV2ZW1lbnRzIjoxLCJiZXN0aWFyeSI6MiwiZGFpbHkiOjEsInNhdmUiOjJ9LCJjYXRTY3JvbGxDb3VudCI6MSwibGFzdFBpcGVkSW4iOmZhbHNlLCJpbml0aWFsaXplZCI6ZmFsc2V9fQ=="
+          "text": "eyJjd2QiOiIvZW50cmFuY2UiLCJwcmV2Q3dkIjoiL2VudHJhbmNlL3N0dWR5IiwiaHAiOjk1LCJ4cCI6OTA1LCJpbnZlbnRvcnkiOlsiYW11bGV0Iiwic3dvcmQiLCJjb2lucyIsImRpYW1vbmRzIiwiZ29ibGV0IiwiZ3JpbW9pcmUiXSwiYWxpYXNlcyI6eyJiYyI6ImVjaG8gNDIifSwiZW52VmFycyI6e30sInVzZXJOb2RlcyI6eyIvZW50cmFuY2UvY2VsbGFyL2FybW91cnkvY2hhbWJlci93b3Jrc2hvcCI6eyJ0eXBlIjoiZGlyIn0sIi9lbnRyYW5jZS9jZWxsYXIvYXJtb3VyeS9jaGFtYmVyL3dvcmtzaG9wL2FudmlsIjp7InR5cGUiOiJmaWxlIiwiY29udGVudCI6IiJ9LCIvZW50cmFuY2Uvc3R1ZHkiOnsidHlwZSI6ImRpciJ9LCIvZW50cmFuY2Uvc3R1ZHkvZ3JpbW9pcmUiOnsidHlwZSI6ImZpbGUiLCJjb250ZW50IjoiIn19LCJjb21wbGV0ZWRRdWVzdElkcyI6WzAsMSwyLDMsNCw1LDYsN10sImN1cnJlbnRRdWVzdElkIjo4LCJ2aXNpdGVkIjpbXSwiaGlzdG9yeSI6W10sImhpc3RvcnlJbmRleCI6LTEsImZsYWdzIjp7InRyZWFzdXJlX2NlbGxhciI6dHJ1ZSwidHJlYXN1cmVfYXJtb3VyeSI6dHJ1ZSwicG90aW9uIjp0cnVlLCJ0cmVhc3VyZV9jaGFtYmVyIjp0cnVlLCJzdGF0dWUiOnRydWUsInBhZGxvY2siOnRydWUsImdvYmxldCI6dHJ1ZX0sInJldmVhbHMiOnsiL2VudHJhbmNlL2NoYXBlbCI6Ii9lbnRyYW5jZS8uY2hhcGVsIiwiL2VudHJhbmNlL3ZhdWx0IjoiL2VudHJhbmNlLy52YXVsdCIsIi9lbnRyYW5jZS9zY3JhcCI6Ii9lbnRyYW5jZS8uc2NyYXAiLCIvZW50cmFuY2UvY2hhcGVsL2dyYXZleWFyZC9tYXVzb2xldW0iOiIvZW50cmFuY2UvLmNoYXBlbC9ncmF2ZXlhcmQvLm1hdXNvbGV1bSIsIi9lbnRyYW5jZS9yaWZ0IjoiL2VudHJhbmNlLy5yaWZ0In0sInRyYWluZXIiOm51bGwsInBhdGhmaW5kIjpudWxsLCJzcGVlZHJ1bkJlc3QiOm51bGwsImFjaGlldmVtZW50cyI6WyJmaXJzdF9zdGVwcyIsInNlYXNvbmVkIiwidHJlYXN1cmVfaHVudGVyIiwia2V5X21hc3RlciIsIndvcmxkX2J1aWxkZXIiLCJjYXJ0b2dyYXBoZXIiXSwiYmVzdGlhcnkiOlsidHJlYXN1cmUiLCJwb3Rpb24iLCJzdGF0dWUiLCJnb2JsZXQiXSwiZGFpbHkiOnsiZGF0ZSI6IjIwMjYtMDEtMTUiLCJiYXNlbGluZVhwIjowLCJnb2FsIjo2MCwiY29tcGxldGVkIjp0cnVlLCJzdHJlYWsiOjEsImxhc3REYXRlIjoiMjAyNi0wMS0xNSJ9LCJyYW5rSW5kZXgiOjQsInN0YXRzIjp7ImNvbW1hbmRzIjp7InB3ZCI6MywibHMiOjcsImNkIjoxNiwiY2F0IjoxLCIuL3RyZWFzdXJlIjo0LCJpbnZlbnRvcnkiOjEsImVjaG8iOjIsIi4vcG90aW9uIjoxLCJncmVwIjoyLCIuL3N0YXR1ZSI6MSwiaGVhbHRoIjoxLCJzdGF0dXMiOjEsIm1rZGlyIjoyLCJ0b3VjaCI6MiwibWFwIjoxLCJsb29rIjoxLCIuL3BhZGxvY2siOjEsIi4vZ29ibGV0IjoxLCJzb3VyY2UiOjEsInF1ZXN0IjoxLCJoaW50IjoxLCJ4cCI6MSwicHJvZmlsZSI6MSwiYWNoaWV2ZW1lbnRzIjoxLCJiZXN0aWFyeSI6MiwiZGFpbHkiOjEsInNhdmUiOjJ9LCJjYXRTY3JvbGxDb3VudCI6MSwibGFzdFBpcGVkSW4iOmZhbHNlLCJpbml0aWFsaXplZCI6ZmFsc2V9LCJsZWFybiI6eyJhY3RpdmUiOm51bGwsInByb2dyZXNzIjp7fSwiY29tcGxldGVkIjpbXX0sIm1hc3RlcnkiOnsic2tpbGxzIjp7InB3ZCI6eyJ1c2VzIjozLCJmYWlscyI6MCwiZmxhZ3MiOltdLCJib3giOjAsImR1ZSI6MH0sImxzIjp7InVzZXMiOjcsImZhaWxzIjowLCJmbGFncyI6WyJGIl0sImJveCI6MCwiZHVlIjowfSwiY2QiOnsidXNlcyI6MTYsImZhaWxzIjowLCJmbGFncyI6W10sImJveCI6MCwiZHVlIjowfSwiY2F0Ijp7InVzZXMiOjEsImZhaWxzIjowLCJmbGFncyI6W10sImJveCI6MCwiZHVlIjowfSwiZWNobyI6eyJ1c2VzIjoyLCJmYWlscyI6MCwiZmxhZ3MiOltdLCJib3giOjAsImR1ZSI6MH0sImdyZXAiOnsidXNlcyI6MiwiZmFpbHMiOjAsImZsYWdzIjpbXSwiYm94IjowLCJkdWUiOjB9LCJta2RpciI6eyJ1c2VzIjoyLCJmYWlscyI6MCwiZmxhZ3MiOltdLCJib3giOjAsImR1ZSI6MH0sInRvdWNoIjp7InVzZXMiOjIsImZhaWxzIjowLCJmbGFncyI6W10sImJveCI6MCwiZHVlIjowfSwic291cmNlIjp7InVzZXMiOjEsImZhaWxzIjowLCJmbGFncyI6W10sImJveCI6MCwiZHVlIjowfX0sInJldmlldyI6bnVsbCwicmV2aWV3cyI6MH19"
         }
       ]
     }
@@ -973,6 +989,82 @@
       "catScrollCount": 1,
       "lastPipedIn": false,
       "initialized": false
+    },
+    "learn": {
+      "active": null,
+      "progress": {},
+      "completed": []
+    },
+    "mastery": {
+      "skills": {
+        "pwd": {
+          "uses": 3,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "ls": {
+          "uses": 7,
+          "fails": 0,
+          "flags": [
+            "F"
+          ],
+          "box": 0,
+          "due": 0
+        },
+        "cd": {
+          "uses": 16,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "cat": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "echo": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "grep": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "mkdir": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "touch": {
+          "uses": 2,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        },
+        "source": {
+          "uses": 1,
+          "fails": 0,
+          "flags": [],
+          "box": 0,
+          "due": 0
+        }
+      },
+      "review": null,
+      "reviews": 0
     }
   }
 }

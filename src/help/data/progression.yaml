@@ -1,0 +1,371 @@
+# ============================================================================
+# Bashcrawl Progression Registry — src/help/data/progression.yaml
+#
+# Single source of truth for the game's progression catalogs. Consumed by:
+#   - Static web export (scripts/export_static_web.py -> web/data/progression.json)
+#   - The game runtime on every surface (web/assets/js/runtime.js + plugins/)
+#   - The HUD presenter (web/assets/js/hud.js): rank titles, badge totals
+#
+# ranks         XP thresholds -> titles, ascending. The first must be min 0.
+# achievements  badges: `when` is a TermForge rule (docs/schemas/rules.v1.md)
+#               evaluated against the session state after every line; earned
+#               once, worth `xp` (default 5). Order is display + award order.
+# bestiary      creatures the `bestiary` command catalogues; each key needs an
+#               encounter-<key> ASCII Motion clip (motion/art/, motion.yaml).
+# trials        Training Arena riddles: `answers` are the exact accepted lines
+#               (lowercased, whitespace-collapsed), first one is shown on a miss.
+# skills        the skill map (`skills`, `review`): commands grouped for display.
+#               Each command is a real handler and belongs to one group; review
+#               cards are generated from commands.yaml and the trials for them.
+#
+# Adding content: add an entry here, then `make validate-contracts && make
+# web-test`. No JavaScript change is needed.
+# ============================================================================
+
+version: 1
+
+ranks:
+  - {min: 0, title: "Novice Whisperer"}
+  - {min: 40, title: "Apprentice of the Shell"}
+  - {min: 80, title: "Adept Spellcaster"}
+  - {min: 130, title: "Terminal Master"}
+  - {min: 190, title: "Archmage of the Command Line"}
+
+achievements:
+  - id: first_steps
+    icon: "🧭"
+    title: "First Steps"
+    desc: "Found your place with pwd."
+    xp: 5
+    when: {state: stats.commands.pwd, gt: 0}
+  - id: cartographer
+    icon: "✨"
+    title: "Cartographer"
+    desc: "Charted the dungeon with map or tree."
+    xp: 5
+    when: {any: [{state: stats.commands.map, gt: 0}, {state: stats.commands.tree, gt: 0}]}
+  - id: scholar
+    icon: "💡"
+    title: "Scholar"
+    desc: "Read three ancient scrolls."
+    xp: 5
+    when: {state: stats.catScrollCount, gte: 3}
+  - id: world_builder
+    icon: "⚡"
+    title: "World-Builder"
+    desc: "Conjured a room with mkdir."
+    xp: 5
+    when: {state: stats.commands.mkdir, gt: 0}
+  - id: treasure_hunter
+    icon: "💰"
+    title: "Treasure Hunter"
+    desc: "Claimed your first loot."
+    xp: 5
+    when: {count: inventory, gte: 1}
+  - id: key_master
+    icon: "🔓"
+    title: "Key-Master"
+    desc: "Unlocked a hidden room."
+    xp: 5
+    when: {count: reveals, gte: 1}
+  - id: arena_graduate
+    icon: "🏅"
+    title: "Arena Graduate"
+    desc: "Cleared a Training Arena run."
+    xp: 5
+    when: {flag: arena_cleared}
+  - id: speed_demon
+    icon: "🏆"
+    title: "Speed Demon"
+    desc: "Finished a timed Speed Run."
+    xp: 5
+    when: {exists: speedrunBest}
+  - id: trailblazer
+    icon: "✅"
+    title: "Trailblazer"
+    desc: "Completed a Path-Finder journey."
+    xp: 5
+    when: {flag: pathfind_done}
+  - id: naturalist
+    icon: "✨"
+    title: "Naturalist"
+    desc: "Catalogued 5 creatures in the bestiary."
+    xp: 5
+    when: {count: bestiary, gte: 5}
+  - id: seasoned
+    icon: "🔥"
+    title: "Seasoned Adventurer"
+    desc: "Earned 150 XP."
+    xp: 5
+    when: {state: xp, gte: 150}
+  # Learning-platform badges (courses/, the skill map, spaced review).
+  - id: student
+    icon: "🎓"
+    title: "Student"
+    desc: "Enrolled in a course with learn."
+    xp: 5
+    when: {exists: learn.active}
+  - id: polymath
+    icon: "🧠"
+    title: "Polymath"
+    desc: "Practised ten different skills."
+    xp: 10
+    when: {count: mastery.skills, gte: 10}
+  - id: keeper_of_cards
+    icon: "🃏"
+    title: "Keeper of Cards"
+    desc: "Finished a spaced-repetition review."
+    xp: 10
+    when: {state: mastery.reviews, gte: 1}
+  - id: graduate
+    icon: "📜"
+    title: "Graduate"
+    desc: "Completed a whole course."
+    xp: 25
+    when: {count: learn.completed, gte: 1}
+
+skills:
+  - group: "Navigation"
+    commands: [pwd, ls, cd, tree, find]
+  - group: "Reading"
+    commands: [cat, less, head, tail, wc, nl, file]
+  - group: "Searching & text"
+    commands: [grep, sort, uniq, cut, tr, sed, rev]
+  - group: "Files"
+    commands: [mkdir, touch, cp, mv, rm, chmod]
+  - group: "The shell"
+    commands: [echo, export, let, alias, env, history, source, man]
+
+bestiary:
+  - key: treasure
+    name: "Treasure Chest"
+    blurb: "Spills jewels for the bold."
+  - key: monster
+    name: "Coiled Serpent"
+    blurb: "Strikes at the unprepared."
+  - key: ghost
+    name: "Restless Ghost"
+    blurb: "Drifts through locked doors."
+  - key: potion
+    name: "Glowing Potion"
+    blurb: "Restores a weary hero's vigor."
+  - key: statue
+    name: "Stone Guardian"
+    blurb: "Wakes when you draw near."
+  - key: goblet
+    name: "Jeweled Goblet"
+    blurb: "A prize of the deep vaults."
+  - key: spell
+    name: "Igniting Rune"
+    blurb: "Crackles with raw magick."
+  - key: crystal
+    name: "Murmuring Crystal"
+    blurb: "Whispers half-truths."
+  - key: penguin
+    name: "Dapper Penguin"
+    blurb: "Inexplicably formal."
+  - key: nyarlathotep
+    name: "The Crawling Chaos"
+    blurb: "Best left uncatalogued."
+  - key: fountain
+    name: "Wishing Fountain"
+    blurb: "Bubbles with possibility."
+
+trials:
+  - cat: see
+    riddle: "Reveal everything standing in your current room."
+    answers: ["ls"]
+    hint: "Three letters — short for 'list'."
+    teaches: "ls lists the contents of a room (directory)."
+  - cat: see
+    riddle: "Reveal even the HIDDEN passages here (names that begin with a dot)."
+    answers: ["ls -a", "ls -la", "ls -al", "ls -a ."]
+    hint: "ls needs the 'all' flag: -a"
+    teaches: "ls -a shows hidden entries whose names start with a dot."
+  - cat: move
+    riddle: "Cast the spell that tells you exactly where you stand."
+    answers: ["pwd"]
+    hint: "Print Working Directory."
+    teaches: "pwd prints your current location."
+  - cat: move
+    riddle: "Descend into the room named 'cellar'."
+    answers: ["cd cellar"]
+    hint: "Change Directory into cellar."
+    teaches: "cd <room> walks you into another directory."
+  - cat: move
+    riddle: "Climb back to the room you came from."
+    answers: ["cd .."]
+    hint: "'..' means the parent room."
+    teaches: "cd .. moves up one directory."
+  - cat: read
+    riddle: "Read the entire scroll lying in this room."
+    answers: ["cat scroll"]
+    hint: "conCATenate the scroll to your screen."
+    teaches: "cat <file> prints a file's full contents."
+  - cat: read
+    riddle: "Peek at only the FIRST lines of the scroll."
+    answers: ["head scroll"]
+    hint: "The opposite of 'tail'."
+    teaches: "head shows the first lines of a file."
+  - cat: read
+    riddle: "Glimpse only the LAST lines of the scroll."
+    answers: ["tail scroll"]
+    hint: "The opposite of 'head'."
+    teaches: "tail shows the last lines of a file."
+  - cat: search
+    riddle: "Hunt the scroll for the word 'amulet'."
+    answers: ["grep amulet scroll"]
+    hint: "grep <word> <file>"
+    teaches: "grep finds lines matching a pattern inside a file."
+  - cat: search
+    riddle: "Count how many lines the scroll holds."
+    answers: ["wc -l scroll", "wc scroll"]
+    hint: "Word Count, with the -l (lines) flag."
+    teaches: "wc -l counts the lines in a file."
+  - cat: make
+    riddle: "Conjure a brand-new room called 'workshop'."
+    answers: ["mkdir workshop"]
+    hint: "MaKe DIRectory."
+    teaches: "mkdir creates a new directory (room)."
+  - cat: make
+    riddle: "Forge an empty artifact named 'torch'."
+    answers: ["touch torch"]
+    hint: "One word — it 'touches' a file into being."
+    teaches: "touch creates an empty file."
+  - cat: magic
+    riddle: "Summon your inventory by echoing the $I treasure-rune."
+    answers: ["echo $i", "echo \"$i\""]
+    hint: "echo $I"
+    teaches: "echo prints text; $I holds your inventory."
+  - cat: magic
+    riddle: "Run the 'treasure' encounter waiting in this room."
+    answers: ["./treasure"]
+    hint: "Execute it with a leading ./"
+    teaches: "./<script> runs an executable in the current room."
+  - cat: magic
+    riddle: "Draw the map of the whole dungeon."
+    answers: ["map", "tree"]
+    hint: "One short word — or the branching 'tree'."
+    teaches: "map / tree reveal the dungeon's layout."
+
+# Authored review cards for skills the generated cards (commands.yaml +
+# trials) do not cover. q = the task, a = accepted command lines (compared
+# with whitespace collapsed; all-lowercase answers also match any case),
+# why = shown when the card is missed.
+cards:
+  - skill: sort
+    q: "Sort names.txt in reverse order."
+    a: ["sort -r names.txt"]
+    why: "-r reverses the order."
+  - skill: sort
+    q: "Sort numbers.txt numerically, so 10 comes after 9."
+    a: ["sort -n numbers.txt"]
+    why: "-n compares numbers, not text."
+  - skill: sort
+    q: "Sort names.txt and drop duplicate lines, in one command."
+    a: ["sort -u names.txt"]
+    why: "-u keeps one copy of each line."
+  - skill: sort
+    q: "Rank the lines of counts.txt from the largest number to the smallest."
+    a: ["sort -rn counts.txt", "sort -nr counts.txt", "sort -n -r counts.txt", "sort -r -n counts.txt"]
+    why: "-n numeric plus -r reverse: biggest first."
+  - skill: uniq
+    q: "Collapse repeated lines of piped input and count each one."
+    a: ["uniq -c"]
+    why: "uniq -c prefixes each line with its count."
+  - skill: uniq
+    q: "Print only the lines of list.txt that are repeated."
+    a: ["uniq -d list.txt"]
+    why: "-d shows duplicated lines only."
+  - skill: cut
+    q: "From data.csv, keep only the 2nd comma-separated field."
+    a: ["cut -d, -f2 data.csv", "cut -d , -f 2 data.csv", "cut -d, -f 2 data.csv", "cut -d , -f2 data.csv"]
+    why: "-d, sets the delimiter, -f2 picks field 2."
+  - skill: cut
+    q: "Keep characters 1 to 3 of every line of codes.txt."
+    a: ["cut -c1-3 codes.txt", "cut -c 1-3 codes.txt"]
+    why: "-c selects character positions."
+  - skill: tr
+    q: "Turn every lowercase letter of piped input into uppercase."
+    a: ["tr a-z A-Z"]
+    why: "tr maps SET1 onto SET2 character by character."
+  - skill: tr
+    q: "Delete every digit from piped input."
+    a: ["tr -d 0-9"]
+    why: "-d deletes the characters in SET1."
+  - skill: sed
+    q: "Replace every 'cat' with 'dog' on every line of pets.txt."
+    a: ["sed 's/cat/dog/g' pets.txt", "sed s/cat/dog/g pets.txt", "sed \"s/cat/dog/g\" pets.txt"]
+    why: "s/old/new/ substitutes; the trailing g means every match on a line."
+  - skill: rev
+    q: "Reverse the characters of each line of word.txt."
+    a: ["rev word.txt"]
+    why: "rev mirrors each line."
+  - skill: cp
+    q: "Make a backup copy of config.txt named config.txt.bak."
+    a: ["cp config.txt config.txt.bak"]
+    why: "cp SOURCE DEST keeps the original."
+  - skill: mv
+    q: "Rename draft.txt to final.txt."
+    a: ["mv draft.txt final.txt"]
+    why: "Renaming is moving to a new name."
+  - skill: rm
+    q: "Delete the file junk.tmp."
+    a: ["rm junk.tmp"]
+    why: "rm is permanent: look before you delete."
+  - skill: chmod
+    q: "Make deploy.sh executable."
+    a: ["chmod +x deploy.sh"]
+    why: "+x adds the execute permission."
+  - skill: chmod
+    q: "Take the execute permission away from deploy.sh."
+    a: ["chmod -x deploy.sh"]
+    why: "-x removes it."
+  - skill: export
+    q: "Set the variable COLOR to blue."
+    a: ["export COLOR=blue"]
+    why: "No spaces around the =."
+  - skill: let
+    q: "Add 5 to the number held in MANA."
+    a: ["let MANA=MANA+5", "let MANA+=5"]
+    why: "Inside let, names are numbers: no $ needed."
+  - skill: alias
+    q: "Make ll a shortcut for ls -F."
+    a: ["alias ll='ls -F'", "alias ll=\"ls -F\""]
+    why: "Quote the command so its space stays inside."
+  - skill: env
+    q: "Print every exported variable."
+    a: ["env"]
+    why: "env lists NAME=value pairs."
+  - skill: less
+    q: "Page through big.log one screen at a time."
+    a: ["less big.log"]
+    why: "Space pages forward, b back, q quits."
+  - skill: nl
+    q: "Print poem.txt with its lines numbered."
+    a: ["nl poem.txt"]
+    why: "nl numbers lines."
+  - skill: file
+    q: "Ask what kind of thing 'mystery' is before opening it."
+    a: ["file mystery"]
+    why: "file identifies text, directories and programs."
+  - skill: tree
+    q: "Draw the directory tree under where you stand."
+    a: ["tree", "tree ."]
+    why: "tree shows the whole structure at once."
+  - skill: source
+    q: "Load the definitions in setup.sh into the current shell."
+    a: ["source setup.sh", ". setup.sh"]
+    why: "source runs a file in THIS shell, so its variables stay."
+  - skill: man
+    q: "Open the manual page for grep."
+    a: ["man grep"]
+    why: "man is the built-in documentation."
+  - skill: history
+    q: "List the command lines you typed recently."
+    a: ["history"]
+    why: "history remembers every line."
+  - skill: echo
+    q: "Print the value of the variable HOME."
+    a: ["echo $HOME"]
+    why: "$NAME expands to the variable's value."

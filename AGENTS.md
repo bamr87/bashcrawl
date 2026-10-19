@@ -1,14 +1,20 @@
 # AGENTS.md
 
-Filesystem dungeon (`entrance/`) + static web trainer (`web/`) generated from the same content. Python/Node are tooling only; the bash game has no runtime deps. Longer notes: `CLAUDE.md`, `.github/instructions/`, `docs/contributing.md`.
+Filesystem dungeon (`entrance/`) + browser trainer (`web/`: a React + Vite app in `web/src/` over the classic-script engine in `web/assets/js/`) generated from the same content. Python/Node are tooling only; the bash game has no runtime deps. Longer notes: `CLAUDE.md`, `.github/instructions/`, `docs/contributing.md`.
 
 ## Where to edit
 
 | Change | Edit here | Do not edit |
 |---|---|---|
 | Rooms, scrolls, encounters | `entrance/` + `src/help/data/*.yaml` | `web/data/*.json`, `docs/generated/` |
-| Emulator kernel | `termforge/core/` (dual-mode UMD+CJS) | `web/assets/js/vendor/termforge/` |
-| Game commands / HUD / arcade | `web/assets/js/runtime.js` (and siblings) | reimplement commands in arcade games |
+| Courses and lessons | `courses/<id>/` (`course.md`, `NN-lesson.md`, `lab/`) — see `docs/authoring-courses.md` | `web/data/courses.json` |
+| Badges, ranks, bestiary, arena trials, skills, review cards | `src/help/data/progression.yaml` (badges are TermForge rules) | JS literals — they are data now |
+| Emulator kernel + platform services | `termforge/core/` (dual-mode UMD+CJS, brand-neutral) | `web/assets/js/vendor/termforge/` |
+| Game features (arena, daily, …) | `web/assets/js/plugins/<id>.js` + `GAME_PLUGINS` in `runtime.js` + a `<script>` in `web/index.html` | a second copy of a command |
+| Game commands / presenter models / arcade games | `web/assets/js/runtime.js` (the manifest), `hud.js` (models both renderers read), `arcade.js` (`GAMES`) | reimplement commands in arcade games; turn an engine file into an ES module |
+| Web UI (screens, HUD panes, effects, sound) | `web/src/` — React + TypeScript; tokens in `web/src/styles/tokens.css`, reactions in `web/src/fx/effects.ts`, sounds in `web/src/audio/sfx.ts` | colour literals or `z-index` numbers outside `tokens.css`; touching the log's children (a DomSink paints it) |
+| Launcher | `bin/bashcrawl` (bash 3.2-compatible, shellcheck-clean) | |
+| TermForge apps | `termforge/apps/registry.js` (one entry per app) | if-chains in the hosts |
 | Playtest harness | `src/playtest/` | |
 
 `web/data/*.json` and the vendor mirror are **committed** projections. After content or `termforge/core/` changes: `make web-build` and commit the result. `make web-test` fails CI if they are stale.
@@ -22,12 +28,16 @@ New `termforge/core/*.js` files must keep the dual-mode wrapper (`core/` cannot 
 ```bash
 make setup                 # chmod encounters
 make validate-contracts    # YAML ↔ filesystem ↔ walkthrough ↔ runtime handlers
-make web-build             # export JSON + vendor TermForge
-make web-test              # web-build + bundle/handler parity
+make web-install           # npm install for the web app (node >= 22.22; no lockfile)
+make web-build             # export JSON + bundle motion + vendor TermForge (python only)
+make web-dev               # Vite dev server, http://127.0.0.1:5173
+make web-bundle            # web-build + vite build -> web/dist
+make web-test              # web-build + bundle/handler parity + eslint + vitest + vite build
 make test                  # pytest unit + integration (cds into test/)
 make test-js               # node --test termforge/test/*.test.js
 make lint                  # shellcheck + yamllint + markdownlint + ruff
 make lint-js               # node --check on every tracked *.js
+make doctor                # bin/bashcrawl doctor — one [ OK ]/[WARN]/[CRIT] line per check
 make clean                 # bash lib/reset.sh — not git checkout
 ```
 
@@ -66,6 +76,14 @@ The filesystem **is** the game. Hidden areas ship as dotted dirs (`entrance/.cha
 - New encounter **basename** must be added to `ENCOUNTERS` in `setup.sh` or `./setup.sh` will not `chmod +x` it.
 - New room: directory + depth-graded `scroll` + chmod'd encounters + unlock `mv` in a treasure + `src/help/data/*.yaml` + `test/datasets/walkthrough.json` + `lib/reset.sh` if it can be unlocked. Then `make validate-contracts && make web-test`.
 - Scroll grades: entrance = pure ASCII / 80 cols / `===` dividers; cellar/armoury = Unicode OK; hidden areas = markdown OK. Details: `.github/instructions/scrolls.instructions.md` and `rooms.instructions.md`.
+
+## Learning platform gotchas
+
+- Every objective needs a `solution`; `termforge/test/courses.test.js` replays them from a fresh lab and fails if a lesson is unwinnable or already complete when it starts.
+- Course and lab files are tracked content: check `git check-ignore` (`*.tmp` is ignored repo-wide), and keep Markdown one paragraph per line (`python3 tools/unwrap-prose.py --check`).
+- `learn`/`mastery` save slices are owned by their plugins, which sanitize them on load — never trust their shape elsewhere.
+- Install order is hook order: curriculum, then the game plugins in `GAME_PLUGINS` order, then mastery and explain.
+- A fresh-clone run of the gate (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
 
 ## Web / TermForge gotchas
 
