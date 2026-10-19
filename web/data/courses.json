@@ -1089,7 +1089,7 @@
           "inbox"
         ],
         "files": {
-          "inbox/junk.tmp": "temporary scratch data; safe to delete\n",
+          "inbox/junk.old": "temporary scratch data; safe to delete\n",
           "inbox/notes.txt": "Remember: copy before you change, and look before you delete.\n",
           "inbox/report-draft.txt": "Quarterly report (draft)\n- forge output up 12%\n- two apprentices promoted\n",
           "inbox/spell.sh": "#!/usr/bin/env bash\n# A tiny script. It cannot run until it is marked executable.\necho \"The forge roars to life.\"\n"
@@ -1184,10 +1184,10 @@
             "rm"
           ],
           "xp": 20,
-          "body": "`rm FILE` deletes a file. **There is no trash can.** A shell `rm` is final.\n\nThat's why the habit is: **look, then delete.** Run `ls` (or `echo` the same glob) first, read what it would touch, and only then `rm`.\n\n```\nls inbox\nrm inbox/junk.tmp\nls inbox\n```\n\nType `explain rm inbox/junk.tmp` before running it. `explain` flags dangerous commands.\n\nReal world: `rm -rf` (recursive, force) on the wrong path is the classic career-ending typo. Many admins alias `rm` to `rm -i`, which asks before each deletion.",
+          "body": "`rm FILE` deletes a file. **There is no trash can.** A shell `rm` is final.\n\nThat's why the habit is: **look, then delete.** Run `ls` (or `echo` the same glob) first, read what it would touch, and only then `rm`.\n\n```\nls inbox\nrm inbox/junk.old\nls inbox\n```\n\nType `explain rm inbox/junk.old` before running it. `explain` flags dangerous commands.\n\nReal world: `rm -rf` (recursive, force) on the wrong path is the classic career-ending typo. Many admins alias `rm` to `rm -i`, which asks before each deletion.",
           "objectives": [
             {
-              "text": "Delete the junk file: rm inbox/junk.tmp",
+              "text": "Delete the junk file: rm inbox/junk.old",
               "when": {
                 "all": [
                   {
@@ -1195,13 +1195,13 @@
                   },
                   {
                     "not": {
-                      "file_exists": "/lab/workshop/inbox/junk.tmp"
+                      "file_exists": "/lab/workshop/inbox/junk.old"
                     }
                   }
                 ]
               },
-              "hint": "rm inbox/junk.tmp",
-              "solution": "rm inbox/junk.tmp"
+              "hint": "rm inbox/junk.old",
+              "solution": "rm inbox/junk.old"
             },
             {
               "text": "Confirm it's gone: ls inbox",

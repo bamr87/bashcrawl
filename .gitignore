@@ -26,9 +26,11 @@ entrance/vault/
 entrance/scrap/
 entrance/rift/
 
-# Tutorial / player-created directories
+# Tutorial / player-created directories (anchored: a `workshop/` anywhere in
+# the dungeon is player state, but courses/workshop/ is shipped content)
 entrance/workshop/
-workshop/
+entrance/**/workshop/
+/workshop/
 
 # ============================================================
 # Generated combat / loot artifacts inside entrance/
