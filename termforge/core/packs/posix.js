@@ -423,6 +423,12 @@
                     return [{ kind: "info", text: `NAME\n    ${found.command}\n\nDESCRIPTION\n    ${found.description}` }];
                 }
             }
+            // Plugin-installed commands carry their own metadata (core/plugin.js).
+            const meta = this.handlers[cmd] && this.commandMeta && this.commandMeta[cmd];
+            if (meta && meta.summary) {
+                const synopsis = meta.usage ? `\n\nSYNOPSIS\n    ${meta.usage}` : "";
+                return [{ kind: "info", text: `NAME\n    ${cmd}${synopsis}\n\nDESCRIPTION\n    ${meta.summary}` }];
+            }
             if (this.handlers[cmd]) return [{ kind: "info", text: `NAME\n    ${cmd}\n\nDESCRIPTION\n    ${this.manBuiltinNote(cmd)}` }];
             return [{ kind: "error", text: `man: no entry for '${cmd}'` }];
         },
