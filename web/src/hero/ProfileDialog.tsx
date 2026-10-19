@@ -8,6 +8,8 @@ import { Dialog } from "../chrome/Dialog";
 import { closeOverlay, openOverlay, startTour, useUi } from "../chrome/ui-store";
 import { game, useGame, type GameStore } from "../engine/game-store";
 import { Gauge } from "../hud/Gauge";
+import { clearDialogues } from "../story/dialogue-store";
+import { resetJournal } from "../story/journal-store";
 import { describeAppearance } from "./appearance";
 import { AppearanceEditor } from "./AppearanceEditor";
 import { HeroFigure } from "./HeroFigure";
@@ -35,6 +37,8 @@ function ProfileBody({ store, hero }: { store: GameStore; hero: Hero }) {
     function newGame() {
         store.newRun();
         clearHero();
+        resetJournal();
+        clearDialogues();
         openOverlay("create");
     }
 

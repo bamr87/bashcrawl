@@ -4,6 +4,8 @@ export interface InputTarget {
     id: string;
     /** Run a line. The prompt has already been cleared. */
     execute(line: string): void;
+    /** A chance to answer a line with a screen instead (`journal`, `menu`); true when taken. */
+    intercept?(line: string): boolean;
     /** Whether an empty Enter means something (the arcade uses it to return home). */
     acceptsEmpty(): boolean;
     /** ↑ (-1) / ↓ (+1) through history; null when there is none. */

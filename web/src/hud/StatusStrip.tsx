@@ -1,17 +1,21 @@
-// The party status bar under the header: rank with the XP gauge toward the
-// next rank, health, quests, badges and a live streak. Every item is a
-// button that runs the command behind it, and each is an effects anchor.
+// The party bar under the header: the hero's portrait and name, rank with
+// the XP gauge toward the next rank, health, quests, badges and a live
+// streak. Every item is a button — the portrait opens the profile, the rest
+// run the command behind them — and each is an effects anchor.
 import { useEffect, useRef } from "react";
 
-import { setUi, useUi } from "../chrome/ui-store";
+import { openOverlay, setUi, useUi } from "../chrome/ui-store";
 import { game, useModel, type GameStore } from "../engine/game-store";
 import { registerAnchor } from "../fx/anchors";
+import { HeroFigure } from "../hero/HeroFigure";
+import { DEFAULT_NAME, useHero } from "../hero/hero-store";
 import { runCommand } from "../terminal/actions";
 import { Gauge } from "./Gauge";
 import { RollingNumber } from "./RollingNumber";
 
 export function StatusStrip({ store = game }: { store?: GameStore }) {
     const st = useModel("statusModel", store);
+    const who = useHero();
     const { panelsOpen } = useUi();
     const xpRef = useRef<HTMLButtonElement>(null);
     const hpRef = useRef<HTMLButtonElement>(null);
@@ -22,14 +26,20 @@ export function StatusStrip({ store = game }: { store?: GameStore }) {
     useEffect(() => registerAnchor("rank", rankRef.current), []);
     useEffect(() => registerAnchor("quest-count", questRef.current), []);
 
+    const name = who?.name ?? DEFAULT_NAME;
     const next = st.nextRank ? `${st.nextRank.remaining} XP to ${st.nextRank.title}` : "highest rank reached";
     const hpLevel = st.hp <= 25 ? "low" : st.hp <= 50 ? "mid" : "high";
     return (
         <div className="bc-status-bar">
         <div className="bc-status" role="group" aria-label="Hero status">
-            <button ref={rankRef} type="button" className="bc-status-item bc-status-rank" onClick={() => runCommand("profile", store)} title={`Rank · level ${st.level} — profile shows your character sheet`} aria-label={`Rank: ${st.rank}, level ${st.level}. Show the character sheet`}>
-                <span aria-hidden="true">★</span>
-                <span className="bc-status-rank-title">{st.rank}</span>
+            <button ref={rankRef} type="button" className="bc-status-item bc-status-portrait" onClick={() => openOverlay("profile")} title="Your hero — profile, wardrobe, new game (Alt+H)" aria-label={`Hero ${name}, ${st.rank}, level ${st.level}. Open the profile`}>
+                <span aria-hidden="true">
+                    <HeroFigure appearance={who?.appearance} size="sm" crop="bust" className="bc-hero-mini" />
+                </span>
+                <span className="bc-status-portrait-text">
+                    <strong>{name}</strong>
+                    <small>Lv {st.level} · <span className="bc-status-rank-title">{st.rank}</span></small>
+                </span>
             </button>
             <button ref={xpRef} type="button" className="bc-status-item bc-status-xp" onClick={() => runCommand("xp", store)} title={next} aria-label={`${st.xp} XP, ${next}`}>
                 <Gauge value={st.pct} max={100} label={`${st.pct}% of the way to the next rank`} tone="xp" />

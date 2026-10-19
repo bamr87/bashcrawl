@@ -59,7 +59,8 @@ describe("StoryScreen", () => {
         const toggle = document.querySelector<HTMLButtonElement>('[data-hud-pane="map"] .bc-panel-toggle');
         await act(async () => { toggle?.click(); });
         expect(store.layout().panes.find((p) => p.id === "map")?.collapsed).toBe(true);
-        expect(document.querySelector('[data-hud-pane="map"] .bc-panel-body')).toHaveAttribute("hidden");
+        expect(document.querySelector('[data-hud-pane="map"] .bc-panel-body')).toHaveAttribute("aria-hidden", "true");
+        expect(document.querySelector('[data-hud-pane="map"] .bc-panel-fold')).not.toHaveAttribute("data-open");
         expect(JSON.parse(window.localStorage.getItem("bashcrawl-hud-layout-v1") ?? "{}").panes.find((p: { id: string }) => p.id === "map").collapsed).toBe(true);
     });
 });

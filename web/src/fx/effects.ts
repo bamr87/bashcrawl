@@ -305,9 +305,13 @@ function onEvent(event: FxEvent): void {
             fx.emit("ember", { from: anchorPoint("stage") ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, count: 20, colors: ["secondary", "warning"], spread: 400 });
             play("poweron");
             break;
-        case "mode":
+        case "mode": {
+            // A door change: the new screen dissolves in through the pixel wipe.
             play("tab");
+            const rect = stageRect();
+            if (rect) fx.wipe({ rect, color: "bg" });
             break;
+        }
     }
 }
 

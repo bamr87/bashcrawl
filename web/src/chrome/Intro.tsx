@@ -12,7 +12,7 @@ import { ArtClip } from "../fx/ArtClip";
 import { HeroFigure } from "../hero/HeroFigure";
 import { roleMeta, useHero, type Hero } from "../hero/hero-store";
 import { setPrefs } from "./prefs-store";
-import { openOverlay, setUi, startTour, useUi } from "./ui-store";
+import { getUi, openOverlay, setUi, startTour, useUi } from "./ui-store";
 
 const DOOR_BLURB: Record<Mode, string> = {
     story: "The dungeon. Quests teach pwd → ls → cd → pipes, room by room.",
@@ -54,6 +54,7 @@ function Pages({ hero }: { hero: Hero | null }) {
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
+            if (getUi().overlay !== "intro") return;
             if (event.key === "Escape") {
                 event.preventDefault();
                 finishIntro(hero);

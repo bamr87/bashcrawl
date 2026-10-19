@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { getUi, setUi } from "../chrome/ui-store";
@@ -64,6 +64,23 @@ describe("the app shell", () => {
         expect(getUi().helpOpen).toBe(true);
         expect(screen.getByRole("dialog", { name: "Keyboard" })).toBeInTheDocument();
         await act(async () => { setUi({ helpOpen: false }); });
+
+        // Escape with nothing open is the game menu; Alt+J the journal; the prompt knows `menu`.
+        await act(async () => { screen.getByRole("tab", { name: /Story/ }).click(); });
+        await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+        expect(getUi().overlay).toBe("menu");
+        expect(screen.getByRole("dialog", { name: "Game menu" })).toBeInTheDocument();
+        await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+        expect(getUi().overlay).toBeNull();
+        await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "j", code: "KeyJ", altKey: true, bubbles: true })); });
+        expect(getUi().overlay).toBe("journal");
+        expect(screen.getByRole("dialog", { name: "Journal" })).toBeInTheDocument();
+        await act(async () => { setUi({ overlay: null }); });
+        const prompt = screen.getByRole("textbox", { name: "Command" });
+        await act(async () => { fireEvent.change(prompt, { target: { value: "journal" } }); fireEvent.keyDown(prompt, { key: "Enter" }); });
+        expect(getUi().overlay).toBe("journal");
+        expect(screen.getByRole("log", { name: "Dungeon log" })).toHaveTextContent("the journal opens");
+        await act(async () => { setUi({ overlay: null }); });
 
         // The reference hides the prompt dock and the status strip.
         await act(async () => { screen.getByRole("tab", { name: /Reference/ }).click(); });

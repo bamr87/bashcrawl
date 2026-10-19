@@ -10,8 +10,9 @@ export type FxEvent =
         outputs: Line[];
         events: HudEvent[];
         error: boolean;
-        /** The quest this command completed, for its title card. */
+        /** The quest this command completed, for its title card and its chapter. */
         questTitle?: string;
+        questId?: number;
         /** The command entered a room for the first time. */
         discovered?: boolean;
     }

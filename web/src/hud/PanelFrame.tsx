@@ -1,5 +1,7 @@
 // A HUD window: nameplate title that folds the body, the pixel frame, and
 // an anchor the effects layer can pulse (data-fx-anchor = the pane id).
+// Folding animates the body's height (a grid track); the folded body is
+// inert and hidden from assistive tech but stays in the DOM.
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { registerAnchor } from "../fx/anchors";
@@ -27,8 +29,10 @@ export function PanelFrame({ id, title, icon, collapsed, onToggle, children, cla
                     <span>{title}</span>
                 </button>
             </h2>
-            <div id={bodyId} className="bc-panel-body" hidden={collapsed}>
-                {children}
+            <div id={bodyId} className="bc-panel-fold" data-open={!collapsed || undefined}>
+                <div className="bc-panel-body" aria-hidden={collapsed} inert={collapsed}>
+                    {children}
+                </div>
             </div>
         </section>
     );

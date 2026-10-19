@@ -13,9 +13,12 @@ import { ArtClip } from "../fx/ArtClip";
 import { HeroFigure } from "../hero/HeroFigure";
 import { clearHero, createHero, DEFAULT_NAME, roleMeta, useHero, type Hero } from "../hero/hero-store";
 import { readRaw } from "../lib/storage";
+import { clearDialogues } from "../story/dialogue-store";
+import { resetJournal } from "../story/journal-store";
+import { unlockChapter } from "../story/story";
 import { getPrefs, setPrefs } from "./prefs-store";
 import { toast } from "./toast-store";
-import { openOverlay, setUi, startTour, useUi } from "./ui-store";
+import { getUi, openOverlay, setUi, startTour, useUi } from "./ui-store";
 
 const SAVE_KEY = "bashcrawl-web-state-v1";
 export const VERSION = "3.2";
@@ -62,10 +65,14 @@ function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
     function confirmNew() {
         store.newRun();
         clearHero();
+        resetJournal();
+        clearDialogues();
         openOverlay("create");
     }
     function dropIn() {
         const who = createHero({ name: DEFAULT_NAME, role: "wanderer" });
+        resetJournal();
+        unlockChapter("prologue");
         enterGame(who);
         if (!getPrefs().introSeen) startTour();
     }
@@ -91,7 +98,8 @@ function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
 
     useEffect(() => {
         const onKey = (event: globalThis.KeyboardEvent) => {
-            if (event.key !== "Escape" || confirming) return;
+            // Only while this is the overlay up: the screen lingers through its exit.
+            if (event.key !== "Escape" || confirming || getUi().overlay !== "title") return;
             event.preventDefault();
             items[0]?.run();
         };

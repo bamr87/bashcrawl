@@ -5,6 +5,7 @@
 // a published version bump, so eight panels asking for the same model share
 // one computation. A module singleton (`game`) is the app's store; tests
 // build their own.
+import { openOverlay } from "../chrome/ui-store";
 import { createStore, useStore, type Store } from "../lib/store";
 import type { InputTarget } from "../terminal/input-target";
 import { decorateLog, placeBlock, revealLines } from "../terminal/log-decor";
@@ -34,6 +35,17 @@ export const WEB_PANES_FOLDED = ["skills", "hero", "spotlight"];
 
 const CAPABILITIES: Capabilities = { surface: "web", pager: true, compactEvents: true };
 const LOG_CAP = 600;
+
+const UI_WORDS: Record<string, { note: string; open: () => void }> = {
+    journal: { note: "the journal opens — Alt+J", open: () => openOverlay("journal") },
+    menu: { note: "the menu opens — Esc", open: () => openOverlay("menu") },
+    pause: { note: "the menu opens — Esc", open: () => openOverlay("menu") },
+    hero: { note: "your profile opens — Alt+H", open: () => openOverlay("profile") },
+    wardrobe: { note: "your profile opens — change your look there", open: () => openOverlay("profile") },
+    options: { note: "the options open — Alt+O", open: () => openOverlay("options") },
+    settings: { note: "the options open — Alt+O", open: () => openOverlay("options") },
+    title: { note: "the title screen opens", open: () => openOverlay("title") },
+};
 
 export class GameStore implements InputTarget {
     readonly id = "story";
@@ -203,10 +215,25 @@ export class GameStore implements InputTarget {
         // What the title cards need beyond the diff: which quest, and whether
         // the room is new to this hero.
         const doneIds = runtime.state.completedQuestIds;
-        const questTitle = doneIds.length > doneBefore ? runtime.quests.find((quest) => quest.id === doneIds[doneIds.length - 1])?.title : undefined;
+        const questId = doneIds.length > doneBefore ? doneIds[doneIds.length - 1] : undefined;
+        const questTitle = questId != null ? runtime.quests.find((quest) => quest.id === questId)?.title : undefined;
         const discovered = runtime.state.visited.length > visitedBefore;
-        fxBus.publish({ type: "command", line, outputs, events, error: outputs.some((out) => out.kind === "error"), questTitle, discovered });
+        fxBus.publish({ type: "command", line, outputs, events, error: outputs.some((out) => out.kind === "error"), questTitle, questId, discovered });
         return outputs;
+    }
+
+    /**
+     * Words the prompt answers with a screen rather than the engine:
+     * `journal`, `menu`, `hero`, `options`, `title`. Echoes a dim line so
+     * the log keeps the thread. Returns true when the line was taken.
+     */
+    intercept(line: string): boolean {
+        const word = line.trim().toLowerCase();
+        const target = UI_WORDS[word];
+        if (!target) return false;
+        this.appendLine("dim", `(${target.note})`);
+        target.open();
+        return true;
     }
 
     /**

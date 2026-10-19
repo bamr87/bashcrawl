@@ -6,6 +6,15 @@ import { useMemo, useRef } from "react";
 import { game, useModel, type GameStore } from "../engine/game-store";
 import type { AsciiClip } from "../engine/types";
 import { useAmbientClip } from "../fx/useAmbientClip";
+import { fillCommand } from "../terminal/actions";
+
+// A click on a thing in the room drops the spell for it into the prompt:
+// a door is walked through, a scroll read, an encounter run.
+function spellFor(entry: { name: string; type: string }): string {
+    if (entry.type === "dir") return `cd ${entry.name}`;
+    if (entry.type === "exec") return `./${entry.name}`;
+    return `cat ${entry.name}`;
+}
 
 function Vignette({ clip, art, roomKey }: { clip: AsciiClip | null; art: string[]; roomKey: string }) {
     const ref = useRef<HTMLPreElement>(null);
@@ -47,7 +56,9 @@ export function RoomPanelBody({ store = game }: { store?: GameStore }) {
                 <ul className="bc-list bc-room-entries">
                     {room.entries.map((entry) => (
                         <li key={entry.name} data-type={entry.type}>
-                            <span aria-hidden="true">{entry.icon} </span>{entry.name}{entry.marker}
+                            <button type="button" className="bc-room-entry" onClick={() => fillCommand(spellFor(entry))} title={`Type ${spellFor(entry)}`}>
+                                <span aria-hidden="true">{entry.icon} </span>{entry.name}{entry.marker}
+                            </button>
                         </li>
                     ))}
                 </ul>

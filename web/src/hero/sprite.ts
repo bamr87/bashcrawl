@@ -11,8 +11,12 @@ import type { Appearance, Companion, HairStyle, Headgear, Outfit, Weapon } from 
 
 export const SPRITE_W = 16;
 export const SPRITE_H = 28;
-/** The eyes' row, for tests and the bust crop. */
+/** The eyes' row in the authored grid, for tests and the bust crop. */
 export const EYE_ROW = 8;
+/** The bitmaps are drawn at 2× through EPX, so diagonals and corners round off. */
+export const SCALE = 2;
+export const OUT_W = SPRITE_W * SCALE;
+export const OUT_H = SPRITE_H * SCALE;
 
 export type Slot = "o" | "s" | "S" | "h" | "H" | "c" | "C" | "t" | "m" | "M" | "l" | "L" | "b" | "B" | "e" | "w" | "g" | "p" | "P";
 
@@ -59,8 +63,8 @@ const BODY = part(4, `
 ....osssssso....
 ....osssssso....
 ....osssssso....
-....osssssso....
-....oSssssSo....
+....ossSssso....
+....oSsSSsSo....
 .....oSSSSo.....
 ......osso......
 `);
@@ -429,25 +433,59 @@ export function partsFor(a: Appearance): Array<[LayerName, Part | null]> {
     ];
 }
 
-/** Rasterise the parts and return each layer's visible horizontal runs. */
+function same(a: Cell | null, b: Cell | null): boolean {
+    return a === b || (a !== null && b !== null && a.slot === b.slot && a.layer === b.layer);
+}
+
+/**
+ * EPX (Eric's Pixel Expansion): each cell becomes 2×2, and a quarter takes a
+ * neighbour's colour where two neighbours agree on a diagonal — staircases
+ * become slopes, square corners round off, 1-pixel details (the eyes) stay
+ * square. Transparency is a colour too, so the silhouette rounds as well.
+ */
+function upscale(grid: Array<Cell | null>): Array<Cell | null> {
+    const out = new Array<Cell | null>(OUT_W * OUT_H).fill(null);
+    const at = (x: number, y: number): Cell | null => (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H ? null : grid[y * SPRITE_W + x] ?? null);
+    for (let y = 0; y < SPRITE_H; y++) {
+        for (let x = 0; x < SPRITE_W; x++) {
+            const p = at(x, y);
+            const a = at(x, y - 1);
+            const b = at(x + 1, y);
+            const c = at(x - 1, y);
+            const d = at(x, y + 1);
+            // The eyes stay square whatever sits beside them (a helm's visor would round them).
+            const crisp = p?.layer === "eyes";
+            const tl = !crisp && same(c, a) && !same(c, d) && !same(a, b) ? a : p;
+            const tr = !crisp && same(a, b) && !same(a, c) && !same(b, d) ? b : p;
+            const bl = !crisp && same(d, c) && !same(d, b) && !same(c, a) ? c : p;
+            const br = !crisp && same(b, d) && !same(b, a) && !same(d, c) ? b : p;
+            const ox = x * SCALE;
+            const oy = y * SCALE;
+            out[oy * OUT_W + ox] = tl;
+            out[oy * OUT_W + ox + 1] = tr;
+            out[(oy + 1) * OUT_W + ox] = bl;
+            out[(oy + 1) * OUT_W + ox + 1] = br;
+        }
+    }
+    return out;
+}
+
+/** Rasterise the parts, upscale, and return each layer's visible horizontal runs on the OUT_W×OUT_H grid. */
 export function compose(a: Appearance): Layer[] {
     const grid: Array<Cell | null> = new Array<Cell | null>(SPRITE_W * SPRITE_H).fill(null);
     for (const [layer, piece] of partsFor(a)) paint(grid, layer, piece);
+    const fine = upscale(grid);
     const runs = new Map<LayerName, Run[]>(LAYERS.map((name) => [name, []]));
-    for (let y = 0; y < SPRITE_H; y++) {
+    for (let y = 0; y < OUT_H; y++) {
         let x = 0;
-        while (x < SPRITE_W) {
-            const cell = grid[y * SPRITE_W + x];
+        while (x < OUT_W) {
+            const cell = fine[y * OUT_W + x];
             if (!cell) {
                 x++;
                 continue;
             }
             let w = 1;
-            while (x + w < SPRITE_W) {
-                const next = grid[y * SPRITE_W + x + w];
-                if (!next || next.slot !== cell.slot || next.layer !== cell.layer) break;
-                w++;
-            }
+            while (x + w < OUT_W && same(fine[y * OUT_W + x + w] ?? null, cell)) w++;
             runs.get(cell.layer)?.push({ x, y, w, slot: cell.slot });
             x += w;
         }

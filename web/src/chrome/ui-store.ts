@@ -1,10 +1,11 @@
 // Transient chrome state shared across components: which dialogs are open,
 // which full-screen overlay is up (the title screen, hero creation, the
-// intro, options, the profile), and the tour's step while it runs.
+// intro, the pause menu, the journal, options, the profile), and the tour's
+// step while it runs.
 import { getHero } from "../hero/hero-store";
 import { createStore, useStore } from "../lib/store";
 
-export type Overlay = "title" | "create" | "intro" | "options" | "profile" | null;
+export type Overlay = "title" | "create" | "intro" | "menu" | "journal" | "options" | "profile" | null;
 
 export interface UiState {
     helpOpen: boolean;
@@ -26,7 +27,11 @@ function initialOverlay(): Overlay {
 const store = createStore<UiState>({ helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false, overlay: initialOverlay(), tour: null });
 
 export function setUi(patch: Partial<UiState>): void {
-    store.set({ ...store.get(), ...patch });
+    const current = store.get();
+    // A no-op patch must not publish: a re-render during a keypress would
+    // re-subscribe dialog listeners and lose that very keypress.
+    if ((Object.keys(patch) as Array<keyof UiState>).every((key) => current[key] === patch[key])) return;
+    store.set({ ...current, ...patch });
 }
 
 export function toggleHelp(): void {
@@ -41,8 +46,20 @@ export function openOverlay(overlay: Exclude<Overlay, null>): void {
     setUi({ overlay, helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false });
 }
 
+/** Open, or close when it is the one already up (the hotkeys toggle). */
+export function toggleOverlay(overlay: Exclude<Overlay, null>): void {
+    if (store.get().overlay === overlay) closeOverlay();
+    else openOverlay(overlay);
+}
+
 export function closeOverlay(): void {
     setUi({ overlay: null });
+}
+
+/** Nothing is up: no overlay, no tour, no dialog, no side panels. */
+export function isIdle(): boolean {
+    const ui = store.get();
+    return ui.overlay === null && ui.tour === null && !ui.helpOpen && !ui.docsOpen && !ui.hudOpen && !ui.panelsOpen;
 }
 
 export function startTour(): void {

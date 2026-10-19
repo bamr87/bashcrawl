@@ -11,6 +11,8 @@ import { play } from "../audio/sfx";
 import { getPrefs, setPrefs } from "../chrome/prefs-store";
 import { SettingsForm } from "../chrome/SettingsForm";
 import { openOverlay, setUi, startTour, useUi } from "../chrome/ui-store";
+import { resetJournal } from "../story/journal-store";
+import { unlockChapter } from "../story/story";
 import { describeAppearance, ROLE_PRESETS, type Appearance } from "./appearance";
 import { AppearanceEditor } from "./AppearanceEditor";
 import { HeroFigure } from "./HeroFigure";
@@ -59,6 +61,9 @@ function Wizard() {
     function finish() {
         const hero = createHero({ name, role, appearance });
         setPrefs({ onboarded: true });
+        // A new hero, a new chronicle: the prologue is told once the screens clear.
+        resetJournal();
+        unlockChapter("prologue");
         play("quest");
         if (getPrefs().introSeen) {
             setUi({ overlay: null });

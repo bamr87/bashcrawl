@@ -4,7 +4,7 @@
 // label shows the full path and, on narrow screens, just the room's name.
 import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
 
-import { setUi, toggleDocs, toggleHelp } from "../chrome/ui-store";
+import { getUi, setUi, toggleDocs, toggleHelp } from "../chrome/ui-store";
 import type { InputTarget } from "./input-target";
 import { labelPath, shortLabel } from "./prompt-label";
 import { setPromptValue, usePrompt } from "./prompt-store";
@@ -32,6 +32,7 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
         const line = value.trim();
         setPromptValue("");
         if (!line && !target.acceptsEmpty()) return;
+        if (target.intercept?.(line)) return;
         target.execute(line);
     }
 
@@ -57,7 +58,13 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
             event.preventDefault();
             target.clearLog();
         } else if (event.key === "Escape") {
-            setUi({ helpOpen: false, docsOpen: false });
+            // Close what is open; with nothing open the keypress reaches the
+            // app, which opens the pause menu.
+            const ui = getUi();
+            if (ui.helpOpen || ui.docsOpen) {
+                event.stopPropagation();
+                setUi({ helpOpen: false, docsOpen: false });
+            }
         }
     }
 

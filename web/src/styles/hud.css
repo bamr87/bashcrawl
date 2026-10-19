@@ -211,7 +211,21 @@
     }
     .bc-panel-toggle:hover { color: var(--fleet-color-ink); }
     .bc-panel-caret { opacity: 0.7; }
-    .bc-panel-body { font-size: var(--fleet-text-sm); }
+    /* The fold: a grid track from 1fr to 0fr, so the body's height animates
+       whatever it holds; the folded body is inert and hidden from AT. */
+    .bc-panel-fold {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows var(--fleet-motion-slow) var(--fleet-ease);
+    }
+    .bc-panel-fold[data-open] { grid-template-rows: 1fr; }
+    .bc-panel-body {
+        min-height: 0;
+        overflow: hidden;
+        font-size: var(--fleet-text-sm);
+        transition: opacity var(--fleet-motion-base) var(--fleet-ease);
+    }
+    .bc-panel-fold:not([data-open]) .bc-panel-body { opacity: 0; }
     .bc-panel-body p { margin: 0 0 var(--fleet-space-1); }
     .bc-panel code {
         color: var(--fleet-color-code-ink);
@@ -324,7 +338,7 @@
        .bc-hero (--hero-skin, -eye, -hair, -cloth, -trim, -cape, -pet); the
        shades derive from them here; --hpx is the cell size. */
     .bc-hero-sprite {
-        --hpx: 4px;
+        --hpx: 5px;
         --hero-outline: var(--bc-hero-outline);
         --hero-white: var(--bc-hero-white);
         --hero-metal: var(--bc-hero-metal);
