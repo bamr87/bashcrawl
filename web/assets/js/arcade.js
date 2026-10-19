@@ -614,5 +614,5 @@
         recall: ["skip · hint", "pass a card · get a nudge"],
     };
 
-    global.BashcrawlArcade = { ArcadeManager, GAMES };
+    global.BashcrawlArcade = { ArcadeManager, GAMES, CHEAT_LINES, BLOCKED_IN_GAME, normalizeAnswer, scopedRuntime };
 })(window);

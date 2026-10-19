@@ -1,0 +1,272 @@
+/* The Learn door: the reader beside the lab terminal. The `learn-*`
+ * classes without the bc- prefix are the engine renderer's own
+ * (web/assets/js/learn.js) and are styled by name. */
+@layer components {
+    .bc-learn {
+        grid-template-columns: 300px minmax(0, 11fr) minmax(0, 9fr);
+    }
+    .bc-learn[data-dock="right"] {
+        grid-template-columns: minmax(0, 11fr) minmax(0, 9fr) 300px;
+    }
+    .bc-learn[data-dock="right"] .bc-sidebar { order: 3; }
+    .bc-stage-learn .bc-log { font-size: 0.86rem; }
+
+    .bc-reader {
+        min-width: 0;
+        min-height: 0;
+        overflow: auto;
+        padding: var(--fleet-space-3) var(--fleet-space-4) var(--fleet-space-5);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--fleet-color-bg-elevated) 70%, var(--fleet-color-bg)), var(--fleet-color-bg) 60%);
+        box-shadow: inset -1px 0 0 var(--fleet-color-border);
+        line-height: var(--fleet-leading-normal);
+        scroll-behavior: smooth;
+    }
+    .bc-learn-head { margin-bottom: var(--fleet-space-3); }
+    .bc-learn-crumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0 0 0.35rem;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-reader h2 {
+        margin: 0 0 0.3rem;
+        font-size: var(--fleet-text-h2);
+        line-height: var(--fleet-leading-tight);
+        color: var(--fleet-color-primary);
+        letter-spacing: 0.06em;
+    }
+    .bc-learn-hero h2 { font-size: var(--fleet-text-h1); }
+    .bc-reader h3 {
+        margin: var(--fleet-space-3) 0 0.4rem;
+        font-size: 1.05rem;
+        color: var(--fleet-color-ink);
+    }
+    .bc-reader h4 {
+        margin: 0.8rem 0 0.3rem;
+        font-size: 0.95rem;
+        color: var(--fleet-color-info);
+    }
+    .bc-learn-sub {
+        margin: 0;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-learn-sub code,
+    .bc-course-skills code,
+    .bc-learn-foot code,
+    .bc-reader section > p code {
+        padding: 0.05rem 0.35rem;
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-info);
+        font-size: 0.82em;
+    }
+    .bc-learn-foot code,
+    .bc-reader section > p code[data-fill] { cursor: pointer; }
+    .bc-level {
+        display: inline-block;
+        padding: 0.1rem 0.45rem;
+        border: 1px solid currentColor;
+        font-family: var(--fleet-font-mono);
+        font-size: 0.66rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .bc-level-beginner { color: var(--fleet-color-success); }
+    .bc-level-intermediate { color: var(--fleet-color-warning); }
+    .bc-level-advanced { color: var(--fleet-color-accent); }
+
+    .bc-outline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0.75rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    .bc-outline li span {
+        display: inline-flex;
+        width: 1.6rem;
+        height: 1.6rem;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        font-family: var(--fleet-font-mono);
+        font-size: 0.75rem;
+        color: var(--fleet-color-ink-muted);
+        transition: background var(--fleet-motion-base) var(--fleet-ease), color var(--fleet-motion-base) var(--fleet-ease), box-shadow var(--fleet-motion-base) var(--fleet-ease);
+    }
+    .bc-outline .is-done span {
+        background: color-mix(in srgb, var(--fleet-color-success) 22%, transparent);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-success);
+        color: var(--fleet-color-success);
+    }
+    .bc-outline .is-current span {
+        box-shadow: inset 0 0 0 1px var(--fleet-color-info), 0 0 0 3px color-mix(in srgb, var(--fleet-color-info) 25%, transparent);
+        color: var(--fleet-color-ink);
+    }
+
+    /* the renderer's markup */
+    .learn-body p { margin: 0.55rem 0; }
+    .learn-body ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+    .learn-body li { margin: 0.2rem 0; }
+    .learn-code {
+        margin: 0.7rem 0;
+        padding: 0.6rem 0.8rem;
+        border-left: 3px solid var(--fleet-color-info);
+        background: var(--fleet-color-code-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        overflow-x: auto;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        white-space: pre;
+    }
+    .learn-code code { font-family: var(--fleet-font-mono); color: var(--fleet-color-code-ink); }
+    .learn-code-line {
+        display: inline-block;
+        min-width: 100%;
+        cursor: pointer;
+        transition: background var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .learn-code-line:hover { background: color-mix(in srgb, var(--fleet-color-info) 14%, transparent); }
+    .learn-code-inline {
+        padding: 0.05rem 0.35rem;
+        background: var(--fleet-color-code-bg);
+        box-shadow: inset 0 0 0 1px transparent;
+        color: var(--fleet-color-code-ink);
+        font-size: 0.88em;
+        cursor: pointer;
+        transition: box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .learn-code-inline:hover { box-shadow: inset 0 0 0 1px var(--fleet-color-primary); }
+    .learn-callout {
+        margin: 0.8rem 0 0;
+        padding: 0.55rem 0.75rem;
+        border-left: 3px solid var(--fleet-color-accent);
+        background: color-mix(in srgb, var(--fleet-color-accent) 8%, transparent);
+        font-size: 0.9rem;
+    }
+    .learn-callout strong { color: var(--fleet-color-accent); }
+
+    .bc-objectives {
+        margin-top: var(--fleet-space-3);
+        padding: 0.85rem 0.95rem;
+    }
+    .bc-objectives h3 {
+        display: flex;
+        justify-content: space-between;
+        margin: 0 0 0.5rem;
+        font-size: var(--fleet-text-xs);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fleet-color-primary);
+    }
+    .bc-objectives-count { font-family: var(--fleet-font-mono); color: var(--fleet-color-info); }
+    .bc-objectives ul {
+        display: grid;
+        gap: 0.35rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .bc-objectives li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.55rem;
+        padding: 0.1rem 0.25rem;
+        font-size: 0.9rem;
+        transition: color var(--fleet-motion-base) var(--fleet-ease);
+    }
+    .obj-mark { flex: 0 0 auto; font-family: var(--fleet-font-mono); }
+    .obj-met { color: var(--fleet-color-success); }
+    .obj-met .learn-code-inline { color: var(--fleet-color-success); }
+    .bc-learn-next { margin: 0.6rem 0 0; font-size: var(--fleet-text-sm); }
+    .bc-learn-actions { margin-top: 0.8rem; }
+    .bc-learn-actions .bc-chip { font-size: var(--fleet-text-sm); padding: 0.28rem 0.65rem; }
+
+    .bc-courses {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 0.8rem;
+        margin-top: 0.4rem;
+    }
+    .bc-course {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.9rem 0.95rem;
+        border: 0;
+        color: var(--fleet-color-ink-muted);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .bc-course:hover,
+    .bc-course:focus-visible,
+    .bc-course.is-active {
+        box-shadow:
+            inset 0 0 0 1px var(--fleet-color-info),
+            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
+            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
+            0 6px 20px color-mix(in srgb, var(--fleet-color-info) 18%, transparent);
+        outline: none;
+    }
+    .bc-course strong { font-size: 1.02rem; color: var(--fleet-color-ink); }
+    .bc-course-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--fleet-font-mono);
+        font-size: 0.72rem;
+    }
+    .bc-course-summary { font-size: var(--fleet-text-sm); line-height: 1.45; }
+    .bc-course-skills { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+    .bc-course-progress {
+        display: block;
+        height: 6px;
+        margin-top: 0.2rem;
+        background: var(--bc-color-gauge-track);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        overflow: hidden;
+    }
+    .bc-course-progress > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--fleet-color-info), var(--fleet-color-success));
+        transition: width var(--fleet-motion-slow) var(--fleet-ease);
+    }
+    .bc-course-meta { font-size: 0.75rem; }
+    .bc-course-cta {
+        margin-top: auto;
+        font-family: var(--fleet-font-mono);
+        font-size: 0.8rem;
+        color: var(--fleet-color-info);
+    }
+    .bc-course-done .bc-course-cta { color: var(--fleet-color-success); }
+    .bc-learn-foot { margin-top: var(--fleet-space-4); font-size: 0.82rem; }
+}
+
+@media (max-width: 1100px) {
+    .bc-learn,
+    .bc-learn[data-dock="right"] {
+        grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    }
+    .bc-learn .bc-sidebar { display: none; }
+}
+@media (max-width: 900px) {
+    .bc-learn,
+    .bc-learn[data-dock="right"] {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 54%) minmax(0, 1fr);
+    }
+    .bc-reader {
+        padding: 0.8rem 0.9rem 1.2rem;
+        box-shadow: inset 0 -1px 0 var(--fleet-color-border);
+    }
+    .bc-learn .bc-sidebar[data-open] { display: flex; }
+}
+@media (max-width: 600px) {
+    .bc-courses { grid-template-columns: 1fr; }
+}

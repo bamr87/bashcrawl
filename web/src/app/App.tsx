@@ -18,6 +18,9 @@ import { ScreenFlash } from "../fx/ScreenFlash";
 import { installEffects } from "../fx/effects";
 import { HudMenu } from "../hud/HudMenu";
 import { StatusStrip } from "../hud/StatusStrip";
+import { getArcade } from "../arcade/arcade-store";
+import { ArcadeScreen } from "../screens/ArcadeScreen";
+import { LearnScreen } from "../screens/LearnScreen";
 import { NotFound } from "../screens/NotFound";
 import { StoryScreen } from "../screens/StoryScreen";
 import { Pager } from "../terminal/Pager";
@@ -127,15 +130,18 @@ export function App() {
         </>
     );
 
+    const arcade = ready ? getArcade() : null;
     let screen = null;
     if (route.kind === "notfound") screen = <NotFound path={route.path} />;
     else if (!ready) screen = <Booting error={bootError} />;
-    else if (mode === "story" || mode === "learn") screen = <StoryScreen />;
+    else if (mode === "story") screen = <StoryScreen />;
+    else if (mode === "learn") screen = <LearnScreen />;
+    else if (mode === "arcade" && arcade) screen = <ArcadeScreen store={arcade} />;
     else if (mode) screen = <Placeholder mode={mode} />;
 
     const storyChrome = ready && storyOwnsInput(mode);
-    const dock = storyChrome ? <PromptDock /> : null;
-    const status = storyChrome ? <StatusStrip /> : null;
+    const dock = storyChrome ? <PromptDock /> : mode === "arcade" && arcade ? <PromptDock target={arcade} suggestions={false} /> : null;
+    const status = ready && mode !== null && mode !== "reference" ? <StatusStrip /> : null;
 
     return (
         <MotionConfig reducedMotion="user">

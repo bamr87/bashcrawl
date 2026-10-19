@@ -4,11 +4,16 @@
 // buffer, which also makes StrictMode's mount → unmount → mount harmless.
 import { useEffect, useRef } from "react";
 
-import { game, type GameStore } from "../engine/game-store";
+import { game } from "../engine/game-store";
 import { registerAnchor } from "../fx/anchors";
 
+/** Anything that paints into a log element: the story and arcade stores. */
+export interface LogHost {
+    attachLog(element: HTMLElement | null): void;
+}
+
 export interface TerminalLogProps {
-    store?: GameStore;
+    store?: LogHost;
     label: string;
     className?: string;
     /** The effects anchor name; the story log is "log". */

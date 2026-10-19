@@ -589,6 +589,56 @@ export interface AmbientModule {
     isPlaying(node: HTMLElement): boolean;
 }
 
+// ── the Practice Arcade's games (web/assets/js/arcade.js GAMES) ──────────
+export interface ArcadeScenario {
+    world?: World;
+    scenario?: { id?: string; [key: string]: unknown };
+    [key: string]: unknown;
+}
+
+export interface ArcadeContext extends ArcadeScenario {
+    rt: Runtime | null;
+    moves: number;
+    hints: number;
+    startedAt: number;
+}
+
+export interface ArcadeTurn {
+    outputs: Line[];
+    done: boolean;
+    success?: boolean;
+}
+
+export interface ArcadeGame {
+    id: string;
+    title: string;
+    icon: string;
+    tagline: string;
+    concepts: string[];
+    needsWorld: boolean;
+    makeScenario(data: { world: World; commands: CommandsData; arcade: ArcadeData }, persist: ArcadeRecords, deckId?: string): ArcadeScenario | null;
+    intro(ctx: ArcadeContext): Line[];
+    objective(ctx: ArcadeContext): string;
+    hintFor(ctx: ArcadeContext): string;
+    input(line: string, ctx: ArcadeContext): ArcadeTurn;
+    scoreFor(ctx: ArcadeContext): { score: number; detail: string };
+}
+
+export interface ArcadeRecord {
+    best: number;
+    plays: number;
+    seen: string[];
+    last?: number;
+}
+
+export interface ArcadeRecords {
+    games: Record<string, ArcadeRecord>;
+}
+
 export interface ArcadeModule {
-    GAMES: unknown[];
+    GAMES: ArcadeGame[];
+    CHEAT_LINES: Record<string, [string, string]>;
+    BLOCKED_IN_GAME: Set<string>;
+    normalizeAnswer(line: string): string;
+    scopedRuntime(world: World): Runtime;
 }

@@ -26,13 +26,20 @@ const BODIES: Record<string, (store: GameStore) => ReactNode> = {
     spotlight: (store) => <SpotlightPanelBody store={store} />,
 };
 
-export function Sidebar({ store = game }: { store?: GameStore }) {
+export interface SidebarProps {
+    store?: GameStore;
+    /** Restrict to these panes (the Learn door keeps the lab's files, skills and the hero). */
+    only?: string[];
+}
+
+export function Sidebar({ store = game, only }: SidebarProps) {
     useGame((snap) => snap.version, store);
     const { panelsOpen } = useUi();
     const layout = store.layout();
+    const panes = layout.panes.filter((pane) => pane.visible && BODIES[pane.id] && (!only || only.includes(pane.id)));
     return (
         <aside id="bc-sidebar" className="bc-sidebar" aria-label="Game status panels" data-open={panelsOpen || undefined}>
-            {layout.panes.filter((pane) => pane.visible && BODIES[pane.id]).map((pane) => (
+            {panes.map((pane) => (
                 <PanelFrame
                     key={pane.id}
                     id={pane.id}

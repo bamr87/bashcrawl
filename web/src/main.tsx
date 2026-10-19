@@ -5,6 +5,8 @@ import "./styles/app.css";
 import "./styles/terminal.css";
 import "./styles/hud.css";
 import "./styles/fx.css";
+import "./styles/learn.css";
+import "./styles/arcade.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
