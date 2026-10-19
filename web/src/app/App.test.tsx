@@ -16,7 +16,7 @@ describe("the app shell", () => {
         window.location.hash = "#/story";
         // A returning hero who has taken the tour: no title screen, no tour.
         clearHero();
-        createHero({ name: "Mira", role: "wanderer", look: 0 });
+        createHero({ name: "Mira", role: "wanderer" });
         setHero({ tourDone: true });
         setUi({ overlay: null, tour: null });
         await game.boot(dataLoader);

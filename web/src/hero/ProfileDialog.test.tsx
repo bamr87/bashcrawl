@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { getUi, setUi } from "../chrome/ui-store";
@@ -17,7 +17,7 @@ describe("the hero profile", () => {
     });
 
     it("shows the sheet, renames, changes the look, and starts a new game after a confirm", async () => {
-        createHero({ name: "Mira", role: "scribe", look: 1 });
+        createHero({ name: "Mira", role: "scribe" });
         const store = new GameStore();
         await store.boot(dataLoader);
         store.execute("pwd");
@@ -37,8 +37,13 @@ describe("the hero profile", () => {
         expect(getHero()?.name).toBe("Mira the Bold");
         expect(dialog).toHaveTextContent("Mira the Bold");
 
-        await act(async () => { screen.getByRole("radio", { name: "Ember" }).click(); });
-        expect(getHero()?.look).toBe(3);
+        await act(async () => { screen.getByRole("button", { name: "Change look" }).click(); });
+        const wardrobe = within(screen.getByRole("group", { name: "Wardrobe" }));
+        await act(async () => { within(wardrobe.getByRole("radiogroup", { name: "Outfit" })).getByRole("radio", { name: "Plate" }).click(); });
+        await act(async () => { within(wardrobe.getByRole("radiogroup", { name: "Headgear" })).getByRole("radio", { name: "Helm" }).click(); });
+        expect(getHero()?.appearance).toMatchObject({ outfit: "plate", headgear: "helm" });
+        expect(dialog).toHaveTextContent("plate");
+        await act(async () => { screen.getByRole("button", { name: "Done" }).click(); });
 
         await act(async () => { screen.getByRole("button", { name: "New game…" }).click(); });
         await act(async () => { screen.getByRole("button", { name: "Yes, start over" }).click(); });

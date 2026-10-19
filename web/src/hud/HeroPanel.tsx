@@ -12,7 +12,7 @@ export function HeroPanelBody({ store = game }: { store?: GameStore }) {
     const name = who?.name ?? DEFAULT_NAME;
     const path = who ? roleMeta(who.role) : null;
     return (
-        <HeroFigure look={who?.look ?? 0} mood={mood} nonce={nonce} label={`${name}, pixel adventurer (${mood})`}>
+        <HeroFigure appearance={who?.appearance} mood={mood} nonce={nonce} label={`${name}, pixel adventurer (${mood})`}>
             <p className="bc-hero-name bc-display">{name}</p>
             {path && <p className="bc-muted bc-hero-path"><span aria-hidden="true">{path.icon} </span>{path.title}</p>}
             <p className="bc-hero-rank bc-display">{hero.rank}</p>

@@ -319,92 +319,71 @@
         padding-top: var(--fleet-space-1);
         text-align: center;
     }
+    /* The sprite: hero/sprite.ts composes 16×28 cells into SVG rects whose
+       fills are the --hero-* slots below. The palette picks arrive inline on
+       .bc-hero (--hero-skin, -eye, -hair, -cloth, -trim, -cape, -pet); the
+       shades derive from them here; --hpx is the cell size. */
     .bc-hero-sprite {
-        --hpx: 7px;
+        --hpx: 4px;
+        --hero-outline: var(--bc-hero-outline);
+        --hero-white: var(--bc-hero-white);
+        --hero-metal: var(--bc-hero-metal);
+        --hero-metal-shade: var(--bc-hero-metal-shade);
+        --hero-leather: var(--bc-hero-leather);
+        --hero-leather-shade: var(--bc-hero-leather-shade);
+        --hero-gem: var(--bc-hero-gem);
+        --hero-skin-shade: color-mix(in srgb, var(--hero-skin) 72%, var(--bc-hero-outline));
+        --hero-hair-shade: color-mix(in srgb, var(--hero-hair) 66%, var(--bc-hero-outline));
+        --hero-cloth-shade: color-mix(in srgb, var(--hero-cloth) 66%, var(--bc-hero-outline));
+        --hero-cape-shade: color-mix(in srgb, var(--hero-cape) 66%, var(--bc-hero-outline));
+        --hero-pet-shade: color-mix(in srgb, var(--hero-pet) 66%, var(--bc-hero-outline));
         position: relative;
-        width: calc(var(--hpx) * 9);
-        height: calc(var(--hpx) * 9);
+        width: calc(var(--hpx) * 16);
+        height: calc(var(--hpx) * 28);
         image-rendering: pixelated;
         transform: translateZ(0);
     }
-    .bc-hero-px {
-        position: absolute;
+    .bc-hero[data-crop="bust"] .bc-hero-sprite {
+        width: calc(var(--hpx) * 12);
+        height: calc(var(--hpx) * 13);
+    }
+    .bc-hero[data-crop="bust"] .bc-hero-shadow { display: none; }
+    .bc-hero-svg {
         display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
     }
-    .bc-hero-helm {
-        top: 0;
-        left: calc(var(--hpx) * 2);
-        width: calc(var(--hpx) * 5);
-        height: calc(var(--hpx) * 2);
-        background: var(--fleet-color-ink-muted);
-        box-shadow: inset 0 calc(var(--hpx) * -0.4) 0 0 var(--bc-color-bevel-lo);
+    .bc-hero-eyes,
+    .bc-hero-weapon,
+    .bc-hero-companion {
+        transform-box: fill-box;
+        transform-origin: center;
     }
-    .bc-hero-face {
-        top: calc(var(--hpx) * 2);
-        left: calc(var(--hpx) * 2.5);
-        width: calc(var(--hpx) * 4);
-        height: calc(var(--hpx) * 2);
-        background: var(--fleet-color-warning);
-        box-shadow:
-            inset calc(var(--hpx) * 0.8) calc(var(--hpx) * 0.6) 0 0 var(--fleet-color-bg),
-            inset calc(var(--hpx) * -1.4) calc(var(--hpx) * 0.6) 0 0 var(--fleet-color-bg);
-    }
-    .bc-hero-torso {
-        top: calc(var(--hpx) * 4);
-        left: calc(var(--hpx) * 2);
-        width: calc(var(--hpx) * 5);
-        height: calc(var(--hpx) * 3);
-        background: var(--fleet-color-success);
-        box-shadow: inset 0 calc(var(--hpx) * -0.6) 0 0 var(--bc-color-bevel-lo);
-    }
-    .bc-hero-arm {
-        top: calc(var(--hpx) * 4);
-        width: var(--hpx);
-        height: calc(var(--hpx) * 2.4);
-        background: var(--fleet-color-warning);
-    }
-    .bc-hero-arm-l { left: var(--hpx); }
-    .bc-hero-arm-r { left: calc(var(--hpx) * 7); }
-    .bc-hero-legs {
-        top: calc(var(--hpx) * 7);
-        left: calc(var(--hpx) * 2.5);
-        width: calc(var(--hpx) * 4);
-        height: calc(var(--hpx) * 2);
-        background: var(--fleet-color-ink-muted);
-        box-shadow: inset var(--hpx) 0 0 0 var(--fleet-color-bg-elevated);
-    }
-    .bc-hero-blade {
-        top: var(--hpx);
-        left: calc(var(--hpx) * 7.6);
-        width: calc(var(--hpx) * 0.7);
-        height: calc(var(--hpx) * 5);
-        background: var(--fleet-color-info);
-        box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-warning);
-        transform-origin: bottom center;
-    }
+    .bc-hero-weapon { transform-origin: 50% 65%; }
     .bc-hero-shadow {
         position: absolute;
         left: 50%;
-        bottom: calc(var(--hpx) * -0.6);
-        width: calc(var(--hpx) * 6);
-        height: var(--hpx);
+        bottom: calc(var(--hpx) * 0.6);
+        width: calc(var(--hpx) * 11);
+        height: calc(var(--hpx) * 1.2);
         transform: translateX(-50%);
-        background: color-mix(in srgb, var(--bc-color-overlay) 40%, transparent);
+        background: color-mix(in srgb, var(--bc-color-overlay) 45%, transparent);
         border-radius: var(--fleet-radius-circle);
         filter: blur(1px);
     }
     .bc-hero-spark {
         position: absolute;
-        width: calc(var(--hpx) * 0.8);
-        height: calc(var(--hpx) * 0.8);
+        width: calc(var(--hpx) * 0.9);
+        height: calc(var(--hpx) * 0.9);
         border-radius: var(--fleet-radius-circle);
         background: var(--fleet-color-warning);
         box-shadow: 0 0 6px 1px color-mix(in srgb, var(--fleet-color-warning) 70%, transparent);
         opacity: 0;
     }
-    .bc-hero-spark-1 { top: 10%; left: 12%; }
-    .bc-hero-spark-2 { top: 4%; left: 70%; }
-    .bc-hero-spark-3 { top: 38%; left: 86%; }
+    .bc-hero-spark-1 { top: 10%; left: 6%; }
+    .bc-hero-spark-2 { top: 2%; left: 62%; }
+    .bc-hero-spark-3 { top: 34%; left: 90%; }
     .bc-hero-rank {
         margin: var(--fleet-space-1) 0 0;
         font-size: var(--fleet-text-xs);
@@ -416,27 +395,6 @@
         font-size: var(--fleet-text-xs);
     }
     .bc-hero-mood { min-height: 1.1em; }
-    /* static mood tints (every motion preference) */
-    .bc-hero[data-mood="hurt"] .bc-hero-torso,
-    .bc-hero[data-mood="hurt"] .bc-hero-face { background: var(--fleet-color-danger); }
-    .bc-hero[data-mood="xp"] .bc-hero-sprite { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--fleet-color-info) 65%, transparent)); }
-    .bc-hero[data-mood="quest"] .bc-hero-blade { background: var(--fleet-color-primary); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-primary); }
-    .bc-hero[data-mood="cast"] .bc-hero-blade { background: var(--fleet-color-accent); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-accent); }
-    .bc-hero[data-mood="cast"] .bc-hero-sprite { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--fleet-color-accent) 75%, transparent)); }
-
-    /* looks (hero-store LOOKS: 0 Verdant is the base palette above) */
-    .bc-hero[data-look="1"] .bc-hero-torso { background: var(--fleet-color-primary); }
-    .bc-hero[data-look="1"] .bc-hero-blade { background: var(--fleet-color-info); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-secondary); }
-    .bc-hero[data-look="1"] .bc-hero-helm { background: var(--fleet-color-warning); }
-    .bc-hero[data-look="2"] .bc-hero-torso { background: var(--fleet-color-accent); }
-    .bc-hero[data-look="2"] .bc-hero-blade { background: var(--fleet-color-primary); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-accent); }
-    .bc-hero[data-look="2"] .bc-hero-helm { background: var(--fleet-color-accent); box-shadow: inset 0 calc(var(--hpx) * -0.4) 0 0 var(--bc-color-bevel-lo); }
-    .bc-hero[data-look="3"] .bc-hero-torso { background: var(--fleet-color-secondary); }
-    .bc-hero[data-look="3"] .bc-hero-blade { background: var(--fleet-color-warning); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-danger); }
-    .bc-hero[data-look="3"] .bc-hero-legs { background: var(--fleet-color-danger); box-shadow: inset var(--hpx) 0 0 0 var(--fleet-color-bg-elevated); }
-    /* sizes */
-    .bc-hero[data-size="sm"] .bc-hero-sprite { --hpx: 3px; }
-    .bc-hero[data-size="lg"] .bc-hero-sprite { --hpx: 12px; }
     .bc-hero-name {
         margin: var(--fleet-space-1) 0 0;
         font-size: var(--fleet-text-sm);
@@ -446,6 +404,23 @@
         margin: 0;
         font-size: var(--fleet-text-xs);
     }
+    /* static mood tints (every motion preference) */
+    .bc-hero[data-mood="hurt"] .bc-hero-sprite {
+        filter: drop-shadow(0 0 6px color-mix(in srgb, var(--fleet-color-danger) 85%, transparent)) sepia(0.5) hue-rotate(-30deg) saturate(2.2);
+    }
+    .bc-hero[data-mood="xp"] .bc-hero-sprite { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--fleet-color-info) 65%, transparent)); }
+    .bc-hero[data-mood="quest"] .bc-hero-sprite {
+        --hero-metal: var(--fleet-color-primary);
+        --hero-gem: var(--fleet-color-primary);
+    }
+    .bc-hero[data-mood="cast"] .bc-hero-sprite {
+        --hero-metal: var(--fleet-color-accent);
+        --hero-gem: var(--fleet-color-accent);
+        filter: drop-shadow(0 0 8px color-mix(in srgb, var(--fleet-color-accent) 75%, transparent));
+    }
+    /* sizes */
+    .bc-hero[data-size="sm"] .bc-hero-sprite { --hpx: 2px; }
+    .bc-hero[data-size="lg"] .bc-hero-sprite { --hpx: 7px; }
 
     /* ── HUD menu ── */
     .bc-hud-panes li {
@@ -517,8 +492,18 @@
         100% { transform: translateX(0) rotate(0); }
     }
     .bc-hero[data-mood="quest"] .bc-hero-sprite { animation: bc-hero-cheer 720ms cubic-bezier(0.34, 1.56, 0.64, 1) 2; }
-    .bc-hero[data-mood="quest"] .bc-hero-arm-r,
-    .bc-hero[data-mood="quest"] .bc-hero-blade { animation: bc-hero-thrust 720ms ease-out 2; transform-origin: bottom center; }
+    .bc-hero[data-mood="quest"] .bc-hero-weapon { animation: bc-hero-thrust 720ms ease-out 2; }
+    /* idle life: a blink every few seconds, a companion that shifts its weight */
+    .bc-hero-eyes { animation: bc-hero-blink 4.6s steps(1, end) infinite; }
+    @keyframes bc-hero-blink {
+        0%, 93%, 100% { transform: scaleY(1); }
+        94%, 97% { transform: scaleY(0.12); }
+    }
+    .bc-hero-companion { animation: bc-hero-pet 2.4s ease-in-out infinite; }
+    @keyframes bc-hero-pet {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-0.4px); }
+    }
     @keyframes bc-hero-cheer {
         0%, 100% { transform: translateY(0); }
         40% { transform: translateY(calc(var(--hpx) * -1.6)); }

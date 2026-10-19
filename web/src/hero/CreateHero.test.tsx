@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { getPrefs, setPrefs } from "../chrome/prefs-store";
@@ -34,7 +34,13 @@ describe("hero creation", () => {
         expect(screen.getByRole("img", { name: /Mira, Scribe/ })).toBeInTheDocument();
         await act(async () => { screen.getByRole("button", { name: "Next" }).click(); });
 
-        await act(async () => { screen.getByRole("radio", { name: "Arcane" }).click(); });
+        // The path dressed the hero (a Scribe's robe and tome); the wardrobe changes it.
+        const outfit = within(screen.getByRole("radiogroup", { name: "Outfit" }));
+        expect(outfit.getByRole("radio", { name: "Robe" })).toHaveAttribute("aria-checked", "true");
+        await act(async () => { within(screen.getByRole("radiogroup", { name: "Hair" })).getByRole("radio", { name: "Curly" }).click(); });
+        await act(async () => { within(screen.getByRole("radiogroup", { name: "Dye" })).getByRole("radio", { name: "Crimson" }).click(); });
+        await act(async () => { within(screen.getByRole("radiogroup", { name: "Companion" })).getByRole("radio", { name: "Frog" }).click(); });
+        expect(document.querySelector(".bc-create-preview .bc-hero-svg .bc-hero-companion")).not.toBeNull();
         await act(async () => { screen.getByRole("button", { name: "Next" }).click(); });
 
         expect(screen.getByRole("radiogroup", { name: "Theme" })).toBeInTheDocument();
@@ -44,7 +50,7 @@ describe("hero creation", () => {
         expect(screen.getByRole("heading", { name: /Ready/ })).toBeInTheDocument();
         await act(async () => { screen.getByRole("button", { name: "Begin the descent" }).click(); });
 
-        expect(getHero()).toMatchObject({ name: "Mira", role: "scribe", look: 2 });
+        expect(getHero()).toMatchObject({ name: "Mira", role: "scribe", appearance: { outfit: "robe", weapon: "tome", hair: "curly", dye: 2, companion: "frog" } });
         expect(getPrefs().onboarded).toBe(true);
         expect(getUi().overlay).toBeNull();
         expect(window.location.hash).toBe("#/learn");

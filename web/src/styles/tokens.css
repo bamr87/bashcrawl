@@ -42,6 +42,56 @@
     --bc-color-scanline: #000000;
     --bc-color-overlay: #05040a;
 
+    /* ── the hero's palette (art, not UI: the same in both colour modes).
+       hero/sprite.ts draws colour SLOTS; hero/appearance.ts picks one of
+       these per slot; hud.css derives the shades with color-mix. ── */
+    --bc-hero-outline: #1b1530;
+    --bc-hero-white: #f7f3e8;
+    --bc-hero-metal: #b9c3d8;
+    --bc-hero-metal-shade: #6e7a97;
+    --bc-hero-leather: #7b4b2a;
+    --bc-hero-leather-shade: #4b2c17;
+    --bc-hero-gem: #7af0d6;
+    --bc-hero-skin-1: #fde3c9;
+    --bc-hero-skin-2: #f3c8a3;
+    --bc-hero-skin-3: #dba47a;
+    --bc-hero-skin-4: #ba7c50;
+    --bc-hero-skin-5: #8d5736;
+    --bc-hero-skin-6: #5e3b25;
+    --bc-hero-hair-1: #2a2019;
+    --bc-hero-hair-2: #6a4326;
+    --bc-hero-hair-3: #c99b4c;
+    --bc-hero-hair-4: #c4482b;
+    --bc-hero-hair-5: #e8e3d7;
+    --bc-hero-hair-6: #4f7fd8;
+    --bc-hero-hair-7: #8b5fd6;
+    --bc-hero-hair-8: #3fa66b;
+    --bc-hero-dye-1: #3f8f5a;
+    --bc-hero-dye-2: #2f6fd0;
+    --bc-hero-dye-3: #b9342b;
+    --bc-hero-dye-4: #8a4fd0;
+    --bc-hero-dye-5: #d08a2a;
+    --bc-hero-dye-6: #2c9aa6;
+    --bc-hero-dye-7: #5b5f6e;
+    --bc-hero-dye-8: #e8dcc3;
+    --bc-hero-dye-9: #c9507f;
+    --bc-hero-dye-10: #1f2340;
+    --bc-hero-trim-1: #e0b341;
+    --bc-hero-trim-2: #c9d2e2;
+    --bc-hero-trim-3: #f4efe2;
+    --bc-hero-trim-4: #b9342b;
+    --bc-hero-trim-5: #2f6fd0;
+    --bc-hero-trim-6: #15121f;
+    --bc-hero-eye-1: #3b2a1a;
+    --bc-hero-eye-2: #2f7fd6;
+    --bc-hero-eye-3: #3c9a5f;
+    --bc-hero-eye-4: #8f5fd6;
+    --bc-hero-pet-cat: #d08a2a;
+    --bc-hero-pet-bat: #5a4a7a;
+    --bc-hero-pet-slime: #5fd27a;
+    --bc-hero-pet-owl: #a9865a;
+    --bc-hero-pet-frog: #4caf50;
+
     /* ── typography (system stacks, no webfont — UPS-FE-05) ── */
     --fleet-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --fleet-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;

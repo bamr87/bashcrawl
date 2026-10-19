@@ -1,4 +1,4 @@
-// The hero's profile: the figure, a rename, the look and the path, the
+// The hero's profile: the figure, a rename, the wardrobe, the path, the
 // sheet (rank, XP, health, quests, badges, rooms, spells cast, pack), and
 // the game's own menu — title screen, options, the tour, a new game.
 import { useState, type FormEvent } from "react";
@@ -8,8 +8,10 @@ import { Dialog } from "../chrome/Dialog";
 import { closeOverlay, openOverlay, startTour, useUi } from "../chrome/ui-store";
 import { game, useGame, type GameStore } from "../engine/game-store";
 import { Gauge } from "../hud/Gauge";
+import { describeAppearance } from "./appearance";
+import { AppearanceEditor } from "./AppearanceEditor";
 import { HeroFigure } from "./HeroFigure";
-import { clearHero, LOOKS, NAME_MAX, ROLES, roleMeta, setHero, useHero, type Hero, type HeroRole } from "./hero-store";
+import { clearHero, NAME_MAX, ROLES, roleMeta, setHero, useHero, type Hero, type HeroRole } from "./hero-store";
 
 function spellsCast(store: GameStore): number {
     const stats = (store.runtime?.state.stats ?? {}) as { commands?: Record<string, number> };
@@ -19,6 +21,7 @@ function spellsCast(store: GameStore): number {
 function ProfileBody({ store, hero }: { store: GameStore; hero: Hero }) {
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState(hero.name);
+    const [styling, setStyling] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const status = store.model("statusModel");
     const meta = roleMeta(hero.role);
@@ -38,7 +41,7 @@ function ProfileBody({ store, hero }: { store: GameStore; hero: Hero }) {
     return (
         <div className="bc-profile">
             <div className="bc-profile-card bc-frame-sunken">
-                <HeroFigure look={hero.look} size="lg" label={`${hero.name}, ${meta.title}`} />
+                <HeroFigure appearance={hero.appearance} size="lg" label={`${hero.name}, ${meta.title}`} />
                 <div className="bc-profile-id">
                     {editing ? (
                         <form className="bc-name-row" onSubmit={save}>
@@ -54,20 +57,22 @@ function ProfileBody({ store, hero }: { store: GameStore; hero: Hero }) {
                         </div>
                     )}
                     <p className="bc-muted"><span aria-hidden="true">{meta.icon} </span>{meta.title} — {meta.trait}</p>
-                    <div className="bc-profile-row" role="radiogroup" aria-label="Look">
-                        <span className="bc-opt-label">Look</span>
-                        {LOOKS.map((label, index) => (
-                            <button key={label} type="button" role="radio" aria-checked={index === hero.look} className="bc-swatch" data-look={index} onClick={() => setHero({ look: index })}>{label}</button>
-                        ))}
-                    </div>
+                    <p className="bc-muted bc-profile-look">{describeAppearance(hero.appearance)}.</p>
                     <div className="bc-profile-row">
                         <label className="bc-opt-label" htmlFor="hero-path">Path</label>
                         <select id="hero-path" value={hero.role} onChange={(event) => setHero({ role: event.target.value as HeroRole })}>
                             {ROLES.map((entry) => <option key={entry.id} value={entry.id}>{entry.icon} {entry.title}</option>)}
                         </select>
+                        <button type="button" className="bc-btn" aria-expanded={styling} onClick={() => setStyling((open) => !open)}>{styling ? "Done" : "Change look"}</button>
                     </div>
                 </div>
             </div>
+
+            {styling && (
+                <div className="bc-profile-wardrobe bc-frame-sunken" role="group" aria-label="Wardrobe">
+                    <AppearanceEditor value={hero.appearance} onChange={(appearance) => setHero({ appearance })} role={hero.role} />
+                </div>
+            )}
 
             <dl className="bc-profile-stats">
                 <div><dt>Rank</dt><dd>{status.rank} · Lv {status.level}</dd></div>

@@ -263,29 +263,63 @@
     }
     .bc-card small { line-height: 1.4; }
     .bc-card-door { color: var(--fleet-color-info); }
-    .bc-looks {
+    /* the wardrobe (AppearanceEditor): a row of radios per part or palette */
+    .bc-appearance {
+        display: grid;
+        gap: var(--fleet-space-2);
+    }
+    .bc-appearance-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--fleet-space-3);
+        gap: var(--fleet-space-2);
+        margin-bottom: var(--fleet-space-1);
     }
-    .bc-look {
-        display: flex;
-        flex-direction: column;
+    .bc-appearance-row {
+        display: grid;
+        grid-template-columns: 6.5rem minmax(0, 1fr);
         align-items: center;
-        gap: 0.5rem;
-        padding: var(--fleet-space-3);
+        gap: var(--fleet-space-2);
+    }
+    .bc-appearance-row .bc-opt-label { font-size: var(--fleet-text-xs); }
+    .bc-options-strip {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .bc-option-chip {
+        padding: 0.2rem 0.6rem;
         border: 0;
-        background: var(--fleet-color-bg);
+        background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-ink-muted);
-        font: inherit;
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-xs);
         cursor: pointer;
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
     }
-    .bc-look .bc-hero { padding-top: 0; }
-    .bc-look[aria-checked="true"] {
-        color: var(--fleet-color-ink);
-        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
+    .bc-option-chip:hover { color: var(--fleet-color-ink); }
+    .bc-option-chip[aria-checked="true"] {
+        color: var(--fleet-color-primary);
+        background: color-mix(in srgb, var(--fleet-color-primary) 18%, var(--fleet-color-bg-muted));
+        box-shadow: inset 0 0 0 1px var(--fleet-color-primary);
     }
+    .bc-swatch-only {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        justify-content: center;
+    }
+    .bc-swatch-only::before {
+        width: 14px;
+        height: 14px;
+    }
+    .bc-create-panel[data-step="look"] { width: min(1040px, 100%); }
+    .bc-profile-wardrobe {
+        padding: var(--fleet-space-3);
+        background: var(--fleet-color-bg);
+    }
+    .bc-profile-look { margin-top: 0 !important; }
     .bc-ready p { margin: 0 0 var(--fleet-space-2); line-height: 1.6; }
     .bc-wizard-nav {
         display: flex;
@@ -598,13 +632,12 @@
         width: 10px;
         height: 10px;
         background: var(--swatch, var(--fleet-color-success));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bc-hero-outline) 60%, transparent);
     }
-    .bc-swatch[data-look="1"] { --swatch: var(--fleet-color-primary); }
-    .bc-swatch[data-look="2"] { --swatch: var(--fleet-color-accent); }
-    .bc-swatch[data-look="3"] { --swatch: var(--fleet-color-secondary); }
+    .bc-swatch:hover { box-shadow: inset 0 0 0 1px var(--fleet-color-ink-muted); }
     .bc-swatch[aria-checked="true"] {
         color: var(--fleet-color-ink);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-primary);
+        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
     }
 
     /* ── the header ── */
@@ -706,6 +739,7 @@
 @media (max-width: 760px) {
     .bc-create-panel,
     .bc-intro-panel { grid-template-columns: minmax(0, 1fr); }
+    .bc-appearance-row { grid-template-columns: minmax(0, 1fr); gap: var(--fleet-space-1); }
     .bc-create-preview { flex-direction: row; justify-content: center; gap: var(--fleet-space-4); }
     .bc-cards { grid-template-columns: minmax(0, 1fr); }
     .bc-title-hero { display: none; }

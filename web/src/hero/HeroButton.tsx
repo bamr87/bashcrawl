@@ -17,7 +17,7 @@ export function HeroButton({ store = game }: { store?: GameStore }) {
             aria-label={`Hero ${name}, ${status.rank}. Open the profile`}
         >
             <span aria-hidden="true">
-                <HeroFigure look={who?.look ?? 0} size="sm" className="bc-hero-mini" />
+                <HeroFigure appearance={who?.appearance} size="sm" crop="bust" className="bc-hero-mini" />
             </span>
             <span className="bc-hero-btn-name">{name}</span>
             <span className="bc-hero-btn-rank">{status.rank}</span>

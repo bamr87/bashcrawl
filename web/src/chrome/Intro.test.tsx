@@ -18,7 +18,7 @@ describe("the intro", () => {
     });
 
     it("pages through the overview and begins at the hero's door with the tour", async () => {
-        createHero({ name: "Mira", role: "wanderer", look: 0 });
+        createHero({ name: "Mira", role: "wanderer" });
         setPrefs({ introSeen: false });
         render(<Intro />);
         await act(async () => { setUi({ overlay: "intro" }); });

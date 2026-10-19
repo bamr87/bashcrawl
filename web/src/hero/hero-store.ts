@@ -1,74 +1,27 @@
 // The hero: who is playing. A name, a path (the door they start at and the
-// kind of help they like), a look (the sprite's palette) and whether they
-// have taken the tour — kept apart from the run (bashcrawl-web-state-v1)
-// under its own key, so a new game can keep the hero and a new hero can
-// keep the preferences. Nothing here reaches the engine: the save is the
-// engine's and `whoami` still answers "adventurer".
-import type { Mode } from "../app/modes";
+// kind of help they like), an appearance (what the sprite is made of) and
+// whether they have taken the tour — kept apart from the run
+// (bashcrawl-web-state-v1) under its own key, so a new game can keep the
+// hero and a new hero can keep the preferences. Nothing here reaches the
+// engine: the save is the engine's and `whoami` still answers "adventurer".
 import { createStore, useStore } from "../lib/store";
 import { readJson, writeJson } from "../lib/storage";
+import { legacyLook, sanitizeAppearance, type Appearance } from "./appearance";
+import { isRole, type HeroRole } from "./roles";
+
+export { ROLES, roleMeta, type HeroRole, type RoleMeta } from "./roles";
 
 export const HERO_KEY = "bashcrawl-web-hero-v1";
 export const NAME_MAX = 16;
 export const DEFAULT_NAME = "Adventurer";
 
-export type HeroRole = "wanderer" | "scribe" | "rogue" | "sage";
-
 export interface Hero {
     name: string;
     role: HeroRole;
-    /** Index into LOOKS: the sprite's palette (data-look). */
-    look: number;
+    appearance: Appearance;
     created: string;
     tourDone: boolean;
 }
-
-export interface RoleMeta {
-    id: HeroRole;
-    title: string;
-    icon: string;
-    blurb: string;
-    trait: string;
-    /** The door this path opens on. */
-    door: Mode;
-}
-
-export const ROLES: readonly RoleMeta[] = [
-    {
-        id: "wanderer",
-        title: "Wanderer",
-        icon: "⚔",
-        blurb: "Learns by walking. Starts in the Story dungeon and follows the quests room by room.",
-        trait: "The quest panel always shows the next spell.",
-        door: "story",
-    },
-    {
-        id: "scribe",
-        title: "Scribe",
-        icon: "📜",
-        blurb: "Learns by reading. Starts in the Learn door with a guided course and a practice lab.",
-        trait: "Lessons tick off objectives as you type.",
-        door: "learn",
-    },
-    {
-        id: "rogue",
-        title: "Rogue",
-        icon: "🗡",
-        blurb: "Learns by doing it fast. Starts in the Arcade's timed trials and comes back for the story.",
-        trait: "Speed and streaks earn the XP.",
-        door: "arcade",
-    },
-    {
-        id: "sage",
-        title: "Sage",
-        icon: "🔮",
-        blurb: "Learns by looking it up. Starts with the Reference open, then descends with the cheatsheet at hand.",
-        trait: "Any reference command drops into the prompt.",
-        door: "reference",
-    },
-];
-
-export const LOOKS: readonly string[] = ["Verdant", "Gold", "Arcane", "Ember"];
 
 const HEADS = ["Ael", "Bryn", "Cor", "Dag", "Eir", "Fen", "Gal", "Hal", "Isk", "Kael", "Lir", "Mor", "Nim", "Orr", "Pel", "Quin", "Ryn", "Sel", "Tam", "Ulf", "Vey", "Wyn", "Yor", "Zan"];
 const TAILS = ["a", "ia", "on", "en", "is", "ric", "wyn", "dor", "ith", "ar", "ow", "ene"];
@@ -87,23 +40,16 @@ export function cleanName(raw: string): string {
     return text || DEFAULT_NAME;
 }
 
-export function roleMeta(role: HeroRole): RoleMeta {
-    return ROLES.find((entry) => entry.id === role) ?? ROLES[0];
-}
-
-function isRole(value: unknown): value is HeroRole {
-    return ROLES.some((entry) => entry.id === value);
-}
-
 function sanitize(raw: unknown): Hero | null {
     if (!raw || typeof raw !== "object") return null;
-    const record = raw as Partial<Hero>;
+    const record = raw as Partial<Hero> & { look?: unknown };
     if (typeof record.name !== "string") return null;
-    const look = typeof record.look === "number" && Number.isInteger(record.look) && record.look >= 0 && record.look < LOOKS.length ? record.look : 0;
+    // A hero saved before appearances existed carried one of four palettes.
+    const appearance = sanitizeAppearance(record.appearance, legacyLook(record.look));
     return {
         name: cleanName(record.name),
         role: isRole(record.role) ? record.role : "wanderer",
-        look,
+        appearance,
         created: typeof record.created === "string" ? record.created : new Date().toISOString(),
         tourDone: record.tourDone === true,
     };
@@ -115,7 +61,7 @@ export function getHero(): Hero | null {
     return store.get();
 }
 
-export function createHero(input: { name: string; role: HeroRole; look: number }): Hero {
+export function createHero(input: { name: string; role: HeroRole; appearance?: Appearance }): Hero {
     const hero = sanitize({ ...input, created: new Date().toISOString(), tourDone: false }) as Hero;
     store.set(hero);
     writeJson(HERO_KEY, hero);

@@ -32,7 +32,7 @@ describe("the guided tour", () => {
     beforeEach(() => {
         window.localStorage.clear();
         clearHero();
-        createHero({ name: "Mira", role: "wanderer", look: 0 });
+        createHero({ name: "Mira", role: "wanderer" });
         setPromptValue("");
         setUi({ overlay: null, tour: null });
     });

@@ -123,7 +123,7 @@ function Pages({ hero }: { hero: Hero | null }) {
                 {page === 0 && <ArtClip name="room-entrance" loop className="bc-intro-clip" />}
                 {page === 1 && <ArtClip name="encounter-treasure" loop className="bc-intro-clip" />}
                 {page === 2 && (hero ? (
-                    <HeroFigure look={hero.look} size="lg">
+                    <HeroFigure appearance={hero.appearance} size="lg">
                         <p className="bc-hero-name bc-display">{hero.name}</p>
                     </HeroFigure>
                 ) : (

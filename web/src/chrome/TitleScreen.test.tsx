@@ -42,7 +42,7 @@ describe("the title screen", () => {
     });
 
     it("continues an existing hero through their last door, and can start over", async () => {
-        createHero({ name: "Mira", role: "scribe", look: 1 });
+        createHero({ name: "Mira", role: "scribe" });
         setPrefs({ mode: "arcade", onboarded: true });
         const store = await mount();
         store.execute("pwd");

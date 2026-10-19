@@ -48,7 +48,7 @@ function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
 
     function continueGame() {
         // A save from before heroes existed continues as the default hero.
-        const who = hero ?? createHero({ name: DEFAULT_NAME, role: "wanderer", look: 0 });
+        const who = hero ?? createHero({ name: DEFAULT_NAME, role: "wanderer" });
         enterGame(who);
         toast(`Welcome back, ${who.name}.`, "magic");
     }
@@ -65,7 +65,7 @@ function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
         openOverlay("create");
     }
     function dropIn() {
-        const who = createHero({ name: DEFAULT_NAME, role: "wanderer", look: 0 });
+        const who = createHero({ name: DEFAULT_NAME, role: "wanderer" });
         enterGame(who);
         if (!getPrefs().introSeen) startTour();
     }
@@ -180,7 +180,7 @@ export function TitleScreen({ store = game }: { store?: GameStore }) {
                     </motion.div>
                     {hero && (
                         <motion.div className="bc-title-hero" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
-                            <HeroFigure look={hero.look} size="lg" label={`${hero.name}, your hero`}>
+                            <HeroFigure appearance={hero.appearance} size="lg" label={`${hero.name}, your hero`}>
                                 <p className="bc-hero-name bc-display">{hero.name}</p>
                                 <p className="bc-muted bc-hero-path">{roleMeta(hero.role).icon} {roleMeta(hero.role).title}</p>
                             </HeroFigure>
