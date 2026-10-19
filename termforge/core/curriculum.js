@@ -433,8 +433,9 @@
                     }
                     s.progress = progress;
                     if (typeof s.active !== "string" || !byId.has(s.active)) s.active = null;
+                    // `completed` is derived from progress, so the two never disagree.
                     s.completed = Array.isArray(s.completed)
-                        ? s.completed.filter((id, i, all) => byId.has(id) && all.indexOf(id) === i) : [];
+                        ? s.completed.filter((id, i, all) => progress[id] && progress[id].complete && all.indexOf(id) === i) : [];
                 },
             },
         };

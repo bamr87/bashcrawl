@@ -126,4 +126,8 @@ test("an imported save cannot smuggle bad course progress past the curriculum", 
     assert.equal(learn.active, null);
     assert.deepStrictEqual(Object.keys(learn.progress), ["navigator"]);
     assert.deepStrictEqual(JSON.parse(JSON.stringify(learn.progress.navigator)), { lesson: 0, met: [], done: ["where-am-i"], complete: false });
+    // A claimed completion without the progress to back it is dropped.
+    runtime.state = { ...runtime.state, learn: { active: null, progress: {}, completed: ["navigator", "navigator", "ghost"] } };
+    run("learn");
+    assert.deepStrictEqual(Array.from(runtime.state.learn.completed), []);
 });
