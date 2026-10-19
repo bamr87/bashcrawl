@@ -35,6 +35,9 @@ const TOAST_KINDS = {
     item: "art",
     levelup: "magic",
     unlock: "magic",
+    lesson: "magic",
+    objective: "success",
+    skill: "info",
 };
 const SILENT_EVENTS = new Set(["move"]);
 const TOAST_MS = 2200;

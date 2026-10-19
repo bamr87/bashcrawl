@@ -80,10 +80,76 @@
         }
     }
 
+    // ── Learning platform models (TermForge curriculum + mastery) ───────────
+    // The active course/lesson with its checklist, and the skill map's
+    // summary. Both read raw session state defensively: the plugins sanitize
+    // their slices on use, but a presenter may run first.
+    function list(value) { return Array.isArray(value) ? value : []; }
+
+    function lessonModel(runtime) {
+        const learn = runtime.state.learn && typeof runtime.state.learn === "object" ? runtime.state.learn : {};
+        const courses = list(runtime.courses);
+        const completed = list(learn.completed).length;
+        const course = learn.active ? courses.find((c) => c.id === learn.active) : null;
+        if (!course) return { active: false, courses: courses.length, completed };
+        const raw = (learn.progress || {})[course.id] || {};
+        const index = Number.isInteger(raw.lesson) && raw.lesson >= 0 && raw.lesson < course.lessons.length ? raw.lesson : 0;
+        const lesson = course.lessons[index];
+        const done = list(raw.done);
+        const finished = raw.complete === true || done.includes(lesson.id);
+        const objectives = lesson.objectives.map((obj, i) => ({ text: obj.text, met: finished || list(raw.met).includes(i) }));
+        return {
+            active: true,
+            courseId: course.id,
+            course: course.title,
+            n: index + 1,
+            total: course.lessons.length,
+            title: lesson.title,
+            complete: raw.complete === true,
+            lab: `/lab/${course.id}`,
+            objectives,
+            met: objectives.filter((o) => o.met).length,
+            lessonsDone: done.length,
+            completed,
+        };
+    }
+
+    function skillsModel(runtime) {
+        const mastery = global.TermForge && global.TermForge.mastery;
+        const groups = list(runtime.catalog && runtime.catalog.skills);
+        const names = [];
+        for (const group of groups) for (const name of list(group.commands)) if (!names.includes(name)) names.push(name);
+        const records = (runtime.state.mastery && runtime.state.mastery.skills) || {};
+        const now = runtime.clock && typeof runtime.clock.now === "function" ? runtime.clock.now() : 0;
+        const rows = names.map((name) => {
+            const rec = mastery && records[name] ? mastery.cleanSkill(records[name]) : null;
+            const level = rec && mastery ? mastery.levelOf(rec) : 0;
+            return { name, level, due: Boolean(rec && (rec.uses || rec.box) && rec.due <= now) };
+        });
+        const practised = rows.filter((r) => r.level > 0);
+        const levelsByName = {};
+        for (const row of practised) levelsByName[row.name] = row.level;
+        return {
+            levelsByName,
+            total: rows.length,
+            practised: practised.length,
+            due: rows.filter((r) => r.due).length,
+            levels: rows.reduce((sum, r) => sum + r.level, 0),
+            top: practised.slice().sort((a, b) => b.level - a.level || a.name.localeCompare(b.name)).slice(0, 3),
+        };
+    }
+
     // Scalar diff-model: cheap to take before/after a command, feeds diffEvents.
     function snapshot(runtime) {
         const s = runtime.state;
+        const lesson = lessonModel(runtime);
+        let lessonsDone = 0;
+        const progress = (s.learn && s.learn.progress) || {};
+        for (const key of Object.keys(progress)) lessonsDone += list(progress[key] && progress[key].done).length;
         return {
+            lessonsDone,
+            objectivesMet: lesson.active ? lesson.met : 0,
+            skillLevels: skillsModel(runtime).levelsByName,
             xp: s.xp,
             hp: s.hp,
             completed: s.completedQuestIds.length,
@@ -96,6 +162,9 @@
             reveals: Object.keys(s.reveals || {}).length,
         };
     }
+
+    // Mastery level names (core/mastery.js DEFAULT_TEXT.masteryLevels).
+    const SKILL_LABELS = Object.freeze(["not yet tried", "Novice", "Apprentice", "Adept", "Expert", "Master"]);
 
     // Semantic before/after transitions. Both renderers key their juice off
     // this: the web maps types to CSS effects, the terminal to toasts/flashes.
@@ -125,6 +194,18 @@
         }
         if ((next.reveals || 0) > (prev.reveals || 0)) {
             events.push({ type: "unlock", text: "New passages have opened." });
+        }
+        if ((next.lessonsDone || 0) > (prev.lessonsDone || 0)) {
+            events.push({ type: "lesson", text: "🎓 LESSON COMPLETE" });
+        } else if ((next.objectivesMet || 0) > (prev.objectivesMet || 0)) {
+            events.push({ type: "objective", text: "✔ Objective met" });
+        }
+        const before = prev.skillLevels || {};
+        const grown = Object.keys(next.skillLevels || {}).filter((name) => next.skillLevels[name] > (before[name] || 0));
+        if (grown.length) {
+            const name = grown[0];
+            const label = SKILL_LABELS[next.skillLevels[name]] || "";
+            events.push({ type: "skill", skills: grown, text: `⬆ ${grown.join(", ")} · ${grown.length === 1 ? label : "skills up"}` });
         }
         return events;
     }
@@ -259,10 +340,12 @@
     const PANE_DEFS = [
         { id: "room", title: "◈ ROOM", surfaces: ["tty", "web"] },
         { id: "quest", title: "◆ QUEST", surfaces: ["tty", "web"] },
+        { id: "lesson", title: "✎ LESSON", surfaces: ["tty", "web"] },
         { id: "pack", title: "▣ PACK", surfaces: ["tty", "web"] },
         { id: "vitals", title: "♥ VITALS", surfaces: ["tty"] },
         { id: "map", title: "☗ MAP", surfaces: ["tty", "web"] },
         { id: "hero", title: "⚔ HERO", surfaces: ["tty", "web"] },
+        { id: "skills", title: "◎ SKILLS", surfaces: ["tty", "web"] },
         { id: "spotlight", title: "✧ TEACH", surfaces: ["web"] },
     ];
     const PANE_IDS = PANE_DEFS.map((pane) => pane.id);
@@ -520,7 +603,28 @@
             roomLines.push({ kind: "dim", text: truncate(room.teaches[0], width) });
         }
 
+        const lesson = lessonModel(runtime);
+        const lessonLines = [];
+        if (!lesson.active) {
+            lessonLines.push({ kind: "dim", text: truncate(`${lesson.courses} courses · type learn`, width) });
+        } else if (lesson.complete) {
+            lessonLines.push({ kind: "success", text: truncate(`${lesson.course} ✅`, width) });
+            lessonLines.push({ kind: "dim", text: "learn to pick the next course" });
+        } else {
+            lessonLines.push({ kind: "info", text: truncate(`${lesson.n}/${lesson.total} ${lesson.title}`, width) });
+            lesson.objectives.slice(0, 4).forEach((obj) => {
+                lessonLines.push({ kind: obj.met ? "success" : "dim", text: truncate(`${obj.met ? "✔" : "○"} ${obj.text}`, width) });
+            });
+            lessonLines.push({ kind: "dim", text: truncate(`lab ${lesson.lab} · lesson hint`, width) });
+        }
+
+        const skills = skillsModel(runtime);
+        const skillLines = skills.top.map((row) => ({ kind: "output", text: truncate(`${row.name.padEnd(7)} ${bar(row.level, 5, 5)}`, width) }));
+        skillLines.push({ kind: "dim", text: truncate(`${skills.practised}/${skills.total} practised${skills.due ? ` · ${skills.due} due` : ""}`, width) });
+
         return decoratePanels({
+            lesson: { title: "✎ LESSON", lines: lessonLines },
+            skills: skills.practised ? { title: "◎ SKILLS", lines: skillLines } : null,
             room: { title: "◈ ROOM", lines: roomLines },
             quest: { title: "◆ QUEST", lines: questLines },
             pack: { title: "▣ PACK", lines: packLines },
@@ -573,6 +677,8 @@
         inventoryModel,
         heroModel,
         roomModel,
+        lessonModel,
+        skillsModel,
         mapModel,
         panels,
         strip,

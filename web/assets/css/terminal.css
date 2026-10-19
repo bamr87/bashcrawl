@@ -1767,3 +1767,23 @@ body[data-crt="on"] .tui-log {
 [hidden] {
     display: none !important;
 }
+
+/* --- Learning platform panels (lesson checklist, skill map) --- */
+.cmd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0.45rem 0 0;
+}
+.cmd-chip {
+    font-size: 0.72rem;
+    padding: 0.12rem 0.45rem;
+}
+.lesson-panel .ql-list li {
+    font-size: 0.8rem;
+}
+.skill-bar {
+    font-family: var(--font-mono);
+    color: var(--accent-purple);
+    letter-spacing: 0.02em;
+}

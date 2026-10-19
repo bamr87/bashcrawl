@@ -45,6 +45,11 @@
                     <h2><button type="button" class="panel-toggle" aria-expanded="true">Active Quest</button></h2>
                     <div id="quest-panel"></div>
                 </section>
+                <!-- Learning platform: the active lesson's checklist (Hud.lessonModel). -->
+                <section class="tui-panel lesson-panel" data-hud-pane="lesson">
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Lesson</button></h2>
+                    <div id="lesson-panel"></div>
+                </section>
                 <section class="tui-panel" data-hud-pane="pack">
                     <h2><button type="button" class="panel-toggle" aria-expanded="true">Inventory</button></h2>
                     <div id="inventory-panel"></div>
@@ -79,6 +84,11 @@
                         </div>
                         <p id="hero-mood-label" class="kind-dim hero-mood-label">Ready for the descent.</p>
                     </div>
+                </section>
+                <!-- Skill map summary: mastery grown by real use (Hud.skillsModel). -->
+                <section class="tui-panel skills-panel" data-hud-pane="skills">
+                    <h2><button type="button" class="panel-toggle" aria-expanded="true">Skills</button></h2>
+                    <div id="skills-panel"></div>
                 </section>
                 <section class="tui-panel tui-room-panel" data-hud-pane="room">
                     <h2><button type="button" class="panel-toggle" aria-expanded="true">Location</button></h2>

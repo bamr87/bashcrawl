@@ -200,3 +200,39 @@ test("strip() compresses the HUD into status plus a Here listing", () => {
     assert.ok(strip[1].text.includes("Here:"));
     assert.ok(strip[1].text.includes("scroll"));
 });
+
+// ── learning platform: lesson + skills panes and events ───────────────────
+
+test("lessonModel and skillsModel follow a course, and diffEvents names what grew", () => {
+    const { runtime, hud } = createHudRuntime();
+    assert.deepEqual({ ...hud.lessonModel(runtime) }, { active: false, courses: runtime.courses.length, completed: 0 });
+    const s0 = hud.snapshot(runtime);
+    runtime.execute("learn navigator");
+    runtime.execute("cd /lab/navigator");
+    const s1 = hud.snapshot(runtime);
+    const objective = hud.diffEvents(s0, s1).find((e) => e.type === "objective");
+    assert.ok(objective, "meeting an objective emits an objective event");
+    const skill = hud.diffEvents(s0, s1).find((e) => e.type === "skill");
+    assert.equal(skill.text, "⬆ cd · Novice");
+    runtime.execute("pwd");
+    const s2 = hud.snapshot(runtime);
+    assert.ok(hud.diffEvents(s1, s2).some((e) => e.type === "lesson"), "finishing a lesson emits a lesson event");
+    const lesson = hud.lessonModel(runtime);
+    assert.equal(lesson.course, "Finding Your Way");
+    assert.equal(lesson.n, 2);
+    assert.equal(lesson.met, 0);
+    assert.equal(lesson.lab, "/lab/navigator");
+    const skills = hud.skillsModel(runtime);
+    assert.ok(skills.practised >= 2 && skills.total >= 30);
+    const panes = hud.panels(runtime, { width: 30 }).map((p) => p.id);
+    assert.ok(panes.includes("lesson") && panes.includes("skills"));
+});
+
+test("a saved layout from before the learning panes gains them, visible, in definition order", () => {
+    const { hud } = createHudRuntime();
+    const old = { version: 1, dock: "left", sidebar: true, width: 28, panes: [{ id: "map", visible: false, collapsed: false }] };
+    const layout = hud.normalizeLayout(old);
+    assert.deepEqual(layout.panes.map((p) => p.id), hud.PANE_DEFS.map((d) => d.id));
+    assert.equal(layout.panes.find((p) => p.id === "lesson").visible, true);
+    assert.equal(layout.panes.find((p) => p.id === "map").visible, false);
+});

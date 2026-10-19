@@ -183,7 +183,8 @@
             // The learning platform: brand-neutral TermForge plugins fed with
             // the game's data (courses/ -> courses.json, progression.yaml).
             const TF = global.TermForge;
-            const Learn = TF.curriculum.plugin({ courses: (data.courses && data.courses.courses) || [] });
+            this.courses = (data.courses && data.courses.courses) || [];
+            const Learn = TF.curriculum.plugin({ courses: this.courses });
             const Mastery = TF.mastery.plugin({
                 skills: this.catalog.skills,
                 cards: this.catalog.cards,

@@ -10,6 +10,8 @@
 
     const dom = {
         quest: document.getElementById("quest-panel"),
+        lesson: document.getElementById("lesson-panel"),
+        skills: document.getElementById("skills-panel"),
         inventory: document.getElementById("inventory-panel"),
         room: document.getElementById("room-panel"),
         map: document.getElementById("map-panel"),
@@ -155,6 +157,18 @@
         if (!line && !nonStoryMode()) return;
         runLine(line);
     });
+
+    // Command chips in the sidebar run their command as if typed (story
+    // mode only), then hand focus back to the prompt.
+    const storySidebar = document.querySelector("#mode-story .tui-sidebar");
+    if (storySidebar) {
+        storySidebar.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-run]");
+            if (!button || nonStoryMode()) return;
+            runLine(button.getAttribute("data-run"));
+            dom.input.focus();
+        });
+    }
 
     function commandInputKeydown(event) {
         if (event.key === "Enter") {
@@ -316,6 +330,13 @@
                 flashPanel(dom.map);
                 shakePanel(dom.map);
 
+            } else if (event.type === "lesson") {
+                flashPanel(dom.lesson);
+                applyHeroMood("quest");
+            } else if (event.type === "objective") {
+                flashPanel(dom.lesson);
+            } else if (event.type === "skill") {
+                flashPanel(dom.skills);
             }
             // "levelup" is already celebrated via the runtime's control record
             // (flashLevelUp in this view's onControl).
@@ -388,6 +409,8 @@
             .forEach((panel) => bump(panel, "is-refreshing", 220));
         recordVisit();
         renderQuest();
+        renderLesson();
+        renderSkills();
         renderInventory();
         renderHpBar();
         renderRoom();
@@ -458,6 +481,44 @@
             ? `<p><strong>${escapeHtml(quest.current.title)}</strong></p><p>${escapeHtml(quest.current.objective)}</p><p class="kind-dim quest-xp">${quest.mainDone}/${quest.mainTotal} complete • ${quest.xp} XP</p>`
             : `<p class="kind-success">All quests complete.</p><p class="quest-xp">${quest.xp} XP earned.</p>`;
         dom.quest.innerHTML = summary + renderQuestLog(quest);
+    }
+
+    // Command chips: buttons that type a command for you (data-run).
+    function chip(command, label) {
+        return `<button type="button" class="tui-button cmd-chip" data-run="${escapeHtml(command)}">${escapeHtml(label || command)}</button>`;
+    }
+
+    function renderLesson() {
+        if (!dom.lesson) return;
+        const lesson = Hud.lessonModel(runtime);
+        if (!lesson.active) {
+            dom.lesson.innerHTML = `<p>${lesson.courses} courses, each with its own lab of real files to practise on.</p>`
+                + `<p class="cmd-chips">${chip("learn", "Browse courses")}${chip("learn navigator", "Start: Finding Your Way")}</p>`;
+            return;
+        }
+        if (lesson.complete) {
+            dom.lesson.innerHTML = `<p class="kind-success"><strong>${escapeHtml(lesson.course)}</strong> ✅ complete</p>`
+                + `<p class="cmd-chips">${chip("learn", "Pick the next course")}</p>`;
+            return;
+        }
+        const rows = lesson.objectives.map((obj) => (
+            `<li class="${obj.met ? "ql-done" : "ql-side"}">${obj.met ? "✔" : "○"} ${escapeHtml(obj.text)}</li>`
+        )).join("");
+        dom.lesson.innerHTML = `<p><strong>${escapeHtml(lesson.course)}</strong></p>`
+            + `<p class="kind-dim">Lesson ${lesson.n}/${lesson.total}: ${escapeHtml(lesson.title)} · ${lesson.met}/${lesson.objectives.length}</p>`
+            + `<ul class="ql-list">${rows}</ul>`
+            + `<p class="cmd-chips">${chip("lesson", "Read")}${chip("lesson hint", "Hint")}${chip(`cd ${lesson.lab}`, "Go to lab")}</p>`;
+    }
+
+    function renderSkills() {
+        if (!dom.skills) return;
+        const skills = Hud.skillsModel(runtime);
+        const top = skills.top.map((row) => (
+            `<li><code>${escapeHtml(row.name)}</code> <span class="skill-bar">${Hud.bar(row.level, 5, 5)}</span></li>`
+        )).join("");
+        dom.skills.innerHTML = (top ? `<ul class="ql-list">${top}</ul>` : "<p>Every command you run grows a skill.</p>")
+            + `<p class="kind-dim">${skills.practised}/${skills.total} practised${skills.due ? ` · ${skills.due} due for review` : ""}</p>`
+            + `<p class="cmd-chips">${chip("skills", "Skill map")}${chip("review", "Review")}</p>`;
     }
 
     function renderInventory() {
