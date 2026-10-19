@@ -78,7 +78,7 @@ Every `core/` file uses one wrapper so the same bytes load as a classic `<script
 })(typeof globalThis !== "undefined" ? globalThis : this, function () { /* ... */ });
 ```
 
-Files with dependencies resolve them per environment (`require("./parser.js")` under CJS, `global.TermForge.parser` as a classic script) — see `core/shell.js`. There is no build step and no `"type": "module"`; classic-script order in `web/index.html` is the browser's dependency graph, and `termforge/node/index.js` is node's.
+Files with dependencies resolve them per environment (`require("./parser.js")` under CJS, `global.TermForge.parser` as a classic script) — see `core/shell.js`. The core has no build step and no `"type": "module"`; classic-script order in `web/index.html` is the browser's dependency graph, and `termforge/node/index.js` is node's. The React app around it (`web/src/`) is compiled by Vite, but it reads the core through `window.TermForge` and never bundles it — the same files the node hosts `require()` are the ones the browser runs.
 
 ## ASCII Motion
 
@@ -156,7 +156,7 @@ The DOM sink appends new lines without remounting existing output. It follows th
 
 ## The vendoring contract
 
-`termforge/core/` is the single source of truth. `make web-build` mirrors it file-for-file into `web/assets/js/vendor/termforge/` (committed, because `web/` deploys to GitHub Pages verbatim). `scripts/vendor_termforge.py --check` enforces byte-identity in both directions and runs inside `scripts/validate_static_web.py`, `make web-test`, and the pytest suite. **Edit `termforge/core/`, never the vendor mirror.** `web/index.html` must load every vendored file before `runtime.js`; the validator checks that too.
+`termforge/core/` is the single source of truth. `make web-build` mirrors it file-for-file into `web/assets/js/vendor/termforge/` (committed, because the web build copies `web/assets/js` into `web/dist` verbatim and the node test harness loads the vendor copies). `scripts/vendor_termforge.py --check` enforces byte-identity in both directions and runs inside `scripts/validate_static_web.py`, `make web-test`, and the pytest suite. **Edit `termforge/core/`, never the vendor mirror.** `web/index.html` (and the built `web/dist/index.html`) must load every vendored file before `runtime.js`; the validator checks that too.
 
 ## Testing
 

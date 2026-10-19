@@ -1,6 +1,6 @@
 # Authoring TermForge Apps
 
-A TermForge **app** is a world + command packs + hooks, wrapped in a small descriptor the hosts understand. The same app runs in the browser (classic scripts), in a local terminal (`host-tty.js`), and over telnet (`host-telnet.js`).
+A TermForge **app** is a world + command packs + hooks, wrapped in a small descriptor the hosts understand. The same app runs in the browser (the core as classic scripts under the React app in `web/src/`), in a local terminal (`host-tty.js`), and over telnet (`host-telnet.js`).
 
 ## The App descriptor
 

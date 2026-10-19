@@ -101,7 +101,7 @@ After content or core changes, run `make web-build` and commit the regenerated `
 | Surface | Start it | Needs |
 |---|---|---|
 | real bash | `bashcrawl play`, or `cd entrance && cat scroll` | bash (3.2+) |
-| browser | <https://bamr87.github.io/bashcrawl/> or `bashcrawl web` — Story, Learn, Arcade and Reference modes (`Alt+1`–`4`) | a browser (python3 to serve locally) |
+| browser | <https://bamr87.github.io/bashcrawl/> or `bashcrawl web` (serves `web/dist`; `make web-dev` for hot reload) — Story, Learn, Arcade and Reference doors (`Alt+1`–`4`) | a browser; Node 22.22+ to build (`make web-bundle`), python3 to serve the build |
 | terminal HUD | `bashcrawl tty` (`make tty-demo`) | Node 20.16+ |
 | telnet | `bashcrawl serve` (`make telnet-demo`) | Node 20.16+ |
 | telnet hub (MUD mode) | `bashcrawl hub` (`make telnet-hub`) | Node 20.16+ |

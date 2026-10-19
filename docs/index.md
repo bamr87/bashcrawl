@@ -25,6 +25,6 @@ bash setup.sh
 cd entrance && cat scroll
 ```
 
-Prefer the browser? Run `make web-preview` (or open `web/index.html`) to play the static web trainer.
+Prefer the browser? Play at <https://bamr87.github.io/bashcrawl/>, or run `make web-dev` locally (node 22.22+).
 
 Or use the launcher: `bin/bashcrawl play` (classic), `bin/bashcrawl tty` (full-screen HUD), `bin/bashcrawl courses` (the learning platform), `bin/bashcrawl doctor` (what this machine can run).

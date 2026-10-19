@@ -49,13 +49,15 @@ cd entrance && cat scroll
 
 ### Web Trainer (browser)
 
-A static, dependency-free web app with the same rooms, scrolls, and encounters:
+The same rooms, scrolls and encounters in the browser, on an in-page bash emulator — hosted at <https://bamr87.github.io/bashcrawl/>, or locally:
 
 ```bash
-make web-preview      # serves web/ at http://127.0.0.1:8000
+make web-install      # once: npm install (node 22.22+)
+make web-dev          # hot-reloading dev server at http://127.0.0.1:5173
+make web-bundle       # or build it: web/dist, then `bin/bashcrawl web` serves it
 ```
 
-Or simply open `web/index.html` in a browser. Rebuild the bundle from the game content with `make web-build`.
+The engine's data bundles (`web/data/*.json`) are regenerated from the game content by `make web-build`, which the targets above run first.
 
 ## Help System
 

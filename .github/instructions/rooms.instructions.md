@@ -456,6 +456,6 @@ QUESTS.YAML (if adding a quest):
 CROSS-SURFACE COMPATIBILITY:
 ✅ Game plays natively: cd entrance && cat scroll, then navigate to the new room
 ✅ Registries match the filesystem: make validate-contracts
-✅ Static web bundle builds and validates: make web-test (preview with make web-preview)
+✅ Web bundle builds and validates: make web-test (look at it with make web-dev)
 ✅ YAML files parse without errors: python3 -c "import yaml; yaml.safe_load(open('file'))"
 ```

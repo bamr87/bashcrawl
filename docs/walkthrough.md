@@ -31,7 +31,7 @@ cd bashcrawl
 bash setup.sh
 ```
 
-Prefer a browser? Run `make web-preview` (or open `web/index.html`) to play the static web trainer instead.
+Prefer a browser? Play at <https://bamr87.github.io/bashcrawl/>, or run `make web-dev` locally (node 22.22+), to play the web trainer instead.
 
 You begin in the **bashcrawl lobby** — the root directory of the game world. Every directory is a room. Every file is an object. Every executable is an encounter.
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Bashcrawl is an educational text-based adventure game that teaches terminal/shell commands through immersive fantasy gameplay. Directories are game rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, etc.) are interactive encounters. The repo has two player surfaces, one harness, and one embedded framework: the pure-bash game under `entrance/` (played with a real shell), the static web trainer in `web/` (built by `scripts/export_static_web.py`), the MCP playtest harness in `src/playtest/`, and TermForge in `termforge/` — the universal terminal framework the web emulator was extracted into (kernel in `termforge/core/`, vendored to `web/assets/js/vendor/termforge/` by `make web-build`; edit the core, never the vendor mirror; node hosts serve the game over TTY/telnet). Runtime dependencies: standard POSIX shell tools. Python 3.10+ required only for the web export/validation tooling (`scripts/`) and the playtest harness; node 20+ only for the TermForge tests and hosts (`make test-js`, `make tty-demo`).
+Bashcrawl is an educational text-based adventure game that teaches terminal/shell commands through immersive fantasy gameplay. Directories are game rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, etc.) are interactive encounters. The repo has two player surfaces, one harness, and one embedded framework: the pure-bash game under `entrance/` (played with a real shell), the browser trainer in `web/` (a React + Vite app in `web/src/` over the classic-script engine in `web/assets/js/`; content built by `scripts/export_static_web.py`, the app by `npm run build` into `web/dist/`), the MCP playtest harness in `src/playtest/`, and TermForge in `termforge/` — the universal terminal framework the web emulator was extracted into (kernel in `termforge/core/`, vendored to `web/assets/js/vendor/termforge/` by `make web-build`; edit the core, never the vendor mirror; node hosts serve the game over TTY/telnet). Runtime dependencies: standard POSIX shell tools. Python 3.10+ required only for the web export/validation tooling (`scripts/`) and the playtest harness; node 20+ for the TermForge tests and hosts (`make test-js`, `make tty-demo`), node 22.22+ to build or test the web app (`make web-test`).
 
 ## Architecture
 
@@ -28,7 +28,7 @@ Each room teaches 1-3 related terminal concepts with progressive difficulty.
 | `src/help/` | `bashcrawl_help.sh`, `ai_engine.sh`, `command_suggester.sh`, `init_help.sh`. YAML data in `src/help/data/` |
 | `lib/` | `colors.sh` (color constants), `log.sh` (JSONL session logging), `yaml_reader.sh` (YAML parsing helpers), `reset.sh` (game-state reset) |
 | `entrance/.functions` | Defines `gameover()` (combat death) and `help()` (delegates to `$BASHCRAWL_ROOT/help.sh`) |
-| `web/` | Static web trainer (GitHub Pages bundle). Data built from the YAML registries by `scripts/export_static_web.py` (`make web-build`); preview with `make web-preview` |
+| `web/` | The browser trainer: React + TypeScript in `web/src/`, the classic-script engine in `web/assets/js/`. Data built from the YAML registries by `scripts/export_static_web.py` (`make web-build`); develop with `make web-dev`, build with `make web-bundle` (→ `web/dist`, what Pages deploys) |
 | `src/playtest/` | Lean MCP playtest harness: `python3 -m playtest.mcp_server` with `PYTHONPATH=src`; sessions scored by `python3 -m playtest.scorer` |
 
 ### Game Content Files
@@ -80,7 +80,7 @@ bash setup.sh              # Make game files executable, validate system
 
 # Play
 cd entrance && cat scroll  # Play the game — the filesystem IS the game
-make web-preview           # Serve the static web trainer at http://127.0.0.1:8000
+make web-dev               # The web trainer with hot reload at http://127.0.0.1:5173
 
 # Help
 bash help.sh               # Contextual help
