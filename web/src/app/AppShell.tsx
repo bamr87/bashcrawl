@@ -5,6 +5,7 @@
 import type { ReactNode } from "react";
 
 import { ModeTabs } from "../chrome/ModeTabs";
+import { openOverlay } from "../chrome/ui-store";
 import { MODE_META, type Mode } from "./modes";
 
 export interface AppShellProps {
@@ -22,11 +23,11 @@ export function AppShell({ mode, actions, status, dock, hint, children }: AppShe
         <div className="bc-shell">
             <a className="bc-skip" href="#main-content">Skip to the game</a>
             <header className="bc-header">
-                <div className="bc-brand bc-display">
+                <button type="button" className="bc-brand bc-display" onClick={() => openOverlay("title")} title="Title screen" aria-label="Bashcrawl: title screen">
                     <span aria-hidden="true">⚔</span>
                     <strong>Bashcrawl</strong>
                     <span className="bc-brand-sub">Terminal Dungeon</span>
-                </div>
+                </button>
                 <ModeTabs mode={mode} />
                 <div className="bc-actions" role="group" aria-label="Settings">
                     {actions}

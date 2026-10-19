@@ -424,6 +424,29 @@
     .bc-hero[data-mood="cast"] .bc-hero-blade { background: var(--fleet-color-accent); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-accent); }
     .bc-hero[data-mood="cast"] .bc-hero-sprite { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--fleet-color-accent) 75%, transparent)); }
 
+    /* looks (hero-store LOOKS: 0 Verdant is the base palette above) */
+    .bc-hero[data-look="1"] .bc-hero-torso { background: var(--fleet-color-primary); }
+    .bc-hero[data-look="1"] .bc-hero-blade { background: var(--fleet-color-info); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-secondary); }
+    .bc-hero[data-look="1"] .bc-hero-helm { background: var(--fleet-color-warning); }
+    .bc-hero[data-look="2"] .bc-hero-torso { background: var(--fleet-color-accent); }
+    .bc-hero[data-look="2"] .bc-hero-blade { background: var(--fleet-color-primary); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-accent); }
+    .bc-hero[data-look="2"] .bc-hero-helm { background: var(--fleet-color-accent); box-shadow: inset 0 calc(var(--hpx) * -0.4) 0 0 var(--bc-color-bevel-lo); }
+    .bc-hero[data-look="3"] .bc-hero-torso { background: var(--fleet-color-secondary); }
+    .bc-hero[data-look="3"] .bc-hero-blade { background: var(--fleet-color-warning); box-shadow: 0 calc(var(--hpx) * 4.6) 0 0 var(--fleet-color-danger); }
+    .bc-hero[data-look="3"] .bc-hero-legs { background: var(--fleet-color-danger); box-shadow: inset var(--hpx) 0 0 0 var(--fleet-color-bg-elevated); }
+    /* sizes */
+    .bc-hero[data-size="sm"] .bc-hero-sprite { --hpx: 3px; }
+    .bc-hero[data-size="lg"] .bc-hero-sprite { --hpx: 12px; }
+    .bc-hero-name {
+        margin: var(--fleet-space-1) 0 0;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink);
+    }
+    .bc-hero-path {
+        margin: 0;
+        font-size: var(--fleet-text-xs);
+    }
+
     /* ── HUD menu ── */
     .bc-hud-panes li {
         display: flex;

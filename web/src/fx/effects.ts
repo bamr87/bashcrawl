@@ -3,10 +3,13 @@
 // shake, a full-screen flash, panel pulses, the hero's mood and a sound.
 // `effectFor` is pure data (tested); `applyReactions` performs it.
 import { play, type SfxName } from "../audio/sfx";
+import { allowed } from "../chrome/settings-store";
 import { fxBus, type FxEvent } from "../engine/fx-bus";
+import { game } from "../engine/game-store";
 import { requireEngine } from "../engine/index";
 import type { HudEvent } from "../engine/types";
 import { anchorElement, anchorPoint, logTailPoint } from "./anchors";
+import { banner } from "./banner-store";
 import { bump } from "./bump";
 import { flash, type FlashKind } from "./flash-store";
 import { fx, type ColorRole } from "./fx-engine";
@@ -172,12 +175,48 @@ function stageRect() {
     return { x: r.left, y: r.top, width: r.width, height: r.height };
 }
 
-export function applyReactions(events: HudEvent[], error: boolean, moveSfx?: SfxName | null): void {
+export interface ReactionContext {
+    questTitle?: string;
+    discovered?: boolean;
+}
+
+/** The title card a moment deserves, if any. */
+function announce(event: HudEvent, events: HudEvent[], context: ReactionContext): void {
+    switch (event.type) {
+        case "move": {
+            if (!context.discovered) return;
+            const room = game.runtime ? game.model("roomModel") : null;
+            const blurb = game.runtime?.currentRoomMeta().description ?? "";
+            banner("room", room?.title ?? event.to ?? "", blurb.length > 96 ? `${blurb.slice(0, 93).trimEnd()}…` : blurb);
+            return;
+        }
+        case "quest": {
+            const xp = events.find((other) => other.type === "xp");
+            banner("quest", context.questTitle ?? "Quest complete", xp ? xp.text : undefined);
+            return;
+        }
+        case "levelup":
+            banner("rank", event.text.replace(/^★\s*/, ""), "A new rank on the ladder");
+            return;
+        case "unlock":
+            banner("unlock", "A new passage", event.text);
+            return;
+        case "lesson":
+            banner("lesson", "Lesson complete", event.text.replace(/^🎓\s*/, ""));
+            return;
+        default:
+            return;
+    }
+}
+
+export function applyReactions(events: HudEvent[], error: boolean, moveSfx?: SfxName | null, context: ReactionContext = {}): void {
     let mood: HeroMood | null = null;
     let sfx: SfxName | null = null;
     let shake = 0;
+    const may = allowed();
     for (const event of events) {
         const effect = effectFor(event);
+        announce(event, events, context);
         for (const pane of effect.panes) bump(anchorElement(pane.pane), pane.className, pane.ms);
         for (const burst of effect.canvas) {
             const from = burst.from === "log-tail" ? logTailPoint() : burst.from === "top" ? topPoint() : anchorPoint(burst.from) ?? logTailPoint();
@@ -191,7 +230,7 @@ export function applyReactions(events: HudEvent[], error: boolean, moveSfx?: Sfx
                 onArrive: burst.kind === "orb" ? () => bump(anchorElement("xp"), "fx-pulse", 300) : undefined,
             });
         }
-        if (effect.flash) flash(effect.flash);
+        if (effect.flash && may.flash) flash(effect.flash);
         if (effect.wipe) {
             const rect = stageRect();
             if (rect) fx.wipe({ rect, color: "bg", onSwap: () => bump(anchorElement("log"), "fx-arrive", 600) });
@@ -202,10 +241,10 @@ export function applyReactions(events: HudEvent[], error: boolean, moveSfx?: Sfx
         if (candidate && (!sfx || SFX_RANK.indexOf(candidate) < SFX_RANK.indexOf(sfx))) sfx = candidate;
     }
     if (mood) setHeroMood(mood);
-    if (shake) addTrauma(shake);
+    if (shake && may.shake) addTrauma(shake);
     if (error) {
         bump(anchorElement("log"), "fx-error", 320);
-        addTrauma(0.08);
+        if (may.shake) addTrauma(0.08);
         play("error");
     } else if (sfx) {
         play(sfx);
@@ -249,20 +288,20 @@ function onEvent(event: FxEvent): void {
             bump(anchorElement("log"), "fx-fresh", 420);
             play("key");
             const moveSfx = applyCommandFx(event.line, event.error, event.events);
-            applyReactions(event.events, event.error, moveSfx);
+            applyReactions(event.events, event.error, moveSfx, { questTitle: event.questTitle, discovered: event.discovered });
             break;
         }
         case "award":
             applyReactions(event.events, false);
             break;
         case "celebrate":
-            flash("magic");
-            addTrauma(0.1);
+            if (allowed().flash) flash("magic");
+            if (allowed().shake) addTrauma(0.1);
             fx.emit("confetti", { from: topPoint(), count: 60, colors: ["primary", "accent", "success", "info"], spread: 900 });
             play("celebrate");
             break;
         case "boot":
-            flash("poweron");
+            if (allowed().flash) flash("poweron");
             fx.emit("ember", { from: anchorPoint("stage") ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, count: 20, colors: ["secondary", "warning"], spread: 400 });
             play("poweron");
             break;

@@ -388,17 +388,31 @@
         animation: bc-caret-blink 1.05s steps(1, end) infinite;
     }
 
-    /* Fresh lines cascade in (log-decor.ts stamps .rv and --i per line). */
+    /* Fresh lines cascade in (log-decor.ts stamps .rv and --i per line);
+       the step is the Options' text speed. */
     @keyframes bc-line-in {
         from { opacity: 0; filter: brightness(2) blur(0.6px); }
         55% { opacity: 1; }
         to { opacity: 1; filter: none; }
     }
+    .bc-log {
+        --bc-reveal-step: 16ms;
+    }
+    html[data-text-speed="slow"] .bc-log {
+        --bc-reveal-step: 36ms;
+    }
     .bc-log .rv:not(.kind-banner) {
         animation: bc-line-in 240ms var(--fleet-ease-out) both;
-        animation-delay: calc(var(--i, 0) * 16ms);
+        animation-delay: calc(var(--i, 0) * var(--bc-reveal-step));
+    }
+    html[data-text-speed="instant"] .bc-log .rv {
+        animation: none;
     }
 }
+
+/* Text size (Options). */
+html[data-text-size="small"] .bc-log { font-size: var(--fleet-text-xs); }
+html[data-text-size="large"] .bc-log { font-size: var(--fleet-text-base); }
 
 @media (max-width: 900px) {
     .bc-story {

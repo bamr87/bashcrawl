@@ -184,21 +184,48 @@ export class GameStore implements InputTarget {
         const { BashcrawlHud: Hud } = requireEngine();
         if (!this.runtime || !this.controller) return [];
         const before = this.prev ?? Hud.snapshot(this.runtime);
+        const visitedBefore = this.runtime.state.visited.length;
+        const doneBefore = this.runtime.state.completedQuestIds.length;
         const log = this.logEl;
         const tail = log?.lastElementChild ?? null;
         const outputs = this.controller.execute(line, { echo: true });
         // `reset` may have swapped the runtime; the fog-of-war visit set is
         // recorded after the command and persisted with it.
-        Hud.ensureVisited(this.runtime);
+        const runtime = this.runtime;
+        Hud.ensureVisited(runtime);
         this.controller.persist();
-        const after = Hud.snapshot(this.runtime);
+        const after = Hud.snapshot(runtime);
         const events = Hud.diffEvents(before, after);
         this.prev = after;
         this.flushLog();
         if (log) this.settle(log, tail);
         this.publish({});
-        fxBus.publish({ type: "command", line, outputs, events, error: outputs.some((out) => out.kind === "error") });
+        // What the title cards need beyond the diff: which quest, and whether
+        // the room is new to this hero.
+        const doneIds = runtime.state.completedQuestIds;
+        const questTitle = doneIds.length > doneBefore ? runtime.quests.find((quest) => quest.id === doneIds[doneIds.length - 1])?.title : undefined;
+        const discovered = runtime.state.visited.length > visitedBefore;
+        fxBus.publish({ type: "command", line, outputs, events, error: outputs.some((out) => out.kind === "error"), questTitle, discovered });
         return outputs;
+    }
+
+    /**
+     * A new game: a fresh runtime, the save cleared, the welcome again. The
+     * hero and the preferences are not the run's, so they stay.
+     */
+    newRun(): void {
+        const { BashcrawlRuntime: RT, BashcrawlStorage: Storage, BashcrawlHud: Hud } = requireEngine();
+        if (!this.data || !this.view) return;
+        this.runtime = new RT.Runtime(this.data);
+        Storage.clear();
+        this.view.clear();
+        this.welcome();
+        Hud.ensureVisited(this.runtime);
+        this.controller?.persist();
+        this.prev = Hud.snapshot(this.runtime);
+        this.flushLog();
+        this.publish({ page: null });
+        fxBus.publish({ type: "boot" });
     }
 
     acceptsEmpty(): boolean {

@@ -1,6 +1,10 @@
-// Transient chrome state shared across components: which overlay is open.
+// Transient chrome state shared across components: which dialogs are open,
+// which full-screen overlay is up (the title screen, hero creation, the
+// intro, options, the profile), and the tour's step while it runs.
+import { getHero } from "../hero/hero-store";
 import { createStore, useStore } from "../lib/store";
-import { getPrefs } from "./prefs-store";
+
+export type Overlay = "title" | "create" | "intro" | "options" | "profile" | null;
 
 export interface UiState {
     helpOpen: boolean;
@@ -8,16 +12,18 @@ export interface UiState {
     hudOpen: boolean;
     /** Small screens: the sidebar shown as an overlay. */
     panelsOpen: boolean;
-    /** The first-visit title screen (not when a door is linked to directly). */
-    landingOpen: boolean;
+    overlay: Overlay;
+    /** The guided tour's step while it runs, else null. */
+    tour: number | null;
 }
 
-function firstVisit(): boolean {
-    if (typeof window === "undefined") return false;
-    return !getPrefs().onboarded && !/^#\/\w+/.test(window.location.hash);
+// No hero yet means a first visit: the title screen leads into creation.
+function initialOverlay(): Overlay {
+    if (typeof window === "undefined") return null;
+    return getHero() ? null : "title";
 }
 
-const store = createStore<UiState>({ helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false, landingOpen: firstVisit() });
+const store = createStore<UiState>({ helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false, overlay: initialOverlay(), tour: null });
 
 export function setUi(patch: Partial<UiState>): void {
     store.set({ ...store.get(), ...patch });
@@ -29,6 +35,22 @@ export function toggleHelp(): void {
 
 export function toggleDocs(): void {
     setUi({ docsOpen: !store.get().docsOpen });
+}
+
+export function openOverlay(overlay: Exclude<Overlay, null>): void {
+    setUi({ overlay, helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false });
+}
+
+export function closeOverlay(): void {
+    setUi({ overlay: null });
+}
+
+export function startTour(): void {
+    setUi({ tour: 0, overlay: null, helpOpen: false, docsOpen: false, hudOpen: false, panelsOpen: false });
+}
+
+export function endTour(): void {
+    setUi({ tour: null });
 }
 
 export function getUi(): UiState {

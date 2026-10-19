@@ -4,7 +4,17 @@
 import type { HudEvent, Line } from "./types";
 
 export type FxEvent =
-    | { type: "command"; line: string; outputs: Line[]; events: HudEvent[]; error: boolean }
+    | {
+        type: "command";
+        line: string;
+        outputs: Line[];
+        events: HudEvent[];
+        error: boolean;
+        /** The quest this command completed, for its title card. */
+        questTitle?: string;
+        /** The command entered a room for the first time. */
+        discovered?: boolean;
+    }
     | { type: "award"; amount: number; label: string; events: HudEvent[] }
     | { type: "boot" }
     | { type: "celebrate" }

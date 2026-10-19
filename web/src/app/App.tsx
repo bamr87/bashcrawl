@@ -1,27 +1,35 @@
 // Root of the web trainer: providers, the route → screen switch, the
-// app-wide keys (Alt+1–4 doors, `?` help, Escape), and the boot of the
-// game store.
+// app-wide keys (Alt+1–4 doors, `?` help, Escape), the boot of the game
+// store, and the game's own screens over it — title, hero creation, the
+// intro, the tour, options, the profile, the title cards.
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
 import { getArcade } from "../arcade/arcade-store";
 import { bindUnlock } from "../audio/synth";
-import { CrtToggle } from "../chrome/CrtToggle";
 import { DocsDrawer } from "../chrome/DocsDrawer";
 import { ErrorBoundary } from "../chrome/ErrorBoundary";
-import { Landing } from "../chrome/Landing";
+import { Intro } from "../chrome/Intro";
+import { OptionsDialog } from "../chrome/OptionsDialog";
 import { ShortcutsHelp } from "../chrome/ShortcutsHelp";
 import { SoundToggle } from "../chrome/SoundToggle";
-import { ThemeToggle } from "../chrome/ThemeToggle";
+import { TitleScreen } from "../chrome/TitleScreen";
 import { Toaster } from "../chrome/Toaster";
+import { Tour } from "../chrome/Tour";
 import { initCrt } from "../chrome/crt-store";
 import { getPrefs, setPrefs, usePrefs } from "../chrome/prefs-store";
-import { setUi, toggleHelp } from "../chrome/ui-store";
+import { initSettings } from "../chrome/settings-store";
+import { openOverlay, setUi, startTour, toggleHelp, useUi } from "../chrome/ui-store";
 import { fxBus } from "../engine/fx-bus";
 import { game, useGame } from "../engine/game-store";
+import { Banners } from "../fx/Banners";
 import { FxCanvas } from "../fx/FxCanvas";
 import { ScreenFlash } from "../fx/ScreenFlash";
 import { installEffects } from "../fx/effects";
+import { CreateHero } from "../hero/CreateHero";
+import { HeroButton } from "../hero/HeroButton";
+import { ProfileDialog } from "../hero/ProfileDialog";
+import { useHero } from "../hero/hero-store";
 import { HudMenu } from "../hud/HudMenu";
 import { StatusStrip } from "../hud/StatusStrip";
 import { ArcadeScreen } from "../screens/ArcadeScreen";
@@ -38,6 +46,7 @@ import { navigate, useRoute } from "./useHashRoute";
 
 initTheme();
 initCrt();
+initSettings();
 
 function isTypingTarget(target: EventTarget | null): boolean {
     return target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
@@ -61,6 +70,8 @@ function Booting({ error }: { error: string | null }) {
 export function App() {
     const route = useRoute();
     const prefs = usePrefs();
+    const hero = useHero();
+    const { overlay, tour } = useUi();
     const phase = useGame((snap) => snap.phase);
     const bootError = useGame((snap) => snap.error);
 
@@ -82,6 +93,17 @@ export function App() {
         if (prefs.mode !== route.mode) setPrefs({ mode: route.mode });
         fxBus.publish({ type: "mode", mode: route.mode });
     }, [route, prefs.mode]);
+
+    const mode: Mode | null = route.kind === "mode" ? route.mode : null;
+    const ready = phase === "ready";
+
+    // A hero who has not taken the tour gets it the first time the Story
+    // door is open with nothing else in the way (the Rogue starts in the
+    // Arcade and meets it later).
+    useEffect(() => {
+        if (!ready || mode !== "story" || !hero || hero.tourDone || overlay !== null || tour !== null || !prefs.onboarded) return;
+        startTour();
+    }, [ready, mode, hero, overlay, tour, prefs.onboarded]);
 
     // Alt+1–4 switch doors (the physical key, since macOS types a symbol for
     // Alt+digit); `?` outside an input opens the shortcuts; F1 the docs;
@@ -110,13 +132,12 @@ export function App() {
         return () => document.removeEventListener("keydown", onKey);
     }, []);
 
-    const mode: Mode | null = route.kind === "mode" ? route.mode : null;
-    const ready = phase === "ready";
     const arcade = ready ? getArcade() : null;
     const storyChrome = ready && storyOwnsInput(mode);
 
     const actions = (
         <>
+            {ready && <HeroButton />}
             {storyChrome && (
                 <button type="button" className="bc-btn" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock">HUD</button>
             )}
@@ -125,8 +146,9 @@ export function App() {
             )}
             <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
             <SoundToggle />
-            <CrtToggle />
-            <ThemeToggle />
+            <button type="button" className="bc-btn" onClick={() => openOverlay("options")} title="Options: theme, sound, effects, text" aria-label="Options">
+                <span aria-hidden="true">⚙</span>
+            </button>
         </>
     );
 
@@ -149,12 +171,18 @@ export function App() {
                 </AppShell>
                 <FxCanvas />
                 <ScreenFlash />
+                <Banners />
                 <Toaster />
                 <ShortcutsHelp />
+                <OptionsDialog />
                 {ready && <Pager />}
                 {ready && <HudMenu />}
                 {ready && <DocsDrawer />}
-                {ready && <Landing />}
+                {ready && <ProfileDialog />}
+                {ready && <Tour />}
+                {ready && <Intro />}
+                {ready && <CreateHero />}
+                {ready && <TitleScreen />}
             </ErrorBoundary>
         </MotionConfig>
     );

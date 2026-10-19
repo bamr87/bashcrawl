@@ -9,16 +9,19 @@ export const PREFS_KEY = "bashcrawl-web-shell-v1";
 export interface Prefs {
     mode: Mode | null;
     onboarded: boolean;
+    /** The intro's pages have been seen once (creation skips straight to the game after). */
+    introSeen: boolean;
 }
 
 function sanitize(raw: Prefs): Prefs {
     return {
         mode: raw.mode && (MODES as readonly string[]).includes(raw.mode) ? raw.mode : null,
         onboarded: raw.onboarded === true,
+        introSeen: raw.introSeen === true,
     };
 }
 
-const store = createStore<Prefs>(sanitize(readJson<Prefs>(PREFS_KEY, { mode: null, onboarded: false })));
+const store = createStore<Prefs>(sanitize(readJson<Prefs>(PREFS_KEY, { mode: null, onboarded: false, introSeen: false })));
 
 export function getPrefs(): Prefs {
     return store.get();

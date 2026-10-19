@@ -1,8 +1,9 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { getUi, setUi } from "../chrome/ui-store";
 import { game } from "../engine/game-store";
+import { clearHero, createHero, setHero } from "../hero/hero-store";
 import { dataLoader, loadEngine } from "../test/engine";
 import { THEME_KEY } from "../theme/theme-store";
 import { App } from "./App";
@@ -13,6 +14,11 @@ describe("the app shell", () => {
     it("has the landmarks, the skip link first, one main, and working chrome", async () => {
         window.localStorage.clear();
         window.location.hash = "#/story";
+        // A returning hero who has taken the tour: no title screen, no tour.
+        clearHero();
+        createHero({ name: "Mira", role: "wanderer", look: 0 });
+        setHero({ tourDone: true });
+        setUi({ overlay: null, tour: null });
         await game.boot(dataLoader);
         const { container } = render(<App />);
 
@@ -26,16 +32,29 @@ describe("the app shell", () => {
         expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
         expect(screen.getByRole("log", { name: "Dungeon log" })).toBeInTheDocument();
         expect(screen.getByRole("group", { name: "Hero status" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /^Hero Mira/ })).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).toBeNull();
 
-        // Theme cycles dark → light → auto and persists.
-        const theme = screen.getByRole("button", { name: /^Theme: Dark/ });
-        await act(async () => { theme.click(); });
+        // Options: the theme cycles dark → light → auto and persists.
+        await act(async () => { screen.getByRole("button", { name: "Options" }).click(); });
+        const options = screen.getByRole("dialog", { name: "Options" });
+        expect(options).toBeInTheDocument();
+        const theme = within(screen.getByRole("radiogroup", { name: "Theme" }));
+        await act(async () => { theme.getByRole("radio", { name: "Light" }).click(); });
         expect(document.documentElement.getAttribute("data-theme")).toBe("light");
         expect(window.localStorage.getItem(THEME_KEY)).toBe("light");
-        await act(async () => { screen.getByRole("button", { name: /^Theme: Light/ }).click(); });
+        await act(async () => { theme.getByRole("radio", { name: "Auto" }).click(); });
         expect(document.documentElement.getAttribute("data-theme")).toBe("auto");
-        await act(async () => { screen.getByRole("button", { name: /^Theme: Auto/ }).click(); });
+        await act(async () => { theme.getByRole("radio", { name: "Dark" }).click(); });
         expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+        await act(async () => { screen.getByRole("button", { name: "Close Options" }).click(); });
+        expect(getUi().overlay).toBeNull();
+
+        // The brand opens the title screen; Escape (Continue) closes it.
+        await act(async () => { screen.getByRole("button", { name: "Bashcrawl: title screen" }).click(); });
+        expect(screen.getByRole("dialog", { name: "Bashcrawl title screen" })).toBeInTheDocument();
+        await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+        expect(getUi().overlay).toBeNull();
 
         // Alt+2 opens Learn; `?` opens the shortcuts; Escape closes them.
         await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "2", code: "Digit2", altKey: true, bubbles: true })); });
