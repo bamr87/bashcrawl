@@ -23,7 +23,11 @@
         position: relative;
         min-height: 0;
         display: grid;
-        grid-template-rows: minmax(0, 1fr);
+        /* Row two is the clip band: a track that opens and closes smoothly
+         * instead of snapping the log 9rem shorter. */
+        --band: 0rem;
+        grid-template-rows: minmax(0, 1fr) var(--band);
+        transition: grid-template-rows var(--fleet-motion-slow) var(--fleet-ease);
         margin: var(--fleet-space-2);
         background: var(--fleet-color-bg);
         box-shadow:
@@ -35,7 +39,7 @@
         --fx-accent: var(--fleet-color-info);
     }
     .bc-stage-log.fx-stage {
-        grid-template-rows: minmax(0, 1fr) 9rem;
+        --band: 9rem;
     }
 
     /* ── the log ── */
@@ -103,7 +107,9 @@
 
     /* The command-clip stage band (fx.js paints frames into .px-am). */
     .px-am {
-        display: none;
+        display: block;
+        box-sizing: border-box;
+        height: 100%;
         min-height: 0;
         margin: 0;
         padding: var(--fleet-space-1) var(--fleet-space-3);
@@ -112,9 +118,139 @@
         white-space: pre;
         font: 11px/1.05 var(--fleet-font-mono);
         color: var(--fx-accent, var(--fleet-color-info));
-        border-top: 1px solid var(--fleet-color-border);
+        box-shadow: inset 0 1px 0 0 var(--fleet-color-border);
+        opacity: 0;
+        transition: opacity var(--fleet-motion-base) var(--fleet-ease);
     }
-    .px-am.px-am-run { display: block; }
+    .px-am.px-am-run { opacity: 1; }
+
+    /* "More below" while unread lines sit under the fold. */
+    .bc-scroll-cue {
+        position: absolute;
+        left: 50%;
+        bottom: calc(var(--band, 0rem) + var(--fleet-space-3));
+        translate: -50% 0;
+        padding: 0.25rem 0.75rem;
+        border: 0;
+        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 86%, var(--fleet-color-primary));
+        color: var(--fleet-color-primary);
+        font: var(--fleet-font-weight-bold) var(--fleet-text-xs)/1.4 var(--fleet-font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px var(--fleet-color-primary), var(--fleet-shadow-lg);
+        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+        transition: bottom var(--fleet-motion-slow) var(--fleet-ease);
+    }
+    .bc-scroll-cue:focus-visible {
+        outline: 2px solid var(--fleet-color-primary);
+    }
+
+    /* ── the reader layer: log-decor.ts classifies a file view line by line ── */
+    .sc-rule { color: color-mix(in srgb, var(--fleet-color-primary) 45%, var(--fleet-color-border)); }
+    .sc-rule-soft { color: var(--fleet-color-border); }
+    .sc-h1,
+    .sc-md-h1 {
+        color: var(--fleet-color-primary);
+        font-weight: var(--fleet-font-weight-bold);
+        letter-spacing: 0.04em;
+        text-shadow: 0 0 10px color-mix(in srgb, var(--fleet-color-primary) 45%, transparent);
+    }
+    .sc-h2,
+    .sc-md-h2 {
+        color: var(--fleet-color-accent);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-md-h3 {
+        color: var(--fleet-color-info);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-hash,
+    .sc-md-h1 > .sc-mark,
+    .sc-md-h2 > .sc-mark,
+    .sc-md-h3 > .sc-mark {
+        display: inline;
+        color: var(--fleet-color-border);
+        font-weight: var(--fleet-font-weight-regular);
+        text-shadow: none;
+    }
+    .sc-label,
+    .sc-box-title {
+        color: var(--fleet-color-warning);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-th {
+        color: var(--fleet-color-ink-muted);
+        font-weight: var(--fleet-font-weight-bold);
+        letter-spacing: 0.06em;
+    }
+    .sc-prompt {
+        color: var(--fleet-color-info);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-cmd {
+        color: var(--fleet-color-code-ink);
+        cursor: pointer;
+    }
+    .sc-cmd:hover,
+    .sc-code[data-fill]:hover {
+        text-decoration: underline dotted;
+        text-underline-offset: 0.2em;
+    }
+    .sc-cmd-name {
+        color: var(--fleet-color-success);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-kw,
+    .sc-op {
+        color: var(--fleet-color-secondary);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-flag { color: var(--fleet-color-warning); }
+    .sc-var { color: var(--fleet-color-secondary); }
+    .sc-str { color: var(--fleet-color-accent); }
+    .sc-path,
+    .sc-dir { color: var(--fleet-color-info); }
+    .sc-dir { font-weight: var(--fleet-font-weight-bold); }
+    .sc-comment,
+    .sc-desc,
+    .sc-em {
+        color: var(--fleet-color-ink-muted);
+        font-style: italic;
+    }
+    .sc-code {
+        padding: 0 0.3em;
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-code-ink);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+    }
+    .sc-code[data-fill] {
+        color: var(--fleet-color-success);
+        cursor: pointer;
+    }
+    .sc-strong {
+        color: var(--fleet-color-ink);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-mark { display: none; }
+    .sc-box .sc-mark {
+        display: inline;
+        opacity: 0.45;
+    }
+    .sc-frame { color: color-mix(in srgb, var(--fleet-color-border) 55%, var(--fleet-color-ink-muted)); }
+    .sc-bullet {
+        color: var(--fleet-color-accent);
+        font-weight: var(--fleet-font-weight-bold);
+    }
+    .sc-ok { color: var(--fleet-color-success); }
+    .sc-warn { color: var(--fleet-color-danger); }
+    .sc-tip { color: var(--fleet-color-warning); }
+    .sc-fence { color: var(--fleet-color-border); }
+    .sc-codeline { color: var(--fleet-color-code-ink); }
+    [data-resolved="light"] .sc-h1,
+    [data-resolved="light"] .sc-md-h1 {
+        text-shadow: none;
+    }
 
     /* ── prompt dock ── */
     .bc-dock {
@@ -220,18 +356,22 @@
     }
 
     /* ── pager ── */
+    .bc-dialog.bc-pager {
+        width: min(960px, 100%);
+    }
     .bc-pager-help {
         margin: 0;
         font-size: var(--fleet-text-sm);
         color: var(--fleet-color-ink-muted);
     }
+    /* Scrolls are set for 80 columns: keep their lines whole and scroll sideways if the window is narrower. */
     .bc-pager-text {
         min-height: 0;
         flex: 1 1 auto;
         margin: 0;
         padding: var(--fleet-space-3);
         overflow: auto;
-        white-space: pre-wrap;
+        white-space: pre;
         background: var(--fleet-color-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         font-size: var(--fleet-text-sm);
@@ -247,6 +387,17 @@
     .bc-prompt-label::after {
         animation: bc-caret-blink 1.05s steps(1, end) infinite;
     }
+
+    /* Fresh lines cascade in (log-decor.ts stamps .rv and --i per line). */
+    @keyframes bc-line-in {
+        from { opacity: 0; filter: brightness(2) blur(0.6px); }
+        55% { opacity: 1; }
+        to { opacity: 1; filter: none; }
+    }
+    .bc-log .rv:not(.kind-banner) {
+        animation: bc-line-in 240ms var(--fleet-ease-out) both;
+        animation-delay: calc(var(--i, 0) * 16ms);
+    }
 }
 
 @media (max-width: 900px) {
@@ -257,10 +408,10 @@
         display: none;
     }
     .bc-stage-log.fx-stage {
-        grid-template-rows: minmax(0, 1fr);
+        --band: 0rem;
     }
     .px-am.px-am-run {
-        display: none;
+        opacity: 0;
     }
 }
 @media (max-width: 600px) {

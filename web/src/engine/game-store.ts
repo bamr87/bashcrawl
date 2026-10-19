@@ -7,6 +7,8 @@
 // build their own.
 import { createStore, useStore, type Store } from "../lib/store";
 import type { InputTarget } from "../terminal/input-target";
+import { decorateLog, placeBlock, revealLines } from "../terminal/log-decor";
+import { SHELL_WORDS, type ProseContext } from "../terminal/prose";
 import { loadGameData } from "./data";
 import { fxBus } from "./fx-bus";
 import { requireEngine } from "./index";
@@ -33,19 +35,6 @@ export const WEB_PANES_FOLDED = ["skills", "hero", "spotlight"];
 const CAPABILITIES: Capabilities = { surface: "web", pager: true, compactEvents: true };
 const LOG_CAP = 600;
 
-// The session echoes each command as a dim "/path $ cmd" line; marking those
-// lets CSS draw a rule above every command block. Idempotent, so a full
-// repaint (scrollback cap) is simply marked again.
-const CMD_ECHO = /^(\/\S*\s\$)\s(.*)$/s;
-export function markCommandBlocks(log: HTMLElement, escapeHtml: (value: unknown) => string): void {
-    log.querySelectorAll("span.kind-dim:not(.is-cmd)").forEach((span) => {
-        const match = CMD_ECHO.exec(span.textContent || "");
-        if (!match) return;
-        span.classList.add("is-cmd");
-        span.innerHTML = `<span class="cmd-prompt">${escapeHtml(match[1])}</span> <span class="cmd-text">${escapeHtml(match[2])}</span>`;
-    });
-}
-
 export class GameStore implements InputTarget {
     readonly id = "story";
     readonly snap: Store<GameSnap> = createStore<GameSnap>({ phase: "idle", version: 0, error: null, page: null });
@@ -59,6 +48,8 @@ export class GameStore implements InputTarget {
     private cache = new Map<string, unknown>();
     private prev: HudSnapshot | null = null;
     private logEl: HTMLElement | null = null;
+    private welcomed = false;
+    private commandCache: { runtime: Runtime; names: ReadonlySet<string> } | null = null;
 
     // ── lifecycle ──────────────────────────────────────────────────────
     boot(loader: () => Promise<GameData> = loadGameData): Promise<void> {
@@ -162,13 +153,20 @@ export class GameStore implements InputTarget {
         // previous attach painted before the full repaint below.
         if (element) element.replaceChildren();
         this.view.sink = element ? new TermForge.sinks.DomSink(element) : null;
-        if (element) this.flushLog();
+        if (!element) return;
+        this.flushLog();
+        // The first paint is the welcome: let it cascade in once. Later
+        // attaches (a mode switch) repaint the scrollback without ceremony.
+        if (!this.welcomed) {
+            this.welcomed = true;
+            revealLines(element, Array.from(element.children) as HTMLElement[]);
+        }
     }
 
     flushLog(): void {
         if (!this.view) return;
         this.view.flush();
-        if (this.logEl) markCommandBlocks(this.logEl, requireEngine().TermForge.sinks.escapeHtml);
+        if (this.logEl) decorateLog(this.logEl, this.proseContext());
     }
 
     appendLine(kind: string, text: string): void {
@@ -186,6 +184,8 @@ export class GameStore implements InputTarget {
         const { BashcrawlHud: Hud } = requireEngine();
         if (!this.runtime || !this.controller) return [];
         const before = this.prev ?? Hud.snapshot(this.runtime);
+        const log = this.logEl;
+        const tail = log?.lastElementChild ?? null;
         const outputs = this.controller.execute(line, { echo: true });
         // `reset` may have swapped the runtime; the fog-of-war visit set is
         // recorded after the command and persisted with it.
@@ -195,6 +195,7 @@ export class GameStore implements InputTarget {
         const events = Hud.diffEvents(before, after);
         this.prev = after;
         this.flushLog();
+        if (log) this.settle(log, tail);
         this.publish({});
         fxBus.publish({ type: "command", line, outputs, events, error: outputs.some((out) => out.kind === "error") });
         return outputs;
@@ -248,6 +249,41 @@ export class GameStore implements InputTarget {
     closePage(): void {
         if (this.snap.get().page == null) return;
         this.snap.set({ ...this.snap.get(), page: null });
+    }
+
+    // ── the reader layer ───────────────────────────────────────────────
+    /** Names the shell answers to: a scroll line that starts with one is an example to cast. */
+    commandSet(): ReadonlySet<string> {
+        const runtime = this.runtime;
+        if (!runtime) return new Set(SHELL_WORDS);
+        if (this.commandCache?.runtime !== runtime) {
+            const names = Object.keys(runtime.handlers).filter((name) => !name.startsWith("_"));
+            this.commandCache = { runtime, names: new Set([...names, ...SHELL_WORDS]) };
+        }
+        return this.commandCache.names;
+    }
+
+    proseContext(): ProseContext {
+        return { commands: this.commandSet(), escapeHtml: requireEngine().TermForge.sinks.escapeHtml };
+    }
+
+    /**
+     * After a command painted: cascade its lines in and put the block where
+     * it reads best — a long scroll opens at its title, anything shorter
+     * pins to the bottom like a terminal. A repaint (scrollback cap, clear)
+     * has no "new" block, so it only re-pins.
+     */
+    private settle(log: HTMLElement, tail: Element | null): void {
+        if (tail && tail.parentNode !== log) {
+            log.scrollTop = log.scrollHeight;
+            return;
+        }
+        const fresh: HTMLElement[] = [];
+        for (let node = tail ? tail.nextElementSibling : log.firstElementChild; node; node = node.nextElementSibling) {
+            fresh.push(node as HTMLElement);
+        }
+        revealLines(log, fresh);
+        placeBlock(log, fresh[0] ?? null);
     }
 
     // ── presenter models and layout ────────────────────────────────────

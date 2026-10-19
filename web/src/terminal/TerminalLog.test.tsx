@@ -1,9 +1,10 @@
-import { render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it } from "vitest";
 
 import { GameStore } from "../engine/game-store";
 import { dataLoader, loadEngine } from "../test/engine";
+import { getPrompt } from "./prompt-store";
 import { TerminalLog } from "./TerminalLog";
 
 loadEngine();
@@ -28,5 +29,19 @@ describe("TerminalLog", () => {
         unmount();
         store.execute("ls");
         expect(pre?.textContent).not.toContain("/entrance $ ls");
+    });
+
+    it("types a scroll's command into the prompt on click", async () => {
+        window.localStorage.clear();
+        const store = new GameStore();
+        await store.boot(dataLoader);
+        const { container } = render(<TerminalLog store={store} label="Dungeon log" />);
+        act(() => {
+            store.execute("cat scroll");
+        });
+        const cmd = container.querySelector<HTMLElement>('[data-fill="cd cellar"]');
+        expect(cmd).not.toBeNull();
+        fireEvent.click(cmd as HTMLElement);
+        expect(getPrompt().value).toBe("cd cellar");
     });
 });

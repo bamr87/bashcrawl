@@ -222,12 +222,25 @@ function applyCommandFx(line: string, error: boolean, events: HudEvent[]): SfxNa
     const stage = anchorElement("stage");
     const form = document.querySelector<HTMLElement>(".bc-prompt");
     const prompt = document.querySelector<HTMLElement>(".bc-prompt-label");
+    // The clip band opening or closing resizes the log over the next frames
+    // (its grid track animates). Hold the bottom only when the reader was
+    // there: a long scroll the store opened at its title keeps its place.
+    const atBottom = !log || log.scrollHeight - log.clientHeight - log.scrollTop <= 4;
     const spec = catalog.apply(line, { log, root: stage, form, prompt, error, events });
-    // Opening the clip band shrinks the log after the sink pinned it: re-pin.
-    if (log) log.scrollTop = log.scrollHeight;
+    if (log && atBottom) holdBottom(log, 360);
     if (spec.motion === "climb") return "climb";
     if (spec.motion === "rewind") return "rewind";
     return null;
+}
+
+/** Keep a scroller pinned to its end while its height is animating. */
+function holdBottom(log: HTMLElement, ms: number): void {
+    const until = performance.now() + ms;
+    const tick = () => {
+        log.scrollTop = log.scrollHeight;
+        if (performance.now() < until && typeof requestAnimationFrame === "function") requestAnimationFrame(tick);
+    };
+    tick();
 }
 
 function onEvent(event: FxEvent): void {

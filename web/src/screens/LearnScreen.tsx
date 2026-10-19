@@ -6,6 +6,7 @@ import { game, useGame, type GameStore } from "../engine/game-store";
 import { registerAnchor } from "../fx/anchors";
 import { Sidebar } from "../hud/Sidebar";
 import { LessonReader } from "../learn/LessonReader";
+import { ScrollCue } from "../terminal/ScrollCue";
 import { TerminalLog } from "../terminal/TerminalLog";
 
 const LEARN_PANES = ["room", "skills", "hero"];
@@ -22,6 +23,7 @@ export function LearnScreen({ store = game }: { store?: GameStore }) {
             <div ref={stageRef} className="bc-stage-log bc-stage-learn">
                 <TerminalLog store={store} label="Lab terminal" />
                 <pre className="px-am" aria-hidden="true" />
+                <ScrollCue store={store} />
             </div>
         </section>
     );

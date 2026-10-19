@@ -52,6 +52,27 @@ describe("game store", () => {
         expect(pre.textContent).not.toContain("/entrance $ pwd");
     });
 
+    it("reads a scroll as prose: a title, castable commands and a cascading reveal", async () => {
+        const store = await booted();
+        const pre = document.createElement("pre");
+        store.attachLog(pre);
+        // The welcome cascades in once.
+        expect(pre.querySelector(".rv")).not.toBeNull();
+        store.execute("cat scroll");
+        expect(pre.querySelector(".sc-h1")?.textContent).toMatch(/ANCIENT SCROLL OF SIGHT/);
+        expect(pre.querySelector('[data-fill="cd cellar"]')).not.toBeNull();
+        const fresh = pre.querySelectorAll(".rv");
+        expect(fresh.length).toBeGreaterThan(50);
+        expect(fresh[0]?.classList.contains("is-cmd")).toBe(true);
+        expect(pre.textContent).toContain("$ cat scroll             # Read a scroll");
+        store.execute("ls");
+        // The previous block snapped complete; ls output is not prose.
+        expect(pre.querySelectorAll(".rv").length).toBeLessThan(10);
+        const last = pre.lastElementChild as HTMLElement;
+        expect(last.classList.contains("kind-output")).toBe(true);
+        expect(Array.from(last.classList).filter((name) => name.startsWith("sc-"))).toEqual([]);
+    });
+
     it("walks history, completes names, echoes candidate lists and clears", async () => {
         const store = await booted();
         store.execute("pwd");

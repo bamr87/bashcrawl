@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { game, useGame, type GameStore } from "../engine/game-store";
 import { registerAnchor } from "../fx/anchors";
 import { Sidebar } from "../hud/Sidebar";
+import { ScrollCue } from "../terminal/ScrollCue";
 import { TerminalLog } from "../terminal/TerminalLog";
 
 export function StoryScreen({ store = game }: { store?: GameStore }) {
@@ -19,6 +20,7 @@ export function StoryScreen({ store = game }: { store?: GameStore }) {
             <div ref={stageRef} className="bc-stage-log">
                 <TerminalLog store={store} label="Dungeon log" />
                 <pre className="px-am" aria-hidden="true" />
+                <ScrollCue store={store} />
             </div>
         </section>
     );

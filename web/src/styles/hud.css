@@ -467,10 +467,6 @@
         0% { color: var(--fleet-color-warning); text-shadow: 0 0 8px color-mix(in srgb, var(--fleet-color-warning) 70%, transparent); }
         100% { text-shadow: none; }
     }
-    @keyframes bc-phosphor {
-        from { filter: brightness(1.55); text-shadow: 0 0 10px color-mix(in srgb, var(--fleet-color-success) 55%, transparent); }
-        to { filter: none; }
-    }
     @keyframes bc-error-shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-3px); }
@@ -481,8 +477,6 @@
     .fx-pulse { animation: bc-pulse 600ms var(--fleet-ease); }
     .fx-arrive .bc-map-here,
     .fx-arrive .bc-room-title { animation: bc-arrive 700ms ease-out; }
-    .fx-fresh .kind-output:last-of-type,
-    .fx-fresh .kind-success:last-of-type { animation: bc-phosphor 400ms ease-out; }
     .fx-error { animation: bc-error-shake 200ms ease-in-out; }
 
     /* hero motion */
