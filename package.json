@@ -1,14 +1,47 @@
 {
-    "name": "bashcrawl",
-    "version": "3.2.0",
-    "private": true,
-    "description": "Bashcrawl monorepo scripts: TermForge framework tests and JS lint. No runtime dependencies.",
-    "license": "GPL-3.0-only",
-    "engines": {
-        "node": ">=20.16"
-    },
-    "scripts": {
-        "test": "node --test termforge/test/*.test.js",
-        "lint:js": "bash -c 'for f in $(git ls-files \"*.js\"); do node --check \"$f\" || exit 1; done'"
-    }
+  "name": "bashcrawl",
+  "version": "3.2.0",
+  "private": true,
+  "description": "Bashcrawl: the React web trainer (web/src), the TermForge framework tests and JS lint. The game engine (termforge/core, web/assets/js) has no runtime dependencies; ranges are '*' and no lockfile is committed (fleet policy).",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=22.22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p web/tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "lint": "eslint .",
+    "test": "node --test termforge/test/*.test.js",
+    "test:web": "vitest run",
+    "lint:js": "bash -c 'for f in $(git ls-files \"*.js\"); do node --check \"$f\" || exit 1; done'"
+  },
+  "dependencies": {
+    "motion": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "@eslint/js": "*",
+    "@tailwindcss/vite": "*",
+    "@testing-library/dom": "*",
+    "@testing-library/jest-dom": "*",
+    "@testing-library/react": "*",
+    "@testing-library/user-event": "*",
+    "@types/node": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@vitejs/plugin-react": "*",
+    "eslint": "*",
+    "eslint-plugin-react-hooks": "*",
+    "eslint-plugin-react-refresh": "*",
+    "globals": "*",
+    "jsdom": "*",
+    "tailwindcss": "*",
+    "typescript": "*",
+    "typescript-eslint": "*",
+    "vite": "*",
+    "vitest": "*"
+  }
 }

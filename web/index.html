@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bashcrawl — learn the terminal by playing</title>
     <meta name="description" content="A free browser dungeon crawl that teaches real bash: take guided courses in a practice lab, explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
-    <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="stylesheet" href="./assets/css/theme.css">
     <link rel="stylesheet" href="./assets/css/terminal.css">
 </head>
@@ -265,5 +265,10 @@
     <script src="./assets/js/arcade.js"></script>
     <script src="./assets/js/game.js"></script>
     <script src="./assets/js/shell.js"></script>
+
+    <!-- The React app (web/src, built by Vite). A module script runs after
+         every classic script above, so the engine globals are ready. -->
+    <div id="root" hidden></div>
+    <script type="module" src="./src/main.tsx"></script>
 </body>
 </html>

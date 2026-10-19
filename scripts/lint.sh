@@ -8,6 +8,7 @@ cd "$ROOT_DIR"
 run_shellcheck() {
     echo "=== ShellCheck: .sh files ==="
     find . -name "*.sh" -not -path "./.git/*" -not -path "./.venv/*" \
+        -not -path "./node_modules/*" -not -path "./web/dist/*" \
         -exec shellcheck {} +
 
     echo "=== ShellCheck: launchers (bin/) ==="
