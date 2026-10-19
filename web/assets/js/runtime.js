@@ -4,86 +4,35 @@
     // termforge/core/, never the vendor copies).
     const { tokenize } = global.TermForge.parser;
 
-    // Local-day helpers for the Daily Challenge, fed from the shell clock.
-    function isoDay(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${y}-${m}-${day}`;
-    }
-    function todayStr(nowMs) { return isoDay(new Date(nowMs)); }
-    function yesterdayStr(nowMs) { return isoDay(new Date(nowMs - 86400000)); }
-    function dailyGoalFor(dateStr) {
-        let h = 0;
-        for (const c of dateStr) h += c.charCodeAt(0);
-        return 30 + (h % 4) * 10; // 30 / 40 / 50 / 60
+    // ── Game features as TermForge plugins ───────────────────────────────
+    // Each mini-game / progression feature is one plugin file under
+    // web/assets/js/plugins/ (docs/schemas/plugin.v1.md), loaded before this
+    // file. Install order matters only for shared hooks: postExecute runs
+    // achievements (award XP) -> daily (reads XP) -> progress (rank-up reads
+    // the final XP).
+    const GAME_PLUGINS = Object.freeze(["achievements", "daily", "progress", "arena", "pathfind", "bestiary"]);
+    function gamePlugin(id) {
+        const mod = (global.BashcrawlPlugins || {})[id];
+        if (!mod || !mod.plugin) throw new Error(`game plugin ${id} is not loaded (web/assets/js/plugins/${id}.js)`);
+        return mod;
     }
 
-    // ── Encounter Creature Gallery ──────────────────────────────────────
-    // Portraits are ASCII Motion art clips named encounter-<SCRIPT BASENAME>
-    // (motion/art/*.asciimtn, registered in src/help/data/motion.yaml and
-    // bundled into art-clips.js, which loads before this file). Color + glow
-    // come from the .kind-art rule.
-
-    // Bestiary metadata (display name + blurb) for each catalogued encounter,
-    // in the order shown by the `bestiary` command.
-    const BESTIARY = [
-        { key: "treasure", name: "Treasure Chest", blurb: "Spills jewels for the bold." },
-        { key: "monster", name: "Coiled Serpent", blurb: "Strikes at the unprepared." },
-        { key: "ghost", name: "Restless Ghost", blurb: "Drifts through locked doors." },
-        { key: "potion", name: "Glowing Potion", blurb: "Restores a weary hero's vigor." },
-        { key: "statue", name: "Stone Guardian", blurb: "Wakes when you draw near." },
-        { key: "goblet", name: "Jeweled Goblet", blurb: "A prize of the deep vaults." },
-        { key: "spell", name: "Igniting Rune", blurb: "Crackles with raw magick." },
-        { key: "crystal", name: "Murmuring Crystal", blurb: "Whispers half-truths." },
-        { key: "penguin", name: "Dapper Penguin", blurb: "Inexplicably formal." },
-        { key: "nyarlathotep", name: "The Crawling Chaos", blurb: "Best left uncatalogued." },
-        { key: "fountain", name: "Wishing Fountain", blurb: "Bubbles with possibility." },
-    ];
-
-    // ── The Training Arena mini-game ──────────────────────────────────────
-    // Riddle -> the real command(s) that answer it. Players practice by
-    // casting actual spells (active recall), the most durable way to memorise.
-    const TRIALS = [
-        { cat: "see", riddle: "Reveal everything standing in your current room.", answers: ["ls"], hint: "Three letters — short for 'list'.", teaches: "ls lists the contents of a room (directory)." },
-        { cat: "see", riddle: "Reveal even the HIDDEN passages here (names that begin with a dot).", answers: ["ls -a", "ls -la", "ls -al", "ls -a ."], hint: "ls needs the 'all' flag: -a", teaches: "ls -a shows hidden entries whose names start with a dot." },
-        { cat: "move", riddle: "Cast the spell that tells you exactly where you stand.", answers: ["pwd"], hint: "Print Working Directory.", teaches: "pwd prints your current location." },
-        { cat: "move", riddle: "Descend into the room named 'cellar'.", answers: ["cd cellar"], hint: "Change Directory into cellar.", teaches: "cd <room> walks you into another directory." },
-        { cat: "move", riddle: "Climb back to the room you came from.", answers: ["cd .."], hint: "'..' means the parent room.", teaches: "cd .. moves up one directory." },
-        { cat: "read", riddle: "Read the entire scroll lying in this room.", answers: ["cat scroll"], hint: "conCATenate the scroll to your screen.", teaches: "cat <file> prints a file's full contents." },
-        { cat: "read", riddle: "Peek at only the FIRST lines of the scroll.", answers: ["head scroll"], hint: "The opposite of 'tail'.", teaches: "head shows the first lines of a file." },
-        { cat: "read", riddle: "Glimpse only the LAST lines of the scroll.", answers: ["tail scroll"], hint: "The opposite of 'head'.", teaches: "tail shows the last lines of a file." },
-        { cat: "search", riddle: "Hunt the scroll for the word 'amulet'.", answers: ["grep amulet scroll"], hint: "grep <word> <file>", teaches: "grep finds lines matching a pattern inside a file." },
-        { cat: "search", riddle: "Count how many lines the scroll holds.", answers: ["wc -l scroll", "wc scroll"], hint: "Word Count, with the -l (lines) flag.", teaches: "wc -l counts the lines in a file." },
-        { cat: "make", riddle: "Conjure a brand-new room called 'workshop'.", answers: ["mkdir workshop"], hint: "MaKe DIRectory.", teaches: "mkdir creates a new directory (room)." },
-        { cat: "make", riddle: "Forge an empty artifact named 'torch'.", answers: ["touch torch"], hint: "One word — it 'touches' a file into being.", teaches: "touch creates an empty file." },
-        { cat: "magic", riddle: "Summon your inventory by echoing the $I treasure-rune.", answers: ["echo $i", 'echo "$i"'], hint: "echo $I", teaches: "echo prints text; $I holds your inventory." },
-        { cat: "magic", riddle: "Run the 'treasure' encounter waiting in this room.", answers: ["./treasure"], hint: "Execute it with a leading ./", teaches: "./<script> runs an executable in the current room." },
-        { cat: "magic", riddle: "Draw the map of the whole dungeon.", answers: ["map", "tree"], hint: "One short word — or the branching 'tree'.", teaches: "map / tree reveal the dungeon's layout." },
-    ];
-    const ARENA_RANKS = [
-        { min: 0, title: "Novice Whisperer" },
-        { min: 40, title: "Apprentice of the Shell" },
-        { min: 80, title: "Adept Spellcaster" },
-        { min: 130, title: "Terminal Master" },
-        { min: 190, title: "Archmage of the Command Line" },
-    ];
-    // Achievements catalog. Icons use only emoji verified to render in COLOR in
-    // the monospace log. test(s) reads runtime state; unlocked once, +5 XP each.
-    const ACHIEVEMENTS = [
-        { id: "first_steps", icon: "🧭", title: "First Steps", desc: "Found your place with pwd.", test: (s) => (s.stats.commands.pwd || 0) > 0 },
-        { id: "cartographer", icon: "✨", title: "Cartographer", desc: "Charted the dungeon with map or tree.", test: (s) => (s.stats.commands.map || 0) > 0 || (s.stats.commands.tree || 0) > 0 },
-        { id: "scholar", icon: "💡", title: "Scholar", desc: "Read three ancient scrolls.", test: (s) => (s.stats.catScrollCount || 0) >= 3 },
-        { id: "world_builder", icon: "⚡", title: "World-Builder", desc: "Conjured a room with mkdir.", test: (s) => (s.stats.commands.mkdir || 0) > 0 },
-        { id: "treasure_hunter", icon: "💰", title: "Treasure Hunter", desc: "Claimed your first loot.", test: (s) => (s.inventory || []).length > 0 },
-        { id: "key_master", icon: "🔓", title: "Key-Master", desc: "Unlocked a hidden room.", test: (s) => Object.keys(s.reveals || {}).length > 0 },
-        { id: "arena_graduate", icon: "🏅", title: "Arena Graduate", desc: "Cleared a Training Arena run.", test: (s) => !!(s.flags && s.flags.arena_cleared) },
-        { id: "speed_demon", icon: "🏆", title: "Speed Demon", desc: "Finished a timed Speed Run.", test: (s) => s.speedrunBest != null },
-        { id: "trailblazer", icon: "✅", title: "Trailblazer", desc: "Completed a Path-Finder journey.", test: (s) => !!(s.flags && s.flags.pathfind_done) },
-        { id: "naturalist", icon: "✨", title: "Naturalist", desc: "Catalogued 5 creatures in the bestiary.", test: (s) => (s.bestiary || []).length >= 5 },
-        { id: "seasoned", icon: "🔥", title: "Seasoned Adventurer", desc: "Earned 150 XP.", test: (s) => (s.xp || 0) >= 150 },
-    ];
-
+    // ── Progression catalogs (data, not code) ────────────────────────────
+    // Ranks, achievements (as TermForge rules), the bestiary and the arena's
+    // trials come from src/help/data/progression.yaml via
+    // web/data/progression.json. A runtime built without them (the Practice
+    // Arcade's scoped sandboxes) gets empty catalogs.
+    function progressionFrom(raw) {
+        const p = raw && typeof raw === "object" ? raw : {};
+        const list = (value) => (Array.isArray(value) ? value : []);
+        const ranks = list(p.ranks).length ? list(p.ranks) : [{ min: 0, title: "" }];
+        return {
+            ranks,
+            achievements: list(p.achievements),
+            bestiary: list(p.bestiary),
+            trials: list(p.trials),
+        };
+    }
 
     function defaultState(root) {
         return {
@@ -145,7 +94,8 @@
     function lineLimit(line) { return /^\s*save\s+import(?:\s|$)/.test(line) ? 1048576 : 4096; }
     function commandLabel(line) { return /^\s*save\s+import\s/.test(line) ? "save import [token]" : line; }
 
-    function loadState(world, parsed) {
+    function loadState(world, parsed, progression) {
+        const trialCount = progression === undefined ? Infinity : progressionFrom(progression).trials.length;
         const base = defaultState(world.root);
         if (parsed == null) return base;
         global.TermForge.state.validateSavedState(base, parsed);
@@ -170,7 +120,7 @@
             const t = next.trainer;
             global.TermForge.state.validateSavedState({ queue: [], pos: 0, score: 0, streak: 0, best: 0, tries: 0, active: false, speed: false, startedAt: 0 }, t, "trainer");
             if (t.active && (!Array.isArray(t.queue) || !t.queue.length ||
-                t.queue.some((id) => !Number.isInteger(id) || id < 0 || id >= TRIALS.length) ||
+                t.queue.some((id) => !Number.isInteger(id) || id < 0 || id >= trialCount) ||
                 !Number.isInteger(t.pos) || t.pos < 0 || t.pos >= t.queue.length ||
                 [t.score, t.streak, t.best, t.tries, t.startedAt].some((n) => !Number.isFinite(n) || n < 0))) throw new Error("invalid trainer");
         }
@@ -205,13 +155,25 @@
             this.capabilities = (options && options.capabilities) || {};
             this.persistence = (options && options.persistence) || null;
             this.quests = data.quests.quests || [];
+            this.catalog = progressionFrom(data.progression);
+            // A save whose arena run points past the loaded trials cannot resume.
+            const t = this.state.trainer;
+            if (t && t.active && (t.queue || []).some((id) => id >= this.catalog.trials.length)) this.state.trainer = null;
             // The game's full command surface, enumerated in one static
             // literal: P.*/F.* are TermForge pack functions, this.cmd* are
-            // game commands on this class. scripts/validate_runtime_commands.py
-            // regex-reads this literal — keep one `key: ref,` per line, bare
-            // references only, and exactly one `this.handlers = {` in the file.
+            // story commands on this class, and Arena.*/Daily.*/… are the game
+            // plugins' commands (web/assets/js/plugins/). The literal is the
+            // command manifest: scripts/validate_runtime_commands.py regex-reads
+            // it — keep one `key: ref,` per line, bare references only, and
+            // exactly one `this.handlers = {` in the file.
             const P = global.TermForge.packs.posix.commands;
             const F = global.TermForge.packs.flavour.commands;
+            const Arena = gamePlugin("arena");
+            const Pathfind = gamePlugin("pathfind");
+            const Daily = gamePlugin("daily");
+            const Achievements = gamePlugin("achievements");
+            const Progress = gamePlugin("progress");
+            const Bestiary = gamePlugin("bestiary");
             this.handlers = {
                 help: this.cmdHelp,
                 pwd: P.pwd,
@@ -259,57 +221,44 @@
                 map: this.cmdMap,
                 look: this.cmdLook,
                 hint: this.cmdHint,
-                xp: this.cmdXp,
+                xp: Progress.xp,
                 fortune: F.fortune,
                 cowsay: F.cowsay,
                 figlet: F.figlet,
                 banner: F.banner,
                 sl: F.sl,
-                train: this.cmdTrain,
-                drill: this.cmdTrain,
-                practice: this.cmdTrain,
-                arena: this.cmdTrain,
-                speedrun: this.cmdSpeedrun,
-                speed: this.cmdSpeedrun,
-                pathfind: this.cmdPathfind,
-                seek: this.cmdPathfind,
-                journey: this.cmdPathfind,
-                achievements: this.cmdAchievements,
-                badges: this.cmdAchievements,
-                profile: this.cmdProfile,
-                stats: this.cmdProfile,
-                sheet: this.cmdProfile,
-                bestiary: this.cmdBestiary,
-                codex: this.cmdBestiary,
-                daily: this.cmdDaily,
-                challenge: this.cmdDaily,
+                train: Arena.train,
+                drill: Arena.train,
+                practice: Arena.train,
+                arena: Arena.train,
+                speedrun: Arena.speedrun,
+                speed: Arena.speedrun,
+                pathfind: Pathfind.pathfind,
+                seek: Pathfind.pathfind,
+                journey: Pathfind.pathfind,
+                achievements: Achievements.achievements,
+                badges: Achievements.achievements,
+                profile: Progress.profile,
+                stats: Progress.profile,
+                sheet: Progress.profile,
+                bestiary: Bestiary.bestiary,
+                codex: Bestiary.bestiary,
+                daily: Daily.daily,
+                challenge: Daily.daily,
                 commands: this.cmdCommands,
                 cmds: this.cmdCommands,
                 menu: this.cmdCommands,
                 features: this.cmdCommands,
             };
             this.installGameHooks();
+            for (const id of GAME_PLUGINS) this.use(gamePlugin(id).plugin);
         }
 
-        // Wire the game onto the TermForge hook spine. Every subscriber body
-        // is the exact logic the pre-framework emulator ran inline in its
+        // Wire the story core onto the TermForge hook spine (the game
+        // plugins bring their own subscribers). Every subscriber body is the
+        // exact logic the pre-framework emulator ran inline in its
         // execute/runPipeline/executeSegment methods.
         installGameHooks() {
-            this.hooks.on("preExecute", () => {
-                this.refreshDaily();
-            });
-            // While the Training Arena is active, every line is an answer, not a command.
-            this.hooks.on("interceptLine", (line) => (
-                (this.state.trainer && this.state.trainer.active) ? this.trainerInput(line) : null
-            ));
-            // Achievements first (they award XP), then daily, then rank-up (reads final XP).
-            this.hooks.on("postExecute", () => (
-                this.checkAchievements().concat(this.checkDaily()).concat(this.checkRankUp())
-            ));
-            // Path-Finder watches normal play: count moves, detect arrival.
-            this.hooks.on("observePipeline", (line) => (
-                (this.state.pathfind && this.state.pathfind.active) ? this.pathfindObserve(line) : []
-            ));
             this.hooks.on("beforeCommand", (cmd, args, stdin) => {
                 this.bump(cmd);
                 this.state.stats.lastPipedIn = stdin != null;
@@ -343,24 +292,29 @@
             return out;
         }
 
-        // Celebrate when accumulated XP crosses an ARENA_RANKS threshold.
-        checkRankUp() {
-            const idx = ARENA_RANKS.reduce((acc, r, i) => ((this.state.xp || 0) >= r.min ? i : acc), 0);
-            if (typeof this.state.rankIndex !== "number") {
-                this.state.rankIndex = idx; // baseline for older saves; no retroactive party
-                return [];
-            }
-            if (idx <= this.state.rankIndex) return [];
-            this.state.rankIndex = idx;
-            return [
-                { kind: "control", action: "levelup" },
-                ...(this.capabilities.compactEvents ? [] : [{ kind: "art", text: this.art("levelup") }]),
-                { kind: "success", text: `★  You are now ${ARENA_RANKS[idx].title}!` },
-            ];
-        }
-
         bump(cmd) {
             this.state.stats.commands[cmd] = (this.state.stats.commands[cmd] || 0) + 1;
+        }
+
+        // ── Progression helpers shared by the story core and the plugins ──
+
+        /** Award XP and announce it on the event bus. */
+        awardXp(amount, reason) {
+            const n = Number(amount) || 0;
+            if (!n) return;
+            this.state.xp += n;
+            this.emit("progress.xp", { amount: n, total: this.state.xp, reason });
+        }
+
+        /** The rank row (from progression.yaml) a given XP total has reached. */
+        rankFor(xp) {
+            const ranks = this.catalog.ranks;
+            return ranks.filter((r) => (xp || 0) >= r.min).pop() || ranks[0];
+        }
+
+        /** Re-show the active arena trial (hosts call this when resuming a save). */
+        trainerChallenge() {
+            return gamePlugin("arena").challenge.call(this);
         }
 
         // ── Filesystem: thin delegates onto the TermForge VFS ────────────────
@@ -373,6 +327,7 @@
             const found = this.vfs.findHiddenDir(name);
             if (!found || this.state.reveals[found.visiblePath]) return null;
             this.state.reveals[found.visiblePath] = found.realPath;
+            this.emit("node.revealed", { name, path: found.visiblePath });
             return { kind: "success", text: `🔓 A new passage opens: ${name}/` };
         }
 
@@ -386,194 +341,6 @@
             ];
         }
 
-        // Prompt shown in the input row; the Arena swaps in a battle prompt.
-        // ── Path-Finder mini-game ───────────────────────────────────────────
-        // Gives the player a target room and lets them navigate there with REAL
-        // cd/ls/pwd; counts cd "moves" and detects arrival. Practices the core
-        // navigation skill (distinct from the recall-based Training Arena).
-        cmdPathfind(args) {
-            if (this.state.trainer && this.state.trainer.active) {
-                return [{ kind: "error", text: "Finish or quit the Training Arena first (type 'quit')." }];
-            }
-            const sub = (args[0] || "").toLowerCase();
-            const pf = this.state.pathfind;
-            if (["quit", "stop", "abort", "q"].includes(sub)) {
-                if (!pf || !pf.active) return [{ kind: "dim", text: "No journey in progress." }];
-                const target = pf.targetTitle;
-                this.state.pathfind = null;
-                return [{ kind: "dim", text: `Journey to ${target} abandoned.` }];
-            }
-            if (pf && pf.active) {
-                return [
-                    { kind: "magic", text: `🧭 Still seeking ${pf.targetTitle}  ·  ${pf.moves} move(s) so far` },
-                    { kind: "dim", text: "Use cd / ls / pwd to find it. 'pathfind quit' to abandon." },
-                ];
-            }
-            // Pick a reachable main-path target that isn't the current room.
-            const candidates = [
-                "/entrance",
-                "/entrance/cellar",
-                "/entrance/cellar/armoury",
-                "/entrance/cellar/armoury/chamber",
-            ].filter((p) => this.isDir(p) && p !== this.state.cwd);
-            if (!candidates.length) return [{ kind: "error", text: "No reachable destination right now." }];
-            const target = candidates[Math.floor(this.rng() * candidates.length)];
-            const targetTitle = (this.world.rooms[target] || {}).title || target;
-            this.state.pathfind = { active: true, target, targetTitle, moves: 0 };
-            return [
-                { kind: "art", text: this.art("pathfind") },
-                { kind: "info", text: `Find your way to ${targetTitle}.` },
-                { kind: "dim", text: "Navigate with cd / ls / pwd. Fewer moves = more XP. 'pathfind quit' to abandon." },
-            ];
-        }
-
-        pathfindObserve(line) {
-            const pf = this.state.pathfind;
-            const cmd = tokenize(line.trim())[0];
-            if (cmd === "cd") pf.moves += 1;
-            if (this.state.cwd !== pf.target) return [];
-            // Arrived.
-            const moves = pf.moves;
-            const xp = Math.max(15, 45 - moves * 5);
-            this.state.xp += xp;
-            const title = pf.targetTitle;
-            this.state.pathfind = null;
-            this.state.flags.pathfind_done = true;
-            const flair = moves <= 1 ? "  A direct route!" : moves <= 3 ? "  Swiftly done." : "";
-            return [
-                { kind: "success", text: `🧭 You reached ${title} in ${moves} move${moves === 1 ? "" : "s"}!  +${xp} XP${flair}` },
-                { kind: "dim", text: "Type 'pathfind' to seek a new destination." },
-            ];
-        }
-
-        // ── Achievements ─────────────────────────────────────────────────────
-        // Evaluate the catalog against current state; award any newly-earned
-        // badge (once each, +5 XP) and return announcement lines.
-        checkAchievements() {
-            if (!Array.isArray(this.state.achievements)) this.state.achievements = [];
-            const have = this.state.achievements;
-            const out = [];
-            for (const a of ACHIEVEMENTS) {
-                if (have.includes(a.id)) continue;
-                let earned = false;
-                try { earned = !!a.test(this.state); } catch (e) { earned = false; }
-                if (!earned) continue;
-                have.push(a.id);
-                this.state.xp += 5;
-                out.push({ kind: "success", text: `${a.icon} Achievement unlocked: ${a.title} — ${a.desc}  (+5 XP)` });
-            }
-            return out;
-        }
-
-        // Character sheet: a one-glance summary of all progress.
-        cmdProfile() {
-            const s = this.state;
-            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
-            const cmds = s.stats.commands || {};
-            const distinct = Object.keys(cmds).length;
-            const total = Object.values(cmds).reduce((a, b) => a + b, 0);
-            const inv = s.inventory || [];
-            const best = s.speedrunBest != null ? `${s.speedrunBest.toFixed(1)}s` : "—";
-            const label = (text) => `  ${(text + ":").padEnd(18)}`;
-            return [
-                { kind: "art", text: this.art("profile") },
-                { kind: "magic", text: `  Rank:  ${rank}` },
-                { kind: "output", text: `${label("XP")}${s.xp}        HP: ${s.hp}/100` },
-                { kind: "output", text: `${label("Quests")}${s.completedQuestIds.length}/${this.quests.length} complete` },
-                { kind: "output", text: `${label("Badges")}${(s.achievements || []).length}/${ACHIEVEMENTS.length} earned` },
-                { kind: "output", text: `${label("Scrolls read")}${s.stats.catScrollCount || 0}` },
-                { kind: "output", text: `${label("Commands")}${distinct} distinct (${total} cast)` },
-                { kind: "output", text: `${label("Hidden rooms")}${Object.keys(s.reveals || {}).length} unlocked` },
-                { kind: "output", text: `${label("Best speed run")}${best}` },
-                { kind: "output", text: `${label("Inventory")}${inv.length ? inv.join(", ") : "(empty)"}` },
-                { kind: "dim", text: "  'achievements' for badges  ·  'train' / 'speedrun' / 'pathfind' to grow" },
-            ];
-        }
-
-        // ── Daily Challenge ──────────────────────────────────────────────────
-        // Each local day offers an XP goal; completing it on consecutive days
-        // builds a streak. Rolls over automatically on the first command of a
-        // new day. Date use is fine in the browser.
-        refreshDaily() {
-            if (!this.state.daily) {
-                this.state.daily = { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null };
-            }
-            const d = this.state.daily;
-            const today = todayStr(this.clock.now());
-            if (d.date === today) return;
-            // New day: reset the day's progress (streak is judged on completion).
-            d.date = today;
-            d.baselineXp = this.state.xp;
-            d.goal = dailyGoalFor(today);
-            d.completed = false;
-        }
-
-        checkDaily() {
-            const d = this.state.daily;
-            if (!d || d.completed || !d.date) return [];
-            const earned = this.state.xp - d.baselineXp;
-            if (earned < d.goal) return [];
-            d.completed = true;
-            d.streak = (d.lastDate === yesterdayStr(this.clock.now())) ? d.streak + 1 : 1;
-            d.lastDate = d.date;
-            this.state.xp += 25;
-            return [
-                { kind: "success", text: `🔥 Daily challenge complete!  +25 XP  ·  Streak: ${d.streak} day${d.streak === 1 ? "" : "s"}` },
-                { kind: "dim", text: "Come back tomorrow to keep the streak alive." },
-            ];
-        }
-
-        cmdDaily() {
-            this.refreshDaily();
-            const d = this.state.daily;
-            const earned = Math.max(0, this.state.xp - d.baselineXp);
-            return [
-                { kind: "magic", text: `✨ Daily Challenge — ${d.date}` },
-                { kind: "output", text: `   Goal:     earn ${d.goal} XP today` },
-                { kind: "output", text: `   Progress: ${d.completed ? "✅ complete" : `${Math.min(earned, d.goal)}/${d.goal} XP`}` },
-                { kind: "output", text: `   Streak:   ${d.streak} day${d.streak === 1 ? "" : "s"}` },
-                { kind: "dim", text: d.completed ? "   Done! Return tomorrow to extend your streak." : "   Earn XP via train / speedrun / pathfind / encounters / badges." },
-            ];
-        }
-
-        // Bestiary: catalogue of encounters you've run. `bestiary <key>` shows
-        // the art + blurb for a discovered creature; bare `bestiary` lists all.
-        cmdBestiary(args) {
-            const seen = this.state.bestiary || [];
-            const want = (args[0] || "").toLowerCase();
-            if (want) {
-                const entry = BESTIARY.find((e) => e.key === want);
-                if (!entry) return [{ kind: "error", text: `No such creature: ${want}` }];
-                if (!seen.includes(want)) return [{ kind: "dim", text: `You haven't encountered the ${entry.name} yet.` }];
-                return [
-                    { kind: "art", text: this.art(`encounter-${want}`) },
-                    { kind: "magic", text: `  ${entry.name}` },
-                    { kind: "output", text: `  ${entry.blurb}` },
-                ];
-            }
-            const lines = [{ kind: "magic", text: `✨ Bestiary — ${seen.length}/${BESTIARY.length} catalogued` }];
-            for (const e of BESTIARY) {
-                lines.push(seen.includes(e.key)
-                    ? { kind: "success", text: `  ✅ ${e.name} — ${e.blurb}` }
-                    : { kind: "dim", text: "  🔒 ??? — undiscovered" });
-            }
-            lines.push({ kind: "dim", text: "  Run an encounter (e.g. ./treasure) to catalogue it.  'bestiary <name>' to view one." });
-            return lines;
-        }
-
-        cmdAchievements() {
-            const have = this.state.achievements || [];
-            const lines = [{ kind: "magic", text: `🏅 Achievements — ${have.length}/${ACHIEVEMENTS.length} unlocked` }];
-            for (const a of ACHIEVEMENTS) {
-                const got = have.includes(a.id);
-                lines.push({
-                    kind: got ? "success" : "dim",
-                    text: got ? `${a.icon} ${a.title} — ${a.desc}` : `🔒 ${a.title} — ${a.desc}`,
-                });
-            }
-            return lines;
-        }
-
         // ── Command reference ────────────────────────────────────────────────
         // Discoverability hub for the web-only features. These commands have no
         // bash equivalent and are otherwise invisible, so surface them grouped
@@ -582,7 +349,7 @@
             const s = this.state;
             const badges = (s.achievements || []).length;
             const seen = (s.bestiary || []).length;
-            const rank = (ARENA_RANKS.filter((r) => (s.xp || 0) >= r.min).pop() || ARENA_RANKS[0]).title;
+            const rank = this.rankFor(s.xp).title;
             const groups = [
                 {
                     title: "🎮 Mini-games (earn XP)",
@@ -596,8 +363,8 @@
                     title: "📊 Progress & collection",
                     items: [
                         ["profile", `Your character sheet — ${rank}, XP, stats`],
-                        ["achievements", `Badge catalogue — ${badges}/${ACHIEVEMENTS.length} unlocked`],
-                        ["bestiary", `Creature codex — ${seen}/${BESTIARY.length} catalogued`],
+                        ["achievements", `Badge catalogue — ${badges}/${this.catalog.achievements.length} unlocked`],
+                        ["bestiary", `Creature codex — ${seen}/${this.catalog.bestiary.length} catalogued`],
                         ["daily", "Today's challenge and your streak"],
                     ],
                 },
@@ -635,6 +402,7 @@
             return lines;
         }
 
+        // Prompt shown in the input row; the Arena swaps in a battle prompt.
         promptLabel() {
             const t = this.state.trainer;
             if (t && t.active) {
@@ -645,112 +413,6 @@
                 return `seek ${pf.targetTitle} [${pf.moves}] ❯`;
             }
             return `${this.state.cwd} $`;
-        }
-
-        cmdTrain() {
-            return this.startArena(false);
-        }
-
-        cmdSpeedrun() {
-            return this.startArena(true);
-        }
-
-        startArena(speed) {
-            const count = Math.min(8, TRIALS.length);
-            const pool = TRIALS.map((_, i) => i);
-            for (let i = pool.length - 1; i > 0; i -= 1) {
-                const j = Math.floor(this.rng() * (i + 1));
-                [pool[i], pool[j]] = [pool[j], pool[i]];
-            }
-            this.state.trainer = {
-                queue: pool.slice(0, count), pos: 0, score: 0, streak: 0, best: 0, tries: 0,
-                active: true, speed: !!speed, startedAt: speed ? this.clock.now() : 0,
-            };
-            if (speed) {
-                const best = this.state.speedrunBest;
-                return [
-                    { kind: "art", text: this.art("arena-open") },
-                    { kind: "magic", text: `SPEED RUN — clear ${count} trials against the clock!` },
-                    { kind: "dim", text: best != null ? `Your best: ${best.toFixed(1)}s. Beat it!` : "No record yet — set the first time!" },
-                    { kind: "dim", text: "Answer fast.  skip = pass · quit = leave" },
-                    ...this.trainerChallenge(),
-                ];
-            }
-            return [
-                { kind: "art", text: this.art("arena-open") },
-                { kind: "info", text: `${count} trials await. Answer each by casting the real spell.` },
-                { kind: "dim", text: "Commands:  hint = clue · skip = pass · quit = leave the arena" },
-                ...this.trainerChallenge(),
-            ];
-        }
-
-        trainerChallenge() {
-            const t = this.state.trainer;
-            const q = TRIALS[t.queue[t.pos]];
-            const flame = t.streak >= 3 ? "  🔥" : "";
-            return [
-                { kind: "magic", text: `✨  Trial ${t.pos + 1}/${t.queue.length}   ·   Score ${t.score} XP   ·   Streak ${t.streak}${flame}` },
-                { kind: "output", text: `    ${q.riddle}` },
-            ];
-        }
-
-        trainerInput(raw) {
-            const t = this.state.trainer;
-            const cmd = raw.trim().replace(/\s+/g, " ").toLowerCase();
-            if (["quit", "exit", ":q", "q"].includes(cmd)) return this.trainerFinish(true);
-            const q = TRIALS[t.queue[t.pos]];
-            if (cmd === "hint") return [{ kind: "dim", text: `💡 ${q.hint}` }];
-            if (cmd === "skip") {
-                t.streak = 0; t.tries = 0; t.pos += 1;
-                return [{ kind: "dim", text: `↷ Skipped. The spell was:  ${q.answers[0]}  — ${q.teaches}` }, ...this.advanceTrainer()];
-            }
-            if (q.answers.includes(cmd)) {
-                const gained = 10 + Math.min(t.streak, 5) * 2;
-                t.score += gained; t.streak += 1; t.best = Math.max(t.best, t.streak);
-                this.state.xp += gained;
-                t.tries = 0; t.pos += 1;
-                const cheer = t.streak >= 3 ? `  🔥 ${t.streak} in a row!` : "";
-                return [{ kind: "success", text: `✅ Correct!  +${gained} XP${cheer}   ${q.teaches}` }, ...this.advanceTrainer()];
-            }
-            t.tries += 1; t.streak = 0;
-            if (t.tries >= 2) {
-                t.tries = 0; t.pos += 1;
-                return [{ kind: "error", text: `❌ The spell was:  ${q.answers[0]}  — ${q.teaches}` }, ...this.advanceTrainer()];
-            }
-            return [{ kind: "error", text: `❌ "${raw.trim()}" fizzles. Try once more, or type 'hint'.` }];
-        }
-
-        advanceTrainer() {
-            const t = this.state.trainer;
-            if (t.pos >= t.queue.length) return this.trainerFinish(false);
-            return this.trainerChallenge();
-        }
-
-        trainerFinish(quit) {
-            const t = this.state.trainer;
-            const answered = t.pos;
-            const rank = ARENA_RANKS.filter((r) => t.score >= r.min).pop() || ARENA_RANKS[0];
-            const completed = answered >= t.queue.length;
-            if (completed) this.state.flags.arena_cleared = true;
-            this.state.trainer = null;
-            const lines = [];
-            if (quit) lines.push({ kind: "dim", text: "You lower your blade and step out of the arena." });
-            lines.push({ kind: "art", text: this.art("arena-done") });
-            lines.push({ kind: "info", text: `Trials answered: ${answered}/${t.queue.length}   ·   Earned: ${t.score} XP   ·   Best streak: ${t.best}` });
-            // Speed Run: record elapsed time and best, only on a full clear.
-            if (t.speed && completed && t.startedAt) {
-                const elapsed = Math.round((this.clock.now() - t.startedAt) / 100) / 10;
-                const prevBest = this.state.speedrunBest;
-                const isRecord = prevBest == null || elapsed < prevBest;
-                if (isRecord) this.state.speedrunBest = elapsed;
-                lines.push({ kind: "magic", text: `⏱  Time: ${elapsed.toFixed(1)}s` });
-                lines.push(isRecord
-                    ? { kind: "success", text: `🏆 NEW RECORD!  (previous: ${prevBest != null ? prevBest.toFixed(1) + "s" : "none"})` }
-                    : { kind: "dim", text: `Best: ${prevBest.toFixed(1)}s — try again to beat it.` });
-            }
-            lines.push({ kind: "success", text: `🏅 Rank attained:  ${rank.title}` });
-            lines.push({ kind: "dim", text: t.speed ? "Type 'speedrun' to race again, or 'train' for untimed practice." : "Type 'train' to drill again, or return to exploring the dungeon." });
-            return lines;
         }
 
         cmdWhoami() {
@@ -829,15 +491,6 @@
             return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}${missing ? `\n   ${missing}` : ""}` }];
         }
 
-        cmdXp() {
-            const xp = this.state.xp;
-            const level = Math.max(1, 1 + Math.floor(xp / 200));
-            const into = xp % 200;
-            const filled = Math.round(into / 20);
-            const bar = "█".repeat(filled) + "░".repeat(10 - filled);
-            return [{ kind: "info", text: `Level ${level}  ${bar}  ${into}/200 to next level  (total ${xp} XP)` }];
-        }
-
         cmdSource(args) {
             if (!args[0]) return [{ kind: "error", text: "Usage: source <file>" }];
             const raw = args[0].replace(/^\.\//, "");
@@ -900,7 +553,7 @@
                     const binary = global.atob(args[1]);
                     const text = decodeURIComponent(Array.from(binary, (ch) => `%${ch.charCodeAt(0).toString(16).padStart(2, "0")}`).join(""));
                     const parsed = JSON.parse(text);
-                    this.state = loadState(this.world, parsed);
+                    this.state = loadState(this.world, parsed, this.catalog);
                     return [{ kind: "success", text: "Progress imported." }];
                 } catch (err) { return [{ kind: "error", text: `Cannot import save: ${err.message}` }]; }
             }
@@ -915,6 +568,7 @@
 
         cmdReset() {
             this.state = defaultState(this.world.root);
+            this.emit("session.reset", {});
             return [{ kind: "control", action: "reset" }, { kind: "info", text: "Session reset. Start with pwd." }];
         }
 
@@ -935,11 +589,17 @@
                 if (!Array.isArray(this.state.bestiary)) this.state.bestiary = [];
                 if (!this.state.bestiary.includes(script)) this.state.bestiary.push(script);
             }
+            this.emit("encounter.run", { key: encounter.key, script, path });
             for (const item of encounter.grants_items || []) {
-                if (!this.state.inventory.includes(item)) this.state.inventory.push(item);
+                if (!this.state.inventory.includes(item)) {
+                    this.state.inventory.push(item);
+                    this.emit("item.gained", { item });
+                }
             }
+            const hpBefore = this.state.hp;
             if (encounter.damage) this.state.hp = Math.max(0, this.state.hp - Number(encounter.damage));
             if (encounter.heals) this.state.hp = Math.min(100, this.state.hp + Number(encounter.heals));
+            if (this.state.hp !== hpBefore) this.emit("health.changed", { delta: this.state.hp - hpBefore, hp: this.state.hp });
             this.state.flags[encounter.key] = true;
             if ((encounter.grants_items || []).length) {
                 messages.push({ kind: "success", text: `Inventory gained: ${encounter.grants_items.join(", ")}` });
@@ -986,7 +646,8 @@
                 }
                 if (!this.state.completedQuestIds.includes(q.id)) {
                     this.state.completedQuestIds.push(q.id);
-                    this.state.xp += Number(q.xp || 0);
+                    this.awardXp(q.xp || 0, "quest");
+                    this.emit("quest.completed", { id: q.id, title: q.title, xp: Number(q.xp || 0) });
                     changed = true;
                 }
                 this.state.currentQuestId += 1;
@@ -996,5 +657,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, ARENA_RANKS, ACHIEVEMENTS };
+    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

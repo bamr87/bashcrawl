@@ -182,6 +182,17 @@ def build_quests() -> dict[str, Any]:
     return {"quests": data.get("quests", [])}
 
 
+def build_progression() -> dict[str, Any]:
+    """Ranks, achievements (TermForge rules), bestiary and arena trials."""
+    data = _load_yaml(ROOT / "src/help/data/progression.yaml")
+    return {
+        "ranks": data.get("ranks") or [],
+        "achievements": data.get("achievements") or [],
+        "bestiary": data.get("bestiary") or [],
+        "trials": data.get("trials") or [],
+    }
+
+
 def build_commands() -> dict[str, Any]:
     reference = _load_yaml(ROOT / "src/help/data/commands.yaml")
     runtime = _load_yaml(ROOT / "src/help/data/runtime_commands.yaml")
@@ -346,6 +357,7 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     write_json(out / "world.json", build_world())
     write_json(out / "quests.json", build_quests())
+    write_json(out / "progression.json", build_progression())
     write_json(out / "commands.json", build_commands())
     write_json(out / "docs.json", build_docs())
     write_json(out / "arcade.json", build_arcade())

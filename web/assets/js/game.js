@@ -2,6 +2,7 @@
     const DATA_PATHS = {
         world: "./data/world.json",
         quests: "./data/quests.json",
+        progression: "./data/progression.json",
         commands: "./data/commands.json",
         docs: "./data/docs.json",
     };
@@ -43,7 +44,7 @@
     const data = await loadData();
     let initialState = window.BashcrawlStorage.load(() => window.BashcrawlRuntime.defaultState(data.world.root));
     let saveError = window.BashcrawlStorage.lastError ? `Could not restore progress: ${window.BashcrawlStorage.lastError}` : "";
-    try { initialState = window.BashcrawlRuntime.loadState(data.world, initialState); }
+    try { initialState = window.BashcrawlRuntime.loadState(data.world, initialState, data.progression); }
     catch (err) {
         window.BashcrawlStorage.backup();
         saveError = `Could not restore progress: ${err.message}`;

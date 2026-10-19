@@ -13,6 +13,7 @@ function loadWebData(dataDir = DEFAULT_DATA_DIR) {
         world: read("world.json"),
         quests: read("quests.json"),
         commands: read("commands.json"),
+        progression: read("progression.json"),
     };
 }
 

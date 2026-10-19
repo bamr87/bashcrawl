@@ -53,9 +53,11 @@
         return "█".repeat(filled) + "░".repeat(w - filled);
     }
 
-    function rankFor(xp) {
-        const ranks = global.BashcrawlRuntime.ARENA_RANKS;
-        return ranks.filter((r) => (xp || 0) >= r.min).pop() || ranks[0];
+    // Rank rows come from the runtime's progression catalog
+    // (src/help/data/progression.yaml).
+    function rankFor(xp, ranks) {
+        const rows = ranks && ranks.length ? ranks : [{ min: 0, title: "" }];
+        return rows.filter((r) => (xp || 0) >= r.min).pop() || rows[0];
     }
 
     // Level curve mirrors the in-game `xp` command: 200 XP per level.
@@ -89,6 +91,7 @@
             inventory: s.inventory.slice(),
             achievements: (s.achievements || []).length,
             rankIndex: s.rankIndex || 0,
+            rankTitle: rankFor(s.xp, runtime.catalog && runtime.catalog.ranks).title,
             cwd: s.cwd,
             reveals: Object.keys(s.reveals || {}).length,
         };
@@ -115,7 +118,7 @@
             events.push({ type: "item", items: gained, text: `💰 ${gained.join(", ")}` });
         }
         if (next.rankIndex > prev.rankIndex) {
-            events.push({ type: "levelup", text: `★ ${rankFor(next.xp).title}` });
+            events.push({ type: "levelup", text: `★ ${next.rankTitle || ""}` });
         }
         if (next.cwd !== prev.cwd) {
             events.push({ type: "move", from: prev.cwd, to: next.cwd, text: `→ ${next.cwd}` });
@@ -172,14 +175,14 @@
         const xp = runtime.state.xp || 0;
         const level = levelFor(xp);
         return {
-            rank: rankFor(xp).title,
+            rank: rankFor(xp, runtime.catalog && runtime.catalog.ranks).title,
             xp,
             level: level.level,
             into: level.into,
             span: level.span,
             xpBar: bar(level.into, level.span, 10),
             badges: (runtime.state.achievements || []).length,
-            badgeTotal: global.BashcrawlRuntime.ACHIEVEMENTS.length,
+            badgeTotal: runtime.catalog ? runtime.catalog.achievements.length : 0,
         };
     }
 

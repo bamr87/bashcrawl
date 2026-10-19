@@ -46,6 +46,7 @@ def validate() -> dict:
         "assets/js/shell.js",
         "data/world.json",
         "data/quests.json",
+        "data/progression.json",
         "data/commands.json",
         "data/docs.json",
         "data/arcade.json",
@@ -91,6 +92,18 @@ def validate() -> dict:
     for rel in vendor_files:
         if rel not in script_srcs:
             errors.append(f"index.html does not load vendored core file: {rel}")
+        elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
+            errors.append(f"index.html must load {rel} before assets/js/runtime.js")
+    # Game feature plugins (web/assets/js/plugins/*.js): dropping a file in
+    # is half the registration — index.html must load it, before the runtime.
+    plugin_files = sorted(
+        p.relative_to(WEB).as_posix() for p in (WEB / "assets/js/plugins").glob("*.js")
+    )
+    if not plugin_files:
+        errors.append("web/assets/js/plugins/ has no game plugins")
+    for rel in plugin_files:
+        if rel not in script_srcs:
+            errors.append(f"index.html does not load game plugin: {rel}")
         elif runtime_idx >= 0 and script_srcs.index(rel) > runtime_idx:
             errors.append(f"index.html must load {rel} before assets/js/runtime.js")
 

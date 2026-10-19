@@ -1,0 +1,352 @@
+{
+  "ranks": [
+    {
+      "min": 0,
+      "title": "Novice Whisperer"
+    },
+    {
+      "min": 40,
+      "title": "Apprentice of the Shell"
+    },
+    {
+      "min": 80,
+      "title": "Adept Spellcaster"
+    },
+    {
+      "min": 130,
+      "title": "Terminal Master"
+    },
+    {
+      "min": 190,
+      "title": "Archmage of the Command Line"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first_steps",
+      "icon": "🧭",
+      "title": "First Steps",
+      "desc": "Found your place with pwd.",
+      "xp": 5,
+      "when": {
+        "state": "stats.commands.pwd",
+        "gt": 0
+      }
+    },
+    {
+      "id": "cartographer",
+      "icon": "✨",
+      "title": "Cartographer",
+      "desc": "Charted the dungeon with map or tree.",
+      "xp": 5,
+      "when": {
+        "any": [
+          {
+            "state": "stats.commands.map",
+            "gt": 0
+          },
+          {
+            "state": "stats.commands.tree",
+            "gt": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "scholar",
+      "icon": "💡",
+      "title": "Scholar",
+      "desc": "Read three ancient scrolls.",
+      "xp": 5,
+      "when": {
+        "state": "stats.catScrollCount",
+        "gte": 3
+      }
+    },
+    {
+      "id": "world_builder",
+      "icon": "⚡",
+      "title": "World-Builder",
+      "desc": "Conjured a room with mkdir.",
+      "xp": 5,
+      "when": {
+        "state": "stats.commands.mkdir",
+        "gt": 0
+      }
+    },
+    {
+      "id": "treasure_hunter",
+      "icon": "💰",
+      "title": "Treasure Hunter",
+      "desc": "Claimed your first loot.",
+      "xp": 5,
+      "when": {
+        "count": "inventory",
+        "gte": 1
+      }
+    },
+    {
+      "id": "key_master",
+      "icon": "🔓",
+      "title": "Key-Master",
+      "desc": "Unlocked a hidden room.",
+      "xp": 5,
+      "when": {
+        "count": "reveals",
+        "gte": 1
+      }
+    },
+    {
+      "id": "arena_graduate",
+      "icon": "🏅",
+      "title": "Arena Graduate",
+      "desc": "Cleared a Training Arena run.",
+      "xp": 5,
+      "when": {
+        "flag": "arena_cleared"
+      }
+    },
+    {
+      "id": "speed_demon",
+      "icon": "🏆",
+      "title": "Speed Demon",
+      "desc": "Finished a timed Speed Run.",
+      "xp": 5,
+      "when": {
+        "exists": "speedrunBest"
+      }
+    },
+    {
+      "id": "trailblazer",
+      "icon": "✅",
+      "title": "Trailblazer",
+      "desc": "Completed a Path-Finder journey.",
+      "xp": 5,
+      "when": {
+        "flag": "pathfind_done"
+      }
+    },
+    {
+      "id": "naturalist",
+      "icon": "✨",
+      "title": "Naturalist",
+      "desc": "Catalogued 5 creatures in the bestiary.",
+      "xp": 5,
+      "when": {
+        "count": "bestiary",
+        "gte": 5
+      }
+    },
+    {
+      "id": "seasoned",
+      "icon": "🔥",
+      "title": "Seasoned Adventurer",
+      "desc": "Earned 150 XP.",
+      "xp": 5,
+      "when": {
+        "state": "xp",
+        "gte": 150
+      }
+    }
+  ],
+  "bestiary": [
+    {
+      "key": "treasure",
+      "name": "Treasure Chest",
+      "blurb": "Spills jewels for the bold."
+    },
+    {
+      "key": "monster",
+      "name": "Coiled Serpent",
+      "blurb": "Strikes at the unprepared."
+    },
+    {
+      "key": "ghost",
+      "name": "Restless Ghost",
+      "blurb": "Drifts through locked doors."
+    },
+    {
+      "key": "potion",
+      "name": "Glowing Potion",
+      "blurb": "Restores a weary hero's vigor."
+    },
+    {
+      "key": "statue",
+      "name": "Stone Guardian",
+      "blurb": "Wakes when you draw near."
+    },
+    {
+      "key": "goblet",
+      "name": "Jeweled Goblet",
+      "blurb": "A prize of the deep vaults."
+    },
+    {
+      "key": "spell",
+      "name": "Igniting Rune",
+      "blurb": "Crackles with raw magick."
+    },
+    {
+      "key": "crystal",
+      "name": "Murmuring Crystal",
+      "blurb": "Whispers half-truths."
+    },
+    {
+      "key": "penguin",
+      "name": "Dapper Penguin",
+      "blurb": "Inexplicably formal."
+    },
+    {
+      "key": "nyarlathotep",
+      "name": "The Crawling Chaos",
+      "blurb": "Best left uncatalogued."
+    },
+    {
+      "key": "fountain",
+      "name": "Wishing Fountain",
+      "blurb": "Bubbles with possibility."
+    }
+  ],
+  "trials": [
+    {
+      "cat": "see",
+      "riddle": "Reveal everything standing in your current room.",
+      "answers": [
+        "ls"
+      ],
+      "hint": "Three letters — short for 'list'.",
+      "teaches": "ls lists the contents of a room (directory)."
+    },
+    {
+      "cat": "see",
+      "riddle": "Reveal even the HIDDEN passages here (names that begin with a dot).",
+      "answers": [
+        "ls -a",
+        "ls -la",
+        "ls -al",
+        "ls -a ."
+      ],
+      "hint": "ls needs the 'all' flag: -a",
+      "teaches": "ls -a shows hidden entries whose names start with a dot."
+    },
+    {
+      "cat": "move",
+      "riddle": "Cast the spell that tells you exactly where you stand.",
+      "answers": [
+        "pwd"
+      ],
+      "hint": "Print Working Directory.",
+      "teaches": "pwd prints your current location."
+    },
+    {
+      "cat": "move",
+      "riddle": "Descend into the room named 'cellar'.",
+      "answers": [
+        "cd cellar"
+      ],
+      "hint": "Change Directory into cellar.",
+      "teaches": "cd <room> walks you into another directory."
+    },
+    {
+      "cat": "move",
+      "riddle": "Climb back to the room you came from.",
+      "answers": [
+        "cd .."
+      ],
+      "hint": "'..' means the parent room.",
+      "teaches": "cd .. moves up one directory."
+    },
+    {
+      "cat": "read",
+      "riddle": "Read the entire scroll lying in this room.",
+      "answers": [
+        "cat scroll"
+      ],
+      "hint": "conCATenate the scroll to your screen.",
+      "teaches": "cat <file> prints a file's full contents."
+    },
+    {
+      "cat": "read",
+      "riddle": "Peek at only the FIRST lines of the scroll.",
+      "answers": [
+        "head scroll"
+      ],
+      "hint": "The opposite of 'tail'.",
+      "teaches": "head shows the first lines of a file."
+    },
+    {
+      "cat": "read",
+      "riddle": "Glimpse only the LAST lines of the scroll.",
+      "answers": [
+        "tail scroll"
+      ],
+      "hint": "The opposite of 'head'.",
+      "teaches": "tail shows the last lines of a file."
+    },
+    {
+      "cat": "search",
+      "riddle": "Hunt the scroll for the word 'amulet'.",
+      "answers": [
+        "grep amulet scroll"
+      ],
+      "hint": "grep <word> <file>",
+      "teaches": "grep finds lines matching a pattern inside a file."
+    },
+    {
+      "cat": "search",
+      "riddle": "Count how many lines the scroll holds.",
+      "answers": [
+        "wc -l scroll",
+        "wc scroll"
+      ],
+      "hint": "Word Count, with the -l (lines) flag.",
+      "teaches": "wc -l counts the lines in a file."
+    },
+    {
+      "cat": "make",
+      "riddle": "Conjure a brand-new room called 'workshop'.",
+      "answers": [
+        "mkdir workshop"
+      ],
+      "hint": "MaKe DIRectory.",
+      "teaches": "mkdir creates a new directory (room)."
+    },
+    {
+      "cat": "make",
+      "riddle": "Forge an empty artifact named 'torch'.",
+      "answers": [
+        "touch torch"
+      ],
+      "hint": "One word — it 'touches' a file into being.",
+      "teaches": "touch creates an empty file."
+    },
+    {
+      "cat": "magic",
+      "riddle": "Summon your inventory by echoing the $I treasure-rune.",
+      "answers": [
+        "echo $i",
+        "echo \"$i\""
+      ],
+      "hint": "echo $I",
+      "teaches": "echo prints text; $I holds your inventory."
+    },
+    {
+      "cat": "magic",
+      "riddle": "Run the 'treasure' encounter waiting in this room.",
+      "answers": [
+        "./treasure"
+      ],
+      "hint": "Execute it with a leading ./",
+      "teaches": "./<script> runs an executable in the current room."
+    },
+    {
+      "cat": "magic",
+      "riddle": "Draw the map of the whole dungeon.",
+      "answers": [
+        "map",
+        "tree"
+      ],
+      "hint": "One short word — or the branching 'tree'.",
+      "teaches": "map / tree reveal the dungeon's layout."
+    }
+  ]
+}

@@ -70,6 +70,7 @@ def _validate_required_files(
         "rooms_yaml": root / "src/help/data/rooms.yaml",
         "quests_yaml": root / "src/help/data/quests.yaml",
         "encounters_yaml": root / "src/help/data/encounters.yaml",
+        "progression_yaml": root / "src/help/data/progression.yaml",
         "walkthrough_json": root / "test/datasets/walkthrough.json",
     }
     out: dict[str, Any] = {}
@@ -505,13 +506,12 @@ def _art_wanted(root: Path) -> set[str]:
     index = root / "web/index.html"
     if index.is_file():
         names.update(re.findall(r'data-art="([a-z0-9-]+)"', index.read_text(encoding="utf-8")))
-    runtime = js / "runtime.js"
-    if runtime.is_file():
-        source = runtime.read_text(encoding="utf-8")
-        bestiary = re.search(r"const BESTIARY = \[(.*?)\n {4}\];", source, re.S)
-        if bestiary:
-            keys = re.findall(r'key: "([a-z0-9-]+)"', bestiary.group(1))
-            names.update(f"encounter-{key}" for key in keys)
+    names.update(_art_calls(js / "plugins"))
+    progression = root / "src/help/data/progression.yaml"
+    if progression.is_file():
+        for entry in _load_yaml(progression).get("bestiary") or []:
+            if isinstance(entry, dict) and entry.get("key"):
+                names.add(f"encounter-{entry['key']}")
     hud = js / "hud.js"
     if hud.is_file():
         source = hud.read_text(encoding="utf-8")
@@ -541,6 +541,138 @@ def _motion_source_ok(path: Path) -> str | None:
     if not isinstance(frames, list) or not frames:
         return "has no frames (expected a JSON export, a session .asciimtn, or a text export)"
     return None
+
+
+# Mirror of termforge/core/rules.js (HEADS / COMPANIONS): the structural rule
+# check content CI runs without node. termforge/test/progression.test.js
+# asserts these lists stay identical to the JavaScript ones, and runs the
+# full JS validator over every authored rule.
+RULE_HEADS = (
+    "all", "any", "not",
+    "command", "arg", "args_contains", "option", "piped", "ok", "output_includes",
+    "cwd", "cwd_includes",
+    "state", "count", "has", "flag", "exists",
+    "file_exists", "dir_exists", "file_contains",
+    "always",
+)
+RULE_COMPARATORS = ("eq", "ne", "gt", "gte", "lt", "lte", "in", "includes", "matches")
+RULE_COMPANIONS = {
+    "state": RULE_COMPARATORS,
+    "count": RULE_COMPARATORS,
+    "has": ("value",),
+    "file_contains": ("text",),
+}
+
+
+def rule_errors(rule: Any, where: str) -> list[str]:
+    """Structural problems in an authored TermForge rule (empty = valid)."""
+    if not isinstance(rule, dict):
+        return [f"{where}: must be a mapping"]
+    heads = [key for key in rule if key in RULE_HEADS]
+    if len(heads) != 1:
+        return [f"{where}: needs exactly one rule head (got {', '.join(rule) or 'nothing'})"]
+    head = heads[0]
+    allowed = {head, *RULE_COMPANIONS.get(head, ())}
+    problems = [
+        f"{where}: unexpected key '{key}' beside '{head}'" for key in rule if key not in allowed
+    ]
+    if head in ("all", "any"):
+        items = rule[head]
+        if not isinstance(items, list) or not items:
+            problems.append(f"{where}.{head}: must be a non-empty list")
+        else:
+            for i, item in enumerate(items):
+                problems.extend(rule_errors(item, f"{where}.{head}[{i}]"))
+    elif head == "not":
+        problems.extend(rule_errors(rule["not"], f"{where}.not"))
+    return problems
+
+
+def _validate_progression(
+    root: Path, errors: list[str], warnings: list[str], report: dict[str, Any]
+) -> None:
+    """ranks / achievements / bestiary / trials in progression.yaml."""
+    data = _load_yaml(root / "src/help/data/progression.yaml")
+    if data.get("version") != 1:
+        _add_error(errors, "progression.yaml: version must be 1")
+    ranks = data.get("ranks")
+    if not isinstance(ranks, list) or not ranks:
+        _add_error(errors, "progression.yaml: ranks must be a non-empty list")
+        ranks = []
+    mins = [r.get("min") for r in ranks if isinstance(r, dict)]
+    if ranks and mins[:1] != [0]:
+        _add_error(errors, "progression.yaml: the first rank must have min: 0")
+    if mins != sorted(mins) or len(set(mins)) != len(mins):
+        _add_error(errors, "progression.yaml: rank thresholds must be strictly ascending")
+    for i, rank in enumerate(ranks):
+        title = rank.get("title") if isinstance(rank, dict) else None
+        if not isinstance(title, str) or not title:
+            _add_error(errors, f"progression.yaml: ranks[{i}] needs a title")
+
+    seen_ids: set[str] = set()
+    for i, badge in enumerate(data.get("achievements") or []):
+        where = f"progression.yaml: achievements[{i}]"
+        if not isinstance(badge, dict):
+            _add_error(errors, f"{where} must be a mapping")
+            continue
+        badge_id = badge.get("id")
+        if not isinstance(badge_id, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", badge_id):
+            _add_error(errors, f"{where}: id must be snake_case")
+        elif badge_id in seen_ids:
+            _add_error(errors, f"{where}: duplicate id '{badge_id}'")
+        else:
+            seen_ids.add(badge_id)
+        for field in ("icon", "title", "desc"):
+            if not isinstance(badge.get(field), str) or not badge[field]:
+                _add_error(errors, f"{where}: missing {field}")
+        xp = badge.get("xp", 5)
+        if not isinstance(xp, int) or xp < 0:
+            _add_error(errors, f"{where}: xp must be a non-negative integer")
+        for problem in rule_errors(badge.get("when"), f"{where}.when"):
+            _add_error(errors, problem)
+
+    seen_keys: set[str] = set()
+    for i, entry in enumerate(data.get("bestiary") or []):
+        where = f"progression.yaml: bestiary[{i}]"
+        key = entry.get("key") if isinstance(entry, dict) else None
+        if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9-]+", key):
+            _add_error(errors, f"{where}: key must be lowercase (an encounter script basename)")
+            continue
+        if key in seen_keys:
+            _add_error(errors, f"{where}: duplicate key '{key}'")
+        seen_keys.add(key)
+        for field in ("name", "blurb"):
+            if not isinstance(entry.get(field), str) or not entry[field]:
+                _add_error(errors, f"{where}: missing {field}")
+
+    trials = data.get("trials") or []
+    if len(trials) < 8:
+        _add_warning(warnings, "progression.yaml: fewer than 8 trials — arena runs will be short")
+    for i, trial in enumerate(trials):
+        where = f"progression.yaml: trials[{i}]"
+        if not isinstance(trial, dict):
+            _add_error(errors, f"{where} must be a mapping")
+            continue
+        for field in ("cat", "riddle", "hint", "teaches"):
+            if not isinstance(trial.get(field), str) or not trial[field]:
+                _add_error(errors, f"{where}: missing {field}")
+        answers = trial.get("answers")
+        if not isinstance(answers, list) or not answers:
+            _add_error(errors, f"{where}: answers must be a non-empty list")
+            continue
+        for answer in answers:
+            # The arena lowercases and collapses whitespace before comparing,
+            # so any other spelling could never be matched.
+            if not isinstance(answer, str) or answer != " ".join(answer.lower().split()):
+                _add_error(
+                    errors, f"{where}: answer {answer!r} must be lowercase with single spaces"
+                )
+    report["progression"] = {
+        "ranks": len(ranks),
+        "achievements": len(seen_ids),
+        "bestiary": len(seen_keys),
+        "trials": len(trials),
+    }
 
 
 def _validate_motion(
@@ -694,6 +826,7 @@ def validate(root: Path) -> dict[str, Any]:
     _validate_quests(quests_data, walkthrough, errors, warnings, report)
     _validate_encounters(root, encounters_data, walkthrough, errors, warnings, report)
     _validate_game_scripts(root, errors, warnings, report)
+    _validate_progression(root, errors, warnings, report)
     _validate_motion(root, errors, warnings, report)
 
     return {
@@ -724,6 +857,12 @@ def _emit_text(result: dict[str, Any]) -> None:
         "Encounters: "
         f"yaml={enc.get('yaml_count', 0)} "
         f"walkthrough_scripts={enc.get('walkthrough_script_count', 0)}"
+    )
+    progression = result.get("progression", {})
+    print(
+        f"Progression: ranks={progression.get('ranks', 0)} "
+        f"achievements={progression.get('achievements', 0)} "
+        f"bestiary={progression.get('bestiary', 0)} trials={progression.get('trials', 0)}"
     )
     motion = result.get("motion", {})
     print(
