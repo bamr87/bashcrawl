@@ -15,7 +15,7 @@
         story: "Story: explore the dungeon with real commands",
         learn: "Learn: read on the left, type on the right · lesson hint when stuck",
         arcade: "Arcade: quit abandons a trial · hint helps (score cost)",
-        reference: "Reference: click any command to copy it",
+        reference: "Reference: click a command to copy it · ▶ drops it into the Story prompt",
     };
 
     const dom = {
@@ -23,7 +23,8 @@
         story: document.getElementById("mode-story"),
         arcade: document.getElementById("mode-arcade"),
         reference: document.getElementById("mode-reference"),
-        inputRow: document.getElementById("command-form"),
+        inputRow: document.getElementById("input-dock") || document.getElementById("command-form"),
+        statusBar: document.getElementById("status-bar"),
         input: document.getElementById("command-input"),
         prompt: document.getElementById("prompt-label"),
         inlineHint: document.getElementById("inline-hint"),
@@ -93,6 +94,8 @@
         if (dom.arcade) dom.arcade.hidden = next !== "arcade";
         if (dom.reference) dom.reference.hidden = next !== "reference";
         if (dom.inputRow) dom.inputRow.hidden = next === "reference";
+        if (dom.statusBar) dom.statusBar.hidden = next === "reference";
+        document.body.removeAttribute("data-panels");
         if (changed) animateEnter(storyish ? dom.story : next === "arcade" ? dom.arcade : dom.reference);
         if (dom.nav) {
             dom.nav.querySelectorAll("[data-mode]").forEach((btn) => {
@@ -116,7 +119,24 @@
         if (next === "learn" && learnView && global.BashcrawlGame) learnView.render(global.BashcrawlGame.getRuntime());
         if (storyish) setPrompt(storyPrompt, { fromStory: true });
         if (next === "arcade" && arcade) setPrompt(arcade.promptLabel());
+        if (global.BashcrawlGame && global.BashcrawlGame.refreshChrome) global.BashcrawlGame.refreshChrome();
         if (next !== "reference" && dom.input) dom.input.focus();
+    }
+
+    // The prompt label is painted twice: the full path, and a short form
+    // (the room's own name) that CSS swaps in on narrow screens so the
+    // input keeps its width. "arcade ▸" and friends have no path to shorten.
+    function paintPrompt(label) {
+        const text = String(label);
+        const short = text.replace(/^\/(?:[^\s/]+\/)*([^\s/]+)(\s.*)$/, "$1$2");
+        const full = document.createElement("span");
+        full.className = "prompt-full";
+        full.textContent = text;
+        const brief = document.createElement("span");
+        brief.className = "prompt-short";
+        brief.textContent = short;
+        brief.setAttribute("aria-hidden", "true");
+        dom.prompt.replaceChildren(full, brief);
     }
 
     function setPrompt(label, { fromStory = false } = {}) {
@@ -124,8 +144,20 @@
         // Only paint the prompt for the mode that owns the input right now.
         if (!dom.prompt) return;
         if ((fromStory && storyOwnsInput()) || (!fromStory && currentMode === "arcade")) {
-            dom.prompt.textContent = label;
+            paintPrompt(label);
         }
+    }
+
+    // A command from the Reference (or anywhere outside the story section)
+    // lands in the Story prompt, ready for Enter. Angle-bracket placeholders
+    // like `cat <file>` are trimmed so the learner types the real argument.
+    function tryCommand(command) {
+        const text = String(command || "");
+        const trimmed = text.replace(/\s*<[^>]+>/g, "").trim();
+        const filled = trimmed + (trimmed !== text.trim() ? " " : "");
+        setMode("story");
+        if (global.BashcrawlGame && global.BashcrawlGame.fillInput) global.BashcrawlGame.fillInput(filled);
+        else if (dom.input) { dom.input.value = filled; dom.input.focus(); }
     }
 
     // ── input routing (game.js delegates non-story lines here) ──────────
@@ -271,7 +303,10 @@
         }
         document.addEventListener("keydown", (event) => {
             if (!event.altKey || event.ctrlKey || event.metaKey) return;
-            const target = { "1": "story", "2": "learn", "3": "arcade", "4": "reference" }[event.key];
+            // macOS types a symbol for Alt+digit (Alt+1 → "¡"), so read the
+            // physical key when it is a digit.
+            const digit = /^Digit[1-4]$/.test(event.code || "") ? event.code.slice(5) : event.key;
+            const target = { "1": "story", "2": "learn", "3": "arcade", "4": "reference" }[digit];
             if (target) {
                 event.preventDefault();
                 setMode(target);
@@ -296,7 +331,8 @@
         document.addEventListener("bashcrawl:ready", (event) => boot(event.detail.data), { once: true });
     }
 
-    global.BashcrawlShell = { mode, setMode, storyOwnsInput, handleInput, awardXp, toast, setPrompt, completions, clearLog,
+    global.BashcrawlShell = { mode, setMode, storyOwnsInput, handleInput, awardXp, toast, setPrompt, completions, clearLog, tryCommand,
+        renderInlineHint() { if (reference) reference.renderInlineHint(); },
         onStoryRender(runtime) {
             if (reference) reference.renderSpotlight(runtime);
             if (learnView && currentMode === "learn") learnView.render(runtime);

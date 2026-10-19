@@ -17,22 +17,30 @@
                 <span class="tui-header-subtitle">Terminal Dungeon Web</span>
             </div>
             <nav class="mode-nav" id="mode-nav" role="tablist" aria-label="Game modes">
-                <button type="button" class="mode-tab mode-tab-on" data-mode="story" role="tab" aria-selected="true" title="Story dungeon (Alt+1)">⚔ Story</button>
-                <button type="button" class="mode-tab" data-mode="learn" role="tab" aria-selected="false" title="Guided courses with a lab (Alt+2)">🎓 Learn</button>
-                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+3)">🕹 Arcade</button>
-                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+4)">📖 Reference</button>
+                <button type="button" class="mode-tab mode-tab-on" data-mode="story" role="tab" aria-selected="true" title="Story dungeon (Alt+1)"><span class="mode-tab-icon" aria-hidden="true">⚔</span> <span class="mode-tab-text">Story</span></button>
+                <button type="button" class="mode-tab" data-mode="learn" role="tab" aria-selected="false" title="Guided courses with a lab (Alt+2)"><span class="mode-tab-icon" aria-hidden="true">🎓</span> <span class="mode-tab-text">Learn</span></button>
+                <button type="button" class="mode-tab" data-mode="arcade" role="tab" aria-selected="false" title="Practice Arcade (Alt+3)"><span class="mode-tab-icon" aria-hidden="true">🕹</span> <span class="mode-tab-text">Arcade</span></button>
+                <button type="button" class="mode-tab" data-mode="reference" role="tab" aria-selected="false" title="Cheatsheets (Alt+4)"><span class="mode-tab-icon" aria-hidden="true">📖</span> <span class="mode-tab-text">Reference</span></button>
             </nav>
             <div class="tui-header-actions">
-                <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <button id="hud-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="hud-menu">HUD</button>
-                <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer">Docs</button>
-                <button id="theme-toggle" class="tui-button" type="button">Dark</button>
-                <button id="crt-toggle" class="tui-button" type="button" aria-pressed="false">CRT Off</button>
+                <a class="tui-button tui-header-link" href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer" title="Source on GitHub">GitHub</a>
+                <button id="hud-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="hud-menu" title="Sidebar panels: fold, hide, dock left or right">HUD</button>
+                <button id="docs-toggle" class="tui-button" type="button" aria-expanded="false" aria-controls="docs-drawer" title="Documentation drawer (F1)">Docs</button>
+                <button id="theme-toggle" class="tui-button" type="button" title="Switch to light theme">Dark</button>
+                <button id="crt-toggle" class="tui-button" type="button" aria-pressed="false" title="Enable retro CRT overlay">CRT Off</button>
             </div>
         </header>
 
+        <!-- Hero status strip: rank → next rank, vitals, quests, badges,
+             streak (Hud.statusModel, painted by game.js). On small screens
+             it also carries the toggle that opens the sidebar panels. -->
+        <div class="status-bar" id="status-bar">
+            <div id="status-strip" class="status-strip" role="group" aria-label="Hero status"></div>
+            <button id="panels-toggle" class="tui-button panels-toggle" type="button" aria-expanded="false" aria-controls="story-sidebar">☰ Panels</button>
+        </div>
+
         <section class="tui-main" id="mode-story" aria-label="Bashcrawl story dungeon">
-            <aside class="tui-sidebar" aria-label="Game status panels">
+            <aside class="tui-sidebar" id="story-sidebar" aria-label="Game status panels">
                 <div id="hud-menu" class="hud-menu" hidden>
                     <p class="kind-dim">Click a pane title to fold it. Uncheck to hide. Layout is saved separately from your run.</p>
                     <div id="hud-menu-panes"></div>
@@ -148,11 +156,17 @@
             <div id="reference-content" class="ref-content"></div>
         </section>
 
-        <form class="tui-input-row" id="command-form">
-            <label id="prompt-label" class="tui-prompt" for="command-input">/entrance $</label>
-            <input id="command-input" class="tui-input" autocomplete="off" spellcheck="false">
-        </form>
-        <p id="inline-hint" class="inline-hint" aria-live="polite" hidden></p>
+        <!-- The one shared prompt. Above it, next-step suggestions for the
+             story (Hud.suggestionsModel): tapping one fills the prompt — the
+             learner still presses Enter. -->
+        <div class="tui-input-dock" id="input-dock">
+            <div id="suggest-row" class="suggest-row" role="group" aria-label="Suggested next commands" hidden></div>
+            <form class="tui-input-row" id="command-form">
+                <label id="prompt-label" class="tui-prompt" for="command-input">/entrance $</label>
+                <input id="command-input" class="tui-input" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="go" placeholder="Type a command…">
+            </form>
+            <p id="inline-hint" class="inline-hint" aria-live="polite" hidden></p>
+        </div>
 
         <footer class="tui-footer">
             <span>Enter=run</span>

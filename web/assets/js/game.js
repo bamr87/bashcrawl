@@ -31,7 +31,17 @@
         hudMenu: document.getElementById("hud-menu"),
         hudMenuPanes: document.getElementById("hud-menu-panes"),
         storyMain: document.getElementById("mode-story"),
+        status: document.getElementById("status-strip"),
+        suggest: document.getElementById("suggest-row"),
+        inputDock: document.getElementById("input-dock"),
+        panelsToggle: document.getElementById("panels-toggle"),
     };
+
+    // The web sidebar leads with the quest (what to do) and the room (where
+    // you are); the companion panes start folded so the first screen is not
+    // a wall of eight panels. Saved layouts keep their own fold flags.
+    const WEB_PANE_ORDER = ["quest", "room", "pack", "lesson", "map", "skills", "hero", "spotlight"];
+    const WEB_PANES_FOLDED = ["skills", "hero", "spotlight"];
 
     const escapeHtml = window.TermForge.sinks.escapeHtml;
     // The shared presenter: every panel below renders a BashcrawlHud model,
@@ -41,7 +51,7 @@
         Hud.attachStore({
             load() { return window.BashcrawlStorage.loadKey(Hud.LAYOUT_KEY, {}); },
             save(value) { window.BashcrawlStorage.saveKey(Hud.LAYOUT_KEY, value); },
-        }, { dock: "left" });
+        }, { dock: "left", order: WEB_PANE_ORDER, collapsed: WEB_PANES_FOLDED });
     }
 
     const data = await loadData();
@@ -179,10 +189,8 @@
     append("banner", runtime.art("banner"));
     if (saveError) append("error", saveError);
     append("info", "Welcome to Bashcrawl Web.");
-    append("dim", "Try: pwd, ls -F, cat scroll, cd cellar  •  cat scroll | wc -l  •  hint, map, tree, cowsay hi  •  F1/Ctrl+/ for Docs.");
-    append("magic", "🎓  New to the terminal? The Learn tab (Alt+2) has guided courses with a practice lab — or type: learn");
-    append("magic", "🕹  Practice Arcade (Alt+3): Path Navigator · grep/find Hunt · Pipe Puzzle · Command Flash. Reference cheatsheets: Alt+4.");
-    append("dim", "In-story drills still work too:  train · speedrun · pathfind · explain. Everything earns XP.");
+    append("dim", "Try: pwd · ls -F · cat scroll · cd cellar  —  stuck? type hint  ·  F1 opens the Docs  ·  the chips under the log suggest what to type next.");
+    append("magic", "🎓  New to the terminal? The Learn tab (Alt+2) walks you through it.   🕹 Arcade (Alt+3) drills   📖 Reference (Alt+4) cheatsheets");
     if (runtime.state.trainer && runtime.state.trainer.active) {
         for (const out of runtime.trainerChallenge()) append(out.kind, out.text);
     }
@@ -204,31 +212,59 @@
         runLine(line);
     });
 
-    // Chips anywhere in the story section (sidebar panes, the lesson reader)
-    // run their command as if typed (data-run), drop a command into the prompt
-    // for the learner to press Enter on (data-fill), or switch modes
-    // (data-goto). Story and Learn only; focus always returns to the prompt.
-    if (dom.storyMain) {
-        dom.storyMain.addEventListener("click", (event) => {
-            if (nonStoryMode()) return;
-            const goto = event.target.closest("[data-goto]");
-            if (goto && window.BashcrawlShell) {
-                window.BashcrawlShell.setMode(goto.getAttribute("data-goto"));
-                return;
-            }
-            const run = event.target.closest("[data-run]");
-            if (run) {
-                runLine(run.getAttribute("data-run"));
-                dom.input.focus();
-                return;
-            }
-            const fill = event.target.closest("[data-fill]");
-            if (fill) {
-                dom.input.value = fill.getAttribute("data-fill") || "";
-                dom.input.focus();
-                dom.input.setSelectionRange(dom.input.value.length, dom.input.value.length);
-                bump(dom.form, "fx-submit", 320);
-            }
+    // Drop a command into the prompt for the learner to press Enter on.
+    function fillInput(command) {
+        dom.input.value = command || "";
+        dom.input.focus();
+        dom.input.setSelectionRange(dom.input.value.length, dom.input.value.length);
+        bump(dom.form, "fx-submit", 320);
+        if (window.BashcrawlShell && window.BashcrawlShell.renderInlineHint) window.BashcrawlShell.renderInlineHint();
+    }
+
+    // Chips anywhere in the story section (sidebar panes, the lesson reader),
+    // the suggestion row and the status strip run their command as if typed
+    // (data-run), fill the prompt (data-fill), or switch modes (data-goto).
+    // Story and Learn only; focus always returns to the prompt. On a small
+    // screen the sidebar is an overlay, so acting on a chip there closes it.
+    function chipClick(event) {
+        const goto = event.target.closest("[data-goto]");
+        if (goto && window.BashcrawlShell) {
+            window.BashcrawlShell.setMode(goto.getAttribute("data-goto"));
+            return;
+        }
+        const run = event.target.closest("[data-run]");
+        const fill = run ? null : event.target.closest("[data-fill]");
+        if (!run && !fill) return;
+        if (nonStoryMode()) {
+            if (!window.BashcrawlShell) return;
+            window.BashcrawlShell.setMode("story");
+        }
+        if (run) {
+            runLine(run.getAttribute("data-run"));
+            dom.input.focus();
+        } else {
+            fillInput(fill.getAttribute("data-fill"));
+        }
+        setPanels(false);
+    }
+    for (const root of [dom.storyMain, dom.inputDock, dom.status]) {
+        if (root) root.addEventListener("click", chipClick);
+    }
+
+    // Small screens: the story sidebar is hidden behind "☰ Panels" and opens
+    // as an overlay over the log (body[data-panels="open"], terminal.css).
+    function setPanels(open) {
+        if (!dom.panelsToggle) return;
+        const on = Boolean(open);
+        if (on) document.body.setAttribute("data-panels", "open");
+        else document.body.removeAttribute("data-panels");
+        dom.panelsToggle.setAttribute("aria-expanded", String(on));
+        dom.panelsToggle.textContent = on ? "✕ Close" : "☰ Panels";
+    }
+    if (dom.panelsToggle) {
+        dom.panelsToggle.addEventListener("click", () => setPanels(!document.body.hasAttribute("data-panels")));
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && document.body.hasAttribute("data-panels")) setPanels(false);
         });
     }
 
@@ -373,6 +409,7 @@
             } else if (event.type === "damage") {
                 shakePanel(dom.inventory);
                 applyHeroMood("hurt");
+                bump(dom.status && dom.status.querySelector(".ss-hp"), "fx-shake", 360);
 
             } else if (event.type === "heal") {
                 flashPanel(dom.inventory);
@@ -381,6 +418,9 @@
                 popXp();
                 floatXp(event.amount);
                 applyHeroMood("xp");
+                bump(dom.status && dom.status.querySelector(".ss-xp"), "fx-pop", 700);
+            } else if (event.type === "levelup") {
+                bump(dom.status && dom.status.querySelector(".ss-rank"), "fx-sparkle", 1100);
             } else if (event.type === "item") {
                 flashPanel(dom.inventory);
                 applyHeroMood("item");
@@ -400,8 +440,8 @@
             } else if (event.type === "skill") {
                 flashPanel(dom.skills);
             }
-            // "levelup" is already celebrated via the runtime's control record
-            // (flashLevelUp in this view's onControl).
+            // The full-screen "levelup" fanfare comes from the runtime's own
+            // control record; the strip's rank sparkle above is its echo.
         }
     }
 
@@ -470,6 +510,7 @@
             .filter(Boolean)
             .forEach((panel) => bump(panel, "is-refreshing", 220));
         recordVisit();
+        renderStatus();
         renderQuest();
         renderLesson();
         renderSkills();
@@ -478,6 +519,7 @@
         renderRoom();
         renderMap();
         renderPrompt();
+        renderSuggestions();
         renderLog();
         applyWebLayout();
         // Concept spotlight: surface what the current room teaches (reference.js).
@@ -535,6 +577,58 @@
             + `<p class="ql-group">Main Quests</p><ul class="ql-list">${mainRows}</ul>`
             + `<p class="ql-group">Side Quests</p><ul class="ql-list">${sideRows}</ul>`
             + `</details>`;
+    }
+
+    // The status strip: the hero at a glance, always on screen. Each item is
+    // a button that runs the command behind it (profile, quest, achievements,
+    // daily) — the strip is both readout and shortcut.
+    function renderStatus() {
+        if (!dom.status) return;
+        const st = Hud.statusModel(runtime);
+        const next = st.nextRank ? `${st.nextRank.remaining} XP to ${st.nextRank.title}` : "highest rank reached";
+        const hpClass = st.hp <= 25 ? " is-low" : st.hp <= 50 ? " is-mid" : "";
+        const item = (cls, run, title, inner) => (
+            `<button type="button" class="ss-item ${cls}" data-run="${escapeHtml(run)}" title="${escapeHtml(title)}">${inner}</button>`
+        );
+        const meter = (cls, pct, label) => (
+            `<span class="ss-bar ${cls}" role="img" aria-label="${escapeHtml(label)}"><span class="ss-bar-fill" style="--fill:${pct}"></span></span>`
+        );
+        const streak = st.streak
+            ? item(`ss-streak${st.dailyDone ? "" : " is-pending"}`, "daily",
+                st.dailyDone ? `Daily challenge done — ${st.streak}-day streak` : `Finish today's daily challenge to keep your ${st.streak}-day streak`,
+                `🔥 ${st.streak}`)
+            : "";
+        dom.status.innerHTML =
+            item("ss-rank", "profile", `Rank · Lv ${st.level} · profile for your character sheet`, `★ <span class="ss-rank-title">${escapeHtml(st.rank)}</span>`)
+            + item("ss-xp", "xp", next,
+                `${meter("ss-bar-xp", st.pct, `${st.pct}% of the way to the next rank`)}<span class="ss-text">${st.xp} XP</span><span class="ss-sub">${escapeHtml(next)}</span>`)
+            + item(`ss-hp${hpClass}`, "status", `Health ${st.hp}/${st.hpMax}`,
+                `${meter("ss-bar-hp", Math.round((st.hp / st.hpMax) * 100), `Health ${st.hp} of ${st.hpMax}`)}<span class="ss-text">♥ ${st.hp}</span>`)
+            + item("ss-quests", "quest", "Main quests complete · quest for the objective", `⚑ ${st.questsDone}/${st.questsTotal}`)
+            + item("ss-badges", "achievements", "Badges earned · achievements for the catalogue", `🏅 ${st.badges}/${st.badgeTotal}`)
+            + streak;
+    }
+
+    // Next-step chips above the prompt. Filling rather than running keeps
+    // the learner typing the command; the leading suggestion also becomes
+    // the prompt's placeholder so an empty input still points somewhere.
+    function renderSuggestions() {
+        if (!dom.suggest) return;
+        if (nonStoryMode()) {
+            dom.suggest.hidden = true;
+            return;
+        }
+        const rows = Hud.suggestionsModel(runtime);
+        if (!rows.length) {
+            dom.suggest.hidden = true;
+            dom.input.placeholder = "Type a command…";
+            return;
+        }
+        dom.suggest.innerHTML = `<span class="suggest-label">Try</span>` + rows.map((row) => (
+            `<button type="button" class="suggest-chip suggest-${row.kind}" data-fill="${escapeHtml(row.cmd)}" title="${escapeHtml(row.why)}">${escapeHtml(row.cmd)}</button>`
+        )).join("");
+        dom.suggest.hidden = false;
+        dom.input.placeholder = `e.g. ${rows[0].cmd}`;
     }
 
     function renderQuest() {
@@ -644,6 +738,22 @@
 
     function renderLog() {
         view.flush();
+        markCommandBlocks();
+    }
+
+    // The session echoes each command as a dim "/path $ cmd" line. Marking
+    // those lines lets CSS draw a rule above every command, so a long scroll
+    // reads as blocks instead of one unbroken column. Idempotent: a full
+    // repaint of the log (scrollback cap) simply gets marked again.
+    function markCommandBlocks() {
+        // Local on purpose: render() runs before this file's later consts exist.
+        const echo = /^(\/\S*\s\$)\s(.*)$/s;
+        dom.log.querySelectorAll("span.kind-dim:not(.is-cmd)").forEach((span) => {
+            const match = echo.exec(span.textContent);
+            if (!match) return;
+            span.classList.add("is-cmd");
+            span.innerHTML = `<span class="cmd-prompt">${escapeHtml(match[1])}</span> <span class="cmd-text">${escapeHtml(match[2])}</span>`;
+        });
     }
 
     function historyStep(direction) {
@@ -820,6 +930,10 @@
         getRuntime: () => runtime,
         saveAndRender,
         runLine,
+        fillInput,
+        // The shell calls this on a mode switch: the suggestion row hides
+        // while another mode owns the prompt and comes back with the story.
+        refreshChrome() { renderStatus(); renderSuggestions(); },
     };
     screenFlash("poweron");
     document.dispatchEvent(new CustomEvent("bashcrawl:ready", { detail: { data } }));

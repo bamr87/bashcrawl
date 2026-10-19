@@ -31,6 +31,13 @@
     --text-secondary: #5c4f3d;
     --text-muted: #8a7b68;
     --text-heading: #1a1008;
+    /* The dark palette's neon accents sit at ~1.6:1 on parchment; these
+       keep each hue but clear WCAG AA for text on every light surface. */
+    --accent-green: #15803d;
+    --accent-red: #b91c1c;
+    --accent-blue: #0e7490;
+    --accent-purple: #7e22ce;
+    --accent-yellow: #b45309;
 }
 
 *,

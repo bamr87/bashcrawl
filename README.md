@@ -21,7 +21,7 @@ Four doors:
 
 - **🎓 Learn** — guided courses beside a real terminal: the lesson on one side (click any `command` to drop it into the prompt), the shell on the other, every objective checked as you type. Each course seeds a lab of real files to practise on. Start here if the terminal is new to you.
 - **⚔ Story** — descend the dungeon. Quests guide you from `pwd` to pipes; hidden
-rooms reward `grep`, `find`, environment variables, and symbolic links. XP, achievements, a fog-of-war map, and a pixel hero cheer you on.
+rooms reward `grep`, `find`, environment variables, and symbolic links. XP, achievements, a fog-of-war map, and a pixel hero cheer you on. A status strip keeps your rank (and the XP to the next one), health, quests, badges and streak in view, and **next-step chips** under the log suggest what to type — tap one to drop it into the prompt.
 - **🕹 Practice Arcade** — timed mini-games on the same bash emulator:
   - **Path Navigator** — race through the real dungeon to a target room (`cd`/`ls`/`tree`).
   - **grep/find Hunt** — one file carries the sigil; track it down (`grep -r`, `find -name`, dotfiles).

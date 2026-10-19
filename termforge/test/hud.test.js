@@ -236,3 +236,97 @@ test("a saved layout from before the learning panes gains them, visible, in defi
     assert.equal(layout.panes.find((p) => p.id === "lesson").visible, true);
     assert.equal(layout.panes.find((p) => p.id === "map").visible, false);
 });
+
+// ── status strip + next-step suggestions ──────────────────────────────────
+
+test("statusModel reports rank progress, vitals, quests and only a live streak", () => {
+    const { runtime, hud } = createHudRuntime();
+    const ranks = runtime.catalog.ranks;
+    const fresh = hud.statusModel(runtime);
+    assert.equal(fresh.xp, 0);
+    assert.equal(fresh.rank, ranks[0].title);
+    assert.equal(fresh.rankIndex, 0);
+    // Spread: the model is built in the sandbox realm, so its prototype differs.
+    assert.deepEqual({ ...fresh.nextRank }, { title: ranks[1].title, min: ranks[1].min, remaining: ranks[1].min });
+    assert.equal(fresh.pct, 0);
+    assert.equal(fresh.hp, 100);
+    assert.equal(fresh.hpMax, 100);
+    assert.equal(fresh.questsDone, 0);
+    assert.equal(fresh.questsTotal, runtime.quests.length);
+    assert.equal(fresh.streak, 0);
+    assert.equal(fresh.badgeTotal, runtime.catalog.achievements.length);
+    runtime.execute("pwd");
+    const after = hud.statusModel(runtime);
+    assert.ok(after.xp > 0, "pwd earns XP");
+    assert.equal(after.questsDone, 1);
+    assert.ok(after.pct > 0 || after.rankIndex > 0, "progress toward the next rank moves");
+    // A streak shows while it is alive (done today, or yesterday with today open).
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-18", streak: 3, completed: true };
+    assert.equal(hud.statusModel(runtime).streak, 3);
+    assert.equal(hud.statusModel(runtime).dailyDone, true);
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-17", streak: 3, completed: false };
+    assert.equal(hud.statusModel(runtime).streak, 3, "yesterday's streak is still alive");
+    assert.equal(hud.statusModel(runtime).dailyDone, false);
+    runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-01", streak: 3, completed: false };
+    assert.equal(hud.statusModel(runtime).streak, 0, "a lapsed streak is not shown");
+    runtime.state.xp = 100000;
+    const top = hud.statusModel(runtime);
+    assert.equal(top.rank, ranks[ranks.length - 1].title);
+    assert.equal(top.nextRank, null);
+    assert.equal(top.pct, 100);
+});
+
+test("suggestionsModel leads with the quest's own command when it can run from here", () => {
+    const { runtime, hud } = createHudRuntime();
+    let rows = hud.suggestionsModel(runtime);
+    assert.equal(rows[0].kind, "quest");
+    assert.equal(rows[0].cmd, "pwd");
+    assert.ok(rows.some((r) => r.cmd === "cat scroll" && r.kind === "room"), "the room's essentials follow");
+    assert.ok(rows.length <= 6);
+    assert.equal(new Set(rows.map((r) => r.cmd)).size, rows.length, "no duplicate chips");
+    runtime.execute("pwd");
+    runtime.execute("ls");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "cd cellar");
+    runtime.execute("cd cellar");
+    rows = hud.suggestionsModel(runtime);
+    assert.equal(rows[0].cmd, "cat scroll");
+    assert.ok(rows.some((r) => r.cmd === "./treasure" && r.kind === "room"), "encounters in the room are offered");
+    runtime.execute("cat scroll");
+    // "Return to the entrance with 'cd ..', then use 'mkdir workshop'": the
+    // first step that can run from here leads, then the next one.
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "cd ..");
+    runtime.execute("cd ..");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "mkdir workshop");
+    runtime.execute("mkdir workshop");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "touch notes.txt");
+});
+
+test("suggestionsModel skips a quest command that cannot land here and adds the lesson's chips", () => {
+    const { runtime, hud } = createHudRuntime();
+    for (const line of ["pwd", "ls", "cd cellar", "cat scroll", "cd ..", "mkdir workshop", "touch notes.txt"]) runtime.execute(line);
+    // The grep quest is scoped to the cellar/armoury: at the entrance it is not offered.
+    assert.ok(!hud.suggestionsModel(runtime).some((r) => r.kind === "quest"), "grep is not suggested outside its rooms");
+    runtime.execute("cd cellar");
+    assert.equal(hud.suggestionsModel(runtime)[0].cmd, "grep magic scroll");
+    runtime.execute("learn navigator");
+    const rows = hud.suggestionsModel(runtime);
+    assert.ok(rows.some((r) => r.cmd === "cd /lab/navigator" && r.kind === "lesson"), "a lab elsewhere is one chip away");
+    assert.ok(rows.some((r) => r.cmd === "lesson hint" && r.kind === "lesson"));
+    assert.equal(rows[0].kind, "quest", "the quest still leads");
+});
+
+test("defaultLayout honours a surface's pane order and folded panes; saved flags survive", () => {
+    const { hud } = createHudRuntime();
+    const web = hud.defaultLayout({ dock: "left", order: ["quest", "room", "bogus", "quest"], collapsed: ["hero"] });
+    assert.deepEqual(web.panes.slice(0, 2).map((p) => p.id), ["quest", "room"]);
+    assert.equal(web.panes.length, hud.PANE_DEFS.length, "every pane is present exactly once");
+    assert.equal(web.panes.find((p) => p.id === "hero").collapsed, true);
+    assert.equal(web.panes.find((p) => p.id === "quest").collapsed, false);
+    const saved = { version: 1, dock: "left", panes: [{ id: "hero", visible: true, collapsed: false }, { id: "map", visible: false, collapsed: true }] };
+    const merged = hud.normalizeLayout(saved, { order: ["quest", "room"], collapsed: ["hero", "skills"] });
+    assert.deepEqual(merged.panes.slice(0, 2).map((p) => p.id), ["quest", "room"], "the surface's order applies to a saved layout");
+    assert.equal(merged.panes.find((p) => p.id === "hero").collapsed, false, "a saved fold flag wins");
+    assert.equal(merged.panes.find((p) => p.id === "skills").collapsed, true, "an unsaved pane takes the surface default");
+    assert.equal(merged.panes.find((p) => p.id === "map").visible, false);
+    assert.deepEqual(hud.defaultLayout().panes.map((p) => p.id), hud.PANE_DEFS.map((d) => d.id), "no overrides: definition order");
+});

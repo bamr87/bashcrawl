@@ -1750,7 +1750,11 @@ body[data-crt="on"] .tui-log {
 @media (max-width: 900px), (max-height: 700px) {
     .tui-content.fx-stage { grid-template-rows: minmax(0, 1fr); gap: 0; }
     .px-am.px-am-run { display: none; }
-    .tui-sidebar { max-height: 22dvh; }
+}
+/* The arcade keeps a short stacked sidebar on phones (its objective and run
+   stats); the story sidebar becomes the Panels overlay instead (below). */
+@media (max-width: 900px) {
+    #mode-arcade .tui-sidebar { max-height: 26dvh; }
 }
 
 /* The `hidden` attribute must always win, even over display rules above
@@ -2190,4 +2194,312 @@ body[data-crt="on"] .tui-log {
     }
     .learn-cards { grid-template-columns: 1fr; }
     .learn-reader h2 { font-size: 1.2rem; }
+}
+
+/* ============================================================
+   Hero status strip · next-step suggestions · command blocks ·
+   small-screen layout (Panels overlay, short prompt, one-line
+   footer) · light-theme legibility
+   ============================================================ */
+
+/* ── Status bar: the hero at a glance, under the header ── */
+.status-bar {
+    position: relative;
+    z-index: 15;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 38px;
+    padding: 0.3rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+.status-strip {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.status-strip::-webkit-scrollbar { display: none; }
+.ss-item {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.3;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+.ss-item:hover,
+.ss-item:focus-visible {
+    border-color: var(--accent-purple);
+    background: var(--bg-input);
+    color: var(--text-heading);
+    outline: none;
+}
+.ss-item.fx-pop { display: inline-flex; }
+.ss-rank { color: var(--accent-purple); font-weight: 700; }
+.ss-rank-title { font-family: var(--font-body); letter-spacing: 0.01em; }
+.ss-text { color: var(--text-primary); }
+.ss-sub { color: var(--text-muted); font-size: 0.72rem; }
+.ss-hp .ss-text { color: var(--accent-green); }
+.ss-hp.is-mid .ss-text { color: var(--accent-yellow); }
+.ss-hp.is-low .ss-text { color: var(--accent-red); }
+.ss-streak { color: var(--accent-yellow); }
+.ss-streak.is-pending {
+    color: var(--text-muted);
+    border-style: dashed;
+    border-color: var(--border-color);
+}
+.ss-bar {
+    display: inline-block;
+    width: 72px;
+    height: 7px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--bg-input);
+    overflow: hidden;
+    vertical-align: middle;
+}
+.ss-bar-fill {
+    display: block;
+    height: 100%;
+    width: calc(var(--fill, 0) * 1%);
+    border-radius: inherit;
+    background: var(--accent-purple);
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ss-bar-xp .ss-bar-fill { background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue)); }
+.ss-bar-hp .ss-bar-fill { background: var(--accent-green); }
+.ss-hp.is-mid .ss-bar-fill { background: var(--accent-yellow); }
+.ss-hp.is-low .ss-bar-fill { background: var(--accent-red); }
+.panels-toggle {
+    display: none;
+    flex: 0 0 auto;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+}
+
+/* ── Input dock: suggestion chips above the shared prompt ── */
+.tui-input-dock {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border-color);
+    background: #0b0b1f;
+}
+[data-theme="light"] .tui-input-dock { background: var(--bg-secondary); }
+.tui-input-dock .tui-input-row {
+    border-top: 0;
+    background: transparent;
+}
+.suggest-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.suggest-row::-webkit-scrollbar { display: none; }
+.suggest-label {
+    flex: 0 0 auto;
+    margin-right: 0.15rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.suggest-chip {
+    flex: 0 0 auto;
+    padding: 0.18rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--accent-yellow);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.3;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+.suggest-chip:hover,
+.suggest-chip:focus-visible {
+    border-color: var(--accent-yellow);
+    background: var(--bg-input);
+    transform: translateY(-1px);
+    outline: none;
+}
+.suggest-quest {
+    color: var(--accent-green);
+    border-color: color-mix(in srgb, var(--accent-green) 55%, var(--border-color));
+}
+.suggest-quest::before {
+    content: "◆ ";
+    font-size: 0.65em;
+    vertical-align: 0.18em;
+}
+.suggest-quest:hover,
+.suggest-quest:focus-visible { border-color: var(--accent-green); }
+.suggest-lesson { color: var(--accent-blue); }
+.suggest-lesson:hover,
+.suggest-lesson:focus-visible { border-color: var(--accent-blue); }
+.tui-input::placeholder { color: var(--text-muted); opacity: 0.8; }
+
+/* ── Command blocks in the log: a rule above each echoed command ── */
+.tui-log .kind-dim.is-cmd {
+    display: inline-block;
+    width: 100%;
+    margin-top: 0.6rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+}
+.tui-log .kind-dim.is-cmd:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+.tui-log .cmd-prompt { color: var(--accent-blue); font-weight: 700; }
+.tui-log .cmd-text { color: var(--text-heading); }
+
+/* ── Prompt label: full path, or the room's name on narrow screens ── */
+.prompt-short { display: none; }
+
+/* ── Reference: ▶ beside every command; spotlight cheats fill the prompt ── */
+.ref-cmd-cell { white-space: nowrap; }
+.ref-try {
+    margin-left: 0.3rem;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    line-height: 1.4;
+    cursor: pointer;
+    vertical-align: middle;
+    opacity: 0.75;
+    transition: color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+.ref-try:hover,
+.ref-try:focus-visible {
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+    opacity: 1;
+    outline: none;
+}
+.cheat-line code[data-fill] {
+    cursor: pointer;
+    border-bottom: 1px dotted currentColor;
+}
+.cheat-line code[data-fill]:hover { color: var(--accent-green); }
+
+/* ── Light theme: the darker accents need no glow ── */
+[data-theme="light"] .tui-log .kind-magic,
+[data-theme="light"] .tui-log .kind-success,
+[data-theme="light"] .kind-art,
+[data-theme="light"] .kind-banner { text-shadow: none; }
+[data-theme="light"] .map-tree .map-here { text-shadow: none; }
+
+/* ── Small screens ── */
+@media (max-width: 900px) {
+    .panels-toggle { display: inline-block; }
+
+    /* The story sidebar is hidden behind "☰ Panels" and opens as an overlay
+       over the log; the status strip and suggestion chips carry the
+       essentials meanwhile. (The arcade keeps its stacked sidebar.) */
+    #mode-story { grid-template-rows: minmax(0, 1fr); }
+    #mode-story .tui-sidebar { display: none; }
+    body[data-panels="open"] #mode-story .tui-sidebar,
+    body[data-panels="open"] #mode-story.layout-learn .tui-sidebar {
+        display: flex;
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        max-height: none;
+        padding-bottom: 1.5rem;
+        border: 0;
+        background: var(--bg-primary);
+        box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+    }
+
+    .tui-footer {
+        flex-wrap: nowrap;
+        gap: 0.75rem;
+        overflow: hidden;
+    }
+    .footer-mode-hint {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .status-bar { padding: 0.25rem 0.5rem; gap: 0.4rem; }
+    .ss-item { padding: 0.15rem 0.45rem; font-size: 0.76rem; }
+    .ss-sub { display: none; }
+    .ss-bar { width: 52px; }
+    .suggest-row { padding: 0.4rem 0.5rem 0; }
+    .tui-input-dock .tui-input-row { padding: 0.5rem; }
+
+    /* Keep the input wide: show "cellar $", not "/entrance/cellar $". */
+    .tui-prompt {
+        white-space: nowrap;
+        word-break: normal;
+        max-width: 40%;
+    }
+    .prompt-full { display: none; }
+    .prompt-short { display: inline; }
+
+    /* Touch keyboards have no Tab or arrows: the footer keeps the mode hint
+       and the repo link only. */
+    .tui-footer > span:not(#footer-mode-hint) { display: none; }
+    .tui-footer .tui-footer-link {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-break: normal;
+    }
+    /* A long rank title would push the vitals off the strip. */
+    .ss-rank-title {
+        display: inline-block;
+        max-width: 11ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: bottom;
+    }
+}
+
+@media (max-width: 480px) {
+    .mode-tab { font-size: 0.74rem; padding: 0.3rem 0.1rem; }
+    .mode-tab-icon { font-size: 0.9em; }
+    #crt-toggle { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ss-bar-fill,
+    .ss-item,
+    .suggest-chip,
+    .ref-try { transition: none; }
 }

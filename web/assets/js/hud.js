@@ -267,6 +267,138 @@
         };
     }
 
+    // ── Status strip + next-step suggestions ────────────────────────────────
+    // The one-line identity a surface can keep above the log: rank with
+    // progress toward the NEXT rank on the progression.yaml ladder (not the
+    // flat 200-XP level curve), vitals, quest count, badges and the streak.
+    function isoDayBefore(day) {
+        const t = Date.parse(`${day}T12:00:00Z`);
+        return Number.isFinite(t) ? new Date(t - 86400000).toISOString().slice(0, 10) : null;
+    }
+
+    function statusModel(runtime) {
+        const s = runtime.state;
+        const xp = s.xp || 0;
+        const ranks = list(runtime.catalog && runtime.catalog.ranks);
+        const rank = rankFor(xp, ranks);
+        const idx = Math.max(0, ranks.indexOf(rank));
+        const next = idx + 1 < ranks.length ? ranks[idx + 1] : null;
+        const floor = rank.min || 0;
+        const pct = next ? Math.max(0, Math.min(100, Math.round(((xp - floor) / (next.min - floor)) * 100))) : 100;
+        const quest = questModel(runtime);
+        const inv = inventoryModel(runtime);
+        const daily = s.daily && typeof s.daily === "object" ? s.daily : {};
+        const streak = Number(daily.streak) || 0;
+        // A streak only counts while it is alive: completed today, or yesterday
+        // with today still open (the daily plugin judges it the same way).
+        const live = Boolean(streak && daily.lastDate && daily.date
+            && (daily.lastDate === daily.date || daily.lastDate === isoDayBefore(daily.date)));
+        return {
+            rank: rank.title,
+            rankIndex: idx,
+            xp,
+            level: levelFor(xp).level,
+            nextRank: next ? { title: next.title, min: next.min, remaining: Math.max(0, next.min - xp) } : null,
+            pct,
+            hp: inv.hp,
+            hpMax: inv.hpMax,
+            questsDone: quest.mainDone,
+            questsTotal: quest.mainTotal,
+            streak: live ? streak : 0,
+            dailyDone: Boolean(daily.completed),
+            badges: list(s.achievements).length,
+            badgeTotal: runtime.catalog ? list(runtime.catalog.achievements).length : 0,
+            cwd: s.cwd,
+        };
+    }
+
+    // What to type next, as data: the active quest's own command when it can
+    // run from here, this room's encounters and essentials, and the lesson's
+    // hint. Rows are {cmd, why, kind}; a quest row, when present, leads.
+    const FILE_COMMANDS = new Set(["cat", "less", "head", "tail", "wc", "grep", "nl", "rev", "sort", "uniq", "file"]);
+
+    function quotedCommands(text) {
+        const out = [];
+        const re = /'([^']+)'/g;
+        let match;
+        while ((match = re.exec(String(text || "")))) out.push(match[1].trim());
+        return out;
+    }
+
+    function parentBasename(runtime, cwd) {
+        const parts = String(cwd || "").split("/").filter(Boolean);
+        return parts.length > 1 ? parts[parts.length - 2] : "";
+    }
+
+    // Would this command make sense typed in the current room? Objectives are
+    // prose, so the verb must be a real handler and its target must exist.
+    function canRunHere(runtime, cmd, entries) {
+        const words = cmd.split(/\s+/);
+        const base = words[0];
+        const table = runtime.handlers;
+        if (!base || (table && !Object.prototype.hasOwnProperty.call(table, base))) return false;
+        const last = words[words.length - 1];
+        const names = new Set(entries.map((e) => e.name));
+        if (base === "cd") {
+            if (words.length < 2) return true;
+            if (last === "..") return runtime.state.cwd !== ((runtime.world && runtime.world.root) || "/entrance");
+            return entries.some((e) => e.type === "dir" && e.name === last);
+        }
+        if (FILE_COMMANDS.has(base) && words.length > 1) return names.has(last);
+        if ((base === "mkdir" || base === "touch") && words.length > 1) return !names.has(last);
+        return true;
+    }
+
+    function questSuggestion(runtime, quest, entries) {
+        const quoted = quotedCommands(quest.objective);
+        // "use 'grep' … e.g. 'grep magic scroll'": keep the fuller example.
+        const full = quoted.filter((c) => !quoted.some((o) => o !== c && o.startsWith(c + " ")));
+        const where = quest.completion && quest.completion.location ? String(quest.completion.location).split("|") : null;
+        const landsRight = (cmd) => {
+            if (!where) return true;
+            const words = cmd.split(/\s+/);
+            const target = words[0] === "cd" && words[1]
+                ? (words[1] === ".." ? parentBasename(runtime, runtime.state.cwd) : words[1])
+                : runtime.basename(runtime.state.cwd);
+            return where.includes(target);
+        };
+        return full.find((cmd) => canRunHere(runtime, cmd, entries) && landsRight(cmd)) || null;
+    }
+
+    function suggestionsModel(runtime) {
+        const entries = runtime.entries(runtime.state.cwd, false);
+        const rows = [];
+        const seen = new Set();
+        const push = (cmd, why, kind) => {
+            const text = String(cmd || "").trim();
+            if (!text || seen.has(text)) return;
+            seen.add(text);
+            rows.push({ cmd: text, why: why || "", kind });
+        };
+        const quest = runtime.quests[runtime.state.currentQuestId];
+        if (quest) {
+            const cmd = questSuggestion(runtime, quest, entries);
+            if (cmd) push(cmd, quest.title, "quest");
+        }
+        // A running lesson is the learner's focus: its chips come before the
+        // room's, so the cap below never squeezes them out.
+        const lesson = lessonModel(runtime);
+        if (lesson.active && !lesson.complete) {
+            if (!String(runtime.state.cwd).startsWith(lesson.lab)) push(`cd ${lesson.lab}`, "your lesson's lab", "lesson");
+            push("lesson hint", `${lesson.course} · lesson ${lesson.n}`, "lesson");
+        }
+        for (const entry of entries) {
+            if (entry.type === "exec") push(`./${entry.name}`, "an encounter in this room", "room");
+        }
+        const meta = runtime.currentRoomMeta ? runtime.currentRoomMeta() : {};
+        for (const item of list(meta.essential_commands).slice(0, 3)) {
+            const cmd = typeof item === "string" ? item : item && item.command;
+            const why = typeof item === "string" ? "essential here" : (item && item.description) || "";
+            push(cmd, why, "room");
+        }
+        return rows.slice(0, 6);
+    }
+
     function roomModel(runtime) {
         const meta = runtime.currentRoomMeta();
         const vignette = roomVignette(runtime);
@@ -350,14 +482,20 @@
     ];
     const PANE_IDS = PANE_DEFS.map((pane) => pane.id);
 
+    // Surface defaults may lead with their own pane `order` (the rest follow
+    // in definition order) and start some panes `collapsed`; a saved layout
+    // keeps the surface's order and its own fold/visibility flags.
     function defaultLayout(overrides) {
         const extra = overrides || {};
+        const lead = list(extra.order).filter((id, i, arr) => PANE_IDS.includes(id) && arr.indexOf(id) === i);
+        const ids = lead.concat(PANE_IDS.filter((id) => !lead.includes(id)));
+        const folded = new Set(list(extra.collapsed));
         return {
             version: 1,
             dock: extra.dock === "left" || extra.dock === "right" ? extra.dock : "right",
             sidebar: extra.sidebar !== false,
             width: clampWidth(extra.width == null ? 30 : extra.width),
-            panes: PANE_DEFS.map((pane) => ({ id: pane.id, visible: true, collapsed: false })),
+            panes: ids.map((id) => ({ id, visible: true, collapsed: folded.has(id) })),
         };
     }
 
@@ -379,12 +517,12 @@
             dock: raw.dock === "left" || raw.dock === "right" ? raw.dock : base.dock,
             sidebar: raw.sidebar !== false,
             width: clampWidth(raw.width == null ? base.width : raw.width),
-            panes: PANE_DEFS.map((def) => {
+            panes: base.panes.map((def) => {
                 const prev = byId.get(def.id);
                 return {
                     id: def.id,
                     visible: prev && prev.visible === false ? false : true,
-                    collapsed: Boolean(prev && prev.collapsed),
+                    collapsed: prev ? Boolean(prev.collapsed) : def.collapsed,
                 };
             }),
         };
@@ -676,6 +814,8 @@
         questModel,
         inventoryModel,
         heroModel,
+        statusModel,
+        suggestionsModel,
         roomModel,
         lessonModel,
         skillsModel,

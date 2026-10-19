@@ -93,12 +93,17 @@
             }).join(" ");
             parts.push(`<div class="ref-chips" role="tablist" aria-label="Command categories">${chips}</div>`);
 
+            // One command cell everywhere: click the code to copy it, or ▶ to
+            // drop it into the Story prompt (BashcrawlShell.tryCommand).
+            const cmdCell = (cmd) => `<td class="ref-cmd-cell"><code class="ref-cmd" data-copy="${escapeHtml(cmd)}" title="Click to copy">${escapeHtml(cmd)}</code>`
+                + `<button type="button" class="ref-try" data-try="${escapeHtml(cmd)}" title="Try it in the Story terminal" aria-label="Try ${escapeHtml(cmd)} in the Story terminal">▶</button></td>`;
+
             // Command category cards
             for (const [key, category] of Object.entries(categories)) {
                 if (this.category !== "all" && this.category !== key) continue;
                 const rows = (category.commands || [])
                     .filter((c) => this.matches(c.command, c.description))
-                    .map((c) => `<tr><td><code class="ref-cmd" data-copy="${escapeHtml(c.command)}" title="Click to copy">${escapeHtml(c.command)}</code></td><td>${escapeHtml(c.description)}</td></tr>`)
+                    .map((c) => `<tr>${cmdCell(c.command)}<td>${escapeHtml(c.description)}</td></tr>`)
                     .join("");
                 if (!rows) continue;
                 parts.push(`<section class="ref-card">
@@ -113,7 +118,7 @@
                     const sections = (sheet.sections || []).map((section) => {
                         const items = (section.items || [])
                             .filter((i) => this.matches(i.cmd, i.desc))
-                            .map((i) => `<tr><td><code class="ref-cmd" data-copy="${escapeHtml(i.cmd)}" title="Click to copy">${escapeHtml(i.cmd)}</code></td><td>${escapeHtml(i.desc)}</td></tr>`)
+                            .map((i) => `<tr>${cmdCell(i.cmd)}<td>${escapeHtml(i.desc)}</td></tr>`)
                             .join("");
                         return items ? `<h4>${escapeHtml(section.title || "")}</h4><div class="ref-table-wrap"><table class="ref-table"><tbody>${items}</tbody></table></div>` : "";
                     }).filter(Boolean).join("");
@@ -154,6 +159,11 @@
             this.dom.content.querySelectorAll(".ref-cmd").forEach((el) => {
                 el.addEventListener("click", () => this.copy(el.dataset.copy, el));
             });
+            this.dom.content.querySelectorAll(".ref-try").forEach((el) => {
+                el.addEventListener("click", () => {
+                    if (global.BashcrawlShell && global.BashcrawlShell.tryCommand) global.BashcrawlShell.tryCommand(el.dataset.try);
+                });
+            });
         }
 
         copy(text, el) {
@@ -189,7 +199,9 @@
                     ? (SYNTAX_HINTS[cmd.split(" ")[0]] || [])[1]
                     : entry.description;
                 if (!cmd) return "";
-                return `<p class="cheat-line"><code>${escapeHtml(cmd)}</code>${note ? `<span class="kind-dim"> ${escapeHtml(note)}</span>` : ""}</p>`;
+                // data-fill: the story section's chip handler (game.js) drops
+                // the cheat into the prompt on click.
+                return `<p class="cheat-line"><code data-fill="${escapeHtml(cmd)}" title="Click to put this in the prompt">${escapeHtml(cmd)}</code>${note ? `<span class="kind-dim"> ${escapeHtml(note)}</span>` : ""}</p>`;
             }).join("");
             this.dom.spotlight.innerHTML = chipRow + cheatRows;
         }
