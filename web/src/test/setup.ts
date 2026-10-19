@@ -38,4 +38,8 @@ if (typeof window !== "undefined") {
     if (typeof Element.prototype.scrollIntoView !== "function") {
         Element.prototype.scrollIntoView = () => {};
     }
+    // jsdom has no canvas: FxCanvas treats a null context as "no effects".
+    if (typeof HTMLCanvasElement !== "undefined") {
+        HTMLCanvasElement.prototype.getContext = (() => null) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+    }
 }

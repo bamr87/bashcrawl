@@ -3,13 +3,18 @@
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
+import { bindUnlock } from "../audio/synth";
 import { ErrorBoundary } from "../chrome/ErrorBoundary";
 import { ShortcutsHelp } from "../chrome/ShortcutsHelp";
+import { SoundToggle } from "../chrome/SoundToggle";
 import { ThemeToggle } from "../chrome/ThemeToggle";
 import { Toaster } from "../chrome/Toaster";
 import { getPrefs, setPrefs, usePrefs } from "../chrome/prefs-store";
 import { setUi, toggleHelp } from "../chrome/ui-store";
+import { fxBus } from "../engine/fx-bus";
 import { game, useGame } from "../engine/game-store";
+import { FxCanvas } from "../fx/FxCanvas";
+import { ScreenFlash } from "../fx/ScreenFlash";
 import { installEffects } from "../fx/effects";
 import { HudMenu } from "../hud/HudMenu";
 import { StatusStrip } from "../hud/StatusStrip";
@@ -58,9 +63,16 @@ export function App() {
     const bootError = useGame((snap) => snap.error);
 
     useEffect(() => {
+        bindUnlock();
+        const off = installEffects();
         void game.boot();
-        return installEffects();
+        return off;
     }, []);
+
+    // A door change is a beat too.
+    useEffect(() => {
+        if (route.kind === "mode") fxBus.publish({ type: "mode", mode: route.mode });
+    }, [route]);
 
     // Escape closes the small-screen panels overlay from anywhere.
     useEffect(() => {
@@ -110,6 +122,7 @@ export function App() {
                 <button type="button" className="bc-btn" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock">HUD</button>
             )}
             <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+            <SoundToggle />
             <ThemeToggle />
         </>
     );
@@ -130,6 +143,8 @@ export function App() {
                 <AppShell mode={mode} actions={actions} status={status} dock={dock}>
                     {screen}
                 </AppShell>
+                <FxCanvas />
+                <ScreenFlash />
                 <Toaster />
                 <ShortcutsHelp />
                 {ready && <Pager />}
