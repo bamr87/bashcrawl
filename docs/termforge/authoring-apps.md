@@ -101,6 +101,24 @@ shell.vfs.addProvider({
 
 Provider files recompute on every read, list in their parent directory, take precedence over world/overlay entries under their prefix, and refuse writes — so `cat proc/uptime | rev` and `grep -r` work over live data with zero extra code.
 
+## Plugins: features in one call
+
+A pack is only commands. When a feature also needs hooks, event sinks, mounts, copy or saved state, ship it as a **plugin** ([docs/schemas/plugin.v1.md](../schemas/plugin.v1.md)) and install it with `shell.use(plugin)`:
+
+```js
+const shell = new TermForge.Shell({ world, packs: [TermForge.packs.posix] });
+shell.use(TermForge.explain.plugin({ docs: { meta: TermForge.packs.posix.meta } }));   // `explain`
+shell.use(TermForge.mastery.plugin({ skills, cards }));                                // `skills`, `review`
+shell.use(TermForge.curriculum.plugin({ courses }));                                  // `learn`, `lesson`, `lab`
+shell.events.on("lesson.completed", (e) => console.log(`${e.title} done`));
+```
+
+The learning platform is three such plugins, brand-neutral, so any app — a monitoring tool, an onboarding sandbox — can teach with courses, track skills and explain command lines.
+
+## Registering an app
+
+The node hosts resolve `--app ID` through `termforge/apps/registry.js`; adding an entry there is the whole registration (`--app list` prints the registry). A path still works for unregistered apps: `--app ./my-tool.js`.
+
 ## Hooks
 
 Subscribe app behavior on `shell.hooks` (full table in [architecture.md](architecture.md)). The two most useful for tools:

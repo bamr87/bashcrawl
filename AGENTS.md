@@ -7,8 +7,13 @@ Filesystem dungeon (`entrance/`) + static web trainer (`web/`) generated from th
 | Change | Edit here | Do not edit |
 |---|---|---|
 | Rooms, scrolls, encounters | `entrance/` + `src/help/data/*.yaml` | `web/data/*.json`, `docs/generated/` |
-| Emulator kernel | `termforge/core/` (dual-mode UMD+CJS) | `web/assets/js/vendor/termforge/` |
-| Game commands / HUD / arcade | `web/assets/js/runtime.js` (and siblings) | reimplement commands in arcade games |
+| Courses and lessons | `courses/<id>/` (`course.md`, `NN-lesson.md`, `lab/`) — see `docs/authoring-courses.md` | `web/data/courses.json` |
+| Badges, ranks, bestiary, arena trials, skills, review cards | `src/help/data/progression.yaml` (badges are TermForge rules) | JS literals — they are data now |
+| Emulator kernel + platform services | `termforge/core/` (dual-mode UMD+CJS, brand-neutral) | `web/assets/js/vendor/termforge/` |
+| Game features (arena, daily, …) | `web/assets/js/plugins/<id>.js` + `GAME_PLUGINS` in `runtime.js` + a `<script>` in `web/index.html` | a second copy of a command |
+| Game commands / HUD / arcade | `web/assets/js/runtime.js` (the manifest), `hud.js`, siblings | reimplement commands in arcade games |
+| Launcher | `bin/bashcrawl` (bash 3.2-compatible, shellcheck-clean) | |
+| TermForge apps | `termforge/apps/registry.js` (one entry per app) | if-chains in the hosts |
 | Playtest harness | `src/playtest/` | |
 
 `web/data/*.json` and the vendor mirror are **committed** projections. After content or `termforge/core/` changes: `make web-build` and commit the result. `make web-test` fails CI if they are stale.
@@ -28,6 +33,7 @@ make test                  # pytest unit + integration (cds into test/)
 make test-js               # node --test termforge/test/*.test.js
 make lint                  # shellcheck + yamllint + markdownlint + ruff
 make lint-js               # node --check on every tracked *.js
+make doctor                # bin/bashcrawl doctor — one [ OK ]/[WARN]/[CRIT] line per check
 make clean                 # bash lib/reset.sh — not git checkout
 ```
 
@@ -66,6 +72,14 @@ The filesystem **is** the game. Hidden areas ship as dotted dirs (`entrance/.cha
 - New encounter **basename** must be added to `ENCOUNTERS` in `setup.sh` or `./setup.sh` will not `chmod +x` it.
 - New room: directory + depth-graded `scroll` + chmod'd encounters + unlock `mv` in a treasure + `src/help/data/*.yaml` + `test/datasets/walkthrough.json` + `lib/reset.sh` if it can be unlocked. Then `make validate-contracts && make web-test`.
 - Scroll grades: entrance = pure ASCII / 80 cols / `===` dividers; cellar/armoury = Unicode OK; hidden areas = markdown OK. Details: `.github/instructions/scrolls.instructions.md` and `rooms.instructions.md`.
+
+## Learning platform gotchas
+
+- Every objective needs a `solution`; `termforge/test/courses.test.js` replays them from a fresh lab and fails if a lesson is unwinnable or already complete when it starts.
+- Course and lab files are tracked content: check `git check-ignore` (`*.tmp` is ignored repo-wide), and keep Markdown one paragraph per line (`python3 tools/unwrap-prose.py --check`).
+- `learn`/`mastery` save slices are owned by their plugins, which sanitize them on load — never trust their shape elsewhere.
+- Install order is hook order: curriculum, then the game plugins in `GAME_PLUGINS` order, then mastery and explain.
+- A fresh-clone run of the gate (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
 
 ## Web / TermForge gotchas
 

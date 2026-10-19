@@ -6,12 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A learning platform on every surface** (browser, `tty`, telnet). It's three brand-neutral TermForge plugins, and any TermForge app can install them:
+  - `learn` / `lesson` / `lab` (`termforge/core/curriculum.js`): courses of lessons whose objectives the game checks as you type real commands, each course with a writable lab under `/lab/<id>/`.
+  - `skills` / `review` (`termforge/core/mastery.js`): a skill map grown by every command you run (uses, distinct flags, failures), plus a Leitner-box spaced-repetition review of your weakest, most-due skills.
+  - `explain LINE` (`termforge/core/explain.js`): an offline, deterministic breakdown of any command line covering stages, decoded flags, what each argument resolves to, pipes, redirects, typo suggestions and destructive-command warnings. Plain `explain` explains the line you just ran.
+- **Five courses** in `courses/` (25 lessons, 70 objectives): Finding Your Way, Reading the Runes, The Pipeline Forge, The Artificer's Workshop, and Words of Power. Lessons are Markdown files with YAML frontmatter (`docs/authoring-courses.md`), compiled by `scripts/course_loader.py` into `web/data/courses.json`. `termforge/test/courses.test.js` plays every course from a fresh lab using only the authored solutions.
+- **Platform services in TermForge core:**
+  - typed events (`core/events.js`, the bashOS `events.py` contract)
+  - declarative rules (`core/rules.js`)
+  - feature plugins (`core/plugin.js`, `shell.use(plugin)`)
+  - a `promptLabel` hook
+  - schemas in `docs/schemas/{events,rules,plugin}.v1.md`
+- **`bin/bashcrawl`**: one dispatch table for `play`, `tty`, `serve`, `hub`, `web`, `courses`, `lab`, `doctor` and `reset`. It's plain bash and compatible with macOS bash 3.2. `doctor` (also `make doctor`) prints a verdict-style `[ OK ]`/`[WARN]`/`[CRIT]` line per check. `lab ID` copies a course's lab to `~/.bashcrawl/labs/ID` and never deletes learner work.
+- **Telnet hub mode** (`--hub`, `make telnet-hub`, `bashcrawl hub`) adds `who`, `say`, `emote`, `shout`, `name` and `top` across sessions, plus announcements of badges, lessons, ranks and room arrivals. Chat is sanitized of control and escape characters and rate-limited. It's opt-in, and the default server stays isolated.
+- **App registry** (`termforge/apps/registry.js`): hosts resolve `--app` through it, and `--app list` prints it.
+- **HUD `lesson` and `skills` panes** on the web and terminal sidebars, with `lesson`/`objective`/named `skill` events (toasts in the terminal, panel flashes on the web) and command chips on the web.
+- Four learning badges: Student, Polymath, Keeper of Cards and Graduate.
+
 ### Changed
+
+- **The game runtime is now plugins over data.** The arena, pathfind, daily, achievements, progress and bestiary moved from the `runtime.js` monolith into `web/assets/js/plugins/`. Ranks, achievements (now rules instead of lambdas), the bestiary, the arena trials, the skill map and review cards live in `src/help/data/progression.yaml`, which the content contracts validate. The golden transcripts were unchanged by the split itself.
+- The save shape gains `learn` and `mastery` slices at the end. The change is additive: older saves load with defaults, and the plugins sanitize both slices on load.
+- `help` and the `commands` deck advertise the learning platform.
 
 - **Relicensed from MIT to GPL-3.0-only.** Bashcrawl is a derivative of [Seth Kenlon's original bashcrawl](https://gitlab.com/slackermedia/bashcrawl), which is distributed under the GNU GPL v3 (no "or later" grant), so the whole repository now uses the same terms. `LICENSE` is the unmodified GPLv3 text from gnu.org; a new `NOTICE` file credits the upstream author and contributors, records the derivation, and reproduces the MIT notices of the bundled third-party code (simplex-noise, ASCII Motion). `package.json`, `pyproject.toml` and the README badge/sections now say `GPL-3.0-only`.
 
 ### Fixed
 
+- **The emulator now counts lines like real tools.** A file's final newline used to count as an extra empty line, so `wc -l` was off by one, `sort` emitted a blank first line, and `tail -n 2` lost a real line. These commands now match bash: `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `cut`, `sed`, `nl` and `rev`.
+- `cp file dir` and `mv x dir` now land inside the directory (cp used to replace the directory with a file), a moved directory takes its contents with it, and `find /abs` and `find sub` print paths from the start argument like `find(1)`.
+- The arena no longer crashes when no trials are loaded. A save whose arena run points past the loaded trials is dropped.
+- `.gitignore` no longer ignores every `workshop/` directory, only the dungeon's player-created ones.
 - **Web trainer: encounters in revealed rooms now run.** After a reveal (e.g.
   the cellar amulet opening `chapel/`), `file <encounter>` reported
   `ASCII art / scroll` and `./<encounter>` failed with `No runnable script`

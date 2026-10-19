@@ -10,6 +10,8 @@ Learn terminal commands by exploring a fantasy dungeon. Directories are rooms, f
 - [Advanced Topics](advanced.md) — Hidden areas, scripting encounters, and scroll standards
 - [Contributing](contributing.md) — How to add rooms, write scrolls, and submit changes
 - [Improvement Plan](improvement-plan.md) — Known issues and planned enhancements
+- [The Bashcrawl Platform](PLATFORM.md) — The layers, the learning loop, and how it aligns with bashOS and chui
+- [Authoring Courses](authoring-courses.md) — Write a course: Markdown lessons, rule objectives, a lab
 - [TermForge Architecture](termforge/architecture.md) — The universal terminal framework under the web game
 - [Authoring TermForge Apps](termforge/authoring-apps.md) — Build your own terminal tools on the framework
 - [Telnet Host](termforge/telnet-host.md) — Serve the game or your tools over lightweight telnet/TCP
@@ -24,3 +26,5 @@ cd entrance && cat scroll
 ```
 
 Prefer the browser? Run `make web-preview` (or open `web/index.html`) to play the static web trainer.
+
+Or use the launcher: `bin/bashcrawl play` (classic), `bin/bashcrawl tty` (full-screen HUD), `bin/bashcrawl courses` (the learning platform), `bin/bashcrawl doctor` (what this machine can run).
