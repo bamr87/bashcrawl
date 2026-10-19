@@ -149,6 +149,11 @@ jobs:
   # Shared fleet gate (UPS-QA-20), pinned per UPS-WORK-10. It runs beside the
   # repo-specific jobs above, not instead of them: standard-ci only detects
   # root-level manifests (bamr87/bamr87#329), so it does not cover this repo's
-  # real test suite.
+  # real test suite. Node 24 rather than the hub default of 20: the manifest
+  # declares engines >= 22.22, and Node 20's npm 10 crashes resolving the
+  # always-latest ranges ("Cannot read properties of null (reading
+  # 'edgesOut')") before any script runs; npm 11 resolves them.
   standard:
     uses: bamr87/bamr87/.github/workflows/standard-ci.yml@v2
+    with:
+      node-version: "24"
