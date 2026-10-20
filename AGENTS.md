@@ -11,7 +11,7 @@ Filesystem dungeon (`entrance/`) + browser trainer (`web/`: a React + Vite app i
 | Badges, ranks, bestiary, arena trials, skills, review cards | `src/help/data/progression.yaml` (badges are TermForge rules) | JS literals — they are data now |
 | Emulator kernel + platform services | `termforge/core/` (dual-mode UMD+CJS, brand-neutral) | `web/assets/js/vendor/termforge/` |
 | Game features (arena, daily, …) | `web/assets/js/plugins/<id>.js` + `GAME_PLUGINS` in `runtime.js` + a `<script>` in `web/index.html` | a second copy of a command |
-| Game commands / presenter models / arcade games | `web/assets/js/runtime.js` (the manifest), `hud.js` (models both renderers read), `arcade.js` (`GAMES`) | reimplement commands in arcade games; turn an engine file into an ES module |
+| Game commands / presenter models / arcade games | `web/assets/js/runtime.js` (the manifest), `hud.js` (models both renderers read), `arcade.js` (`GAMES`), `vim.js` (the Vim Catacombs' editor) | reimplement commands in arcade games; turn an engine file into an ES module |
 | Web UI (screens, HUD panes, effects, sound) | `web/src/` — React + TypeScript; tokens in `web/src/styles/tokens.css`, reactions in `web/src/fx/effects.ts`, sounds in `web/src/audio/sfx.ts` | colour literals or `z-index` numbers outside `tokens.css`; touching the log's children (a DomSink paints it) |
 | Launcher | `bin/bashcrawl` (bash 3.2-compatible, shellcheck-clean) | |
 | TermForge apps | `termforge/apps/registry.js` (one entry per app) | if-chains in the hosts |

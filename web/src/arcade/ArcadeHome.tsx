@@ -1,4 +1,5 @@
-// The arcade floor: four trials as cards, and the Command Flash decks.
+// The arcade floor: five trials as cards, the Command Flash decks and the
+// Vim Catacombs levels (a chip per level; cleared ones are marked).
 import { motion } from "motion/react";
 
 import type { ArcadeStore } from "./arcade-store";
@@ -7,11 +8,13 @@ import { useArcade } from "./arcade-store";
 export function ArcadeHome({ store }: { store: ArcadeStore }) {
     useArcade((snap) => snap.version, store);
     const flashDecks = (store.data?.arcade.flash_decks ?? []).slice(0, 12);
+    const vimLevels = store.data?.arcade.vim_levels ?? [];
+    const vimCleared = store.records.games.vim?.cleared ?? [];
     return (
         <div className="bc-arcade-home">
             <header className="bc-arcade-intro">
                 <h2 className="bc-display">Practice Arcade</h2>
-                <p className="bc-muted">Four trials, one real bash kernel. Scores feed your story XP.</p>
+                <p className="bc-muted">Five trials — four on one real bash kernel, one in a vim buffer. Scores feed your story XP.</p>
             </header>
             <div className="bc-arcade-grid">
                 {store.games.map((gameDef, i) => {
@@ -38,6 +41,28 @@ export function ArcadeHome({ store }: { store: ArcadeStore }) {
                     );
                 })}
             </div>
+            {vimLevels.length > 0 && (
+                <section className="bc-arcade-decks" aria-label="Vim Catacombs levels">
+                    <p className="bc-group-label">Vim Catacombs levels</p>
+                    <p className="bc-chips">
+                        {vimLevels.map((level, i) => {
+                            const done = vimCleared.includes(level.id);
+                            return (
+                                <button
+                                    key={level.id}
+                                    type="button"
+                                    className={`bc-chip${done ? " bc-chip-on" : ""}`}
+                                    onClick={() => store.start("vim", level.id)}
+                                    title={level.brief}
+                                    aria-label={`Level ${i + 1}: ${level.title}${done ? ", cleared" : ""}`}
+                                >
+                                    {i + 1} · {level.title}{done ? " ✓" : ""}
+                                </button>
+                            );
+                        })}
+                    </p>
+                </section>
+            )}
             {flashDecks.length > 0 && (
                 <section className="bc-arcade-decks" aria-label="Command Flash decks">
                     <p className="bc-group-label">Command Flash decks</p>

@@ -349,7 +349,48 @@ def build_arcade() -> dict[str, Any]:
         "pipe_puzzles": arcade.get("pipe_puzzles") or [],
         "hunt_scenarios": arcade.get("hunt_scenarios") or [],
         "flash_decks": decks,
+        "vim_levels": _validate_vim_levels(arcade.get("vim_levels") or []),
     }
+
+
+def _validate_vim_levels(levels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The Vim Catacombs levels: a buffer is the map, so a malformed one
+    (non-ASCII, too wide, a cursor off the map, nothing to win) is a content
+    bug the build must refuse rather than ship."""
+    seen: set[str] = set()
+    for level in levels:
+        ident = str(level.get("id") or "")
+        if not ident or ident in seen:
+            raise SystemExit(f"arcade.yaml vim_levels: missing or duplicate id {ident!r}")
+        seen.add(ident)
+        lines = level.get("lines")
+        if not isinstance(lines, list) or not lines or not all(isinstance(ln, str) for ln in lines):
+            raise SystemExit(f"vim level {ident}: lines must be a non-empty list of strings")
+        for line in lines:
+            if not line.isascii() or len(line) > 40:
+                raise SystemExit(
+                    f"vim level {ident}: lines must be ASCII and at most 40 columns: {line!r}"
+                )
+        row, col = level.get("cursor") or [0, 0]
+        if not (0 <= row < len(lines)) or not (0 <= col <= max(0, len(lines[row]) - 1)):
+            raise SystemExit(f"vim level {ident}: cursor {level.get('cursor')} is off the map")
+        if not isinstance(level.get("keys"), list):
+            raise SystemExit(f"vim level {ident}: keys must be a list")
+        if not isinstance(level.get("par"), int) or level["par"] <= 0:
+            raise SystemExit(f"vim level {ident}: par must be a positive integer")
+        if not isinstance(level.get("solution"), list) or not level["solution"]:
+            raise SystemExit(f"vim level {ident}: solution must be a non-empty list of runs")
+        target = level.get("target")
+        if target is not None and (
+            not isinstance(target, list) or not all(isinstance(t, str) for t in target)
+        ):
+            raise SystemExit(f"vim level {ident}: target must be a list of strings")
+        if target is None and not any("*" in line for line in lines):
+            raise SystemExit(f"vim level {ident}: nothing to win — no gems and no target")
+        for field in ("title", "brief", "hint"):
+            if not level.get(field):
+                raise SystemExit(f"vim level {ident}: missing {field}")
+    return levels
 
 
 def build_docs() -> dict[str, Any]:

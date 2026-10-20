@@ -6,6 +6,13 @@ export interface InputTarget {
     execute(line: string): void;
     /** A chance to answer a line with a screen instead (`journal`, `menu`); true when taken. */
     intercept?(line: string): boolean;
+    /**
+     * A raw key, before the prompt handles it: a modal trial (the Vim
+     * Catacombs) reads keys as they are pressed. The prompt's current text
+     * comes along so a `:` or `/` line being typed is left alone. True when
+     * the key was consumed.
+     */
+    keystroke?(key: string, promptValue: string): boolean;
     /** Whether an empty Enter means something (the arcade uses it to return home). */
     acceptsEmpty(): boolean;
     /** ↑ (-1) / ↓ (+1) through history; null when there is none. */

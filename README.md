@@ -27,6 +27,7 @@ rooms reward `grep`, `find`, environment variables, and symbolic links. XP, achi
   - **grep/find Hunt** — one file carries the sigil; track it down (`grep -r`, `find -name`, dotfiles).
   - **Pipe Puzzle** — forge a pipeline that turns INPUT into TARGET (`sort | uniq -c | head`…).
   - **Command Flash** — rapid-fire "which command?" drills, generated from the game's own reference data.
+  - **Vim Catacombs** — VIM Adventures-style levels on a real vim buffer: the buffer is the map, `*` gems are taken by resting the cursor on them, `!` spikes cost hearts, and the keys unlock level by level (`h j k l` → `w b e` → `0 ^ $` → counts → `gg G` → `f t ; ,` → `x` → `dd` → `dw D` → `p P yy` → insert mode → `/ n N` → a gauntlet). Keys go straight to the buffer; `:q`, `:help` and `/text` work as in vim. Score is keystrokes against par.
 
   Scores persist, bests are tracked, and every win feeds XP back to your story hero.
 - **📖 Reference** — searchable cheatsheets for every command the dungeon teaches,
@@ -118,7 +119,7 @@ Python (3.10+) is only needed for the web export and the playtest harness: `pip 
 2. Keep the registries in `src/help/data/*.yaml` in sync — they drive the help
    system, the web app, and the docs.
 3. Arcade content lives in `src/help/data/arcade.yaml` (pipe puzzles, hunts,
-   flashcard decks); Command Flash also auto-generates decks from `commands.yaml`.
+flashcard decks, vim levels); Command Flash also auto-generates decks from `commands.yaml`. Every vim level carries a `solution` that `make test-js` plays — it must win at exactly `par`.
 4. `make validate-contracts && make web-test` — CI enforces both.
 
 ### Playtesting with an AI agent

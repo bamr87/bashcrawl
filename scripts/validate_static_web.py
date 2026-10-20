@@ -95,6 +95,7 @@ def validate() -> dict:
         "assets/js/fx.js",
         "assets/js/art-clips.js",
         "assets/js/ambient.js",
+        "assets/js/vim.js",
         "assets/js/arcade.js",
         "data/world.json",
         "data/quests.json",
@@ -176,7 +177,7 @@ def validate() -> dict:
 
     if (WEB / "data/arcade.json").is_file():
         arcade = json.loads(_read(WEB / "data/arcade.json"))
-        for key in ("pipe_puzzles", "hunt_scenarios", "flash_decks"):
+        for key in ("pipe_puzzles", "hunt_scenarios", "flash_decks", "vim_levels"):
             if not arcade.get(key):
                 errors.append(f"arcade.json missing or empty: {key}")
         for puzzle in arcade.get("pipe_puzzles", []):

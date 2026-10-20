@@ -294,6 +294,10 @@ function onEvent(event: FxEvent): void {
         case "award":
             applyReactions(event.events, false);
             break;
+        case "key":
+            play("key");
+            applyReactions(event.events, event.error);
+            break;
         case "celebrate":
             if (allowed().flash) flash("magic");
             if (allowed().shake) addTrauma(0.1);
