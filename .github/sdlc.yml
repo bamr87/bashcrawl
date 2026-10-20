@@ -1,0 +1,36 @@
+# kit: sdlc v0.1.0 — the repo's SDLC declaration (UPS-WORK-01). Lands at .github/sdlc.yml.
+# Contract: templates/sdlc/sdlc.schema.json in bamr87/bamr87 (validated by the conformance check).
+# The hub registry (_data/projects.yml `sdlc:` block) may mirror these keys; when both exist,
+# this file wins.
+schema: sdlc/v1
+
+# Repo type (decision D6): app | library | site | docs | demo | control-plane | fork
+type: app
+# UPS kinds the specs apply to. Omit to use the type's default:
+#   app -> [app]   library -> [lib]   site -> [site]   docs -> [content]
+#   demo -> [site]   control-plane -> [site, hub]   fork -> [fork]
+# List more when the repo is several things at once, e.g. [app, api] or [lib, cli].
+kinds: [app]
+tier: active              # active | maintenance | experiment | archived (hub _data/standards.yml)
+
+backlog:
+  mode: issues            # issues (default, decision D1) | file
+  # file: BACKLOG.md      # required when mode is file: BACKLOG.md (spec-driven) or _data/backlog.yml
+  mirror_to_issues: false # file mode only: a sync job keeps one issue per open item
+
+# Optional modules. Always a map of name -> true/false (never a list).
+modules:
+  spec_driven: false      # specs/NNN-slug/{spec,plan,tasks}.md + BACKLOG.md + the hub's spec-driven kit tools
+  adr: true               # decision log at adr_path (UPS-WORK-04)
+  features: true          # features/features.yml (features/v1)
+  issue_autopilot: false  # .issues/ (hub templates/issue-autopilot)
+  content_queue: false    # _data/backlog.yml content queue (content-queue/v1), NOT the engineering backlog
+  ai_lanes: false         # fleet.manifest.yml + <LANE>_ENABLED kill switches
+
+adr_path: docs/adr        # where ADRs live: NNNN-slug.md + README.md index (decision D2)
+
+release:
+  type: node            # release-please release-type: simple | node | python | ruby (decision D5)
+
+# Waived requirements, each also listed in AGENTS.md § Standard deviations.
+deviations: []            # - { id: UPS-WORK-07, reason: "…", until: "2027-01-01" }   # quote the date
