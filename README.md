@@ -119,8 +119,7 @@ Python (3.10+) is only needed for the web export and the playtest harness: `pip 
 2. Keep the registries in `src/help/data/*.yaml` in sync — they drive the help
    system, the web app, and the docs.
 3. Arcade content lives in `src/help/data/arcade.yaml` (pipe puzzles, hunts,
-   flashcard decks, vim levels); Command Flash also auto-generates decks from `commands.yaml`.
-   Every vim level carries a `solution` that `make test-js` plays — it must win at exactly `par`.
+flashcard decks, vim levels); Command Flash also auto-generates decks from `commands.yaml`. Every vim level carries a `solution` that `make test-js` plays — it must win at exactly `par`.
 4. `make validate-contracts && make web-test` — CI enforces both.
 
 ### Playtesting with an AI agent
