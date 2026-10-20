@@ -6,7 +6,6 @@ schema: sdlc/v1
 
 # Repo type (decision D6): app | library | site | docs | demo | control-plane | fork
 type: app
-# UPS kinds the specs apply to. Omit to use the type's default:
 #   app -> [app]   library -> [lib]   site -> [site]   docs -> [content]
 #   demo -> [site]   control-plane -> [site, hub]   fork -> [fork]
 # List more when the repo is several things at once, e.g. [app, api] or [lib, cli].
