@@ -119,7 +119,7 @@ bash lib/reset.sh          # Execute
 
 ### Shell Script Standards
 - `#!/usr/bin/env bash` shebang for all executables
-- Infrastructure scripts (`setup.sh`, `help.sh`, `lib/*.sh`) use `set -euo pipefail`, `readonly` vars, shared color constants from `lib/colors.sh`, structured logging via `lib/log.sh`
+- Infrastructure scripts (`setup.sh`, `help.sh`, `lib/*.sh`) use `set -euo pipefail`, `readonly` vars, shared color constants from `lib/colors.sh`, structured logging via `lib/log.sh` — except `lib/playrc.sh`, the interactive rcfile of `bashcrawl play`, where strict mode would break the player's shell
 - Game executables: no strict mode, plain text output, **NEVER modify git-tracked files**
 - macOS compatibility: `sed -i.bak` instead of `sed -i`, avoid GNU-specific flags
 - Auto-detect `ls` color: `${LS_COLOR_FLAGS[@]}` array set at script init (GNU `--color=auto` vs macOS `-G`)

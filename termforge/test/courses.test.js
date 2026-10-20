@@ -130,4 +130,64 @@ test("an imported save cannot smuggle bad course progress past the curriculum", 
     runtime.state = { ...runtime.state, learn: { active: null, progress: {}, completed: ["navigator", "navigator", "ghost"] } };
     run("learn");
     assert.deepStrictEqual(Array.from(runtime.state.learn.completed), []);
+    // So is `complete` without every lesson earned.
+    const navigator = bundle.courses.find((c) => c.id === "navigator");
+    const some = navigator.lessons.slice(0, 2).map((l) => l.id);
+    runtime.state = { ...runtime.state, learn: { active: null, progress: { navigator: { lesson: 4, met: [], done: some, complete: true } }, completed: ["navigator"] } };
+    run("learn");
+    assert.equal(runtime.state.learn.progress.navigator.complete, false);
+    assert.deepStrictEqual(Array.from(runtime.state.learn.completed), []);
+});
+
+test("skipping lessons defers them: a course completes, and pays, only once every lesson is earned", () => {
+    const { runtime, run } = boot();
+    const course = bundle.courses.find((c) => c.id === "navigator");
+    run(`learn ${course.id}`);
+    const xp0 = runtime.state.xp;
+    const badges0 = (runtime.state.achievements || []).length;
+    const progress = () => runtime.state.learn.progress[course.id];
+    for (let i = 0; i < course.lessons.length - 1; i += 1) assert.match(run("lesson skip").join("\n"), /Skipped[\s\S]*Next up/);
+    const wrapped = run("lesson skip").join("\n");
+    assert.match(wrapped, /Skipped[\s\S]*5 lessons are still to be earned — Lesson 1\/5/);
+    assert.equal(progress().complete, false);
+    assert.equal(progress().lesson, 0, "back to the first lesson still unearned");
+    assert.deepStrictEqual(Array.from(runtime.state.learn.completed), []);
+    assert.equal(runtime.state.xp, xp0, "skipping pays nothing — not even the course bonus");
+    assert.equal((runtime.state.achievements || []).length, badges0, "and unlocks nothing");
+    // Earn lesson 2 out of order: the pointer moves forward past it, never back onto an earned lesson.
+    run("lesson skip");
+    assert.equal(progress().lesson, 1);
+    run(`cd /lab/${course.id}`);
+    for (const obj of course.lessons[1].objectives) run(obj.solution);
+    assert.deepStrictEqual(Array.from(progress().done), [course.lessons[1].id]);
+    assert.equal(progress().lesson, 2);
+    // Earning the rest in the order the course now serves them (3, 4, 5, then
+    // back to the skipped 1) finishes the course for real.
+    const served = [];
+    for (let guard = 0; !progress().complete && guard < course.lessons.length; guard += 1) {
+        served.push(progress().lesson + 1);
+        for (const obj of course.lessons[progress().lesson].objectives) run(obj.solution);
+    }
+    assert.deepStrictEqual(served, [3, 4, 5, 1]);
+    assert.equal(progress().complete, true);
+    assert.deepStrictEqual(Array.from(runtime.state.learn.completed), [course.id]);
+    assert.ok(runtime.state.xp > xp0);
+});
+
+test("resuming a course or typing `lab` never undoes the learner's work; only `lab reset` re-seeds", () => {
+    const { runtime, run } = boot();
+    run("learn workshop");
+    run("cd /lab/workshop");
+    run("rm inbox/junk.old");
+    run("mv inbox/report-draft.txt inbox/report.txt");
+    assert.match(run("lab").join("\n"), /Lab: \/lab\/workshop/);
+    assert.equal(runtime.readFile("/lab/workshop/inbox/junk.old"), null, "`lab` did not resurrect a removed file");
+    run("learn quit");
+    run("learn workshop");
+    assert.equal(runtime.readFile("/lab/workshop/inbox/junk.old"), null, "resuming did not either");
+    assert.equal(runtime.readFile("/lab/workshop/inbox/report-draft.txt"), null, "a rename stays renamed");
+    assert.ok(runtime.readFile("/lab/workshop/inbox/report.txt"));
+    assert.match(run("lab reset").join("\n"), /Lab restored/);
+    assert.ok(runtime.readFile("/lab/workshop/inbox/junk.old"));
+    assert.equal(runtime.readFile("/lab/workshop/inbox/report.txt"), null);
 });

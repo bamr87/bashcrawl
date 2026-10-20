@@ -145,6 +145,7 @@ mv ../../.chapel ../../chapel   # Unlock a hidden room (target may be 2+ levels 
 - All executables use `#!/usr/bin/env bash`.
 - **Infrastructure** scripts (`setup.sh`, `help.sh`, `lib/*.sh`) use `set -euo pipefail`,
   shared color constants from `lib/colors.sh`, structured logging via `lib/log.sh`.
+- `lib/playrc.sh` is the one exception: it is the rcfile `bashcrawl play` sources into the player's interactive shell, where strict mode would break the game itself.
 - **Game executables** use no strict mode, emit plain text, never modify tracked files.
 - macOS compatibility: use `sed -i.bak` (not bare `sed -i`); auto-detect `ls` color flags.
 - `.shellcheckrc` disables a number of checks; the lint job shellchecks all `*.sh` plus

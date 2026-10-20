@@ -139,6 +139,39 @@ test("rules evaluate state, command context and filesystem heads", () => {
     assert.strictEqual(rules.evaluate({ command: "ls" }, { state }), false);
 });
 
+test("rules: a list on any string head means 'any of', and validate agrees with evaluate", () => {
+    const shell = makeShell();
+    const ctx = { state: { cwd: "/lab" }, cmd: "grep", args: ["-rn", "beta", "notes.txt"], outputs: [{ kind: "output", text: "notes.txt:2:beta" }], shell };
+    const yes = [
+        { args_contains: ["alpha", "beta"] }, { option: ["z", "n"] }, { output_includes: ["nope", "beta"] },
+        { file_exists: ["missing", "notes.txt"] }, { dir_exists: ["nope", "vault"] },
+        { file_contains: ["missing", "notes.txt"], text: "alpha" },
+    ];
+    for (const rule of yes) {
+        assert.deepStrictEqual(rules.validate(rule), [], JSON.stringify(rule));
+        assert.strictEqual(rules.evaluate(rule, ctx), true, JSON.stringify(rule));
+    }
+    assert.strictEqual(rules.evaluate({ output_includes: ["nope", "zilch"] }, ctx), false);
+    assert.strictEqual(rules.evaluate({ file_exists: ["missing", "also-missing"] }, ctx), false);
+});
+
+test("rules: command heads are unknown outside a command context, so `not` cannot hand out a free pass", () => {
+    const shell = makeShell();
+    const lineCtx = { state: { cwd: "/lab/vault" }, line: "pwd", shell };
+    const cmdCtx = { ...lineCtx, cmd: "pwd", args: [], outputs: [] };
+    assert.strictEqual(rules.evaluate({ not: { command: "cd" } }, cmdCtx), true);
+    assert.strictEqual(rules.evaluate({ not: { command: "cd" } }, lineCtx), false);
+    assert.strictEqual(rules.evaluate({ all: [{ cwd: "/lab/vault" }, { not: { command: "cd" } }] }, lineCtx), false);
+    assert.strictEqual(rules.evaluate({ piped: false }, lineCtx), false);
+    assert.strictEqual(rules.evaluate({ ok: true }, lineCtx), false);
+    assert.strictEqual(rules.evaluate({ not: { output_includes: "x" } }, lineCtx), false);
+    // Unknown never poisons what can be decided without a command.
+    assert.strictEqual(rules.evaluate({ not: { file_exists: "missing" } }, lineCtx), true);
+    assert.strictEqual(rules.evaluate({ any: [{ not: { command: "x" } }, { cwd: "/lab/vault" }] }, lineCtx), true);
+    assert.strictEqual(rules.evaluate({ all: [{ cwd: "/nowhere" }, { not: { command: "x" } }] }, lineCtx), false);
+    for (const head of rules.COMMAND_HEADS) assert.ok(rules.HEADS.includes(head), head);
+});
+
 test("rules.validate rejects authoring mistakes with a located message", () => {
     const cases = [
         [{}, /exactly one/],
@@ -252,4 +285,44 @@ test("constructor plugins install in order", () => {
     const calls = [];
     const shell = makeShell({ plugins: [greeter(calls), { id: "after", requires: ["greeter"] }] });
     assert.deepStrictEqual(Array.from(shell.plugins.keys()), ["greeter", "after"]);
+});
+
+test("a plugin whose setup throws leaves nothing behind and can be installed again", () => {
+    const shell = makeShell();
+    const calls = [];
+    const broken = { ...greeter(calls), setup() { throw new Error("needs an option"); } };
+    assert.throws(() => shell.use(broken), /needs an option/);
+    assert.strictEqual(shell.plugins.has("greeter"), false);
+    assert.strictEqual(shell.handlers.hello, undefined);
+    assert.strictEqual(shell.commandMeta.hello, undefined);
+    assert.strictEqual(shell.vfs.providerFor("/lab/live"), null);
+    shell.execute("cd vault");
+    assert.deepStrictEqual(calls, [], "its hooks and sinks are gone");
+    assert.doesNotThrow(() => shell.use(greeter(calls)));
+    assert.strictEqual(shell.execute("hello")[0].text, "hello world");
+});
+
+test("uninstall unmounts a plugin's providers, so a reinstall does not stack mounts", () => {
+    const shell = makeShell();
+    const first = shell.use(greeter([]));
+    assert.strictEqual(shell.execute("cat live/now")[0].text, "tick");
+    first.uninstall();
+    assert.strictEqual(shell.vfs.providerFor("/lab/live"), null);
+    assert.strictEqual(shell.execute("cat live/now")[0].kind, "error");
+    assert.ok(!shell.vfs.entries("/lab").some((e) => e.name === "live"), "the mount is gone from the listing");
+    const second = shell.use(greeter([]));
+    assert.strictEqual(shell.execute("cat live/now")[0].text, "tick");
+    second.uninstall();
+    assert.strictEqual(shell.vfs.providerFor("/lab/live"), null, "no stale mount survives a second cycle");
+});
+
+test("mv refuses a read-only mount as its destination, like cp and > already did", () => {
+    const shell = makeShell();
+    shell.use(greeter([]));
+    shell.execute("touch note");
+    assert.match(shell.execute("mv note live/note")[0].text, /read-only/);
+    assert.match(shell.execute("mv note live")[0].text, /read-only/);
+    assert.strictEqual(shell.state.userNodes["/lab/live/note"], undefined);
+    assert.ok(shell.state.userNodes["/lab/note"], "the source is untouched");
+    assert.strictEqual(shell.execute("cat live/now")[0].text, "tick");
 });

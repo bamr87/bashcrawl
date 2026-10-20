@@ -70,10 +70,11 @@ The hub also announces moments from each player's [typed event bus](../schemas/e
 
 What changes in the posture: players see each other's **names, current directories and XP**, and **chat text crosses sessions**. That text is sanitized before it is stored or delivered:
 
-- C0 and C1 control characters, ESC (so no injected escape sequences), bidi overrides and zero-width characters are removed.
+- C0 and C1 control characters, ESC (so no injected escape sequences), bidi overrides and zero-width characters are removed — from chat, and from anything else of one player that another player sees, such as the directory names `who` prints (a player can `mkdir` anything).
 - Whitespace collapses and messages are capped at 240 characters.
 - Names must match `[A-Za-z][A-Za-z0-9_-]{1,15}` and be unique, ignoring case.
-- Each player has a token-bucket rate limit (a burst of 5, then one message every 2 seconds).
+- Each player has a token-bucket rate limit for what it broadcasts: `say`, `emote`, `shout` and `name` share one lane (a burst of 5, then one every 2 seconds, refused with a notice past that); room arrivals and departures have their own (a burst of 8), past which a move simply goes unannounced — `who` still tells the truth.
+- A player whose connection keeps failing deliveries is dropped from the hub rather than kept silently.
 
 Everything else in the posture below still holds. Game state, files and saves stay per-session.
 

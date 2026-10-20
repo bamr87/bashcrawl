@@ -16,8 +16,14 @@
 // terminal, so text is sanitized before it is stored or delivered: C0/C1
 // control characters (ESC included — no injected escape sequences), bidi
 // overrides and zero-width characters are removed, whitespace collapses,
-// and length is capped. Names are a strict [A-Za-z][A-Za-z0-9_-]{1,15},
-// unique case-insensitively. Each member has a token-bucket rate limit.
+// and length is capped. The same filter covers every other string of one
+// member that is shown to another — `who` prints a directory a player named
+// with `mkdir`, so it is cleaned too. Names are a strict
+// [A-Za-z][A-Za-z0-9_-]{1,15}, unique case-insensitively. Each member has a
+// token-bucket rate limit for what it broadcasts: chat and renames share one
+// lane, room moves have their own (an unannounced move is harmless; a chat
+// message is refused with a notice). A member whose `deliver` keeps throwing
+// is reported through `onError` and dropped, never silently kept.
 // A member sees others' names, locations and XP — nothing else of theirs.
 
 const UNSAFE = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufeff]/g;
@@ -59,16 +65,22 @@ const DEFAULT_TEXT = {
 class Hub {
     /**
      * @param {object} [options]
-     * @param {number} [options.maxMessage]  chat length cap (default 240)
-     * @param {number} [options.burst]       messages allowed in a burst (default 5)
-     * @param {number} [options.refillMs]    ms to regain one message (default 2000)
+     * @param {number} [options.maxMessage]    chat length cap (default 240)
+     * @param {number} [options.burst]         messages (chat, renames) allowed in a burst (default 5)
+     * @param {number} [options.presenceBurst] room moves announced in a burst (default 8)
+     * @param {number} [options.refillMs]      ms to regain one message or move (default 2000)
+     * @param {number} [options.maxFailures]   consecutive failed deliveries before a member is dropped (default 3)
+     * @param {(err: Error, member: object) => void} [options.onError]  called when a member's deliver() throws
      * @param {{now: () => number}} [options.clock]
      */
     constructor(options) {
         const opts = options || {};
         this.maxMessage = opts.maxMessage || 240;
         this.burst = opts.burst || 5;
+        this.presenceBurst = opts.presenceBurst || 8;
         this.refillMs = opts.refillMs || 2000;
+        this.maxFailures = opts.maxFailures || 3;
+        this.onError = typeof opts.onError === "function" ? opts.onError : null;
         this.clock = opts.clock || { now: () => Date.now() };
         this.members = new Map();
         this._next = 0;
@@ -95,13 +107,17 @@ class Hub {
         if (!NAME_RE.test(base)) base = `guest${this._next}`;
         let unique = base;
         for (let n = 2; this.nameTaken(unique); n += 1) unique = `${base.slice(0, 14)}${n}`;
+        const now = this.clock.now();
         const member = {
             id: this._next,
             name: unique,
             shell: null,
             deliver: typeof deliver === "function" ? deliver : () => {},
-            tokens: this.burst,
-            refilledAt: this.clock.now(),
+            lanes: {
+                chat: { burst: this.burst, tokens: this.burst, refilledAt: now },
+                presence: { burst: this.presenceBurst, tokens: this.presenceBurst, refilledAt: now },
+            },
+            failures: 0,
             unbind: null,
             bind: (next) => this.bind(member, next),
         };
@@ -130,39 +146,60 @@ class Hub {
         this.announce(member, "all", (s) => s.text("hubLeft", member.name));
     }
 
+    /** A member's exact working directory — for scoping, never for display. */
     where(member) {
         return member.shell && member.shell.state ? String(member.shell.state.cwd || "") : "";
+    }
+
+    /** The same, safe to print in another member's terminal. */
+    whereShown(member) {
+        return clean(this.where(member), 48);
     }
 
     /**
      * Deliver a line to other members. scope: "all", "room" (same cwd as the
      * sender), or a cwd string. `render(shell)` builds the text in each
      * recipient's own copy deck. Returns how many members received it.
+     *
+     * A throwing `deliver` (a socket that died before its close event, a host
+     * bug) never breaks the sender: the failure is reported to `onError`, and
+     * after `maxFailures` in a row the member is dropped from the hub.
      */
     announce(from, scope, render, kind) {
         let count = 0;
         const room = scope === "room" ? this.where(from) : scope;
         for (const member of this.list()) {
-            if (member === from || !member.shell) continue;
+            if (member === from || !member.shell || !this.members.has(member.id)) continue;
             if (scope !== "all" && this.where(member) !== room) continue;
             try {
                 member.deliver([{ kind: kind || "dim", text: render(member.shell) }]);
+                member.failures = 0;
                 count += 1;
-            } catch (_err) { /* a dead socket never breaks the sender */ }
+            } catch (err) {
+                member.failures += 1;
+                if (this.onError) this.onError(err, member);
+                if (member.failures >= this.maxFailures) this.leave(member);
+            }
         }
         return count;
     }
 
-    /** Token bucket: true when the member may send now. */
-    allow(member) {
+    /**
+     * Token bucket per lane: true when the member may send now. "chat" (the
+     * default) covers say/emote/shout and renames; "presence" covers room
+     * moves. Both regain one token every refillMs, up to the lane's burst.
+     */
+    allow(member, lane) {
+        const bucket = member.lanes[lane || "chat"];
+        if (!bucket) return false;
         const now = this.clock.now();
-        const regained = Math.floor((now - member.refilledAt) / this.refillMs);
+        const regained = Math.floor((now - bucket.refilledAt) / this.refillMs);
         if (regained > 0) {
-            member.tokens = Math.min(this.burst, member.tokens + regained);
-            member.refilledAt += regained * this.refillMs;
+            bucket.tokens = Math.min(bucket.burst, bucket.tokens + regained);
+            bucket.refilledAt += regained * this.refillMs;
         }
-        if (member.tokens <= 0) return false;
-        member.tokens -= 1;
+        if (bucket.tokens <= 0) return false;
+        bucket.tokens -= 1;
         return true;
     }
 
@@ -186,6 +223,10 @@ class Hub {
                 this.announce(member, "all", (s) => s.text("hubReveal", name, event.name));
                 break;
             case "location.changed":
+                // A player bouncing between rooms at socket speed must not
+                // flood everyone else; past the burst, moves go unannounced
+                // (`who` still tells the truth).
+                if (!this.allow(member, "presence")) break;
                 this.announce(member, event.from, (s) => s.text("hubLeaves", name));
                 this.announce(member, event.to, (s) => s.text("hubArrives", name));
                 break;
@@ -208,7 +249,7 @@ class Hub {
                 who() {
                     const rows = hub.list().map((m) => ({
                         kind: m === member ? "info" : "output",
-                        text: this.text("hubWhoRow", m.name, hub.where(m), `${xpOf(m)} XP`, m === member),
+                        text: this.text("hubWhoRow", m.name, hub.whereShown(m), `${xpOf(m)} XP`, m === member),
                     }));
                     return [{ kind: "magic", text: this.text("hubWhoTitle", rows.length) }, ...rows];
                 },
@@ -240,6 +281,8 @@ class Hub {
                     const next = clean(args[0], 16);
                     if (!NAME_RE.test(next)) return [{ kind: "error", text: this.text("hubBadName") }];
                     if (hub.nameTaken(next, member)) return [{ kind: "error", text: this.text("hubTaken", next) }];
+                    // A rename is broadcast to everyone: it spends a chat token.
+                    if (!hub.allow(member)) return [{ kind: "error", text: this.text("hubSlowDown") }];
                     const old = member.name;
                     member.name = next;
                     hub.announce(member, "all", (s) => s.text("hubRenamed", old, next));

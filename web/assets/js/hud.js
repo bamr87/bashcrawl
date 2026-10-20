@@ -139,6 +139,14 @@
         };
     }
 
+    // Mastery level names come from the mastery plugin's copy deck (its
+    // `masteryLevels` uiText), read like the catalogs at call time — an app
+    // that renames a level renames it in the toast too.
+    function skillLabels(runtime) {
+        const levels = typeof runtime.text === "function" ? runtime.text("masteryLevels") : null;
+        return Array.isArray(levels) ? levels : [];
+    }
+
     // Scalar diff-model: cheap to take before/after a command, feeds diffEvents.
     function snapshot(runtime) {
         const s = runtime.state;
@@ -150,6 +158,7 @@
             lessonsDone,
             objectivesMet: lesson.active ? lesson.met : 0,
             skillLevels: skillsModel(runtime).levelsByName,
+            skillLabels: skillLabels(runtime),
             xp: s.xp,
             hp: s.hp,
             completed: s.completedQuestIds.length,
@@ -162,9 +171,6 @@
             reveals: Object.keys(s.reveals || {}).length,
         };
     }
-
-    // Mastery level names (core/mastery.js DEFAULT_TEXT.masteryLevels).
-    const SKILL_LABELS = Object.freeze(["not yet tried", "Novice", "Apprentice", "Adept", "Expert", "Master"]);
 
     // Semantic before/after transitions. Both renderers key their juice off
     // this: the web maps types to CSS effects, the terminal to toasts/flashes.
@@ -204,7 +210,7 @@
         const grown = Object.keys(next.skillLevels || {}).filter((name) => next.skillLevels[name] > (before[name] || 0));
         if (grown.length) {
             const name = grown[0];
-            const label = SKILL_LABELS[next.skillLevels[name]] || "";
+            const label = (next.skillLabels || [])[next.skillLevels[name]] || "";
             events.push({ type: "skill", skills: grown, text: `⬆ ${grown.join(", ")} · ${grown.length === 1 ? label : "skills up"}` });
         }
         return events;

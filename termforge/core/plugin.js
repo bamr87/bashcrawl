@@ -79,8 +79,10 @@
     /**
      * Install a plugin into a shell. Returns a handle { id, uninstall() } that
      * removes exactly what this install added (commands it registered, hook
-     * and event subscriptions, its setup teardown). Throws on an invalid
-     * plugin, a duplicate id, or a missing requirement.
+     * and event subscriptions, VFS mounts, its setup teardown). Throws on an
+     * invalid plugin, a duplicate id, or a missing requirement — and when
+     * `setup` throws, after rolling the partial install back, so the plugin
+     * can be fixed and installed again on the same shell.
      */
     function installPlugin(shell, plugin, options) {
         const errors = validatePlugin(plugin);
@@ -125,12 +127,22 @@
             if (!Object.prototype.hasOwnProperty.call(shell.uiText, key)) shell.uiText[key] = value;
         }
         const providers = typeof plugin.providers === "function" ? plugin.providers(shell) : plugin.providers;
-        for (const provider of providers || []) shell.vfs.addProvider(provider);
+        for (const provider of providers || []) {
+            shell.vfs.addProvider(provider);
+            undo.push(() => shell.vfs.removeProvider(provider));
+        }
 
         const record = { plugin, options: options || {} };
         shell.plugins.set(plugin.id, record);
         if (plugin.setup) {
-            const teardown = plugin.setup(shell, record.options);
+            let teardown;
+            try {
+                teardown = plugin.setup(shell, record.options);
+            } catch (err) {
+                while (undo.length) undo.pop()();
+                shell.plugins.delete(plugin.id);
+                throw err;
+            }
             if (typeof teardown === "function") undo.push(teardown);
         }
         return {

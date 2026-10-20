@@ -31,7 +31,14 @@
     // Each course brings a lab: its files are seeded into the session overlay
     // under <root>/<course id>/ (default /lab/...) — real, writable session
     // files, so lessons can teach `>`, `mv` and `rm` on something that is
-    // safe to break. `lab reset` restores it.
+    // safe to break. The lab is seeded once, when it does not exist yet;
+    // resuming a course or typing `lab` never undoes a learner's rm/mv work.
+    // Only `lab reset` (and `learn restart`) rewrite it.
+    //
+    // `lesson skip` defers a lesson, it does not forgive it: the pointer moves
+    // on without XP, and when the end of the course is reached with lessons
+    // still unearned it comes back to the first of them. A course completes
+    // — and pays its bonus — only once every lesson has been earned.
 
     const LEVELS = ["beginner", "intermediate", "advanced"];
 
@@ -145,7 +152,8 @@
         lessonNoHint: "Every objective here is met.",
         lessonOutline: (title) => `📘 ${title} — lessons`,
         lessonOutOfRange: (n) => `There is no lesson ${n} in this course.`,
-        lessonSkipped: (title) => `↷ Skipped ${title} (no XP).`,
+        lessonSkipped: (title) => `↷ Skipped ${title} (no XP; it comes back before the course can complete).`,
+        lessonRevisit: (left, n, total, title) => `↶ ${left === 1 ? "One lesson is" : `${left} lessons are`} still to be earned — Lesson ${n}/${total}: ${title}. Type lesson to read it.`,
         objectiveMet: (text) => `✔ Objective: ${text}`,
         lessonDone: (title, xp) => `🎓 Lesson complete: ${title}${xp ? `  +${xp} XP` : ""}`,
         lessonNext: (n, total, title) => `📘 Next up — Lesson ${n}/${total}: ${title}. Type lesson to read it.`,
@@ -188,9 +196,13 @@
         }
         function labPath(course) { return `${root}/${course.id}`; }
 
+        // Create a course's lab. With `reset` it is wiped and rewritten;
+        // without, nothing happens when the lab already exists — the learner's
+        // deletions and renames are theirs to keep.
         function seedLab(shell, course, reset) {
             const nodes = shell.state.userNodes;
             const base = labPath(course);
+            if (!reset && nodes[base]) return;
             if (reset) {
                 for (const path of Object.keys(nodes)) if (path === base || path.startsWith(`${base}/`)) delete nodes[path];
             }
@@ -336,7 +348,11 @@
             return [{ kind: "info", text: this.text("labPath", labPath(cur.course)) }];
         }
 
-        // Move past the current lesson (completed or skipped).
+        // Move past the current lesson (completed or skipped). The next lesson
+        // is the first unearned one after it, or — past the end — the first
+        // unearned one from the top; a lesson already earned is never served
+        // again, and a skipped one always comes back. With every lesson earned
+        // the course completes and pays its bonus.
         function advance(shell, course, p, earned) {
             const out = [];
             const current = course.lessons[p.lesson];
@@ -348,8 +364,14 @@
                 out.push({ kind: "success", text: shell.text("lessonDone", current.title, xp) });
             }
             p.met = [];
-            p.lesson += 1;
-            if (p.lesson >= course.lessons.length) {
+            const unearned = (lesson) => !p.done.includes(lesson.id);
+            let next = course.lessons.findIndex((lesson, i) => i > p.lesson && unearned(lesson));
+            let revisit = false;
+            if (next < 0) {
+                next = course.lessons.findIndex(unearned);
+                revisit = next >= 0;
+            }
+            if (next < 0) {
                 p.lesson = course.lessons.length - 1;
                 p.complete = true;
                 const s = slice(shell);
@@ -361,9 +383,15 @@
                 out.push({ kind: "dim", text: shell.text("courseNext") });
                 return out;
             }
-            const next = course.lessons[p.lesson];
-            shell.emit("lesson.started", { course: course.id, lesson: next.id, title: next.title });
-            out.push({ kind: "magic", text: shell.text("lessonNext", p.lesson + 1, course.lessons.length, next.title) });
+            p.lesson = next;
+            const lesson = course.lessons[next];
+            shell.emit("lesson.started", { course: course.id, lesson: lesson.id, title: lesson.title });
+            if (revisit) {
+                const left = course.lessons.filter(unearned).length;
+                out.push({ kind: "magic", text: shell.text("lessonRevisit", left, next + 1, course.lessons.length, lesson.title) });
+            } else {
+                out.push({ kind: "magic", text: shell.text("lessonNext", next + 1, course.lessons.length, lesson.title) });
+            }
             return out;
         }
 
@@ -436,11 +464,14 @@
                             const lessonIds = new Set(course.lessons.map((l) => l.id));
                             const lesson = Number.isInteger(raw.lesson) && raw.lesson >= 0 && raw.lesson < course.lessons.length ? raw.lesson : 0;
                             const count = course.lessons[lesson].objectives.length;
+                            const done = Array.isArray(raw.done) ? raw.done.filter((l) => lessonIds.has(l)) : [];
                             progress[id] = {
                                 lesson,
                                 met: Array.isArray(raw.met) ? raw.met.filter((i) => Number.isInteger(i) && i >= 0 && i < count) : [],
-                                done: Array.isArray(raw.done) ? raw.done.filter((l) => lessonIds.has(l)) : [],
-                                complete: raw.complete === true,
+                                done,
+                                // Complete means every lesson was earned — a save
+                                // cannot claim the one without the other.
+                                complete: raw.complete === true && course.lessons.every((l) => done.includes(l.id)),
                             };
                         }
                     }

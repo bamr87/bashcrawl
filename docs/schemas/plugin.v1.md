@@ -30,14 +30,15 @@ Installing a plugin is the whole registration. A bashOS desktop app is one `AppS
 | `meta` | `man NAME` prints `summary` and `usage` for plugin commands. The first plugin to describe a name keeps it. |
 | `hooks` | HookBus subscribers (the table in [architecture.md](../termforge/architecture.md)), called with `this` = the shell. |
 | `events` | Bus sinks (see [events.v1.md](events.v1.md)), called as `fn.call(shell, event, shell)`. |
-| `providers` | Read-only VFS mounts (`{ prefix, isDir, list, read }`). |
+| `providers` | Read-only VFS mounts (`{ prefix, isDir, list, read }`), unmounted again by `uninstall()`. |
 | `uiText` | Copy-deck **defaults**. A key the app (or an earlier plugin) already set is never overwritten, so the app's voice always wins. |
 | `state` | `shell.pluginState(id)` returns `shell.state[key]` and creates or tops it up from `defaults()` on every call. That keeps working across a wholesale state swap (reset or save import). For persistence, the app includes `key` in its saved state. |
 | `setup` | Runs last. May return a teardown function. |
 
 ## Lifecycle
 
-- `shell.use(plugin, options)` validates, checks `requires`, installs, and returns `{ id, uninstall() }`. `uninstall()` removes exactly what this install added.
+- `shell.use(plugin, options)` validates, checks `requires`, installs, and returns `{ id, uninstall() }`. `uninstall()` removes exactly what this install added: the commands and `man` entries it registered, its hook and event subscriptions, its VFS mounts, and it runs the `setup` teardown.
+- If `setup` throws, the partial install is rolled back first and the error propagates, so the shell is left as it was and the plugin can be installed again once fixed.
 - Install order matters only through `requires`. A `Shell` constructed with `plugins: [...]` installs them in order. Subclasses that replace `handlers` after `super()` (the bashcrawl `Runtime`) call `use()` themselves afterwards.
 - Plugins never touch a host. Their only outputs are Line records and typed events, which every surface already renders.
 

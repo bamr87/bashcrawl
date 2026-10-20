@@ -71,7 +71,7 @@ The filesystem **is** the game. Hidden areas ship as dotted dirs (`entrance/.cha
 
 - Reset with `bash lib/reset.sh --dry` then `bash lib/reset.sh`. Never `git checkout -- entrance/`.
 - Game executables: `#!/usr/bin/env bash`, 14-line "wandered out of bounds" header, no `set -euo pipefail`, plain-text heredocs (no ANSI), **never mutate git-tracked files**. State is `$I` / `$HP` and untracked flags (`touch .statue_defeated`).
-- Infra scripts (`setup.sh`, `help.sh`, `lib/*.sh`) **do** use `set -euo pipefail`.
+- Infra scripts (`setup.sh`, `help.sh`, `lib/*.sh`) **do** use `set -euo pipefail` — except `lib/playrc.sh`, the rcfile of `bashcrawl play`: it is sourced into the player's interactive shell, where strict mode would break the game.
 - macOS bash 3.2: `sed -i.bak`, no GNU-only flags. CI smokes `/bin/bash`.
 - New encounter **basename** must be added to `ENCOUNTERS` in `setup.sh` or `./setup.sh` will not `chmod +x` it.
 - New room: directory + depth-graded `scroll` + chmod'd encounters + unlock `mv` in a treasure + `src/help/data/*.yaml` + `test/datasets/walkthrough.json` + `lib/reset.sh` if it can be unlocked. Then `make validate-contracts && make web-test`.

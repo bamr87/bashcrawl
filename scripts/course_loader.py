@@ -36,6 +36,11 @@ _ID = re.compile(r"^[a-z][a-z0-9-]*$")
 MAX_LAB_FILE = 64 * 1024
 
 
+def _is_int(value: Any) -> bool:
+    """A real integer: YAML `true` is an int to Python and is not one here."""
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def _rel(path: Path, root: Path) -> str:
     try:
         return path.relative_to(root).as_posix()
@@ -137,8 +142,9 @@ def load_course(course_dir: Path, errors: list[str], root: Path = ROOT) -> dict[
             errors.append(f"{lesson_where}: needs at least one objective")
             objectives_raw = []
         xp = lmeta.get("xp", 25)
-        if not isinstance(xp, int) or xp < 0:
+        if not _is_int(xp) or xp < 0:
             errors.append(f"{lesson_where}: xp must be a non-negative integer")
+            xp = 25
         lessons.append(
             {
                 "id": lmeta.get("id", match.group(2)),
@@ -156,15 +162,25 @@ def load_course(course_dir: Path, errors: list[str], root: Path = ROOT) -> dict[
             errors.append(f"{lesson_where}: needs a title")
     if not lessons:
         errors.append(f"{where}: needs at least one NN-lesson.md")
+    # A quoted number (`order: "2"`) would otherwise crash the (order, id)
+    # sort with no file named, and a non-numeric bonus would pay nothing.
+    order = meta.get("order", 0)
+    if not _is_int(order):
+        errors.append(f"{where}/course.md: order must be an integer")
+        order = 0
+    course_xp = meta.get("xp", 50)
+    if not _is_int(course_xp) or course_xp < 0:
+        errors.append(f"{where}/course.md: xp must be a non-negative integer")
+        course_xp = 50
     return {
         "id": course_id,
         "title": meta.get("title"),
         "summary": meta.get("summary", ""),
         "level": meta.get("level"),
-        "order": meta.get("order", 0),
+        "order": order,
         "requires": [str(r) for r in meta.get("requires") or []],
         "skills": [str(s) for s in meta.get("skills") or []],
-        "xp": meta.get("xp", 50),
+        "xp": course_xp,
         "intro": intro,
         "lab": _lab(course_dir, errors, root),
         "lessons": lessons,

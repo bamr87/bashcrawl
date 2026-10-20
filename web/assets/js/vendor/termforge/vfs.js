@@ -59,6 +59,13 @@
             providers.sort((a, b) => b.prefix.length - a.prefix.length);
         }
 
+        /** Unmount a provider added with addProvider (by identity). True when it was mounted. */
+        function removeProvider(provider) {
+            const at = providers.indexOf(provider);
+            if (at >= 0) providers.splice(at, 1);
+            return at >= 0;
+        }
+
         function providerFor(path) {
             for (const provider of providers) {
                 if (path === provider.prefix || path.startsWith(provider.prefix + "/")) {
@@ -235,6 +242,7 @@
             roomMeta,
             findHiddenDir,
             addProvider,
+            removeProvider,
             providerFor,
         };
     }

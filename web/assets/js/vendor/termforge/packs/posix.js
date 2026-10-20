@@ -546,6 +546,8 @@
             if (this.isDir(dst) && dst !== src) dst = `${dst === "/" ? "" : dst}/${this.basename(src)}`;
             if (dst === src || dst.startsWith(`${src}/`)) return [{ kind: "error", text: `mv: cannot move ${args[0]} into itself` }];
             if (!this.isDir(this.parentPath(dst))) return [{ kind: "error", text: `mv: no such directory for ${args[1]}` }];
+            // Provider mounts are read-only for mv exactly as for cp and `>`.
+            if (this.vfs.providerFor(dst)) return [{ kind: "error", text: `mv: cannot write to ${args[1]}: read-only filesystem` }];
             nodes[dst] = node;
             delete nodes[src];
             // A moved directory takes its contents with it.

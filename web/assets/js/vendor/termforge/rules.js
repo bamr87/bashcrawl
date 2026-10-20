@@ -22,12 +22,12 @@
     //   combinators   { all: [rule…] }  { any: [rule…] }  { not: rule }
     //   the command   { command: "ls" | ["map","tree"] }   ctx.cmd is one of
     //                 { arg: "docs" | [...] }               an argument equals one of
-    //                 { args_contains: "-name" }            joined args contain text
-    //                 { option: "a" }                       a dash-token carries the
+    //                 { args_contains: "-name" | [...] }    joined args contain one of
+    //                 { option: "a" | [...] }               a dash-token carries the
     //                                                       letter (-la) or --name
     //                 { piped: true }                       ran with non-empty stdin
     //                 { ok: true }                          produced no error record
-    //                 { output_includes: "text" }           some output contains text
+    //                 { output_includes: "text" | [...] }   some output contains one of
     //                 { line_includes: "grep" | [...] }     the whole input line contains
     //                                                       one of these (pipelines)
     //   location      { cwd: "/abs" | [...] }   { cwd_includes: "room" | [...] }
@@ -36,9 +36,14 @@
     //                 { has: "inventory", value: "x" | [...] }   array holds all
     //                 { flag: "name" }           state.flags[name] is truthy
     //                 { exists: "a.b" }          value is not null/undefined
-    //   filesystem    { file_exists: "path" }  { dir_exists: "path" }
-    //                 { file_contains: "path", text: "…" }
+    //   filesystem    { file_exists: "path" | [...] }  { dir_exists: "path" | [...] }
+    //                 { file_contains: "path" | [...], text: "…" }
     //   constant      { always: true|false }
+    //
+    // Wherever a string head takes a list, the list means ANY OF (the same
+    // reading `command` and `line_includes` always had); `all` spells out
+    // "every one of them". validate() and evaluate() agree on this: a shape
+    // the validator accepts is a shape the evaluator can satisfy.
     //
     // Comparators (state / count): eq ne gt gte lt lte in includes matches.
     // Numeric comparisons read a missing value as 0, so `{ state:
@@ -47,6 +52,12 @@
     // ctx = { state, cmd?, args?, stdin?, outputs?, line?, shell? } — the command
     // fields are present when a rule is checked after a command ran; `shell`
     // (anything with resolve/isDir/readFile) backs the filesystem heads.
+    //
+    // Without a command context the command heads are UNKNOWN, not false:
+    // `not` of an unknown stays unknown, `all`/`any` propagate it, and an
+    // unknown rule is unmet. So `{ not: { command: cd } }` cannot hand out a
+    // free pass on a per-line check, while `{ not: { file_exists: x } }`,
+    // which needs no command, still decides.
 
     const COMBINATORS = ["all", "any", "not"];
     const HEADS = [
@@ -57,6 +68,8 @@
         "file_exists", "dir_exists", "file_contains",
         "always",
     ];
+    // Heads that describe the command that just ran: unknown without ctx.cmd.
+    const COMMAND_HEADS = ["command", "arg", "args_contains", "option", "piped", "ok", "output_includes"];
     const COMPARATORS = ["eq", "ne", "gt", "gte", "lt", "lte", "in", "includes", "matches"];
     // Keys a head may carry beside itself.
     const COMPANIONS = {
@@ -137,33 +150,65 @@
 
     /**
      * Evaluate a rule against a context. Never throws for missing state or a
-     * missing command context — an unmet condition is simply false.
+     * missing command context — an unmet (or undecidable) condition is false.
      */
     function evaluate(rule, ctx) {
-        const c = ctx || {};
+        return decide(rule, ctx || {}) === true;
+    }
+
+    // Three-valued: true, false, or null for "unknown here" — a command head
+    // checked where no command ran. Combinators propagate unknown the way SQL
+    // treats NULL, so `not` never turns a missing fact into a met condition.
+    function decide(rule, c) {
         if (rule == null) return true;
         if (!isPlainObject(rule)) return false;
         const state = c.state || {};
         const args = Array.isArray(c.args) ? c.args : [];
         const outputs = Array.isArray(c.outputs) ? c.outputs : [];
         const [head] = headOf(rule);
+        if (COMMAND_HEADS.includes(head) && c.cmd == null) return null;
         switch (head) {
-            case "all": return asList(rule.all).every((r) => evaluate(r, c));
-            case "any": return asList(rule.any).some((r) => evaluate(r, c));
-            case "not": return !evaluate(rule.not, c);
-            case "command": return c.cmd != null && asList(rule.command).includes(c.cmd);
-            case "arg": return asList(rule.arg).some((want) => args.includes(want));
-            case "args_contains": return args.join(" ").includes(rule.args_contains);
-            case "option": {
-                const letter = String(rule.option);
-                return args.some((a) => (letter.length > 1
-                    ? a === `--${letter}`
-                    : /^-[A-Za-z]+$/.test(a) && a.slice(1).includes(letter)));
+            case "all": {
+                let unknown = false;
+                for (const r of asList(rule.all)) {
+                    const v = decide(r, c);
+                    if (v === false) return false;
+                    if (v === null) unknown = true;
+                }
+                return unknown ? null : true;
             }
+            case "any": {
+                let unknown = false;
+                for (const r of asList(rule.any)) {
+                    const v = decide(r, c);
+                    if (v === true) return true;
+                    if (v === null) unknown = true;
+                }
+                return unknown ? null : false;
+            }
+            case "not": {
+                const v = decide(rule.not, c);
+                return v === null ? null : !v;
+            }
+            case "command": return asList(rule.command).includes(c.cmd);
+            case "arg": return asList(rule.arg).some((want) => args.includes(want));
+            case "args_contains": {
+                const joined = args.join(" ");
+                return asList(rule.args_contains).some((part) => joined.includes(part));
+            }
+            case "option":
+                return asList(rule.option).some((raw) => {
+                    const letter = String(raw);
+                    return args.some((a) => (letter.length > 1
+                        ? a === `--${letter}`
+                        : /^-[A-Za-z]+$/.test(a) && a.slice(1).includes(letter)));
+                });
             case "piped": return (c.stdin != null && c.stdin.length > 0) === Boolean(rule.piped);
             case "ok": return !outputs.some((o) => o && o.kind === "error") === Boolean(rule.ok);
             case "output_includes":
-                return outputs.some((o) => o && typeof o.text === "string" && o.text.includes(rule.output_includes));
+                return asList(rule.output_includes).some((part) => (
+                    outputs.some((o) => o && typeof o.text === "string" && o.text.includes(part))
+                ));
             case "line_includes": return asList(rule.line_includes).some((part) => String(c.line || "").includes(part));
             case "cwd": return asList(rule.cwd).includes(state.cwd);
             case "cwd_includes": return asList(rule.cwd_includes).some((part) => String(state.cwd || "").includes(part));
@@ -175,19 +220,22 @@
             }
             case "flag": return Boolean(lookup(state, "flags") && lookup(state.flags, rule.flag));
             case "exists": return lookup(state, rule.exists) != null;
-            case "file_exists": {
-                const path = resolvePath(c, rule.file_exists);
-                return path != null && c.shell.readFile(path) != null;
-            }
-            case "dir_exists": {
-                const path = resolvePath(c, rule.dir_exists);
-                return path != null && Boolean(c.shell.isDir(path));
-            }
-            case "file_contains": {
-                const path = resolvePath(c, rule.file_contains);
-                const text = path != null ? c.shell.readFile(path) : null;
-                return typeof text === "string" && text.includes(rule.text);
-            }
+            case "file_exists":
+                return asList(rule.file_exists).some((raw) => {
+                    const path = resolvePath(c, raw);
+                    return path != null && c.shell.readFile(path) != null;
+                });
+            case "dir_exists":
+                return asList(rule.dir_exists).some((raw) => {
+                    const path = resolvePath(c, raw);
+                    return path != null && Boolean(c.shell.isDir(path));
+                });
+            case "file_contains":
+                return asList(rule.file_contains).some((raw) => {
+                    const path = resolvePath(c, raw);
+                    const text = path != null ? c.shell.readFile(path) : null;
+                    return typeof text === "string" && text.includes(rule.text);
+                });
             case "always": return Boolean(rule.always);
             default: return false;
         }
@@ -249,5 +297,5 @@
         return errors;
     }
 
-    return { HEADS, COMPARATORS, lookup, evaluate, validate };
+    return { HEADS, COMMAND_HEADS, COMPARATORS, lookup, evaluate, validate };
 });
