@@ -112,6 +112,51 @@ test("typed events are announced; leaving cleans up and a rebind moves the plugi
     assert.equal(fresh.handlers.who, undefined);
 });
 
+test("who prints directories sanitized: a room named with an escape sequence cannot reach another terminal", () => {
+    const hub = new Hub();
+    const a = player(hub, "alice");
+    const b = player(hub, "bob");
+    // What `mkdir $'\e[31mPWNED'; cd` into it leaves in the mover's state.
+    a.shell.state.cwd = "/town/\x1b[31mPWNED";
+    const who = b.run("who");
+    assert.ok(!who.includes("\x1b"), who);
+    assert.match(who, /alice +\/town\/ \[31mPWNED/);
+});
+
+test("room moves and renames are rate-limited too: a bouncing player cannot flood the others", () => {
+    const clock = { t: 0, now() { return this.t; } };
+    const hub = new Hub({ clock, burst: 2, presenceBurst: 2, refillMs: 1000 });
+    const a = player(hub, "alice");
+    const b = player(hub, "bob");
+    b.inbox.length = 0;
+    for (let i = 0; i < 6; i += 1) a.run(i % 2 ? "cd .." : "cd inn");
+    assert.deepStrictEqual(b.inbox, ["← alice leaves.", "→ alice arrives."], "past the burst, moves go unannounced");
+    assert.equal(a.shell.state.cwd, "/town", "the moves themselves still happen");
+    clock.t += 1000;
+    a.run("cd inn");
+    assert.deepStrictEqual(b.inbox.slice(-1), ["← alice leaves."]);
+    // A rename is a broadcast, so it spends a chat token like a shout.
+    assert.match(a.run("name ann"), /You are ann\./);
+    assert.match(a.run("name anne"), /You are anne\./);
+    assert.match(a.run("name annie"), /Slow down/);
+    assert.equal(a.member.name, "anne");
+});
+
+test("a member whose deliveries keep failing is reported and dropped; the others keep hearing", () => {
+    const errors = [];
+    const hub = new Hub({ maxFailures: 2, onError: (err, m) => errors.push(`${m.name}:${err.message}`) });
+    const a = player(hub, "alice");
+    const b = player(hub, "bob");
+    const ghost = hub.join({ shell: new Shell({ world: WORLD, packs: [posix] }), name: "ghost", deliver: () => { throw new Error("EPIPE"); } });
+    b.inbox.length = 0;
+    a.run("shout one");
+    assert.ok(hub.list().includes(ghost), "one failure is forgiven");
+    a.run("shout two");
+    assert.deepStrictEqual(errors, ["ghost:EPIPE", "ghost:EPIPE"]);
+    assert.ok(!hub.list().includes(ghost), "dropped after maxFailures consecutive failures");
+    assert.deepStrictEqual(b.inbox, ["📣 alice shouts: one", "📣 alice shouts: two", "✦ ghost left."]);
+});
+
 // ── end to end: two raw clients on one --hub server ──────────────────────
 
 function listen(opts) {

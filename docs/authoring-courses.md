@@ -86,6 +86,10 @@ Prefer absolute `/lab/<id>/…` paths in filesystem rules. The learner might be 
 
 Everything under `lab/` is seeded into the session as real, writable files under `/lab/<id>/` the first time a learner enrolls. Lessons can teach `>`, `mv` and `rm` on files that are safe to break, and `lab reset` restores them. Keep lab files small UTF-8 text (64 KB cap). Check that `git check-ignore` doesn't swallow a name: `*.tmp` is ignored repo-wide.
 
+The seed happens once. Resuming a course (`learn NAME`) or typing `lab` never re-creates a file the learner removed or renamed, so an objective such as *remove junk.old* stays met; only `lab reset` and `learn restart` rewrite the lab. If you add a file to a lab after learners have it, they see it on their next `lab reset`.
+
+`lesson skip` defers a lesson, it does not forgive it: the learner moves on without XP, a skipped lesson comes back once the others are earned, and the course bonus is paid only when every lesson has been. Design each lesson so it can be earned in any order after the first.
+
 ## Style
 
 - **One paragraph per line**: the repo's prose rule, enforced by `tools/unwrap-prose.py` in CI.

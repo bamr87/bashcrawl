@@ -61,7 +61,10 @@ describe("the lesson reader", () => {
 
         await run("learn navigator");
         const state = store.runtime!.state;
-        store.runtime!.state = { ...state, learn: { ...state.learn, progress: { navigator: { lesson: 4, met: [], done: ["where-am-i", "look-around", "walking", "going-up", "finding-things"], complete: true } } } };
+        // A course counts as complete only with every lesson earned, so the
+        // injected save lists the real lesson ids rather than a guess.
+        const done = store.runtime!.courses.find((course) => course.id === "navigator")!.lessons.map((lesson) => lesson.id);
+        store.runtime!.state = { ...state, learn: { ...state.learn, progress: { navigator: { lesson: 4, met: [], done, complete: true } } } };
         await run("pwd");
         expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Finding Your Way complete");
         expect(container).toHaveTextContent("Keep going");

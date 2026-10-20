@@ -132,7 +132,7 @@ A world is flat maps — the exact shape `scripts/export_static_web.py` emits an
 
 Layered on top, in lookup precedence order:
 
-1. **Providers** — read-only dynamic subtrees (`vfs.addProvider({ prefix, isDir, list, read })`), longest mount wins, mounts appear as directories in their parent's listing, writes into a mount are refused. This is the monitoring-tool seam: procwatch maps `node:os` metrics to `/procwatch/sys/*`, recomputed on every read.
+1. **Providers** — read-only dynamic subtrees (`vfs.addProvider({ prefix, isDir, list, read })`, `vfs.removeProvider(provider)` to unmount — a plugin's mounts go with its `uninstall()`), longest mount wins, mounts appear as directories in their parent's listing, writes into a mount (`>`, `cp`, `mv`) are refused. This is the monitoring-tool seam: procwatch maps `node:os` metrics to `/procwatch/sys/*`, recomputed on every read.
 2. **`state.userNodes`** — session-created files/dirs; a written file shadows a same-named world file and `rm` peels the shadow back off.
 3. **The world** (+ `state.reveals`, the visible-path → dotted-path aliases for unlocked hidden rooms, applied longest-prefix-first).
 
