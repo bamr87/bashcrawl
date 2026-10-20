@@ -17,10 +17,10 @@ const harness = require("../../../termforge/test/helpers/game-harness.js") as {
     DATA_DIR: string;
 };
 
-const EXTRA = ["hud.js", "learn.js", "fx-clips.js", "fx.js", "ambient.js", "arcade.js"].map((name) => join(harness.WEB_JS, name));
+const EXTRA = ["hud.js", "learn.js", "fx-clips.js", "fx.js", "ambient.js", "vim.js", "arcade.js"].map((name) => join(harness.WEB_JS, name));
 const GLOBALS = [
     "TermForge", "BashcrawlRuntime", "BashcrawlHud", "BashcrawlStorage", "BashcrawlLearn", "BashcrawlCommandFx",
-    "BashcrawlAmbient", "BashcrawlArcade", "BashcrawlArtClips", "BashcrawlFxClips", "BashcrawlFxClipManifest", "BashcrawlPlugins",
+    "BashcrawlAmbient", "BashcrawlVim", "BashcrawlArcade", "BashcrawlArtClips", "BashcrawlFxClips", "BashcrawlFxClipManifest", "BashcrawlPlugins",
 ];
 
 export function loadEngine(): void {

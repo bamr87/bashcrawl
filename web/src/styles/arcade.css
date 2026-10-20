@@ -42,6 +42,116 @@
     .bc-arcade-tagline { font-size: var(--fleet-text-sm); line-height: 1.4; }
     .bc-arcade-stats { font-size: var(--fleet-text-xs); margin-top: auto; }
     .bc-arcade-decks { margin-top: var(--fleet-space-4); }
+
+    /* ── the Vim Catacombs: the buffer is the map, above the trial log ── */
+    .bc-stage-log-vim {
+        grid-template-rows: auto minmax(0, 1fr) var(--band);
+    }
+    .bc-vim {
+        /* A viewport cap, not a percentage: the auto grid track sizes to this
+         * content, so a percentage would resolve against itself and clamp. */
+        min-height: 0;
+        max-height: 45dvh;
+        overflow: auto;
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.5;
+        color: var(--fleet-color-ink);
+        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 45%, var(--fleet-color-bg));
+        box-shadow: inset 0 -1px 0 var(--fleet-color-border);
+        cursor: text;
+        scrollbar-width: thin;
+    }
+    .bc-vim-head {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--fleet-space-2);
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-ink-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .bc-vim-panes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--fleet-space-2) var(--fleet-space-4);
+        margin: var(--fleet-space-1) 0;
+    }
+    .bc-vim-buffer,
+    .bc-vim-target {
+        margin: 0;
+        white-space: pre;
+        overflow-x: auto;
+        font: inherit;
+    }
+    .bc-vim-target {
+        color: var(--fleet-color-ink-muted);
+        padding-left: var(--fleet-space-3);
+        box-shadow: inset 1px 0 0 var(--fleet-color-border);
+    }
+    .bc-vim-target-label {
+        display: block;
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-warning);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .bc-vim-line { min-height: 1.5em; }
+    .bc-vim-buffer .bc-vim-line[data-current] {
+        background: color-mix(in srgb, var(--fleet-color-accent) 10%, transparent);
+    }
+    .bc-vim-gutter {
+        display: inline-block;
+        margin-right: 1ch;
+        color: var(--fleet-color-ink-muted);
+        user-select: none;
+    }
+    .bc-vim-line[data-current] .bc-vim-gutter { color: var(--fleet-color-warning); }
+    .bc-vim-gem {
+        color: var(--fleet-color-primary);
+        font-weight: var(--fleet-font-weight-bold);
+        text-shadow: var(--bc-glow-gold);
+    }
+    .bc-vim-spike { color: var(--fleet-color-danger); }
+    .bc-vim-cursor {
+        background: var(--fleet-color-ink);
+        color: var(--fleet-color-bg);
+        text-shadow: none;
+    }
+    .bc-vim-cursor.bc-vim-gem { background: var(--fleet-color-primary); }
+    .bc-vim-cursor.bc-vim-spike { background: var(--fleet-color-danger); }
+    .bc-vim[data-mode="insert"] .bc-vim-cursor {
+        background: transparent;
+        color: inherit;
+        box-shadow: inset 2px 0 0 var(--fleet-color-accent);
+    }
+    .bc-vim-modeline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--fleet-space-3);
+        font-size: var(--fleet-text-xs);
+    }
+    .bc-vim-mode {
+        font-weight: var(--fleet-font-weight-bold);
+        color: var(--fleet-color-success);
+    }
+    .bc-vim[data-mode="insert"] .bc-vim-mode { color: var(--fleet-color-accent); }
+    .bc-vim-gems { color: var(--fleet-color-primary); }
+    .bc-vim-hp { color: var(--fleet-color-danger); letter-spacing: 0.1em; }
+    .bc-vim-pos { margin-left: auto; color: var(--fleet-color-ink-muted); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .bc-vim[data-mode="normal"] .bc-vim-cursor { animation: bc-vim-blink 1.2s steps(1) infinite; }
+    @keyframes bc-vim-blink {
+        0%, 55% { background: var(--fleet-color-ink); color: var(--fleet-color-bg); }
+        56%, 100% { background: color-mix(in srgb, var(--fleet-color-ink) 35%, transparent); color: inherit; }
+    }
+    .bc-vim[data-mode="normal"] .bc-vim-cursor.bc-vim-gem { animation-name: bc-vim-blink-gem; }
+    @keyframes bc-vim-blink-gem {
+        0%, 55% { background: var(--fleet-color-primary); color: var(--fleet-color-bg); }
+        56%, 100% { background: color-mix(in srgb, var(--fleet-color-primary) 35%, transparent); color: var(--fleet-color-primary); }
+    }
 }
 @media (max-width: 900px) {
     .bc-arcade .bc-sidebar {

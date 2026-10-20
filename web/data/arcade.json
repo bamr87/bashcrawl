@@ -689,5 +689,404 @@
       "xp": 25,
       "generated": true
     }
+  ],
+  "vim_levels": [
+    {
+      "id": "first-steps",
+      "title": "First Steps",
+      "brief": "Walk the catacombs with h j k l and gather every gem. Never rest on a spike.",
+      "keys": [
+        "h",
+        "j",
+        "k",
+        "l"
+      ],
+      "lines": [
+        "................",
+        "....*...........",
+        "....!...........",
+        ".........*......",
+        "..*.............",
+        "...........*...."
+      ],
+      "par": 22,
+      "solution": [
+        "jllll",
+        "hjjjh",
+        "klllllll",
+        "jjll"
+      ],
+      "hint": "h ← · j ↓ · k ↑ · l → — the home row is the compass. Step around the spike, not over it."
+    },
+    {
+      "id": "word-leaps",
+      "title": "Word Leaps",
+      "brief": "Gems lie among the words. Leap with w (next word), b (back) and e (word's end).",
+      "keys": [
+        "w",
+        "b",
+        "e"
+      ],
+      "lines": [
+        "the crypt door * creaks and the *",
+        "damp stair * descends ! into * dark",
+        "beneath * the * altar the * waits"
+      ],
+      "par": 20,
+      "solution": [
+        "www",
+        "wwww",
+        "www",
+        "jbb",
+        "ww",
+        "www",
+        "kw"
+      ],
+      "hint": "w lands on every word — a spike too. Drop a line with j, walk back with b, and come up with k past it."
+    },
+    {
+      "id": "line-ends",
+      "title": "The Ends of the Line",
+      "brief": "Gems sit at the edges. 0 jumps to the line's start, ^ to its first mark, $ to its end.",
+      "keys": [
+        "0",
+        "^",
+        "$"
+      ],
+      "cursor": [
+        0,
+        10
+      ],
+      "lines": [
+        "*.....the.hall.of.echoes.....*",
+        "     *...a sunken step......*",
+        "*....the lantern alcove.....*"
+      ],
+      "par": 7,
+      "solution": [
+        "0",
+        "$",
+        "j",
+        "^",
+        "j",
+        "0",
+        "$"
+      ],
+      "hint": "$ remembers: after $, j keeps you at the line's end. ^ skips leading blanks where 0 does not."
+    },
+    {
+      "id": "the-count",
+      "title": "The Count",
+      "brief": "A number before a motion repeats it: 6j leaps six lines in one bound, spikes and all.",
+      "keys": [
+        "count"
+      ],
+      "lines": [
+        "................",
+        "...*........*...",
+        "................",
+        "!...............",
+        "................",
+        "................",
+        "*.....!.....*...",
+        "................"
+      ],
+      "par": 9,
+      "solution": [
+        "6j",
+        "12l",
+        "5k",
+        "9h"
+      ],
+      "hint": "Only where you LAND matters — 6j passes over the spike. The gutter counts the lines for you."
+    },
+    {
+      "id": "top-and-bottom",
+      "title": "Top and Bottom",
+      "brief": "gg flies to the first line, G to the last, and 8G to line eight. The walls of spikes mean nothing to a flyer.",
+      "keys": [
+        "gg",
+        "G"
+      ],
+      "cursor": [
+        4,
+        3
+      ],
+      "lines": [
+        "      *",
+        "  . . . . .",
+        "  . . . . .",
+        "  !!!!!!!!!",
+        "  . . . . .",
+        "  !!!!!!!!!",
+        "  . . . . .",
+        "  *",
+        "  !!!!!!!!!",
+        "  . . . . .",
+        "  . . . . .",
+        "  !!!!!!!!!",
+        "  . . . . .",
+        "   *"
+      ],
+      "par": 5,
+      "solution": [
+        "G",
+        "gg",
+        "8G"
+      ],
+      "hint": "gg and G land on the line's first mark, not column 0 — read the line numbers in the gutter for 8G."
+    },
+    {
+      "id": "find-the-rune",
+      "title": "Find the Rune",
+      "brief": "f* leaps onto the next * in the line; ; repeats it, , reverses it, F looks backward. t stops one short — t! approaches a spike safely.",
+      "keys": [
+        "f",
+        "t",
+        "F",
+        "T",
+        ";",
+        ","
+      ],
+      "cursor": [
+        0,
+        13
+      ],
+      "lines": [
+        "..*......*............*......*!...",
+        "....!*....!*....!*...."
+      ],
+      "par": 11,
+      "solution": [
+        "f*",
+        ";",
+        "F*",
+        ";",
+        "j",
+        "f*",
+        ";",
+        ";"
+      ],
+      "hint": "f and F take the character to find as their next key: f* then ; ; ; — the taken gems become . and are skipped."
+    },
+    {
+      "id": "cut-the-thorns",
+      "title": "Cut the Thorns",
+      "brief": "Thorns (#) have grown through the inscription. x cuts the character under the cursor; X the one before it. Match the target exactly.",
+      "keys": [
+        "x",
+        "X"
+      ],
+      "lines": [
+        "the# key li#es# beneath",
+        "#the altar# of ash#"
+      ],
+      "target": [
+        "the key lies beneath",
+        "the altar of ash"
+      ],
+      "par": 15,
+      "solution": [
+        "f#",
+        "x",
+        ";",
+        "x",
+        ";",
+        "x",
+        "j",
+        "0",
+        "x",
+        "f#",
+        "x",
+        "$",
+        "x"
+      ],
+      "hint": "f# finds a thorn, x cuts it, ; finds the next. 0 and $ reach the ones at the edges."
+    },
+    {
+      "id": "cursed-lines",
+      "title": "Cursed Lines",
+      "brief": "Three lines carry a curse (~~~). dd deletes a whole line; 2dd deletes two.",
+      "keys": [
+        "dd"
+      ],
+      "lines": [
+        "the gate of the catacombs",
+        "~~~ a curse hums here ~~~",
+        "~~~ and here ~~~",
+        "seven steps down",
+        "~~~ the last curse ~~~",
+        "the altar of ash"
+      ],
+      "target": [
+        "the gate of the catacombs",
+        "seven steps down",
+        "the altar of ash"
+      ],
+      "par": 7,
+      "solution": [
+        "j",
+        "2dd",
+        "j",
+        "dd"
+      ],
+      "hint": "Move onto a cursed line with j, then dd. Two adjacent curses fall to one 2dd."
+    },
+    {
+      "id": "the-operators",
+      "title": "Operator and Motion",
+      "brief": "d takes any motion: dw deletes a word, d2w two, D (d$) the rest of the line. Leave no trailing space.",
+      "keys": [
+        "d",
+        "D"
+      ],
+      "lines": [
+        "the junk key junk junk opens",
+        "the gate waits beyond the fog"
+      ],
+      "target": [
+        "the key opens",
+        "the gate waits"
+      ],
+      "par": 11,
+      "solution": [
+        "w",
+        "dw",
+        "w",
+        "d2w",
+        "j",
+        "e",
+        "l",
+        "D"
+      ],
+      "hint": "dw also eats the space after the word. For the tail, stand on the space after 'waits' (e then l) and press D."
+    },
+    {
+      "id": "paste-the-pieces",
+      "title": "Paste the Pieces",
+      "brief": "What d and x take, p puts back after the cursor (P before). ddp swaps two lines, xp two letters, yyp copies a line.",
+      "keys": [
+        "p",
+        "P",
+        "yy"
+      ],
+      "lines": [
+        "second verse",
+        "first verse",
+        "teh third verse"
+      ],
+      "target": [
+        "first verse",
+        "second verse",
+        "the third verse",
+        "the third verse"
+      ],
+      "par": 10,
+      "solution": [
+        "dd",
+        "p",
+        "j",
+        "l",
+        "x",
+        "p",
+        "yy",
+        "p"
+      ],
+      "hint": "ddp on the first line swaps the verses. On 'teh', stand on the e: xp. Then yy and p to copy the line."
+    },
+    {
+      "id": "the-scribe",
+      "title": "The Scribe",
+      "brief": "Insert mode: i inserts here, a after the cursor, I at the line's start, A at its end, o opens a line below, O above. Esc returns to normal mode.",
+      "keys": [
+        "i",
+        "a",
+        "I",
+        "A",
+        "o",
+        "O"
+      ],
+      "lines": [
+        "open sesame",
+        "gate"
+      ],
+      "target": [
+        "open sesame now",
+        "the gate",
+        "and enter"
+      ],
+      "par": 24,
+      "solution": [
+        "A now<esc>",
+        "jIthe <esc>",
+        "oand enter<esc>"
+      ],
+      "hint": "A now, Esc. Down a line, I the, Esc. Then o and the new line's words, Esc. Every typed character is a keystroke."
+    },
+    {
+      "id": "seek",
+      "title": "Seek",
+      "brief": "The gems are scattered through the chronicle. /text searches forward from the cursor and wraps around; n repeats, N reverses.",
+      "keys": [
+        "/",
+        "n",
+        "N"
+      ],
+      "cursor": [
+        4,
+        0
+      ],
+      "lines": [
+        "the chronicle of the deep halls",
+        "where the first * was buried",
+        "none remember the stair",
+        "nor the * that lit the vault",
+        "you stand at the midpoint",
+        "below, the * of the warden",
+        "and the echo of a name",
+        "the last * sleeps in the ash"
+      ],
+      "par": 6,
+      "solution": [
+        "/*",
+        "n",
+        "n",
+        "n"
+      ],
+      "hint": "Type / and the text, then Enter — /* finds the next gem. n and n again; the search wraps past the last line."
+    },
+    {
+      "id": "the-gauntlet",
+      "title": "The Gauntlet",
+      "brief": "Every key you have learned, one chamber. Seven gems between the spike walls — fly, find, search.",
+      "keys": [],
+      "cursor": [
+        4,
+        10
+      ],
+      "lines": [
+        "*.........................*",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "...the dark * remembers....",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "....!..........!...........",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "....*...!!!!!!!!!....*.....",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "*.........................*"
+      ],
+      "par": 13,
+      "solution": [
+        "7G",
+        "f*",
+        ";",
+        "G",
+        "$",
+        "gg",
+        "$",
+        "/*"
+      ],
+      "hint": "7G then f* and ; for the sixth row; G and $ for the last; gg and $ for the first; /* for the one that is left."
+    }
   ]
 }

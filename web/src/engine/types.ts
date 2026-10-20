@@ -197,6 +197,23 @@ export interface ArcadeData {
     pipe_puzzles: unknown[];
     hunt_scenarios: unknown[];
     flash_decks: FlashDeck[];
+    vim_levels: VimLevel[];
+}
+
+/** One Vim Catacombs level (arcade.yaml `vim_levels`): the buffer is the map. */
+export interface VimLevel {
+    id: string;
+    title: string;
+    brief: string;
+    hint: string;
+    /** The keys this level teaches; its spellbook is every level's keys up to its own. */
+    keys: string[];
+    lines: string[];
+    cursor?: [number, number];
+    /** An exact buffer to produce (edit levels); gem levels have none. */
+    target?: string[];
+    par: number;
+    solution: string[];
 }
 
 /** The seven generated bundles under web/data. */
@@ -589,6 +606,40 @@ export interface AmbientModule {
     isPlaying(node: HTMLElement): boolean;
 }
 
+// ── the vim engine (web/assets/js/vim.js) ───────────────────────────────
+export interface VimBuffer {
+    lines: string[];
+    row: number;
+    col: number;
+    want: number;
+    mode: "normal" | "insert";
+    /** The keys of the command being typed (`2`, `d` …). */
+    pending: string[];
+    register: { text: string[]; linewise: boolean } | null;
+    undo: Array<{ lines: string[]; row: number; col: number }>;
+    lastFind: { ch: string; kind: string } | null;
+    lastSearch: { pattern: string; backward: boolean } | null;
+    changes: number;
+}
+
+export interface VimFeedResult {
+    /** false: not the editor's key — the host may use it. */
+    consumed: boolean;
+    applied: boolean;
+    kind: string | null;
+    command: string | null;
+    pending: string;
+    error: { code: "locked" | "unknown" | "fail"; key: string; message: string } | null;
+}
+
+export interface VimModule {
+    createState(lines: string[], options?: { row?: number; col?: number }): VimBuffer;
+    feed(state: VimBuffer, key: string, options?: { allowed?: string[] | Set<string> | null }): VimFeedResult;
+    search(state: VimBuffer, pattern: string, backward?: boolean): { found: boolean; wrapped: boolean };
+    toKeys(text: string): string[];
+    keyLabel(key: string): string;
+}
+
 // ── the Practice Arcade's games (web/assets/js/arcade.js GAMES) ──────────
 export interface ArcadeScenario {
     world?: World;
@@ -601,12 +652,31 @@ export interface ArcadeContext extends ArcadeScenario {
     moves: number;
     hints: number;
     startedAt: number;
+    // The Vim Catacombs trial's state (arcade.js VimCatacombs), read by VimStage.
+    vim?: VimBuffer;
+    level?: VimLevel;
+    index?: number;
+    levelCount?: number;
+    allowed?: string[];
+    total?: number;
+    taken?: number;
+    hp?: number;
+    traps?: number;
+    keys?: number;
+    par?: number;
 }
 
 export interface ArcadeTurn {
     outputs: Line[];
     done: boolean;
     success?: boolean;
+    /** HUD-shaped events for the effects layer (a gem taken, a spike sprung). */
+    events?: HudEvent[];
+}
+
+export interface ArcadeKeyTurn extends ArcadeTurn {
+    /** false: the key was not the trial's — the prompt handles it as usual. */
+    consumed: boolean;
 }
 
 export interface ArcadeGame {
@@ -616,12 +686,17 @@ export interface ArcadeGame {
     tagline: string;
     concepts: string[];
     needsWorld: boolean;
-    makeScenario(data: { world: World; commands: CommandsData; arcade: ArcadeData }, persist: ArcadeRecords, deckId?: string): ArcadeScenario | null;
+    /** `variant` picks a Command Flash deck or a Vim Catacombs level. */
+    makeScenario(data: { world: World; commands: CommandsData; arcade: ArcadeData }, persist: ArcadeRecords, variant?: string): ArcadeScenario | null;
     intro(ctx: ArcadeContext): Line[];
     objective(ctx: ArcadeContext): string;
     hintFor(ctx: ArcadeContext): string;
     input(line: string, ctx: ArcadeContext): ArcadeTurn;
     scoreFor(ctx: ArcadeContext): { score: number; detail: string };
+    /** A modal trial reads raw keys as they are pressed (the Vim Catacombs). */
+    keystroke?(key: string, ctx: ArcadeContext): ArcadeKeyTurn;
+    /** Level-specific cheats for the side panel, instead of the concept lines. */
+    cheatsFor?(ctx: ArcadeContext): Array<[string, string]>;
 }
 
 export interface ArcadeRecord {
@@ -629,6 +704,8 @@ export interface ArcadeRecord {
     plays: number;
     seen: string[];
     last?: number;
+    /** Scenarios won, not merely played (the Vim Catacombs picks the next one). */
+    cleared?: string[];
 }
 
 export interface ArcadeRecords {

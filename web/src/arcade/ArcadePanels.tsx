@@ -47,7 +47,9 @@ export function RunStatsPanel({ store }: { store: ArcadeStore }) {
         <PanelFrame id="arcade-stats" title="This run" icon="◎" collapsed={collapsed} onToggle={toggle}>
             {stats ? (
                 <ul className="bc-list">
-                    <li>Commands: <strong>{stats.moves}</strong></li>
+                    {stats.keys != null
+                        ? <li>Keystrokes: <strong>{stats.keys}</strong> <span className="bc-muted">(par {stats.par})</span></li>
+                        : <li>Commands: <strong>{stats.moves}</strong></li>}
                     <li>Hints: <strong>{stats.hints}</strong></li>
                     <li>Elapsed: <strong>{stats.seconds}s</strong></li>
                 </ul>

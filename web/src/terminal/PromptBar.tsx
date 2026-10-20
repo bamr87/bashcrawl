@@ -1,7 +1,9 @@
 // The one shared prompt. Enter runs the line through whoever owns the input
 // (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, F1 and
-// Ctrl+/ toggle the docs, `?` on an empty line opens the shortcuts. The
-// label shows the full path and, on narrow screens, just the room's name.
+// Ctrl+/ toggle the docs, `?` on an empty line opens the shortcuts. An owner
+// with a keystroke hook (a Vim Catacombs trial) sees every plain key first
+// and keeps the ones it consumes. The label shows the full path and, on
+// narrow screens, just the room's name.
 import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
 
 import { getUi, setUi, toggleDocs, toggleHelp } from "../chrome/ui-store";
@@ -37,6 +39,12 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
     }
 
     function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+        if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.nativeEvent.isComposing && target.keystroke?.(event.key, value)) {
+            // A modal trial took the key: it reaches neither the input nor the app.
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (event.key === "Enter") {
             event.preventDefault();
             submit();

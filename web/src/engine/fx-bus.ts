@@ -17,6 +17,8 @@ export type FxEvent =
         discovered?: boolean;
     }
     | { type: "award"; amount: number; label: string; events: HudEvent[] }
+    /** One key of a modal trial (the Vim Catacombs): a tick, plus what it did. */
+    | { type: "key"; key: string; events: HudEvent[]; error: boolean }
     | { type: "boot" }
     | { type: "celebrate" }
     | { type: "mode"; mode: string };

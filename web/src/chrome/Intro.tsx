@@ -17,7 +17,7 @@ import { getUi, openOverlay, setUi, startTour, useUi } from "./ui-store";
 const DOOR_BLURB: Record<Mode, string> = {
     story: "The dungeon. Quests teach pwd → ls → cd → pipes, room by room.",
     learn: "Guided courses with a practice lab. Objectives tick off as you type.",
-    arcade: "Timed mini-games: navigation, grep/find, pipelines, flashcards.",
+    arcade: "Timed mini-games: navigation, grep/find, pipelines, flashcards — and the Vim Catacombs.",
     reference: "Searchable cheatsheets for every command the dungeon teaches.",
 };
 const PAGES = 3;

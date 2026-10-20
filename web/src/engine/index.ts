@@ -4,7 +4,7 @@
 // the page was built or served without the engine, and we say so.
 import type {
     AmbientModule, ArcadeModule, CommandFxModule, HudModule, LearnModule,
-    RuntimeModule, StorageModule, TermForgeGlobal,
+    RuntimeModule, StorageModule, TermForgeGlobal, VimModule,
 } from "./types";
 
 export interface Engine {
@@ -16,6 +16,7 @@ export interface Engine {
     BashcrawlCommandFx?: CommandFxModule;
     BashcrawlAmbient?: AmbientModule;
     BashcrawlArcade?: ArcadeModule;
+    BashcrawlVim?: VimModule;
     BashcrawlArtClips?: Record<string, unknown>;
 }
 
@@ -43,6 +44,7 @@ export function requireEngine(): Engine {
         BashcrawlCommandFx: window.BashcrawlCommandFx,
         BashcrawlAmbient: window.BashcrawlAmbient,
         BashcrawlArcade: window.BashcrawlArcade,
+        BashcrawlVim: window.BashcrawlVim,
         BashcrawlArtClips: window.BashcrawlArtClips,
     };
 }
