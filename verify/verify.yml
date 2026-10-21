@@ -1,0 +1,60 @@
+# =============================================================================
+# verify/verify.yml — how to run bashcrawl the way a USER would
+# =============================================================================
+# kit: verify v0.1.0 (seeded from bamr87/bamr87 templates/verify/)
+#
+# Read by three consumers, so it is the one place "how do I start this thing and
+# where do I look" is written down:
+#   1. verify/runner.mjs            — executes verify/scenarios/*.yml with Playwright
+#   2. fleet-verify.yml (reusable)  — starts the app in CI, runs the runner, and
+#                                     (on `verify`-labelled PRs) hands the live
+#                                     app to a Claude Code pass via the Playwright MCP
+#   3. .claude/skills/verify-feature — the agent skill that drives it locally
+#
+# Fill in `app:` for your stack. Examples:
+#   React/Vite   start: "npm run dev -- --host 127.0.0.1 --port 5000"  url: http://127.0.0.1:5000
+#   Next.js      start: "npm run dev"                                  url: http://127.0.0.1:3000
+#   Jekyll       start: "bundle exec jekyll serve --host 127.0.0.1"    url: http://127.0.0.1:4000
+#   Django       start: "python manage.py runserver 127.0.0.1:8000"    url: http://127.0.0.1:8000
+#   Static build build: "npm run build"  static_dir: dist              (served by python http.server)
+# =============================================================================
+schema: verify/v1
+
+app:
+  # Command that serves the app (run from the repo root, in the background).
+  # Leave empty and set `static_dir` to serve a built directory instead.
+  start: ""
+  # Optional one-shot build before `start` / before serving `static_dir`.
+  build: ""
+  # Directory to serve statically when `start` is empty (e.g. _site, dist, build).
+  static_dir: ""
+  # Base URL the scenarios navigate against.
+  url: http://127.0.0.1:4000
+  # Path polled until it answers 200 before any scenario runs.
+  ready: /
+  # Seconds to wait for `ready`.
+  timeout_s: 180
+  # Optional install step (CI runs `npm install` / `bundle install` /
+  # `pip install -r requirements.txt` automatically when the manifest exists;
+  # set this to override).
+  install: ""
+
+# Named viewports scenarios can reference by name.
+viewports:
+  desktop: { width: 1280, height: 800 }
+  tablet: { width: 768, height: 1024 }
+  mobile: { width: 390, height: 844 }
+
+# Where things live (relative to the repo root).
+features: features/features.yml
+scenarios: verify/scenarios
+evidence_dir: test/evidence
+
+# The agent pass (fleet-verify.yml with `agent: true`, or the verify-feature skill).
+agent:
+  # Routes the agent should start from when exploring beyond the scenarios.
+  entry_routes: ["/"]
+  # Things the agent must never do against this app (it reads this list).
+  never:
+    - "submit forms that send email or create real records against a shared backend"
+    - "sign in with real credentials"

@@ -1,0 +1,43 @@
+# =============================================================================
+# verify/scenarios/smoke-home.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# kit: verify v0.1.0 (seeded from bamr87/bamr87 templates/verify/)
+#
+# A scenario is the sequence of things a person does to use one feature, written
+# so that BOTH a deterministic runner (verify/runner.mjs) and an AI agent can
+# execute it. Keep scenarios small: one feature, one path through it. Steps:
+#
+#   - goto: /route                       navigate (relative to app.url)
+#   - click: <selector>                  Playwright selector (text=…, role=…, css)
+#   - fill: { selector, value }          type into a field
+#   - press: Enter                       key press on the focused element
+#   - select: { selector, value }        <select> option
+#   - hover: <selector>
+#   - wait: { selector | ms | url }      wait for an element, a delay, or a URL substring
+#   - expect: { visible: <selector> }    assertions — any of:
+#             { hidden: <selector> }
+#             { text: "substring" }      page text contains
+#             { title: "substring" }     document.title contains
+#             { url: "substring" }       location.href contains
+#             { count: { selector, min, max } }
+#             { no_console_errors: true }
+#             { no_horizontal_scroll: true }
+#             { status: 200 }            last main-frame response status
+#   - screenshot: <name>                 → test/evidence/<scenario id>/<viewport>-<name>.png
+#   - eval: { name, script }             record a JS expression's value in report.json
+#
+# `viewports` lists names from verify/verify.yml (or inline {width,height});
+# the runner executes the whole scenario once per viewport.
+# =============================================================================
+id: smoke-home
+feature: TODO-001
+title: "Home page renders and is usable"
+description: "The first thing any visitor does: land on the home page, see the main content, and find the navigation."
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - expect: { status: 200 }
+  - expect: { visible: "main, [role=main], #main-content" }
+  - expect: { no_horizontal_scroll: true }
+  - expect: { no_console_errors: true }
+  - screenshot: home

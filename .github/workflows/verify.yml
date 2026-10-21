@@ -1,0 +1,56 @@
+name: Verify
+
+# kit: verify v0.1.0
+# Adopted from bamr87/bamr87 via verify-fanout (tools/fanout.sh --kit verify).
+# Thin caller — the machinery is shared and versioned in bamr87/bamr87
+# (.github/workflows/fleet-verify.yml, tools/features_index.py, docs/VERIFICATION.md).
+#
+# What runs:
+#   every PR / push   validate features/features.yml, start the app per
+#                     verify/verify.yml, execute verify/scenarios/*.yml with
+#                     Playwright, upload the evidence bundles, summarise coverage.
+#   label `verify`    additionally hand the LIVE app to a Claude Code pass that
+#   (or dispatch)     drives it through the Playwright MCP like a user would,
+#                     writes verify/AGENT-REPORT.md, and the WORKFLOW (never the
+#                     agent) posts it on the PR. Needs CLAUDE_CODE_OAUTH_TOKEN
+#                     (ANTHROPIC_API_KEY fallback) — pass `secrets: inherit`.
+#
+# Advisory until this repo's scenarios are trustworthy; then set `gate: true`
+# to make a failing scenario block the PR. (main is substituted
+# on adoption.)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: "Run the Claude Code verification pass against the live app"
+        type: boolean
+        default: false
+      only:
+        description: "Comma-separated scenario ids (empty = all)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    uses: bamr87/bamr87/.github/workflows/fleet-verify.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    with:
+      gate: false
+      agent: ${{ github.event_name == 'workflow_dispatch' && inputs.agent || contains(github.event.pull_request.labels.*.name, 'verify') }}
+      only: ${{ github.event_name == 'workflow_dispatch' && inputs.only || '' }}
+    secrets: inherit
