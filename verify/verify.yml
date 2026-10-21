@@ -41,9 +41,15 @@ app:
 
 # Named viewports scenarios can reference by name.
 viewports:
-  desktop: { width: 1280, height: 800 }
-  tablet: { width: 768, height: 1024 }
-  mobile: { width: 390, height: 844 }
+  desktop:
+    width: 1280
+    height: 800
+  tablet:
+    width: 768
+    height: 1024
+  mobile:
+    width: 390
+    height: 844
 
 # Where things live (relative to the repo root).
 features: features/features.yml
