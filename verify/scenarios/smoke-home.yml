@@ -36,8 +36,12 @@ description: "The first thing any visitor does: land on the home page, see the m
 viewports: [desktop, mobile]
 steps:
   - goto: /
-  - expect: { status: 200 }
-  - expect: { visible: "main, [role=main], #main-content" }
-  - expect: { no_horizontal_scroll: true }
-  - expect: { no_console_errors: true }
+  - expect:
+      status: 200
+  - expect:
+      visible: "main, [role=main], #main-content"
+  - expect:
+      no_horizontal_scroll: true
+  - expect:
+      no_console_errors: true
   - screenshot: home
