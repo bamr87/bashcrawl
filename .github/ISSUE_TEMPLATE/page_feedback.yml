@@ -1,0 +1,48 @@
+# .github/ISSUE_TEMPLATE/page_feedback.yml — the no-JS twin of the
+# <fleet-feedback> widget (spec: specs/FEEDBACK.md, UPS-FB-07/25).
+# Seeded by the feedback kit; the inline "Improve this page" anchor points here.
+name: Page feedback
+description: Report a problem with, or suggest an improvement to, a specific page.
+title: "[Page feedback] "
+labels: [page-feedback]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Request type
+      options:
+        - Report a problem (fix-page)
+        - Improve this page (improve-page)
+        - Add missing detail (expand-page)
+        - Flag outdated content (update-page)
+        - Accessibility issue (accessibility)
+        - UI / UX improvement (ui-ux)
+        - Performance (performance)
+        - Feature request (feature)
+        - Ask a question (question)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is wrong or what would you change, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      placeholder: https://…
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, device, colour scheme — anything that helps reproduce.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console / error logs
+      render: text

@@ -1,0 +1,32 @@
+name: Release
+
+# kit: sdlc v0.1.0 — thin caller of the fleet's ONE release-please
+# workflow (decision D5: every repo, content included, has a CHANGELOG.md that
+# release-please writes). Needs release-please-config.json and
+# .release-please-manifest.json at the repo root (templates/sdlc/release/ in
+# bamr87/bamr87 has one config per release type). Don't edit the logic here.
+#
+# Pinned to the floating major tag, never a branch (UPS-WORK-10). Optional
+# secret RELEASE_PLEASE_TOKEN lets the release PR's commits trigger CI.
+# A repo that publishes to a registry chains its publish job off
+# `needs.release.outputs.release_created` below this one.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: bamr87/bamr87/.github/workflows/release-please.yml@v2
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets: inherit
