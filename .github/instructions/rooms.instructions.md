@@ -416,7 +416,7 @@ cat scroll
 ./anvil
 ```
 
-Then run `make validate-contracts` to confirm the registries match the filesystem, and `make web-build` to regenerate the static web trainer — it picks up the room title, context hint, encounter icon, and item icon from the registries.
+Then run `make generate-contract-docs` to refresh `docs/generated/` (`make validate-contracts` fails while it is stale), `make validate-contracts` to confirm the registries match the filesystem, and `make web-build` to regenerate the static web trainer — it picks up the room title, context hint, encounter icon, and item icon from the registries.
 
 ## Validation Checklist
 

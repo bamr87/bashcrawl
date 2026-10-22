@@ -1,5 +1,7 @@
 # Authoring Courses
 
+> Write a course without JavaScript: Markdown lessons with rule objectives in their frontmatter, a lab of practice files, and how to check your work.
+
 A course is a directory of Markdown files. You can add one without writing any JavaScript: the frontmatter carries the machine-readable parts, and the body is the lesson text learners read. It's the same shape as a bashOS slash command, one spec per file.
 
 ```text

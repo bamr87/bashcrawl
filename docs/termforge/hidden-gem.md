@@ -1,5 +1,7 @@
 # Hidden Gem — DAEMON STORM
 
+> DAEMON STORM, the secret pixel shooter in the TermForge HUD: how to open it, how its pixels and rules work, and how to recapture its screenshots.
+
 A secret pixel shooter inside the TermForge HUD. It is **not** a listed command, does **not** appear in `help` / `commands`, and is **not** in the web arcade. HUD-mode `host-tty.js` only (`make tty-demo`). Zero dependencies: the whole thing is `termforge/node/gem.js` on top of a 350-line pixel canvas.
 
 Rogue processes descend on the shell in formation. You are the prompt. Every shot is a signal.

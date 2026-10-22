@@ -1,5 +1,7 @@
 # Events v1
 
+> The normative contract for TermForge typed events: the event shape, delivery rules, every type and how events relate to the HUD's state diff.
+
 Normative contract for TermForge **typed events**: the structured channel between a session and everything that watches it. The [Line protocol](terminal-protocol.v2.md) is what a command *prints*; events are what *happened*.
 
 Implementation: `termforge/core/events.js` (`EventBus`, `TYPES`). The Shell owns one bus per session (`shell.events`). The design mirrors bashOS's `src/bashos/events.py`: the kernel emits typed facts, and surfaces render them. Kernel code never prints.

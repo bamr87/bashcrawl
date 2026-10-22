@@ -2,19 +2,9 @@
 # =================================
 # Two things live here: the terminal-core game (play it with real cd/cat under
 # entrance/) and the static web trainer generated from it. Plus a lean MCP
-# playtest harness. Usage:
-#   make setup             One-time game setup (make encounters executable)
-#   make web-build         Build the static web bundle (web/data/*.json)
-#   make web-dev           The web app with hot reload at http://127.0.0.1:5173 (make web-install first)
-#   make web-test          Build + validate the web bundle
-#   make validate-contracts  Validate YAML registries against the filesystem
-#   make test              Run unit + integration tests
-#   make test-mcp          Run the playtest-harness smoke tests in a .venv
-#   make playtest          Blank-slate playtest: Claude Code plays via MCP, then score
-#   make ux-review         Score the terminal stage against the UX rules
-#   make lint              Run shellcheck, yamllint, markdownlint
-#   make clean             Reset game state to defaults
-#   make help              Show this help
+# playtest harness. Every target documents itself with a `##` comment:
+# `make help` prints them, and `make generate-contract-docs` writes the same
+# list to docs/generated/make-targets.md.
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
@@ -100,14 +90,15 @@ agentwatch: ## AI-agent task dashboard (ARGS="--data-dir logs/sessions" for real
 # ── Content contracts ──────────────────────────────────────────────────
 
 .PHONY: validate-contracts
-validate-contracts: ## Validate shared content contracts against the filesystem
+validate-contracts: ## Validate shared content contracts against the filesystem (and docs/generated/ freshness)
 	@$(PYTHON) scripts/validate_content_contracts.py
 	@$(PYTHON) scripts/validate_walkthrough_fs.py
 	@$(PYTHON) scripts/validate_runtime_commands.py
 	@$(PYTHON) scripts/generate_content_index.py --check
+	@$(PYTHON) scripts/generate_contract_docs.py --check
 
 .PHONY: generate-contract-docs
-generate-contract-docs: ## Generate docs from shared contracts
+generate-contract-docs: ## Rewrite docs/generated/ from the registries, the Makefile and the launcher
 	@$(PYTHON) scripts/generate_contract_docs.py
 
 # ── Testing ────────────────────────────────────────────────────────────
