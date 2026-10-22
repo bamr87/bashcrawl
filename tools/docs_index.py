@@ -179,7 +179,7 @@ def balanced(text):
 
 
 def clean(text):
-    text = re.sub(r"<!--.*?-->", "", text)
+    text = re.sub(r"<!--.*?--!?>", "", text, flags=re.S)  # a comment may span lines or end "--!>"
     text = re.sub(r"\s+", " ", text).strip()
     if len(text) > SUMMARY_MAX:
         cut = text[:SUMMARY_MAX].rsplit(" ", 1)[0]
