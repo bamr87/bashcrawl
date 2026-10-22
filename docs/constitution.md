@@ -22,7 +22,7 @@ These rules are lifted from the repo's own agent guide; breaking one is grounds 
 - The reader layer (`web/src/terminal/prose.ts` + `log-decor.ts`) runs after every paint. _(CLAUDE.md)_
 - The prompt answers some words with screens: `journal`, `menu`/`pause`, `hero`/`wardrobe`, `options`/`settings`, `title` never reach the engine — `GameStore.intercept()` echoes a dim line and opens the overlay (`InputTarget.intercept`). _(CLAUDE.md)_
 - A new surface should get the same treatment — and never `AnimatePresence mode="wait"`. _(CLAUDE.md)_
-- A mini-game = *(seed world + goal predicate + scoring)* over a scoped bare `Runtime` (`BashcrawlArcade.GAMES` in `arcade.js`) — never reimplement command behavior outside `termforge/core/` + `runtime.js`. _(CLAUDE.md)_
+- A mini-game = _(seed world + goal predicate + scoring)_ over a scoped bare `Runtime` (`BashcrawlArcade.GAMES` in `arcade.js`) — never reimplement command behavior outside `termforge/core/` + `runtime.js`. _(CLAUDE.md)_
 - Dialogs animate out with `AnimatePresence`, which never completes under jsdom — assert the store state, not the DOM's absence, and never use `mode="wait"` for a sequence of cards (the next one never mounts there); key an enter-only `motion.div` instead. _(CLAUDE.md)_
 - Secrets (tokens, API keys) are never printed, logged or committed. _(fleet rule)_
 - `CHANGELOG.md`, when present, is not hand-edited once release-please owns it. _(fleet rule)_
@@ -84,7 +84,7 @@ Every PR passes the checks the repo's guide names:
 
 This constitution changes only through a numbered record in [docs/amendments/](amendments/) (`NNNN-kebab-slug.md`, copied from [0000-template.md](amendments/0000-template.md)):
 
-1. **Propose** — open a PR that adds the record (`Status: proposed`) *and* the edit to this file it describes.
+1. **Propose** — open a PR that adds the record (`Status: proposed`) _and_ the edit to this file it describes.
    Name what it affects: constitution sections, PRD requirement ids, feature ids.
 2. **Review** — the maintainer reviews; an agent never approves or merges its own amendment.
 3. **Ratify** — merging the PR ratifies it. The record says `Status: ratified` and `Ratified by:` the PR.
