@@ -1,5 +1,7 @@
 # ASCII Motion in TermForge
 
+> How every picture is an ASCII Motion file: where the art lives, how to change or add one, the motion CLI, and what plays where.
+
 Every picture TermForge and Bashcrawl draw is an [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) file. That covers the command-stage animations, the encounter portraits, the room vignettes, the banners, and the cow in `cowsay`. No art is written into the code as string literals. Each file is a `.asciimtn` session, the format the editor at
 <https://ascii-motion.app> opens and saves. So changing a picture means opening
 the file in the editor, not editing JavaScript.

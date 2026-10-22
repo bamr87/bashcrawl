@@ -1,5 +1,7 @@
 # TermForge Architecture
 
+> TermForge, the universal terminal framework under the web game: its module map, dependency rules, hook spine, platform services, VFS, sessions and vendoring contract.
+
 TermForge is the universal terminal framework extracted from Bashcrawl's browser emulator: one environment-agnostic kernel that powers the web game, real terminal sessions, a lightweight telnet server, and custom dev/monitoring tools.
 
 One sentence per layer: a **Shell** executes command lines over a **VFS** world and returns **Line protocol** records; a **TerminalView** buffers those records and paints them through a **sink** (DOM or ANSI); a **SessionController** owns command history, controls, errors, and persistence; **hosts** own transport and input; **apps** compose worlds, command packs, and hooks.

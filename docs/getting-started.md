@@ -1,5 +1,7 @@
 # Getting Started
 
+> Install and start playing: clone and play, Binder or a macOS download, the web trainer, the help system, resetting the game and the playtest harness.
+
 ## Prerequisites
 
 - A terminal (bash or zsh on macOS/Linux, or WSL on Windows)

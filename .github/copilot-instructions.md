@@ -1,5 +1,7 @@
 # Bashcrawl Copilot Instructions
 
+> GitHub Copilot's repository instructions for Bashcrawl — architecture, conventions and content rules; AGENTS.md is the canonical source.
+
 ## Project Overview
 
 Bashcrawl is an educational text-based adventure game that teaches terminal/shell commands through immersive fantasy gameplay. Directories are game rooms, files named `scroll` are educational content, and executable scripts (`treasure`, `potion`, `spell`, etc.) are interactive encounters. The repo has two player surfaces, one harness, and one embedded framework: the pure-bash game under `entrance/` (played with a real shell), the browser trainer in `web/` (a React + Vite app in `web/src/` over the classic-script engine in `web/assets/js/`; content built by `scripts/export_static_web.py`, the app by `npm run build` into `web/dist/`), the MCP playtest harness in `src/playtest/`, and TermForge in `termforge/` — the universal terminal framework the web emulator was extracted into (kernel in `termforge/core/`, vendored to `web/assets/js/vendor/termforge/` by `make web-build`; edit the core, never the vendor mirror; node hosts serve the game over TTY/telnet). Runtime dependencies: standard POSIX shell tools. Python 3.10+ required only for the web export/validation tooling (`scripts/`) and the playtest harness; node 20+ for the TermForge tests and hosts (`make test-js`, `make tty-demo`), node 22.22+ to build or test the web app (`make web-test`).
@@ -129,7 +131,7 @@ bash lib/reset.sh          # Execute
 - Level 1 (entrance): Pure ASCII, `===` dividers, 80-char width, `cat`-readable — no Unicode, no ANSI
 - Level 2 (cellar/armoury): Unicode box-drawing (`┌─┐`), emojis OK, `####` headers
 - Level 3 (hidden areas): Markdown features allowed (players know `cat` and pagers by then)
-- See [.github/instructions/scrolls.instructions.md](.github/instructions/scrolls.instructions.md) for the full standard
+- See [.github/instructions/scrolls.instructions.md](instructions/scrolls.instructions.md) for the full standard
 - Emoji conventions: 🗡️ executables, 🏰 directories, 💰 treasures, 📜 scrolls
 
 ### Adding New Rooms
