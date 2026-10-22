@@ -92,3 +92,7 @@ The filesystem **is** the game. Hidden areas ship as dotted dirs (`entrance/.cha
 - Goldens: regenerate only with `node termforge/test/tools/record-goldens.js --update`. A fixture diff is a claimed behavior change. `termforge/test/fixtures/save/save-v1-legacy.json` is write-once.
 - Do not rename or drop keys on the story save (`bashcrawl-web-state-v1`); `termforge/test/game-save.test.js` locks the shape.
 - `make generate-contract-docs` writes `docs/generated/` — do not hand-edit those files.
+
+## Governance
+
+Read [`docs/constitution.md`](docs/constitution.md) before changing anything: it is the highest-precedence rule set here and wins over this file when they disagree. It changes only through a numbered record in [`docs/amendments/`](docs/amendments/), ratified by the maintainer merging the PR; agents propose, never merge. Every user-facing feature has a stable id in [`features/features.yml`](features/features.yml) with `status`, location and the PRD requirement ids it serves; the PRD's "Feature catalog" block is generated from it (`python3 <bamr87/bamr87>/tools/governance_lint.py prd-sync . --write`; check with `… check .`). Never hand-edit that block or `CHANGELOG.md`.
