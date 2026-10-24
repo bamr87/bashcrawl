@@ -1,0 +1,9 @@
+{
+  "_comment": "kit: verify — MCP servers the verification agent needs. Playwright MCP lets Claude Code drive the live app the way a user would (navigate, click, fill, snapshot, screenshot). Referenced by fleet-verify.yml (--mcp-config verify/mcp.json) and by the verify-feature skill.",
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--output-dir", "test/evidence/agent"]
+    }
+  }
+}
