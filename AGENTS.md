@@ -300,3 +300,7 @@ validates the bundle (`test_static_web.py` fails CI if committed data or the ven
   `PYTHONPATH=src`; smoke-tested via `make test-mcp`.
 - **Logging**: JSONL session logs in `logs/sessions/` (playtest recorder + test log capture).
 - **Docs**: human docs in `docs/`; generated docs in `docs/generated/` (do not hand-edit).
+
+## Governance
+
+Read [`docs/constitution.md`](docs/constitution.md) before changing anything: it is the highest-precedence rule set here and wins over this file when they disagree. It changes only through a numbered record in [`docs/amendments/`](docs/amendments/), ratified by the maintainer merging the PR; agents propose, never merge. Every user-facing feature has a stable id in [`features/features.yml`](features/features.yml) with `status`, location and the PRD requirement ids it serves; the PRD's "Feature catalog" block is generated from it (`python3 <bamr87/bamr87>/tools/governance_lint.py prd-sync . --write`; check with `… check .`). Never hand-edit that block or `CHANGELOG.md`.
