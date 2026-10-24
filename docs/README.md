@@ -29,11 +29,13 @@ New to the game? Read [getting-started.md](getting-started.md), then [gameplay.m
 | [`docs/advanced.md`](advanced.md) | Hidden areas, the full dungeon map, scroll format standards, the executable encounter template and agent playtesting, for players and authors going deeper. |
 | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | The component map behind AGENTS.md: where every part of the dungeon, the TermForge framework, the game engine, the React web app and the tooling lives, what each owns, and the web app's design rules. |
 | [`docs/authoring-courses.md`](authoring-courses.md) | Write a course without JavaScript: Markdown lessons with rule objectives in their frontmatter, a lab of practice files, and how to check your work. |
+| [`docs/constitution.md`](constitution.md) | The rules every change to this repo must satisfy, whoever makes it — a human or an AI agent. Agents read this before [AGENTS.md](../AGENTS.md) conventions, the [PRD](../PRD.md), or the [feature catalog](../features/features.yml). Ratified… |
 | [`docs/contributing.md`](contributing.md) | How to report issues, set up a development checkout, add rooms, encounters and scrolls, follow the code standards, and open a pull request. |
 | [`docs/gameplay.md`](gameplay.md) | The game's mechanics: core commands, room progression, inventory, health, encounters, hidden rooms, combat and game state. |
 | [`docs/getting-started.md`](getting-started.md) | Install and start playing: clone and play, Binder or a macOS download, the web trainer, the help system, resetting the game and the playtest harness. |
 | [`docs/PLATFORM.md`](PLATFORM.md) | The platform's five layers, the learning loop, how its patterns align with bashOS and chui, how to extend it, and the contracts that keep it honest. |
 | [`docs/walkthrough.md`](walkthrough.md) | Every path, puzzle and command in the dungeon, quest by quest: a complete guide to learning real UNIX commands by exploring the catacombs, solving puzzles and defeating monsters from the command line. |
+| [`docs/amendments/`](amendments/README.md) | The append-only log of changes to [the constitution](constitution.md). |
 | [`docs/generated/`](generated/README.md) | Reference pages generated from the content registries, the courses, the `Makefile` and the launcher; rebuild them with `make generate-contract-docs` instead of editing them. |
 
 ### `src/`
