@@ -1,0 +1,54 @@
+# =============================================================================
+# features/features.yml — THE FEATURE INDEX for bamr87/bashcrawl
+# =============================================================================
+# kit: verify v0.1.0 · governance v0.1.0 (bamr87/bamr87 templates/verify/, templates/governance/)
+#
+# One entry per user-facing capability, grounded in this repo's PRD, README and
+# code: what it does, where it lives (`link`), where it is explained (`docs`),
+# its `status` (shipped | partial | planned | deprecated | tbd) and the PRD
+# requirements it serves (`prd:`; TBD = not yet traced). Ids are STABLE: never
+# renumber or reuse one. The PRD's "Feature catalog" block is generated from
+# this file — edit here, then run:
+#   python3 <bamr87/bamr87>/tools/governance_lint.py prd-sync . --write
+# Validate: python3 <hub>/tools/governance_lint.py check .  ·  <hub>/tools/features_index.py check .
+# Schema: features/v1 (field reference: bamr87/bamr87 templates/verify/features.template.yml)
+# =============================================================================
+schema: features/v1
+repo: bamr87/bashcrawl
+
+features:
+  - id: BASHCRAWL-001
+    title: "Web app (bamr87.github.io/bashcrawl)"
+    description: "Web app (bamr87.github.io/bashcrawl): Learn courses beside an emulated shell, Story mode, Practice Arcade (Path Navigator, grep/find Hunt, Pipe Puzzle, Command Flash, Vim Catacombs), Reference cheatsheets"
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: cli
+    link: "web/index.html"
+    docs: "README.md"
+  - id: BASHCRAWL-002
+    title: "Classic terminal dungeon"
+    description: "Classic terminal dungeon (`entrance/`, `setup.sh`)"
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: cli
+    link: "entrance"
+    docs: "README.md"
+  - id: BASHCRAWL-003
+    title: "XP/score persistence across modes"
+    description: "XP/score persistence across modes"
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: infra
+    docs: "README.md"
+  - id: BASHCRAWL-004
+    title: "Content data"
+    description: "Content data (rooms, recommendations) and transcript-based tests"
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: cli
+    link: "src/help/data/rooms.yaml"
+    docs: "README.md"
