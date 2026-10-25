@@ -300,3 +300,39 @@ class TestTomeStudyGate:
         assert "cd study" in result.stdout
         assert "You still need" not in result.stdout
         assert library.joinpath("study").is_dir()
+
+
+# ---------------------------------------------------------------------------
+# Hidden study seal: `ls -a` + `cd .study` must not skip the tome
+# ---------------------------------------------------------------------------
+
+_GRIMOIRE_HIDDEN = "entrance/.chapel/courtyard/aviary/hall/library/.study/grimoire"
+
+
+class TestStudySeal:
+    """The grimoire stays sealed until the tome has opened the study."""
+
+    def test_grimoire_via_hidden_path_is_sealed(self, sandbox):
+        result = run_game_script(sandbox, _GRIMOIRE_HIDDEN, {"I": "amulet,coins"})
+        study = (sandbox / _GRIMOIRE_HIDDEN).parent
+        assert "sealed" in result.stdout
+        assert "./tome" in result.stdout
+        assert not study.joinpath("portal").exists()
+        assert "bc ()" not in result.stdout
+
+    def test_grimoire_without_items_names_them(self, sandbox):
+        library = (sandbox / _TOME).parent
+        (library / ".study").rename(library / "study")
+        grimoire = (library / "study" / "grimoire").relative_to(sandbox)
+        result = run_game_script(sandbox, str(grimoire), {"I": "amulet"})
+        assert "sealed" in result.stdout
+        assert "the coins" in result.stdout
+        assert not library.joinpath("study", "portal").exists()
+
+    def test_grimoire_after_tome_opens_portal(self, sandbox):
+        run_game_script(sandbox, _TOME, {"I": "amulet,coins"})
+        library = (sandbox / _TOME).parent
+        grimoire = (library / "study" / "grimoire").relative_to(sandbox)
+        result = run_game_script(sandbox, str(grimoire), {"I": "amulet,coins"})
+        assert "sealed" not in result.stdout
+        assert "portal" in result.stdout.lower()
