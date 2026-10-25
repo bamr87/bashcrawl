@@ -55,9 +55,12 @@ test("the dotted stored path still runs encounters after a reveal", () => {
 // Nested reveals: a hidden room inside an already-revealed room must be keyed
 // by the visible parent path, or `cd study` fails after ./tome (#104).
 const LIBRARY = "cd /entrance/chapel/courtyard/aviary/hall/library";
+// The tome only moves the bookshelf for amulet (cellar) + coins (chamber).
+const COINS = ["cd /entrance/cellar/armoury/chamber", "./treasure"];
+const STUDY = [...REVEAL, ...COINS, LIBRARY, "./tome"];
 
 test("./tome reveals study/ so `cd study` and `ls` work by its visible name", () => {
-    const { runtime, out } = play([...REVEAL, LIBRARY, "./tome", "ls", "cd study"]);
+    const { runtime, out } = play([...STUDY, "ls", "cd study"]);
     assert.ok(out["./tome"].includes("🔓 A new passage opens: study/"), out["./tome"].join("\n"));
     assert.match(out.ls.join("\n"), /\bstudy\b/);
     assert.doesNotMatch(out.ls.join("\n"), /\.study/);
@@ -66,7 +69,7 @@ test("./tome reveals study/ so `cd study` and `ls` work by its visible name", ()
 });
 
 test("vfs.visible() is the inverse of actual() across nested reveals", () => {
-    const { runtime } = play([...REVEAL, LIBRARY, "./tome"]);
+    const { runtime } = play(STUDY);
     const real = "/entrance/.chapel/courtyard/aviary/hall/library/.study/grimoire";
     const vis = runtime.vfs.visible(real);
     assert.strictEqual(vis, "/entrance/chapel/courtyard/aviary/hall/library/study/grimoire");
@@ -82,27 +85,43 @@ const PREP = [
 ];
 const GRIMOIRE = [LIBRARY, "./tome", "cd study", "./grimoire", "source grimoire"];
 
-test("source grimoire without coins names the missing item and does not claim the quest", () => {
+test("without coins the tome names the missing item and the quest says so too", () => {
     const { runtime, out } = play([...PREP, ...GRIMOIRE, "hint", "quest"]);
-    const src = out["source grimoire"].join("\n");
     const q = runtime.quests[runtime.state.currentQuestId];
     assert.strictEqual(q && q.id, 7, "quest 7 should be the active (stalled) quest");
-    assert.doesNotMatch(src, /quest ready/);
-    assert.match(src, /You still need: coins/);
+    assert.match(out["./tome"].join("\n"), /will not move[\s\S]*You still need the coins/);
+    assert.ok(!out["./tome"].some((t) => /passage opens/.test(t)), out["./tome"].join("\n"));
+    assert.match(out["cd study"].join("\n"), /Not a directory/);
+    assert.doesNotMatch(out["source grimoire"].join("\n"), /quest ready|merges with your shell/);
     assert.match(out.hint.join("\n"), /You still need: coins/);
     assert.match(out.quest.join("\n"), /You still need: coins/);
     assert.match(q.hint, /coins/);
 });
 
-test("fetching the coins and sourcing again completes the final quest (no softlock)", () => {
-    const { runtime, out } = play([
-        ...PREP, ...GRIMOIRE,
-        "cd /entrance/cellar/armoury/chamber", "./treasure",
-        "cd /entrance/chapel/courtyard/aviary/hall/library/study", "source grimoire",
-    ]);
+test("fetching the coins and reading the tome again completes the final quest (no softlock)", () => {
+    const { runtime, out } = play([...PREP, ...GRIMOIRE, ...COINS, ...GRIMOIRE]);
     assert.ok(runtime.state.completedQuestIds.includes(7), JSON.stringify(runtime.state.completedQuestIds));
     assert.strictEqual(runtime.quests[runtime.state.currentQuestId], undefined);
     assert.ok(out["source grimoire"].join("\n").length > 0);
+});
+
+// Exploit: `ls -a` shows the hidden `.study`, but the dotted path must stay
+// sealed — no cd, cat, ./grimoire or source grimoire before the tome opens it.
+test("the hidden .study is sealed before the tome opens it", () => {
+    const { runtime, out } = play([
+        ...PREP, ...COINS, LIBRARY, "ls -a", "cd .study", "cat .study/scroll",
+        "./.study/grimoire", "source .study/grimoire",
+        "cd /entrance/.chapel/courtyard/aviary/hall/library/.study",
+    ]);
+    assert.match(out["ls -a"].join("\n"), /\.study/);
+    assert.match(out["cd .study"].join("\n"), /Not a directory/);
+    assert.match(out["cat .study/scroll"].join("\n"), /No such file/);
+    assert.match(out["./.study/grimoire"].join("\n"), /No runnable script/);
+    assert.match(out["source .study/grimoire"].join("\n"), /Cannot source/);
+    assert.match(out["cd /entrance/.chapel/courtyard/aviary/hall/library/.study"].join("\n"), /Not a directory/);
+    assert.ok(!runtime.state.inventory.includes("grimoire"));
+    assert.ok(!runtime.state.completedQuestIds.includes(7));
+    assert.ok(runtime.state.cwd.endsWith("/library"), runtime.state.cwd);
 });
 
 test("with coins, source grimoire says the quest is ready", () => {
@@ -114,7 +133,7 @@ test("with coins, source grimoire says the quest is ready", () => {
 });
 
 test("the study's web room panel only suggests commands the web port supports", () => {
-    const { runtime } = play([...REVEAL, LIBRARY, "./tome", "cd study"]);
+    const { runtime } = play([...STUDY, "cd study"]);
     const meta = runtime.currentRoomMeta();
     const text = JSON.stringify([meta.next_steps, meta.essential_commands, meta.hint]);
     assert.doesNotMatch(text, /cd portal|init_help/);

@@ -94,6 +94,8 @@
         reviewHint: (hint) => `💡 ${hint}`,
         reviewDone: (right, total) => `🏁 Review complete — ${right}/${total} correct.`,
         reviewQuit: "Review ended early; progress so far is kept.",
+        reviewQuitEmpty: "Review ended early — no cards answered, nothing counted.",
+        reviewPartial: (right, answered, total) => `Review ended early — ${right}/${answered} correct (${answered} of ${total} cards). Card progress is kept; finish a whole review to count it.`,
         reviewNext: (when) => (when ? `Next card due ${when}.` : "Every skill you know is scheduled — come back tomorrow."),
         reviewBusy: (reason) => reason,
         reviewPrompt: (pos, total) => `review ${pos}/${total} ❯`,
@@ -113,6 +115,20 @@
         const groups = (opts.skills || []).map((g) => ({ group: String(g.group), commands: (g.commands || []).map(String) }));
         const skillGroup = new Map();
         for (const g of groups) for (const cmd of g.commands) if (!skillGroup.has(cmd)) skillGroup.set(cmd, g.group);
+        // The real short flags of each command (`flags: {ls: "aFl"}` on a
+        // skill group). Only these count toward the skill map, so `ls -z`
+        // is not a discovered flag; a command with no entry counts none.
+        const validFlags = new Map();
+        for (const g of opts.skills || []) {
+            const table = g && g.flags && typeof g.flags === "object" && !Array.isArray(g.flags) ? g.flags : {};
+            for (const [cmd, letters] of Object.entries(table)) {
+                if (skillGroup.has(cmd) && typeof letters === "string") validFlags.set(cmd, new Set(letters.split("")));
+            }
+        }
+        function isValidFlag(cmd, letter) {
+            const set = validFlags.get(cmd);
+            return Boolean(set && set.has(letter));
+        }
         const cards = (opts.cards || []).filter((c) => c && skillGroup.has(c.skill) && Array.isArray(c.a) && c.a.length && c.q);
         const size = Math.max(1, Number(opts.size) || 5);
         const xpPerCard = opts.xpPerCard == null ? 5 : Number(opts.xpPerCard);
@@ -137,6 +153,7 @@
                 for (const arg of event.args || []) {
                     if (!/^-[A-Za-z0-9]+$/.test(arg)) continue;
                     for (const letter of arg.slice(1)) {
+                        if (!isValidFlag(event.cmd, letter)) continue;
                         if (!rec.flags.includes(letter) && rec.flags.length < MAX_FLAGS) rec.flags.push(letter);
                     }
                 }
@@ -234,19 +251,25 @@
             return [{ kind: "info", text: this.text("reviewStart", queue.length) }, ...cardLine(this)];
         }
 
+        // A review counts (mastery.reviews, which the "finished a review"
+        // badge and anything keyed on it read) only when every card was
+        // answered. Quitting early keeps the per-card progress already made
+        // but is not a finished review; quitting before answering anything
+        // earns and reports nothing.
         function finish(shell, quit) {
             const s = slice(shell);
             const r = s.review;
             s.review = null;
-            s.reviews += 1;
+            if (quit && r.pos === 0) return [{ kind: "dim", text: shell.text("reviewQuitEmpty") }];
+            if (!quit) s.reviews += 1;
             const now = shell.clock.now();
             const next = Object.entries(s.skills)
                 .filter(([name, rec]) => skillGroup.has(name) && (rec.uses || rec.box) && rec.due > now)
                 .map(([, rec]) => rec.due).sort((a, b) => a - b)[0];
             const days = next ? Math.ceil((next - now) / DAY_MS) : 0;
             const out = [];
-            if (quit) out.push({ kind: "dim", text: shell.text("reviewQuit") });
-            out.push({ kind: "success", text: shell.text("reviewDone", r.right, quit ? r.pos : r.queue.length) });
+            if (quit) out.push({ kind: "dim", text: shell.text("reviewPartial", r.right, r.pos, r.queue.length) });
+            else out.push({ kind: "success", text: shell.text("reviewDone", r.right, r.queue.length) });
             out.push({ kind: "dim", text: shell.text("reviewNext", dueCount(shell) ? "now" : next ? `in ${days} day${days === 1 ? "" : "s"}` : "") });
             return out;
         }
@@ -324,6 +347,9 @@
                         for (const [name, raw] of Object.entries(s.skills)) {
                             if (skillGroup.has(name)) skills[name] = cleanSkill(raw);
                         }
+                    }
+                    for (const [name, rec] of Object.entries(skills)) {
+                        rec.flags = rec.flags.filter((f) => isValidFlag(name, f));
                     }
                     s.skills = skills;
                     const r = s.review;
