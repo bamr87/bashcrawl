@@ -694,6 +694,15 @@ def _validate_progression(
             if cmd in tracked:
                 _add_error(errors, f"{where}: '{cmd}' is already in group '{tracked[cmd]}'")
             tracked[str(cmd)] = str(name)
+        flags = group.get("flags") or {}
+        if not isinstance(flags, dict):
+            _add_error(errors, f"{where}: flags must be a map of command -> letters")
+            continue
+        for cmd, letters in flags.items():
+            if cmd not in commands:
+                _add_error(errors, f"{where}: flags for '{cmd}', which is not in this group")
+            if not isinstance(letters, str) or not re.fullmatch(r"[A-Za-z0-9]+", letters):
+                _add_error(errors, f"{where}: flags for '{cmd}' must be a string of flag letters")
     cards = data.get("cards") or []
     for i, card in enumerate(cards):
         where = f"progression.yaml: cards[{i}]"

@@ -19,7 +19,7 @@ const WORLD = {
     directories: { "/w": [{ name: "notes", type: "file", hidden: false }, { name: "a.log", type: "file", hidden: false }] },
     files: { "/w/notes": "alpha\nbeta\n", "/w/a.log": "x\n" },
 };
-const SKILLS = [{ group: "Basics", commands: ["ls", "cat", "grep", "wc"] }];
+const SKILLS = [{ group: "Basics", commands: ["ls", "cat", "grep", "wc"], flags: { ls: "alF", grep: "inv", wc: "lwc" } }];
 const CARDS = [
     { skill: "ls", q: "Show hidden files too.", a: ["ls -a"], why: "-a is all" },
     { skill: "cat", q: "Print notes.", a: ["cat notes"], why: "" },
@@ -96,11 +96,14 @@ test("review can be refused (busy), quit mid-way, and an imported slice is sanit
     assert.match(busy.run("review"), /Finish the quiz first\./);
     const { shell, run } = masteryShell();
     run("review");
-    assert.match(run("quit"), /Review ended early[\s\S]*0\/0 correct/);
+    const quitOut = run("quit");
+    assert.match(quitOut, /Review ended early — no cards answered, nothing counted/);
+    assert.doesNotMatch(quitOut, /Review complete/);
+    assert.equal(shell.state.mastery.reviews, 0, "a review quit before any answer does not count");
     shell.state = {
         ...shell.state,
         mastery: {
-            skills: { ls: { uses: -4, fails: "x", flags: ["a", "<script>", 3], box: 99, due: 5 }, ghost: { uses: 9 } },
+            skills: { ls: { uses: -4, fails: "x", flags: ["a", "z", "<script>", 3], box: 99, due: 5 }, ghost: { uses: 9 } },
             review: { queue: [0, 99], pos: 0 },
             reviews: -1,
         },
@@ -111,6 +114,35 @@ test("review can be refused (busy), quit mid-way, and an imported slice is sanit
     assert.deepStrictEqual({ ...m.skills.ls, flags: [...m.skills.ls.flags] }, { uses: 0, fails: 0, flags: ["a"], box: 5, due: 5 });
     assert.equal(m.review, null);
     assert.equal(m.reviews, 0);
+});
+
+test("only a command's real flags count toward the skill map (no ls -z / -q)", () => {
+    const { shell, run } = masteryShell();
+    run("ls -z");
+    run("ls -q");
+    run("ls --bogus");
+    run("ls -zaq");
+    run("cat -a notes");
+    const s = shell.state.mastery.skills;
+    assert.deepStrictEqual([...s.ls.flags], ["a"], "only -a is a real ls flag here");
+    assert.deepStrictEqual([...((s.cat || {}).flags || [])], [], "a command with no allowlist counts no flags");
+});
+
+test("a partial review keeps card progress but is not a finished review", () => {
+    const { shell, xp, run } = masteryShell();
+    run("ls -a");
+    run("review");
+    const card = run("hint");
+    assert.ok(card.length > 0);
+    shell.state.mastery.review.queue = [0, 1, 2];
+    shell.state.mastery.review.pos = 0;
+    run("ls -a");
+    const out = run("quit");
+    assert.match(out, /Review ended early — 1\/1 correct \(1 of 3 cards\)/);
+    assert.doesNotMatch(out, /Review complete/);
+    assert.equal(shell.state.mastery.reviews, 0);
+    assert.equal(shell.state.mastery.skills.ls.box, 1, "the answered card's progress is kept");
+    assert.equal(xp(), 5, "the correct answer still earns its card XP");
 });
 
 test("explain captures the raw line, decodes flags and arguments, and never runs anything", () => {

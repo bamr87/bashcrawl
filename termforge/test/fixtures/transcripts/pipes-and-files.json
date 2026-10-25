@@ -577,9 +577,7 @@
           "uses": 5,
           "fails": 0,
           "flags": [
-            "3",
-            "n",
-            "1"
+            "n"
           ],
           "box": 0,
           "due": 0
@@ -587,10 +585,7 @@
         "tail": {
           "uses": 2,
           "fails": 0,
-          "flags": [
-            "1",
-            "2"
-          ],
+          "flags": [],
           "box": 0,
           "due": 0
         },
@@ -650,8 +645,7 @@
           "uses": 2,
           "fails": 0,
           "flags": [
-            "f",
-            "2"
+            "f"
           ],
           "box": 0,
           "due": 0
@@ -703,9 +697,7 @@
         "chmod": {
           "uses": 3,
           "fails": 1,
-          "flags": [
-            "x"
-          ],
+          "flags": [],
           "box": 0,
           "due": 0
         },
