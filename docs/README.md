@@ -35,7 +35,8 @@ New to the game? Read [getting-started.md](getting-started.md), then [gameplay.m
 | [`docs/getting-started.md`](getting-started.md) | Install and start playing: clone and play, Binder or a macOS download, the web trainer, the help system, resetting the game and the playtest harness. |
 | [`docs/PLATFORM.md`](PLATFORM.md) | The platform's five layers, the learning loop, how its patterns align with bashOS and chui, how to extend it, and the contracts that keep it honest. |
 | [`docs/walkthrough.md`](walkthrough.md) | Every path, puzzle and command in the dungeon, quest by quest: a complete guide to learning real UNIX commands by exploring the catacombs, solving puzzles and defeating monsters from the command line. |
-| [`docs/amendments/`](amendments/README.md) | The append-only log of changes to [the constitution](constitution.md). |
+| [`docs/adr/`](adr/README.md) | The index and format of bashcrawl's Architecture Decision Records: one file per hard-to-reverse decision. |
+| [`docs/amendments/`](amendments/README.md) | The append-only log of numbered amendments to the bashcrawl constitution, and how one is proposed and ratified. |
 | [`docs/generated/`](generated/README.md) | Reference pages generated from the content registries, the courses, the `Makefile` and the launcher; rebuild them with `make generate-contract-docs` instead of editing them. |
 
 ### `src/`

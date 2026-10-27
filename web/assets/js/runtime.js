@@ -148,6 +148,11 @@
         return next;
     }
 
+    // See Runtime#sealedPath / #missingUnlockItems.
+    const SEALED_SEGMENT = /(^|\/)\.study(\/|$)/;
+    const ROOM_UNLOCK_ITEMS = { study: ["amulet", "coins"] };
+    const ITEM_WHERE = { amulet: "the amulet (cellar treasure)", coins: "the coins (treasure in cellar/armoury/chamber)" };
+
     class Runtime extends global.TermForge.Shell {
         constructor(data, state, options) {
             super({
@@ -350,6 +355,37 @@
         // ── Filesystem: thin delegates onto the TermForge VFS ────────────────
         // (semantics live in termforge/core/vfs.js; these keep the public
         // surface game.js/docs.js/reference.js already consume)
+
+        // The hidden study is sealed behind the library bookshelf: until the
+        // tome moves it (amulet + coins), the stored `.study` path cannot be
+        // entered, read or run, even though `ls -a` still shows it. Once
+        // revealed the room lives at the un-dotted `study` path, so the dotted
+        // spelling stays sealed for good (matching the CLI's `mv .study study`).
+        sealedPath(path) {
+            return SEALED_SEGMENT.test(String(path || ""));
+        }
+
+        isDir(path) {
+            return this.sealedPath(path) ? false : super.isDir(path);
+        }
+
+        readFile(path) {
+            return this.sealedPath(path) ? null : super.readFile(path);
+        }
+
+        node(path) {
+            return this.sealedPath(path) ? null : super.node(path);
+        }
+
+        entries(path, showHidden = false) {
+            return this.sealedPath(path) ? [] : super.entries(path, showHidden);
+        }
+
+        // Items each gated room needs before its encounter may unlock it
+        // (rooms.yaml `unlocked_by`; the CLI tome checks the same pair).
+        missingUnlockItems(room) {
+            return (ROOM_UNLOCK_ITEMS[room] || []).filter((item) => !this.state.inventory.includes(item));
+        }
 
         // Reveal a hidden room by logical name (e.g. "chapel"), mapping the visible
         // path to its stored dotted path. Returns a message if newly unlocked.
@@ -623,7 +659,9 @@
         }
 
         runScript(script) {
-            const path = this.actual(`${this.state.cwd}/${script}`.replace(/\/+/g, "/"));
+            const typed = `${this.state.cwd}/${script}`.replace(/\/+/g, "/");
+            if (this.sealedPath(typed)) return [{ kind: "error", text: `No runnable script: ./${script}` }];
+            const path = this.actual(typed);
             const encounter = this.world.encounters[path];
             if (!encounter) return [{ kind: "error", text: `No runnable script: ./${script}` }];
             const messages = [{ kind: "magic", text: `${encounter.icon || "⚡"} ${encounter.description || script}` }];
@@ -633,6 +671,7 @@
                 if (!Array.isArray(this.state.bestiary)) this.state.bestiary = [];
                 if (!this.state.bestiary.includes(script)) this.state.bestiary.push(script);
             }
+            if (encounter.key === "monster") return this.fightMonster(encounter, script, path, messages);
             this.emit("encounter.run", { key: encounter.key, script, path });
             for (const item of encounter.grants_items || []) {
                 if (!this.state.inventory.includes(item)) {
@@ -649,11 +688,67 @@
                 messages.push({ kind: "success", text: `Inventory gained: ${encounter.grants_items.join(", ")}` });
             }
             for (const room of encounter.unlocks_rooms || []) {
+                const missing = this.missingUnlockItems(room);
+                if (missing.length) {
+                    // Same wording as the CLI tome (#103): say what is missing.
+                    if (!this.vfs.findHiddenDir(room) || !this.state.reveals[this.vfs.findHiddenDir(room).visiblePath]) {
+                        messages.push({ kind: "error", text: `A bookshelf creaks, but it will not move. Something you carry is missing. You still need ${missing.map((m) => ITEM_WHERE[m] || m).join(" and ")}.` });
+                    }
+                    continue;
+                }
                 const unlocked = this.revealRoom(room);
                 if (unlocked) messages.push(unlocked);
             }
             if (encounter.damage) messages.push({ kind: "error", text: `You took ${encounter.damage} damage.` });
             if (encounter.heals) messages.push({ kind: "success", text: `HP restored to ${this.state.hp}.` });
+            return messages;
+        }
+
+        // The hall monster (#exploit): no sword, no fight; with the sword the
+        // CLI's dice duel plays out (two d100 rolls per round, ties re-rolled),
+        // each lost round costs 5 HP, and only a win grants the crown. Dice
+        // come from the shell rng so tests can seed them.
+        fightMonster(encounter, script, path, messages) {
+            if (this.state.flags.monster) {
+                messages.push({ kind: "dim", text: "The monster's carcass lies still. The crown is already yours." });
+                return messages;
+            }
+            if (!this.state.inventory.includes("sword")) {
+                messages.push({ kind: "error", text: "The monster towers over you. Without a sword you back away — there is no crown for the unarmed. Claim the sword (cellar/armoury/treasure), then come back." });
+                return messages;
+            }
+            this.emit("encounter.run", { key: encounter.key, script, path });
+            const roll = () => Math.floor(this.rng() * 100);
+            const hpBefore = this.state.hp;
+            let won = false;
+            while (this.state.hp > 0) {
+                const you = roll();
+                const it = roll();
+                if (you === it) continue;
+                if (you > it) {
+                    messages.push({ kind: "output", text: `You roll ${you}, the monster rolls ${it}. Your sword strikes true!` });
+                    won = true;
+                    break;
+                }
+                this.state.hp = Math.max(0, this.state.hp - 5);
+                messages.push({ kind: "error", text: `You roll ${you}, the monster rolls ${it}. It wounds you for 5 HP (HP ${this.state.hp}).` });
+            }
+            if (this.state.hp !== hpBefore) this.emit("health.changed", { delta: this.state.hp - hpBefore, hp: this.state.hp });
+            if (!won) {
+                this.state.hp = Math.max(this.state.hp, 1);
+                messages.push({ kind: "error", text: "You stagger back from the monster, barely alive. Drink a potion and try ./monster again." });
+                return messages;
+            }
+            this.state.flags[encounter.key] = true;
+            for (const item of encounter.grants_items || []) {
+                if (!this.state.inventory.includes(item)) {
+                    this.state.inventory.push(item);
+                    this.emit("item.gained", { item });
+                }
+            }
+            if ((encounter.grants_items || []).length) {
+                messages.push({ kind: "success", text: `The monster falls. Inventory gained: ${encounter.grants_items.join(", ")}` });
+            }
             return messages;
         }
 

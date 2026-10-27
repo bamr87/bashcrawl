@@ -1,0 +1,5 @@
+# kit: community v0.1.0 — soft default (UPS-REPO-16) so the issue
+# pipeline's owner routing always has someone. Every listed owner must be a real
+# user or team; tighten per path once a repo has more than one maintainer, e.g.
+#   /.github/workflows/ @bamr87
+* @bamr87
