@@ -1,5 +1,7 @@
 # Logs Directory
 
+> What lands in `logs/` during play and testing — JSONL gameplay and playtest telemetry, all of it gitignored — and the format of each file.
+
 Gameplay and playtest telemetry. All runtime files are gitignored — they are generated locally during play or testing and should not be committed.
 
 ## Directory Structure

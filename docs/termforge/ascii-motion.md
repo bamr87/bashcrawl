@@ -1,5 +1,7 @@
 # ASCII Motion in TermForge
 
+> How every picture is an ASCII Motion file: where the art lives, how to change or add one, the motion CLI, and what plays where.
+
 Every picture TermForge and Bashcrawl draw is an [ASCII Motion](https://github.com/cameronfoxly/Ascii-Motion) file. That covers the command-stage animations, the encounter portraits, the room vignettes, the banners, and the cow in `cowsay`. No art is written into the code as string literals. Each file is a `.asciimtn` session, the format the editor at
 <https://ascii-motion.app> opens and saves. So changing a picture means opening
 the file in the editor, not editing JavaScript.
@@ -20,8 +22,7 @@ the file in the editor, not editing JavaScript.
 2. Draw. Add frames, color, layers, keyframes, or effects. All of it plays (see below).
 3. Export → **Session (.asciimtn)** and save it over the original file.
 4. Preview it in a terminal: `make motion CLIP=motion/art/encounter-ghost.asciimtn`.
-5. `make web-build && make validate-contracts && make test-js`, then commit the
-   `.asciimtn` together with the regenerated bundles.
+5. `make web-build && make validate-contracts && make test-js`, then commit the `.asciimtn` together with the regenerated bundles.
 
 ## Workflow: add a picture
 
@@ -29,8 +30,7 @@ the file in the editor, not editing JavaScript.
 `art.<name>` (file, title, description) to `motion.yaml`, then draw it with `this.art("<name>")` in the runtime. Art may have any number of frames: `art` lines and the terminal HUD print frame 0, and the web plays the whole clip (see *Ambient art* below). Encounter portraits are found by name (`encounter-<script basename>`), and so are room vignettes (`room-<key>` for each key in `BashcrawlHud.VIGNETTE_KEYS`). Page art is a React component: `<ArtClip name="<name>" />` (it renders the `<pre data-art>` and plays the clip). The validator fails when the code asks for a name with no registry entry (`.art("x")`, `<ArtClip name="x">`).
 - **A stage animation for a command:** save `motion/clips/<motion>.asciimtn`,
 where `<motion>` is a motion name from `web/assets/js/fx.js`. Then add `clips.<motion>` to `motion.yaml`. `aliases` reuse a clip for other motions, and `events` let a game event (levelup/quest/unlock) replace the command's motion.
-- **Framework default art:** save `termforge/motion/<name>.asciimtn`. It has
-  to stay brand-neutral (`test/content-separation.test.js`).
+- **Framework default art:** save `termforge/motion/<name>.asciimtn`. It has to stay brand-neutral (`test/content-separation.test.js`).
 
 Have existing text art? Convert it with `node termforge/node/motion-cli.js from-text art.txt --name ghost -o motion/art/ghost.asciimtn`.
 
@@ -101,5 +101,4 @@ Ask the agent to export a **session**, save it under `motion/`, and register it 
 
 - **Terminal-core** (`entrance/` scrolls and encounter scripts) is pure POSIX
 shell played with real `cat`. Its heredoc art stays plain text, because the game has no dependencies and no JSON reader.
-- **`node/gem.js` sprites** are pixel bitmaps for the half-block `PixelBuffer`,
-  not text art. The golden pixel-identity contract pins them.
+- **`node/gem.js` sprites** are pixel bitmaps for the half-block `PixelBuffer`, not text art. The golden pixel-identity contract pins them.

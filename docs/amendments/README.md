@@ -1,6 +1,8 @@
 <!-- kit: governance v0.1.0 -->
 # Amendments — bashcrawl
 
+> The append-only log of numbered amendments to the bashcrawl constitution, and how one is proposed and ratified.
+
 The append-only log of changes to [the constitution](../constitution.md). Process: constitution § 8.
 
 - File name: `NNNN-kebab-slug.md`, next free number, never reused. Copy [0000-template.md](0000-template.md).

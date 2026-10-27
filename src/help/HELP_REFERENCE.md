@@ -1,5 +1,7 @@
 # 🎯 Bashcrawl Help System Quick Reference
 
+> Quick reference for the in-game help system: how to activate it and every command it offers.
+
 ## Activation
 
 The intelligent help system can be activated in several ways:

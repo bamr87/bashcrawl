@@ -1,6 +1,8 @@
 <!-- kit: sdlc v0.1.0 · ADR index (UPS-WORK-04, decision D2: law-ai format) -->
 # Architecture Decision Records
 
+> The index and format of bashcrawl's Architecture Decision Records: one file per hard-to-reverse decision.
+
 This directory records decisions for bashcrawl that are hard to reverse: the stack, data model, security model, public interfaces, and any relaxation of a gate. Add an ADR in the same PR as the change it justifies.
 
 ## Format

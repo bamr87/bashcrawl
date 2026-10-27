@@ -1,5 +1,7 @@
 # motion/
 
+> Where Bashcrawl's ASCII Motion art lives — stage clips and static art — and how to change a picture.
+
 Every picture Bashcrawl draws is an [ASCII Motion](https://ascii-motion.app) session file here:
 
 - `clips/`: command-stage animations (radar, scan, warp, ...).

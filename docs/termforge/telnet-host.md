@@ -1,5 +1,7 @@
 # TermForge Telnet Host
 
+> Serve the game or any TermForge app over lightweight telnet/TCP: flags, negotiated and raw modes, the session model, hub mode and the security posture.
+
 Serve any TermForge app over lightweight telnet/TCP: `make telnet-demo` (the game), or directly:
 
 ```bash

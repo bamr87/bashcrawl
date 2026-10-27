@@ -1,8 +1,6 @@
 # PRD — Bashcrawl
 
-> Product requirements for [`bamr87/bashcrawl`](https://github.com/bamr87/bashcrawl).
-> Derived from the README, agent docs, config and code in this repo. Anything not
-> stated in those sources is marked **TBD**; success metrics are proposals.
+> The product requirements for Bashcrawl — problem, users, goals, features and open questions — derived from the README, agent docs, config and code, with anything those sources do not state marked **TBD**.
 
 ## 1. Overview / problem
 

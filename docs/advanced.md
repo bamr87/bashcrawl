@@ -1,5 +1,7 @@
 # Advanced Topics
 
+> Hidden areas, the full dungeon map, scroll format standards, the executable encounter template and agent playtesting, for players and authors going deeper.
+
 ## Hidden Area Map
 
 After unlocking hidden rooms, the full dungeon structure looks like this:

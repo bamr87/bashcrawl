@@ -1,5 +1,7 @@
 # Rules v1
 
+> The normative contract for TermForge rules — declarative predicates over a session that let content say when something is true, as data.
+
 Normative contract for TermForge **rules**: declarative predicates over a session. With rules, content says *when* something is true as data. Authors extend a TermForge app in YAML or Markdown frontmatter without writing JavaScript.
 
 Implementation: `termforge/core/rules.js` (`evaluate`, `validate`, `lookup`). It has a structural mirror for node-free CI in `scripts/validate_content_contracts.py` (`rule_errors`), and `termforge/test/progression.test.js` keeps the two head lists identical.
