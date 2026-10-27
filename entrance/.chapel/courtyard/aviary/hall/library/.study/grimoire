@@ -18,6 +18,27 @@
 # That's 7 levels deep from the game root.
 GAME_ROOT="$(cd "$(dirname "$0")/../../../../../../../" 2>/dev/null && pwd)"
 
+# The study stays sealed until the tome moves the bookshelf (amulet + coins).
+# Slipping in through the hidden '.study' path with `ls -a` / `cd .study`
+# finds the grimoire's pages stuck together. Plain text only; nothing written.
+_study_dir="$(basename "$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)")"
+_sealed_need=""
+grep --quiet amulet <<< "$I" 2>/dev/null || _sealed_need="the amulet"
+if ! grep --quiet coins <<< "$I" 2>/dev/null; then
+    [ -n "$_sealed_need" ] && _sealed_need="$_sealed_need and "
+    _sealed_need="${_sealed_need}the coins"
+fi
+if [ "$_study_dir" = ".study" ] || [ -n "$_sealed_need" ]; then
+    echo
+    echo "The grimoire's pages are sealed shut. This study is still hidden"
+    echo "behind the library bookshelf."
+    [ -n "$_sealed_need" ] && echo "You still need $_sealed_need."
+    echo "Read the tome in the library (cd .. && ./tome) to open the passage."
+    echo
+    # shellcheck disable=SC2317
+    return 0 2>/dev/null || exit 0
+fi
+
 echo
 if grep --quiet grimoire <<< "$I" 2>/dev/null; then
     echo "You have already absorbed the grimoire's knowledge."

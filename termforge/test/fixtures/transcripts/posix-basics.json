@@ -172,7 +172,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "./.chapel/courtyard/aviary/hall/library/.study/scroll\n./.chapel/courtyard/aviary/hall/library/scroll\n./.chapel/courtyard/aviary/hall/scroll\n./.chapel/courtyard/aviary/scroll\n./.chapel/courtyard/scroll\n./.chapel/graveyard/.mausoleum/scroll\n./.chapel/graveyard/columbarium/scroll\n./.chapel/graveyard/lower-quadrant/scroll\n./.chapel/graveyard/royal-tombs/scroll\n./.chapel/graveyard/scroll\n./.chapel/scroll\n./.rift/arena/pit/scroll\n./.rift/arena/scroll\n./.rift/scroll\n./.rift/spire/scroll\n./.scrap/scroll\n./.vault/scroll\n./.vault/stronghold/nursery/lab/scroll\n./.vault/stronghold/nursery/scroll\n./.vault/stronghold/scroll\n./cellar/armoury/chamber/scroll\n./cellar/armoury/scroll\n./cellar/scroll\n./scroll"
+          "text": "./.chapel/courtyard/aviary/hall/library/scroll\n./.chapel/courtyard/aviary/hall/scroll\n./.chapel/courtyard/aviary/scroll\n./.chapel/courtyard/scroll\n./.chapel/graveyard/.mausoleum/scroll\n./.chapel/graveyard/columbarium/scroll\n./.chapel/graveyard/lower-quadrant/scroll\n./.chapel/graveyard/royal-tombs/scroll\n./.chapel/graveyard/scroll\n./.chapel/scroll\n./.rift/arena/pit/scroll\n./.rift/arena/scroll\n./.rift/scroll\n./.rift/spire/scroll\n./.scrap/scroll\n./.vault/scroll\n./.vault/stronghold/nursery/lab/scroll\n./.vault/stronghold/nursery/scroll\n./.vault/stronghold/scroll\n./cellar/armoury/chamber/scroll\n./cellar/armoury/scroll\n./cellar/scroll\n./scroll"
         }
       ]
     },
@@ -181,7 +181,7 @@
       "outputs": [
         {
           "kind": "output",
-          "text": "./.chapel\n./.chapel/courtyard\n./.chapel/courtyard/aviary\n./.chapel/courtyard/aviary/hall\n./.chapel/courtyard/aviary/hall/library\n./.chapel/courtyard/aviary/hall/library/.study\n./.chapel/graveyard\n./.chapel/graveyard/.mausoleum\n./.chapel/graveyard/columbarium\n./.chapel/graveyard/lower-quadrant\n./.chapel/graveyard/royal-tombs\n./.rift\n./.rift/arena\n./.rift/arena/pit\n./.rift/spire\n./.rift/spire/mezzanine\n./.rift/spire/mezzanine/.elevator\n./.rift/spire/mezzanine/.elevator/.satellite\n./.scrap\n./.vault\n./.vault/stronghold\n./.vault/stronghold/nursery\n./.vault/stronghold/nursery/lab\n./cellar\n./cellar/armoury\n./cellar/armoury/chamber"
+          "text": "./.chapel\n./.chapel/courtyard\n./.chapel/courtyard/aviary\n./.chapel/courtyard/aviary/hall\n./.chapel/courtyard/aviary/hall/library\n./.chapel/graveyard\n./.chapel/graveyard/.mausoleum\n./.chapel/graveyard/columbarium\n./.chapel/graveyard/lower-quadrant\n./.chapel/graveyard/royal-tombs\n./.rift\n./.rift/arena\n./.rift/arena/pit\n./.rift/spire\n./.rift/spire/mezzanine\n./.rift/spire/mezzanine/.elevator\n./.rift/spire/mezzanine/.elevator/.satellite\n./.scrap\n./.vault\n./.vault/stronghold\n./.vault/stronghold/nursery\n./.vault/stronghold/nursery/lab\n./cellar\n./cellar/armoury\n./cellar/armoury/chamber"
         }
       ]
     },
@@ -478,15 +478,7 @@
         "find": {
           "uses": 2,
           "fails": 0,
-          "flags": [
-            "n",
-            "a",
-            "m",
-            "e",
-            "t",
-            "y",
-            "p"
-          ],
+          "flags": [],
           "box": 0,
           "due": 0
         },

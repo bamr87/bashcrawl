@@ -17,6 +17,9 @@
 # skills        the skill map (`skills`, `review`): commands grouped for display.
 #               Each command is a real handler and belongs to one group; review
 #               cards are generated from commands.yaml and the trials for them.
+#               `flags` lists each command's real short flags (letters); only
+#               those count as discovered flags (`ls -z` does not). A command
+#               without an entry counts no flags.
 #
 # Adding content: add an entry here, then `make validate-contracts && make
 # web-test`. No JavaScript change is needed.
@@ -127,14 +130,19 @@ achievements:
 skills:
   - group: "Navigation"
     commands: [pwd, ls, cd, tree, find]
+    flags: {pwd: "LP", ls: "1AFRSadhilrt", cd: "LP", tree: "CDLadfilps", find: "HLP"}
   - group: "Reading"
     commands: [cat, less, head, tail, wc, nl, file]
+    flags: {cat: "AEbenstuv", less: "FNRSXi", head: "cnqv", tail: "cfnqv", wc: "Lclmw", nl: "bnsvw", file: "Lbiz"}
   - group: "Searching & text"
     commands: [grep, sort, uniq, cut, tr, sed, rev]
+    flags: {grep: "ABCEFHLPRabcefhilnoqrsvwx", sort: "MRVbcdfghiknorstuz", uniq: "Dcdfisuz", cut: "bcdfnsz", tr: "Ccdst", sed: "Eeinrsz"}
   - group: "Files"
     commands: [mkdir, touch, cp, mv, rm, chmod]
+    flags: {mkdir: "mpv", touch: "acdhmrt", cp: "HLPRTafilnprsuv", mv: "Tfinuv", rm: "Rdfirv", chmod: "Rcfv"}
   - group: "The shell"
     commands: [echo, export, let, alias, env, history, source, man]
+    flags: {echo: "Een", export: "fnp", alias: "p", env: "0iu", history: "acdnprsw", man: "afk"}
 
 bestiary:
   - key: treasure

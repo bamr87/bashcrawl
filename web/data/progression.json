@@ -401,7 +401,14 @@
         "cd",
         "tree",
         "find"
-      ]
+      ],
+      "flags": {
+        "pwd": "LP",
+        "ls": "1AFRSadhilrt",
+        "cd": "LP",
+        "tree": "CDLadfilps",
+        "find": "HLP"
+      }
     },
     {
       "group": "Reading",
@@ -413,7 +420,16 @@
         "wc",
         "nl",
         "file"
-      ]
+      ],
+      "flags": {
+        "cat": "AEbenstuv",
+        "less": "FNRSXi",
+        "head": "cnqv",
+        "tail": "cfnqv",
+        "wc": "Lclmw",
+        "nl": "bnsvw",
+        "file": "Lbiz"
+      }
     },
     {
       "group": "Searching & text",
@@ -425,7 +441,15 @@
         "tr",
         "sed",
         "rev"
-      ]
+      ],
+      "flags": {
+        "grep": "ABCEFHLPRabcefhilnoqrsvwx",
+        "sort": "MRVbcdfghiknorstuz",
+        "uniq": "Dcdfisuz",
+        "cut": "bcdfnsz",
+        "tr": "Ccdst",
+        "sed": "Eeinrsz"
+      }
     },
     {
       "group": "Files",
@@ -436,7 +460,15 @@
         "mv",
         "rm",
         "chmod"
-      ]
+      ],
+      "flags": {
+        "mkdir": "mpv",
+        "touch": "acdhmrt",
+        "cp": "HLPRTafilnprsuv",
+        "mv": "Tfinuv",
+        "rm": "Rdfirv",
+        "chmod": "Rcfv"
+      }
     },
     {
       "group": "The shell",
@@ -449,7 +481,15 @@
         "history",
         "source",
         "man"
-      ]
+      ],
+      "flags": {
+        "echo": "Een",
+        "export": "fnp",
+        "alias": "p",
+        "env": "0iu",
+        "history": "acdnprsw",
+        "man": "afk"
+      }
     }
   ],
   "cards": [
