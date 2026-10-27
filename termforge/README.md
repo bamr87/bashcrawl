@@ -1,5 +1,7 @@
 # TermForge
 
+> TermForge in brief — the zero-dependency terminal framework behind every surface — with the commands to try its hosts and links to the full docs.
+
 The universal terminal framework extracted from Bashcrawl's browser emulator: one environment-agnostic kernel (parser, VFS, Shell, Line protocol, TerminalView) that powers the web game, local terminal sessions, a lightweight telnet server, and custom dev/monitoring tools — zero runtime dependencies, no build step.
 
 ## Try it

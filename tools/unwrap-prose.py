@@ -2,12 +2,15 @@
 """
 unwrap-prose.py — join soft-wrapped prose lines so each paragraph is one line.
 
-Only body-text paragraphs are unwrapped. Everything structural is left
+Only body-text paragraphs are unwrapped — including the text of a list
+item: its wrapped, indented continuation lines join the item line,
+and a later indented paragraph of the item is joined in place with its indent
+kept, so no text ever leaves its list. Everything structural is left
 byte-for-byte identical: YAML/TOML front matter, fenced & indented code,
-tables (any line containing "|"), lists, blockquotes, ATX & setext headings,
-block-level HTML, Liquid "{% %}" tag lines, reference/footnote definitions,
-thematic breaks, and any paragraph that uses hard line breaks (a line ending
-in two+ spaces or a backslash).
+tables (any line containing "|"), list markers and nesting, blockquotes, ATX
+& setext headings, block-level HTML, Liquid "{% %}" tag lines,
+reference/footnote definitions, thematic breaks, and any paragraph that uses
+hard line breaks (a line ending in two+ spaces or a backslash).
 
 Conservative by design: when a line's role is ambiguous it is treated as a
 boundary and left alone rather than risk corrupting structure. The transform
@@ -87,8 +90,58 @@ def transform(text: str) -> str:
             if closed:
                 break
 
+    in_list = False  # inside a list item, whose indented lines are its own content
     while i < n:
         line = lines[i]
+        indented = line[:1] in (" ", "\t")
+
+        # A list item: join its wrapped continuation lines onto the item line.
+        # A continuation is an INDENTED text line — the author's own mark that
+        # it continues the item. A flush-left line after an item is left on its
+        # own line: in raw-read text (agent prompts, skills) it is often a new
+        # instruction, even though CommonMark would render it lazily joined.
+        # The run stops at the next block (a nested item, a quote, a fence, a
+        # table row ...), so nothing leaves the item.
+        if LIST.match(line):
+            group = [line]
+            i += 1
+            while i < n:
+                nxt = lines[i]
+                if (BLANK.match(nxt) or nxt[:1] not in (" ", "\t") or starts_atomic(nxt.lstrip())
+                        or SETEXT.match(nxt) or HARD_BREAK.search(group[-1])
+                        or (i + 1 < n and SETEXT.match(lines[i + 1]))):
+                    break
+                group.append(nxt)
+                i += 1
+            if len(group) == 1 or any(HARD_BREAK.search(g) for g in group):
+                out.extend(group)
+            else:
+                out.append(group[0].rstrip() + " " + " ".join(g.strip() for g in group[1:]))
+            in_list = True
+            continue
+
+        # A later paragraph of the same item (indented 1-3 spaces after a blank
+        # line) is joined among itself and keeps its indent; stripping it would
+        # pull the paragraph out of the list. Deeper lines (code) fall through.
+        if in_list and indented and not BLANK.match(line):
+            indent = len(line) - len(line.lstrip())
+            if indent <= 3 and not starts_atomic(line.lstrip()) and not SETEXT.match(line):
+                group = [line]
+                i += 1
+                while i < n:
+                    nxt = lines[i]
+                    if (BLANK.match(nxt) or nxt[:1] not in (" ", "\t") or starts_atomic(nxt.lstrip())
+                            or SETEXT.match(nxt) or HARD_BREAK.search(group[-1])):
+                        break
+                    group.append(nxt)
+                    i += 1
+                if len(group) == 1 or any(HARD_BREAK.search(g) for g in group):
+                    out.extend(group)
+                else:
+                    out.append(line[:indent] + " ".join(g.strip() for g in group))
+                continue
+        elif not BLANK.match(line) and not indented:
+            in_list = False
 
         # Fenced code block: copy verbatim through the matching closing fence.
         m = FENCE.match(line)
@@ -105,7 +158,10 @@ def transform(text: str) -> str:
                     break
             continue
 
-        if BLANK.match(line) or starts_atomic(line):
+        # A lone setext underline (`=`, `---`) with no heading text above it is
+        # kept on its own line: merging it into the next paragraph would
+        # erase the boundary and make a second pass change the file again.
+        if BLANK.match(line) or starts_atomic(line) or SETEXT.match(line):
             out.append(line)
             i += 1
             continue
@@ -182,6 +238,13 @@ def main() -> int:
             print(f"skip {path}: {e}", file=sys.stderr)
             continue
         updated = transform(original)
+        # Belt and braces: converge before comparing, so `--write` always
+        # produces a file that `--check` accepts.
+        for _ in range(8):
+            again = transform(updated)
+            if again == updated:
+                break
+            updated = again
         if updated == original:
             continue
         changed.append(path)

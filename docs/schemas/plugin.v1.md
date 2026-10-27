@@ -1,5 +1,7 @@
 # Plugins v1
 
+> The normative contract for TermForge plugins: the descriptor, its lifecycle, the rules for plugins in `termforge/core/`, and validation.
+
 Normative contract for TermForge **plugins**: the unit of extension above a command pack. A pack is only commands. A plugin is a *feature*: commands plus the hooks, event sinks, read-only mounts, copy defaults, and state slice that make them work.
 
 Implementation: `termforge/core/plugin.js` (`validatePlugin`, `installPlugin`, `pluginState`, `listPlugins`), exposed on the Shell as `shell.use(plugin)` and `shell.pluginState(id)`.

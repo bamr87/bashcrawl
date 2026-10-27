@@ -1,5 +1,7 @@
 # Terminal Protocol v2
 
+> The normative contract for the TermForge Line protocol (v2): the record every command handler, frontend and fixture exchanges, its display kinds and control actions.
+
 Normative contract for the TermForge **Line protocol** — the output currency shared by every command handler, frontend, and fixture in this repository.
 
 Implementations: `termforge/core/protocol.js` (constants and validators), `termforge/core/shell.js` (producer), `termforge/core/view.js` + `termforge/core/sinks/` (consumers).

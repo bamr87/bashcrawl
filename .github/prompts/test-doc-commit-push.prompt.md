@@ -147,8 +147,7 @@ Execute the complete release pipeline for bashcrawl. This workflow covers shell 
    git add -A
    ```
 
-3. **Create Semantic Commit Message**:
-   Format: `<type>(<scope>): <description>`
+3. **Create Semantic Commit Message**: Format: `<type>(<scope>): <description>`
 
    Types:
    - `feat`: New room, encounter, mechanic, or feature

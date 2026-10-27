@@ -1,5 +1,7 @@
 # The Bashcrawl Platform
 
+> The platform's five layers, the learning loop, how its patterns align with bashOS and chui, how to extend it, and the contracts that keep it honest.
+
 Bashcrawl is a terminal learning platform built in five layers. The classic game is still the filesystem itself (`cd entrance && cat scroll`). Around it sits a kernel that emulates a shell, a few platform services, a set of feature plugins, content kept as data, and five surfaces that all run the same thing:
 
 - real bash
