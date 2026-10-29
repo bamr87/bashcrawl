@@ -1,6 +1,6 @@
 {
   "name": "bashcrawl",
-  "version": "3.2.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Bashcrawl: the React web trainer (web/src), the TermForge framework tests and JS lint. The game engine (termforge/core, web/assets/js) has no runtime dependencies; ranges are '*' and no lockfile is committed (fleet policy).",
   "license": "GPL-3.0-only",
