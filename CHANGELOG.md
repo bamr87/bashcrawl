@@ -4,6 +4,85 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0](https://github.com/bamr87/bashcrawl/compare/v0.1.0...v0.2.0) (2026-10-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **license:** relicense from MIT to GPL-3.0-only to match upstream bashcrawl ([#116](https://github.com/bamr87/bashcrawl/issues/116))
+* reduce to terminal-core + web flagship — Practice Arcade, Reference mode, lean MCP playtest (v3.1.0) ([#66](https://github.com/bamr87/bashcrawl/issues/66))
+
+### Added
+
+* add agent mode for AI-driven gameplay with SVG screenshots ([176ccd6](https://github.com/bamr87/bashcrawl/commit/176ccd6482e55135852152db679522dcabdb478f))
+* add complete walkthrough with SVG screenshots, fix test suite ([faee6a9](https://github.com/bamr87/bashcrawl/commit/faee6a99a3b72d5d24357311cdfd86db3c6fd6fa))
+* add demo-test framework with full game walkthrough generation ([8cb8ee9](https://github.com/bamr87/bashcrawl/commit/8cb8ee9c087dfd177d0c23c2e4644a3a5ac98e21))
+* Add interactive gameplay simulation and core game architecture ([f503b4e](https://github.com/bamr87/bashcrawl/commit/f503b4ee9f6c2e2a9bc5c8cc3bb1051db8632273))
+* Add interactive terminal emulator and demo script for enhanced learning experience ([17a7b8e](https://github.com/bamr87/bashcrawl/commit/17a7b8e303777530bd9d4e48a597c82e6ad6b0f1))
+* add MCP and browser automation interfaces ([5938055](https://github.com/bamr87/bashcrawl/commit/5938055e17126ccf1938163676a499b75f36c247))
+* add static GitHub Pages web game ([7f80835](https://github.com/bamr87/bashcrawl/commit/7f808353135ffd74a8f1a119c5fb1b7209ef35d2))
+* add termforge session, motion, and host UX ([#92](https://github.com/bamr87/bashcrawl/issues/92)) ([32b43b9](https://github.com/bamr87/bashcrawl/commit/32b43b94d04a766c5b6902dcab1fd1283d48d747))
+* add Textual TUI app and refactor terminal engine ([2cc30b7](https://github.com/bamr87/bashcrawl/commit/2cc30b79aaf82e5b2768a3021f52c71bd5db0d37))
+* **arcade:** add the Vim Catacombs, a VIM Adventures-style trial ([276673c](https://github.com/bamr87/bashcrawl/commit/276673c011738d717727c35e34448d48d9674736))
+* **arcade:** add the Vim Catacombs, a VIM Adventures-style trial ([91bf794](https://github.com/bamr87/bashcrawl/commit/91bf79443e3d8b26c3dd3a4f771d82f8b5b3ca88))
+* comprehensive UX improvements for clarity, engagement, and education ([26fd246](https://github.com/bamr87/bashcrawl/commit/26fd2465e3d318f377d4e79b84e33ee43305f988))
+* comprehensive UX improvements for clarity, engagement, and education ([9c0f564](https://github.com/bamr87/bashcrawl/commit/9c0f564b774f282d2d9011f59e6421b84f6c8001))
+* expand web gameplay with new quests and terminal effects ([bc70d4a](https://github.com/bamr87/bashcrawl/commit/bc70d4aa60006b21ebddbc5cb4d77377d61c5e75))
+* improve bashcrawl prompts, map, area context, and mkdir -p support ([3961e50](https://github.com/bamr87/bashcrawl/commit/3961e50252773a29cbc219c7a0b7620df4a1bac7))
+* improve UI/UX across terminal emulator and game scrolls ([eeef0c1](https://github.com/bamr87/bashcrawl/commit/eeef0c1c7a0244534d1fe94aaa732775d3d55722))
+* improve UI/UX across terminal emulator and game scrolls ([3411ab6](https://github.com/bamr87/bashcrawl/commit/3411ab6d0e575dd0716b79b7cf04f7ef424c18d1))
+* integrate screenshot capture into test and logging framework ([57a6750](https://github.com/bamr87/bashcrawl/commit/57a6750dcedef13de68d146e581450623400b8b3))
+* Introduce intelligent help system with contextual command suggestions, error solutions, and workflows ([ed0667d](https://github.com/bamr87/bashcrawl/commit/ed0667dbcf47d94f43f41c8e421aa9321a069911))
+* persist test screenshots and logs in logs/ directory ([d28971f](https://github.com/bamr87/bashcrawl/commit/d28971f83ba18dc24187a2e756ccbe0f2a6d1d0e))
+* **termforge:** make ASCII Motion the art pipeline for the whole framework ([#100](https://github.com/bamr87/bashcrawl/issues/100)) ([6f912dd](https://github.com/bamr87/bashcrawl/commit/6f912ddcabd6a2faf95e18fb9236908bbfd7dadc))
+* **terminal-illness:** add optional audio system and settings modal ([6b234c4](https://github.com/bamr87/bashcrawl/commit/6b234c4700f3cb6582e44f7fcd90894cc48937f2))
+* **tui,help:** add Merlin AI chat guide with F3 toggle panel ([1f7fea3](https://github.com/bamr87/bashcrawl/commit/1f7fea3c85241606a6c7cd3329b4780a34c2f4a2))
+* **viewer,game,test:** add log viewer, hidden study room, live agent logging ([4f36334](https://github.com/bamr87/bashcrawl/commit/4f36334f8ede4b72cbb7696fddc2d70af58c48bf))
+* **web:** engagement pack — minigames, progression & sidebar overhaul ([#59](https://github.com/bamr87/bashcrawl/issues/59)) ([77cde77](https://github.com/bamr87/bashcrawl/commit/77cde77c33bc03bebf7737e6789ded5fd554bdce))
+* **web:** rewrite the web trainer in React 19 + Vite + TypeScript as a 16-bit dungeon RPG ([#120](https://github.com/bamr87/bashcrawl/issues/120)) ([72d2af2](https://github.com/bamr87/bashcrawl/commit/72d2af2b69bab637ce9542284f2cef14b795d239))
+* **web:** room-unlock parity fix + Training Arena, Pixel Hero & encounter art ([#58](https://github.com/bamr87/bashcrawl/issues/58)) ([bb96f8c](https://github.com/bamr87/bashcrawl/commit/bb96f8c9f75906f1269bc5652ba34dad5697f64a))
+* zero-knowledge playtest harness — Claude Code (OAuth) plays Bashcrawl via MCP ([#61](https://github.com/bamr87/bashcrawl/issues/61)) ([6a7563c](https://github.com/bamr87/bashcrawl/commit/6a7563c7b736c2f734e85a8beb3fc7ee26e79967))
+
+
+### Fixed
+
+* address Copilot review on PR [#20](https://github.com/bamr87/bashcrawl/issues/20) ([089c912](https://github.com/bamr87/bashcrawl/commit/089c9121a1a256306d9c2a0cb8b29fda411d45e0))
+* align demo framework with interactive bashcrawl game scripts ([002ac09](https://github.com/bamr87/bashcrawl/commit/002ac09784fc4d1c417b5763c5d65ce262139365))
+* bash 3 compat, color escapes, zsh support, goblet path, help unbound vars ([aeea5c8](https://github.com/bamr87/bashcrawl/commit/aeea5c8c4bf8ef8f2cab364fafcd73e6e9c351d6))
+* **ci:** drop leading blank line that fails yamllint ([#89](https://github.com/bamr87/bashcrawl/issues/89)) ([b3cdb8b](https://github.com/bamr87/bashcrawl/commit/b3cdb8bf043be3e26c7262f324f078d6b865d6b6))
+* **ci:** green workflow checks — walkthrough paths, markdownlint, shellcheck, Windows tests ([e7acec6](https://github.com/bamr87/bashcrawl/commit/e7acec6ec7904c696da773b035cbf9d59940e874))
+* **ci:** make main's Lint and Contracts + Tests jobs pass ([#93](https://github.com/bamr87/bashcrawl/issues/93)) ([b3c714a](https://github.com/bamr87/bashcrawl/commit/b3c714a9751c3114629b4cb9a78f7f38a667123d))
+* **ci:** repair game-tests.yml YAML — multiline python broke run block ([4b4b582](https://github.com/bamr87/bashcrawl/commit/4b4b5822ea6337bea102a5ad8a3fe7a1f2290460))
+* close four gameplay exploits (review quit, fake flags, free crown, .study bypass) ([#128](https://github.com/bamr87/bashcrawl/issues/128)) ([423dbb3](https://github.com/bamr87/bashcrawl/commit/423dbb3af24db82b9871f59125011f04b45ea1cd))
+* improve _hardcoded_quests docstring with canonical YAML reference ([bc8cca9](https://github.com/bamr87/bashcrawl/commit/bc8cca9ae736b21e8cb8bed4c9b0a1aa0215b40c))
+* keep web terminal output scrollable ([96d354f](https://github.com/bamr87/bashcrawl/commit/96d354f3f81b576d2e7d29317c108e0620e4d7c7))
+* **platform:** resolve the code-review findings on the learning platform ([#119](https://github.com/bamr87/bashcrawl/issues/119)) ([42b5dce](https://github.com/bamr87/bashcrawl/commit/42b5dce41af047bf4f73af0fe9ea943dab1dc965))
+* **platform:** resolve the code-review findings on the learning platform ([#119](https://github.com/bamr87/bashcrawl/issues/119)) ([4477818](https://github.com/bamr87/bashcrawl/commit/447781896e8a7c0ca4a8ad5e834b12e06453853e))
+* **playtest:** surface claude stderr when a blank-slate seed fails ([#94](https://github.com/bamr87/bashcrawl/issues/94)) ([359fd77](https://github.com/bamr87/bashcrawl/commit/359fd774eed4047e044ae5da55ceb0be1b5e3c8c))
+* resolve all CI workflow failures (shellcheck, yamllint, markdownlint, tests) ([cf099fa](https://github.com/bamr87/bashcrawl/commit/cf099fadc552755136047e3516115589e5aa89fb))
+* **story:** unblock the Grimoire endgame and nested reveals ([#103](https://github.com/bamr87/bashcrawl/issues/103), [#104](https://github.com/bamr87/bashcrawl/issues/104)) ([#118](https://github.com/bamr87/bashcrawl/issues/118)) ([6abf8ac](https://github.com/bamr87/bashcrawl/commit/6abf8ac707d945bebe2f1d4b4fc85273961d8cd0))
+* terminal emulator bugs + add logging framework ([b31fd22](https://github.com/bamr87/bashcrawl/commit/b31fd22c9ed95fb4326cb23fac9506cf417e0af3))
+* update default value for run_ai_tests in test-framework.yml to boolean type ([8902317](https://github.com/bamr87/bashcrawl/commit/8902317186d561cca20af4f3b0a7eb3573c71acd))
+* **viewer,tui,test:** fix screenshot rendering, ls -F crash, and agent path nesting ([31bd0a6](https://github.com/bamr87/bashcrawl/commit/31bd0a630500ff6c73a5e2895434096127107196))
+* **web:** remove phantom scriptorium/observatory rooms; make map generative ([#60](https://github.com/bamr87/bashcrawl/issues/60)) ([75c4dac](https://github.com/bamr87/bashcrawl/commit/75c4dac8e115dcfeb861e32f51ff01f385e594c7))
+* **web:** run encounters inside revealed rooms by their visible path ([#98](https://github.com/bamr87/bashcrawl/issues/98)) ([5d1761d](https://github.com/bamr87/bashcrawl/commit/5d1761d7e5af9d9b363943321939636fd5d0fbce))
+
+
+### Changed
+
+* consolidate runtime boundaries and test infrastructure ([2fb8980](https://github.com/bamr87/bashcrawl/commit/2fb8980f3f0395fea3ed6885f3d9bf75c92dcd92))
+* harmonize entry points, config, deps, and testing ([498891a](https://github.com/bamr87/bashcrawl/commit/498891afacacd6ab7a124fee2f00804298cc677a))
+* integrate help system into src/ with shared YAML data layer ([d4211b8](https://github.com/bamr87/bashcrawl/commit/d4211b8e95f6bbc85e5e77737394f08c3e0da089))
+* reduce to terminal-core + web flagship — Practice Arcade, Reference mode, lean MCP playtest (v3.1.0) ([#66](https://github.com/bamr87/bashcrawl/issues/66)) ([fdc9329](https://github.com/bamr87/bashcrawl/commit/fdc9329eb5de815c8a7398bef1cd3a77d124ae9e))
+* **reset:** streamline re-hiding logic and enhance duplicate handling ([9b6a4ff](https://github.com/bamr87/bashcrawl/commit/9b6a4ff796615d7920b3620fe7befadfab773224))
+* **test:** migrate to walkthrough-driven integration suite ([f6a7228](https://github.com/bamr87/bashcrawl/commit/f6a7228a4a97027c30e624468aa0570ac77b5cf3))
+* unify contract validation and dev automation across runtimes ([83271e6](https://github.com/bamr87/bashcrawl/commit/83271e6c62528c9208a83159c7a18304de62f1d7))
+
+
+### Miscellaneous
+
+* **license:** relicense from MIT to GPL-3.0-only to match upstream bashcrawl ([#116](https://github.com/bamr87/bashcrawl/issues/116)) ([b206e18](https://github.com/bamr87/bashcrawl/commit/b206e18a1f627fad808fc4cbda6fbdb137cf958b))
+
 ## [Unreleased]
 
 ### Added
