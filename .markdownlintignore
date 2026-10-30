@@ -1,2 +1,5 @@
 node_modules/
 web/dist/
+# Written by release-please (`*` bullets) on top of hand-written history (`-`
+# bullets), so MD004 can never pass on it; it is generated, not linted.
+CHANGELOG.md
