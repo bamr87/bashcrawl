@@ -43,7 +43,7 @@ When two documents disagree, the higher one wins and the lower one is fixed in t
 | Actor | May | May not |
 | --- | --- | --- |
 | Maintainer (human) | Ratify amendments, PRD changes and releases by merging PRs; change settings, secrets, branch protection | — |
-| AI agent | Read this file first; open PRs on a branch with Conventional Commit titles; update the feature catalog, PRD block and docs in the same PR as the change; propose amendments | Merge its own PRs; push to the default branch; force-push; change repo settings or branch protection; print or commit secrets; invent features or requirements (unknown = **TBD**) |
+| AI agent | Read this file first; open PRs on a branch with Conventional Commit titles; update the feature catalog, PRD block and docs in the same PR as the change; propose amendments | Merge a PR that is not mergeable, or one the review gate holds (§ Merge authority); push to the default branch; force-push; change repo settings or branch protection; print or commit secrets; invent features or requirements (unknown = **TBD**) |
 
 ## 5. How the artifacts relate
 
@@ -90,3 +90,11 @@ This constitution changes only through a numbered record in [docs/amendments/](a
 4. **Supersede** — a later amendment may replace an earlier one; mark the old record `superseded by NNNN`.
 
 Records are append-only history: fix a ratified rule with a new amendment, never by editing an old record. [0001](amendments/0001-ratify-constitution.md) ratifies this document.
+
+## Merge authority and the review gate
+
+_(amendment `agent-merge-review-gate`, numbered at merge; conforms to hub constitution § 12, [bamr87/bamr87 amendment](https://github.com/bamr87/bamr87/pull/481). The hub's text governs.)_
+
+1. **Mergeable PR.** A PR is mergeable only when **all** of these are true, rechecked against live state just before the merge: (1) the required CI checks are green; (2) the required reviews are satisfied; (3) there are no merge conflicts; (4) the review gate has passed wherever human review is required.
+2. An AI agent may merge a PR only when it is mergeable; otherwise it waits. Merges use a merge commit, never squash or rebase, never `--admin`, and never a force-push.
+3. **Review gate.** The gated categories are those in hub § 12: amendments and this constitution; secrets, budgets and billing; settings, branch protection and permissions; security-sensitive changes; deploys and the maintainer's machines; non-trivial conflicts; destructive changes; and anything labelled `agent:hold`, `blocked` or `needs-amr`. A gated PR gets the `needs-amr` label and the Fleet status _Needs Amr_. An agent never merges it, and amendments are ratified only by the maintainer merging.
