@@ -1,7 +1,7 @@
 name: 📚 Documentation Improvement
 description: Suggest improvements to documentation
 title: "[Docs]: "
-labels: ["documentation", "improvement"]
+labels: ["docs", "agent:queued"]
 assignees: []
 
 body:

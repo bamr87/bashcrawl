@@ -17,6 +17,7 @@ New to the game? Read [getting-started.md](getting-started.md), then [gameplay.m
 | --- | --- |
 | [`AGENTS.md`](../AGENTS.md) | How to work in Bashcrawl, the terminal-teaching dungeon crawl: exact commands, layout, conventions and the invariants the gates enforce; canonical for every agent and contributor. |
 | [`CHANGELOG.md`](../CHANGELOG.md) | Release history: the notable changes in each version, newest first. |
+| [`SECURITY.md`](../SECURITY.md) | Supported versions and how to report a vulnerability privately. |
 | [`PRD.md`](../PRD.md) | The product requirements for Bashcrawl — problem, users, goals, features and open questions — derived from the README, agent docs, config and code, with anything those sources do not state marked **TBD**. |
 | [`logs/`](../logs/README.md) | What lands in `logs/` during play and testing — JSONL gameplay and playtest telemetry, all of it gitignored — and the format of each file. |
 | [`motion/`](../motion/README.md) | Where Bashcrawl's ASCII Motion art lives — stage clips and static art — and how to change a picture. |
