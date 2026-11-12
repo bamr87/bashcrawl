@@ -22,7 +22,7 @@ features:
     description: "Web app (bamr87.github.io/bashcrawl): Learn courses beside an emulated shell, Story mode, Practice Arcade (Path Navigator, grep/find Hunt, Pipe Puzzle, Command Flash, Vim Catacombs), Reference cheatsheets"
     implemented: true
     status: shipped
-    prd: [TBD]
+    prd: [FR1, FR2, FR5, FR6, NFR1, NFR2]
     surface: cli
     link: "web/index.html"
     docs: "README.md"
@@ -31,7 +31,7 @@ features:
     description: "Classic terminal dungeon (`entrance/`, `setup.sh`)"
     implemented: true
     status: shipped
-    prd: [TBD]
+    prd: [FR3, FR4, NFR4]
     surface: cli
     link: "entrance"
     docs: "README.md"
@@ -40,7 +40,7 @@ features:
     description: "XP/score persistence across modes"
     implemented: true
     status: shipped
-    prd: [TBD]
+    prd: [FR2]
     surface: infra
     docs: "README.md"
   - id: BASHCRAWL-004
@@ -48,7 +48,230 @@ features:
     description: "Content data (rooms, recommendations) and transcript-based tests"
     implemented: true
     status: shipped
-    prd: [TBD]
+    prd: [FR9]
     surface: cli
     link: "src/help/data/rooms.yaml"
     docs: "README.md"
+  - id: BASHCRAWL-005
+    title: "Learn courses"
+    description: "Guided Markdown courses (`learn`, `learn ID`, `lesson`) beside an emulated shell; lesson objectives are checked as the learner types real commands."
+    implemented: true
+    status: shipped
+    prd: [FR1, FR7]
+    surface: cli
+    link: "courses"
+    docs: "docs/authoring-courses.md"
+    tests:
+      - "termforge/test/courses.test.js"
+  - id: BASHCRAWL-006
+    title: "Course labs"
+    description: "Each course ships a lab of real practice files under `/lab/ID` in the emulator; `bin/bashcrawl lab ID` copies it to `~/.bashcrawl/labs/ID` for a real shell."
+    implemented: true
+    status: shipped
+    prd: [FR7, FR8]
+    surface: cli
+    link: "bin/bashcrawl"
+    docs: "README.md"
+  - id: BASHCRAWL-007
+    title: "Skills map"
+    description: "`skills` shows a per-command skill map: uses, discovered flags and common mistakes, grown by every command run."
+    implemented: true
+    status: shipped
+    prd: [FR2, FR7]
+    surface: cli
+    link: "termforge/core/mastery.js"
+    docs: "README.md"
+  - id: BASHCRAWL-008
+    title: "Spaced-repetition review"
+    description: "`review` drills the weakest, most-due skills with Leitner boxes rescheduled 1 to 16 days out."
+    implemented: true
+    status: shipped
+    prd: [FR2, FR7]
+    surface: cli
+    link: "termforge/core/mastery.js"
+    docs: "README.md"
+  - id: BASHCRAWL-009
+    title: "Offline command explainer"
+    description: "`explain LINE` (or bare `explain` for the last line) breaks a command line into stages, flags, arguments, pipes and redirects without any AI call."
+    implemented: true
+    status: shipped
+    prd: [FR7]
+    surface: cli
+    link: "termforge/core/explain.js"
+    docs: "README.md"
+  - id: BASHCRAWL-010
+    title: "Story mode quests and hidden rooms"
+    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks."
+    implemented: true
+    status: shipped
+    prd: [FR4]
+    surface: cli
+    link: "entrance"
+    docs: "docs/gameplay.md"
+    tests:
+      - "termforge/test/game-reveals.test.js"
+  - id: BASHCRAWL-011
+    title: "Hints and fog-of-war map"
+    description: "`hint` gives context for the current room and `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
+    implemented: true
+    status: shipped
+    prd: [FR4]
+    surface: cli
+    link: "web/assets/js/runtime.js"
+    docs: "README.md"
+  - id: BASHCRAWL-012
+    title: "Practice Arcade mini-games"
+    description: "Timed mini-games on the bash emulator: Path Navigator, grep/find Hunt, Pipe Puzzle and Command Flash (decks auto-generated from `commands.yaml`); scores and bests persist and wins feed story XP."
+    implemented: true
+    status: shipped
+    prd: [FR2, FR5]
+    surface: ui
+    link: "web/assets/js/arcade.js"
+    docs: "README.md"
+    tests:
+      - "web/src/arcade/arcade-store.test.ts"
+  - id: BASHCRAWL-013
+    title: "Vim Catacombs"
+    description: "VIM Adventures-style arcade levels on a real vim buffer: gems, spikes and keys unlocked level by level; every level's `solution` must win at exactly `par` (#122)."
+    implemented: true
+    status: shipped
+    prd: [FR5]
+    surface: ui
+    link: "web/src/arcade/VimStage.tsx"
+    docs: "README.md"
+    tests:
+      - "termforge/test/arcade-vim.test.js"
+      - "web/src/arcade/vim-trial.test.ts"
+  - id: BASHCRAWL-014
+    title: "Reference cheatsheets"
+    description: "Searchable cheatsheets for every command the dungeon teaches, a glossary, a map of where each concept is taught, plus an in-story concept spotlight and inline syntax hints."
+    implemented: true
+    status: shipped
+    prd: [FR6]
+    surface: ui
+    link: "web/src/screens/ReferenceScreen.tsx"
+    docs: "README.md"
+    tests:
+      - "web/src/screens/ReferenceScreen.test.tsx"
+  - id: BASHCRAWL-015
+    title: "16-bit RPG web UI"
+    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120)."
+    implemented: true
+    status: shipped
+    prd: [FR13, NFR1, NFR2]
+    surface: ui
+    link: "web/src/app/App.tsx"
+    docs: "AGENTS.md"
+    tests:
+      - "web/src/app/App.test.tsx"
+  - id: BASHCRAWL-016
+    title: "Training Arena and speed run"
+    description: "`train` drills riddles answered with real commands (active recall); `speedrun` clears the arena's trials against the clock."
+    implemented: true
+    status: shipped
+    prd: [FR5]
+    surface: cli
+    link: "web/assets/js/plugins/arena.js"
+    docs: "AGENTS.md"
+  - id: BASHCRAWL-017
+    title: "Progression: ranks, achievements, daily challenge, bestiary"
+    description: "Ranks and badges defined as rules in `progression.yaml`, `achievements`, a daily XP goal with streaks (`daily`), `pathfind`, and a `bestiary` codex of encountered creatures."
+    implemented: true
+    status: shipped
+    prd: [FR2, FR9]
+    surface: cli
+    link: "web/assets/js/plugins"
+    docs: "AGENTS.md"
+    tests:
+      - "termforge/test/progression.test.js"
+  - id: BASHCRAWL-018
+    title: "Save and load"
+    description: "`save` / `load` persist and restore the emulated game state locally."
+    implemented: true
+    status: shipped
+    prd: [FR2, FR12]
+    surface: cli
+    link: "web/assets/js/storage.js"
+    docs: "docs/generated/runtime-commands.md"
+    tests:
+      - "termforge/test/game-save.test.js"
+  - id: BASHCRAWL-019
+    title: "Launcher bin/bashcrawl"
+    description: "One plain-bash launcher (macOS bash 3.2 compatible) for every surface: `play`, `tty`, `serve`, `hub`, `web`, `courses`, `lab`, `doctor` and `reset`."
+    implemented: true
+    status: shipped
+    prd: [FR8, NFR4]
+    surface: cli
+    link: "bin/bashcrawl"
+    docs: "README.md"
+    tests:
+      - "test/integration/test_launcher.py"
+  - id: BASHCRAWL-020
+    title: "TermForge terminal framework and TTY HUD"
+    description: "TermForge, the terminal kernel extracted from the web emulator, runs the same game in the browser and in a full-screen terminal HUD (`bin/bashcrawl tty`)."
+    implemented: true
+    status: shipped
+    prd: [FR10]
+    surface: cli
+    link: "termforge"
+    docs: "termforge/README.md"
+    tests:
+      - "test/integration/test_tty_host.py"
+      - "termforge/test/tui.test.js"
+  - id: BASHCRAWL-021
+    title: "Telnet server and shared hub"
+    description: "`bin/bashcrawl serve` serves the game over telnet on 127.0.0.1:2323; `hub` adds shared presence (`who`, `say`, `emote`, `shout`, `top`)."
+    implemented: true
+    status: shipped
+    prd: [FR10]
+    surface: cli
+    link: "termforge/node/host-telnet.js"
+    docs: "README.md"
+    tests:
+      - "termforge/test/telnet.test.js"
+      - "termforge/test/hub.test.js"
+  - id: BASHCRAWL-022
+    title: "Context help"
+    description: "`bash help.sh` gives context-aware help, tutorials and command suggestions inside the classic dungeon."
+    implemented: true
+    status: shipped
+    prd: [FR3, FR9]
+    surface: cli
+    link: "help.sh"
+    docs: "src/help/README.md"
+    tests:
+      - "test/integration/test_help_system.py"
+  - id: BASHCRAWL-023
+    title: "Dungeon reset"
+    description: "`bash lib/reset.sh` (preview with `--dry`) restores the classic dungeon after play without touching tracked files."
+    implemented: true
+    status: shipped
+    prd: [FR3]
+    surface: cli
+    link: "lib/reset.sh"
+    docs: "README.md"
+    tests:
+      - "test/unit/test_reset.py"
+  - id: BASHCRAWL-024
+    title: "AI playtest harness"
+    description: "An MCP server lets an AI agent play the real dungeon in a sandboxed bash session; `scripts/playtest.sh` runs blind sessions and a scorer flags content gaps."
+    implemented: true
+    status: shipped
+    prd: [FR11]
+    surface: infra
+    link: "src/playtest"
+    docs: "README.md"
+    tests:
+      - "test/integration/test_mcp_server.py"
+  - id: BASHCRAWL-025
+    title: "Effects layer and chiptune SFX"
+    description: "Per-command visual FX (particles, shake, flash, ASCII Motion clips) and optional chiptune sound effects in the web trainer."
+    implemented: true
+    status: shipped
+    prd: [FR13]
+    surface: ui
+    link: "web/src/fx"
+    docs: "AGENTS.md"
+    tests:
+      - "termforge/test/fx.test.js"
+      - "web/src/audio/synth.test.ts"
