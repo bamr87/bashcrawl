@@ -39,30 +39,78 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 
 | ID | Feature | Status | Where | Requirements |
 | --- | --- | --- | --- | --- |
-| [BASHCRAWL-001](features/features.yml) | Web app (bamr87.github.io/bashcrawl) | shipped | [`web/index.html`](web/index.html) · [`README.md`](README.md) | TBD |
-| [BASHCRAWL-002](features/features.yml) | Classic terminal dungeon | shipped | [`entrance`](entrance) · [`README.md`](README.md) | TBD |
-| [BASHCRAWL-003](features/features.yml) | XP/score persistence across modes | shipped | [`README.md`](README.md) | TBD |
-| [BASHCRAWL-004](features/features.yml) | Content data | shipped | [`src/help/data/rooms.yaml`](src/help/data/rooms.yaml) · [`README.md`](README.md) | TBD |
+| [BASHCRAWL-001](features/features.yml) | Web app (bamr87.github.io/bashcrawl) | shipped | [`web/index.html`](web/index.html) · [`README.md`](README.md) | FR1, FR2, FR5, FR6, NFR1, NFR2 |
+| [BASHCRAWL-002](features/features.yml) | Classic terminal dungeon | shipped | [`entrance`](entrance) · [`README.md`](README.md) | FR3, FR4, NFR4 |
+| [BASHCRAWL-003](features/features.yml) | XP/score persistence across modes | shipped | [`README.md`](README.md) | FR2 |
+| [BASHCRAWL-004](features/features.yml) | Content data | shipped | [`src/help/data/rooms.yaml`](src/help/data/rooms.yaml) · [`README.md`](README.md) | FR9 |
+| [BASHCRAWL-005](features/features.yml) | Learn courses | shipped | [`courses`](courses) · [`docs/authoring-courses.md`](docs/authoring-courses.md) | FR1, FR7 |
+| [BASHCRAWL-006](features/features.yml) | Course labs | shipped | [`bin/bashcrawl`](bin/bashcrawl) · [`README.md`](README.md) | FR7, FR8 |
+| [BASHCRAWL-007](features/features.yml) | Skills map | shipped | [`termforge/core/mastery.js`](termforge/core/mastery.js) · [`README.md`](README.md) | FR2, FR7 |
+| [BASHCRAWL-008](features/features.yml) | Spaced-repetition review | shipped | [`termforge/core/mastery.js`](termforge/core/mastery.js) · [`README.md`](README.md) | FR2, FR7 |
+| [BASHCRAWL-009](features/features.yml) | Offline command explainer | shipped | [`termforge/core/explain.js`](termforge/core/explain.js) · [`README.md`](README.md) | FR7 |
+| [BASHCRAWL-010](features/features.yml) | Story mode quests and hidden rooms | shipped | [`entrance`](entrance) · [`docs/gameplay.md`](docs/gameplay.md) | FR4 |
+| [BASHCRAWL-011](features/features.yml) | Hints and fog-of-war map | shipped | [`web/assets/js/runtime.js`](web/assets/js/runtime.js) · [`README.md`](README.md) | FR4 |
+| [BASHCRAWL-012](features/features.yml) | Practice Arcade mini-games | shipped | [`web/assets/js/arcade.js`](web/assets/js/arcade.js) · [`README.md`](README.md) | FR2, FR5 |
+| [BASHCRAWL-013](features/features.yml) | Vim Catacombs | shipped | [`web/src/arcade/VimStage.tsx`](web/src/arcade/VimStage.tsx) · [`README.md`](README.md) | FR5 |
+| [BASHCRAWL-014](features/features.yml) | Reference cheatsheets | shipped | [`web/src/screens/ReferenceScreen.tsx`](web/src/screens/ReferenceScreen.tsx) · [`README.md`](README.md) | FR6 |
+| [BASHCRAWL-015](features/features.yml) | 16-bit RPG web UI | shipped | [`web/src/app/App.tsx`](web/src/app/App.tsx) · [`AGENTS.md`](AGENTS.md) | FR13, NFR1, NFR2 |
+| [BASHCRAWL-016](features/features.yml) | Training Arena and speed run | shipped | [`web/assets/js/plugins/arena.js`](web/assets/js/plugins/arena.js) · [`AGENTS.md`](AGENTS.md) | FR5 |
+| [BASHCRAWL-017](features/features.yml) | Progression: ranks, achievements, daily challenge, bestiary | shipped | [`web/assets/js/plugins`](web/assets/js/plugins) · [`AGENTS.md`](AGENTS.md) | FR2, FR9 |
+| [BASHCRAWL-018](features/features.yml) | Save and load | shipped | [`web/assets/js/storage.js`](web/assets/js/storage.js) · [`docs/generated/runtime-commands.md`](docs/generated/runtime-commands.md) | FR2, FR12 |
+| [BASHCRAWL-019](features/features.yml) | Launcher bin/bashcrawl | shipped | [`bin/bashcrawl`](bin/bashcrawl) · [`README.md`](README.md) | FR8, NFR4 |
+| [BASHCRAWL-020](features/features.yml) | TermForge terminal framework and TTY HUD | shipped | [`termforge`](termforge) · [`termforge/README.md`](termforge/README.md) | FR10 |
+| [BASHCRAWL-021](features/features.yml) | Telnet server and shared hub | shipped | [`termforge/node/host-telnet.js`](termforge/node/host-telnet.js) · [`README.md`](README.md) | FR10 |
+| [BASHCRAWL-022](features/features.yml) | Context help | shipped | [`help.sh`](help.sh) · [`src/help/README.md`](src/help/README.md) | FR3, FR9 |
+| [BASHCRAWL-023](features/features.yml) | Dungeon reset | shipped | [`lib/reset.sh`](lib/reset.sh) · [`README.md`](README.md) | FR3 |
+| [BASHCRAWL-024](features/features.yml) | AI playtest harness | shipped | [`src/playtest`](src/playtest) · [`README.md`](README.md) | FR11 |
+| [BASHCRAWL-025](features/features.yml) | Effects layer and chiptune SFX | shipped | [`web/src/fx`](web/src/fx) · [`AGENTS.md`](AGENTS.md) | FR13 |
 
 **Requirement → feature trace**
 
 | Requirement | Features |
 | --- | --- |
-| TBD | BASHCRAWL-001, BASHCRAWL-002, BASHCRAWL-003, BASHCRAWL-004 |
+| FR1 | BASHCRAWL-001, BASHCRAWL-005 |
+| FR2 | BASHCRAWL-001, BASHCRAWL-003, BASHCRAWL-007, BASHCRAWL-008, BASHCRAWL-012, BASHCRAWL-017, BASHCRAWL-018 |
+| FR5 | BASHCRAWL-001, BASHCRAWL-012, BASHCRAWL-013, BASHCRAWL-016 |
+| FR6 | BASHCRAWL-001, BASHCRAWL-014 |
+| NFR1 | BASHCRAWL-001, BASHCRAWL-015 |
+| NFR2 | BASHCRAWL-001, BASHCRAWL-015 |
+| FR3 | BASHCRAWL-002, BASHCRAWL-022, BASHCRAWL-023 |
+| FR4 | BASHCRAWL-002, BASHCRAWL-010, BASHCRAWL-011 |
+| NFR4 | BASHCRAWL-002, BASHCRAWL-019 |
+| FR9 | BASHCRAWL-004, BASHCRAWL-017, BASHCRAWL-022 |
+| FR7 | BASHCRAWL-005, BASHCRAWL-006, BASHCRAWL-007, BASHCRAWL-008, BASHCRAWL-009 |
+| FR8 | BASHCRAWL-006, BASHCRAWL-019 |
+| FR13 | BASHCRAWL-015, BASHCRAWL-025 |
+| FR12 | BASHCRAWL-018 |
+| FR10 | BASHCRAWL-020, BASHCRAWL-021 |
+| FR11 | BASHCRAWL-024 |
 <!-- features:end -->
 
 ## 5. Requirements
 
 **Functional**
 
-- FR1: Course objectives are checked as the learner types
-- FR2: Scores and bests persist locally
+- FR1: Course objectives are checked as the learner types (BASHCRAWL-001, BASHCRAWL-005)
+- FR2: Scores and bests persist locally (BASHCRAWL-001, BASHCRAWL-003, BASHCRAWL-007, BASHCRAWL-008, BASHCRAWL-012, BASHCRAWL-017, BASHCRAWL-018)
+- FR3: The classic dungeon plays in a real terminal with only bash: directories are rooms, `scroll` files are lessons, executables are encounters (BASHCRAWL-002, BASHCRAWL-022, BASHCRAWL-023)
+- FR4: Story progression is driven by real commands: quests, hints, a map, and hidden rooms revealed by `ls -a`, `grep`, `find`, `mv`, variables and symlinks (BASHCRAWL-002, BASHCRAWL-010, BASHCRAWL-011)
+- FR5: Timed practice games run on the same emulator and feed XP back to the story hero (BASHCRAWL-001, BASHCRAWL-012, BASHCRAWL-013, BASHCRAWL-016)
+- FR6: Searchable reference cheatsheets and a glossary cover every command the dungeon teaches (BASHCRAWL-001, BASHCRAWL-014)
+- FR7: A learning platform offers courses with labs, a skill map, spaced-repetition review and an offline command explainer (BASHCRAWL-005, BASHCRAWL-006, BASHCRAWL-007, BASHCRAWL-008, BASHCRAWL-009)
+- FR8: One launcher reaches every surface and reports what the machine can run (BASHCRAWL-006, BASHCRAWL-019)
+- FR9: Browser and terminal content is generated from one set of content registries (BASHCRAWL-004, BASHCRAWL-017, BASHCRAWL-022)
+- FR10: One terminal framework hosts the game in the browser, a terminal HUD and over telnet (BASHCRAWL-020, BASHCRAWL-021)
+- FR11: An AI agent can playtest the real dungeon in a sandbox and report content gaps (BASHCRAWL-024)
+- FR12: Players can save and restore their game state (BASHCRAWL-018)
+- FR13: The web trainer presents the game as an RPG with a hero, HUD and feedback effects (BASHCRAWL-015, BASHCRAWL-025)
 
 **Non-functional**
 
-- NFR1: Node ≥ 22.22 for the web build; typecheck, lint and tests in CI
-- NFR2: Works on mobile
-- NFR3: GPL-3.0-only
+- NFR1: Node ≥ 22.22 for the web build; typecheck, lint and tests in CI (BASHCRAWL-001, BASHCRAWL-015)
+- NFR2: Works on mobile (BASHCRAWL-001, BASHCRAWL-015)
+- NFR3: GPL-3.0-only (project-wide; no single feature)
+- NFR4: The classic dungeon and launcher need no dependencies beyond bash and run on macOS `/bin/bash` 3.2 (BASHCRAWL-002, BASHCRAWL-019)
 
 ## 6. Success metrics (proposed — not defined in sources)
 
