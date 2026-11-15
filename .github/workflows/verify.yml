@@ -13,7 +13,8 @@ name: Verify
 #   (or dispatch)     drives it through the Playwright MCP like a user would,
 #                     writes verify/AGENT-REPORT.md, and the WORKFLOW (never the
 #                     agent) posts it on the PR. Needs CLAUDE_CODE_OAUTH_TOKEN
-#                     (ANTHROPIC_API_KEY fallback) — pass `secrets: inherit`.
+#                     (OAuth only — ANTHROPIC_API_KEY disabled for now,
+#                     2026-11-15) — pass `secrets: inherit`.
 #
 # Advisory until this repo's scenarios are trustworthy; then set `gate: true`
 # to make a failing scenario block the PR. (main is substituted
