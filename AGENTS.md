@@ -86,8 +86,8 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Definition of Done:** the checklist in `.github/PULL_REQUEST_TEMPLATE/pull_request_template.md`, plus the CI gates above green locally.
 - **Decisions:** none are recorded as ADRs yet; add `docs/adr/NNNN-slug.md` for anything hard to reverse.
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
-- **Changelog:** `CHANGELOG.md` (Keep a Changelog) records notable changes under `## [Unreleased]`.
-- **Markdown:** one paragraph per line (`python3 tools/unwrap-prose.py --check`, `--write` to fix); CI's `markdown-oneline` pushes the fix otherwise.
+- **Changelog:** release-please writes `CHANGELOG.md` from the Conventional Commit titles on `main`; never hand-edit it.
+- **Markdown:** one paragraph per line. Check with `python3 tools/unwrap-prose.py --check --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$'` (`--write` in place of `--check` fixes), the same call CI's `markdown-oneline` makes, and it pushes the fix otherwise. `CHANGELOG.md` is excluded on purpose: it is release-please's file.
 - **Never:** push to `main` directly, commit a lockfile or secrets, suppress type errors, leave empty exception handlers, or hand-edit generated or vendored files: `web/data/*.json`, `web/assets/js/vendor/termforge/`, `termforge/core/art.js`, `web/assets/js/{fx-clips,art-clips}.js`, `docs/generated/`, `web/dist/`, `tools/`.
 - Dependabot owns dependency updates.
 
