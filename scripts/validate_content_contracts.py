@@ -620,8 +620,13 @@ def _validate_progression(
         if mins != sorted(mins) or len(set(mins)) != len(mins):
             _add_error(errors, f"progression.yaml: {ladder} thresholds must be strictly ascending")
         quest_floors = [r.get("quests", 0) for r in rows if isinstance(r, dict)]
-        if any(not isinstance(q, int) or q < 0 for q in quest_floors) or quest_floors != sorted(quest_floors):
-            _add_error(errors, f"progression.yaml: {ladder} `quests` must be ascending non-negative integers")
+        if any(not isinstance(q, int) or q < 0 for q in quest_floors) or (
+            quest_floors != sorted(quest_floors)
+        ):
+            _add_error(
+                errors,
+                f"progression.yaml: {ladder} `quests` must be ascending non-negative integers",
+            )
         for i, rank in enumerate(rows):
             title = rank.get("title") if isinstance(rank, dict) else None
             if not isinstance(title, str) or not title:
