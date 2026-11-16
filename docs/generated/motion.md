@@ -58,5 +58,7 @@ Static one-frame clips drawn with `Shell#art(name)`.
 | `pathfind` | Compass rose | `motion/art/pathfind.asciimtn` | Header for `pathfind` journeys. |
 | `levelup` | Level up | `motion/art/levelup.asciimtn` | Burst printed on a level-up. |
 | `profile` | Character sheet | `motion/art/profile.asciimtn` | Header for `profile`. |
+| `door-arcade` | Arcade door | `motion/art/door-arcade.asciimtn` | Header of the Practice Arcade floor (web) — two blades slide in and clash; plays once on entry. |
+| `door-reference` | Reference door | `motion/art/door-reference.asciimtn` | Header of the Reference door (web) — an open tome riffles two pages; plays once on entry. |
 
 Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`; an app's `art` option overrides them by name): `banner`, `cow`, `sl`.
