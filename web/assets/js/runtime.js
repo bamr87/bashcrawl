@@ -463,7 +463,7 @@
                 {
                     title: "🧭 Navigation & lore",
                     items: [
-                        ["map", "ASCII map of the dungeon"],
+                        ["map", "ASCII map of the rooms you have explored"],
                         ["look", "Describe the current room and its contents"],
                         ["hint", "A nudge toward the next objective"],
                         ["quest", "Your active quest objectives"],
@@ -525,27 +525,24 @@
             return [{ kind: "output", text: lines.join("\n") }];
         }
 
-        // Draw the dungeon map by walking the live runtime filesystem, so the map
+        // Draw the explored part of the dungeon (Hud.mapModel over the live filesystem), so the map
         // never advertises a room you cannot actually `cd` into. Only directories
         // (rooms) are shown; revealed hidden rooms appear un-dotted via entries().
         cmdMap() {
-            const here = this.state.cwd;
+            // Fog of war: the rooms the sidebar map shows (Hud.mapModel), never the
+            // real tree. `tree` stays the filesystem view.
+            const hud = global.BashcrawlHud;
+            if (!hud) return [{ kind: "error", text: "map: the map needs the HUD presenter (hud.js)." }];
             const root = this.world.root || "/entrance";
-            const marker = (path) => (path === here ? "  ← you are here" : "");
-            const lines = [root + marker(root)];
-            const walk = (path, prefix, depth) => {
-                if (depth > 4) return;
-                const rooms = this.entries(path, false).filter((entry) => entry.type === "dir");
-                rooms.forEach((entry, idx) => {
-                    const last = idx === rooms.length - 1;
-                    const tee = last ? "└── " : "├── ";
-                    const childPath = `${path === "/" ? "" : path}/${entry.name}`;
-                    lines.push(prefix + tee + entry.name + "/" + marker(childPath));
-                    walk(childPath, prefix + (last ? "    " : "│   "), depth + 1);
-                });
-            };
-            walk(root, "  ", 0);
+            const { rows } = hud.mapModel(this);
+            const lines = rows.map((row, i) => {
+                const mark = row.here ? "  ← you are here" : row.seen ? "" : "  ░ unexplored";
+                return i === 0 ? root + mark : "  " + row.prefix + row.name + mark;
+            });
             const out = [{ kind: "art", text: lines.join("\n") }];
+            if (rows.some((row) => !row.seen)) {
+                out.push({ kind: "dim", text: "░ marks a door you have seen but not entered — cd through it to chart it." });
+            }
             // Teach that the dungeon hides more than it shows, until it doesn't.
             if (this.entries(root, true).some((entry) => entry.type === "dir" && entry.hidden)) {
                 out.push({ kind: "dim", text: "Some passages stay hidden until unlocked — try `ls -la` and read the scrolls." });

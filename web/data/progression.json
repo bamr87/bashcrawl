@@ -887,6 +887,14 @@
       "why": ""
     },
     {
+      "skill": "tree",
+      "q": "Draw the real filesystem tree from here, explored or not",
+      "a": [
+        "tree"
+      ],
+      "why": ""
+    },
+    {
       "skill": "ls",
       "q": "Reveal everything standing in your current room.",
       "a": [

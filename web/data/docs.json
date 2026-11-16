@@ -1522,6 +1522,14 @@
           {
             "command": "man <command>",
             "description": "Manual page for any command"
+          },
+          {
+            "command": "map",
+            "description": "Chart the rooms you have explored (and the doors you have only glimpsed, as fog)"
+          },
+          {
+            "command": "tree",
+            "description": "Draw the real filesystem tree from here, explored or not"
           }
         ]
       }

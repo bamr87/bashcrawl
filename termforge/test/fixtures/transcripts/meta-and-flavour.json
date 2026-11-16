@@ -236,7 +236,7 @@
         },
         {
           "kind": "output",
-          "text": "  map             ASCII map of the dungeon"
+          "text": "  map             ASCII map of the rooms you have explored"
         },
         {
           "kind": "output",

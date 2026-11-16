@@ -272,7 +272,7 @@
       "outputs": [
         {
           "kind": "info",
-          "text": "NAME\n    map\n\nDESCRIPTION\n    Built-in for Bashcrawl Web. Try 'map --help' or open Docs (F1)."
+          "text": "NAME\n    map\n\nDESCRIPTION\n    Chart the rooms you have explored (and the doors you have only glimpsed, as fog)"
         }
       ]
     },

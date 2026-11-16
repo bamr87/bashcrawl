@@ -325,7 +325,11 @@
       "outputs": [
         {
           "kind": "art",
-          "text": "/entrance  ← you are here\n  ├── cellar/\n  │   └── armoury/\n  │       └── chamber/\n  │           └── workshop/\n  ├── chapel/\n  │   ├── courtyard/\n  │   │   └── aviary/\n  │   │       └── hall/\n  │   │           └── library/\n  │   └── graveyard/\n  │       ├── columbarium/\n  │       ├── lower-quadrant/\n  │       └── royal-tombs/\n  ├── scrap/\n  └── vault/\n      └── stronghold/\n          └── nursery/\n              └── lab/"
+          "text": "/entrance  ← you are here\n  ├── cellar/  ░ unexplored\n  ├── chapel/  ░ unexplored\n  ├── scrap/  ░ unexplored\n  └── vault/  ░ unexplored"
+        },
+        {
+          "kind": "dim",
+          "text": "░ marks a door you have seen but not entered — cd through it to chart it."
         },
         {
           "kind": "dim",
