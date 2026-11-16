@@ -6,7 +6,12 @@
 #   - The game runtime on every surface (web/assets/js/runtime.js + plugins/)
 #   - The HUD presenter (web/assets/js/hud.js): rank titles, badge totals
 #
-# ranks         XP thresholds -> titles, ascending. The first must be min 0.
+# ranks         the STORY ladder: XP thresholds -> titles, ascending. The first
+#               must be min 0. An optional `quests: N` also needs N main quests
+#               complete, so the top title cannot arrive before the story ends.
+#               Drives the HUD, `xp`, `profile` and the LEVEL UP banner.
+# arena_ranks   the Training Arena ladder: one run's score -> title (a single
+#               run is worth far less than a lifetime of story XP).
 # achievements  badges: `when` is a TermForge rule (docs/schemas/rules.v1.md)
 #               evaluated against the session state after every line; earned
 #               once, worth `xp` (default 5). Order is display + award order.
@@ -28,6 +33,13 @@
 version: 1
 
 ranks:
+  - {min: 0, title: "Novice Whisperer"}
+  - {min: 100, quests: 2, title: "Apprentice of the Shell"}
+  - {min: 250, quests: 4, title: "Adept Spellcaster"}
+  - {min: 500, quests: 6, title: "Terminal Master"}
+  - {min: 900, quests: 8, title: "Archmage of the Command Line"}
+
+arena_ranks:
   - {min: 0, title: "Novice Whisperer"}
   - {min: 40, title: "Apprentice of the Shell"}
   - {min: 80, title: "Adept Spellcaster"}

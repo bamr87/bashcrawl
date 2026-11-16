@@ -26,8 +26,10 @@
         const p = raw && typeof raw === "object" ? raw : {};
         const list = (value) => (Array.isArray(value) ? value : []);
         const ranks = list(p.ranks).length ? list(p.ranks) : [{ min: 0, title: "" }];
+        const arenaRanks = list(p.arena_ranks).length ? list(p.arena_ranks) : ranks;
         return {
             ranks,
+            arenaRanks,
             achievements: list(p.achievements),
             bestiary: list(p.bestiary),
             trials: list(p.trials),
@@ -100,6 +102,12 @@
     function lineLimit(line) { return /^\s*save\s+import(?:\s|$)/.test(line) ? 1048576 : 4096; }
     function commandLabel(line) { return /^\s*save\s+import\s/.test(line) ? "save import [token]" : line; }
 
+    // Index of the highest rank a total has reached: its XP floor, and (story
+    // ladder only) the main quests it asks for.
+    function rankIndexFor(ranks, xp, questsDone) {
+        return ranks.reduce((acc, r, i) => ((xp || 0) >= r.min && (questsDone || 0) >= (r.quests || 0) ? i : acc), 0);
+    }
+
     function loadState(world, parsed, progression) {
         const trialCount = progression === undefined ? Infinity : progressionFrom(progression).trials.length;
         const base = defaultState(world.root);
@@ -145,6 +153,9 @@
         if (next.hp < 0 || next.hp > 100 || next.xp < 0 || next.currentQuestId < 0 || next.rankIndex < 0) throw new Error("invalid progress");
         if (next.history.length > 1000) next.history = next.history.slice(-1000);
         next.historyIndex = next.history.length;
+        // Saves written under an older ladder keep their XP; the rank baseline
+        // is re-derived so the new ladder never shows a retroactive LEVEL UP.
+        if (progression !== undefined) next.rankIndex = rankIndexFor(progressionFrom(progression).ranks, next.xp, next.completedQuestIds.length);
         return next;
     }
 
@@ -341,10 +352,14 @@
             this.emit("progress.xp", { amount: n, total: this.state.xp, reason });
         }
 
-        /** The rank row (from progression.yaml) a given XP total has reached. */
-        rankFor(xp) {
-            const ranks = this.catalog.ranks;
-            return ranks.filter((r) => (xp || 0) >= r.min).pop() || ranks[0];
+        /**
+         * The rank row (from progression.yaml) a given XP total has reached.
+         * Defaults to the story ladder (gated by main quests done); the arena
+         * passes `catalog.arenaRanks` for a run's score.
+         */
+        rankFor(xp, ranks) {
+            const ladder = ranks || this.catalog.ranks;
+            return ladder[rankIndexFor(ladder, xp, this.state.completedQuestIds.length)];
         }
 
         /** Re-show the active arena trial (hosts call this when resuming a save). */
@@ -796,5 +811,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
+    global.BashcrawlRuntime = { Runtime, defaultState, loadState, rankIndexFor, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

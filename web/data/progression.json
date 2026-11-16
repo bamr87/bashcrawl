@@ -5,6 +5,32 @@
       "title": "Novice Whisperer"
     },
     {
+      "min": 100,
+      "quests": 2,
+      "title": "Apprentice of the Shell"
+    },
+    {
+      "min": 250,
+      "quests": 4,
+      "title": "Adept Spellcaster"
+    },
+    {
+      "min": 500,
+      "quests": 6,
+      "title": "Terminal Master"
+    },
+    {
+      "min": 900,
+      "quests": 8,
+      "title": "Archmage of the Command Line"
+    }
+  ],
+  "arena_ranks": [
+    {
+      "min": 0,
+      "title": "Novice Whisperer"
+    },
+    {
       "min": 40,
       "title": "Apprentice of the Shell"
     },
