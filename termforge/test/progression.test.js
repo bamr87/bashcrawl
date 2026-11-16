@@ -31,6 +31,16 @@ test("every authored achievement rule passes the JS rule validator", () => {
     }
 });
 
+test("every authored quest step rule passes the JS rule validator", () => {
+    const quests = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "quests.json"), "utf8")).quests;
+    const steps = quests.flatMap((quest) => (quest.steps || []).map((step, i) => ({ step, where: `quests.${quest.id}.steps[${i}]` })));
+    assert.ok(steps.length > 0, "quest 7 carries a checklist");
+    for (const { step, where } of steps) {
+        assert.equal(typeof step.label, "string", where);
+        assert.deepStrictEqual(rules.validate(step.when, `${where}.when`), []);
+    }
+});
+
 test("the Python rule mirror (validate_content_contracts.py) matches core/rules.js", () => {
     const py = fs.readFileSync(path.join(REPO_ROOT, "scripts", "validate_content_contracts.py"), "utf8");
     const tuple = (name) => {

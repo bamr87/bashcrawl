@@ -1,5 +1,6 @@
 // The active quest at a glance, and the full main/side log folded under it.
 import { game, useModel, type GameStore } from "../engine/game-store";
+import { QuestSteps } from "./QuestSteps";
 
 export function QuestPanelBody({ store = game }: { store?: GameStore }) {
     const quest = useModel("questModel", store);
@@ -9,6 +10,7 @@ export function QuestPanelBody({ store = game }: { store?: GameStore }) {
                 <>
                     <p className="bc-quest-title">{quest.current.title}</p>
                     <p className="bc-quest-objective">{quest.current.objective}</p>
+                    <QuestSteps steps={quest.current.steps} />
                     <p className="bc-muted bc-quest-xp">{quest.mainDone}/{quest.mainTotal} complete · {quest.xp} XP</p>
                 </>
             ) : (

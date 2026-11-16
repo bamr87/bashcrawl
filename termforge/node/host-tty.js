@@ -29,6 +29,7 @@ const { StringDecoder } = require("node:string_decoder");
 
 const TOAST_KINDS = {
     quest: "magic",
+    "quest-step": "success",
     damage: "error",
     heal: "success",
     xp: "success",

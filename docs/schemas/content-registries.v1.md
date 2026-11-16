@@ -29,6 +29,7 @@ This contract defines the minimum fields used by both shell and Python runtimes.
   - `id` (integer)
   - `title` (string)
   - `completion.command` (string)
+- A quest may add `steps`: its checklist, a non-empty list of `{label, when}` entries with distinct labels, where `when` is a [TermForge rule](rules.v1.md) over the session state. The web Quest panel, the story tracker and the terminal HUD draw the steps under the objective and tick each one while its rule holds; a step that newly holds emits one `quest-step` HUD event (`Hud.diffEvents`). Steps are feedback only: they grant no XP, and `completion` alone finishes the quest. `make validate-contracts` rejects a malformed entry.
 
 ## CI enforcement
 

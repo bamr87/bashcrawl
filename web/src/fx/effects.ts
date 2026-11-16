@@ -75,6 +75,15 @@ export function effectFor(event: HudEvent): Effect {
                     { kind: "ring", from: "quest", count: 1, colors: ["primary"], size: 80 },
                 ],
             };
+        case "quest-step":
+            // A checklist step ticked: a small sparkle on the quest panel and
+            // the tracker, a few glints, a two-note chime. No flash, no shake.
+            return {
+                ...none,
+                sfx: "step",
+                panes: [{ pane: "quest", className: "fx-sparkle", ms: SPARKLE }, { pane: "tracker", className: "fx-pulse", ms: 700 }],
+                canvas: [{ kind: "glint", from: "quest", count: 6, colors: ["success", "primary"], spread: 90 }],
+            };
         case "levelup":
             return {
                 ...none,
@@ -162,7 +171,7 @@ export function effectFor(event: HudEvent): Effect {
 // Moods in priority order when one command raises several events.
 const MOOD_RANK: HeroMood[] = ["hurt", "quest", "cast", "item", "xp", "idle"];
 // Sounds in priority order: one phrase per command, the loudest moment wins.
-const SFX_RANK: SfxName[] = ["levelup", "damage", "quest", "lesson", "unlock", "heal", "item", "objective", "skill", "xp", "warp"];
+const SFX_RANK: SfxName[] = ["levelup", "damage", "quest", "lesson", "unlock", "heal", "item", "objective", "step", "skill", "xp", "warp"];
 
 function topPoint() {
     return { x: window.innerWidth / 2, y: -10 };

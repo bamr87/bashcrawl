@@ -177,7 +177,72 @@
       "xp": 200,
       "location_check": "study|help",
       "prerequisites": "amulet and coins in inventory, tome read in library",
-      "next_quest": null
+      "next_quest": null,
+      "steps": [
+        {
+          "label": "Carry the amulet and coins",
+          "when": {
+            "has": "inventory",
+            "value": [
+              "amulet",
+              "coins"
+            ]
+          }
+        },
+        {
+          "label": "Find the chapel library",
+          "when": {
+            "any": [
+              {
+                "cwd_includes": "/library"
+              },
+              {
+                "state": "visited",
+                "includes": "/entrance/chapel/courtyard/aviary/hall/library"
+              },
+              {
+                "flag": "tome"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Read the tome: ./tome",
+          "when": {
+            "flag": "tome"
+          }
+        },
+        {
+          "label": "Enter the hidden study",
+          "when": {
+            "any": [
+              {
+                "cwd_includes": "/study"
+              },
+              {
+                "state": "visited",
+                "includes": "/entrance/chapel/courtyard/aviary/hall/library/study"
+              },
+              {
+                "flag": "grimoire"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Run the grimoire: ./grimoire",
+          "when": {
+            "flag": "grimoire"
+          }
+        },
+        {
+          "label": "Define bc: source grimoire",
+          "when": {
+            "has": "inventory",
+            "value": "grimoire"
+          }
+        }
+      ]
     }
   ]
 }
