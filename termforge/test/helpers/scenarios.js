@@ -44,11 +44,13 @@ const SCENARIOS = [
             "cd nowhere",
             "cat nofile",
             "frobnicate",
-            // Bash fidelity (#108).
+            // Bash fidelity and near-miss feedback (#108, #111).
             "ls -l",
             "ls -z",
             "ls README.md",
             "cd /",
+            "cd celar",
+            "lgs",
             "cd ~",
         ],
     },

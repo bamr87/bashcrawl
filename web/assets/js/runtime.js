@@ -80,6 +80,9 @@
         mvSessionOnly: "Web Bashcrawl only moves files you created in this session.",
         rmWorldFile: (name) => `rm: cannot remove '${name}': the dungeon's own files are indestructible`,
         rmSessionOnly: "Only session-created files can be removed in Web Bashcrawl.",
+        cdNearby: (names) => (names.length
+            ? `Rooms here: ${names.join(", ")} (hidden rooms only show with ls -a).`
+            : "No rooms lead on from here (hidden rooms only show with ls -a)."),
         lsUnavailable: (flag, what, tip) => `ls: -${flag}${what ? ` (${what})` : ""} isn't available in the dungeon${tip ? `; try ${tip}` : ""}`,
         execFileKind: "encounter",
         figletDefault: "BASHCRAWL",

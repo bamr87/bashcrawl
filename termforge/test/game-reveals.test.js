@@ -132,6 +132,24 @@ test("with coins, source grimoire says the quest is ready", () => {
     assert.match(out["source grimoire"].join("\n"), /Scriptorium quest ready/);
 });
 
+// #111: a failed cd points at the rooms the player can already see. A hidden
+// room is never named, not even for a near-miss spelling of it; once revealed
+// it is fair game.
+test("a failed cd suggests visible rooms only, never a hidden one", () => {
+    const { out } = play(["cd study", "cd chapl", "cd celar"]);
+    assert.strictEqual(out["cd study"].join("\n"),
+        "cd: study: No such file or directory. Rooms here: cellar (hidden rooms only show with ls -a).");
+    assert.strictEqual(out["cd celar"].join("\n"), "cd: celar: No such file or directory. Did you mean cellar?");
+    for (const line of ["cd study", "cd chapl"]) {
+        assert.doesNotMatch(out[line].join("\n"), /chapel|vault|rift|scrap|functions/, line);
+    }
+    const revealed = play([...REVEAL, "cd chapl"]);
+    assert.match(revealed.out["cd chapl"].join("\n"), /Did you mean chapel\?/);
+    const library = play([...REVEAL, LIBRARY, "cd study"]);
+    assert.strictEqual(library.out["cd study"].join("\n"),
+        "cd: study: No such file or directory. No rooms lead on from here (hidden rooms only show with ls -a).");
+});
+
 test("the study's web room panel only suggests commands the web port supports", () => {
     const { runtime } = play([...STUDY, "cd study"]);
     const meta = runtime.currentRoomMeta();

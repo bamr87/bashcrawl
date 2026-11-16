@@ -17,7 +17,7 @@
     // unbound, invoked as fn.call(shell, args, stdin), and returns Line[].
     // Bodies are extracted verbatim from the original browser emulator.
 
-    const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet } = deps.parser;
+    const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet, suggest } = deps.parser;
 
     // A file's lines, the way POSIX tools see them: a final newline ends the
     // last line rather than starting an empty one ("a\nb\n" is 2 lines).
@@ -39,9 +39,28 @@
         return path === "/" && !shell.isDir("/") ? root : path;
     }
 
-    // `<who>: No such file or directory`, worded like bash.
-    function notFound(who) {
-        return [{ kind: "error", text: `${who}: No such file or directory` }];
+    // What a failed lookup can point at instead: close names from the
+    // directory the path points into, spelled the way the path was typed;
+    // failing that, cd lists the directories there and cat points at ls.
+    // Only visible entries are ever named; hidden ones are left to `ls -a`.
+    function nearMiss(shell, cmd, arg, path) {
+        const parent = shell.parentPath(path);
+        if (!shell.isDir(parent)) return "";
+        const names = shell.entries(parent, false)
+            .filter((entry) => cmd !== "cd" || entry.type === "dir")
+            .map((entry) => entry.name);
+        const bare = arg.replace(/\/+$/, "");
+        const typed = bare.slice(0, bare.lastIndexOf("/") + 1);
+        const near = suggest(shell.basename(path), names);
+        if (near.length) return shell.text("didYouMean", near.map((name) => typed + name));
+        if (cmd === "cd") return shell.text("cdNearby", names);
+        return cmd === "cat" ? shell.text("catNearby") : "";
+    }
+
+    // `<who>: No such file or directory`, with the near-miss hint on the same line.
+    function notFound(shell, cmd, who, arg, path) {
+        const hint = nearMiss(shell, cmd, arg, path);
+        return [{ kind: "error", text: `${who}: No such file or directory${hint ? `. ${hint}` : ""}` }];
     }
 
     // ls options. The pack models -a, -A (the same here: . and .. are never
@@ -119,7 +138,7 @@
             const noted = this.inPipeline ? [] : notes.map((text) => ({ kind: "info", text }));
             const path = target === null ? this.state.cwd : resolveHome(this, target);
             if (!this.isDir(path)) {
-                if (!this.node(path)) return notFound(`ls: cannot access '${target}'`);
+                if (!this.node(path)) return notFound(this, "ls", `ls: cannot access '${target}'`, target, path);
                 // A file operand lists as its own name, like ls(1).
                 const entry = this.entries(this.parentPath(path), true).find((e) => e.name === this.basename(path));
                 const marker = on.has("F") && entry && entry.type === "exec" ? "*" : "";
@@ -148,7 +167,7 @@
             const next = arg ? resolveHome(this, arg) : this.world.root;
             if (!this.isDir(next)) {
                 if (this.node(next)) return [{ kind: "error", text: `cd: ${arg}: Not a directory` }];
-                return notFound(`cd: ${arg}`);
+                return notFound(this, "cd", `cd: ${arg}`, arg, next);
             }
             this.state.prevCwd = this.state.cwd;
             this.state.cwd = next;
@@ -156,11 +175,12 @@
         },
 
         cat(args) {
-            const path = this.resolve(args[0] || "");
             if (!args[0]) return [{ kind: "error", text: "cat requires a file path" }];
+            const path = this.resolve(args[0]);
             const text = this.readFile(path);
-            if (text === null) return [{ kind: "error", text: `No such file: ${args[0]}` }];
-            return [{ kind: "output", text }];
+            if (text !== null) return [{ kind: "output", text }];
+            if (this.isDir(path)) return [{ kind: "error", text: `cat: ${args[0]}: Is a directory` }];
+            return notFound(this, "cat", `cat: ${args[0]}`, args[0], path);
         },
 
         head(args, stdin) {

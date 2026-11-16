@@ -333,7 +333,7 @@
       "outputs": [
         {
           "kind": "error",
-          "text": "cd: nowhere: No such file or directory"
+          "text": "cd: nowhere: No such file or directory. Rooms here: armoury (hidden rooms only show with ls -a)."
         }
       ]
     },
@@ -342,7 +342,7 @@
       "outputs": [
         {
           "kind": "error",
-          "text": "No such file: nofile"
+          "text": "cat: nofile: No such file or directory. ls lists what is here; ls -a shows hidden files too."
         }
       ]
     },
@@ -396,6 +396,24 @@
         {
           "kind": "success",
           "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "cd celar",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "cd: celar: No such file or directory. Did you mean cellar?"
+        }
+      ]
+    },
+    {
+      "line": "lgs",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "Unknown command: lgs. Did you mean ls?"
         }
       ]
     },
@@ -459,7 +477,7 @@
         "ls": 8,
         "cat": 3,
         "file": 1,
-        "cd": 6,
+        "cd": 7,
         "tree": 1,
         "find": 2,
         "grep": 1,
@@ -470,7 +488,8 @@
         "whoami": 1,
         "man": 3,
         "date": 1,
-        "frobnicate": 1
+        "frobnicate": 1,
+        "lgs": 1
       },
       "catScrollCount": 2,
       "lastPipedIn": false,
@@ -517,7 +536,7 @@
         },
         "cd": {
           "uses": 5,
-          "fails": 1,
+          "fails": 2,
           "flags": [],
           "box": 0,
           "due": 0

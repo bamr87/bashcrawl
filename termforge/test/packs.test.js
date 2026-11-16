@@ -217,7 +217,7 @@ test("find spells results from the start argument as typed", () => {
     assert.strictEqual(run(shell, "find box/ -name x"), "box/x");
 });
 
-// ── Bash fidelity (#108) ───────────────────────────────────────────────────
+// ── Bash fidelity (#108) and near-miss feedback (#111) ─────────────────────
 // A world whose root is not `/`, with names that contain the letter a (the
 // old ls read any argument containing an `a` as -a) and hidden entries at
 // two levels.
@@ -335,4 +335,21 @@ test("a world with a real / directory keeps cd / there", () => {
     });
     assert.strictEqual(run(s, "cd /"), "Moved to /");
     assert.strictEqual(run(s, "cd ~"), "Moved to /home");
+});
+
+test("a failed cd or cat names close visible entries, never hidden ones", () => {
+    const s = fidelityShell();
+    assert.deepStrictEqual(only(s.execute("cd atic")),
+        { kind: "error", text: "cd: atic: No such file or directory. Did you mean attic?" });
+    assert.strictEqual(run(s, "cd map"), "cd: map: Not a directory");
+    // .vault is hidden: a near miss lists what is visible and points at ls -a.
+    const vault = run(s, "cd vault");
+    assert.strictEqual(vault, "cd: vault: No such file or directory. Directories here: attic (ls -a also shows hidden ones).");
+    assert.doesNotMatch(vault, /\.vault/);
+    // The suggestion keeps the path as typed.
+    assert.strictEqual(run(s, "cat attic/chset"), "cat: attic/chset: No such file or directory. Did you mean attic/chest?");
+    assert.strictEqual(run(s, "cat attic"), "cat: attic: Is a directory");
+    assert.strictEqual(run(s, "cat nothing"),
+        "cat: nothing: No such file or directory. ls lists what is here; ls -a shows hidden files too.");
+    assert.strictEqual(run(s, "ls atic"), "ls: cannot access 'atic': No such file or directory. Did you mean attic?");
 });
