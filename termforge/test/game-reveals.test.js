@@ -91,7 +91,7 @@ test("without coins the tome names the missing item and the quest says so too", 
     assert.strictEqual(q && q.id, 7, "quest 7 should be the active (stalled) quest");
     assert.match(out["./tome"].join("\n"), /will not move[\s\S]*You still need the coins/);
     assert.ok(!out["./tome"].some((t) => /passage opens/.test(t)), out["./tome"].join("\n"));
-    assert.match(out["cd study"].join("\n"), /Not a directory/);
+    assert.match(out["cd study"].join("\n"), /^cd: study: No such file or directory/);
     assert.doesNotMatch(out["source grimoire"].join("\n"), /quest ready|merges with your shell/);
     assert.match(out.hint.join("\n"), /You still need: coins/);
     assert.match(out.quest.join("\n"), /You still need: coins/);
@@ -114,11 +114,11 @@ test("the hidden .study is sealed before the tome opens it", () => {
         "cd /entrance/.chapel/courtyard/aviary/hall/library/.study",
     ]);
     assert.match(out["ls -a"].join("\n"), /\.study/);
-    assert.match(out["cd .study"].join("\n"), /Not a directory/);
+    assert.match(out["cd .study"].join("\n"), /^cd: \.study: No such file or directory/);
     assert.match(out["cat .study/scroll"].join("\n"), /No such file/);
     assert.match(out["./.study/grimoire"].join("\n"), /No runnable script/);
     assert.match(out["source .study/grimoire"].join("\n"), /Cannot source/);
-    assert.match(out["cd /entrance/.chapel/courtyard/aviary/hall/library/.study"].join("\n"), /Not a directory/);
+    assert.match(out["cd /entrance/.chapel/courtyard/aviary/hall/library/.study"].join("\n"), /No such file or directory/);
     assert.ok(!runtime.state.inventory.includes("grimoire"));
     assert.ok(!runtime.state.completedQuestIds.includes(7));
     assert.ok(runtime.state.cwd.endsWith("/library"), runtime.state.cwd);

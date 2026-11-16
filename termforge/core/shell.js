@@ -77,6 +77,8 @@
         mvSessionOnly: "mv only moves files created in this session.",
         rmWorldFile: (name) => `rm: cannot remove '${name}': read-only world file`,
         rmSessionOnly: "rm only removes files created in this session.",
+        // A real ls option this shell has no data for (owners, sizes, times).
+        lsUnavailable: (flag, what, tip) => `ls: -${flag}${what ? ` (${what})` : ""} isn't available in this shell${tip ? `; try ${tip}` : ""}`,
         execFileKind: "program",
         figletDefault: "TERMFORGE",
         fortunes: [

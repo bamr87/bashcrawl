@@ -216,3 +216,123 @@ test("find spells results from the start argument as typed", () => {
     assert.strictEqual(run(shell, "find box -name x"), "box/x");
     assert.strictEqual(run(shell, "find box/ -name x"), "box/x");
 });
+
+// ── Bash fidelity (#108) ───────────────────────────────────────────────────
+// A world whose root is not `/`, with names that contain the letter a (the
+// old ls read any argument containing an `a` as -a) and hidden entries at
+// two levels.
+
+function fidelityShell() {
+    return new Shell({
+        world: {
+            root: "/base",
+            directories: {
+                "/base": [
+                    { name: "attic", type: "dir", hidden: false },
+                    { name: "map", type: "file", hidden: false },
+                    { name: "run", type: "exec", hidden: false },
+                    { name: ".vault", type: "dir", hidden: true },
+                ],
+                "/base/attic": [
+                    { name: "chest", type: "file", hidden: false },
+                    { name: ".bats", type: "dir", hidden: true },
+                ],
+                "/base/attic/.bats": [],
+                "/base/.vault": [],
+            },
+            files: { "/base/map": "x marks the spot", "/base/run": "#!/bin/sh", "/base/attic/chest": "gold" },
+        },
+        packs: [posix],
+    });
+}
+
+function only(out) {
+    assert.strictEqual(out.length, 1, JSON.stringify(out));
+    return out[0];
+}
+
+test("ls rejects an unknown option letter or long option and lists nothing", () => {
+    const s = fidelityShell();
+    let out = s.execute("ls -z");
+    assert.deepStrictEqual(out[0], { kind: "error", text: "ls: invalid option -- 'z'" });
+    assert.ok(!out.some((o) => o.kind === "output"), "no listing after an invalid option");
+    out = s.execute("ls -az");
+    assert.match(out[0].text, /invalid option -- 'z'/);
+    out = s.execute("ls --bogus");
+    assert.deepStrictEqual(out[0], { kind: "error", text: "ls: unrecognized option '--bogus'" });
+    assert.ok(!out.some((o) => o.kind === "output"));
+    assert.strictEqual(out[1].text, "Try 'ls --help' for more information.");
+});
+
+test("ls -l and the other real options with no data here say so, and still list", () => {
+    const s = fidelityShell();
+    assert.deepStrictEqual(s.execute("ls -l"), [
+        { kind: "output", text: "attic  map  run" },
+        { kind: "info", text: "ls: -l (long format) isn't available in this shell; try ls -F" },
+    ]);
+    // The everyday spelling keeps working: -a still applies.
+    assert.deepStrictEqual(s.execute("ls -la")[0], { kind: "output", text: ".vault  attic  map  run" });
+    assert.match(run(s, "ls -R"), /-R \(recursive listing\) isn't available in this shell; try tree/);
+    assert.match(run(s, "ls -x"), /^attic {2}map {2}run\nls: -x isn't available in this shell$/);
+    // A note never travels down a pipe or into a file.
+    assert.strictEqual(run(s, "ls -l | wc -l"), "1");
+    s.execute("ls -l > listing");
+    assert.strictEqual(run(s, "cat listing"), "attic  map  run");
+});
+
+test("only dash-words are options: a name containing 'a' lists without hidden entries", () => {
+    const s = fidelityShell();
+    assert.strictEqual(run(s, "ls attic"), "chest");
+    assert.strictEqual(run(s, "ls /base"), "attic  map  run");
+    assert.strictEqual(run(s, "ls -a attic"), ".bats  chest");
+});
+
+test("a file operand lists as its own name", () => {
+    const s = fidelityShell();
+    assert.deepStrictEqual(only(s.execute("ls map")), { kind: "output", text: "map" });
+    assert.strictEqual(run(s, "ls attic/chest"), "attic/chest");
+    assert.strictEqual(run(s, "ls -F run"), "run*");
+    assert.deepStrictEqual(only(s.execute("ls nope")),
+        { kind: "error", text: "ls: cannot access 'nope': No such file or directory" });
+});
+
+test("ls -a, -F and -aF list exactly as before", () => {
+    const s = fidelityShell();
+    assert.strictEqual(run(s, "ls"), "attic  map  run");
+    assert.strictEqual(run(s, "ls -a"), ".vault  attic  map  run");
+    assert.strictEqual(run(s, "ls -F"), "attic/  map  run*");
+    assert.strictEqual(run(s, "ls -aF"), ".vault/  attic/  map  run*");
+    assert.strictEqual(run(s, "ls -a -F"), ".vault/  attic/  map  run*");
+});
+
+test("ls -A, -1, --help and the long names of the modelled options", () => {
+    const s = fidelityShell();
+    assert.strictEqual(run(s, "ls -A"), ".vault  attic  map  run");
+    assert.strictEqual(run(s, "ls -1"), "attic\nmap\nrun");
+    assert.strictEqual(run(s, "ls --all --classify"), ".vault/  attic/  map  run*");
+    assert.strictEqual(run(s, "ls -F --color=auto"), "attic/  map  run*");
+    assert.match(run(s, "ls --help"), /^Usage: ls[\s\S]*-a, --all/);
+});
+
+test("cd / and cd ~ go to the world root, like a bare cd", () => {
+    const s = fidelityShell();
+    s.execute("cd attic");
+    assert.strictEqual(run(s, "cd /"), "Moved to /base");
+    assert.strictEqual(s.state.cwd, "/base");
+    s.execute("cd attic");
+    assert.strictEqual(run(s, "cd ~"), "Moved to /base");
+    assert.strictEqual(s.state.cwd, "/base");
+    assert.strictEqual(run(s, "cd ~/attic"), "Moved to /base/attic");
+    assert.strictEqual(run(s, "ls ~"), "attic  map  run");
+    assert.strictEqual(run(s, "ls /"), "attic  map  run");
+    assert.strictEqual(run(s, "cd"), "Moved to /base");
+});
+
+test("a world with a real / directory keeps cd / there", () => {
+    const s = new Shell({
+        world: { root: "/home", directories: { "/": [{ name: "home", type: "dir", hidden: false }], "/home": [] }, files: {} },
+        packs: [posix],
+    });
+    assert.strictEqual(run(s, "cd /"), "Moved to /");
+    assert.strictEqual(run(s, "cd ~"), "Moved to /home");
+});

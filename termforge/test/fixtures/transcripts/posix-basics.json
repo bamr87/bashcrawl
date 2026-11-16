@@ -333,7 +333,7 @@
       "outputs": [
         {
           "kind": "error",
-          "text": "Not a directory: nowhere"
+          "text": "cd: nowhere: No such file or directory"
         }
       ]
     },
@@ -354,10 +354,63 @@
           "text": "Unknown command: frobnicate. Try help."
         }
       ]
+    },
+    {
+      "line": "ls -l",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "armoury  README.md  scroll  treasure"
+        },
+        {
+          "kind": "info",
+          "text": "ls: -l (long format) isn't available in the dungeon; try ls -F"
+        }
+      ]
+    },
+    {
+      "line": "ls -z",
+      "outputs": [
+        {
+          "kind": "error",
+          "text": "ls: invalid option -- 'z'"
+        },
+        {
+          "kind": "dim",
+          "text": "Try 'ls --help' for more information."
+        }
+      ]
+    },
+    {
+      "line": "ls README.md",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "README.md"
+        }
+      ]
+    },
+    {
+      "line": "cd /",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
+    },
+    {
+      "line": "cd ~",
+      "outputs": [
+        {
+          "kind": "success",
+          "text": "Moved to /entrance"
+        }
+      ]
     }
   ],
   "finalState": {
-    "cwd": "/entrance/cellar",
+    "cwd": "/entrance",
     "prevCwd": "/entrance",
     "hp": 100,
     "xp": 350,
@@ -403,10 +456,10 @@
     "stats": {
       "commands": {
         "pwd": 3,
-        "ls": 5,
+        "ls": 8,
         "cat": 3,
         "file": 1,
-        "cd": 4,
+        "cd": 6,
         "tree": 1,
         "find": 2,
         "grep": 1,
@@ -438,11 +491,12 @@
           "due": 0
         },
         "ls": {
-          "uses": 5,
-          "fails": 0,
+          "uses": 7,
+          "fails": 1,
           "flags": [
             "a",
-            "F"
+            "F",
+            "l"
           ],
           "box": 0,
           "due": 0
@@ -462,7 +516,7 @@
           "due": 0
         },
         "cd": {
-          "uses": 3,
+          "uses": 5,
           "fails": 1,
           "flags": [],
           "box": 0,
