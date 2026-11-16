@@ -37,7 +37,7 @@ make web-bundle          # build: web-build + vite build -> web/dist, with /vers
 
 CI (`ci.yml`) runs exactly those gates: `make lint` + `make lint-js` + `npm run lint`, then `make validate-contracts` + `make test` + `make test-js` + `make web-test` on Node 24, plus a stock macOS `/bin/bash` 3.2 smoke. A fresh-clone run (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
 
-Single test (the pytest ini lives in `test/`; markers `unit`, `integration`, `slow`, `bash`):
+Single test (pytest is configured in `pyproject.toml` under `[tool.pytest.ini_options]`: suites `test/unit` and `test/integration`, markers `unit`, `integration`, `slow`, `bash`, a 60 s timeout):
 
 ```bash
 cd test
@@ -88,6 +88,7 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
 - **Changelog:** release-please writes `CHANGELOG.md` from the Conventional Commit titles on `main`; never hand-edit it.
 - **Markdown:** one paragraph per line. Check with `python3 tools/unwrap-prose.py --check --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$'` (`--write` in place of `--check` fixes), the same call CI's `markdown-oneline` makes, and it pushes the fix otherwise. `CHANGELOG.md` is excluded on purpose: it is release-please's file.
+- **Formatting:** Prettier with the hub's `.prettierrc`; `.prettierignore` keeps it off generated, vendored and release-please files. `npm run format:check` covers `web/src` and `vite.config.mts`. It is not a CI gate yet: the one-time reformat of that tree lands in its own PR, so never run `npm run format` inside an unrelated change.
 - **Never:** push to `main` directly, commit a lockfile or secrets, suppress type errors, leave empty exception handlers, or hand-edit generated or vendored files: `web/data/*.json`, `web/assets/js/vendor/termforge/`, `termforge/core/art.js`, `web/assets/js/{fx-clips,art-clips}.js`, `docs/generated/`, `web/dist/`, `tools/`.
 - Dependabot owns dependency updates.
 
