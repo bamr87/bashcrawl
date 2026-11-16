@@ -265,7 +265,7 @@ features:
       - "test/integration/test_mcp_server.py"
   - id: BASHCRAWL-025
     title: "Effects layer and chiptune SFX"
-    description: "Per-command visual FX (particles, shake, flash, ASCII Motion clips) and optional chiptune sound effects in the web trainer."
+    description: "Per-command visual FX (particles, shake, flash, ASCII Motion clips on the command stage), an ASCII Motion clip on every screen (title, intro, room vignette, the Arcade and Reference door headers; the resting frame under reduced motion) and optional chiptune sound effects in the web trainer (#91)."
     implemented: true
     status: shipped
     prd: [FR13]
@@ -274,4 +274,7 @@ features:
     docs: "AGENTS.md"
     tests:
       - "termforge/test/fx.test.js"
+      - "termforge/test/ambient.test.js"
+      - "web/src/arcade/ArcadeHome.test.tsx"
+      - "web/src/screens/ReferenceScreen.test.tsx"
       - "web/src/audio/synth.test.ts"

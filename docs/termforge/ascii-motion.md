@@ -76,7 +76,8 @@ API: `parse`, `flattenSession`, `Player`, `renderFrame` (cells, text, 24-bit ANS
 The browser plays multi-frame art in place, through `web/assets/js/ambient.js` (`BashcrawlAmbient`):
 
 - the room vignette in the Location panel loops (`room-*`: torches flicker at the entrance, the cellar drips, mist drifts through the graveyard, light glints across the vault's gems, the rift breathes, a bat crosses the deep). A room change crossfades the old scene into the new one.
-- `<ArtClip>` art in the page plays once and rests on its last frame (the landing logo materialises out of static); `loop` makes it ambient.
+- `<ArtClip>` art in the page plays once and rests on its last frame (the landing logo materialises out of static; the Arcade door's blades clash, `door-arcade`; the Reference door's tome riffles two pages, `door-reference`); `loop` makes it ambient.
+- Every screen carries a clip: the title (`landing-brand`), the intro pages, the Story room vignette, the Arcade floor and Reference headers above, and the command stage under the log in Story, Learn and Arcade trials (`fx.js`).
 
 Cells painted in the clip's default colour (`#ffffff`) inherit the CSS colour of their element, so one clip follows the theme and the per-area colours in `terminal.css`; only highlights (flames, water, a glint) carry their own hue. A hidden tab pauses every clip; a detached node ends its loop; under `prefers-reduced-motion` a loop shows its first frame and a reveal its last, with no timer. The terminal HUD draws frame 0 of the same files.
 
