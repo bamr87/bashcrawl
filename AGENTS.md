@@ -32,7 +32,7 @@ make test-js             # TermForge suites (node --test, zero deps)
 make web-test            # web-build + bundle/handler parity + eslint + vitest + vite build
 make lint                # shellcheck + yamllint + markdownlint + ruff
 make lint-js             # node --check on every tracked *.js
-make web-bundle          # build: web-build + vite build -> web/dist (what Pages serves)
+make web-bundle          # build: web-build + vite build -> web/dist, with /version + /healthz (what Pages serves)
 ```
 
 CI (`ci.yml`) runs exactly those gates: `make lint` + `make lint-js` + `npm run lint`, then `make validate-contracts` + `make test` + `make test-js` + `make web-test` on Node 24, plus a stock macOS `/bin/bash` 3.2 smoke. A fresh-clone run (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
