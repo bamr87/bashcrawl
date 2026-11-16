@@ -155,7 +155,7 @@ features:
       - "web/src/screens/ReferenceScreen.test.tsx"
   - id: BASHCRAWL-015
     title: "16-bit RPG web UI"
-    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112)."
+    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112), with a terminal Ctrl+C and a welcome-back recap after a reload (#115)."
     implemented: true
     status: shipped
     prd: [FR13, NFR1, NFR2]
@@ -165,6 +165,7 @@ features:
     tests:
       - "web/src/app/App.test.tsx"
       - "web/src/terminal/PromptBar.test.tsx"
+      - "web/src/engine/game-store.test.ts"
   - id: BASHCRAWL-016
     title: "Training Arena and speed run"
     description: "`train` drills riddles answered with real commands (active recall); `speedrun` clears the arena's trials against the clock."

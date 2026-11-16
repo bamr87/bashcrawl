@@ -282,6 +282,12 @@ export class ArcadeStore implements InputTarget {
         return this.historyIndex === this.history.length ? "" : this.history[this.historyIndex];
     }
 
+    interrupt(text: string): void {
+        this.historyIndex = this.history.length;
+        this.append("dim", `${this.promptLabel()} ${text}^C`);
+        this.flushLog();
+    }
+
     complete(text: string): string | null {
         const rt = this.ctx?.rt;
         if (!rt) return null;

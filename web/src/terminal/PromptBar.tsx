@@ -1,5 +1,6 @@
 // The one shared prompt. Enter runs the line through whoever owns the input
-// (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, F1 and
+// (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, Ctrl+C
+// abandons the line (unless text is selected: then it copies), F1 and
 // Ctrl+/ toggle the docs, `?` on an empty line opens the shortcuts. An owner
 // with a keystroke hook (a Vim Catacombs trial) sees every plain key first
 // and keeps the ones it consumes. The label shortens the path from the left
@@ -16,6 +17,12 @@ export interface PromptBarProps {
     target: InputTarget;
     label: string;
     placeholder: string;
+}
+
+// Text selected in the prompt or on the page: Ctrl+C is a copy, not ^C.
+function hasSelection(input: HTMLInputElement): boolean {
+    if (input.selectionStart !== input.selectionEnd) return true;
+    return Boolean(window.getSelection()?.toString());
 }
 
 export function PromptBar({ target, label, placeholder }: PromptBarProps) {
@@ -66,6 +73,11 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
         } else if (event.key.toLowerCase() === "l" && event.ctrlKey) {
             event.preventDefault();
             target.clearLog();
+        } else if (event.key.toLowerCase() === "c" && event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && !hasSelection(event.currentTarget)) {
+            // As in a terminal: echo the line with ^C, drop it, start a fresh one.
+            event.preventDefault();
+            target.interrupt?.(value);
+            setPromptValue("");
         } else if (event.key === "Escape") {
             // Close what is open; with nothing open the keypress reaches the
             // app, which opens the pause menu.

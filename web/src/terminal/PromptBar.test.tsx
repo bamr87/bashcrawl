@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -97,5 +97,38 @@ describe("PromptBar", () => {
 
         await user.keyboard("{Control>}l{/Control}");
         expect(store.view?.lines).toEqual([]);
+    });
+
+    it("abandons the line on Ctrl+C: echoes it with ^C, clears it and resets history (#115)", async () => {
+        const store = await bootedStore();
+        store.execute("pwd");
+        store.execute("ls");
+        const user = userEvent.setup();
+        render(<PromptBar target={store} label={store.promptLabel()} placeholder="" />);
+        const input = screen.getByRole("textbox", { name: "Command" });
+
+        await user.click(input);
+        await user.keyboard("{ArrowUp}{ArrowUp}");
+        expect(input).toHaveValue("pwd");
+        await user.keyboard(" -P{Control>}c{/Control}");
+        expect(input).toHaveValue("");
+        expect(store.view?.lines.at(-1)).toMatchObject({ kind: "dim", text: "/entrance $ pwd -P^C" });
+        // History navigation starts again from the newest entry.
+        await user.keyboard("{ArrowUp}");
+        expect(input).toHaveValue("ls");
+        expect(store.runtime?.state.history).toEqual(["pwd", "ls"]);
+    });
+
+    it("leaves Ctrl+C to the browser while text is selected", async () => {
+        const store = await bootedStore();
+        render(<PromptBar target={store} label={store.promptLabel()} placeholder="" />);
+        const input = screen.getByRole("textbox", { name: "Command" }) as HTMLInputElement;
+        await act(async () => { setPromptValue("ls -la"); });
+        const lines = store.view?.lines.length ?? 0;
+        input.setSelectionRange(0, 2);
+        // dispatchEvent answers false when a handler called preventDefault().
+        expect(fireEvent.keyDown(input, { key: "c", ctrlKey: true })).toBe(true);
+        expect(input).toHaveValue("ls -la");
+        expect(store.view?.lines.length).toBe(lines);
     });
 });
