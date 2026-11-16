@@ -548,7 +548,8 @@
       },
       "catScrollCount": 8,
       "lastPipedIn": false,
-      "initialized": false
+      "initialized": false,
+      "errorStreak": 0
     },
     "learn": {
       "active": null,
