@@ -2,13 +2,14 @@
 // (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, F1 and
 // Ctrl+/ toggle the docs, `?` on an empty line opens the shortcuts. An owner
 // with a keystroke hook (a Vim Catacombs trial) sees every plain key first
-// and keeps the ones it consumes. The label shows the full path and, on
-// narrow screens, just the room's name.
+// and keeps the ones it consumes. The label shortens the path from the left
+// (`~/chapel/…/.study $`) so the room stays visible, shows just the room's
+// name on narrow screens, and keeps the full path in its tooltip.
 import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
 
 import { getUi, setUi, toggleDocs, toggleHelp } from "../chrome/ui-store";
 import type { InputTarget } from "./input-target";
-import { labelPath, shortLabel } from "./prompt-label";
+import { compactLabel, labelPath, shortLabel } from "./prompt-label";
 import { setPromptValue, usePrompt } from "./prompt-store";
 
 export interface PromptBarProps {
@@ -76,13 +77,13 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
         }
     }
 
-    const full = label;
+    const compact = compactLabel(label);
     const short = shortLabel(label);
     const path = labelPath(label);
     return (
         <form className="bc-prompt" onSubmit={submit} data-owner={target.id}>
             <label htmlFor="command-input" className="bc-prompt-label" title={path ? `Full path: ${path}` : undefined}>
-                <span className="bc-prompt-full">{full}</span>
+                <span className="bc-prompt-full">{compact}</span>
                 <span className="bc-prompt-short" aria-hidden="true">{short}</span>
             </label>
             <input
