@@ -64,6 +64,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [BASHCRAWL-023](features/features.yml) | Dungeon reset | shipped | [`lib/reset.sh`](lib/reset.sh) · [`README.md`](README.md) | FR3 |
 | [BASHCRAWL-024](features/features.yml) | AI playtest harness | shipped | [`src/playtest`](src/playtest) · [`README.md`](README.md) | FR11 |
 | [BASHCRAWL-025](features/features.yml) | Effects layer and chiptune SFX | shipped | [`web/src/fx`](web/src/fx) · [`AGENTS.md`](AGENTS.md) | FR13 |
+| [BASHCRAWL-026](features/features.yml) | Feedback widget | shipped | [`web/src/chrome/Feedback.tsx`](web/src/chrome/Feedback.tsx) · [`README.md`](README.md) | TBD |
 
 **Requirement → feature trace**
 
@@ -85,6 +86,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | FR12 | BASHCRAWL-018 |
 | FR10 | BASHCRAWL-020, BASHCRAWL-021 |
 | FR11 | BASHCRAWL-024 |
+| TBD | BASHCRAWL-026 |
 <!-- features:end -->
 
 ## 5. Requirements

@@ -275,3 +275,21 @@ features:
     tests:
       - "termforge/test/fx.test.js"
       - "web/src/audio/synth.test.ts"
+  - id: BASHCRAWL-026
+    title: "Feedback widget"
+    description: "An \"Improve this page\" button in the web trainer files a prefilled GitHub issue on bamr87/bashcrawl carrying the door, the browser and the console errors that led up to the report; the not-found and crash screens open it pre-typed. It is the fleet feedback kit's widget, vendored in `public/` and `components/`."
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: ui
+    link: "web/src/chrome/Feedback.tsx"
+    docs: "README.md"
+    tests:
+      - "web/src/chrome/Feedback.test.tsx"
+      - "web/src/app/AppShell.test.tsx"
+      - "web/src/app/App.test.tsx"
+      - "test/unit/test_static_web.py"
+    scenarios:
+      - "verify/scenarios/feedback-widget.yml"
+    evidence:
+      - "test/evidence/feedback-widget"
