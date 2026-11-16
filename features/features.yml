@@ -275,3 +275,11 @@ features:
     tests:
       - "termforge/test/fx.test.js"
       - "web/src/audio/synth.test.ts"
+  - id: BASHCRAWL-026
+    title: "Missions in constitution §1"
+    description: "Three product missions under one direction statement, ratified through amendment 0003."
+    implemented: false
+    status: planned
+    prd: ["§1.1"]
+    surface: docs
+    docs: "docs/constitution.md"
