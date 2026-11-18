@@ -1,6 +1,6 @@
 name: Claude
 
-# kit: agent-context v0.6.0
+# kit: agent-context v0.7.0
 # @claude mention handler, seeded from bamr87/bamr87 templates/agent-context/.
 # Mention @claude in an issue or PR comment and Claude Code picks up the task.
 #
@@ -11,10 +11,11 @@ name: Claude
 # still matches the kit byte for byte is upgraded by the fan-out, and an edited
 # one is left alone for good.
 #
-# Auth: tried in the order this repo's CLAUDE_AUTH_ORDER variable names —
-# `oauth` = CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`), `api_key` =
-# ANTHROPIC_API_KEY. Set per repo or group in bamr87/bamr87 _data/fleet.yml
-# `ai_auth:`; unset means the fleet default, oauth then api_key.
+# Auth: CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`), through the
+# claude-auth step and this repo's CLAUDE_AUTH_ORDER (bamr87/bamr87
+# _data/fleet.yml `ai_auth:`).
+# Claude auth: OAuth only (CLAUDE_CODE_OAUTH_TOKEN). ANTHROPIC_API_KEY disabled for now
+# (2026-11-15); to restore, re-add the secrets.ANTHROPIC_API_KEY reference.
 # See bamr87/bamr87 docs/AI-INTEGRATION.md.
 
 on:
@@ -79,12 +80,10 @@ jobs:
         with:
           order: ${{ vars.CLAUDE_AUTH_ORDER }}
           has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
-          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
-          anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           # The model is an exact id from the fleet's allowlist (bamr87/bamr87
           # _data/fleet.yml `ai_models.allowed`), never an alias and never the
           # action's default of the day. The dollar ceiling is a circuit
