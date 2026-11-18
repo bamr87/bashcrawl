@@ -1,0 +1,650 @@
+{
+  "id": "door-art",
+  "title": "The Arcade and Reference doors open with an ASCII Motion clip",
+  "features": [
+    "BASHCRAWL-025"
+  ],
+  "path": "verify/scenarios/door-art.yml",
+  "started": "2026-11-16T07:33:05.852Z",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 628
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"reference\", onboarded: true, introSeen: true });\nlocalStorage.setItem(\"bashcrawl-web-theme\", \"dark\");\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 5
+        },
+        {
+          "step": "goto",
+          "arg": "/?theme=dark#/reference",
+          "ok": true,
+          "ms": 545
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
+          },
+          "ok": true,
+          "ms": 16
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "dark-arcade-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-arcade",
+            "distinctFrames": 6,
+            "ariaHidden": "true",
+            "rest": [
+              "               \\ | /",
+              "    o==[]::::::>-*-<::::::[]==o",
+              "               / | \\"
+            ]
+          },
+          "ms": 2443
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-dark",
+          "ok": true,
+          "file": "test/evidence/door-art/desktop-arcade-dark.png",
+          "ms": 68
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "dark-reference-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-reference",
+            "distinctFrames": 9,
+            "ariaHidden": "true",
+            "rest": [
+              "    _________*_________",
+              "   /  ~~~~~~ |  ~~~~   \\",
+              "  /  ~~~~~   |  ~~~~~~~ \\",
+              " /  ~~~~~~~  |  ~~~~     \\",
+              "/____________|____________\\"
+            ]
+          },
+          "ms": 2437
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "input.bc-ref-search"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-dark",
+          "ok": true,
+          "file": "test/evidence/door-art/desktop-reference-dark.png",
+          "ms": 43
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-theme",
+            "script": "localStorage.setItem(\"bashcrawl-web-theme\", \"light\");\n\"light\"\n"
+          },
+          "ok": true,
+          "value": "light",
+          "ms": 1
+        },
+        {
+          "step": "goto",
+          "arg": "/?theme=light#/reference",
+          "ok": true,
+          "ms": 543
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
+          },
+          "ok": true,
+          "ms": 19
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-arcade-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-arcade",
+            "distinctFrames": 6,
+            "ariaHidden": "true",
+            "rest": [
+              "               \\ | /",
+              "    o==[]::::::>-*-<::::::[]==o",
+              "               / | \\"
+            ]
+          },
+          "ms": 2430
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-light",
+          "ok": true,
+          "file": "test/evidence/door-art/desktop-arcade-light.png",
+          "ms": 50
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-reference-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-reference",
+            "distinctFrames": 9,
+            "ariaHidden": "true",
+            "rest": [
+              "    _________*_________",
+              "   /  ~~~~~~ |  ~~~~   \\",
+              "  /  ~~~~~   |  ~~~~~~~ \\",
+              " /  ~~~~~~~  |  ~~~~     \\",
+              "/____________|____________\\"
+            ]
+          },
+          "ms": 2432
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 2
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-light",
+          "ok": true,
+          "file": "test/evidence/door-art/desktop-reference-light.png",
+          "ms": 53
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/door-art/desktop-arcade-dark.png",
+        "test/evidence/door-art/desktop-reference-dark.png",
+        "test/evidence/door-art/desktop-arcade-light.png",
+        "test/evidence/door-art/desktop-reference-light.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "dark-arcade-plays-once": {
+          "art": "door-arcade",
+          "distinctFrames": 6,
+          "ariaHidden": "true",
+          "rest": [
+            "               \\ | /",
+            "    o==[]::::::>-*-<::::::[]==o",
+            "               / | \\"
+          ]
+        },
+        "dark-reference-plays-once": {
+          "art": "door-reference",
+          "distinctFrames": 9,
+          "ariaHidden": "true",
+          "rest": [
+            "    _________*_________",
+            "   /  ~~~~~~ |  ~~~~   \\",
+            "  /  ~~~~~   |  ~~~~~~~ \\",
+            " /  ~~~~~~~  |  ~~~~     \\",
+            "/____________|____________\\"
+          ]
+        },
+        "light-theme": "light",
+        "light-arcade-plays-once": {
+          "art": "door-arcade",
+          "distinctFrames": 6,
+          "ariaHidden": "true",
+          "rest": [
+            "               \\ | /",
+            "    o==[]::::::>-*-<::::::[]==o",
+            "               / | \\"
+          ]
+        },
+        "light-reference-plays-once": {
+          "art": "door-reference",
+          "distinctFrames": 9,
+          "ariaHidden": "true",
+          "rest": [
+            "    _________*_________",
+            "   /  ~~~~~~ |  ~~~~   \\",
+            "  /  ~~~~~   |  ~~~~~~~ \\",
+            " /  ~~~~~~~  |  ~~~~     \\",
+            "/____________|____________\\"
+          ]
+        }
+      },
+      "final_url": "http://127.0.0.1:4798/?theme=light#/reference"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 603
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"reference\", onboarded: true, introSeen: true });\nlocalStorage.setItem(\"bashcrawl-web-theme\", \"dark\");\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 2
+        },
+        {
+          "step": "goto",
+          "arg": "/?theme=dark#/reference",
+          "ok": true,
+          "ms": 537
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
+          },
+          "ok": true,
+          "ms": 12
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "dark-arcade-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-arcade",
+            "distinctFrames": 6,
+            "ariaHidden": "true",
+            "rest": [
+              "               \\ | /",
+              "    o==[]::::::>-*-<::::::[]==o",
+              "               / | \\"
+            ]
+          },
+          "ms": 2435
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-dark",
+          "ok": true,
+          "file": "test/evidence/door-art/mobile-arcade-dark.png",
+          "ms": 31
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "dark-reference-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-reference",
+            "distinctFrames": 9,
+            "ariaHidden": "true",
+            "rest": [
+              "    _________*_________",
+              "   /  ~~~~~~ |  ~~~~   \\",
+              "  /  ~~~~~   |  ~~~~~~~ \\",
+              " /  ~~~~~~~  |  ~~~~     \\",
+              "/____________|____________\\"
+            ]
+          },
+          "ms": 2443
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "input.bc-ref-search"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-dark",
+          "ok": true,
+          "file": "test/evidence/door-art/mobile-reference-dark.png",
+          "ms": 23
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-theme",
+            "script": "localStorage.setItem(\"bashcrawl-web-theme\", \"light\");\n\"light\"\n"
+          },
+          "ok": true,
+          "value": "light",
+          "ms": 0
+        },
+        {
+          "step": "goto",
+          "arg": "/?theme=light#/reference",
+          "ok": true,
+          "ms": 531
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
+          },
+          "ok": true,
+          "ms": 9
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-arcade-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-arcade",
+            "distinctFrames": 6,
+            "ariaHidden": "true",
+            "rest": [
+              "               \\ | /",
+              "    o==[]::::::>-*-<::::::[]==o",
+              "               / | \\"
+            ]
+          },
+          "ms": 2431
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-light",
+          "ok": true,
+          "file": "test/evidence/door-art/mobile-arcade-light.png",
+          "ms": 19
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "light-reference-plays-once",
+            "script": "(async () => {\n  // Switch to the other door (no reload), then sample its header for\n  // 2.4 s: a door clip animates from its first frame, then stops.\n  const door = location.hash.includes(\"arcade\") ? \"reference\" : \"arcade\";\n  location.hash = `#/${door}`;\n  const tick = () => new Promise((done) => setTimeout(done, 20));\n  let node = null;\n  for (let i = 0; i < 100 && !node; i += 1) {\n    await tick();\n    node = document.querySelector(`[data-art=\"door-${door}\"]`);\n  }\n  if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);\n  const frames = new Set();\n  const until = Date.now() + 2400;\n  while (Date.now() < until) {\n    frames.add(node.textContent);\n    await tick();\n  }\n  const playing = window.BashcrawlAmbient.isPlaying(node);\n  if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);\n  if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);\n  return {\n    art: node.dataset.art,\n    distinctFrames: frames.size,\n    ariaHidden: node.getAttribute(\"aria-hidden\"),\n    rest: node.textContent.split(\"\\n\").map((line) => line.trimEnd()),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "art": "door-reference",
+            "distinctFrames": 9,
+            "ariaHidden": "true",
+            "rest": [
+              "    _________*_________",
+              "   /  ~~~~~~ |  ~~~~   \\",
+              "  /  ~~~~~   |  ~~~~~~~ \\",
+              " /  ~~~~~~~  |  ~~~~     \\",
+              "/____________|____________\\"
+            ]
+          },
+          "ms": 2433
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-light",
+          "ok": true,
+          "file": "test/evidence/door-art/mobile-reference-light.png",
+          "ms": 18
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/door-art/mobile-arcade-dark.png",
+        "test/evidence/door-art/mobile-reference-dark.png",
+        "test/evidence/door-art/mobile-arcade-light.png",
+        "test/evidence/door-art/mobile-reference-light.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "dark-arcade-plays-once": {
+          "art": "door-arcade",
+          "distinctFrames": 6,
+          "ariaHidden": "true",
+          "rest": [
+            "               \\ | /",
+            "    o==[]::::::>-*-<::::::[]==o",
+            "               / | \\"
+          ]
+        },
+        "dark-reference-plays-once": {
+          "art": "door-reference",
+          "distinctFrames": 9,
+          "ariaHidden": "true",
+          "rest": [
+            "    _________*_________",
+            "   /  ~~~~~~ |  ~~~~   \\",
+            "  /  ~~~~~   |  ~~~~~~~ \\",
+            " /  ~~~~~~~  |  ~~~~     \\",
+            "/____________|____________\\"
+          ]
+        },
+        "light-theme": "light",
+        "light-arcade-plays-once": {
+          "art": "door-arcade",
+          "distinctFrames": 6,
+          "ariaHidden": "true",
+          "rest": [
+            "               \\ | /",
+            "    o==[]::::::>-*-<::::::[]==o",
+            "               / | \\"
+          ]
+        },
+        "light-reference-plays-once": {
+          "art": "door-reference",
+          "distinctFrames": 9,
+          "ariaHidden": "true",
+          "rest": [
+            "    _________*_________",
+            "   /  ~~~~~~ |  ~~~~   \\",
+            "  /  ~~~~~   |  ~~~~~~~ \\",
+            " /  ~~~~~~~  |  ~~~~     \\",
+            "/____________|____________\\"
+          ]
+        }
+      },
+      "final_url": "http://127.0.0.1:4798/?theme=light#/reference"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-16T07:33:29.314Z",
+  "base": "http://127.0.0.1:4798"
+}

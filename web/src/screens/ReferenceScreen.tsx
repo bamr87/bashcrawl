@@ -1,11 +1,13 @@
 // The Reference door: every command the dungeon teaches as searchable
 // cheatsheets, the quick-reference sheets, a glossary, and where each
 // concept is taught. Click a command to copy it; ▶ drops it into the Story
-// prompt.
+// prompt. The door art beside the search is an ASCII Motion clip that plays
+// once on entry.
 import { useState } from "react";
 
 import { toast } from "../chrome/toast-store";
 import { game, type GameStore } from "../engine/game-store";
+import { ArtClip } from "../fx/ArtClip";
 import { tryCommand } from "../terminal/actions";
 
 function CommandCell({ cmd }: { cmd: string }) {
@@ -111,6 +113,7 @@ export function ReferenceScreen({ store = game }: { store?: GameStore }) {
     return (
         <section className="bc-reference" aria-label="Command reference and cheatsheets">
             <div className="bc-ref-controls">
+                <ArtClip name="door-reference" className="bc-door-art bc-ref-art" />
                 <input
                     type="search"
                     className="bc-input bc-ref-search"

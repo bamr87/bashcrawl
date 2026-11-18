@@ -226,6 +226,16 @@ art:
     title: Character sheet
     description: Header for `profile`.
 
+  door-arcade:
+    file: motion/art/door-arcade.asciimtn
+    title: Arcade door
+    description: Header of the Practice Arcade floor (web) — two blades slide in and clash; plays once on entry.
+
+  door-reference:
+    file: motion/art/door-reference.asciimtn
+    title: Reference door
+    description: Header of the Reference door (web) — an open tome riffles two pages; plays once on entry.
+
 events:
   - event: levelup
     motion: cast

@@ -1,14 +1,47 @@
 import { act, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { GameStore } from "../engine/game-store";
+import { artClip, isPlaying, paintedText, preferReducedMotion } from "../test/art";
 import { dataLoader, loadEngine } from "../test/engine";
 import { getPrompt, setPromptValue } from "../terminal/prompt-store";
 import { ReferenceScreen } from "./ReferenceScreen";
 
 loadEngine();
 
+async function mountArt() {
+    window.localStorage.clear();
+    const store = new GameStore();
+    await store.boot(dataLoader);
+    const { container } = render(<ReferenceScreen store={store} />);
+    return container.querySelector('.bc-ref-controls [data-art="door-reference"]');
+}
+
 describe("the reference", () => {
+    let restore: (() => void) | null = null;
+    afterEach(() => {
+        restore?.();
+        restore = null;
+    });
+
+    it("opens with the door's ASCII Motion clip beside the search, playing once from its first frame", async () => {
+        const art = await mountArt();
+        const clip = artClip("door-reference");
+        expect(clip?.frames).toBeGreaterThan(1);
+        expect(art).toHaveAttribute("aria-hidden", "true");
+        expect(art).not.toHaveAttribute("tabindex");
+        expect(paintedText(art)).toBe(clip?.frameText(0));
+        expect(isPlaying(art)).toBe(true);
+    });
+
+    it("paints the clip's resting frame and holds still under prefers-reduced-motion", async () => {
+        restore = preferReducedMotion();
+        const art = await mountArt();
+        const clip = artClip("door-reference");
+        expect(paintedText(art)).toBe(clip?.frameText(clip.frames - 1));
+        expect(isPlaying(art)).toBe(false);
+    });
+
     it("searches, filters by category, and ▶ drops a command into the Story prompt", async () => {
         window.localStorage.clear();
         setPromptValue("");
