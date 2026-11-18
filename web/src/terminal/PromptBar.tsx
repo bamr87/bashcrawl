@@ -1,20 +1,28 @@
 // The one shared prompt. Enter runs the line through whoever owns the input
-// (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, F1 and
+// (story or arcade), ↑/↓ walk history, Tab completes, Ctrl+L clears, Ctrl+C
+// abandons the line (unless text is selected: then it copies), F1 and
 // Ctrl+/ toggle the docs, `?` on an empty line opens the shortcuts. An owner
 // with a keystroke hook (a Vim Catacombs trial) sees every plain key first
-// and keeps the ones it consumes. The label shows the full path and, on
-// narrow screens, just the room's name.
+// and keeps the ones it consumes. The label shortens the path from the left
+// (`~/chapel/…/.study $`) so the room stays visible, shows just the room's
+// name on narrow screens, and keeps the full path in its tooltip.
 import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
 
 import { getUi, setUi, toggleDocs, toggleHelp } from "../chrome/ui-store";
 import type { InputTarget } from "./input-target";
-import { labelPath, shortLabel } from "./prompt-label";
+import { compactLabel, labelPath, shortLabel } from "./prompt-label";
 import { setPromptValue, usePrompt } from "./prompt-store";
 
 export interface PromptBarProps {
     target: InputTarget;
     label: string;
     placeholder: string;
+}
+
+// Text selected in the prompt or on the page: Ctrl+C is a copy, not ^C.
+function hasSelection(input: HTMLInputElement): boolean {
+    if (input.selectionStart !== input.selectionEnd) return true;
+    return Boolean(window.getSelection()?.toString());
 }
 
 export function PromptBar({ target, label, placeholder }: PromptBarProps) {
@@ -65,6 +73,11 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
         } else if (event.key.toLowerCase() === "l" && event.ctrlKey) {
             event.preventDefault();
             target.clearLog();
+        } else if (event.key.toLowerCase() === "c" && event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && !hasSelection(event.currentTarget)) {
+            // As in a terminal: echo the line with ^C, drop it, start a fresh one.
+            event.preventDefault();
+            target.interrupt?.(value);
+            setPromptValue("");
         } else if (event.key === "Escape") {
             // Close what is open; with nothing open the keypress reaches the
             // app, which opens the pause menu.
@@ -76,13 +89,13 @@ export function PromptBar({ target, label, placeholder }: PromptBarProps) {
         }
     }
 
-    const full = label;
+    const compact = compactLabel(label);
     const short = shortLabel(label);
     const path = labelPath(label);
     return (
         <form className="bc-prompt" onSubmit={submit} data-owner={target.id}>
             <label htmlFor="command-input" className="bc-prompt-label" title={path ? `Full path: ${path}` : undefined}>
-                <span className="bc-prompt-full">{full}</span>
+                <span className="bc-prompt-full">{compact}</span>
                 <span className="bc-prompt-short" aria-hidden="true">{short}</span>
             </label>
             <input
