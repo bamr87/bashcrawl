@@ -116,6 +116,20 @@ test("the clip manifest drives aliases, the stage set, and event overrides", () 
     assert.equal(lib.get("tally").frames.length, 2);
 });
 
+test("the clip ls plays names no room or file (issue #110)", () => {
+    const env = loadClassic({ files: [ASCII_MOTION, FX_CLIPS, FX] });
+    const fx = env.sandbox.BashcrawlCommandFx;
+    const am = env.sandbox.TermForge.asciiMotion;
+    const clip = am.parse(fx.clipFor(fx.describe("ls").motion));
+    assert.ok(clip.frames.length >= 3);
+    for (let i = 0; i < clip.frames.length; i++) {
+        const text = am.renderFrame(clip, i).text.toLowerCase();
+        for (const name of ["cellar", "armoury", "treasure", "scroll", "manifest"]) {
+            assert.ok(!text.includes(name), `frame ${i} names "${name}"`);
+        }
+    }
+});
+
 test("a failing command keeps its red wash but plays no stage clip (#111)", () => {
     const env = loadClassic({ files: [PARSER, ASCII_MOTION, FX_CLIPS, FX] });
     env.sandbox.setTimeout = () => 0;

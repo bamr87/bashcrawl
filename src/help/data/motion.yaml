@@ -41,8 +41,8 @@ clips:
 
   scan:
     file: motion/clips/scan.asciimtn
-    title: Room manifest
-    description: A scanline runs down a manifest of the room's exits and items — ls.
+    title: Scan
+    description: A generic scanline sweeps a blank panel, with no room or file names — ls.
     stage: true
     aliases: []
 

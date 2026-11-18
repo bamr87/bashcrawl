@@ -98,7 +98,7 @@
     function finish(quit) {
         const t = this.state.trainer;
         const answered = t.pos;
-        const rank = this.rankFor(t.score);
+        const rank = this.rankFor(t.score, this.catalog.arenaRanks);
         const completed = answered >= t.queue.length;
         if (completed) this.state.flags.arena_cleared = true;
         this.state.trainer = null;

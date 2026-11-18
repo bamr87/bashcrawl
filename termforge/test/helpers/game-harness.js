@@ -49,6 +49,8 @@ const RUNTIME_FILES = [
     // The game's feature plugins, in the runtime's install order.
     ...GAME_PLUGIN_IDS.map((id) => path.join(WEB_JS, "plugins", `${id}.js`)),
     path.join(WEB_JS, "runtime.js"),
+    // `map` draws the fog-of-war model the sidebar uses.
+    path.join(WEB_JS, "hud.js"),
 ];
 
 const STORAGE_FILE = path.join(WEB_JS, "storage.js");

@@ -226,6 +226,7 @@ def build_progression() -> dict[str, Any]:
     trials = data.get("trials") or []
     return {
         "ranks": data.get("ranks") or [],
+        "arena_ranks": data.get("arena_ranks") or [],
         "achievements": data.get("achievements") or [],
         "bestiary": data.get("bestiary") or [],
         "trials": trials,

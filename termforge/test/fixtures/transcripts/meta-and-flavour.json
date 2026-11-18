@@ -236,7 +236,7 @@
         },
         {
           "kind": "output",
-          "text": "  map             ASCII map of the dungeon"
+          "text": "  map             ASCII map of the rooms you have explored"
         },
         {
           "kind": "output",
@@ -285,11 +285,11 @@
         },
         {
           "kind": "output",
-          "text": "   Goal:     earn 60 XP today"
+          "text": "   Goal:     earn 175 XP today"
         },
         {
           "kind": "output",
-          "text": "   Progress: 0/60 XP"
+          "text": "   Progress: 0/175 XP"
         },
         {
           "kind": "output",
@@ -394,18 +394,6 @@
         {
           "kind": "success",
           "text": "✅ Achievement unlocked: Trailblazer — Completed a Path-Finder journey.  (+5 XP)"
-        },
-        {
-          "kind": "control",
-          "action": "levelup"
-        },
-        {
-          "kind": "art",
-          "text": "     .  *  .     *   .    *  .\n    *    L E V E L   U P !    *\n     *  .   *     .   *  .  *"
-        },
-        {
-          "kind": "success",
-          "text": "★  You are now Apprentice of the Shell!"
         }
       ]
     },
@@ -505,18 +493,6 @@
         {
           "kind": "success",
           "text": "🧭 Achievement unlocked: First Steps — Found your place with pwd.  (+5 XP)"
-        },
-        {
-          "kind": "control",
-          "action": "levelup"
-        },
-        {
-          "kind": "art",
-          "text": "     .  *  .     *   .    *  .\n    *    L E V E L   U P !    *\n     *  .   *     .   *  .  *"
-        },
-        {
-          "kind": "success",
-          "text": "★  You are now Apprentice of the Shell!"
         }
       ]
     },
@@ -538,11 +514,11 @@
         },
         {
           "kind": "output",
-          "text": "   Goal:     earn 30 XP today"
+          "text": "   Goal:     earn 100 XP today"
         },
         {
           "kind": "output",
-          "text": "   Progress: 0/30 XP"
+          "text": "   Progress: 0/100 XP"
         },
         {
           "kind": "output",
@@ -584,12 +560,12 @@
     "daily": {
       "date": "2026-01-16",
       "baselineXp": 55,
-      "goal": 30,
+      "goal": 100,
       "completed": false,
       "streak": 0,
       "lastDate": null
     },
-    "rankIndex": 1,
+    "rankIndex": 0,
     "stats": {
       "commands": {
         "pwd": 1,

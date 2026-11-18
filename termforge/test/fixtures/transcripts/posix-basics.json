@@ -13,6 +13,15 @@
         {
           "kind": "success",
           "text": "🧭 Achievement unlocked: First Steps — Found your place with pwd.  (+5 XP)"
+        }
+      ]
+    },
+    {
+      "line": "ls",
+      "outputs": [
+        {
+          "kind": "output",
+          "text": "cellar  README.md  scroll"
         },
         {
           "kind": "control",
@@ -25,35 +34,6 @@
         {
           "kind": "success",
           "text": "★  You are now Apprentice of the Shell!"
-        }
-      ]
-    },
-    {
-      "line": "ls",
-      "outputs": [
-        {
-          "kind": "output",
-          "text": "cellar  README.md  scroll"
-        },
-        {
-          "kind": "success",
-          "text": "🔥 Daily challenge complete!  +25 XP  ·  Streak: 1 day"
-        },
-        {
-          "kind": "dim",
-          "text": "Come back tomorrow to keep the streak alive."
-        },
-        {
-          "kind": "control",
-          "action": "levelup"
-        },
-        {
-          "kind": "art",
-          "text": "     .  *  .     *   .    *  .\n    *    L E V E L   U P !    *\n     *  .   *     .   *  .  *"
-        },
-        {
-          "kind": "success",
-          "text": "★  You are now Terminal Master!"
         }
       ]
     },
@@ -105,16 +85,12 @@
           "text": "🔥 Achievement unlocked: Seasoned Adventurer — Earned 150 XP.  (+5 XP)"
         },
         {
-          "kind": "control",
-          "action": "levelup"
-        },
-        {
-          "kind": "art",
-          "text": "     .  *  .     *   .    *  .\n    *    L E V E L   U P !    *\n     *  .   *     .   *  .  *"
-        },
-        {
           "kind": "success",
-          "text": "★  You are now Archmage of the Command Line!"
+          "text": "🔥 Daily challenge complete!  +25 XP  ·  Streak: 1 day"
+        },
+        {
+          "kind": "dim",
+          "text": "Come back tomorrow to keep the streak alive."
         }
       ]
     },
@@ -133,6 +109,18 @@
         {
           "kind": "output",
           "text": "\n################################################################################\n#                🌟 THE CELLAR OF TRUE SIGHT - ENHANCED TERMINAL VISION       #\n################################################################################\n\n🔮 ANCIENT WISDOM: Seeing Beyond the Veil\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n*The air grows thick with mystical energy as you descend into the cellar...*\n*Here, ancient magic teaches adventurers to distinguish reality from illusion.*\n\n**Illusions are strong here.** It is difficult to tell what is a doorway and what is an object.\nThe untrained eye sees only a simple list of names, but the wise terminal mage learns to\nperceive the **true nature** of all things in the catacombs.\n\n--------------------------------------------------------------------------------\n⚡ THE ENHANCED SIGHT SPELL: ls -F\n--------------------------------------------------------------------------------\n\nThe magic spell you use to look can be **augmented** with powerful enchantments.\n\n*Master this incantation to pierce through the veils of confusion...*\n\n┌─ ENHANCED SIGHT INCANTATION ───────────────────────────────────────────────┐\n│                                                                             │\n│ $ ls -F                           # Cast enhanced sight spell              │\n│                                                                             │\n│ Expected Manifestation:                                                     │\n│ scroll  treasure*  armoury/  README.md                                     │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎯 What the Mystical Symbols Reveal\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you cast `ls -F`, the mystical energies reveal secrets through their symbols:\n\n┌─────────────────┬────────────────────────────┬──────────────────────────────┐\n│ SYMBOL          │ TYPE                       │ DESCRIPTION                  │\n├─────────────────┼────────────────────────────┼──────────────────────────────┤\n│ /               │ Directory (Chamber)        │ Rooms you can enter          │\n│ *               │ Executable (Encounter)     │ Interactive adventures       │\n│ @               │ Symbolic Link (Portal)     │ Magickal doorways            │\n│ |               │ Named Pipe (Channel)       │ Communication pathways       │\n│ =               │ Socket (Connection)        │ Network junction points      │\n│ (none)          │ Regular File (Scroll)      │ Documents and knowledge      │\n└─────────────────┴────────────────────────────┴──────────────────────────────┘\n\n################################################################################\n#              🪄 THE ALIAS ENCHANTMENT: Permanent Spell Enhancement          #\n################################################################################\n\nYou can avoid having to type `ls -F` every time by weaving a **command alias** -\na permanent enchantment that enhances your basic spells:\n\n╭─ PERMANENT ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F'                # Weave the permanent enchantment        │\n│                                                                             │\n│ Effect: Your basic 'ls' spell now carries enhanced sight                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n🎓 Understanding Shell Aliases\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThis is known as a **shell alias** or **command alias**. With this alias active:\n\n• Typing simply `ls` by itself will automatically run `ls -F`\n• Your spell becomes permanently enhanced for this terminal session  \n• The magic persists until you close your terminal or create a new alias\n\n--------------------------------------------------------------------------------\n🔄 Try It Out! - Interactive Learning Path\n--------------------------------------------------------------------------------\n\nPRACTICE PATH: Discovery → Understanding → Mastery\n\n    1. FIRST STEP: Cast the enhanced spell manually\n       $ ls -F\n\n    2. SECOND STEP: Create the permanent enchantment  \n       $ alias ls='ls -F'\n\n    3. THIRD STEP: Test your enhanced spell\n       $ ls\n\n    4. FOURTH STEP: Verify the magic worked\n       $ alias ls\n       (This reveals your current alias definition)\n\n################################################################################\n#                  🏆 ADVANCED SIGHT TECHNIQUES: Master's Methods             #\n################################################################################\n\n⚡ COLOR-ENHANCED VISION: Advanced Sight Magic\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nFor terminals that support color magic, enhance your sight even further:\n\n╭─ CHROMATIC ENHANCEMENT SPELL ──────────────────────────────────────────────╮\n│                                                                             │\n│ $ alias ls='ls -F --color=auto'   # Weave color into your sight            │\n│                                                                             │\n│ Color Manifestations:                                                       │\n│ • Blue: Directories (chambers)                                             │\n│ • Green: Executables (encounters)                                          │\n│ • Cyan: Symbolic links (portals)                                           │\n│ • White: Regular files (scrolls)                                           │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n⚡ DETAILED INSPECTION: The Master's Eye\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen you need to examine items more thoroughly:\n\n╭─ COMPREHENSIVE SIGHT SPELL ────────────────────────────────────────────────╮\n│                                                                             │\n│ $ ls -laF                         # Master-level inspection spell          │\n│                                                                             │\n│ This reveals hidden knowledge:                                              │\n│ • -l: Long format (permissions, size, modification time)                   │\n│ • -a: Hidden files (starting with '.')                                     │\n│ • -F: Your familiar file type indicators                                   │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n################################################################################\n#          🎯 CELLAR CHALLENGE: Master the Enhanced Sight Spells              #\n################################################################################\n\nBefore you may claim the **emerald amulet** that awaits in this chamber,\nprove your mastery of the ancient sight arts:\n\nREQUIRED TASKS:\n~~~~~~~~~~~~~~~\n✅ Cast Enhanced Sight: Use ls -F to see the true nature of this cellar\n✅ Create Permanent Enhancement: Set up the alias ls='ls -F' enchantment  \n✅ Test Your Magic: Verify that plain ls now shows file type indicators\n✅ Explore Thoroughly: Use enhanced sight to identify all chambers and encounters\n✅ Find the Treasure: Locate and examine the treasure file in this room\n\nEXPECTED DISCOVERIES:\n~~~~~~~~~~~~~~~~~~~~\nIn this cellar, your enhanced sight should reveal:\n\n┌─ CHAMBER CONTENTS ──────────────────────────────────────────────────────────┐\n│                                                                             │\n│ 🏰 Directories ending with / (chambers you can enter)                      │\n│ 🗡️ Executables ending with * (encounters you can experience)               │\n│ 📜 Regular files with no suffix (scrolls to read)                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\n################################################################################\n#               💡 PATH TO MASTERY: Building Terminal Intuition               #\n################################################################################\n\n🧠 WHY THIS KNOWLEDGE MATTERS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nUnderstanding file types is **fundamental** to terminal mastery:\n\n• **Safety**: Know if something is executable before running it\n• **Navigation**: Quickly identify which items are directories\n• **Efficiency**: Understand your environment at a glance\n• **Problem-solving**: Debug issues by understanding file types\n\n🚀 REAL-WORLD APPLICATIONS:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n╭─ PROFESSIONAL CONTEXTS ────────────────────────────────────────────────────╮\n│                                                                             │\n│ • System Administration: Quickly assess directory contents                 │\n│ • Development: Identify scripts, configs, and executables                  │\n│ • Debugging: Understand file permissions and types                         │\n│ • Automation: Write scripts that handle different file types               │\n│                                                                             │\n╰─────────────────────────────────────────────────────────────────────────────╯\n\n💰 TREASURE VAULT: The Emerald Amulet Awaits\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nOnce you've mastered the enhanced sight spell and understand the true nature\nof files in the terminal realm, seek out the **treasure** in this chamber.\n\nThe emerald amulet you'll find here is more than decoration - it unlocks\n**new pathways** deeper into the catacombs, revealing hidden chambers that\nwere previously concealed from untrained eyes.\n\n################################################################################\n#                        🗺️ NEXT STEPS IN YOUR JOURNEY                       #\n################################################################################\n\nWith mastery of enhanced sight spells, new mystical pathways reveal themselves:\n\nAVAILABLE PATHS:\n┌─────────────────────────────────────────────────────────────────────────────┐\n│ 🗡️ The Armoury: Weapon Mastery Training                                    │\n│    Access: cd armoury                                                       │\n│    Focus: Combat skills and file manipulation                              │\n│    Rewards: Executable permissions and advanced file operations            │\n│                                                                             │\n│ ⛪ Hidden Chapel: Sacred Knowledge Vault                                    │\n│    Access: [unlock condition - collect 3 treasures]                        │\n│    Focus: Secret commands and advanced techniques                           │\n│    Skills: Hidden file manipulation and system secrets                     │\n│                                                                             │\n│ 💰 The Vault: Master's Inventory Domain                                     │\n│    Access: [requires emerald amulet from this chamber]                     │\n│    Focus: Environment variables and inventory management                    │\n│    Rewards: Variable manipulation and state management                      │\n│                                                                             │\n│ 🔧 The Scrap: System Information Sanctum                                   │\n│    Access: [requires completion of armoury trials]                         │\n│    Focus: System information and debugging techniques                       │\n│    Skills: Process monitoring and system analysis                          │\n│                                                                             │\n└─────────────────────────────────────────────────────────────────────────────┘\n\nVISUAL PATHWAY MAP:\n    Entrance → Cellar → Armoury → Chamber → Hidden Realms\n       ⭐        ⚡        🗡️        🏆         🎖️\n\nEach path teaches **different aspects** of terminal mastery. Choose based on\nyour interests and learning goals, or explore them all to become a true\ncommand-line champion!\n\n================================================================================\n*\"In the depths of the cellar, sight becomes insight, and knowledge becomes power.\"*\n*~ Ancient Terminal Wisdom*\n\n**The magic grows stronger within you, brave adventurer. Press onward!**\n================================================================================\n"
+        },
+        {
+          "kind": "control",
+          "action": "levelup"
+        },
+        {
+          "kind": "art",
+          "text": "     .  *  .     *   .    *  .\n    *    L E V E L   U P !    *\n     *  .   *     .   *  .  *"
+        },
+        {
+          "kind": "success",
+          "text": "★  You are now Adept Spellcaster!"
         }
       ]
     },
@@ -284,7 +272,7 @@
       "outputs": [
         {
           "kind": "info",
-          "text": "NAME\n    map\n\nDESCRIPTION\n    Built-in for Bashcrawl Web. Try 'map --help' or open Docs (F1)."
+          "text": "NAME\n    map\n\nDESCRIPTION\n    Chart the rooms you have explored (and the doors you have only glimpsed, as fog)"
         }
       ]
     },
@@ -465,12 +453,12 @@
     "daily": {
       "date": "2026-01-15",
       "baselineXp": 0,
-      "goal": 60,
+      "goal": 175,
       "completed": true,
       "streak": 1,
       "lastDate": "2026-01-15"
     },
-    "rankIndex": 4,
+    "rankIndex": 2,
     "stats": {
       "commands": {
         "pwd": 3,
