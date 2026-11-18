@@ -273,6 +273,8 @@ test("statusModel reports rank progress, vitals, quests and only a live streak",
     runtime.state.daily = { date: "2026-10-18", lastDate: "2026-10-01", streak: 3, completed: false };
     assert.equal(hud.statusModel(runtime).streak, 0, "a lapsed streak is not shown");
     runtime.state.xp = 100000;
+    assert.notEqual(hud.statusModel(runtime).rank, ranks[ranks.length - 1].title, "the top rank needs every main quest");
+    runtime.state.completedQuestIds = runtime.quests.map((_, i) => i);
     const top = hud.statusModel(runtime);
     assert.equal(top.rank, ranks[ranks.length - 1].title);
     assert.equal(top.nextRank, null);

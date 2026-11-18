@@ -35,6 +35,16 @@ describe("the app shell", () => {
         expect(screen.getByRole("button", { name: /^Hero Mira/ })).toBeInTheDocument();
         expect(screen.queryByRole("dialog")).toBeNull();
 
+        // The feedback widget: mounted once, beside the shell rather than in it
+        // (the crash screen replaces the shell), filing against this repo from
+        // the door the reader is in.
+        const feedback = container.querySelectorAll("fleet-feedback");
+        expect(feedback).toHaveLength(1);
+        expect(container.querySelector(".bc-shell fleet-feedback")).toBeNull();
+        expect(feedback[0]).toHaveAttribute("repo", "bamr87/bashcrawl");
+        expect(feedback[0]).toHaveAttribute("route", "#/story");
+        expect(feedback[0]).toHaveAttribute("page-title", "Bashcrawl — Story dungeon");
+
         // Options: the theme cycles dark → light → auto and persists.
         await act(async () => { screen.getByRole("button", { name: "Options" }).click(); });
         const options = screen.getByRole("dialog", { name: "Options" });
@@ -59,6 +69,7 @@ describe("the app shell", () => {
         // Alt+2 opens Learn; `?` opens the shortcuts; Escape closes them.
         await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "2", code: "Digit2", altKey: true, bubbles: true })); });
         expect(window.location.hash).toBe("#/learn");
+        expect(container.querySelector("fleet-feedback")).toHaveAttribute("route", "#/learn");
         expect(screen.getByRole("tab", { name: /Learn/ })).toHaveAttribute("aria-selected", "true");
         await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "?", bubbles: true })); });
         expect(getUi().helpOpen).toBe(true);

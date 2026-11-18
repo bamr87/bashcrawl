@@ -8,12 +8,17 @@
     // A TermForge plugin (docs/schemas/plugin.v1.md). Functions run with
     // `this` = the game Runtime.
 
+    // Highest rank reached: XP floor, plus the main quests the row asks for.
+    function rankIndexFor(ranks, xp, questsDone) {
+        return ranks.reduce((acc, r, i) => ((xp || 0) >= r.min && (questsDone || 0) >= (r.quests || 0) ? i : acc), 0);
+    }
+
     // Celebrate when accumulated XP crosses a rank threshold.
     function checkRankUp() {
         const ranks = this.catalog.ranks;
-        const idx = ranks.reduce((acc, r, i) => ((this.state.xp || 0) >= r.min ? i : acc), 0);
-        if (typeof this.state.rankIndex !== "number") {
-            this.state.rankIndex = idx; // baseline for older saves; no retroactive party
+        const idx = rankIndexFor(ranks, this.state.xp, this.state.completedQuestIds.length);
+        if (typeof this.state.rankIndex !== "number" || idx < this.state.rankIndex) {
+            this.state.rankIndex = idx; // baseline for older saves or ladders; no retroactive party
             return [];
         }
         if (idx <= this.state.rankIndex) return [];
@@ -52,12 +57,18 @@
     }
 
     function xp() {
+        // One scale: the level is the rank on the story ladder.
         const total = this.state.xp;
-        const level = Math.max(1, 1 + Math.floor(total / 200));
-        const into = total % 200;
-        const filled = Math.round(into / 20);
+        const ranks = this.catalog.ranks;
+        const idx = rankIndexFor(ranks, total, this.state.completedQuestIds.length);
+        const next = ranks[idx + 1];
+        const floor = ranks[idx].min;
+        const span = next ? next.min - floor : 0;
+        const into = next ? Math.min(span, Math.max(0, total - floor)) : 0;
+        const filled = next ? Math.round((into / span) * 10) : 10;
         const bar = "█".repeat(filled) + "░".repeat(10 - filled);
-        return [{ kind: "info", text: `Level ${level}  ${bar}  ${into}/200 to next level  (total ${total} XP)` }];
+        const tail = next ? `${into}/${span} to ${next.title}` : "top rank";
+        return [{ kind: "info", text: `Level ${idx + 1}  ${bar}  ${tail}  (total ${total} XP)` }];
     }
 
     const plugin = {
@@ -76,5 +87,5 @@
     };
 
     global.BashcrawlPlugins = global.BashcrawlPlugins || {};
-    global.BashcrawlPlugins.progress = { plugin, profile, xp, checkRankUp };
+    global.BashcrawlPlugins.progress = { plugin, profile, xp, checkRankUp, rankIndexFor };
 })(typeof globalThis !== "undefined" ? globalThis : window);

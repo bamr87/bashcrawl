@@ -31,6 +31,8 @@ bash setup.sh
 
 Prefer a browser? Play at <https://bamr87.github.io/bashcrawl/>, or run `make web-dev` locally (node 22.22+), to play the web trainer instead.
 
+The web trainer's shell is an emulator with no file owners, sizes or dates: `ls -l` and the other `ls` options that need them print a note under the plain listing, an option `ls` does not have is an error as in bash, and `cd /` or `cd ~` take you to the entrance.
+
 You begin in the **bashcrawl lobby** — the root directory of the game world. Every directory is a room. Every file is an object. Every executable is an encounter.
 
 

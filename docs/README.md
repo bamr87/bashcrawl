@@ -15,7 +15,7 @@ New to the game? Read [getting-started.md](getting-started.md), then [gameplay.m
 
 | Document | What it covers |
 | --- | --- |
-| [`AGENTS.md`](../AGENTS.md) | How to work in Bashcrawl, the terminal-teaching dungeon crawl: exact commands, layout, conventions and the invariants the gates enforce; canonical for every agent and contributor. |
+| [`AGENTS.md`](../AGENTS.md) | Bashcrawl's direction is to become the ultimate open home for all things terminal learning: data, tools, resources and transparency, with a fantasy dungeon in your shell and a free browser trainer built from the same content, for everyone… |
 | [`CHANGELOG.md`](../CHANGELOG.md) | Release history: the notable changes in each version, newest first. |
 | [`SECURITY.md`](../SECURITY.md) | Supported versions and how to report a vulnerability privately. |
 | [`PRD.md`](../PRD.md) | The product requirements for Bashcrawl — problem, users, goals, features and open questions — derived from the README, agent docs, config and code, with anything those sources do not state marked **TBD**. |

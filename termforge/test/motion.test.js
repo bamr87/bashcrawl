@@ -23,10 +23,11 @@ test("cd plans warp in the stage, not a viewport slide", () => {
     assert.ok(down.frames[0].length >= 4);
 });
 
-test("a bad command plans the error stage and cat stays a wash", () => {
-    const error = planMotion("nope", { error: true });
-    assert.equal(error.motion, "error");
-    assert.ok(error.frames.some((rows) => rows.join("\n").includes("ERROR")));
+test("a bad command plans no stage clip (the error line carries it) and cat stays a wash", () => {
+    // #111: the big "do not enter" sign stays off the stage; the clip is
+    // still bundled for an explicit play.
+    assert.equal(planMotion("nope", { error: true }), null);
+    assert.equal(planMotion("cd nowhere", { error: true }), null);
     const read = planMotion("cat scroll");
     assert.equal(read, null);
 });
@@ -53,9 +54,10 @@ test("every command option is classified by the review", () => {
 test("the TTY stage set and event overrides come from the shared clip manifest", () => {
     const { stageMotions } = require("../apps/bashcrawl-motion.js");
     const stage = stageMotions();
-    for (const motion of ["radar", "scan", "warp", "climb", "rewind", "home", "error"]) {
+    for (const motion of ["radar", "scan", "warp", "climb", "rewind", "home"]) {
         assert.ok(stage.includes(motion), motion);
     }
+    assert.ok(!stage.includes("error"), "failures stay off the stage (#111)");
     assert.equal(planMotion("ls", { events: [{ type: "quest" }] }).motion, "spark");
     assert.equal(planMotion("ls", { events: [{ type: "unlock" }] }).motion, "warp");
     assert.equal(planMotion("cd ..").motion, "climb");

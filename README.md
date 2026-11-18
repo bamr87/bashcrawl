@@ -1,6 +1,6 @@
 # Bashcrawl
 
-> Learn real terminal skills by playing a fantasy dungeon crawl — in your own shell, or in a free browser trainer built from the same content.
+> Bashcrawl's direction is to become the ultimate open home for all things terminal learning: data, tools, resources and transparency, with a fantasy dungeon in your shell and a free browser trainer built from the same content, for everyone ([constitution](docs/constitution.md) §1).
 
 [![CI](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml) [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE) [![Live site](https://img.shields.io/badge/live-bamr87.github.io%2Fbashcrawl-2ea44f)](https://bamr87.github.io/bashcrawl/)
 
@@ -79,6 +79,7 @@ Every guide, schema and generated reference is indexed in [docs/README.md](docs/
 | `courses/` | The courses: one Markdown file per lesson, objectives as rules, a lab of practice files per course. |
 | `bin/bashcrawl` | The launcher: one dispatch table for every surface, plus `doctor` and `lab`. |
 | `web/` | The browser trainer: a React + Vite app (`web/src/`, a 16-bit dungeon-RPG skin with a particle/shake/flash effects layer and optional chiptune SFX) over the same classic-script engine the terminal hosts run. Built to `web/dist/`, hosted free on GitHub Pages. |
+| `public/`, `components/` | The web trainer's static files (favicon, `.nojekyll`) and the fleet feedback widget, vendored from the hub's feedback kit: `fleet-feedback.js`, its console/error buffer and the `FeedbackButton` React adapter. Vite copies `public/` into `web/dist/`. |
 | `termforge/` | **TermForge** — the universal terminal framework extracted from the web emulator: one kernel powering the browser game, the terminal HUD, the telnet server and custom monitoring-style tools. Zero dependencies. See [docs/termforge/architecture.md](docs/termforge/architecture.md). |
 | `src/help/` | The bash help engine and the **content registries** (`data/*.yaml`) — the single source of truth for rooms, quests, commands, encounters, tutorials, arcade content and progression. |
 | `scripts/` | The exporter that generates `web/data/*.json` from `entrance/` + the registries (the web app is always a projection of the real game), plus validators and doc generators. |
@@ -92,7 +93,7 @@ Python (3.10+) is only needed for the web export, the validators and the playtes
 
 ## Contributing
 
-Contributions are welcome via pull request — read [docs/contributing.md](docs/contributing.md) first. Use [Conventional Commits](https://www.conventionalcommits.org/) and keep the CI checks green. The fleet-wide workflow is described in the hub's [CONTRIBUTING.md](https://github.com/bamr87/bamr87/blob/main/CONTRIBUTING.md). AI agents start with [AGENTS.md](AGENTS.md).
+Found a problem in the browser trainer? The 📣 **Improve this page** button at the bottom right opens a prefilled GitHub issue on this repo with the door you were in, your browser and any console errors attached; nothing is filed until you submit it on GitHub under your own account. Contributions are welcome via pull request — read [docs/contributing.md](docs/contributing.md) first. Use [Conventional Commits](https://www.conventionalcommits.org/) and keep the CI checks green. The fleet-wide workflow is described in the hub's [CONTRIBUTING.md](https://github.com/bamr87/bamr87/blob/main/CONTRIBUTING.md). AI agents start with [AGENTS.md](AGENTS.md).
 
 ## Changelog
 
