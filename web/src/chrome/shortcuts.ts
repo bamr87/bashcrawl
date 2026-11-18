@@ -1,5 +1,6 @@
 // The one list of keyboard shortcuts (UPS-FE-22), rendered by ShortcutsHelp
-// and the footer. None of them override browser defaults.
+// and the footer. None of them override browser defaults: Ctrl+C is taken
+// only when no text is selected, so copying still works.
 export interface Shortcut {
     keys: string[];
     does: string;
@@ -16,5 +17,6 @@ export const SHORTCUTS: Shortcut[] = [
     { keys: ["Esc"], does: "close what is open; with nothing open, the game menu" },
     { keys: ["F1"], does: "open or close the documentation drawer" },
     { keys: ["Ctrl", "L"], does: "clear the log" },
+    { keys: ["Ctrl", "C"], does: "abandon the line you are typing (^C); with text selected, copy" },
     { keys: ["?"], does: "this list (with an empty prompt)" },
 ];

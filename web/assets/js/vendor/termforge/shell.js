@@ -57,11 +57,16 @@
     // whole features (commands + hooks + sinks + mounts) in one call. Bare
     // shells emit no events, exactly as they run no hooks.
 
-    const { tokenizeDetailed, tokenize, splitRedirect, splitPipes, escapeRegExp } = deps.parser;
+    const { tokenizeDetailed, tokenize, splitRedirect, splitPipes, escapeRegExp, suggest } = deps.parser;
 
     function defaultEncodeBase64(text) {
         const binary = encodeURIComponent(String(text)).replace(/%([0-9A-F]{2})/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)));
         return btoa(binary);
+    }
+
+    // "a", "a or b", "a, b or c".
+    function orList(names) {
+        return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} or ${names[names.length - 1]}`;
     }
 
     // The framework's neutral copy deck. Every player-facing string a core
@@ -77,6 +82,16 @@
         mvSessionOnly: "mv only moves files created in this session.",
         rmWorldFile: (name) => `rm: cannot remove '${name}': read-only world file`,
         rmSessionOnly: "rm only removes files created in this session.",
+        // Near-miss feedback (core/parser.js suggest): the closest names, or
+        // what a failed cd / cat / ls can point at instead. Only visible
+        // entries are ever named; hidden ones are left for `ls -a` to find.
+        didYouMean: (names) => `Did you mean ${orList(names)}?`,
+        cdNearby: (names) => (names.length
+            ? `Directories here: ${names.join(", ")} (ls -a also shows hidden ones).`
+            : "No directories here (ls -a also shows hidden ones)."),
+        catNearby: "ls lists what is here; ls -a shows hidden files too.",
+        // A real ls option this shell has no data for (owners, sizes, times).
+        lsUnavailable: (flag, what, tip) => `ls: -${flag}${what ? ` (${what})` : ""} isn't available in this shell${tip ? `; try ${tip}` : ""}`,
         execFileKind: "program",
         figletDefault: "TERMFORGE",
         fortunes: [
@@ -281,7 +296,10 @@
             }
             const handler = this.handlers[cmd];
             if (!handler) {
-                const unknown = [{ kind: "error", text: `Unknown command: ${cmd}. Try help.` }];
+                // One line, with the closest command or alias names when there are any.
+                const near = suggest(cmd, [...Object.keys(this.handlers), ...Object.keys(this.state.aliases || {})]);
+                const hint = near.length ? this.text("didYouMean", near) : "Try help.";
+                const unknown = [{ kind: "error", text: `Unknown command: ${cmd}. ${hint}` }];
                 this.emitCommand(cmd, args, stdin, unknown, true);
                 return unknown;
             }
