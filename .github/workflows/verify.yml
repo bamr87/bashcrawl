@@ -44,7 +44,7 @@ concurrency:
 
 jobs:
   verify:
-    uses: bamr87/bamr87/.github/workflows/fleet-verify.yml@main
+    uses: bamr87/bamr87/.github/workflows/fleet-verify.yml@v2
     permissions:
       contents: read
       pull-requests: write
@@ -53,4 +53,5 @@ jobs:
       gate: false
       agent: ${{ github.event_name == 'workflow_dispatch' && inputs.agent || contains(github.event.pull_request.labels.*.name, 'verify') }}
       only: ${{ github.event_name == 'workflow_dispatch' && inputs.only || '' }}
+      hub-ref: v2   # the runner and tooling at the same tag as the workflow
     secrets: inherit

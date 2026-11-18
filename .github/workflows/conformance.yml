@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   conformance:
-    uses: bamr87/bamr87/.github/workflows/fleet-conformance.yml@main
+    uses: bamr87/bamr87/.github/workflows/fleet-conformance.yml@v2
     with:
       gate: false
+      hub-ref: v2   # keep the checker on the same version as the workflow
