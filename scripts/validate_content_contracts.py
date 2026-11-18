@@ -609,18 +609,29 @@ def _validate_progression(
     if data.get("version") != 1:
         _add_error(errors, "progression.yaml: version must be 1")
     ranks = data.get("ranks")
-    if not isinstance(ranks, list) or not ranks:
-        _add_error(errors, "progression.yaml: ranks must be a non-empty list")
-        ranks = []
-    mins = [r.get("min") for r in ranks if isinstance(r, dict)]
-    if ranks and mins[:1] != [0]:
-        _add_error(errors, "progression.yaml: the first rank must have min: 0")
-    if mins != sorted(mins) or len(set(mins)) != len(mins):
-        _add_error(errors, "progression.yaml: rank thresholds must be strictly ascending")
-    for i, rank in enumerate(ranks):
-        title = rank.get("title") if isinstance(rank, dict) else None
-        if not isinstance(title, str) or not title:
-            _add_error(errors, f"progression.yaml: ranks[{i}] needs a title")
+    for ladder in ("ranks", "arena_ranks"):
+        rows = data.get(ladder)
+        if not isinstance(rows, list) or not rows:
+            _add_error(errors, f"progression.yaml: {ladder} must be a non-empty list")
+            rows = []
+        mins = [r.get("min") for r in rows if isinstance(r, dict)]
+        if rows and mins[:1] != [0]:
+            _add_error(errors, f"progression.yaml: the first {ladder} row must have min: 0")
+        if mins != sorted(mins) or len(set(mins)) != len(mins):
+            _add_error(errors, f"progression.yaml: {ladder} thresholds must be strictly ascending")
+        quest_floors = [r.get("quests", 0) for r in rows if isinstance(r, dict)]
+        if any(not isinstance(q, int) or q < 0 for q in quest_floors) or (
+            quest_floors != sorted(quest_floors)
+        ):
+            _add_error(
+                errors,
+                f"progression.yaml: {ladder} `quests` must be ascending non-negative integers",
+            )
+        for i, rank in enumerate(rows):
+            title = rank.get("title") if isinstance(rank, dict) else None
+            if not isinstance(title, str) or not title:
+                _add_error(errors, f"progression.yaml: {ladder}[{i}] needs a title")
+    ranks = ranks if isinstance(ranks, list) else []
 
     seen_ids: set[str] = set()
     for i, badge in enumerate(data.get("achievements") or []):

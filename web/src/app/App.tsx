@@ -3,7 +3,7 @@
 // `?` help, Escape → the game menu), the boot of the game store, the story
 // observer, and the game's own screens over it — title, hero creation, the
 // intro, the tour, the pause menu, the journal, options, the profile, the
-// title cards, the tooltips.
+// title cards, the tooltips — and the fleet feedback widget.
 import { motion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
@@ -11,6 +11,7 @@ import { getArcade } from "../arcade/arcade-store";
 import { bindUnlock } from "../audio/synth";
 import { DocsDrawer } from "../chrome/DocsDrawer";
 import { ErrorBoundary } from "../chrome/ErrorBoundary";
+import { Feedback } from "../chrome/Feedback";
 import { GameMenu } from "../chrome/GameMenu";
 import { Intro } from "../chrome/Intro";
 import { OptionsDialog } from "../chrome/OptionsDialog";
@@ -48,8 +49,8 @@ import { Pager } from "../terminal/Pager";
 import { PromptDock } from "../terminal/PromptDock";
 import { initTheme } from "../theme/theme-store";
 import { AppShell } from "./AppShell";
-import { MODES, storyOwnsInput, type Mode } from "./modes";
-import { navigate, useRoute } from "./useHashRoute";
+import { MODE_META, MODES, storyOwnsInput, type Mode } from "./modes";
+import { hrefFor, navigate, useRoute } from "./useHashRoute";
 
 initTheme();
 initCrt();
@@ -196,6 +197,7 @@ export function App() {
 
     const dock = storyChrome ? <PromptDock /> : mode === "arcade" && arcade ? <PromptDock target={arcade} suggestions={false} /> : null;
     const status = ready && mode !== null && mode !== "reference" ? <StatusStrip /> : null;
+    const feedbackRoute = route.kind === "mode" ? hrefFor(route.mode) : route.kind === "notfound" ? `#${route.path}` : undefined;
 
     return (
         <MotionConfig reducedMotion="user">
@@ -228,6 +230,8 @@ export function App() {
                 {ready && <CreateHero />}
                 {ready && <TitleScreen />}
             </ErrorBoundary>
+            {/* Outside the boundary: the crash screen is the one most worth reporting from. */}
+            <Feedback route={feedbackRoute} pageTitle={mode ? `Bashcrawl — ${MODE_META[mode].title}` : undefined} />
         </MotionConfig>
     );
 }

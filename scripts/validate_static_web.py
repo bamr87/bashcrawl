@@ -15,6 +15,18 @@ import vendor_termforge  # noqa: E402  (sibling script, stdlib only)
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 
+# Vite's publicDir is the repo-root public/ (vite.config.mts): copied into
+# web/dist verbatim. The fleet feedback kit vendors its widget there, and its
+# React adapter into components/ (bamr87/bamr87 templates/feedback).
+PUBLIC_FILES = (
+    "favicon.svg",
+    ".nojekyll",
+    "fleet-feedback.js",
+    "fleet-feedback-capture.js",
+)
+FEEDBACK_CAPTURE = "fleet-feedback-capture.js"
+FEEDBACK_WIDGET = "fleet-feedback.js"
+
 # index.html is allowed to link to the project repo; other absolute URLs are rejected.
 ALLOWED_INDEX_ABSOLUTE_HREFS = frozenset(
     {
@@ -74,6 +86,27 @@ def _engine_script_order(html: str, vendor_files: list[str], label: str) -> list
     return problems
 
 
+def _feedback_scripts(html: str, label: str) -> list[str]:
+    """The fleet feedback widget (UPS-FB-01/04): its console/error buffer loads
+    in <head>, ahead of every engine script, so an error thrown while the
+    engine loads is in the report; the widget itself loads as a classic script
+    so <fleet-feedback> is defined before the app mounts it."""
+    problems = []
+    script_srcs = re.findall(r'<script src="\./([^"]+)"[^>]*></script>', html)
+    head = html.split("</head>", 1)[0]
+    if FEEDBACK_CAPTURE not in script_srcs:
+        problems.append(f"{label} does not load ./{FEEDBACK_CAPTURE}")
+    else:
+        if f'src="./{FEEDBACK_CAPTURE}"' not in head:
+            problems.append(f"{label} must load ./{FEEDBACK_CAPTURE} in <head>")
+        engine = [src for src in script_srcs if src.startswith("assets/js/")]
+        if engine and script_srcs.index(FEEDBACK_CAPTURE) > script_srcs.index(engine[0]):
+            problems.append(f"{label} must load ./{FEEDBACK_CAPTURE} before the engine scripts")
+    if FEEDBACK_WIDGET not in script_srcs:
+        problems.append(f"{label} does not load ./{FEEDBACK_WIDGET}")
+    return problems
+
+
 def validate() -> dict:
     errors: list[str] = []
     required = [
@@ -84,8 +117,6 @@ def validate() -> dict:
         "src/app/App.tsx",
         "src/styles/tokens.css",
         "src/styles/app.css",
-        "public/favicon.svg",
-        "public/.nojekyll",
         # The ENGINE: classic scripts index.html loads before the app module.
         "assets/js/storage.js",
         "assets/js/runtime.js",
@@ -115,6 +146,9 @@ def validate() -> dict:
     for rel in required:
         if not (WEB / rel).is_file():
             errors.append(f"Missing static web file: web/{rel}")
+    for rel in [f"public/{name}" for name in PUBLIC_FILES] + ["components/FeedbackButton.tsx"]:
+        if not (ROOT / rel).is_file():
+            errors.append(f"Missing static web file: {rel}")
 
     # Vendor mirror freshness: web/assets/js/vendor/termforge/** must be a
     # byte-identical copy of termforge/core/** (both directions).
@@ -142,12 +176,14 @@ def validate() -> dict:
         )
 
     errors.extend(_engine_script_order(index, vendor_files, "index.html"))
+    errors.extend(_feedback_scripts(index, "index.html"))
     # The built site, when present (make web-bundle): the copy step must have
     # shipped the engine beside the bundle, in the same order, still relative.
     dist_index = WEB / "dist" / "index.html"
     if dist_index.is_file():
         dist = _read(dist_index)
         errors.extend(_engine_script_order(dist, vendor_files, "dist/index.html"))
+        errors.extend(_feedback_scripts(dist, "dist/index.html"))
         errors.extend(_relative_urls(dist, "dist/index.html"))
         shipped = (
             "assets/js/runtime.js",
@@ -159,6 +195,9 @@ def validate() -> dict:
                 errors.append(
                     f"web/dist is missing the engine file {rel} (vite.config.mts copyEngine)"
                 )
+        for name in PUBLIC_FILES:
+            if not (WEB / "dist" / name).is_file():
+                errors.append(f"web/dist is missing public/{name} (vite.config.mts publicDir)")
 
     if (WEB / "data/world.json").is_file():
         world = json.loads(_read(WEB / "data/world.json"))

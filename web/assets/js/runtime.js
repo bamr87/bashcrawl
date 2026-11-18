@@ -26,8 +26,10 @@
         const p = raw && typeof raw === "object" ? raw : {};
         const list = (value) => (Array.isArray(value) ? value : []);
         const ranks = list(p.ranks).length ? list(p.ranks) : [{ min: 0, title: "" }];
+        const arenaRanks = list(p.arena_ranks).length ? list(p.arena_ranks) : ranks;
         return {
             ranks,
+            arenaRanks,
             achievements: list(p.achievements),
             bestiary: list(p.bestiary),
             trials: list(p.trials),
@@ -80,6 +82,10 @@
         mvSessionOnly: "Web Bashcrawl only moves files you created in this session.",
         rmWorldFile: (name) => `rm: cannot remove '${name}': the dungeon's own files are indestructible`,
         rmSessionOnly: "Only session-created files can be removed in Web Bashcrawl.",
+        cdNearby: (names) => (names.length
+            ? `Rooms here: ${names.join(", ")} (hidden rooms only show with ls -a).`
+            : "No rooms lead on from here (hidden rooms only show with ls -a)."),
+        lsUnavailable: (flag, what, tip) => `ls: -${flag}${what ? ` (${what})` : ""} isn't available in the dungeon${tip ? `; try ${tip}` : ""}`,
         execFileKind: "encounter",
         figletDefault: "BASHCRAWL",
         fortunes: [
@@ -99,6 +105,12 @@
     // Save tokens have their own bounded budget; normal commands stay small.
     function lineLimit(line) { return /^\s*save\s+import(?:\s|$)/.test(line) ? 1048576 : 4096; }
     function commandLabel(line) { return /^\s*save\s+import\s/.test(line) ? "save import [token]" : line; }
+
+    // Index of the highest rank a total has reached: its XP floor, and (story
+    // ladder only) the main quests it asks for.
+    function rankIndexFor(ranks, xp, questsDone) {
+        return ranks.reduce((acc, r, i) => ((xp || 0) >= r.min && (questsDone || 0) >= (r.quests || 0) ? i : acc), 0);
+    }
 
     function loadState(world, parsed, progression) {
         const trialCount = progression === undefined ? Infinity : progressionFrom(progression).trials.length;
@@ -145,6 +157,9 @@
         if (next.hp < 0 || next.hp > 100 || next.xp < 0 || next.currentQuestId < 0 || next.rankIndex < 0) throw new Error("invalid progress");
         if (next.history.length > 1000) next.history = next.history.slice(-1000);
         next.historyIndex = next.history.length;
+        // Saves written under an older ladder keep their XP; the rank baseline
+        // is re-derived so the new ladder never shows a retroactive LEVEL UP.
+        if (progression !== undefined) next.rankIndex = rankIndexFor(progressionFrom(progression).ranks, next.xp, next.completedQuestIds.length);
         return next;
     }
 
@@ -341,10 +356,14 @@
             this.emit("progress.xp", { amount: n, total: this.state.xp, reason });
         }
 
-        /** The rank row (from progression.yaml) a given XP total has reached. */
-        rankFor(xp) {
-            const ranks = this.catalog.ranks;
-            return ranks.filter((r) => (xp || 0) >= r.min).pop() || ranks[0];
+        /**
+         * The rank row (from progression.yaml) a given XP total has reached.
+         * Defaults to the story ladder (gated by main quests done); the arena
+         * passes `catalog.arenaRanks` for a run's score.
+         */
+        rankFor(xp, ranks) {
+            const ladder = ranks || this.catalog.ranks;
+            return ladder[rankIndexFor(ladder, xp, this.state.completedQuestIds.length)];
         }
 
         /** Re-show the active arena trial (hosts call this when resuming a save). */
@@ -448,7 +467,7 @@
                 {
                     title: "🧭 Navigation & lore",
                     items: [
-                        ["map", "ASCII map of the dungeon"],
+                        ["map", "ASCII map of the rooms you have explored"],
                         ["look", "Describe the current room and its contents"],
                         ["hint", "Your quest's next step, and the route there from this room"],
                         ["quest", "Your active quest objectives"],
@@ -510,27 +529,24 @@
             return [{ kind: "output", text: lines.join("\n") }];
         }
 
-        // Draw the dungeon map by walking the live runtime filesystem, so the map
+        // Draw the explored part of the dungeon (Hud.mapModel over the live filesystem), so the map
         // never advertises a room you cannot actually `cd` into. Only directories
         // (rooms) are shown; revealed hidden rooms appear un-dotted via entries().
         cmdMap() {
-            const here = this.state.cwd;
+            // Fog of war: the rooms the sidebar map shows (Hud.mapModel), never the
+            // real tree. `tree` stays the filesystem view.
+            const hud = global.BashcrawlHud;
+            if (!hud) return [{ kind: "error", text: "map: the map needs the HUD presenter (hud.js)." }];
             const root = this.world.root || "/entrance";
-            const marker = (path) => (path === here ? "  ← you are here" : "");
-            const lines = [root + marker(root)];
-            const walk = (path, prefix, depth) => {
-                if (depth > 4) return;
-                const rooms = this.entries(path, false).filter((entry) => entry.type === "dir");
-                rooms.forEach((entry, idx) => {
-                    const last = idx === rooms.length - 1;
-                    const tee = last ? "└── " : "├── ";
-                    const childPath = `${path === "/" ? "" : path}/${entry.name}`;
-                    lines.push(prefix + tee + entry.name + "/" + marker(childPath));
-                    walk(childPath, prefix + (last ? "    " : "│   "), depth + 1);
-                });
-            };
-            walk(root, "  ", 0);
+            const { rows } = hud.mapModel(this);
+            const lines = rows.map((row, i) => {
+                const mark = row.here ? "  ← you are here" : row.seen ? "" : "  ░ unexplored";
+                return i === 0 ? root + mark : "  " + row.prefix + row.name + mark;
+            });
             const out = [{ kind: "art", text: lines.join("\n") }];
+            if (rows.some((row) => !row.seen)) {
+                out.push({ kind: "dim", text: "░ marks a door you have seen but not entered — cd through it to chart it." });
+            }
             // Teach that the dungeon hides more than it shows, until it doesn't.
             if (this.entries(root, true).some((entry) => entry.type === "dir" && entry.hidden)) {
                 out.push({ kind: "dim", text: "Some passages stay hidden until unlocked — try `ls -la` and read the scrolls." });
@@ -901,5 +917,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
+    global.BashcrawlRuntime = { Runtime, defaultState, loadState, rankIndexFor, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

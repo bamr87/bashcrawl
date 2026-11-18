@@ -95,7 +95,8 @@ function analyze(trace) {
         findings.push(finding("cursor-bounds", turn.frames.every((frame) => frame.validCursor), `${turn.line}: cursor addresses stay inside the terminal`));
         const injected = turn.frames.some((frame) => {
             if (!frame.stage) return false;
-            return frame.stage.split("\n").some((line) => line.trim() && frame.log.includes(line.trim()));
+            // A lone glyph (the radar's centre "+") is not text and matches any log line holding it.
+            return frame.stage.split("\n").some((line) => line.trim().length > 2 && frame.log.includes(line.trim()));
         });
         findings.push(finding(
             "log-not-injected",
