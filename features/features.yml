@@ -101,7 +101,7 @@ features:
     docs: "README.md"
   - id: BASHCRAWL-010
     title: "Story mode quests and hidden rooms"
-    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks."
+    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. `cat` on an encounter script shows its real source, and the web trainer puts one dim line above it saying how to cast it."
     implemented: true
     status: shipped
     prd: [FR4]
@@ -110,6 +110,7 @@ features:
     docs: "docs/gameplay.md"
     tests:
       - "termforge/test/game-reveals.test.js"
+      - "termforge/test/game-cat.test.js"
   - id: BASHCRAWL-011
     title: "Hints and fog-of-war map"
     description: "`hint` gives the active quest's next step and, when its room is elsewhere, the next `cd` of the shortest route there through revealed rooms only (a still-hidden quest room routes to the encounter that opens it); three failed commands in a row bring a \"Stuck?\" nudge. `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
@@ -157,7 +158,7 @@ features:
       - "web/src/screens/ReferenceScreen.test.tsx"
   - id: BASHCRAWL-015
     title: "16-bit RPG web UI"
-    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120)."
+    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112), with a terminal Ctrl+C and a welcome-back recap after a reload (#115)."
     implemented: true
     status: shipped
     prd: [FR13, NFR1, NFR2]
@@ -166,6 +167,8 @@ features:
     docs: "AGENTS.md"
     tests:
       - "web/src/app/App.test.tsx"
+      - "web/src/terminal/PromptBar.test.tsx"
+      - "web/src/engine/game-store.test.ts"
   - id: BASHCRAWL-016
     title: "Training Arena and speed run"
     description: "`train` drills riddles answered with real commands (active recall); `speedrun` clears the arena's trials against the clock."
