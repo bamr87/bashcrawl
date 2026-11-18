@@ -101,7 +101,7 @@ features:
     docs: "README.md"
   - id: BASHCRAWL-010
     title: "Story mode quests and hidden rooms"
-    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks."
+    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. `cat` on an encounter script shows its real source, and the web trainer puts one dim line above it saying how to cast it."
     implemented: true
     status: shipped
     prd: [FR4]
@@ -110,6 +110,7 @@ features:
     docs: "docs/gameplay.md"
     tests:
       - "termforge/test/game-reveals.test.js"
+      - "termforge/test/game-cat.test.js"
   - id: BASHCRAWL-011
     title: "Hints and fog-of-war map"
     description: "`hint` gives context for the current room and `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."

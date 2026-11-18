@@ -205,7 +205,7 @@
                 pwd: P.pwd,
                 ls: P.ls,
                 cd: P.cd,
-                cat: P.cat,
+                cat: this.cmdCat,
                 less: this.cmdLess,
                 head: P.head,
                 tail: P.tail,
@@ -621,6 +621,23 @@
 
         cmdStatus() {
             return [{ kind: "info", text: `Location: ${this.state.cwd}\nHP: ${this.state.hp}\nXP: ${this.state.xp}\nInventory: ${this.state.inventory.join(", ") || "(empty)"}` }];
+        }
+
+        // cat, plus one dim line when the file is an encounter script: cat
+        // shows its real source, as on a real system, and the note says how
+        // to play it (#114). Piped or redirected output stays byte-identical,
+        // so the note never reaches stdin or a file; a player-written file
+        // that shadows a script is just a file.
+        cmdCat(args, stdin) {
+            const outputs = global.TermForge.packs.posix.commands.cat.call(this, args, stdin);
+            if (!args[0] || this.inPipeline || stdin != null || outputs.some((out) => out.kind === "error")) return outputs;
+            const path = this.resolve(args[0]);
+            if (this.state.userNodes[path] || !(this.world.encounters || {})[this.actual(path)]) return outputs;
+            const name = this.basename(path);
+            const how = this.parentPath(path) === this.state.cwd
+                ? `cast it with \`./${name}\``
+                : `cd into its room and cast it with \`./${name}\``;
+            return [{ kind: "dim", text: `${name} is an encounter, not a scroll: ${how}. \`cat\` shows its source, as on a real system.` }, ...outputs];
         }
 
         cmdLess(args, stdin) {
