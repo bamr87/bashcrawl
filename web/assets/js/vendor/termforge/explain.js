@@ -25,7 +25,9 @@
     // -> the `explain` command. The whole raw line is captured (interceptLine),
     // so pipes need no quoting.
 
-    const { tokenizeDetailed, splitRedirect, splitPipes } = parser;
+    // suggest: the shared "did you mean" rule (1 edit for short names, 2 for
+    // long, best first), also used by the shell and the POSIX pack.
+    const { tokenizeDetailed, splitRedirect, splitPipes, suggest } = parser;
 
     // Common flags of the standard tools, in plain words. Brand-neutral shell
     // knowledge; apps add or override entries via the plugin's `flags` option.
@@ -70,31 +72,6 @@
         cp: "silently overwrites a file that already has the destination name",
     };
     const MAX_LINE = 1024;
-
-    // Optimal-string-alignment distance: a swapped pair of letters (grpe ->
-    // grep) costs 1, the most common typo at a keyboard.
-    function editDistance(a, b) {
-        const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
-        for (let j = 1; j <= b.length; j += 1) dp[0][j] = j;
-        for (let i = 1; i <= a.length; i += 1) {
-            for (let j = 1; j <= b.length; j += 1) {
-                dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-                if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
-            }
-        }
-        return dp[a.length][b.length];
-    }
-
-    /** Closest known command names (1 edit for short names, 2 for long), best first. */
-    function suggest(name, known) {
-        const limit = name.length <= 4 ? 1 : 2;
-        return known
-            .map((k) => ({ k, d: editDistance(name, k) }))
-            .filter(({ d }) => d > 0 && d <= limit)
-            .sort((x, y) => x.d - y.d || x.k.localeCompare(y.k))
-            .slice(0, 3)
-            .map(({ k }) => k);
-    }
 
     function summaryOf(shell, docs, cmd) {
         const fromDocs = docs && docs.meta && docs.meta[cmd];
