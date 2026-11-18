@@ -16,6 +16,14 @@
 #   args_file  — file argument that must match (null = any file)
 #   item_check — comma-separated items the player must carry (null = none)
 #
+# steps (optional): the quest's checklist, shown under the objective in the
+# web Quest panel, the story tracker and the terminal HUD. Each step is
+# {label, when}, where `when` is a TermForge rule (docs/schemas/rules.v1.md)
+# checked against the session state, the same format achievements use. Steps
+# are progress feedback only: they grant no XP, and `completion` alone
+# decides when the quest is done. A step that newly holds emits one
+# `quest-step` HUD event. make validate-contracts checks every step.
+#
 # Adding a new quest: add an entry here; both engines pick it up.
 # ============================================================================
 
@@ -174,3 +182,27 @@ quests:
     location_check: "study|help"
     prerequisites: "amulet and coins in inventory, tome read in library"
     next_quest: null
+    # The library and study steps also hold while the hero stands there, and
+    # stay ticked once the fog-of-war trail (state.visited) has the room, so
+    # stepping out again does not untick them.
+    steps:
+      - label: "Carry the amulet and coins"
+        when: {has: inventory, value: [amulet, coins]}
+      - label: "Find the chapel library"
+        when:
+          any:
+            - {cwd_includes: /library}
+            - {state: visited, includes: /entrance/chapel/courtyard/aviary/hall/library}
+            - {flag: tome}
+      - label: "Read the tome: ./tome"
+        when: {flag: tome}
+      - label: "Enter the hidden study"
+        when:
+          any:
+            - {cwd_includes: /study}
+            - {state: visited, includes: /entrance/chapel/courtyard/aviary/hall/library/study}
+            - {flag: grimoire}
+      - label: "Run the grimoire: ./grimoire"
+        when: {flag: grimoire}
+      - label: "Define bc: source grimoire"
+        when: {has: inventory, value: grimoire}

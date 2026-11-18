@@ -106,6 +106,117 @@ test("questModel mirrors the quest chain and side objectives", () => {
     assert.equal(quest.side.length, hud.SIDE_QUESTS.length);
     assert.ok(quest.side.every((s) => s.done === false), "no side quests done at boot");
     assert.equal(quest.rows.filter((r) => r.status === "active").length, 1);
+    assert.equal(quest.current.steps.length, 0, "quest 0 has no checklist");
+});
+
+// Quest 7's checklist (quests.yaml `steps`, #113): quests 0-6 done with the
+// amulet but not the coins, then the road to the study one command at a
+// time, the way the web store and the TTY host drive the presenter.
+const QUEST_7_PREP = [
+    "pwd", "ls", "cd cellar", "cat scroll", "./treasure", "cd armoury", "./treasure",
+    "cd /entrance", "mkdir workshop", "cd workshop", "touch notes.txt",
+    "cd /entrance/cellar", "grep catacombs scroll",
+];
+const LIBRARY = "/entrance/chapel/courtyard/aviary/hall/library";
+
+function stepper(runtime, hud) {
+    hud.ensureVisited(runtime);
+    let prev = hud.snapshot(runtime);
+    return (line) => {
+        runtime.execute(line);
+        hud.ensureVisited(runtime);
+        const next = hud.snapshot(runtime);
+        const events = hud.diffEvents(prev, next);
+        prev = next;
+        return events;
+    };
+}
+
+function ticked(runtime, hud) {
+    const current = hud.questModel(runtime).current;
+    return current ? Array.from(current.steps.filter((s) => s.done), (s) => s.label) : null;
+}
+
+function stepEvents(events) {
+    // Array.from: the sandbox realm's arrays are not deep-equal to ours.
+    return Array.from(events.filter((e) => e.type === "quest-step"), (e) => e.label);
+}
+
+test("quest 7's checklist ticks as the hero reaches the library, reads the tome and enters the study", () => {
+    const { runtime, hud } = createHudRuntime();
+    const run = stepper(runtime, hud);
+    for (const line of QUEST_7_PREP) run(line);
+    assert.equal(runtime.state.currentQuestId, 7);
+    const steps = hud.questModel(runtime).current.steps;
+    assert.deepEqual(Array.from(steps, (s) => s.label), [
+        "Carry the amulet and coins", "Find the chapel library", "Read the tome: ./tome",
+        "Enter the hidden study", "Run the grimoire: ./grimoire", "Define bc: source grimoire",
+    ]);
+    assert.deepEqual(ticked(runtime, hud), []);
+
+    assert.deepEqual(stepEvents(run("cd /entrance/cellar/armoury/chamber")), []);
+    assert.deepEqual(stepEvents(run("./treasure")), ["Carry the amulet and coins"]);
+    assert.deepEqual(stepEvents(run(`cd ${LIBRARY}`)), ["Find the chapel library"]);
+
+    const tome = run("./tome");
+    assert.deepEqual(stepEvents(tome), ["Read the tome: ./tome"], "./tome ticks its step");
+    const event = tome.find((e) => e.type === "quest-step");
+    assert.equal(event.text, "☑ Read the tome: ./tome");
+    assert.ok(tome.some((e) => e.type === "unlock"), "the bookshelf still announces the study");
+
+    // Stepping out does not untick a room already reached (state.visited).
+    assert.deepEqual(stepEvents(run("cd ..")), []);
+    assert.ok(ticked(runtime, hud).includes("Find the chapel library"));
+    run(`cd ${LIBRARY}`);
+
+    assert.deepEqual(stepEvents(run("cd study")), ["Enter the hidden study"]);
+    assert.deepEqual(stepEvents(run("./grimoire")), ["Run the grimoire: ./grimoire"]);
+    assert.equal(ticked(runtime, hud).length, 5);
+
+    // Sourcing finishes the quest: the quest's own event, no step events.
+    const done = run("source grimoire");
+    assert.ok(runtime.state.completedQuestIds.includes(7));
+    assert.deepEqual(stepEvents(done), []);
+    assert.ok(done.some((e) => e.type === "quest"));
+    assert.equal(hud.questModel(runtime).current, null);
+});
+
+test("without the coins the checklist shows what is missing after ./tome", () => {
+    const { runtime, hud } = createHudRuntime();
+    const run = stepper(runtime, hud);
+    for (const line of QUEST_7_PREP) run(line);
+    run(`cd ${LIBRARY}`);
+    assert.deepEqual(stepEvents(run("./tome")), ["Read the tome: ./tome"]);
+    assert.deepEqual(ticked(runtime, hud), ["Find the chapel library", "Read the tome: ./tome"]);
+    const panel = hud.panels(runtime, { width: 40 }).find((p) => p.title.includes("QUEST"));
+    const text = panel.lines.map((l) => l.text);
+    assert.ok(text.includes("☐ Carry the amulet and coins"), text.join("\n"));
+    assert.ok(text.includes("☑ Read the tome: ./tome"), text.join("\n"));
+    assert.equal(panel.lines.find((l) => l.text === "☑ Read the tome: ./tome").kind, "success");
+});
+
+test("quest steps are read-only: evaluating them changes no state and grants no XP", () => {
+    const { runtime, hud } = createHudRuntime();
+    for (const line of QUEST_7_PREP) runtime.execute(line);
+    runtime.execute(`cd ${LIBRARY}`);
+    runtime.execute("./tome");
+    hud.ensureVisited(runtime);
+    const before = JSON.stringify(runtime.state);
+    hud.questModel(runtime);
+    hud.snapshot(runtime);
+    hud.panels(runtime);
+    assert.equal(JSON.stringify(runtime.state), before);
+});
+
+test("diffEvents emits one quest-step per newly held step, and none across a quest change", () => {
+    const { hud } = createHudRuntime();
+    const base = { xp: 0, hp: 100, completed: 7, currentQuestId: 7, inventory: [], rankIndex: 0, cwd: "/x", reveals: 0 };
+    const a = { ...base, questSteps: ["one"] };
+    const b = { ...base, questSteps: ["one", "two", "three"] };
+    assert.deepEqual(Array.from(hud.diffEvents(a, b), (e) => e.label), ["two", "three"]);
+    assert.deepEqual(Array.from(hud.diffEvents(b, a)), [], "an unticked step is not an event");
+    const next = { ...base, completed: 8, currentQuestId: 8, questSteps: ["other"] };
+    assert.deepEqual(Array.from(hud.diffEvents(b, next), (e) => e.type), ["quest"]);
 });
 
 test("ensureVisited records the room trail idempotently", () => {

@@ -268,6 +268,8 @@ def _validate_quests(
             _add_error(errors, f"quests.yaml: quest id must be int, got {qid!r}")
             continue
         yaml_by_id[qid] = q
+        for problem in quest_step_errors(q.get("steps"), f"quests.yaml: quest {qid} steps"):
+            _add_error(errors, problem)
 
     wt_by_id: dict[int, dict[str, Any]] = {}
     for q in wt_quests:
@@ -598,6 +600,46 @@ def rule_errors(rule: Any, where: str) -> list[str]:
                 problems.extend(rule_errors(item, f"{where}.{head}[{i}]"))
     elif head == "not":
         problems.extend(rule_errors(rule["not"], f"{where}.not"))
+    return problems
+
+
+QUEST_STEP_KEYS = ("label", "when")
+
+
+def quest_step_errors(steps: Any, where: str) -> list[str]:
+    """Problems in a quest's optional `steps` checklist (empty = valid).
+
+    Absent is fine; present means a non-empty list of {label, when} mappings
+    with distinct labels, each `when` a valid TermForge rule. The web HUD
+    (web/assets/js/hud.js questModel) evaluates them.
+    """
+    if steps is None:
+        return []
+    if not isinstance(steps, list) or not steps:
+        return [f"{where}: must be a non-empty list of {{label, when}} entries"]
+    problems: list[str] = []
+    seen: set[str] = set()
+    for i, step in enumerate(steps):
+        at = f"{where}[{i}]"
+        if not isinstance(step, dict):
+            problems.append(f"{at}: must be a mapping with label and when")
+            continue
+        problems.extend(
+            f"{at}: unexpected key '{key}' (allowed: {', '.join(QUEST_STEP_KEYS)})"
+            for key in step
+            if key not in QUEST_STEP_KEYS
+        )
+        label = step.get("label")
+        if not isinstance(label, str) or not label.strip():
+            problems.append(f"{at}: label must be a non-empty string")
+        elif label in seen:
+            problems.append(f"{at}: duplicate label '{label}'")
+        else:
+            seen.add(label)
+        if "when" not in step:
+            problems.append(f"{at}: needs a when rule")
+        else:
+            problems.extend(rule_errors(step["when"], f"{at}.when"))
     return problems
 
 

@@ -3,7 +3,7 @@ import { arp, click, tone } from "./synth";
 
 export type SfxName =
     | "key" | "xp" | "quest" | "levelup" | "damage" | "heal" | "item" | "warp" | "climb" | "rewind"
-    | "unlock" | "lesson" | "objective" | "skill" | "error" | "tab" | "poweron" | "celebrate";
+    | "unlock" | "lesson" | "objective" | "step" | "skill" | "error" | "tab" | "poweron" | "celebrate";
 
 // Note frequencies (Hz).
 const C5 = 523.25, D5 = 587.33, E5 = 659.25, FS5 = 739.99, G5 = 783.99, A5 = 880, B5 = 987.77;
@@ -44,6 +44,10 @@ export const SFX: Record<SfxName, () => void> = {
     objective: () => {
         tone(A5, { type: "sine", dur: 0.07, vol: 0.05 });
         tone(CS6, { type: "sine", dur: 0.11, vol: 0.05, delay: 0.07 });
+    },
+    step: () => {
+        tone(E6, { type: "triangle", dur: 0.06, vol: 0.05 });
+        tone(A6, { type: "triangle", dur: 0.1, vol: 0.04, delay: 0.06 });
     },
     skill: () => {
         tone(B5, { type: "triangle", dur: 0.08, vol: 0.05 });

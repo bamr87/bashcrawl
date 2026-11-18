@@ -174,6 +174,7 @@
             hp: s.hp,
             completed: s.completedQuestIds.length,
             currentQuestId: s.currentQuestId,
+            questSteps: questSteps(runtime, runtime.quests[s.currentQuestId]).filter((step) => step.done).map((step) => step.label),
             inventory: s.inventory.slice(),
             achievements: (s.achievements || []).length,
             rankIndex: s.rankIndex || 0,
@@ -189,6 +190,14 @@
         const events = [];
         if (next.completed > prev.completed) {
             events.push({ type: "quest", text: "✦ QUEST COMPLETE ✦" });
+        }
+        // One event per checklist step that newly holds on the SAME quest; a
+        // finished quest says so with its own event instead.
+        if (next.currentQuestId === prev.currentQuestId) {
+            const had = new Set(prev.questSteps || []);
+            for (const label of next.questSteps || []) {
+                if (!had.has(label)) events.push({ type: "quest-step", label, text: `☑ ${label}` });
+            }
         }
         if (next.hp < prev.hp) {
             events.push({ type: "damage", amount: prev.hp - next.hp, text: `−${prev.hp - next.hp} HP` });
@@ -238,6 +247,22 @@
         return "locked";
     }
 
+    // A quest's optional checklist (quests.yaml `steps`): each step's `when`
+    // is a TermForge rule over the session state, the same format the
+    // achievements use. Feedback only: `completion` alone finishes a quest,
+    // and a step grants nothing.
+    function questSteps(runtime, quest) {
+        const steps = quest && Array.isArray(quest.steps) ? quest.steps : [];
+        const rules = global.TermForge && global.TermForge.rules;
+        return steps.map((step) => {
+            let done = false;
+            if (rules && step && step.when) {
+                try { done = rules.evaluate(step.when, { state: runtime.state, shell: runtime }); } catch (e) { done = false; }
+            }
+            return { label: String((step && step.label) || ""), done };
+        });
+    }
+
     // The quest panel model: at-a-glance current quest + the full main/side log.
     function questModel(runtime) {
         const current = runtime.quests[runtime.state.currentQuestId] || null;
@@ -254,7 +279,7 @@
             return { key: s.key, name: s.name, hint: s.hint, done, icon: done ? "✅" : "○" };
         });
         return {
-            current: current ? { title: current.title, objective: current.objective } : null,
+            current: current ? { title: current.title, objective: current.objective, steps: questSteps(runtime, current) } : null,
             mainDone: runtime.state.completedQuestIds.length,
             mainTotal: runtime.quests.length,
             rows,
@@ -721,6 +746,9 @@
         if (quest.current) {
             questLines.push({ kind: "info", text: truncate(quest.current.title, width) });
             questLines.push({ kind: "dim", text: truncate(quest.current.objective, width) });
+            for (const step of quest.current.steps) {
+                questLines.push({ kind: step.done ? "success" : "dim", text: truncate(`${step.done ? "☑" : "☐"} ${step.label}`, width) });
+            }
         } else {
             questLines.push({ kind: "success", text: "All quests complete." });
         }
@@ -835,6 +863,7 @@
         snapshot,
         diffEvents,
         sideQuestDone,
+        questSteps,
         questModel,
         inventoryModel,
         heroModel,

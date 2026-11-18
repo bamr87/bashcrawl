@@ -10,6 +10,7 @@ Consumers today:
 
 - achievements: the `when` field in `src/help/data/progression.yaml`
 - lesson objectives: `objectives[].when` in `courses/*/*.md`
+- quest checklists: `steps[].when` in `src/help/data/quests.yaml`, checked against the state with no command context (like achievements)
 
 ## Shape
 
