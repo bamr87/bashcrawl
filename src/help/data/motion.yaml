@@ -84,8 +84,8 @@ clips:
   error:
     file: motion/clips/error.asciimtn
     title: Warning sign
-    description: A flashing "do not enter" sign — unknown commands and failures.
-    stage: true
+    description: A flashing "do not enter" sign, kept off the stage; a failed command only flashes the log.
+    stage: false
     aliases: []
 
   unroll:

@@ -1,6 +1,8 @@
-// A real not-found route (UPS-FE-15), in the game's own voice.
+// A real not-found route (UPS-FE-15), in the game's own voice, with a link
+// that reports the broken route through the feedback widget.
 import { MODES, MODE_META } from "../app/modes";
 import { hrefFor } from "../app/useHashRoute";
+import { ReportLink } from "../chrome/Feedback";
 
 export function NotFound({ path }: { path: string }) {
     return (
@@ -16,6 +18,9 @@ export function NotFound({ path }: { path: string }) {
                     </a>
                 ))}
             </div>
+            <p>
+                Did a link lead you here? <ReportLink type="fix-page" extra={`Missing route: #${path}`}>Report the broken link</ReportLink>.
+            </p>
         </section>
     );
 }

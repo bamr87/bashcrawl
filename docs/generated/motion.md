@@ -17,7 +17,7 @@ Every file below is an [ASCII Motion](https://github.com/cameronfoxly/Ascii-Moti
 | `cast` | Casting circle | — | `motion/clips/cast.asciimtn` | A rune circle charges around a sigil — running ./scripts, and level-ups. |
 | `steam` | Steam engine | — | `motion/clips/steam.asciimtn` | The train puffs across the stage — sl. |
 | `burn` | Burning crate | — | `motion/clips/burn.asciimtn` | A crate catches fire and burns down — rm. |
-| `error` | Warning sign | — | `motion/clips/error.asciimtn` | A flashing "do not enter" sign — unknown commands and failures. |
+| `error` | Warning sign | — | `motion/clips/error.asciimtn` | A flashing "do not enter" sign, kept off the stage; a failed command only flashes the log. |
 | `unroll` | Unrolling scroll | — | `motion/clips/unroll.asciimtn` | A scroll unrolls line by line — lesson, banner, figlet. |
 | `lore` | Open book | — | `motion/clips/lore.asciimtn` | An open book whose page turns — help, man, hint, learn, commands. |
 

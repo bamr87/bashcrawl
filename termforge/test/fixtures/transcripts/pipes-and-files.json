@@ -452,7 +452,7 @@
       "outputs": [
         {
           "kind": "error",
-          "text": "No such file: fru*"
+          "text": "cat: fru*: No such file or directory. ls lists what is here; ls -a shows hidden files too."
         }
       ]
     },

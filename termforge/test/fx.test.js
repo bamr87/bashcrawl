@@ -129,3 +129,27 @@ test("the clip ls plays names no room or file (issue #110)", () => {
         }
     }
 });
+
+test("a failing command keeps its red wash but plays no stage clip (#111)", () => {
+    const env = loadClassic({ files: [PARSER, ASCII_MOTION, FX_CLIPS, FX] });
+    env.sandbox.setTimeout = () => 0;
+    env.sandbox.clearTimeout = () => {};
+    const fx = env.sandbox.BashcrawlCommandFx;
+    assert.equal(fx.onStage("error"), false, "the error clip is off the stage");
+    assert.ok(fx.clipFor("error"), "but still bundled for an explicit play");
+    // A stand-in for the stage element, mid-way through a previous clip.
+    const classes = new Set(["fx-stage"]);
+    const stage = {
+        dataset: {},
+        style: { setProperty() {} },
+        offsetWidth: 0,
+        classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) },
+        setAttribute() {},
+        querySelector: () => null,
+    };
+    const spec = fx.apply("lgs", { root: stage, error: true });
+    assert.equal(spec.motion, "error");
+    assert.equal(stage.dataset.fxMotion, "error");
+    assert.ok(classes.has("fx-play"), "the red wash still plays");
+    assert.ok(!classes.has("fx-stage"), "no clip holds the stage");
+});
