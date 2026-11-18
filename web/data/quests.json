@@ -123,7 +123,7 @@
       "completion": {
         "command": "touch",
         "location": null,
-        "args": null,
+        "args": "notes.txt",
         "args_file": null,
         "item_check": null
       },
