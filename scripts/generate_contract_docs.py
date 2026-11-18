@@ -77,8 +77,8 @@ def _render_quests(data: dict[str, Any]) -> str:
     quests = data.get("quests", [])
     lines = _head(
         "Quest Index",
-        "Every quest with its objective, XP and the command and location that"
-        " complete it, from `src/help/data/quests.yaml`.",
+        "Every quest with its objective, XP, the command and location that"
+        " complete it, and its checklist steps, from `src/help/data/quests.yaml`.",
     )
     for quest in quests:
         if not isinstance(quest, dict):
@@ -91,6 +91,10 @@ def _render_quests(data: dict[str, Any]) -> str:
         if isinstance(completion, dict):
             lines.append(f"- Completion command: `{completion.get('command', '')}`")
             lines.append(f"- Completion location: `{completion.get('location', '')}`")
+        steps = quest.get("steps") or []
+        if isinstance(steps, list) and steps:
+            labels = [str(s.get("label", "")) for s in steps if isinstance(s, dict)]
+            lines.append(f"- Steps: {'; '.join(labels)}")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 

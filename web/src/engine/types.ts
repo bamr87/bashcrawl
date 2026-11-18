@@ -17,7 +17,7 @@ export interface Line {
 
 // ── HUD presenter events (Hud.diffEvents) ─────────────────────────────────
 export type HudEventType =
-    | "quest" | "damage" | "heal" | "xp" | "item" | "levelup"
+    | "quest" | "quest-step" | "damage" | "heal" | "xp" | "item" | "levelup"
     | "move" | "unlock" | "lesson" | "objective" | "skill";
 
 export interface HudEvent {
@@ -28,6 +28,8 @@ export interface HudEvent {
     from?: string;
     to?: string;
     skills?: string[];
+    /** quest-step: the checklist step that newly holds. */
+    label?: string;
 }
 
 export interface HudSnapshot {
@@ -35,6 +37,8 @@ export interface HudSnapshot {
     hp: number;
     completed: number;
     currentQuestId: number;
+    /** Labels of the current quest's checklist steps that hold. */
+    questSteps: string[];
     inventory: string[];
     achievements: number;
     rankIndex: number;
@@ -99,6 +103,8 @@ export interface Quest {
     reward?: string;
     reward_name?: string;
     xp: number;
+    /** Optional checklist; each `when` is a TermForge rule (rules.v1.md). */
+    steps?: Array<{ label: string; when: unknown }>;
 }
 
 export interface Rank {
@@ -429,8 +435,13 @@ export interface Suggestion {
     kind: "quest" | "room" | "lesson";
 }
 
+export interface QuestStep {
+    label: string;
+    done: boolean;
+}
+
 export interface QuestModel {
-    current: { title: string; objective: string } | null;
+    current: { title: string; objective: string; steps: QuestStep[] } | null;
     mainDone: number;
     mainTotal: number;
     rows: Array<{ status: "done" | "active" | "locked"; icon: string; title: string }>;

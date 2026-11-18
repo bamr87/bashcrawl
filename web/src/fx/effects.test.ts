@@ -5,7 +5,7 @@ import { SFX } from "../audio/sfx";
 import type { HudEvent, HudEventType } from "../engine/types";
 import { effectFor } from "./effects";
 
-const TYPES: HudEventType[] = ["quest", "damage", "heal", "xp", "item", "levelup", "move", "unlock", "lesson", "objective", "skill"];
+const TYPES: HudEventType[] = ["quest", "quest-step", "damage", "heal", "xp", "item", "levelup", "move", "unlock", "lesson", "objective", "skill"];
 
 describe("the event → effect table", () => {
     it("scales XP orbs with the amount and aims them at the gauge", () => {
@@ -32,6 +32,16 @@ describe("the event → effect table", () => {
         const move = effectFor({ type: "move", from: "/entrance", to: "/entrance/cellar", text: "" });
         expect(move.wipe).toBe(true);
         expect(move.shake).toBe(0);
+    });
+
+    it("a ticked quest step sparkles the quest panel and the tracker with a small chime, no flash or shake", () => {
+        const step = effectFor({ type: "quest-step", label: "Read the tome: ./tome", text: "☑ Read the tome: ./tome" });
+        expect(step.panes.map((p) => p.pane)).toEqual(["quest", "tracker"]);
+        expect(step.panes[0].className).toBe("fx-sparkle");
+        expect(step.canvas[0]).toMatchObject({ kind: "glint", from: "quest" });
+        expect(step.sfx).toBe("step");
+        expect(step.flash).toBeNull();
+        expect(step.shake).toBe(0);
     });
 
     it("maps every event type and every sound it names exists", () => {

@@ -101,7 +101,7 @@ features:
     docs: "README.md"
   - id: BASHCRAWL-010
     title: "Story mode quests and hidden rooms"
-    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. `cat` on an encounter script shows its real source, and the web trainer puts one dim line above it saying how to cast it."
+    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. `cat` on an encounter script shows its real source, and the web trainer puts one dim line above it saying how to cast it. A multi-step quest shows its checklist (`steps` in `quests.yaml`) in the web Quest panel, the story tracker and the terminal HUD, and each step that ticks gets a sparkle and a chime (#113)."
     implemented: true
     status: shipped
     prd: [FR4]
@@ -111,6 +111,11 @@ features:
     tests:
       - "termforge/test/game-reveals.test.js"
       - "termforge/test/game-cat.test.js"
+      - "termforge/test/hud.test.js"
+      - "web/src/hud/QuestSteps.test.tsx"
+      - "test/unit/test_quest_steps.py"
+    evidence:
+      - "test/evidence/quest-steps"
   - id: BASHCRAWL-011
     title: "Hints and fog-of-war map"
     description: "`hint` gives the active quest's next step and, when its room is elsewhere, the next `cd` of the shortest route there through revealed rooms only (a still-hidden quest room routes to the encounter that opens it); three failed commands in a row bring a \"Stuck?\" nudge. `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."

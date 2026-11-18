@@ -774,6 +774,10 @@
         color: var(--fleet-color-ink-muted);
         line-height: 1.4;
     }
+    .bc-tracker-steps {
+        margin: 0 0 0.4rem;
+        font-size: var(--fleet-text-xs);
+    }
 
     /* ── the dialogue box ── */
     .bc-dialogue {

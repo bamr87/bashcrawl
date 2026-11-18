@@ -5,7 +5,7 @@
 // viewport rectangle at the moment they fire.
 const registry = new Map<string, HTMLElement>();
 
-export type AnchorName = "xp" | "hp" | "rank" | "quest" | "map" | "pack" | "skills" | "lesson" | "room" | "hero" | "stage" | "log";
+export type AnchorName = "xp" | "hp" | "rank" | "quest" | "tracker" | "map" | "pack" | "skills" | "lesson" | "room" | "hero" | "stage" | "log";
 
 export function registerAnchor(name: AnchorName | string, element: HTMLElement | null): () => void {
     if (!element) return () => {};
