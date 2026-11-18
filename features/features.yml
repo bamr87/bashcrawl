@@ -113,13 +113,15 @@ features:
       - "termforge/test/game-cat.test.js"
   - id: BASHCRAWL-011
     title: "Hints and fog-of-war map"
-    description: "`hint` gives context for the current room and `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
+    description: "`hint` gives the active quest's next step and, when its room is elsewhere, the next `cd` of the shortest route there through revealed rooms only (a still-hidden quest room routes to the encounter that opens it); three failed commands in a row bring a \"Stuck?\" nudge. `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
     implemented: true
     status: shipped
     prd: [FR4]
     surface: cli
     link: "web/assets/js/runtime.js"
     docs: "README.md"
+    tests:
+      - "termforge/test/game-hint.test.js"
   - id: BASHCRAWL-012
     title: "Practice Arcade mini-games"
     description: "Timed mini-games on the bash emulator: Path Navigator, grep/find Hunt, Pipe Puzzle and Command Flash (decks auto-generated from `commands.yaml`); scores and bests persist and wins feed story XP."

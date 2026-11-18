@@ -139,7 +139,9 @@ test("a failed cd suggests visible rooms only, never a hidden one", () => {
     const { out } = play(["cd study", "cd chapl", "cd celar"]);
     assert.strictEqual(out["cd study"].join("\n"),
         "cd: study: No such file or directory. Rooms here: cellar (hidden rooms only show with ls -a).");
-    assert.strictEqual(out["cd celar"].join("\n"), "cd: celar: No such file or directory. Did you mean cellar?");
+    // The third failure in a row also earns the one-line "Stuck?" nudge (#105).
+    assert.match(out["cd celar"].join("\n"),
+        /^cd: celar: No such file or directory\. Did you mean cellar\?(\nStuck\? Try .*)?$/);
     for (const line of ["cd study", "cd chapl"]) {
         assert.doesNotMatch(out[line].join("\n"), /chapel|vault|rift|scrap|functions/, line);
     }

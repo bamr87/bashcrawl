@@ -340,6 +340,10 @@
         {
           "kind": "error",
           "text": "Unknown command: frobnicate. Try help."
+        },
+        {
+          "kind": "dim",
+          "text": "Stuck? Try `hint`, `ls -a` or `cat scroll`."
         }
       ]
     },
@@ -481,7 +485,8 @@
       },
       "catScrollCount": 2,
       "lastPipedIn": false,
-      "initialized": false
+      "initialized": false,
+      "errorStreak": 0
     },
     "learn": {
       "active": null,

@@ -21,7 +21,7 @@ const FIXTURES_DIR = path.resolve(__dirname, "..", "fixtures");
 // two trees are byte-identical.
 const VENDOR_JS = path.join(WEB_JS, "vendor", "termforge");
 // Mirrors GAME_PLUGINS in runtime.js (asserted by platform-game.test.js).
-const GAME_PLUGIN_IDS = ["achievements", "daily", "progress", "arena", "pathfind", "bestiary"];
+const GAME_PLUGIN_IDS = ["achievements", "daily", "progress", "arena", "pathfind", "bestiary", "nudge"];
 const RUNTIME_FILES = [
     path.join(VENDOR_JS, "protocol.js"),
     path.join(VENDOR_JS, "parser.js"),

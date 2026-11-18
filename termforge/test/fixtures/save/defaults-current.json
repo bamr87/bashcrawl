@@ -32,7 +32,8 @@
     "commands": {},
     "catScrollCount": 0,
     "lastPipedIn": false,
-    "initialized": false
+    "initialized": false,
+    "errorStreak": 0
   },
   "learn": {
     "active": null,
