@@ -17,7 +17,7 @@
     // unbound, invoked as fn.call(shell, args, stdin), and returns Line[].
     // Bodies are extracted verbatim from the original browser emulator.
 
-    const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet } = deps.parser;
+    const { escapeRegExp, parseLineCount, parseRangeList, expandTrSet, suggest } = deps.parser;
 
     // A file's lines, the way POSIX tools see them: a final newline ends the
     // last line rather than starting an empty one ("a\nb\n" is 2 lines).
@@ -27,24 +27,130 @@
         return parts;
     }
 
+    // `~`, `~/…` and a bare `/` lead to the world root, where `cd` alone
+    // goes: the root is the session's home and the top of its tree. A world
+    // that has a real `/` directory keeps it. (cd and ls only: bash expands
+    // `~` as a shell word, so every-command tilde expansion belongs beside
+    // glob expansion in the shell, not in the filesystem's resolve().)
+    function resolveHome(shell, arg) {
+        const root = shell.world.root;
+        const raw = arg === "~" ? root : arg.startsWith("~/") ? root + arg.slice(1) : arg;
+        const path = shell.resolve(raw);
+        return path === "/" && !shell.isDir("/") ? root : path;
+    }
+
+    // What a failed lookup can point at instead: close names from the
+    // directory the path points into, spelled the way the path was typed;
+    // failing that, cd lists the directories there and cat points at ls.
+    // Only visible entries are ever named; hidden ones are left to `ls -a`.
+    function nearMiss(shell, cmd, arg, path) {
+        const parent = shell.parentPath(path);
+        if (!shell.isDir(parent)) return "";
+        const names = shell.entries(parent, false)
+            .filter((entry) => cmd !== "cd" || entry.type === "dir")
+            .map((entry) => entry.name);
+        const bare = arg.replace(/\/+$/, "");
+        const typed = bare.slice(0, bare.lastIndexOf("/") + 1);
+        const near = suggest(shell.basename(path), names);
+        if (near.length) return shell.text("didYouMean", near.map((name) => typed + name));
+        if (cmd === "cd") return shell.text("cdNearby", names);
+        return cmd === "cat" ? shell.text("catNearby") : "";
+    }
+
+    // `<who>: No such file or directory`, with the near-miss hint on the same line.
+    function notFound(shell, cmd, who, arg, path) {
+        const hint = nearMiss(shell, cmd, arg, path);
+        return [{ kind: "error", text: `${who}: No such file or directory${hint ? `. ${hint}` : ""}` }];
+    }
+
+    // ls options. The pack models -a, -A (the same here: . and .. are never
+    // listed), -F and -1. GNU ls's other letters are real options this
+    // filesystem has no data for (owners, sizes, times): they get a note and
+    // the listing still runs, so `ls -la` keeps working. A letter ls does not
+    // have is an error, worded like ls's own.
+    const LS_LONG = { all: "a", "almost-all": "A", classify: "F", color: "" };
+    const LS_UNMODELLED = {
+        l: ["long format", "ls -F"], R: ["recursive listing", "tree"], S: ["sort by size"],
+        t: ["sort by time"], r: ["reverse order"], d: ["list directories themselves"],
+        h: ["human-readable sizes"], i: ["inode numbers"],
+    };
+    const LS_GNU_OTHER = "bBcCDfgGHIkLmnNopqQsTuUvwxXZ";
+    const LS_TAKES_VALUE = "ITw";
+    const LS_HELP = [
+        ["-a, --all", "include hidden entries (names that start with .)"],
+        ["-A, --almost-all", "the same here: . and .. are never listed"],
+        ["-F, --classify", "mark types: / directory, * executable"],
+        ["-1", "one entry per line"],
+    ].reduce((text, [flags, what]) => `${text}\n  ${flags.padEnd(18)} ${what}`, "Usage: ls [OPTION]... [DIR|FILE]");
+
+    function lsUsageError(text) {
+        return [{ kind: "error", text }, { kind: "dim", text: "Try 'ls --help' for more information." }];
+    }
+
     const commands = {
         pwd() {
             return [{ kind: "output", text: this.state.cwd }];
         },
 
         ls(args) {
-            const showHidden = args.some((arg) => arg.includes("a"));
-            const showMarkers = args.some((arg) => arg.includes("F"));
-            const targetArg = args.find((arg) => !arg.startsWith("-"));
-            const target = this.resolve(targetArg || ".");
-            if (!this.isDir(target)) return [{ kind: "error", text: `Not a directory: ${targetArg || target}` }];
-            const text = this.entries(target, showHidden).map((entry) => {
-                if (!showMarkers) return entry.name;
+            const on = new Set();
+            const notes = [];
+            let target = null;
+            let operandsOnly = false;
+            for (let i = 0; i < args.length; i += 1) {
+                const arg = args[i];
+                if (operandsOnly || arg === "-" || !arg.startsWith("-")) {
+                    if (target === null) target = arg;
+                    continue;
+                }
+                if (arg === "--") {
+                    operandsOnly = true;
+                    continue;
+                }
+                if (arg.startsWith("--")) {
+                    const name = arg.slice(2).split("=")[0];
+                    if (name === "help") return [{ kind: "output", text: LS_HELP }];
+                    if (!Object.prototype.hasOwnProperty.call(LS_LONG, name)) return lsUsageError(`ls: unrecognized option '${arg}'`);
+                    if (LS_LONG[name]) on.add(LS_LONG[name]);
+                    continue;
+                }
+                const letters = arg.slice(1);
+                for (let j = 0; j < letters.length; j += 1) {
+                    const letter = letters[j];
+                    if ("aAF1".includes(letter)) {
+                        on.add(letter);
+                    } else if (LS_UNMODELLED[letter] || LS_GNU_OTHER.includes(letter)) {
+                        const [what, tip] = LS_UNMODELLED[letter] || [];
+                        const note = this.text("lsUnavailable", letter, what, tip);
+                        if (!notes.includes(note)) notes.push(note);
+                        // -I PATTERN, -T COLS, -w COLS: the value is the rest of
+                        // the word, or the next argument.
+                        if (LS_TAKES_VALUE.includes(letter)) {
+                            if (j === letters.length - 1) i += 1;
+                            break;
+                        }
+                    } else {
+                        return lsUsageError(`ls: invalid option -- '${letter}'`);
+                    }
+                }
+            }
+            // Notes go to the screen, never into a pipe or a file.
+            const noted = this.inPipeline ? [] : notes.map((text) => ({ kind: "info", text }));
+            const path = target === null ? this.state.cwd : resolveHome(this, target);
+            if (!this.isDir(path)) {
+                if (!this.node(path)) return notFound(this, "ls", `ls: cannot access '${target}'`, target, path);
+                // A file operand lists as its own name, like ls(1).
+                const entry = this.entries(this.parentPath(path), true).find((e) => e.name === this.basename(path));
+                const marker = on.has("F") && entry && entry.type === "exec" ? "*" : "";
+                return [{ kind: "output", text: `${target}${marker}` }, ...noted];
+            }
+            const text = this.entries(path, on.has("a") || on.has("A")).map((entry) => {
+                if (!on.has("F")) return entry.name;
                 if (entry.type === "dir") return `${entry.name}/`;
                 if (entry.type === "exec") return `${entry.name}*`;
                 return entry.name;
-            }).join("  ");
-            return [{ kind: "output", text: text || "(empty)" }];
+            }).join(on.has("1") ? "\n" : "  ");
+            return [{ kind: "output", text: text || "(empty)" }, ...noted];
         },
 
         cd(args) {
@@ -52,24 +158,29 @@
             if (args[0] === "-") {
                 const prev = this.state.prevCwd;
                 if (!prev) return [{ kind: "error", text: "cd: OLDPWD not set" }];
-                if (!this.isDir(prev)) return [{ kind: "error", text: `Not a directory: ${prev}` }];
+                if (!this.isDir(prev)) return [{ kind: "error", text: `cd: ${prev}: No such file or directory` }];
                 this.state.prevCwd = this.state.cwd;
                 this.state.cwd = prev;
                 return [{ kind: "output", text: prev }, { kind: "success", text: `Moved to ${prev}` }];
             }
-            const next = this.resolve(args[0] || this.world.root);
-            if (!this.isDir(next)) return [{ kind: "error", text: `Not a directory: ${args[0] || next}` }];
+            const arg = args[0];
+            const next = arg ? resolveHome(this, arg) : this.world.root;
+            if (!this.isDir(next)) {
+                if (this.node(next)) return [{ kind: "error", text: `cd: ${arg}: Not a directory` }];
+                return notFound(this, "cd", `cd: ${arg}`, arg, next);
+            }
             this.state.prevCwd = this.state.cwd;
             this.state.cwd = next;
             return [{ kind: "success", text: `Moved to ${next}` }];
         },
 
         cat(args) {
-            const path = this.resolve(args[0] || "");
             if (!args[0]) return [{ kind: "error", text: "cat requires a file path" }];
+            const path = this.resolve(args[0]);
             const text = this.readFile(path);
-            if (text === null) return [{ kind: "error", text: `No such file: ${args[0]}` }];
-            return [{ kind: "output", text }];
+            if (text !== null) return [{ kind: "output", text }];
+            if (this.isDir(path)) return [{ kind: "error", text: `cat: ${args[0]}: Is a directory` }];
+            return notFound(this, "cat", `cat: ${args[0]}`, args[0], path);
         },
 
         head(args, stdin) {
@@ -587,8 +698,8 @@
 
     const meta = {
         pwd: { summary: "print the current directory", usage: "pwd" },
-        ls: { summary: "list directory contents", usage: "ls [-a] [-F] [DIR]" },
-        cd: { summary: "change directory", usage: "cd [DIR|-|..]" },
+        ls: { summary: "list directory contents", usage: "ls [-aAF1] [DIR|FILE]" },
+        cd: { summary: "change directory", usage: "cd [DIR|-|..|~|/]" },
         cat: { summary: "print file contents", usage: "cat FILE" },
         head: { summary: "first lines of input", usage: "head [-n N] [FILE]" },
         tail: { summary: "last lines of input", usage: "tail [-n N] [FILE]" },

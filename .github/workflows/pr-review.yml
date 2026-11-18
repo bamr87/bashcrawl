@@ -1,0 +1,28 @@
+name: PR review
+
+# kit: pr-review v0.1.0
+# Seeded from bamr87/bamr87 templates/pr-review/. Every CI failure on a pull
+# request is summarized in one sticky comment (constitution § 19): the job, the
+# reason from its log, whether the PR probably caused it, and what to do. The
+# comment is deleted when nothing is failing. All the logic lives in the hub's
+# reusable pr-review.yml; repo-specific checks plug in as inputs there.
+# Off switch: set the repo variable PR_REVIEW_ENABLED to 'false'.
+
+on:
+  workflow_run:
+    workflows: ["**", "!PR review"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    uses: bamr87/bamr87/.github/workflows/pr-review.yml@v2
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: write
+    with:
+      hub-ref: v2
