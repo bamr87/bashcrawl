@@ -119,4 +119,36 @@ describe("game store", () => {
         expect(store.layout().dock).toBe("right");
         expect(JSON.parse(window.localStorage.getItem("bashcrawl-hud-layout-v1") ?? "{}")).toMatchObject({ dock: "right" });
     });
+
+    it("recaps where you are when a save with progress is reloaded, and only then (#115)", async () => {
+        const fresh = await booted();
+        const recap = (store: GameStore) => (store.view?.lines ?? []).filter((line) => line.text.startsWith("Welcome back"));
+        expect(recap(fresh)).toEqual([]);
+        fresh.execute("pwd");
+        fresh.execute("cd cellar");
+
+        // A reload: a new store over the same save.
+        const reloaded = await booted();
+        const quest = reloaded.model("questModel").current?.title;
+        expect(quest).toBeTruthy();
+        expect(recap(reloaded)).toEqual([
+            { kind: "info", text: `Welcome back — you're in /entrance/cellar. Current quest: ${quest} (type quest).` },
+        ]);
+
+        // A new run starts from scratch: no recap.
+        reloaded.newRun();
+        expect(recap(reloaded)).toEqual([]);
+    });
+
+    it("abandons a typed line on Ctrl+C: a dim ^C echo, history navigation reset (#115)", async () => {
+        const store = await booted();
+        store.execute("pwd");
+        store.execute("ls");
+        expect(store.historyStep(-1)).toBe("ls");
+        expect(store.historyStep(-1)).toBe("pwd");
+        store.interrupt("cat scr");
+        expect(store.view?.lines.at(-1)).toEqual({ kind: "dim", text: "/entrance $ cat scr^C" });
+        expect(store.historyStep(-1)).toBe("ls");
+        expect(store.runtime?.state.history).toEqual(["pwd", "ls"]);
+    });
 });

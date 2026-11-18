@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p web/tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint .",
+    "format": "prettier --write web/src vite.config.mts",
+    "format:check": "prettier --check web/src vite.config.mts",
     "test": "node --test termforge/test/*.test.js",
     "test:web": "vitest run",
     "lint:js": "bash -c 'for f in $(git ls-files \"*.js\"); do node --check \"$f\" || exit 1; done'"
@@ -38,6 +40,7 @@
     "eslint-plugin-react-refresh": "*",
     "globals": "*",
     "jsdom": "*",
+    "prettier": "*",
     "tailwindcss": "*",
     "typescript": "*",
     "typescript-eslint": "*",
