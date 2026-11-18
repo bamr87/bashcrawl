@@ -9,7 +9,15 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+
+import validate_static_web  # noqa: E402
+
 _DATA_FILES = ("world.json", "quests.json", "commands.json", "docs.json")
+
+_ENGINE = '<script src="./assets/js/runtime.js" vite-ignore></script>'
+_CAPTURE = '<script src="./fleet-feedback-capture.js" vite-ignore></script>'
+_WIDGET = '<script src="./fleet-feedback.js" vite-ignore></script>'
 
 
 def _export_to(root: Path, out_dir: Path) -> subprocess.CompletedProcess[str]:
@@ -98,3 +106,18 @@ def test_web_runtime_declares_handlers_for_demo_commands() -> None:
         check=False,
     )
     assert validate.returncode == 0, validate.stdout + validate.stderr
+
+
+def test_feedback_capture_loads_in_head_before_the_engine() -> None:
+    """The widget's console/error buffer must exist before the engine runs,
+    or a report opened after a failed load arrives with an empty log."""
+    check = validate_static_web._feedback_scripts
+    assert check(f"<head>{_CAPTURE}</head><body>{_ENGINE}{_WIDGET}</body>", "index.html") == []
+    assert check(f"<head></head><body>{_ENGINE}{_CAPTURE}{_WIDGET}</body>", "index.html") == [
+        "index.html must load ./fleet-feedback-capture.js in <head>",
+        "index.html must load ./fleet-feedback-capture.js before the engine scripts",
+    ]
+    assert check(f"<head></head><body>{_ENGINE}</body>", "index.html") == [
+        "index.html does not load ./fleet-feedback-capture.js",
+        "index.html does not load ./fleet-feedback.js",
+    ]
