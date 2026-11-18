@@ -11,10 +11,10 @@
 | `make venv` | Create .venv and install web-build + test dependencies |
 | `make web-install` | Install the web app's toolchain (npm, always-latest ranges, no lockfile) |
 | `make web-build` | Regenerate the engine's data bundles, motion clips and vendored core (python only) |
-| `make web-bundle` | web-build, then compile the React app into web/dist (node >= 22.22) |
+| `make web-bundle` | web-build, then compile the React app into web/dist with /version and /healthz (node >= 22.22) |
 | `make web-dev` | Vite dev server with hot reload at http://127.0.0.1:5173 |
 | `make web-preview` | Serve the production build at http://127.0.0.1:4173 |
-| `make web-test` | Validate the bundle, then lint, test and build the React app |
+| `make web-test` | Validate the bundle, then lint, test and build the React app (with /version and /healthz) |
 | `make tty-demo` | Play bashcrawl in this terminal (JS emulator on node; ARGS="--no-hud" for the classic stream) |
 | `make telnet-demo` | Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc) |
 | `make telnet-hub` | Serve bashcrawl as a shared hub (who/say/shout/top) at telnet://127.0.0.1:2323 |
