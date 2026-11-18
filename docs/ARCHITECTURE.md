@@ -105,11 +105,12 @@ Classic/CJS scripts shared by the browser, the node hosts and the node test harn
 | Component | Purpose |
 |-----------|---------|
 | `src/playtest/` | `bash_session.py` (PTY bash REPL + sentinel prompt), `sandbox.py`, `recorder.py`, `harness.py`, `mcp_server.py`, `scorer.py`. |
-| `scripts/` | `export_static_web.py`, `vendor_termforge.py`, `validate_*`, `generate_*`, `playtest.sh`, `lint.sh`, `run_tests.sh`. |
+| `scripts/` | `export_static_web.py`, `vendor_termforge.py`, `write_build_info.py`, `validate_*`, `generate_*`, `playtest.sh`, `lint.sh`, `run_tests.sh`. |
 
 ## Integration points
 
 - **CI** (`.github/workflows/`): `ci.yml` is the PR/push gate — `lint` (shellcheck/yamllint/markdownlint/ruff via `scripts/lint.sh`, `make lint-js`, `npm run lint`), `test` (`make validate-contracts` + `make test` + `make test-js` + `make web-test`; Node 24, `npm install` with no lockfile), `macos-smoke` (real gameplay on stock macOS bash 3.2) and the hub's shared `standard-ci.yml`. `pages.yml` runs `make web-test` and deploys `web/dist` on `main`. `blank-slate-audit.yml` is the weekly agent playtest; `claude.yml` answers `@claude` mentions; `markdown-oneline.yml` unwraps soft-wrapped prose. Every CI check mirrors a local `make` target, and content rules (shebangs, scrolls, unlocks) live in `scripts/validate_content_contracts.py`, not inline in workflows.
+- **Build identity and health** (hub UPS-BE-10, UPS-BE-11): the site is static, so `scripts/write_build_info.py` runs after every `vite build` in `make web-bundle` and `make web-test` and writes `web/dist/version` + `version.json` (`name`; `version`, release-please's, from `package.json`; `commit`, from `GITHUB_SHA` in CI; `built_at`; `game_version`, from `VERSION`) and `web/dist/healthz` + `healthz.json` (`{"status": "ok"}`). Pages serves them at `<site>/version` and `<site>/healthz`, so the live site says which build it is. A missing version stops the build instead of publishing an empty value.
 - **Why `standard-ci` gets `node-version: 24`**: its default Node 20 ships npm 10, whose engines-aware resolution of the always-latest ranges crashes before any script runs (`Cannot read properties of null (reading 'edgesOut')`, reproducible in `node:20`). Vitest stays `npm run test:web` so that job's `npm test` is still the engine suite.
 - **MCP server**: `playtest.mcp_server`, configured in `.mcp.json` / `.cursor/mcp.json` with `PYTHONPATH=src`; smoke-tested by `make test-mcp`.
 - **Logging**: JSONL session logs in `logs/sessions/` (playtest recorder + test log capture).

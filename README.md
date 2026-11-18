@@ -52,7 +52,7 @@ make test-js             # TermForge suites (node --test, zero deps)
 make web-test            # web-build + bundle/handler parity + eslint + vitest + vite build
 make lint                # shellcheck + yamllint + markdownlint + ruff
 make lint-js             # node --check on every tracked *.js
-make web-bundle          # build: web-build + vite build -> web/dist (what Pages serves)
+make web-bundle          # build: web-build + vite build -> web/dist, with /version + /healthz (what Pages serves)
 ```
 
 ## The launcher
