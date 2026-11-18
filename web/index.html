@@ -13,6 +13,11 @@
     <meta property="og:url" content="https://bamr87.github.io/bashcrawl/">
     <meta name="twitter:card" content="summary">
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <!-- The feedback widget's console/error buffer (UPS-FB-04), first of all
+         scripts so an error thrown while the engine loads is in the report.
+         Vendored in the repo-root public/ (the fleet feedback kit); Vite
+         copies it into dist. -->
+    <script src="./fleet-feedback-capture.js" vite-ignore></script>
     <!-- Colour mode before first paint (UPS-FE-06): the saved preference,
          with "auto" resolved against the OS. theme-store.ts takes over. -->
     <script>
@@ -64,6 +69,7 @@
     <script src="./assets/js/plugins/arena.js" vite-ignore></script>
     <script src="./assets/js/plugins/pathfind.js" vite-ignore></script>
     <script src="./assets/js/plugins/bestiary.js" vite-ignore></script>
+    <script src="./assets/js/plugins/nudge.js" vite-ignore></script>
     <script src="./assets/js/runtime.js" vite-ignore></script>
     <script src="./assets/js/hud.js" vite-ignore></script>
     <script src="./assets/js/learn.js" vite-ignore></script>
@@ -72,6 +78,10 @@
     <script src="./assets/js/ambient.js" vite-ignore></script>
     <script src="./assets/js/vim.js" vite-ignore></script>
     <script src="./assets/js/arcade.js" vite-ignore></script>
+
+    <!-- The feedback widget (UPS-FB-01): defines <fleet-feedback>, which the
+         app mounts once (src/chrome/Feedback.tsx, rendered by App.tsx). -->
+    <script src="./fleet-feedback.js" vite-ignore></script>
 
     <!-- The React app (web/src, built by Vite). A module script runs after
          every classic script above, so the engine globals are ready. -->

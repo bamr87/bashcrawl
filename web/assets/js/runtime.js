@@ -9,8 +9,8 @@
     // web/assets/js/plugins/ (docs/schemas/plugin.v1.md), loaded before this
     // file. Install order matters only for shared hooks: postExecute runs
     // achievements (award XP) -> daily (reads XP) -> progress (rank-up reads
-    // the final XP).
-    const GAME_PLUGINS = Object.freeze(["achievements", "daily", "progress", "arena", "pathfind", "bestiary"]);
+    // the final XP) -> nudge (the "Stuck?" line comes after any rank-up).
+    const GAME_PLUGINS = Object.freeze(["achievements", "daily", "progress", "arena", "pathfind", "bestiary", "nudge"]);
     function gamePlugin(id) {
         const mod = (global.BashcrawlPlugins || {})[id];
         if (!mod || !mod.plugin) throw new Error(`game plugin ${id} is not loaded (web/assets/js/plugins/${id}.js)`);
@@ -26,8 +26,10 @@
         const p = raw && typeof raw === "object" ? raw : {};
         const list = (value) => (Array.isArray(value) ? value : []);
         const ranks = list(p.ranks).length ? list(p.ranks) : [{ min: 0, title: "" }];
+        const arenaRanks = list(p.arena_ranks).length ? list(p.arena_ranks) : ranks;
         return {
             ranks,
+            arenaRanks,
             achievements: list(p.achievements),
             bestiary: list(p.bestiary),
             trials: list(p.trials),
@@ -60,7 +62,7 @@
             bestiary: [],
             daily: { date: null, baselineXp: 0, goal: 0, completed: false, streak: 0, lastDate: null },
             rankIndex: 0,
-            stats: { commands: {}, catScrollCount: 0, lastPipedIn: false, initialized: false },
+            stats: { commands: {}, catScrollCount: 0, lastPipedIn: false, initialized: false, errorStreak: 0 },
             // Learning platform slices (TermForge curriculum + mastery plugins;
             // each plugin sanitizes its own slice on load).
             learn: { active: null, progress: {}, completed: [] },
@@ -80,6 +82,10 @@
         mvSessionOnly: "Web Bashcrawl only moves files you created in this session.",
         rmWorldFile: (name) => `rm: cannot remove '${name}': the dungeon's own files are indestructible`,
         rmSessionOnly: "Only session-created files can be removed in Web Bashcrawl.",
+        cdNearby: (names) => (names.length
+            ? `Rooms here: ${names.join(", ")} (hidden rooms only show with ls -a).`
+            : "No rooms lead on from here (hidden rooms only show with ls -a)."),
+        lsUnavailable: (flag, what, tip) => `ls: -${flag}${what ? ` (${what})` : ""} isn't available in the dungeon${tip ? `; try ${tip}` : ""}`,
         execFileKind: "encounter",
         figletDefault: "BASHCRAWL",
         fortunes: [
@@ -99,6 +105,12 @@
     // Save tokens have their own bounded budget; normal commands stay small.
     function lineLimit(line) { return /^\s*save\s+import(?:\s|$)/.test(line) ? 1048576 : 4096; }
     function commandLabel(line) { return /^\s*save\s+import\s/.test(line) ? "save import [token]" : line; }
+
+    // Index of the highest rank a total has reached: its XP floor, and (story
+    // ladder only) the main quests it asks for.
+    function rankIndexFor(ranks, xp, questsDone) {
+        return ranks.reduce((acc, r, i) => ((xp || 0) >= r.min && (questsDone || 0) >= (r.quests || 0) ? i : acc), 0);
+    }
 
     function loadState(world, parsed, progression) {
         const trialCount = progression === undefined ? Infinity : progressionFrom(progression).trials.length;
@@ -145,6 +157,9 @@
         if (next.hp < 0 || next.hp > 100 || next.xp < 0 || next.currentQuestId < 0 || next.rankIndex < 0) throw new Error("invalid progress");
         if (next.history.length > 1000) next.history = next.history.slice(-1000);
         next.historyIndex = next.history.length;
+        // Saves written under an older ladder keep their XP; the rank baseline
+        // is re-derived so the new ladder never shows a retroactive LEVEL UP.
+        if (progression !== undefined) next.rankIndex = rankIndexFor(progressionFrom(progression).ranks, next.xp, next.completedQuestIds.length);
         return next;
     }
 
@@ -341,10 +356,14 @@
             this.emit("progress.xp", { amount: n, total: this.state.xp, reason });
         }
 
-        /** The rank row (from progression.yaml) a given XP total has reached. */
-        rankFor(xp) {
-            const ranks = this.catalog.ranks;
-            return ranks.filter((r) => (xp || 0) >= r.min).pop() || ranks[0];
+        /**
+         * The rank row (from progression.yaml) a given XP total has reached.
+         * Defaults to the story ladder (gated by main quests done); the arena
+         * passes `catalog.arenaRanks` for a run's score.
+         */
+        rankFor(xp, ranks) {
+            const ladder = ranks || this.catalog.ranks;
+            return ladder[rankIndexFor(ladder, xp, this.state.completedQuestIds.length)];
         }
 
         /** Re-show the active arena trial (hosts call this when resuming a save). */
@@ -448,9 +467,9 @@
                 {
                     title: "🧭 Navigation & lore",
                     items: [
-                        ["map", "ASCII map of the dungeon"],
+                        ["map", "ASCII map of the rooms you have explored"],
                         ["look", "Describe the current room and its contents"],
-                        ["hint", "A nudge toward the next objective"],
+                        ["hint", "Your quest's next step, and the route there from this room"],
                         ["quest", "Your active quest objectives"],
                     ],
                 },
@@ -510,27 +529,24 @@
             return [{ kind: "output", text: lines.join("\n") }];
         }
 
-        // Draw the dungeon map by walking the live runtime filesystem, so the map
+        // Draw the explored part of the dungeon (Hud.mapModel over the live filesystem), so the map
         // never advertises a room you cannot actually `cd` into. Only directories
         // (rooms) are shown; revealed hidden rooms appear un-dotted via entries().
         cmdMap() {
-            const here = this.state.cwd;
+            // Fog of war: the rooms the sidebar map shows (Hud.mapModel), never the
+            // real tree. `tree` stays the filesystem view.
+            const hud = global.BashcrawlHud;
+            if (!hud) return [{ kind: "error", text: "map: the map needs the HUD presenter (hud.js)." }];
             const root = this.world.root || "/entrance";
-            const marker = (path) => (path === here ? "  ← you are here" : "");
-            const lines = [root + marker(root)];
-            const walk = (path, prefix, depth) => {
-                if (depth > 4) return;
-                const rooms = this.entries(path, false).filter((entry) => entry.type === "dir");
-                rooms.forEach((entry, idx) => {
-                    const last = idx === rooms.length - 1;
-                    const tee = last ? "└── " : "├── ";
-                    const childPath = `${path === "/" ? "" : path}/${entry.name}`;
-                    lines.push(prefix + tee + entry.name + "/" + marker(childPath));
-                    walk(childPath, prefix + (last ? "    " : "│   "), depth + 1);
-                });
-            };
-            walk(root, "  ", 0);
+            const { rows } = hud.mapModel(this);
+            const lines = rows.map((row, i) => {
+                const mark = row.here ? "  ← you are here" : row.seen ? "" : "  ░ unexplored";
+                return i === 0 ? root + mark : "  " + row.prefix + row.name + mark;
+            });
             const out = [{ kind: "art", text: lines.join("\n") }];
+            if (rows.some((row) => !row.seen)) {
+                out.push({ kind: "dim", text: "░ marks a door you have seen but not entered — cd through it to chart it." });
+            }
             // Teach that the dungeon hides more than it shows, until it doesn't.
             if (this.entries(root, true).some((entry) => entry.type === "dir" && entry.hidden)) {
                 out.push({ kind: "dim", text: "Some passages stay hidden until unlocked — try `ls -la` and read the scrolls." });
@@ -564,11 +580,116 @@
             return missing.length ? `You still need: ${missing.join(", ")}` : "";
         }
 
+        // ── Location-aware hints (#105) ─────────────────────────────────────
+        // The rooms the player can `cd` into from `path` right now: visible
+        // subdirectories (a revealed hidden room lists un-dotted) and `..`.
+        // Hidden, dotted and sealed rooms never appear, so a route built on
+        // this graph never passes through, or names, an unrevealed room.
+        roomExits(path) {
+            const exits = this.entries(path, false)
+                .filter((entry) => entry.type === "dir" && !entry.name.startsWith("."))
+                .map((entry) => ({ step: entry.name, path: `${path === "/" ? "" : path}/${entry.name}` }));
+            if (path !== (this.world.root || "/entrance") && path !== "/") exits.push({ step: "..", path: this.parentPath(path) });
+            return exits;
+        }
+
+        // Shortest `cd` route (breadth-first) from the current room to the
+        // nearest room `isGoal` accepts: { path, steps } or null.
+        routeTo(isGoal) {
+            const start = this.state.cwd;
+            const came = new Map([[start, null]]);
+            const queue = [start];
+            while (queue.length) {
+                const path = queue.shift();
+                if (path !== start && isGoal(path)) {
+                    const steps = [];
+                    for (let at = path; came.get(at); at = came.get(at).from) steps.unshift(came.get(at).step);
+                    return { path, steps };
+                }
+                for (const exit of this.roomExits(path)) {
+                    if (came.has(exit.path)) continue;
+                    came.set(exit.path, { from: path, step: exit.step });
+                    queue.push(exit.path);
+                }
+            }
+            return null;
+        }
+
+        // The `hint` line that points from here toward the quest's room, or
+        // "" when the quest has no room, the player is already there (the
+        // same test advanceQuests applies), or no revealed route leads there.
+        // A quest room that is still hidden routes to the room whose
+        // encounter opens it (the library's tome opens the study) instead.
+        questRouteLine(q) {
+            const comp = (q && q.completion) || {};
+            if (!comp.location) return "";
+            const names = String(comp.location).split("|").map((v) => v.trim()).filter(Boolean);
+            const cwd = this.state.cwd;
+            if (names.some((loc) => cwd.includes(loc))) return "";
+            const rooms = this.world.rooms || {};
+            const here = this.basename(cwd) || cwd;
+            const away = (steps) => `${steps.length} room${steps.length === 1 ? "" : "s"} away`;
+            const route = this.routeTo((path) => names.includes(this.basename(path))
+                && Object.prototype.hasOwnProperty.call(rooms, this.actual(path)));
+            if (route) {
+                return `🧭 You're in the ${here}. The ${this.basename(route.path)} is ${away(route.steps)}, at ${route.path}. Next: cd ${route.steps[0]}`;
+            }
+            const openers = new Map();
+            for (const [stored, encounter] of Object.entries(this.world.encounters || {})) {
+                if (!(encounter.unlocks_rooms || []).some((room) => names.includes(room))) continue;
+                const room = this.vfs.visible(this.parentPath(stored));
+                if (!openers.has(room)) openers.set(room, encounter.script || this.basename(stored));
+            }
+            if (!openers.size) return "";
+            if (openers.has(cwd)) return `🧭 The way on opens from here: run ./${openers.get(cwd)}`;
+            const opener = this.routeTo((path) => openers.has(path));
+            if (!opener) return "";
+            return `🧭 You're in the ${here}. The way on starts in the ${this.basename(opener.path)} (./${openers.get(opener.path)}), ${away(opener.steps)}, at ${opener.path}. Next: cd ${opener.steps[0]}`;
+        }
+
+        // Names of the world's rooms the player cannot reach yet (inside a
+        // hidden room that is still unrevealed, or sealed).
+        unrevealedRoomNames() {
+            const root = this.world.root || "/entrance";
+            const reachable = new Set([root]);
+            const queue = [root];
+            while (queue.length) {
+                for (const exit of this.roomExits(queue.shift())) {
+                    if (exit.step === ".." || reachable.has(exit.path)) continue;
+                    reachable.add(exit.path);
+                    queue.push(exit.path);
+                }
+            }
+            const open = new Set([...reachable].map((path) => this.basename(path)));
+            const names = new Set();
+            for (const stored of Object.keys(this.world.rooms || {})) {
+                const name = this.basename(stored).replace(/^\./, "");
+                if (name && !open.has(name)) names.add(name);
+            }
+            return [...names];
+        }
+
+        // The room's own note (rooms.yaml `hint`), unless it names a room
+        // the player has not revealed yet (the vault's mentions the Rift).
+        roomHintLine() {
+            const note = String(this.currentRoomMeta().hint || "").trim();
+            if (!note) return "";
+            const words = new Set(note.toLowerCase().split(/[^a-z0-9-]+/));
+            return this.unrevealedRoomNames().some((name) => words.has(name.toLowerCase())) ? "" : `Here: ${note}`;
+        }
+
         cmdHint() {
             const q = this.quests[this.state.currentQuestId];
             if (!q) return [{ kind: "success", text: "No quests left. Try `map`, `tree`, `cowsay hi`, or the `train` / `speedrun` / `pathfind` mini-games." }];
             const missing = this.missingItemsLine(q);
-            return [{ kind: "magic", text: `🔮 ${q.title}\n   ${q.hint || q.objective}${missing ? `\n   ${missing}` : ""}` }];
+            const route = this.questRouteLine(q);
+            const lines = [`🔮 ${q.title}`, `   ${q.hint || q.objective}`];
+            if (missing) lines.push(`   ${missing}`);
+            if (route) lines.push(`   ${route}`);
+            const out = [{ kind: "magic", text: lines.join("\n") }];
+            const note = this.roomHintLine();
+            if (note) out.push({ kind: "dim", text: `   ${note}` });
+            return out;
         }
 
         cmdSource(args) {
@@ -796,5 +917,5 @@
 
     }
 
-    global.BashcrawlRuntime = { Runtime, defaultState, loadState, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
+    global.BashcrawlRuntime = { Runtime, defaultState, loadState, rankIndexFor, lineLimit, commandLabel, tokenize, progressionFrom, GAME_PLUGINS };
 })(typeof globalThis !== "undefined" ? globalThis : window);

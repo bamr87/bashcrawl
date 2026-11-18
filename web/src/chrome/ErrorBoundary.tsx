@@ -1,6 +1,10 @@
-// Recover-in-place fallback (UPS-FE-16): the error and three ways out. A
-// render error never blanks the page — the engine's own save is untouched.
+// Recover-in-place fallback (UPS-FE-16): the error, three ways out and a way
+// to report it (the feedback widget lives outside this boundary, so it is
+// still there, with the console lines that led up to the crash). A render
+// error never blanks the page — the engine's own save is untouched.
 import { Component, type ErrorInfo, type ReactNode } from "react";
+
+import { ReportLink } from "./Feedback";
 
 interface Props {
     children: ReactNode;
@@ -34,6 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
                         <button type="button" className="bc-btn bc-btn-primary" onClick={() => this.setState({ error: null })}>Try again</button>
                         <button type="button" className="bc-btn" onClick={() => window.location.reload()}>Reload</button>
                         <a className="bc-btn" href="#/story" onClick={() => this.setState({ error: null })}>Go to the entrance</a>
+                        <ReportLink className="bc-btn" type="fix-page" extra={`UI error: ${error.name}: ${error.message}`}>Report this</ReportLink>
                     </div>
                 </section>
             </main>

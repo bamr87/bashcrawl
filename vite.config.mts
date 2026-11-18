@@ -45,7 +45,12 @@ function copyEngine(): Plugin {
 export default defineConfig({
     root: web,
     base: "./",
-    publicDir: "public",
+    // The repo-root public/, not web/public/: besides the favicon and
+    // .nojekyll it holds the fleet feedback widget (fleet-feedback.js and
+    // fleet-feedback-capture.js), which the hub's feedback fan-out vendors
+    // and upgrades in place at public/ (bamr87/bamr87 tools/fanout.sh).
+    // Serving the kit-owned path keeps --upgrade reaching the copy we ship.
+    publicDir: resolve(here, "public"),
     plugins: [react(), tailwindcss(), copyEngine()],
     build: {
         outDir: "dist",

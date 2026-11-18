@@ -115,3 +115,41 @@ test("the clip manifest drives aliases, the stage set, and event overrides", () 
     assert.equal(fx.onStage("tally"), false);
     assert.equal(lib.get("tally").frames.length, 2);
 });
+
+test("the clip ls plays names no room or file (issue #110)", () => {
+    const env = loadClassic({ files: [ASCII_MOTION, FX_CLIPS, FX] });
+    const fx = env.sandbox.BashcrawlCommandFx;
+    const am = env.sandbox.TermForge.asciiMotion;
+    const clip = am.parse(fx.clipFor(fx.describe("ls").motion));
+    assert.ok(clip.frames.length >= 3);
+    for (let i = 0; i < clip.frames.length; i++) {
+        const text = am.renderFrame(clip, i).text.toLowerCase();
+        for (const name of ["cellar", "armoury", "treasure", "scroll", "manifest"]) {
+            assert.ok(!text.includes(name), `frame ${i} names "${name}"`);
+        }
+    }
+});
+
+test("a failing command keeps its red wash but plays no stage clip (#111)", () => {
+    const env = loadClassic({ files: [PARSER, ASCII_MOTION, FX_CLIPS, FX] });
+    env.sandbox.setTimeout = () => 0;
+    env.sandbox.clearTimeout = () => {};
+    const fx = env.sandbox.BashcrawlCommandFx;
+    assert.equal(fx.onStage("error"), false, "the error clip is off the stage");
+    assert.ok(fx.clipFor("error"), "but still bundled for an explicit play");
+    // A stand-in for the stage element, mid-way through a previous clip.
+    const classes = new Set(["fx-stage"]);
+    const stage = {
+        dataset: {},
+        style: { setProperty() {} },
+        offsetWidth: 0,
+        classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) },
+        setAttribute() {},
+        querySelector: () => null,
+    };
+    const spec = fx.apply("lgs", { root: stage, error: true });
+    assert.equal(spec.motion, "error");
+    assert.equal(stage.dataset.fxMotion, "error");
+    assert.ok(classes.has("fx-play"), "the red wash still plays");
+    assert.ok(!classes.has("fx-stage"), "no clip holds the stage");
+});
