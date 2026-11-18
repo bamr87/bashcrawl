@@ -345,6 +345,17 @@
         line-height: 1;
     }
 
+    /* ── feedback button (the fleet widget, UPS-FB-01) ──
+       Its shadow DOM places the button at bottom: offset + gap + size — one
+       slot above a back-to-top button. Bashcrawl has none, but it has the
+       prompt dock and the footer along that edge: AppShell publishes their
+       height, and the gap becomes whatever lifts the button one offset clear
+       of them, in every door and at any width. Layer and sizes stay the
+       tokens'. */
+    fleet-feedback {
+        --fleet-space-fab-gap: calc(var(--bc-bottom-chrome, 0px) - var(--fleet-space-fab-size));
+    }
+
     /* ── dialogs ── */
     .bc-backdrop {
         position: fixed;
