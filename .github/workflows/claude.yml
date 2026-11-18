@@ -1,11 +1,20 @@
 name: Claude
 
-# kit: agent-context v0.4.0
+# kit: agent-context v0.6.0
 # @claude mention handler, seeded from bamr87/bamr87 templates/agent-context/.
 # Mention @claude in an issue or PR comment and Claude Code picks up the task.
 #
-# Auth (house convention): CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`)
-# preferred; ANTHROPIC_API_KEY used only when the OAuth token is absent.
+# Built to the fleet's harness standard (bamr87/bamr87 _data/fleet.yml
+# `harnesses.standard`, docs/HARNESS-OPS.md): a trusted-author gate, an exact
+# model, a dollar ceiling, the ordered credential, least-privilege permissions
+# and a timeout. Change any of them in the kit, not in this copy: a copy that
+# still matches the kit byte for byte is upgraded by the fan-out, and an edited
+# one is left alone for good.
+#
+# Auth: tried in the order this repo's CLAUDE_AUTH_ORDER variable names —
+# `oauth` = CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`), `api_key` =
+# ANTHROPIC_API_KEY. Set per repo or group in bamr87/bamr87 _data/fleet.yml
+# `ai_auth:`; unset means the fleet default, oauth then api_key.
 # See bamr87/bamr87 docs/AI-INTEGRATION.md.
 
 on:
@@ -25,22 +34,30 @@ permissions:
 # mentions in quick succession each spin up their own 30-minute agent against
 # the same thread, racing each other on the same branch.
 #
-# Deliberately NOT cancel-in-progress: each mention is a distinct request, so a
-# newer run is queued behind the current one rather than killing it mid-task.
-# The job's token is read-only (contents/pull-requests/issues: read), so the
-# agent cannot commit or push from here; it reports back via the action's own
-# comment, and any code change still lands through a PR.
+# Deliberately NOT cancel-in-progress: each mention is a distinct request and
+# the agent commits and pushes, so a superseded run is queued behind the current
+# one rather than killed mid-push.
 concurrency:
   group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
   claude:
+    # Only trusted authors can start a run. On a public repo anyone can open an
+    # issue or comment, and an @claude mention spends the repo's Claude
+    # credential and hands the text to an agent with a checkout — so the
+    # mention must come from someone with write-level standing. The
+    # author_association is read from the object that carries the @claude text
+    # (the comment, the review, or the issue itself).
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -54,7 +71,26 @@ jobs:
         with:
           fetch-depth: 1
 
+      # The credential comes from this repo's CLAUDE_AUTH_ORDER (ai_auth: in
+      # bamr87/bamr87 _data/fleet.yml) — a method NAME, never a secret, in the output.
+      - name: Choose the Claude credential (ai_auth order)
+        id: claude-auth
+        uses: bamr87/bamr87/.github/actions/claude-auth@v2
+        with:
+          order: ${{ vars.CLAUDE_AUTH_ORDER }}
+          has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
       - uses: anthropics/claude-code-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
+          claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
+          # The model is an exact id from the fleet's allowlist (bamr87/bamr87
+          # _data/fleet.yml `ai_models.allowed`), never an alias and never the
+          # action's default of the day. The dollar ceiling is a circuit
+          # breaker, not a budget: a mention is the one HUMAN-triggered call
+          # site, so there is no turn cap to size against, but it is unattended
+          # spend the moment the person who wrote it walks away. Both values
+          # are the kit's (`budget.call_sites` `claude.yml:claude` in the same
+          # file); they change by a kit release and an upgrade fan-out.
+          claude_args: "--model claude-sonnet-5-5 --max-budget-usd 20"
