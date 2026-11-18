@@ -1,0 +1,85 @@
+# =============================================================================
+# verify/scenarios/feedback-widget.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The in-app feedback widget (BASHCRAWL-026): a returning hero in the Story
+# door finds the "Improve this page" button clear of the prompt dock and the
+# footer — also while the inline hint grows the dock — and opens the report
+# dialog. Filing opens github.com, so the scenario stops at the dialog;
+# web/src/chrome/Feedback.test.tsx files a report and checks its marker.
+# =============================================================================
+id: feedback-widget
+feature: BASHCRAWL-026
+title: "The feedback button sits clear of the prompt and opens the report dialog"
+description: >-
+  A returning hero opens the Story door, finds the floating Improve this page
+  button above the prompt dock and the footer, and opens the dialog that files
+  a GitHub issue.
+viewports:
+  - name: phone-360
+    width: 360
+    height: 740
+  - desktop
+steps:
+  - goto: /
+  - eval:
+      name: returning-hero
+      script: |
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "story", onboarded: true, introSeen: true });
+        "seeded"
+  - goto: /?hero=returning#/story
+  - wait:
+      selector: "input.bc-input"
+  - expect:
+      count:
+        selector: "fleet-feedback"
+        min: 1
+        max: 1
+  - expect:
+      visible: "button.fab"
+  - eval:
+      name: clear-of-the-dock
+      script: &clearance |
+        (async () => {
+          // Measure what is painted: AppShell's ResizeObserver moves the button
+          // in the frame the dock changes size, so let two frames go by first.
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const fab = document.querySelector("fleet-feedback").shadowRoot.querySelector(".fab").getBoundingClientRect();
+          const box = (selector) => {
+            const r = document.querySelector(selector)?.getBoundingClientRect();
+            return r && r.height ? r : null;
+          };
+          const parts = { "prompt dock": box(".bc-dock-slot"), footer: box(".bc-footer") };
+          const hits = Object.keys(parts).filter((name) => {
+            const r = parts[name];
+            return r && fab.bottom > r.top && fab.top < r.bottom && fab.right > r.left && fab.left < r.right;
+          });
+          if (hits.length) throw new Error(`the feedback button overlaps the ${hits.join(" and ")}`);
+          return {
+            button: [Math.round(fab.top), Math.round(fab.bottom)],
+            dockTop: Math.round(parts["prompt dock"]?.top ?? 0),
+            footerTop: Math.round(parts.footer?.top ?? 0),
+          };
+        })()
+  - expect:
+      no_console_errors: true
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: story
+  - fill:
+      selector: "input.bc-input"
+      value: "grep"
+  - expect:
+      visible: ".bc-inline-hint"
+  - eval:
+      name: clear-of-the-hint
+      script: *clearance
+  - screenshot: story-hint
+  - click: "button.fab"
+  - expect:
+      visible: "#ff-dlg"
+  # The dialog fades in over --fleet-motion-base (200ms).
+  - wait:
+      ms: 500
+  - screenshot: dialog

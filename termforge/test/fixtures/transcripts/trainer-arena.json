@@ -437,7 +437,7 @@
       "outputs": [
         {
           "kind": "info",
-          "text": "Level 1  █░░░░░░░░░  20/200 to next level  (total 20 XP)"
+          "text": "Level 1  ██░░░░░░░░  20/100 to Apprentice of the Shell  (total 20 XP)"
         }
       ]
     }
@@ -471,7 +471,7 @@
     "daily": {
       "date": "2026-01-15",
       "baselineXp": 0,
-      "goal": 60,
+      "goal": 175,
       "completed": false,
       "streak": 0,
       "lastDate": null
@@ -485,7 +485,8 @@
       },
       "catScrollCount": 0,
       "lastPipedIn": false,
-      "initialized": false
+      "initialized": false,
+      "errorStreak": 0
     },
     "learn": {
       "active": null,

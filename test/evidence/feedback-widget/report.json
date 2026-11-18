@@ -1,0 +1,412 @@
+{
+  "id": "feedback-widget",
+  "title": "The feedback button sits clear of the prompt and opens the report dialog",
+  "features": [
+    "BASHCRAWL-026"
+  ],
+  "path": "verify/scenarios/feedback-widget.yml",
+  "started": "2026-11-16T03:19:04.313Z",
+  "viewports": [
+    {
+      "name": "phone-360",
+      "width": 360,
+      "height": 740,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 595
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 6
+        },
+        {
+          "step": "goto",
+          "arg": "/?hero=returning#/story",
+          "ok": true,
+          "ms": 546
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 16
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": "fleet-feedback",
+              "min": 1,
+              "max": 1
+            }
+          },
+          "ok": true,
+          "value": 1,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.fab"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "clear-of-the-dock",
+            "script": "(async () => {\n  // Measure what is painted: AppShell's ResizeObserver moves the button\n  // in the frame the dock changes size, so let two frames go by first.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const fab = document.querySelector(\"fleet-feedback\").shadowRoot.querySelector(\".fab\").getBoundingClientRect();\n  const box = (selector) => {\n    const r = document.querySelector(selector)?.getBoundingClientRect();\n    return r && r.height ? r : null;\n  };\n  const parts = { \"prompt dock\": box(\".bc-dock-slot\"), footer: box(\".bc-footer\") };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && fab.bottom > r.top && fab.top < r.bottom && fab.right > r.left && fab.left < r.right;\n  });\n  if (hits.length) throw new Error(`the feedback button overlaps the ${hits.join(\" and \")}`);\n  return {\n    button: [Math.round(fab.top), Math.round(fab.bottom)],\n    dockTop: Math.round(parts[\"prompt dock\"]?.top ?? 0),\n    footerTop: Math.round(parts.footer?.top ?? 0),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "button": [
+              556,
+              604
+            ],
+            "dockTop": 621,
+            "footerTop": 707
+          },
+          "ms": 32
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 360,
+            "cw": 360
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/phone-360-story.png",
+          "ms": 54
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "grep"
+          },
+          "ok": true,
+          "ms": 11
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-inline-hint"
+          },
+          "ok": true,
+          "ms": 6
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "clear-of-the-hint",
+            "script": "(async () => {\n  // Measure what is painted: AppShell's ResizeObserver moves the button\n  // in the frame the dock changes size, so let two frames go by first.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const fab = document.querySelector(\"fleet-feedback\").shadowRoot.querySelector(\".fab\").getBoundingClientRect();\n  const box = (selector) => {\n    const r = document.querySelector(selector)?.getBoundingClientRect();\n    return r && r.height ? r : null;\n  };\n  const parts = { \"prompt dock\": box(\".bc-dock-slot\"), footer: box(\".bc-footer\") };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && fab.bottom > r.top && fab.top < r.bottom && fab.right > r.left && fab.left < r.right;\n  });\n  if (hits.length) throw new Error(`the feedback button overlaps the ${hits.join(\" and \")}`);\n  return {\n    button: [Math.round(fab.top), Math.round(fab.bottom)],\n    dockTop: Math.round(parts[\"prompt dock\"]?.top ?? 0),\n    footerTop: Math.round(parts.footer?.top ?? 0),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "button": [
+              511,
+              559
+            ],
+            "dockTop": 575,
+            "footerTop": 707
+          },
+          "ms": 28
+        },
+        {
+          "step": "screenshot",
+          "arg": "story-hint",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/phone-360-story-hint.png",
+          "ms": 52
+        },
+        {
+          "step": "click",
+          "arg": "button.fab",
+          "ok": true,
+          "ms": 231
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "#ff-dlg"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 503
+        },
+        {
+          "step": "screenshot",
+          "arg": "dialog",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/phone-360-dialog.png",
+          "ms": 55
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/feedback-widget/phone-360-story.png",
+        "test/evidence/feedback-widget/phone-360-story-hint.png",
+        "test/evidence/feedback-widget/phone-360-dialog.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "clear-of-the-dock": {
+          "button": [
+            556,
+            604
+          ],
+          "dockTop": 621,
+          "footerTop": 707
+        },
+        "clear-of-the-hint": {
+          "button": [
+            511,
+            559
+          ],
+          "dockTop": 575,
+          "footerTop": 707
+        }
+      },
+      "final_url": "http://127.0.0.1:4176/?hero=returning#/story"
+    },
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 595
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 1
+        },
+        {
+          "step": "goto",
+          "arg": "/?hero=returning#/story",
+          "ok": true,
+          "ms": 534
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 11
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": "fleet-feedback",
+              "min": 1,
+              "max": 1
+            }
+          },
+          "ok": true,
+          "value": 1,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.fab"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "clear-of-the-dock",
+            "script": "(async () => {\n  // Measure what is painted: AppShell's ResizeObserver moves the button\n  // in the frame the dock changes size, so let two frames go by first.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const fab = document.querySelector(\"fleet-feedback\").shadowRoot.querySelector(\".fab\").getBoundingClientRect();\n  const box = (selector) => {\n    const r = document.querySelector(selector)?.getBoundingClientRect();\n    return r && r.height ? r : null;\n  };\n  const parts = { \"prompt dock\": box(\".bc-dock-slot\"), footer: box(\".bc-footer\") };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && fab.bottom > r.top && fab.top < r.bottom && fab.right > r.left && fab.left < r.right;\n  });\n  if (hits.length) throw new Error(`the feedback button overlaps the ${hits.join(\" and \")}`);\n  return {\n    button: [Math.round(fab.top), Math.round(fab.bottom)],\n    dockTop: Math.round(parts[\"prompt dock\"]?.top ?? 0),\n    footerTop: Math.round(parts.footer?.top ?? 0),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "button": [
+              616,
+              664
+            ],
+            "dockTop": 681,
+            "footerTop": 767
+          },
+          "ms": 30
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/desktop-story.png",
+          "ms": 75
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "grep"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-inline-hint"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "clear-of-the-hint",
+            "script": "(async () => {\n  // Measure what is painted: AppShell's ResizeObserver moves the button\n  // in the frame the dock changes size, so let two frames go by first.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const fab = document.querySelector(\"fleet-feedback\").shadowRoot.querySelector(\".fab\").getBoundingClientRect();\n  const box = (selector) => {\n    const r = document.querySelector(selector)?.getBoundingClientRect();\n    return r && r.height ? r : null;\n  };\n  const parts = { \"prompt dock\": box(\".bc-dock-slot\"), footer: box(\".bc-footer\") };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && fab.bottom > r.top && fab.top < r.bottom && fab.right > r.left && fab.left < r.right;\n  });\n  if (hits.length) throw new Error(`the feedback button overlaps the ${hits.join(\" and \")}`);\n  return {\n    button: [Math.round(fab.top), Math.round(fab.bottom)],\n    dockTop: Math.round(parts[\"prompt dock\"]?.top ?? 0),\n    footerTop: Math.round(parts.footer?.top ?? 0),\n  };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "button": [
+              588,
+              636
+            ],
+            "dockTop": 653,
+            "footerTop": 767
+          },
+          "ms": 18
+        },
+        {
+          "step": "screenshot",
+          "arg": "story-hint",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/desktop-story-hint.png",
+          "ms": 77
+        },
+        {
+          "step": "click",
+          "arg": "button.fab",
+          "ok": true,
+          "ms": 36
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "#ff-dlg"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 503
+        },
+        {
+          "step": "screenshot",
+          "arg": "dialog",
+          "ok": true,
+          "file": "test/evidence/feedback-widget/desktop-dialog.png",
+          "ms": 82
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/feedback-widget/desktop-story.png",
+        "test/evidence/feedback-widget/desktop-story-hint.png",
+        "test/evidence/feedback-widget/desktop-dialog.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "clear-of-the-dock": {
+          "button": [
+            616,
+            664
+          ],
+          "dockTop": 681,
+          "footerTop": 767
+        },
+        "clear-of-the-hint": {
+          "button": [
+            588,
+            636
+          ],
+          "dockTop": 653,
+          "footerTop": 767
+        }
+      },
+      "final_url": "http://127.0.0.1:4176/?hero=returning#/story"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-16T03:19:08.534Z",
+  "base": "http://127.0.0.1:4176"
+}

@@ -1,14 +1,14 @@
 name: Verify
 
-# kit: verify v0.1.0
+# kit: verify v0.3.0
 # Adopted from bamr87/bamr87 via verify-fanout (tools/fanout.sh --kit verify).
 # Thin caller — the machinery is shared and versioned in bamr87/bamr87
 # (.github/workflows/fleet-verify.yml, tools/features_index.py, docs/VERIFICATION.md).
 #
 # What runs:
-#   every PR / push   validate features/features.yml, start the app per
-#                     verify/verify.yml, execute verify/scenarios/*.yml with
-#                     Playwright, upload the evidence bundles, summarise coverage.
+#   every PR commit   validate features/features.yml, start the app per
+#   (opened, pushed   verify/verify.yml, execute verify/scenarios/*.yml with
+#   to, reopened)     Playwright, upload the evidence bundles, summarise coverage.
 #   label `verify`    additionally hand the LIVE app to a Claude Code pass that
 #   (or dispatch)     drives it through the Playwright MCP like a user would,
 #                     writes verify/AGENT-REPORT.md, and the WORKFLOW (never the
@@ -16,15 +16,23 @@ name: Verify
 #                     (OAuth only — ANTHROPIC_API_KEY disabled for now,
 #                     2026-11-15) — pass `secrets: inherit`.
 #
-# Advisory until this repo's scenarios are trustworthy; then set `gate: true`
-# to make a failing scenario block the PR. (main is substituted
-# on adoption.)
+# What does not run, because it only repeated a verdict (kit 0.2.0):
+#   any other label   bots label a PR in bursts as they open it (Dependabot two
+#                     labels, the content agents up to four), and each label
+#                     started a full pass that cancelled the one in flight.
+#                     Such a run now takes a concurrency group of its own and
+#                     its job skips, at zero minutes.
+#   a push to the     nearly every push there is a merged PR whose commits
+#   default branch    this workflow had just verified (151 of 155 sampled
+#                     across ten repos in 2026-11). Dispatch it to verify the
+#                     default branch on demand.
+#
+# Advisory until this repo's scenarios are trustworthy; then flip `gate` to
+# true to make a failing scenario block the PR.
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       agent:
@@ -39,13 +47,18 @@ on:
 permissions:
   contents: read
 
+# A label other than `verify` must neither re-run the pass nor cancel the one in
+# flight, so it gets a group of its own here and the job below skips. Both halves
+# are needed: with the `if:` alone, the label run would still take the shared
+# group and cancel the real run before skipping, leaving the PR with no verdict.
 concurrency:
-  group: verify-${{ github.ref }}
+  group: verify-${{ github.ref }}${{ (github.event.action == 'labeled' && github.event.label.name != 'verify') && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    uses: bamr87/bamr87/.github/workflows/fleet-verify.yml@main
+    if: ${{ github.event.action != 'labeled' || github.event.label.name == 'verify' }}
+    uses: bamr87/bamr87/.github/workflows/fleet-verify.yml@v2
     permissions:
       contents: read
       pull-requests: write
@@ -54,4 +67,5 @@ jobs:
       gate: false
       agent: ${{ github.event_name == 'workflow_dispatch' && inputs.agent || contains(github.event.pull_request.labels.*.name, 'verify') }}
       only: ${{ github.event_name == 'workflow_dispatch' && inputs.only || '' }}
+      hub-ref: v2           # the runner and tooling at the same tag as the workflow
     secrets: inherit

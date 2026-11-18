@@ -1,0 +1,105 @@
+# =============================================================================
+# verify/scenarios/door-art.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The Arcade and Reference doors' ASCII Motion headers (BASHCRAWL-025, #91): a
+# returning hero walks between the Practice Arcade and the Reference door in
+# the dark and the light theme. Each door switch mounts the header fresh; it
+# plays its clip once (several distinct frames, then no timer) and rests on
+# its last frame. The reduced-motion path is covered by
+# web/src/arcade/ArcadeHome.test.tsx and web/src/screens/ReferenceScreen.test.tsx
+# (the runner cannot emulate it).
+# =============================================================================
+id: door-art
+feature: BASHCRAWL-025
+title: "The Arcade and Reference doors open with an ASCII Motion clip"
+description: >-
+  A returning hero switches between the Practice Arcade and the Reference door
+  in both themes; each door's header plays its ASCII Motion clip once and rests
+  on its last frame, beside the door's own content, with no console errors and
+  no sideways scroll.
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - eval:
+      name: returning-hero
+      script: |
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "reference", onboarded: true, introSeen: true });
+        localStorage.setItem("bashcrawl-web-theme", "dark");
+        "seeded"
+  - goto: /?theme=dark#/reference
+  - wait:
+      selector: '.bc-ref-controls [data-art="door-reference"]'
+  - eval:
+      name: dark-arcade-plays-once
+      script: &switch |
+        (async () => {
+          // Switch to the other door (no reload), then sample its header for
+          // 2.4 s: a door clip animates from its first frame, then stops.
+          const door = location.hash.includes("arcade") ? "reference" : "arcade";
+          location.hash = `#/${door}`;
+          const tick = () => new Promise((done) => setTimeout(done, 20));
+          let node = null;
+          for (let i = 0; i < 100 && !node; i += 1) {
+            await tick();
+            node = document.querySelector(`[data-art="door-${door}"]`);
+          }
+          if (!node) throw new Error(`no door-${door} art after switching to #/${door}`);
+          const frames = new Set();
+          const until = Date.now() + 2400;
+          while (Date.now() < until) {
+            frames.add(node.textContent);
+            await tick();
+          }
+          const playing = window.BashcrawlAmbient.isPlaying(node);
+          if (frames.size < 3) throw new Error(`door-${door} painted ${frames.size} frame(s), expected an animation`);
+          if (playing) throw new Error(`door-${door} still plays after 2.4 s; a door clip plays once`);
+          return {
+            art: node.dataset.art,
+            distinctFrames: frames.size,
+            ariaHidden: node.getAttribute("aria-hidden"),
+            rest: node.textContent.split("\n").map((line) => line.trimEnd()),
+          };
+        })()
+  - expect:
+      count:
+        selector: ".bc-arcade-card"
+        min: 5
+  - expect:
+      no_console_errors: true
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: arcade-dark
+  - eval:
+      name: dark-reference-plays-once
+      script: *switch
+  - expect:
+      visible: "input.bc-ref-search"
+  - expect:
+      no_console_errors: true
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: reference-dark
+  - eval:
+      name: light-theme
+      script: |
+        localStorage.setItem("bashcrawl-web-theme", "light");
+        "light"
+  - goto: /?theme=light#/reference
+  - wait:
+      selector: '.bc-ref-controls [data-art="door-reference"]'
+  - eval:
+      name: light-arcade-plays-once
+      script: *switch
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: arcade-light
+  - eval:
+      name: light-reference-plays-once
+      script: *switch
+  - expect:
+      no_console_errors: true
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: reference-light

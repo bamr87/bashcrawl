@@ -122,9 +122,13 @@ test("only a command's real flags count toward the skill map (no ls -z / -q)", (
     run("ls -q");
     run("ls --bogus");
     run("ls -zaq");
+    run("ls -aq");
     run("cat -a notes");
     const s = shell.state.mastery.skills;
     assert.deepStrictEqual([...s.ls.flags], ["a"], "only -a is a real ls flag here");
+    // ls rejects a letter it does not have, like ls(1) (#108): those runs are failures.
+    assert.equal(s.ls.fails, 3, "ls -z, ls --bogus and ls -zaq fail");
+    assert.equal(s.ls.uses, 2, "ls -q and ls -aq list (-q has no data here, so it only adds a note)");
     assert.deepStrictEqual([...((s.cat || {}).flags || [])], [], "a command with no allowlist counts no flags");
 });
 

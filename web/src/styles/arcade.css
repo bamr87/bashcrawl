@@ -5,13 +5,22 @@
         overflow-y: auto;
         padding: var(--fleet-space-4) var(--fleet-space-4) var(--fleet-space-5);
     }
+    .bc-arcade-intro {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fleet-space-2) var(--fleet-space-4);
+        margin: 0 0 var(--fleet-space-3);
+    }
+    .bc-arcade-intro-text { flex: 1 1 20rem; min-width: 0; }
     .bc-arcade-intro h2 {
         margin: 0 0 0.2rem;
         font-size: var(--fleet-text-h1);
         color: var(--fleet-color-primary);
         text-shadow: 0 2px 0 var(--bc-color-bevel-lo);
     }
-    .bc-arcade-intro p { margin: 0 0 var(--fleet-space-3); }
+    .bc-arcade-intro p { margin: 0; }
     .bc-arcade-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));

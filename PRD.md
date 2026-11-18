@@ -6,6 +6,17 @@
 
 Bashcrawl teaches real POSIX terminal skills through a fantasy dungeon crawl where the filesystem is the game: directories are rooms, `scroll` files are lessons, and executable scripts are encounters. It ships two doors — the classic dungeon in a real terminal and a free browser trainer (courses, story, practice arcade, reference) built from the same content. Derivative of Seth Kenlon's bashcrawl, GPL-3.0-only.
 
+
+## 1.1 Missions
+
+Bashcrawl's direction is to become the ultimate open home for all things terminal learning — data, tools, resources and transparency, gathered in one place that anyone can inspect and reuse.
+
+1. **Provide data, tools, resources and transparency for all stakeholders, learners, educators, terminal practitioners and the general public.** Beginners, teachers, contributors, and the general public are first-class audiences. The aim is a shared, open commons: the same lessons, the same tools, and the same trail of evidence for everyone.
+2. **Teach real POSIX terminal skills through a fantasy dungeon crawl where the filesystem is the game: directories are rooms, scroll files are lessons, and executable scripts are encounters.** Lessons stay correct; a wrong command in a scroll is a defect. The classic dungeon runs in a real terminal.
+3. **Put that dungeon in every learner's hands through two doors — the classic terminal dungeon and a free browser trainer built from the same content.** Courses, story, practice arcade and reference ship alongside the dungeon, under GPL-3.0-only, in the lineage of Seth Kenlon's bashcrawl — an open toolkit for working with all things terminal learning.
+
+These missions set the course; they do not claim the work is finished. They serve the existing constitution and PRD: real POSIX skills, two doors, and the GPL-3.0-only lineage. The earlier mission paragraph is absorbed into these three. Attribution and license principles are kept. Every feature must trace to them.
+
 ## 2. Target users
 
 - Beginners learning the Linux/macOS terminal
@@ -64,6 +75,8 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [BASHCRAWL-023](features/features.yml) | Dungeon reset | shipped | [`lib/reset.sh`](lib/reset.sh) · [`README.md`](README.md) | FR3 |
 | [BASHCRAWL-024](features/features.yml) | AI playtest harness | shipped | [`src/playtest`](src/playtest) · [`README.md`](README.md) | FR11 |
 | [BASHCRAWL-025](features/features.yml) | Effects layer and chiptune SFX | shipped | [`web/src/fx`](web/src/fx) · [`AGENTS.md`](AGENTS.md) | FR13 |
+| [BASHCRAWL-026](features/features.yml) | Feedback widget | shipped | [`web/src/chrome/Feedback.tsx`](web/src/chrome/Feedback.tsx) · [`README.md`](README.md) | TBD |
+| [BASHCRAWL-027](features/features.yml) | Missions in constitution §1 | planned | [`docs/constitution.md`](docs/constitution.md) | §1.1 |
 
 **Requirement → feature trace**
 
@@ -85,6 +98,8 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | FR12 | BASHCRAWL-018 |
 | FR10 | BASHCRAWL-020, BASHCRAWL-021 |
 | FR11 | BASHCRAWL-024 |
+| TBD | BASHCRAWL-026 |
+| §1.1 | BASHCRAWL-027 |
 <!-- features:end -->
 
 ## 5. Requirements
