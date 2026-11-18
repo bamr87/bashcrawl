@@ -13,6 +13,7 @@ Bashcrawl teaches terminal commands through a fantasy dungeon adventure. Directo
 | Go back | `cd ..` | Return to parent room |
 | Read a scroll | `cat scroll` | Display educational content |
 | Run an encounter | `./EXECUTABLE` | `./treasure` |
+| Read an encounter's source | `cat EXECUTABLE` | `cat treasure` shows the script, as on a real system; the web trainer adds one dim line first saying to cast it with `./treasure` |
 | Check location | `pwd` | Print working directory |
 | Find hidden items | `ls -la` | Show hidden files/dirs |
 
