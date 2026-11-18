@@ -55,15 +55,26 @@
 
     // Rank rows come from the runtime's progression catalog
     // (src/help/data/progression.yaml).
-    function rankFor(xp, ranks) {
+    // `questsDone` gates the rows that ask for main quests (the story ladder).
+    function rankFor(xp, ranks, questsDone) {
         const rows = ranks && ranks.length ? ranks : [{ min: 0, title: "" }];
-        return rows.filter((r) => (xp || 0) >= r.min).pop() || rows[0];
+        return rows.filter((r) => (xp || 0) >= r.min && (questsDone || 0) >= (r.quests || 0)).pop() || rows[0];
     }
 
-    // Level curve mirrors the in-game `xp` command: 200 XP per level.
-    function levelFor(xp) {
+    // Level = position on the rank ladder, mirroring the in-game `xp` command:
+    // `into`/`span` is progress toward the next rank (full at the top).
+    function levelFor(xp, ranks, questsDone) {
         const total = xp || 0;
-        return { level: Math.max(1, 1 + Math.floor(total / 200)), into: total % 200, span: 200 };
+        const rows = ranks && ranks.length ? ranks : [{ min: 0, title: "" }];
+        const idx = Math.max(0, rows.indexOf(rankFor(total, rows, questsDone)));
+        const floor = rows[idx].min || 0;
+        const next = rows[idx + 1];
+        if (!next) {
+            const span = Math.max(1, total - floor);
+            return { level: idx + 1, into: span, span };
+        }
+        const span = next.min - floor;
+        return { level: idx + 1, into: Math.min(span, Math.max(0, total - floor)), span };
     }
 
     // Record the current room (and its ancestors, so the trunk is always solid)
@@ -166,7 +177,7 @@
             inventory: s.inventory.slice(),
             achievements: (s.achievements || []).length,
             rankIndex: s.rankIndex || 0,
-            rankTitle: rankFor(s.xp, runtime.catalog && runtime.catalog.ranks).title,
+            rankTitle: rankFor(s.xp, runtime.catalog && runtime.catalog.ranks, s.completedQuestIds.length).title,
             cwd: s.cwd,
             reveals: Object.keys(s.reveals || {}).length,
         };
@@ -260,9 +271,10 @@
 
     function heroModel(runtime) {
         const xp = runtime.state.xp || 0;
-        const level = levelFor(xp);
+        const ranks = runtime.catalog && runtime.catalog.ranks;
+        const level = levelFor(xp, ranks, runtime.state.completedQuestIds.length);
         return {
-            rank: rankFor(xp, runtime.catalog && runtime.catalog.ranks).title,
+            rank: rankFor(xp, ranks, runtime.state.completedQuestIds.length).title,
             xp,
             level: level.level,
             into: level.into,
@@ -275,8 +287,7 @@
 
     // ── Status strip + next-step suggestions ────────────────────────────────
     // The one-line identity a surface can keep above the log: rank with
-    // progress toward the NEXT rank on the progression.yaml ladder (not the
-    // flat 200-XP level curve), vitals, quest count, badges and the streak.
+    // progress toward the NEXT rank on the progression.yaml ladder (the same scale as the level), vitals, quest count, badges and the streak.
     function isoDayBefore(day) {
         const t = Date.parse(`${day}T12:00:00Z`);
         return Number.isFinite(t) ? new Date(t - 86400000).toISOString().slice(0, 10) : null;
@@ -286,7 +297,7 @@
         const s = runtime.state;
         const xp = s.xp || 0;
         const ranks = list(runtime.catalog && runtime.catalog.ranks);
-        const rank = rankFor(xp, ranks);
+        const rank = rankFor(xp, ranks, s.completedQuestIds.length);
         const idx = Math.max(0, ranks.indexOf(rank));
         const next = idx + 1 < ranks.length ? ranks[idx + 1] : null;
         const floor = rank.min || 0;
@@ -303,7 +314,7 @@
             rank: rank.title,
             rankIndex: idx,
             xp,
-            level: levelFor(xp).level,
+            level: levelFor(xp, ranks, s.completedQuestIds.length).level,
             nextRank: next ? { title: next.title, min: next.min, remaining: Math.max(0, next.min - xp) } : null,
             pct,
             hp: inv.hp,

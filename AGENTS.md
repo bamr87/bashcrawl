@@ -2,6 +2,8 @@
 
 # bashcrawl
 
+> Bashcrawl's direction is to become the ultimate open home for all things terminal learning: data, tools, resources and transparency, with a fantasy dungeon in your shell and a free browser trainer built from the same content, for everyone ([constitution](docs/constitution.md) §1).
+
 > How to work in Bashcrawl, the terminal-teaching dungeon crawl: exact commands, layout, conventions and the invariants the gates enforce; canonical for every agent and contributor.
 
 ## What this repo is
@@ -32,12 +34,12 @@ make test-js             # TermForge suites (node --test, zero deps)
 make web-test            # web-build + bundle/handler parity + eslint + vitest + vite build
 make lint                # shellcheck + yamllint + markdownlint + ruff
 make lint-js             # node --check on every tracked *.js
-make web-bundle          # build: web-build + vite build -> web/dist (what Pages serves)
+make web-bundle          # build: web-build + vite build -> web/dist, with /version + /healthz (what Pages serves)
 ```
 
 CI (`ci.yml`) runs exactly those gates: `make lint` + `make lint-js` + `npm run lint`, then `make validate-contracts` + `make test` + `make test-js` + `make web-test` on Node 24, plus a stock macOS `/bin/bash` 3.2 smoke. A fresh-clone run (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
 
-Single test (the pytest ini lives in `test/`; markers `unit`, `integration`, `slow`, `bash`):
+Single test (pytest is configured in `pyproject.toml` under `[tool.pytest.ini_options]`: suites `test/unit` and `test/integration`, markers `unit`, `integration`, `slow`, `bash`, a 60 s timeout):
 
 ```bash
 cd test
@@ -88,8 +90,9 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Definition of Done:** the checklist in `.github/PULL_REQUEST_TEMPLATE/pull_request_template.md`, plus the CI gates above green locally.
 - **Decisions:** none are recorded as ADRs yet; add `docs/adr/NNNN-slug.md` for anything hard to reverse.
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
-- **Changelog:** `CHANGELOG.md` (Keep a Changelog) records notable changes under `## [Unreleased]`.
-- **Markdown:** one paragraph per line (`python3 tools/unwrap-prose.py --check`, `--write` to fix); CI's `markdown-oneline` pushes the fix otherwise.
+- **Changelog:** release-please writes `CHANGELOG.md` from the Conventional Commit titles on `main`; never hand-edit it.
+- **Markdown:** one paragraph per line. Check with `python3 tools/unwrap-prose.py --check --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$'` (`--write` in place of `--check` fixes), the same call CI's `markdown-oneline` makes, and it pushes the fix otherwise. `CHANGELOG.md` is excluded on purpose: it is release-please's file.
+- **Formatting:** Prettier with the hub's `.prettierrc`; `.prettierignore` keeps it off generated, vendored and release-please files. `npm run format:check` covers `web/src` and `vite.config.mts`. It is not a CI gate yet: the one-time reformat of that tree lands in its own PR, so never run `npm run format` inside an unrelated change.
 - **Never:** push to `main` directly, commit a lockfile or secrets, suppress type errors, leave empty exception handlers, or hand-edit generated or vendored files: `web/data/*.json`, `web/assets/js/vendor/termforge/`, `termforge/core/art.js`, `web/assets/js/{fx-clips,art-clips}.js`, `docs/generated/`, `web/dist/`, `tools/`, and the feedback kit's `public/fleet-feedback*.js` and `components/FeedbackButton.tsx` (the hub's `tools/fanout.sh --kit feedback --upgrade` refreshes them).
 - Dependabot owns dependency updates.
 
@@ -126,7 +129,7 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Edit `termforge/core/`, never the vendor mirror.** New core files keep the dual-mode wrapper (no `node:*`, no DOM), stay brand-neutral (`content-separation.test.js`), and are listed in `web/index.html` before `runtime.js`.
 - **Committed projections:** `web/data/*.json` and the vendor mirror are committed; after content or `termforge/core/` changes run `make web-build` and commit the result — `make web-test` fails CI when they are stale.
 - **The handlers literal:** `this.handlers = { … }` in `runtime.js` stays one static literal (exactly one `this.handlers = {` in the file), one `key: ref,` per line, bare refs only; every `demo: true` entry in `src/help/data/runtime_commands.yaml` must appear there (`validate_runtime_commands.py`).
-- **Plugin order is hook order:** curriculum, then `GAME_PLUGINS` in order (`postExecute` order matters: achievements → daily → progress's rank-up), then mastery and explain.
+- **Plugin order is hook order:** curriculum, then `GAME_PLUGINS` in order (`postExecute` order matters: achievements → daily → progress's rank-up → nudge's "Stuck?" line), then mastery and explain.
 - **Mini-games** are seed world + goal predicate + scoring over a scoped bare `Runtime`; never reimplement command behaviour. A new Vim Catacombs level is an `arcade.yaml` `vim_levels` entry whose `solution` wins at exactly `par` and steps on no spike (`arcade-vim.test.js`).
 - **Design tokens:** colour literals and numeric `z-index` live only in `web/src/styles/tokens.css` (`theme.test.ts`); read a colour in code with `colorOf(role)`; everything that moves is gated on `prefers-reduced-motion`.
 - **Art** is drawn only through `Shell#art(name)` / `<ArtClip name>`, never string literals (`art.test.js` scans `web/src` too).

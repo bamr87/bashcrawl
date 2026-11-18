@@ -144,6 +144,13 @@ export class GameStore implements InputTarget {
         view.appendLine("info", "Welcome to Bashcrawl.");
         view.appendLine("dim", "Try: pwd · ls -F · cat scroll · cd cellar  —  stuck? type hint  ·  F1 opens the Docs  ·  the chips under the log suggest what to type next.");
         view.appendLine("magic", "🎓  New to the terminal? The Learn door (Alt+2) walks you through it.   🕹 Arcade (Alt+3) drills   📖 Reference (Alt+4) cheatsheets");
+        // A reload restores the state but not the scrollback: say where the
+        // hero stands so the empty log does not read as a new game.
+        const s = rt.state;
+        if (s.history.length || s.completedQuestIds.length || s.xp) {
+            const quest = rt.quests[s.currentQuestId];
+            view.appendLine("info", `Welcome back — you're in ${s.cwd}. ${quest ? `Current quest: ${quest.title} (type quest).` : "All quests complete."}`);
+        }
         if (rt.state.trainer && rt.state.trainer.active) {
             for (const out of rt.trainerChallenge()) view.appendLine(out.kind, out.text);
         }
@@ -189,6 +196,13 @@ export class GameStore implements InputTarget {
     clearLog(): void {
         this.view?.clear();
         this.flushLog();
+    }
+
+    /** Ctrl+C: the abandoned line, dimmed with `^C`; ↑ starts again from the newest command. */
+    interrupt(text: string): void {
+        const state = this.runtime?.state;
+        if (state) state.historyIndex = state.history.length;
+        this.appendLine("dim", `${this.promptLabel()} ${text}^C`);
     }
 
     // ── commands ───────────────────────────────────────────────────────

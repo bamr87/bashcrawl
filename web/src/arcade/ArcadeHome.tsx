@@ -1,7 +1,9 @@
 // The arcade floor: five trials as cards, the Command Flash decks and the
-// Vim Catacombs levels (a chip per level; cleared ones are marked).
+// Vim Catacombs levels (a chip per level; cleared ones are marked). The
+// header's door art is an ASCII Motion clip that plays once on entry.
 import { motion } from "motion/react";
 
+import { ArtClip } from "../fx/ArtClip";
 import type { ArcadeStore } from "./arcade-store";
 import { useArcade } from "./arcade-store";
 
@@ -13,8 +15,11 @@ export function ArcadeHome({ store }: { store: ArcadeStore }) {
     return (
         <div className="bc-arcade-home">
             <header className="bc-arcade-intro">
-                <h2 className="bc-display">Practice Arcade</h2>
-                <p className="bc-muted">Five trials — four on one real bash kernel, one in a vim buffer. Scores feed your story XP.</p>
+                <div className="bc-arcade-intro-text">
+                    <h2 className="bc-display">Practice Arcade</h2>
+                    <p className="bc-muted">Five trials — four on one real bash kernel, one in a vim buffer. Scores feed your story XP.</p>
+                </div>
+                <ArtClip name="door-arcade" className="bc-door-art" />
             </header>
             <div className="bc-arcade-grid">
                 {store.games.map((gameDef, i) => {

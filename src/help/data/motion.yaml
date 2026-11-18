@@ -41,8 +41,8 @@ clips:
 
   scan:
     file: motion/clips/scan.asciimtn
-    title: Room manifest
-    description: A scanline runs down a manifest of the room's exits and items — ls.
+    title: Scan
+    description: A generic scanline sweeps a blank panel, with no room or file names — ls.
     stage: true
     aliases: []
 
@@ -225,6 +225,16 @@ art:
     file: motion/art/profile.asciimtn
     title: Character sheet
     description: Header for `profile`.
+
+  door-arcade:
+    file: motion/art/door-arcade.asciimtn
+    title: Arcade door
+    description: Header of the Practice Arcade floor (web) — two blades slide in and clash; plays once on entry.
+
+  door-reference:
+    file: motion/art/door-reference.asciimtn
+    title: Reference door
+    description: Header of the Reference door (web) — an open tome riffles two pages; plays once on entry.
 
 events:
   - event: levelup

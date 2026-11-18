@@ -1,6 +1,6 @@
 # Bashcrawl
 
-> Learn real terminal skills by playing a fantasy dungeon crawl — in your own shell, or in a free browser trainer built from the same content.
+> Bashcrawl's direction is to become the ultimate open home for all things terminal learning: data, tools, resources and transparency, with a fantasy dungeon in your shell and a free browser trainer built from the same content, for everyone ([constitution](docs/constitution.md) §1).
 
 [![CI](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/bashcrawl/actions/workflows/ci.yml) [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE) [![Live site](https://img.shields.io/badge/live-bamr87.github.io%2Fbashcrawl-2ea44f)](https://bamr87.github.io/bashcrawl/)
 
@@ -52,7 +52,7 @@ make test-js             # TermForge suites (node --test, zero deps)
 make web-test            # web-build + bundle/handler parity + eslint + vitest + vite build
 make lint                # shellcheck + yamllint + markdownlint + ruff
 make lint-js             # node --check on every tracked *.js
-make web-bundle          # build: web-build + vite build -> web/dist (what Pages serves)
+make web-bundle          # build: web-build + vite build -> web/dist, with /version + /healthz (what Pages serves)
 ```
 
 ## The launcher

@@ -21,7 +21,7 @@
     function dailyGoalFor(dateStr) {
         let h = 0;
         for (const c of dateStr) h += c.charCodeAt(0);
-        return 30 + (h % 4) * 10; // 30 / 40 / 50 / 60
+        return 100 + (h % 4) * 25; // 100 / 125 / 150 / 175: never met by one command
     }
 
     function refresh() {

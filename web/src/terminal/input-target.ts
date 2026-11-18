@@ -21,6 +21,12 @@ export interface InputTarget {
     complete(text: string): string | null;
     /** Ctrl+L. */
     clearLog(): void;
+    /**
+     * Ctrl+C with no text selected: the line being typed is abandoned. The
+     * owner echoes it with `^C` and starts history navigation over; the
+     * prompt clears itself.
+     */
+    interrupt?(text: string): void;
     promptLabel(): string;
     placeholder(): string;
 }

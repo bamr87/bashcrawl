@@ -66,4 +66,19 @@ describe("the arcade store", () => {
         expect(arcade.snap.get().gameId).toBe("hunt");
         expect(arcade.promptLabel()).toBe("/hunt ⚔");
     });
+
+    it("Ctrl+C abandons the typed line with a ^C echo and resets history (#115)", async () => {
+        const { arcade } = await boot();
+        const pre = document.createElement("pre");
+        arcade.attachLog(pre);
+        arcade.start("pathnav");
+        arcade.execute("ls");
+        arcade.execute("pwd");
+        expect(arcade.historyStep(-1)).toBe("pwd");
+        expect(arcade.historyStep(-1)).toBe("ls");
+        arcade.interrupt("cd ce");
+        expect(pre.lastElementChild?.textContent).toBe(`${arcade.promptLabel()} cd ce^C`);
+        expect(arcade.historyStep(-1)).toBe("pwd");
+        expect(arcade.stats()?.moves).toBe(2);
+    });
 });

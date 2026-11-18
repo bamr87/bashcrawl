@@ -41,3 +41,19 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
+
+# The one pytest config (UPS-QA-11). The suites, conftest.py and fixtures live
+# in test/. `make test` (scripts/run_tests.sh, run from test/), the single-test
+# `cd test && python3 -m pytest unit/<file>` and a bare `pytest` at the root
+# (the hub's standard-ci job) all read this table.
+[tool.pytest.ini_options]
+testpaths = ["test/unit", "test/integration"]
+markers = [
+  "unit: Deterministic unit tests (no LLM, no subprocess)",
+  "integration: Integration tests with real filesystem and bash scripts",
+  "slow: Tests that take >30 seconds (combat retries, full playthroughs)",
+  "bash: Tests that require a bash-capable environment",
+]
+addopts = "--timeout=60"
+log_cli = true
+log_cli_level = "INFO"
