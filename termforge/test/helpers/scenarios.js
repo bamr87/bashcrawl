@@ -44,6 +44,14 @@ const SCENARIOS = [
             "cd nowhere",
             "cat nofile",
             "frobnicate",
+            // Bash fidelity and near-miss feedback (#108, #111).
+            "ls -l",
+            "ls -z",
+            "ls README.md",
+            "cd /",
+            "cd celar",
+            "lgs",
+            "cd ~",
         ],
     },
     {
@@ -124,7 +132,9 @@ const SCENARIOS = [
             "health",
             "status",
             "mkdir workshop",
-            "touch workshop/anvil",
+            // Quest 5 completes on its exact file name (#108).
+            "cd workshop",
+            "touch notes.txt",
             "cd /entrance",
             "ls",
             "map",

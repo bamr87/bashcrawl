@@ -1,10 +1,14 @@
 name: Conformance
 
-# Adopted from bamr87/bamr87 via standardize-fanout (artifact `conformance`).
+# kit: conformance v0.2.0
+# Adopted from bamr87/bamr87 via fanout.yml (kit standardize, artifact `conformance`).
 # Thin caller — the Universal Project Standard checker is shared and versioned
 # in bamr87/bamr87 (specs/, tools/conformance.py, fleet-conformance.yml).
 # Advisory until this repo's MUST rows pass; then set `gate: true` to make it a
 # PR-blocking check. (main is substituted on adoption.)
+# Pinned to the hub's floating major tag, never a branch (UPS-WORK-10); the
+# checker is checked out at the same tag, so the workflow and the rules it
+# runs move together (docs/WORKFLOW-VERSIONING.md).
 
 on:
   pull_request:
@@ -20,6 +24,7 @@ concurrency:
 
 jobs:
   conformance:
-    uses: bamr87/bamr87/.github/workflows/fleet-conformance.yml@main
+    uses: bamr87/bamr87/.github/workflows/fleet-conformance.yml@v2
     with:
       gate: false
+      hub-ref: v2

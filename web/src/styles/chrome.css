@@ -1,6 +1,22 @@
-/* The rest of the chrome: the Reference door, the docs drawer, the inline
- * hint, the title screen and the CRT overlay. */
+/* The rest of the chrome: the door art, the Reference door, the docs drawer,
+ * the inline hint, the title screen and the CRT overlay. */
 @layer components {
+    /* ── door art: the ASCII Motion clip heading the Arcade and Reference
+     * doors (<ArtClip>; ambient.js paints the resting frame under reduced
+     * motion) ── */
+    .bc-door-art {
+        margin: 0;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: pre;
+        font-family: var(--fleet-font-mono);
+        font-size: clamp(0.72rem, 1.1vw, 0.92rem);
+        line-height: 1.15;
+        color: var(--fleet-color-primary);
+        user-select: none;
+        pointer-events: none;
+    }
+
     /* ── reference ── */
     .bc-reference {
         min-height: 0;
@@ -8,10 +24,17 @@
         flex-direction: column;
     }
     .bc-ref-controls {
-        display: flex;
-        flex-direction: column;
-        gap: var(--fleet-space-2);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--fleet-space-2) var(--fleet-space-4);
         padding: var(--fleet-space-3) var(--fleet-space-4) var(--fleet-space-2);
+    }
+    .bc-ref-controls > :not(.bc-ref-art) { grid-column: 1; }
+    .bc-ref-art {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        justify-self: end;
     }
     .bc-ref-search { max-width: 480px; }
     .bc-chip-on {
@@ -282,4 +305,6 @@ html[data-crt="on"] .bc-log {
     .bc-landing-doors { grid-template-columns: 1fr; }
     .bc-ref-controls,
     .bc-ref-content { padding-left: var(--fleet-space-3); padding-right: var(--fleet-space-3); }
+    .bc-ref-controls { grid-template-columns: minmax(0, 1fr); }
+    .bc-ref-art { grid-column: 1; grid-row: auto; justify-self: start; }
 }

@@ -10,8 +10,9 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
     "use strict";
     // TermForge command-line parser: quote-aware tokenizing, `|` pipeline
-    // splitting, `>`/`>>` redirection, and the small flag/list/set parsers the
-    // POSIX command pack shares. Pure functions, no environment dependencies.
+    // splitting, `>`/`>>` redirection, the small flag/list/set parsers the
+    // POSIX command pack shares, and the near-miss matcher behind every
+    // "did you mean" (suggest). Pure functions, no environment dependencies.
     // Extracted verbatim from the original browser emulator.
 
     function escapeRegExp(value) {
@@ -177,6 +178,35 @@
         return String(text).split("\n");
     }
 
+    // Optimal-string-alignment distance: a swapped pair of letters (grpe ->
+    // grep) costs 1, the most common typo at a keyboard.
+    function editDistance(a, b) {
+        const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+        for (let j = 1; j <= b.length; j += 1) dp[0][j] = j;
+        for (let i = 1; i <= a.length; i += 1) {
+            for (let j = 1; j <= b.length; j += 1) {
+                dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+            }
+        }
+        return dp[a.length][b.length];
+    }
+
+    /**
+     * The "did you mean" rule the shell, the POSIX pack and explain share:
+     * up to 3 known names within 1 edit (names of 4 characters or fewer) or
+     * 2 edits (longer ones), closest first, ties alphabetical.
+     */
+    function suggest(name, known) {
+        const limit = name.length <= 4 ? 1 : 2;
+        return [...new Set(known)]
+            .map((k) => ({ k, d: editDistance(name, k) }))
+            .filter(({ d }) => d > 0 && d <= limit)
+            .sort((x, y) => x.d - y.d || x.k.localeCompare(y.k))
+            .slice(0, 3)
+            .map(({ k }) => k);
+    }
+
     return {
         escapeRegExp,
         tokenize,
@@ -187,5 +217,7 @@
         expandTrSet,
         splitPipes,
         asLines,
+        editDistance,
+        suggest,
     };
 });

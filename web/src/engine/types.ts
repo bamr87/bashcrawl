@@ -109,6 +109,8 @@ export interface Quest {
 
 export interface Rank {
     min: number;
+    /** Main quests that must be complete (story ladder only). */
+    quests?: number;
     title: string;
 }
 
@@ -127,6 +129,7 @@ export interface SkillGroup {
 
 export interface Catalog {
     ranks: Rank[];
+    arenaRanks: Rank[];
     achievements: Achievement[];
     bestiary: Array<{ key: string; name: string; blurb: string }>;
     trials: unknown[];
@@ -326,7 +329,7 @@ export interface Runtime {
     resolve(path: string, cwd?: string): string;
     actual(path: string): string;
     awardXp(amount: number, reason?: string): void;
-    rankFor(xp: number): Rank;
+    rankFor(xp: number, ranks?: Rank[]): Rank;
     trainerChallenge(): Line[];
     revealRoom(name: string): Line | null;
 }
@@ -552,8 +555,8 @@ export type HudModule = {
     diffEvents(prev: HudSnapshot, next: HudSnapshot): HudEvent[];
     ensureVisited(runtime: Runtime): void;
     bar(value: number, max: number, width?: number): string;
-    rankFor(xp: number, ranks: Rank[]): Rank;
-    levelFor(xp: number): { level: number; into: number; span: number };
+    rankFor(xp: number, ranks: Rank[], questsDone?: number): Rank;
+    levelFor(xp: number, ranks?: Rank[], questsDone?: number): { level: number; into: number; span: number };
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────

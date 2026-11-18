@@ -101,7 +101,7 @@ features:
     docs: "README.md"
   - id: BASHCRAWL-010
     title: "Story mode quests and hidden rooms"
-    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. A multi-step quest shows its checklist (`steps` in `quests.yaml`) in the web Quest panel, the story tracker and the terminal HUD, and each step that ticks gets a sparkle and a chime (#113)."
+    description: "Story mode descends the dungeon with quests from `pwd` to pipes; hidden rooms (e.g. `.chapel`, `.mausoleum`, `.study`) are revealed by real commands such as `ls -a`, `grep`, `find`, `mv`, environment variables and symlinks. `cat` on an encounter script shows its real source, and the web trainer puts one dim line above it saying how to cast it. A multi-step quest shows its checklist (`steps` in `quests.yaml`) in the web Quest panel, the story tracker and the terminal HUD, and each step that ticks gets a sparkle and a chime (#113)."
     implemented: true
     status: shipped
     prd: [FR4]
@@ -110,6 +110,7 @@ features:
     docs: "docs/gameplay.md"
     tests:
       - "termforge/test/game-reveals.test.js"
+      - "termforge/test/game-cat.test.js"
       - "termforge/test/hud.test.js"
       - "web/src/hud/QuestSteps.test.tsx"
       - "test/unit/test_quest_steps.py"
@@ -117,13 +118,15 @@ features:
       - "test/evidence/quest-steps"
   - id: BASHCRAWL-011
     title: "Hints and fog-of-war map"
-    description: "`hint` gives context for the current room and `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
+    description: "`hint` gives the active quest's next step and, when its room is elsewhere, the next `cd` of the shortest route there through revealed rooms only (a still-hidden quest room routes to the encounter that opens it); three failed commands in a row bring a \"Stuck?\" nudge. `map` draws the explored dungeon with fog of war; the web HUD mirrors both in its quest and map panes."
     implemented: true
     status: shipped
     prd: [FR4]
     surface: cli
     link: "web/assets/js/runtime.js"
     docs: "README.md"
+    tests:
+      - "termforge/test/game-hint.test.js"
   - id: BASHCRAWL-012
     title: "Practice Arcade mini-games"
     description: "Timed mini-games on the bash emulator: Path Navigator, grep/find Hunt, Pipe Puzzle and Command Flash (decks auto-generated from `commands.yaml`); scores and bests persist and wins feed story XP."
@@ -160,7 +163,7 @@ features:
       - "web/src/screens/ReferenceScreen.test.tsx"
   - id: BASHCRAWL-015
     title: "16-bit RPG web UI"
-    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120)."
+    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112), with a terminal Ctrl+C and a welcome-back recap after a reload (#115)."
     implemented: true
     status: shipped
     prd: [FR13, NFR1, NFR2]
@@ -169,6 +172,8 @@ features:
     docs: "AGENTS.md"
     tests:
       - "web/src/app/App.test.tsx"
+      - "web/src/terminal/PromptBar.test.tsx"
+      - "web/src/engine/game-store.test.ts"
   - id: BASHCRAWL-016
     title: "Training Arena and speed run"
     description: "`train` drills riddles answered with real commands (active recall); `speedrun` clears the arena's trials against the clock."
@@ -213,7 +218,7 @@ features:
       - "test/integration/test_launcher.py"
   - id: BASHCRAWL-020
     title: "TermForge terminal framework and TTY HUD"
-    description: "TermForge, the terminal kernel extracted from the web emulator, runs the same game in the browser and in a full-screen terminal HUD (`bin/bashcrawl tty`)."
+    description: "TermForge, the terminal kernel extracted from the web emulator, runs the same game in the browser and in a full-screen terminal HUD (`bin/bashcrawl tty`). Its shell answers like bash: unknown options are errors, options it cannot model say so, and a typo gets a one-line \"did you mean\" that never names a hidden entry."
     implemented: true
     status: shipped
     prd: [FR10]
@@ -223,6 +228,8 @@ features:
     tests:
       - "test/integration/test_tty_host.py"
       - "termforge/test/tui.test.js"
+      - "termforge/test/packs.test.js"
+      - "termforge/test/shell.test.js"
   - id: BASHCRAWL-021
     title: "Telnet server and shared hub"
     description: "`bin/bashcrawl serve` serves the game over telnet on 127.0.0.1:2323; `hub` adds shared presence (`who`, `say`, `emote`, `shout`, `top`)."
@@ -270,7 +277,7 @@ features:
       - "test/integration/test_mcp_server.py"
   - id: BASHCRAWL-025
     title: "Effects layer and chiptune SFX"
-    description: "Per-command visual FX (particles, shake, flash, ASCII Motion clips) and optional chiptune sound effects in the web trainer."
+    description: "Per-command visual FX (particles, shake, flash, ASCII Motion clips on the command stage), an ASCII Motion clip on every screen (title, intro, room vignette, the Arcade and Reference door headers; the resting frame under reduced motion) and optional chiptune sound effects in the web trainer (#91). A failed command flashes the log and plays its sound without a stage clip."
     implemented: true
     status: shipped
     prd: [FR13]
@@ -279,4 +286,34 @@ features:
     docs: "AGENTS.md"
     tests:
       - "termforge/test/fx.test.js"
+      - "termforge/test/ambient.test.js"
+      - "web/src/arcade/ArcadeHome.test.tsx"
+      - "web/src/screens/ReferenceScreen.test.tsx"
+      - "termforge/test/motion.test.js"
       - "web/src/audio/synth.test.ts"
+  - id: BASHCRAWL-026
+    title: "Feedback widget"
+    description: "An \"Improve this page\" button in the web trainer files a prefilled GitHub issue on bamr87/bashcrawl carrying the door, the browser and the console errors that led up to the report; the not-found and crash screens open it pre-typed. It is the fleet feedback kit's widget, vendored in `public/` and `components/`."
+    implemented: true
+    status: shipped
+    prd: [TBD]
+    surface: ui
+    link: "web/src/chrome/Feedback.tsx"
+    docs: "README.md"
+    tests:
+      - "web/src/chrome/Feedback.test.tsx"
+      - "web/src/app/AppShell.test.tsx"
+      - "web/src/app/App.test.tsx"
+      - "test/unit/test_static_web.py"
+    scenarios:
+      - "verify/scenarios/feedback-widget.yml"
+    evidence:
+      - "test/evidence/feedback-widget"
+  - id: BASHCRAWL-027
+    title: "Missions in constitution §1"
+    description: "Three product missions under one direction statement, ratified through amendment 0003."
+    implemented: false
+    status: planned
+    prd: ["§1.1"]
+    surface: docs
+    docs: "docs/constitution.md"

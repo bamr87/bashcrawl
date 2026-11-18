@@ -87,6 +87,20 @@ test("unknown commands error without dispatch", () => {
     ]);
 });
 
+test("an unknown command near a known name or alias says which, on one line (#111)", () => {
+    const shell = makeShell();
+    assert.deepStrictEqual(shell.execute("lgs"), [
+        { kind: "error", text: "Unknown command: lgs. Did you mean ls?" },
+    ]);
+    assert.deepStrictEqual(shell.execute("cst log"), [
+        { kind: "error", text: "Unknown command: cst. Did you mean cat or cut?" },
+    ]);
+    shell.execute("alias ll='ls -F'");
+    assert.deepStrictEqual(shell.execute("lll"), [
+        { kind: "error", text: "Unknown command: lll. Did you mean ll?" },
+    ]);
+});
+
 test("hook spine: order, interception, appended lines, exec dispatch", () => {
     const calls = [];
     const hooks = new HookBus();

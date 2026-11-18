@@ -50,8 +50,9 @@ web-build: ## Regenerate the engine's data bundles, motion clips and vendored co
 	@$(PYTHON) scripts/vendor_termforge.py
 
 .PHONY: web-bundle
-web-bundle: web-build ## web-build, then compile the React app into web/dist (node >= 22.22)
+web-bundle: web-build ## web-build, then compile the React app into web/dist with /version and /healthz (node >= 22.22)
 	@npm run build
+	@$(PYTHON) scripts/write_build_info.py
 
 .PHONY: web-dev
 web-dev: web-build ## Vite dev server with hot reload at http://127.0.0.1:5173
@@ -62,12 +63,13 @@ web-preview: web-bundle ## Serve the production build at http://127.0.0.1:4173
 	@npm run preview
 
 .PHONY: web-test
-web-test: web-build ## Validate the bundle, then lint, test and build the React app
+web-test: web-build ## Validate the bundle, then lint, test and build the React app (with /version and /healthz)
 	@$(PYTHON) scripts/validate_static_web.py
 	@$(PYTHON) scripts/validate_runtime_commands.py
 	@npm run lint
 	@npm run test:web
 	@npm run build
+	@$(PYTHON) scripts/write_build_info.py
 
 # ── TermForge hosts (the same game/tools, off the browser) ─────────────
 
