@@ -23,7 +23,7 @@ The design borrows its patterns from the sibling repos [bashOS](https://github.c
             entrance/                   the dungeon itself
  ─────────────────────────────────────────────────────────────────────────────
  features   web/assets/js/plugins/      the game: arena, pathfind, daily, achievements,
-                                        progress, bestiary
+                                        progress, bestiary, nudge
             termforge/core/             platform plugins: curriculum, mastery, explain
             termforge/node/hub.js       multiplayer presence + chat (telnet --hub)
  ─────────────────────────────────────────────────────────────────────────────

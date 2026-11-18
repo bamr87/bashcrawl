@@ -11,13 +11,13 @@ Every file below is an [ASCII Motion](https://github.com/cameronfoxly/Ascii-Moti
 | Motion | Title | Aliases | File | Plays on |
 |---|---|---|---|---|
 | `radar` | Radar sweep | — | `motion/clips/radar.asciimtn` | A sweep arm rotates around the player's position — pwd, whoami. |
-| `scan` | Room manifest | — | `motion/clips/scan.asciimtn` | A scanline runs down a manifest of the room's exits and items — ls. |
+| `scan` | Scan | — | `motion/clips/scan.asciimtn` | A generic scanline sweeps a blank panel, with no room or file names — ls. |
 | `warp` | Warp ring | `climb`, `rewind`, `home` | `motion/clips/warp.asciimtn` | A portal ring opens and collapses — cd, and unlocking a hidden room. |
 | `spark` | Spark burst | — | `motion/clips/spark.asciimtn` | Particles scatter outward — quest progress, inventory, xp. |
 | `cast` | Casting circle | — | `motion/clips/cast.asciimtn` | A rune circle charges around a sigil — running ./scripts, and level-ups. |
 | `steam` | Steam engine | — | `motion/clips/steam.asciimtn` | The train puffs across the stage — sl. |
 | `burn` | Burning crate | — | `motion/clips/burn.asciimtn` | A crate catches fire and burns down — rm. |
-| `error` | Warning sign | — | `motion/clips/error.asciimtn` | A flashing "do not enter" sign — unknown commands and failures. |
+| `error` | Warning sign | — | `motion/clips/error.asciimtn` | A flashing "do not enter" sign, kept off the stage; a failed command only flashes the log. |
 | `unroll` | Unrolling scroll | — | `motion/clips/unroll.asciimtn` | A scroll unrolls line by line — lesson, banner, figlet. |
 | `lore` | Open book | — | `motion/clips/lore.asciimtn` | An open book whose page turns — help, man, hint, learn, commands. |
 
@@ -58,5 +58,7 @@ Static one-frame clips drawn with `Shell#art(name)`.
 | `pathfind` | Compass rose | `motion/art/pathfind.asciimtn` | Header for `pathfind` journeys. |
 | `levelup` | Level up | `motion/art/levelup.asciimtn` | Burst printed on a level-up. |
 | `profile` | Character sheet | `motion/art/profile.asciimtn` | Header for `profile`. |
+| `door-arcade` | Arcade door | `motion/art/door-arcade.asciimtn` | Header of the Practice Arcade floor (web) — two blades slide in and clash; plays once on entry. |
+| `door-reference` | Reference door | `motion/art/door-reference.asciimtn` | Header of the Reference door (web) — an open tome riffles two pages; plays once on entry. |
 
 Framework defaults (`termforge/motion/`, bundled into `termforge/core/art.js`; an app's `art` option overrides them by name): `banner`, `cow`, `sl`.

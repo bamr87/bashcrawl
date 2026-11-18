@@ -136,6 +136,10 @@ categories:
         description: "Show advanced tips and tricks"
       - command: "man <command>"
         description: "Manual page for any command"
+      - command: "map"
+        description: "Chart the rooms you have explored (and the doors you have only glimpsed, as fog)"
+      - command: "tree"
+        description: "Draw the real filesystem tree from here, explored or not"
 
 # ============================================================================
 # Quick reference card groups — used by quick_ref.sh and Python help

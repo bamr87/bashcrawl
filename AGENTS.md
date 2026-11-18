@@ -76,6 +76,8 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 | `bin/bashcrawl` | The launcher |
 | `termforge/` | The framework: `core/` (source of truth), `node/` hosts, `apps/`, `motion/`, `test/` |
 | `web/` | The trainer: `src/` (React app), `assets/js/` (engine), `data/` (generated), `index.html` |
+| `public/` | Vite's `publicDir`, copied into `web/dist` as is: the favicon, `.nojekyll` and the fleet feedback widget (`fleet-feedback*.js`, vendored) |
+| `components/` | `FeedbackButton.tsx`, the feedback kit's React adapter (vendored), mounted by `web/src/chrome/Feedback.tsx` |
 | `motion/` | All art, as ASCII Motion `.asciimtn` files |
 | `scripts/` | Export, vendoring, validators, generators, lint and test runners |
 | `test/` | pytest unit + integration suites and datasets |
@@ -90,7 +92,7 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
 - **Changelog:** `CHANGELOG.md` (Keep a Changelog) records notable changes under `## [Unreleased]`.
 - **Markdown:** one paragraph per line (`python3 tools/unwrap-prose.py --check`, `--write` to fix); CI's `markdown-oneline` pushes the fix otherwise.
-- **Never:** push to `main` directly, commit a lockfile or secrets, suppress type errors, leave empty exception handlers, or hand-edit generated or vendored files: `web/data/*.json`, `web/assets/js/vendor/termforge/`, `termforge/core/art.js`, `web/assets/js/{fx-clips,art-clips}.js`, `docs/generated/`, `web/dist/`, `tools/`.
+- **Never:** push to `main` directly, commit a lockfile or secrets, suppress type errors, leave empty exception handlers, or hand-edit generated or vendored files: `web/data/*.json`, `web/assets/js/vendor/termforge/`, `termforge/core/art.js`, `web/assets/js/{fx-clips,art-clips}.js`, `docs/generated/`, `web/dist/`, `tools/`, and the feedback kit's `public/fleet-feedback*.js` and `components/FeedbackButton.tsx` (the hub's `tools/fanout.sh --kit feedback --upgrade` refreshes them).
 - Dependabot owns dependency updates.
 
 ## Where to edit
@@ -104,6 +106,7 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 | Game features (arena, daily, …) | `web/assets/js/plugins/<id>.js` + `GAME_PLUGINS` in `runtime.js` + a `<script>` in `web/index.html` | a second copy of a command |
 | Game commands, presenter models, arcade games | `web/assets/js/runtime.js`, `hud.js`, `arcade.js` (`GAMES`), `vim.js` | an engine file turned ES module |
 | Web UI (screens, HUD panes, effects, sound) | `web/src/`; tokens in `web/src/styles/tokens.css`, reactions in `web/src/fx/effects.ts`, sounds in `web/src/audio/sfx.ts` | colour literals or `z-index` numbers outside `tokens.css`; the log's children (a DomSink paints them) |
+| Feedback widget (where reports go, report links, the button's place) | `web/src/chrome/Feedback.tsx`, `--bc-bottom-chrome` in `web/src/app/AppShell.tsx` + `app.css` | `public/fleet-feedback*.js`, `components/FeedbackButton.tsx` (change the kit in the hub) |
 | Art | `motion/*.asciimtn` + `src/help/data/motion.yaml` | string literals in code |
 | TermForge apps | `termforge/apps/registry.js` (one entry per app) | if-chains in the hosts |
 | Launcher / playtest harness | `bin/bashcrawl` / `src/playtest/` | |
@@ -125,7 +128,7 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **Edit `termforge/core/`, never the vendor mirror.** New core files keep the dual-mode wrapper (no `node:*`, no DOM), stay brand-neutral (`content-separation.test.js`), and are listed in `web/index.html` before `runtime.js`.
 - **Committed projections:** `web/data/*.json` and the vendor mirror are committed; after content or `termforge/core/` changes run `make web-build` and commit the result — `make web-test` fails CI when they are stale.
 - **The handlers literal:** `this.handlers = { … }` in `runtime.js` stays one static literal (exactly one `this.handlers = {` in the file), one `key: ref,` per line, bare refs only; every `demo: true` entry in `src/help/data/runtime_commands.yaml` must appear there (`validate_runtime_commands.py`).
-- **Plugin order is hook order:** curriculum, then `GAME_PLUGINS` in order (`postExecute` order matters: achievements → daily → progress's rank-up), then mastery and explain.
+- **Plugin order is hook order:** curriculum, then `GAME_PLUGINS` in order (`postExecute` order matters: achievements → daily → progress's rank-up → nudge's "Stuck?" line), then mastery and explain.
 - **Mini-games** are seed world + goal predicate + scoring over a scoped bare `Runtime`; never reimplement command behaviour. A new Vim Catacombs level is an `arcade.yaml` `vim_levels` entry whose `solution` wins at exactly `par` and steps on no spike (`arcade-vim.test.js`).
 - **Design tokens:** colour literals and numeric `z-index` live only in `web/src/styles/tokens.css` (`theme.test.ts`); read a colour in code with `colorOf(role)`; everything that moves is gated on `prefers-reduced-motion`.
 - **Art** is drawn only through `Shell#art(name)` / `<ArtClip name>`, never string literals (`art.test.js` scans `web/src` too).

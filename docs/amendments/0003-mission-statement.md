@@ -5,7 +5,7 @@
 - **Date:** 2026-11-16
 - **Proposed by:** Grok Bot (agent), at the maintainer's request
 - **Ratified by:**
-- **Affects:** constitution §1; PRD.md §1.1; BASHCRAWL-026
+- **Affects:** constitution §1; PRD.md §1.1; BASHCRAWL-027
 - **Supersedes:** none
 - **Related:** [PRD.md](../../PRD.md) §1.1
 
@@ -33,4 +33,4 @@ _Source: [../PRD.md](../PRD.md) §1.1._
 
 ## Consequences
 
-Agents and reviewers judge fit against these three missions before inventing scope, treating them as the direction of the repo rather than a description of what already ships. The same text is added as PRD.md §1.1 so the constitution's `_Source:` line stays accurate. The PRD purpose, goals, feature catalog and invariants outside this addition are unchanged except for a new catalog entry (BASHCRAWL-026) and a regenerated feature-catalog block where the repo already has one. This PR also aligns the README and AGENTS.md one-liners with the missions and links them to constitution §1.
+Agents and reviewers judge fit against these three missions before inventing scope, treating them as the direction of the repo rather than a description of what already ships. The same text is added as PRD.md §1.1 so the constitution's `_Source:` line stays accurate. The PRD purpose, goals, feature catalog and invariants outside this addition are unchanged except for a new catalog entry (BASHCRAWL-027) and a regenerated feature-catalog block where the repo already has one. This PR also aligns the README and AGENTS.md one-liners with the missions and links them to constitution §1.

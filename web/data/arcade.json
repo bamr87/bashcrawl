@@ -684,6 +684,20 @@
             "help tips"
           ],
           "why": ""
+        },
+        {
+          "q": "Chart the rooms you have explored (and the doors you have only glimpsed, as fog)",
+          "a": [
+            "map"
+          ],
+          "why": ""
+        },
+        {
+          "q": "Draw the real filesystem tree from here, explored or not",
+          "a": [
+            "tree"
+          ],
+          "why": ""
         }
       ],
       "xp": 25,
