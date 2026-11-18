@@ -2,6 +2,8 @@
 
 # bashcrawl
 
+> Bashcrawl's direction is to become the ultimate open home for all things terminal learning: data, tools, resources and transparency, with a fantasy dungeon in your shell and a free browser trainer built from the same content, for everyone ([constitution](docs/constitution.md) §1).
+
 > How to work in Bashcrawl, the terminal-teaching dungeon crawl: exact commands, layout, conventions and the invariants the gates enforce; canonical for every agent and contributor.
 
 ## What this repo is
