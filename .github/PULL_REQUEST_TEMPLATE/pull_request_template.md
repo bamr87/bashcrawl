@@ -1,47 +1,40 @@
-## 📋 Description
+<!-- kit: community v0.1.0 · fleet PR template (UPS-WORK-03, UPS-REPO-19) -->
 
-Brief description of the changes made in this PR.
+## What and why
 
-## 🔗 Related Issues
+<!-- One or two sentences: what changes, and why now. -->
 
-- Fixes #(issue number)
-- Resolves #(issue number)
+Closes #
 
-## 🎯 Type of Change
+<!-- Or, in a repo with a declared file backlog: `Backlog: BL-YYYYMMDD-NN` (spec-driven) or `Backlog: T-NNN`.
+     Spec-driven repos also link the package: `Spec: specs/NNN-slug` -->
 
-- [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
-- [ ] ✨ New feature (non-breaking change which adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📚 Documentation update
-- [ ] 🔧 Maintenance/refactoring
-- [ ] 🧪 Test improvements
+## Definition of Done
 
-## 🧪 Testing
+<!-- fleet-dod:start v1 -->
+- [ ] **Title** is a Conventional Commit (`feat:`, `fix:`, `docs:`, `chore:` …). It becomes the squash subject and drives the next version and the release-please CHANGELOG entry. Never edit `CHANGELOG.md` or version numbers by hand.
+- [ ] **CI is green**: tests, lint, build and the conformance check.
+- [ ] **Tests** were added or updated for the change, or this box says why none apply.
+- [ ] **Docs** are current (README-First, README-Last): the nearest `README.md`, `docs/`, `SCHEMA.md` if files were added, moved or removed, and `features/features.yml` if a user-facing capability changed.
+- [ ] **Agent instructions**: `AGENTS.md` is updated if commands, layout or conventions changed. `CLAUDE.md` stays a pointer to it.
+- [ ] **Decision recorded** in `docs/adr/NNNN-slug.md` if this is hard to reverse.
+- [ ] **Backlog of record** is updated: the issue is linked above, or the backlog item is moved to Done in this PR.
+- [ ] **Clean diff**: no secrets, lockfiles, generated artefacts or unrelated changes.
+<!-- fleet-dod:end -->
 
-- [ ] Tests pass locally
-- [ ] New tests added for new functionality
-- [ ] Manual testing completed
+<!-- Repo-specific gates go BELOW this line. A repo may add boxes; it never removes or rewords the ones above. -->
 
-Describe the tests that you ran to verify your changes:
+### bashcrawl gates
 
-## 📝 Checklist
+- [ ] `make lint` and `make lint-js` pass.
+- [ ] `make validate-contracts`, `make test`, `make test-js` and `make web-test` pass (what `ci.yml` runs).
+- [ ] Game executables still use no strict mode, emit plain text and never modify git-tracked files; game state was reset with `bash lib/reset.sh` (never `git checkout -- entrance/`).
+- [ ] Generated and vendored files (`web/data/*.json`, `web/assets/js/vendor/termforge/`, `docs/generated/`, `tools/`) were regenerated, not hand-edited.
 
-- [ ] My code follows the project's coding standards
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+## Evidence
 
-## 📸 Screenshots (if applicable)
+<!-- Command output, screenshots for visual changes, or links. -->
 
-Add screenshots to help reviewers understand the changes.
+## Follow-ups discovered
 
-## 📎 Additional Notes
-
-Any additional information, concerns, or questions for reviewers.
-
-## 🎉 Celebration
-
-What are you most excited about with this change?
+<!-- New work found while doing this, filed as issues or backlog items. Write "none" if there are none. -->
