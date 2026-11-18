@@ -2,7 +2,7 @@
 // =============================================================================
 // verify/runner.mjs — execute USER SCENARIOS into EVIDENCE with Playwright
 // =============================================================================
-// kit: verify v0.1.0 (seeded from bamr87/bamr87 templates/verify/)
+// kit: verify v0.3.0 (seeded from bamr87/bamr87 templates/verify/)
 //
 // Reads verify/verify.yml (where the app runs) and verify/scenarios/*.yml (what
 // a user does), drives a real Chromium through each scenario at each viewport,

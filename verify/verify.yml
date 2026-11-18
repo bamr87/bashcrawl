@@ -1,7 +1,7 @@
 # =============================================================================
 # verify/verify.yml — how to run bashcrawl the way a USER would
 # =============================================================================
-# kit: verify v0.1.0 (seeded from bamr87/bamr87 templates/verify/)
+# kit: verify v0.3.0 (seeded from bamr87/bamr87 templates/verify/)
 #
 # Read by three consumers, so it is the one place "how do I start this thing and
 # where do I look" is written down:
