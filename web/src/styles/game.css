@@ -1,6 +1,7 @@
-/* The game's own screens: the title, hero creation, the intro, the tour's
- * coach marks, the options form, the profile sheet and the title cards.
- * Tokens only; layers from the layer scale. */
+/* The game's own screens: the title menu, hero creation, the intro, the
+ * tour's coach marks, the options form, the profile sheet, the journal, the
+ * quest tracker, the dialogue card and the title cards. Tokens only; layers
+ * from the layer scale. */
 @layer components {
     /* ── full-screen scenes (title, create, intro) ── */
     .bc-title {
@@ -12,35 +13,12 @@
         padding: var(--fleet-space-3);
         overflow: auto;
         background:
-            radial-gradient(1000px 600px at 50% -10%, color-mix(in srgb, var(--bc-color-torch) 22%, transparent), transparent 70%),
-            radial-gradient(700px 500px at 12% 110%, color-mix(in srgb, var(--fleet-color-accent) 14%, transparent), transparent 70%),
+            radial-gradient(60rem 30rem at 50% -8rem, color-mix(in srgb, var(--fleet-color-primary) 12%, transparent), transparent 70%),
             var(--fleet-color-bg);
     }
-    /* The stone wall behind the title: a faint grid fading at the edges. */
-    .bc-title-scene {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-        background-image:
-            repeating-linear-gradient(0deg, transparent 0 46px, color-mix(in srgb, var(--fleet-color-border) 40%, transparent) 46px 47px),
-            repeating-linear-gradient(90deg, transparent 0 46px, color-mix(in srgb, var(--fleet-color-border) 30%, transparent) 46px 47px);
-        mask-image: radial-gradient(ellipse at 50% 35%, var(--fleet-color-ink) 15%, transparent 75%);
-        opacity: 0.45;
-    }
-    .bc-title-torch {
-        position: absolute;
-        width: 36vmax;
-        height: 36vmax;
-        border-radius: var(--fleet-radius-circle);
-        background: radial-gradient(circle, color-mix(in srgb, var(--bc-color-torch) 32%, transparent), transparent 65%);
-        filter: blur(12px);
-    }
-    .bc-title-torch-l { left: -12vmax; top: 8vh; }
-    .bc-title-torch-r { right: -12vmax; top: 34vh; }
     .bc-title-card {
         position: relative;
-        width: min(760px, 100%);
+        width: min(560px, 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -54,15 +32,16 @@
         text-align: left;
         color: var(--fleet-color-primary);
         font-family: var(--fleet-font-mono);
-        font-size: clamp(0.42rem, 1.5vw, 0.78rem);
+        font-size: clamp(0.4rem, 1.3vw, 0.66rem);
         line-height: 1.25;
-        text-shadow: 0 0 14px color-mix(in srgb, var(--fleet-color-primary) 50%, transparent);
     }
     .bc-title-tag {
         margin: 0;
-        font-size: var(--fleet-text-sm);
-        letter-spacing: 0.45em;
-        color: var(--fleet-color-accent);
+        font-size: var(--fleet-text-xs);
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-eyebrow-tracking);
+        text-transform: uppercase;
+        color: var(--fleet-color-ink-muted);
     }
     .bc-title-sub {
         margin: 0;
@@ -72,7 +51,6 @@
     .bc-title-foot {
         margin: var(--fleet-space-2) 0 0;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.06em;
         color: var(--fleet-color-ink-muted);
     }
     .bc-title-hero {
@@ -83,11 +61,13 @@
     .bc-link {
         padding: 0.2rem 0.4rem;
         border: 0;
+        border-radius: var(--fleet-radius-sm);
         background: transparent;
         color: var(--fleet-color-link);
         font: inherit;
         font-size: var(--fleet-text-sm);
-        text-decoration: underline dotted;
+        text-decoration: underline;
+        text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
         text-underline-offset: 0.2em;
         cursor: pointer;
     }
@@ -97,37 +77,43 @@
     .bc-menu {
         width: min(440px, 100%);
         margin: var(--fleet-space-2) 0 0;
-        padding: 0;
+        padding: 0.3rem;
         list-style: none;
         display: flex;
         flex-direction: column;
-        gap: var(--fleet-space-1);
+        gap: 2px;
+        border-radius: var(--fleet-radius-xl);
+        background: var(--fleet-color-bg-elevated);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border), var(--fleet-shadow-md);
     }
     .bc-menu-item {
         display: grid;
-        grid-template-columns: 1.4rem minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 1rem;
         align-items: center;
         gap: var(--fleet-space-2);
         width: 100%;
-        padding: 0.55rem 0.9rem;
+        padding: 0.6rem 0.85rem;
         border: 0;
-        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 72%, transparent);
+        border-radius: var(--fleet-radius-lg);
+        background: transparent;
         color: var(--fleet-color-ink);
         font: inherit;
         text-align: left;
         cursor: pointer;
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
-        clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
-        transition: background var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+        transition: background var(--fleet-motion-fast) var(--fleet-ease);
     }
     .bc-menu-item:hover,
     .bc-menu-item:focus-visible {
         outline: none;
-        background: color-mix(in srgb, var(--fleet-color-primary) 14%, var(--fleet-color-bg-elevated));
-        box-shadow: inset 0 0 0 1px var(--fleet-color-primary), 0 0 18px color-mix(in srgb, var(--fleet-color-primary) 25%, transparent);
+        background: var(--fleet-color-bg-muted);
+    }
+    .bc-menu-item:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
     }
     .bc-menu-cursor {
+        order: 2;
         color: var(--fleet-color-primary);
+        font-size: 0.7em;
         opacity: 0;
         transition: opacity var(--fleet-motion-fast) var(--fleet-ease);
     }
@@ -139,9 +125,7 @@
         min-width: 0;
     }
     .bc-menu-text strong {
-        font-family: var(--fleet-font-mono);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-weight: var(--fleet-font-weight-semibold);
     }
     .bc-menu-text small {
         overflow: hidden;
@@ -165,7 +149,9 @@
     }
     .bc-btn-danger {
         color: var(--fleet-color-danger);
-        background: color-mix(in srgb, var(--fleet-color-danger) 14%, var(--fleet-color-bg-muted));
+        background: color-mix(in srgb, var(--fleet-color-danger) 12%, var(--fleet-color-bg-muted));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fleet-color-danger) 40%, var(--fleet-color-border));
+        border-radius: var(--fleet-radius-base);
     }
 
     /* ── hero creation ── */
@@ -184,9 +170,8 @@
         gap: var(--fleet-space-2);
         padding: var(--fleet-space-4) var(--fleet-space-3);
         background: var(--fleet-color-bg);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 0 0 50px color-mix(in srgb, var(--bc-color-torch) 10%, transparent);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-create-preview .bc-hero-name { font-size: var(--fleet-text-lg); }
     .bc-create-trait {
@@ -198,14 +183,15 @@
     .bc-step-kicker {
         margin: 0;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.25em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-accent);
     }
     .bc-create-step h2 {
         margin: 0.1rem 0 var(--fleet-space-3);
         font-size: var(--fleet-text-h2);
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
     }
     .bc-create-step > p { margin: var(--fleet-space-2) 0 0; }
     .bc-name-row {
@@ -223,9 +209,8 @@
         color: var(--fleet-color-ink);
         font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-lg);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-lo);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-cards {
         display: grid;
@@ -244,22 +229,20 @@
         text-align: left;
         cursor: pointer;
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
-        clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+        border-radius: var(--fleet-radius-lg);
         transition: box-shadow var(--fleet-motion-fast) var(--fleet-ease), color var(--fleet-motion-fast) var(--fleet-ease);
     }
     .bc-card:hover { color: var(--fleet-color-ink); }
     .bc-card[aria-checked="true"] {
         color: var(--fleet-color-ink);
-        box-shadow: inset 0 0 0 2px var(--fleet-color-primary), 0 0 18px color-mix(in srgb, var(--fleet-color-primary) 25%, transparent);
+        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
     }
     .bc-card strong {
         display: flex;
         align-items: center;
         gap: 0.45rem;
-        font-family: var(--fleet-font-mono);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
+        font-weight: var(--fleet-font-weight-semibold);
     }
     .bc-card small { line-height: 1.4; }
     .bc-card-door { color: var(--fleet-color-info); }
@@ -292,11 +275,11 @@
         border: 0;
         background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-xs);
         cursor: pointer;
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-option-chip:hover { color: var(--fleet-color-ink); }
     .bc-option-chip[aria-checked="true"] {
@@ -370,6 +353,7 @@
         background: var(--fleet-color-bg);
         color: var(--fleet-color-accent);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-intro-art pre {
         margin: 0;
@@ -390,9 +374,7 @@
         align-items: baseline;
     }
     .bc-intro-doors strong {
-        font-family: var(--fleet-font-mono);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
+        font-weight: var(--fleet-font-weight-semibold);
     }
     .bc-intro-doors li[data-mine] strong { color: var(--fleet-color-primary); }
     .bc-intro-doors small {
@@ -418,41 +400,47 @@
         min-width: 0;
     }
     .bc-opt-label {
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-sm);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-weight: var(--fleet-font-weight-semibold);
         color: var(--fleet-color-ink);
     }
     .bc-opt-hint {
         font-size: var(--fleet-text-xs);
         color: var(--fleet-color-ink-muted);
     }
-    .bc-seg { display: inline-flex; }
-    .bc-seg-btn {
-        padding: 0.3rem 0.75rem;
-        border: 0;
-        background: var(--fleet-color-bg-muted);
-        color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
-        font-size: var(--fleet-text-sm);
-        cursor: pointer;
+    .bc-seg {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border-radius: var(--fleet-radius-base);
+        background: var(--fleet-color-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+    }
+    .bc-seg-btn {
+        padding: 0.25rem 0.75rem;
+        border: 0;
+        border-radius: var(--fleet-radius-sm);
+        background: transparent;
+        color: var(--fleet-color-ink-muted);
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-medium);
+        cursor: pointer;
         transition: color var(--fleet-motion-fast) var(--fleet-ease), background var(--fleet-motion-fast) var(--fleet-ease);
     }
     .bc-seg-btn[aria-checked="true"] {
-        background: color-mix(in srgb, var(--fleet-color-primary) 22%, var(--fleet-color-bg-muted));
-        color: var(--fleet-color-primary);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-primary);
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-ink);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-xs);
     }
     .bc-switch {
         position: relative;
-        width: 46px;
-        height: 24px;
+        flex: none;
+        width: 2.5rem;
+        height: 1.5rem;
         border: 0;
-        background: var(--fleet-color-bg-muted);
+        border-radius: var(--fleet-radius-pill);
+        background: var(--bc-color-border-strong);
         cursor: pointer;
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         transition: background var(--fleet-motion-base) var(--fleet-ease);
     }
     .bc-switch::after {
@@ -460,18 +448,19 @@
         position: absolute;
         top: 3px;
         left: 3px;
-        width: 18px;
-        height: 18px;
-        background: var(--fleet-color-ink-muted);
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: var(--fleet-radius-circle);
+        background: var(--fleet-color-ink);
+        box-shadow: var(--fleet-shadow-xs);
         transition: translate var(--fleet-motion-base) var(--fleet-ease), background var(--fleet-motion-base) var(--fleet-ease);
     }
     .bc-switch[aria-checked="true"] {
-        background: color-mix(in srgb, var(--fleet-color-success) 25%, var(--fleet-color-bg-muted));
-        box-shadow: inset 0 0 0 1px var(--fleet-color-success);
+        background: var(--fleet-color-primary);
     }
     .bc-switch[aria-checked="true"]::after {
-        translate: 22px 0;
-        background: var(--fleet-color-success);
+        translate: 1rem 0;
+        background: var(--bc-color-on-primary);
     }
     .bc-switch:disabled {
         opacity: 0.45;
@@ -517,8 +506,6 @@
         padding: var(--fleet-space-3) var(--fleet-space-4);
         box-shadow:
             inset 0 0 0 1px var(--fleet-color-primary),
-            inset 3px 3px 0 0 var(--bc-color-bevel-hi),
-            inset -3px -3px 0 0 var(--bc-color-bevel-lo),
             var(--fleet-shadow-lg);
     }
     .bc-tour-card[data-center] {
@@ -545,7 +532,6 @@
     .bc-tour-nav .bc-doors { margin: 0; }
     .bc-tour-step {
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.1em;
         color: var(--fleet-color-ink-muted);
     }
 
@@ -584,6 +570,7 @@
         background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-ink);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-profile-stats {
         margin: 0;
@@ -595,10 +582,12 @@
         padding: var(--fleet-space-2) var(--fleet-space-3);
         background: var(--fleet-color-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-profile-stats dt {
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.1em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-ink-muted);
     }
@@ -622,10 +611,10 @@
         border: 0;
         background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-xs);
         cursor: pointer;
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-swatch::before {
         content: "";
@@ -641,13 +630,6 @@
     }
 
     /* ── the header ── */
-    /* The brand is a button now: it opens the title screen. */
-    .bc-brand {
-        padding: 0;
-        border: 0;
-        background: transparent;
-        cursor: pointer;
-    }
     .bc-hero-btn { gap: 0.5rem; }
     .bc-hero-mini {
         padding: 0;
@@ -667,23 +649,27 @@
         translate: -50% -100%;
         width: max-content;
         max-width: min(300px, calc(100vw - 24px));
-        padding: 0.35rem 0.65rem;
-        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 94%, var(--fleet-color-primary));
-        color: var(--fleet-color-ink);
-        font-family: var(--fleet-font-mono);
+        padding: 0.35rem 0.6rem;
+        border-radius: var(--fleet-radius-base);
+        background: var(--fleet-color-ink);
+        color: var(--fleet-color-bg);
         font-size: var(--fleet-text-xs);
+        font-weight: var(--fleet-font-weight-medium);
         line-height: 1.4;
         text-align: center;
         pointer-events: none;
-        box-shadow: inset 0 0 0 1px var(--fleet-color-primary), var(--fleet-shadow-md);
-        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+        box-shadow: var(--fleet-shadow-md);
     }
     .bc-tooltip[data-below] { translate: -50% 0; }
 
     /* ── screen transitions ── */
     .bc-screen {
+        min-width: 0;
         min-height: 0;
         display: grid;
+        /* minmax(0, …) both ways: content scrolls inside a screen, it never
+           makes the screen wider or taller than the window. */
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr);
     }
 
@@ -701,8 +687,7 @@
         text-align: left;
     }
     .bc-status-portrait-text strong {
-        font-family: var(--fleet-font-mono);
-        letter-spacing: 0.04em;
+        font-weight: var(--fleet-font-weight-semibold);
     }
     .bc-status-portrait-text small {
         font-size: var(--fleet-text-xs);
@@ -712,14 +697,14 @@
     .bc-badge-count {
         display: inline-grid;
         place-items: center;
-        min-width: 1.3em;
-        height: 1.3em;
+        min-width: 1.15rem;
+        height: 1.15rem;
         padding: 0 0.3em;
-        background: var(--fleet-color-primary);
-        color: var(--fleet-color-bg);
-        font-size: 0.72em;
-        font-weight: var(--fleet-font-weight-bold);
         border-radius: var(--fleet-radius-pill);
+        background: var(--fleet-color-primary);
+        color: var(--bc-color-on-primary);
+        font-size: 0.6875rem;
+        font-weight: var(--fleet-font-weight-bold);
     }
 
     /* ── clickable things in the room ── */
@@ -755,12 +740,14 @@
         backdrop-filter: blur(2px);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border), inset 3px 0 0 0 var(--fleet-color-primary);
         font-size: var(--fleet-text-sm);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-tracker[data-done] { box-shadow: inset 0 0 0 1px var(--fleet-color-border), inset 3px 0 0 0 var(--fleet-color-success); }
     .bc-tracker-kicker {
         margin: 0;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.18em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-accent);
     }
@@ -789,13 +776,10 @@
         grid-template-columns: auto minmax(0, 1fr);
         gap: var(--fleet-space-3);
         padding: var(--fleet-space-3) var(--fleet-space-4);
-        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 96%, var(--fleet-color-primary));
+        border-radius: var(--fleet-radius-lg);
+        background: var(--bc-color-surface-raised);
         color: var(--fleet-color-ink);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-primary),
-            inset 3px 3px 0 0 var(--bc-color-bevel-hi),
-            inset -3px -3px 0 0 var(--bc-color-bevel-lo),
-            var(--fleet-shadow-lg);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
         cursor: pointer;
         transition: bottom var(--fleet-motion-slow) var(--fleet-ease);
     }
@@ -805,14 +789,15 @@
     .bc-dialogue-kicker {
         margin: 0;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.25em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-accent);
     }
     .bc-dialogue h3 {
         margin: 0.1rem 0 0.4rem;
         font-size: var(--fleet-text-lg);
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
     }
     .bc-dialogue-text {
         margin: 0;
@@ -831,7 +816,7 @@
     }
     .bc-dialogue-next {
         color: var(--fleet-color-primary);
-        font-family: var(--fleet-font-mono);
+        font-weight: var(--fleet-font-weight-semibold);
         text-decoration: none;
     }
 
@@ -847,22 +832,20 @@
         border-bottom: 1px solid var(--fleet-color-border);
     }
     .bc-tabs [role="tab"] {
-        padding: 0.35rem 0.8rem;
+        padding: 0.45rem 0.8rem;
         border: 0;
         background: transparent;
         color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-sm);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        font-weight: var(--fleet-font-weight-medium);
         cursor: pointer;
-        box-shadow: inset 0 -3px 0 0 transparent;
+        box-shadow: inset 0 -2px 0 0 transparent;
         transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
     }
     .bc-tabs [role="tab"]:hover { color: var(--fleet-color-ink); }
     .bc-tabs [role="tab"][aria-selected="true"] {
-        color: var(--fleet-color-primary);
-        box-shadow: inset 0 -3px 0 0 var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
+        box-shadow: inset 0 -2px 0 0 var(--fleet-color-primary);
     }
     .bc-journal-body {
         min-height: 0;
@@ -874,6 +857,7 @@
     .bc-journal-body > .bc-muted { margin: 0; font-size: var(--fleet-text-sm); }
     .bc-chapter {
         padding: var(--fleet-space-3);
+        border-radius: var(--fleet-radius-lg);
         background: var(--fleet-color-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
     }
@@ -882,7 +866,8 @@
     .bc-chapter-kicker {
         margin: 0;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.2em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-accent);
     }
@@ -909,6 +894,7 @@
         background: var(--fleet-color-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         font-size: var(--fleet-text-sm);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-journal-row small {
         display: block;
@@ -943,7 +929,7 @@
     .bc-gamemenu h2 {
         margin: 0;
         font-size: var(--fleet-text-h2);
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
     }
 
     /* ── title cards ── */
@@ -952,40 +938,41 @@
         left: 0;
         right: 0;
         top: 22vh;
-        z-index: var(--fleet-layer-popover);
+        /* Above the page and the effects, under any dialog: a card must not
+           cover the Options someone has just opened. */
+        z-index: var(--fleet-layer-fab);
         display: flex;
         justify-content: center;
         pointer-events: none;
     }
     .bc-banner {
         pointer-events: auto;
-        min-width: min(540px, 92vw);
+        min-width: min(480px, 92vw);
         max-width: 92vw;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.15rem;
         padding: var(--fleet-space-3) var(--fleet-space-5);
+        border-radius: var(--fleet-radius-xl);
         text-align: center;
-        background: color-mix(in srgb, var(--fleet-color-bg) 86%, transparent);
-        box-shadow:
-            inset 0 2px 0 0 var(--fleet-color-primary),
-            inset 0 -2px 0 0 var(--fleet-color-primary),
-            0 0 40px color-mix(in srgb, var(--fleet-color-primary) 25%, transparent);
-        backdrop-filter: blur(3px);
+        background: color-mix(in srgb, var(--bc-color-surface-raised) 92%, transparent);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
+        backdrop-filter: blur(8px);
         cursor: pointer;
     }
     .bc-banner-kicker {
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.3em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
         color: var(--fleet-color-accent);
     }
     .bc-banner-title {
-        font-size: clamp(1.2rem, 1rem + 1.6vw, 2rem);
-        letter-spacing: 0.1em;
-        color: var(--fleet-color-primary);
-        text-shadow: 0 0 18px color-mix(in srgb, var(--fleet-color-primary) 55%, transparent);
+        font-size: clamp(1.2rem, 1rem + 1.4vw, 1.8rem);
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-display-tracking);
+        color: var(--fleet-color-ink);
     }
     .bc-banner-sub {
         font-size: var(--fleet-text-sm);
@@ -993,23 +980,19 @@
     }
     .bc-banner[data-kind="room"] .bc-banner-title {
         font-size: clamp(1rem, 0.9rem + 1vw, 1.5rem);
-        color: var(--fleet-color-ink);
-        text-shadow: none;
     }
     .bc-banner[data-kind="quest"] .bc-banner-kicker { color: var(--fleet-color-success); }
     .bc-banner[data-kind="rank"] {
-        box-shadow:
-            inset 0 2px 0 0 var(--fleet-color-warning),
-            inset 0 -2px 0 0 var(--fleet-color-warning),
-            0 0 60px color-mix(in srgb, var(--fleet-color-warning) 40%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fleet-color-warning) 55%, var(--bc-color-border-strong)), var(--fleet-shadow-lg);
     }
     .bc-banner[data-kind="rank"] .bc-banner-kicker { color: var(--fleet-color-warning); }
-    [data-resolved="light"] .bc-banner-title,
-    [data-resolved="light"] .bc-title-logo { text-shadow: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    .bc-btn:hover:not(:disabled) { filter: brightness(1.1); }
+    @keyframes bc-caret-blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+    }
     .bc-dialogue-caret::after {
         content: "▌";
         margin-left: 0.1em;
@@ -1021,12 +1004,6 @@
         50% { transform: translateX(3px); }
     }
     .bc-dialogue-next { animation: bc-nudge 1.3s ease-in-out infinite; }
-    @keyframes bc-torch-breathe {
-        0%, 100% { opacity: 0.7; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.08); }
-    }
-    .bc-title-torch-l { animation: bc-torch-breathe 3.8s ease-in-out infinite; }
-    .bc-title-torch-r { animation: bc-torch-breathe 4.7s ease-in-out infinite 0.9s; }
     @keyframes bc-cursor-blink {
         0%, 60% { opacity: 1; }
         61%, 100% { opacity: 0.25; }
@@ -1051,4 +1028,25 @@
     .bc-dialogue { grid-template-columns: minmax(0, 1fr); }
     .bc-dialogue-portrait { display: none; }
     .bc-status-portrait-text small { display: none; }
+}
+
+/* The journal button's unread count sits on its corner. */
+.bc-journal-btn {
+    position: relative;
+}
+.bc-journal-btn .bc-badge-count {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.3rem;
+}
+
+/* Inside the game menu's own card the menu is flat: one card, not two. */
+.bc-gamemenu-panel .bc-menu {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+.bc-gamemenu-panel {
+    border-radius: var(--fleet-radius-xl);
+    box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
 }

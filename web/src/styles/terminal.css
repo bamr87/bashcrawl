@@ -1,5 +1,5 @@
-/* The terminal: the dungeon log in its dialogue-box frame, the line kinds,
- * command blocks, the prompt dock with its chips, and the pager. */
+/* The terminal: the log in its window, the line kinds, command blocks, the
+ * reader layer's classes, the prompt dock with its chips, and the pager. */
 @layer components {
     /* ── story layout ── */
     .bc-story {
@@ -12,13 +12,15 @@
         display: flex;
         flex-direction: column;
         gap: var(--fleet-space-2);
-        padding: var(--fleet-space-2);
+        padding: var(--fleet-space-3);
         overflow: auto;
-        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 55%, var(--fleet-color-bg));
-        box-shadow: inset -1px 0 0 var(--fleet-color-border);
+        scrollbar-width: thin;
+        scrollbar-color: var(--fleet-color-border) transparent;
+        border-right: 1px solid var(--fleet-color-border);
     }
 
-    /* The dialogue box: a sunken, corner-notched window the log scrolls in. */
+    /* The terminal window: the darkest surface on the page, a hairline, a
+       soft corner. The log scrolls in it. */
     .bc-stage-log {
         position: relative;
         min-height: 0;
@@ -28,14 +30,11 @@
         --band: 0rem;
         grid-template-rows: minmax(0, 1fr) var(--band);
         transition: grid-template-rows var(--fleet-motion-slow) var(--fleet-ease);
-        margin: var(--fleet-space-2);
-        background: var(--fleet-color-bg);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
-            inset -2px -2px 0 0 var(--bc-color-bevel-hi),
-            inset 0 0 60px color-mix(in srgb, var(--bc-color-overlay) 50%, transparent);
-        clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+        margin: var(--fleet-space-3);
+        border-radius: var(--fleet-radius-lg);
+        background: var(--bc-color-term-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border), var(--fleet-shadow-sm);
+        overflow: hidden;
         --fx-accent: var(--fleet-color-info);
     }
     .bc-stage-log.fx-stage {
@@ -52,18 +51,23 @@
         word-break: break-word;
         font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-sm);
-        line-height: 1.5;
+        line-height: 1.6;
         color: var(--fleet-color-ink);
         scrollbar-width: thin;
         scrollbar-color: var(--fleet-color-border) transparent;
+    }
+    /* While a chapter is being told (StoryDialogue publishes its height),
+       the log ends above the card instead of under it. */
+    .bc-stage-log .bc-log {
+        padding-bottom: calc(var(--fleet-space-3) + var(--bc-dialogue-clear, 0px));
     }
     .bc-log:focus-visible {
         outline-offset: -2px;
     }
     .kind-error { color: var(--fleet-color-danger); }
-    .kind-success { color: var(--fleet-color-success); text-shadow: 0 0 6px color-mix(in srgb, currentColor 35%, transparent); }
+    .kind-success { color: var(--fleet-color-success); }
     .kind-info { color: var(--fleet-color-info); }
-    .kind-magic { color: var(--fleet-color-primary); text-shadow: 0 0 6px color-mix(in srgb, currentColor 35%, transparent); }
+    .kind-magic { color: var(--fleet-color-primary); }
     .kind-dim { color: var(--fleet-color-ink-muted); }
     .kind-output { color: var(--fleet-color-ink); }
     .kind-control { display: none; }
@@ -76,17 +80,9 @@
     }
     .kind-art {
         color: var(--fleet-color-accent);
-        text-shadow: 0 0 8px color-mix(in srgb, var(--fleet-color-accent) 30%, transparent);
     }
     .kind-banner {
         color: var(--fleet-color-primary);
-        text-shadow: 0 0 10px color-mix(in srgb, var(--fleet-color-primary) 40%, transparent);
-    }
-    [data-resolved="light"] .kind-success,
-    [data-resolved="light"] .kind-magic,
-    [data-resolved="light"] .kind-art,
-    [data-resolved="light"] .kind-banner {
-        text-shadow: none;
     }
 
     /* Command blocks: a rule above each echoed command. */
@@ -95,14 +91,14 @@
         width: 100%;
         margin-top: 0.7rem;
         padding-top: 0.45rem;
-        border-top: 1px solid color-mix(in srgb, var(--fleet-color-border) 75%, transparent);
+        border-top: 1px solid var(--fleet-color-border);
     }
     .bc-log .kind-dim.is-cmd:first-child {
         margin-top: 0;
         padding-top: 0;
         border-top: 0;
     }
-    .bc-log .cmd-prompt { color: var(--fleet-color-info); font-weight: var(--fleet-font-weight-bold); }
+    .bc-log .cmd-prompt { color: var(--fleet-color-success); font-weight: var(--fleet-font-weight-semibold); }
     .bc-log .cmd-text { color: var(--fleet-color-ink); }
 
     /* The command-clip stage band (fx.js paints frames into .px-am). */
@@ -130,16 +126,14 @@
         left: 50%;
         bottom: calc(var(--band, 0rem) + var(--fleet-space-3));
         translate: -50% 0;
-        padding: 0.25rem 0.75rem;
+        padding: 0.3rem 0.85rem;
         border: 0;
-        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 86%, var(--fleet-color-primary));
-        color: var(--fleet-color-primary);
-        font: var(--fleet-font-weight-bold) var(--fleet-text-xs)/1.4 var(--fleet-font-mono);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
+        background: var(--bc-color-surface-raised);
+        color: var(--fleet-color-ink);
+        font: var(--fleet-font-weight-medium) var(--fleet-text-xs)/1.4 var(--fleet-font-sans);
         cursor: pointer;
-        box-shadow: inset 0 0 0 1px var(--fleet-color-primary), var(--fleet-shadow-lg);
-        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-md);
+        border-radius: var(--fleet-radius-pill);
         transition: bottom var(--fleet-motion-slow) var(--fleet-ease);
     }
     .bc-scroll-cue:focus-visible {
@@ -154,7 +148,6 @@
         color: var(--fleet-color-primary);
         font-weight: var(--fleet-font-weight-bold);
         letter-spacing: 0.04em;
-        text-shadow: 0 0 10px color-mix(in srgb, var(--fleet-color-primary) 45%, transparent);
     }
     .sc-h2,
     .sc-md-h2 {
@@ -219,10 +212,10 @@
         font-style: italic;
     }
     .sc-code {
-        padding: 0 0.3em;
-        background: var(--fleet-color-code-bg);
+        padding: 0.05em 0.35em;
+        border-radius: var(--fleet-radius-sm);
+        background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-code-ink);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
     }
     .sc-code[data-fill] {
         color: var(--fleet-color-success);
@@ -247,59 +240,56 @@
     .sc-tip { color: var(--fleet-color-warning); }
     .sc-fence { color: var(--fleet-color-border); }
     .sc-codeline { color: var(--fleet-color-code-ink); }
-    [data-resolved="light"] .sc-h1,
-    [data-resolved="light"] .sc-md-h1 {
-        text-shadow: none;
-    }
-
     /* ── prompt dock ── */
     .bc-dock {
         display: flex;
         flex-direction: column;
+        border-top: 1px solid var(--fleet-color-border);
         background: var(--fleet-color-bg-elevated);
-        box-shadow: inset 0 2px 0 0 var(--bc-color-bevel-hi), inset 0 1px 0 0 var(--fleet-color-border);
     }
     .bc-suggest {
         display: flex;
         align-items: center;
-        gap: var(--fleet-space-2);
-        padding: var(--fleet-space-2) var(--fleet-space-3) 0;
+        gap: 0.4rem;
+        padding: 0.6rem var(--fleet-space-container-x) 0;
         overflow-x: auto;
         scrollbar-width: none;
     }
     .bc-suggest::-webkit-scrollbar { display: none; }
     .bc-suggest-label {
         flex: 0 0 auto;
-        font-size: var(--fleet-text-xs);
-        letter-spacing: 0.1em;
+        margin-right: 0.2rem;
+        font-size: 0.6875rem;
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-eyebrow-tracking);
         text-transform: uppercase;
         color: var(--fleet-color-ink-muted);
     }
     .bc-chip {
         flex: 0 0 auto;
-        padding: 0.18rem 0.6rem;
+        padding: 0.2rem 0.65rem;
         border: 0;
+        border-radius: var(--fleet-radius-pill);
         background: var(--fleet-color-bg-muted);
-        color: var(--fleet-color-code-ink);
+        color: var(--fleet-color-ink);
         font-family: var(--fleet-font-mono);
-        font-size: var(--fleet-text-sm);
-        line-height: 1.3;
+        font-size: var(--fleet-text-xs);
+        line-height: 1.4;
         cursor: pointer;
         white-space: nowrap;
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 1px 1px 0 0 var(--bc-color-bevel-hi),
-            inset -1px -1px 0 0 var(--bc-color-bevel-lo);
-        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
-        transition: color var(--fleet-motion-fast) var(--fleet-ease);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
     }
     .bc-chip:hover,
     .bc-chip:focus-visible {
         color: var(--fleet-color-primary);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-primary);
     }
     .bc-chip-quest {
         color: var(--fleet-color-success);
-        background: color-mix(in srgb, var(--fleet-color-success) 14%, var(--fleet-color-bg-muted));
+        background: color-mix(in srgb, var(--fleet-color-success) 12%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fleet-color-success) 40%, transparent);
+        border-radius: var(--fleet-radius-base);
     }
     .bc-chip-lesson {
         color: var(--fleet-color-info);
@@ -308,9 +298,16 @@
         display: flex;
         align-items: center;
         gap: var(--fleet-space-2);
-        min-height: 50px;
-        margin: 0;
-        padding: var(--fleet-space-2) var(--fleet-space-3);
+        margin: 0.6rem var(--fleet-space-container-x);
+        padding: 0 var(--fleet-space-3);
+        min-height: 2.75rem;
+        border-radius: var(--fleet-radius-lg);
+        background: var(--bc-color-term-bg);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong);
+        transition: box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-prompt:focus-within {
+        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
     }
     .bc-prompt-label {
         flex: 0 1 auto;
@@ -320,39 +317,41 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         font-family: var(--fleet-font-mono);
-        font-weight: var(--fleet-font-weight-bold);
-        color: var(--fleet-color-info);
-    }
-    .bc-prompt-label::after {
-        content: "";
-        display: inline-block;
-        width: 0.6ch;
-        height: 1em;
-        margin-left: 0.2ch;
-        vertical-align: -0.12em;
-        background: var(--fleet-color-success);
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-semibold);
+        color: var(--fleet-color-success);
     }
     .bc-prompt-short { display: none; }
+    /* A text field. Inside the prompt it loses its own box: the prompt is the box. */
     .bc-input {
         flex: 1 1 auto;
         min-width: 0;
-        padding: 0.5rem 0.7rem;
+        padding: 0.5rem 0.75rem;
         border: 0;
-        background: var(--fleet-color-code-bg);
+        border-radius: var(--fleet-radius-base);
+        background: var(--fleet-color-bg);
         color: var(--fleet-color-ink);
-        font-family: var(--fleet-font-mono);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
-            inset -1px -1px 0 0 var(--bc-color-bevel-hi);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong);
     }
     .bc-input::placeholder {
         color: var(--fleet-color-ink-muted);
-        opacity: 0.8;
+        opacity: 0.7;
     }
     .bc-input:focus {
         outline: 2px solid var(--fleet-color-primary);
         outline-offset: 0;
+    }
+    .bc-prompt .bc-input {
+        padding: 0.5rem 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        font-family: var(--fleet-font-mono);
+        /* 16px keeps iOS from zooming the page when the field takes focus. */
+        font-size: max(1rem, var(--fleet-text-sm));
+    }
+    .bc-prompt .bc-input:focus {
+        outline: none;
     }
 
     /* ── pager ── */
@@ -372,7 +371,8 @@
         padding: var(--fleet-space-3);
         overflow: auto;
         white-space: pre;
-        background: var(--fleet-color-bg);
+        border-radius: var(--fleet-radius-base);
+        background: var(--bc-color-term-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         font-size: var(--fleet-text-sm);
         line-height: 1.5;
@@ -380,14 +380,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    @keyframes bc-caret-blink {
-        0%, 49% { opacity: 1; }
-        50%, 100% { opacity: 0; }
-    }
-    .bc-prompt-label::after {
-        animation: bc-caret-blink 1.05s steps(1, end) infinite;
-    }
-
     /* Fresh lines cascade in (log-decor.ts stamps .rv and --i per line);
        the step is the Options' text speed. */
     @keyframes bc-line-in {
@@ -430,7 +422,10 @@ html[data-text-size="large"] .bc-log { font-size: var(--fleet-text-base); }
 }
 @media (max-width: 600px) {
     .bc-prompt {
-        padding: var(--fleet-space-2);
+        margin: 0.5rem var(--fleet-space-2);
+    }
+    .bc-suggest {
+        padding-inline: var(--fleet-space-2);
     }
     .bc-prompt-label {
         max-width: 40%;
@@ -438,7 +433,7 @@ html[data-text-size="large"] .bc-log { font-size: var(--fleet-text-base); }
     .bc-prompt-full { display: none; }
     .bc-prompt-short { display: inline; }
     .bc-stage-log {
-        margin: var(--fleet-space-1);
+        margin: var(--fleet-space-2);
     }
     .bc-log {
         padding: var(--fleet-space-2) var(--fleet-space-3);

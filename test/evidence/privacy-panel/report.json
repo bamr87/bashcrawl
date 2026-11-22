@@ -1,0 +1,744 @@
+{
+  "id": "privacy-panel",
+  "title": "A build with no analytics key asks nothing, sends nothing and says so",
+  "features": [
+    "BASHCRAWL-029"
+  ],
+  "path": "verify/scenarios/privacy-panel.yml",
+  "started": "2026-11-20T03:07:21.275Z",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 586
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "first-visit",
+            "script": "localStorage.clear();\n\"cleared\"\n"
+          },
+          "ok": true,
+          "value": "cleared",
+          "ms": 5
+        },
+        {
+          "step": "goto",
+          "arg": "/?visit=privacy",
+          "ok": true,
+          "ms": 550
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-try[data-ready]"
+          },
+          "ok": true,
+          "ms": 22
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-consent",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "#bc-try-input",
+            "value": "ls -F"
+          },
+          "ok": true,
+          "ms": 5
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 10
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "cellar/"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Options\"]",
+          "ok": true,
+          "ms": 40
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 36
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "This copy collects nothing"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 400
+        },
+        {
+          "step": "screenshot",
+          "arg": "options",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/desktop-options.png",
+          "ms": 86
+        },
+        {
+          "step": "click",
+          "arg": "role=dialog[name=\"Options\"] >> role=button[name=\"Details\"]",
+          "ok": true,
+          "ms": 56
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "This copy of Bashcrawl has analytics switched off entirely: it sends nothing, and there is nothing to opt out of."
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-privacy-switch",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "every-event-is-listed",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 400));\n  const names = [...document.querySelectorAll(\".bc-privacy-events dt code\")].map((code) => code.textContent.trim());\n  const all = names.length ? names : [...document.querySelectorAll(\".bc-privacy-events code\")].map((code) => code.textContent.trim());\n  for (const name of [\"$pageview\", \"app_loaded\", \"command_first_used\", \"quest_completed\", \"reference_searched\", \"consent_updated\"]) {\n    if (!all.includes(name)) throw new Error(`the Privacy panel does not list ${name}`);\n  }\n  if (all.length < 20) throw new Error(`the Privacy panel lists ${all.length} names, expected the whole catalogue`);\n  return { listed: all.length, first: all.slice(0, 6) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "listed": 25,
+            "first": [
+              "$pageview",
+              "app_loaded",
+              "landing_cta_clicked",
+              "hero_created",
+              "intro_finished",
+              "tour_finished"
+            ]
+          },
+          "ms": 402
+        },
+        {
+          "step": "screenshot",
+          "arg": "privacy",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/desktop-privacy.png",
+          "ms": 103
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 283
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 281
+        },
+        {
+          "step": "click",
+          "arg": "main >> role=button[name=\"Privacy\"]",
+          "ok": true,
+          "ms": 20
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 281
+        },
+        {
+          "step": "click",
+          "arg": "text=Skip setup, jump in",
+          "ok": true,
+          "ms": 87
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=button[name=\"Skip tour\"]",
+          "ok": true,
+          "ms": 253
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 7
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 26
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"1 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 8
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-consent",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "nothing-left-the-site",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 1500));\n  const here = location.origin;\n  const elsewhere = performance.getEntriesByType(\"resource\").map((entry) => entry.name).filter((url) => !url.startsWith(here + \"/\") && !url.startsWith(\"data:\") && !url.startsWith(\"blob:\"));\n  if (elsewhere.length) throw new Error(`${elsewhere.length} request(s) left the site: ${elsewhere.slice(0, 3).join(\" \")}`);\n  const posthog = performance.getEntriesByType(\"resource\").map((entry) => entry.name).filter((url) => /posthog/i.test(url));\n  if (posthog.length) throw new Error(`PostHog code was loaded: ${posthog[0]}`);\n  if (typeof window.posthog !== \"undefined\") throw new Error(\"window.posthog exists\");\n  const keys = Object.keys(localStorage);\n  const stored = keys.filter((key) => /^ph_|posthog|consent/i.test(key));\n  if (stored.length) throw new Error(`analytics storage was written: ${stored.join(\", \")}`);\n  if (document.cookie) throw new Error(`a cookie was set: ${document.cookie.slice(0, 60)}`);\n  const foreign = [...document.querySelectorAll(\"script[src], iframe[src], img[src]\")].map((el) => el.src).filter((src) => src && !src.startsWith(here) && !src.startsWith(\"data:\"));\n  if (foreign.length) throw new Error(`the page embeds ${foreign[0]}`);\n  return { resources: performance.getEntriesByType(\"resource\").length, elsewhere: 0, storageKeys: keys, cookies: document.cookie.length };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "resources": 50,
+            "elsewhere": 0,
+            "storageKeys": [
+              "bashcrawl-web-hero-v1",
+              "bashcrawl-web-journal-v1",
+              "bashcrawl-web-state-v1",
+              "bashcrawl-web-shell-v1"
+            ],
+            "cookies": 0
+          },
+          "ms": 1504
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/desktop-story.png",
+          "ms": 55
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/privacy-panel/desktop-options.png",
+        "test/evidence/privacy-panel/desktop-privacy.png",
+        "test/evidence/privacy-panel/desktop-story.png"
+      ],
+      "evals": {
+        "first-visit": "cleared",
+        "every-event-is-listed": {
+          "listed": 25,
+          "first": [
+            "$pageview",
+            "app_loaded",
+            "landing_cta_clicked",
+            "hero_created",
+            "intro_finished",
+            "tour_finished"
+          ]
+        },
+        "nothing-left-the-site": {
+          "resources": 50,
+          "elsewhere": 0,
+          "storageKeys": [
+            "bashcrawl-web-hero-v1",
+            "bashcrawl-web-journal-v1",
+            "bashcrawl-web-state-v1",
+            "bashcrawl-web-shell-v1"
+          ],
+          "cookies": 0
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?visit=privacy#/story"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 589
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "first-visit",
+            "script": "localStorage.clear();\n\"cleared\"\n"
+          },
+          "ok": true,
+          "value": "cleared",
+          "ms": 6
+        },
+        {
+          "step": "goto",
+          "arg": "/?visit=privacy",
+          "ok": true,
+          "ms": 554
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-try[data-ready]"
+          },
+          "ok": true,
+          "ms": 20
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-consent",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "#bc-try-input",
+            "value": "ls -F"
+          },
+          "ok": true,
+          "ms": 6
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 13
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "cellar/"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Options\"]",
+          "ok": true,
+          "ms": 35
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "This copy collects nothing"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 401
+        },
+        {
+          "step": "screenshot",
+          "arg": "options",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/mobile-options.png",
+          "ms": 45
+        },
+        {
+          "step": "click",
+          "arg": "role=dialog[name=\"Options\"] >> role=button[name=\"Details\"]",
+          "ok": true,
+          "ms": 31
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "This copy of Bashcrawl has analytics switched off entirely: it sends nothing, and there is nothing to opt out of."
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-privacy-switch",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "every-event-is-listed",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 400));\n  const names = [...document.querySelectorAll(\".bc-privacy-events dt code\")].map((code) => code.textContent.trim());\n  const all = names.length ? names : [...document.querySelectorAll(\".bc-privacy-events code\")].map((code) => code.textContent.trim());\n  for (const name of [\"$pageview\", \"app_loaded\", \"command_first_used\", \"quest_completed\", \"reference_searched\", \"consent_updated\"]) {\n    if (!all.includes(name)) throw new Error(`the Privacy panel does not list ${name}`);\n  }\n  if (all.length < 20) throw new Error(`the Privacy panel lists ${all.length} names, expected the whole catalogue`);\n  return { listed: all.length, first: all.slice(0, 6) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "listed": 25,
+            "first": [
+              "$pageview",
+              "app_loaded",
+              "landing_cta_clicked",
+              "hero_created",
+              "intro_finished",
+              "tour_finished"
+            ]
+          },
+          "ms": 404
+        },
+        {
+          "step": "screenshot",
+          "arg": "privacy",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/mobile-privacy.png",
+          "ms": 42
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 279
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 281
+        },
+        {
+          "step": "click",
+          "arg": "main >> role=button[name=\"Privacy\"]",
+          "ok": true,
+          "ms": 34
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-privacy-note"
+          },
+          "ok": true,
+          "ms": 282
+        },
+        {
+          "step": "click",
+          "arg": "text=Skip setup, jump in",
+          "ok": true,
+          "ms": 74
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=button[name=\"Skip tour\"]",
+          "ok": true,
+          "ms": 261
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 17
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"1 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 5
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-consent",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "nothing-left-the-site",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 1500));\n  const here = location.origin;\n  const elsewhere = performance.getEntriesByType(\"resource\").map((entry) => entry.name).filter((url) => !url.startsWith(here + \"/\") && !url.startsWith(\"data:\") && !url.startsWith(\"blob:\"));\n  if (elsewhere.length) throw new Error(`${elsewhere.length} request(s) left the site: ${elsewhere.slice(0, 3).join(\" \")}`);\n  const posthog = performance.getEntriesByType(\"resource\").map((entry) => entry.name).filter((url) => /posthog/i.test(url));\n  if (posthog.length) throw new Error(`PostHog code was loaded: ${posthog[0]}`);\n  if (typeof window.posthog !== \"undefined\") throw new Error(\"window.posthog exists\");\n  const keys = Object.keys(localStorage);\n  const stored = keys.filter((key) => /^ph_|posthog|consent/i.test(key));\n  if (stored.length) throw new Error(`analytics storage was written: ${stored.join(\", \")}`);\n  if (document.cookie) throw new Error(`a cookie was set: ${document.cookie.slice(0, 60)}`);\n  const foreign = [...document.querySelectorAll(\"script[src], iframe[src], img[src]\")].map((el) => el.src).filter((src) => src && !src.startsWith(here) && !src.startsWith(\"data:\"));\n  if (foreign.length) throw new Error(`the page embeds ${foreign[0]}`);\n  return { resources: performance.getEntriesByType(\"resource\").length, elsewhere: 0, storageKeys: keys, cookies: document.cookie.length };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "resources": 50,
+            "elsewhere": 0,
+            "storageKeys": [
+              "bashcrawl-web-hero-v1",
+              "bashcrawl-web-journal-v1",
+              "bashcrawl-web-state-v1",
+              "bashcrawl-web-shell-v1"
+            ],
+            "cookies": 0
+          },
+          "ms": 1508
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/privacy-panel/mobile-story.png",
+          "ms": 73
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/privacy-panel/mobile-options.png",
+        "test/evidence/privacy-panel/mobile-privacy.png",
+        "test/evidence/privacy-panel/mobile-story.png"
+      ],
+      "evals": {
+        "first-visit": "cleared",
+        "every-event-is-listed": {
+          "listed": 25,
+          "first": [
+            "$pageview",
+            "app_loaded",
+            "landing_cta_clicked",
+            "hero_created",
+            "intro_finished",
+            "tour_finished"
+          ]
+        },
+        "nothing-left-the-site": {
+          "resources": 50,
+          "elsewhere": 0,
+          "storageKeys": [
+            "bashcrawl-web-hero-v1",
+            "bashcrawl-web-journal-v1",
+            "bashcrawl-web-state-v1",
+            "bashcrawl-web-shell-v1"
+          ],
+          "cookies": 0
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?visit=privacy#/story"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-20T03:07:31.489Z",
+  "base": "http://127.0.0.1:4004"
+}

@@ -1,0 +1,128 @@
+# =============================================================================
+# verify/scenarios/privacy-panel.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# Analytics in a build with no key (BASHCRAWL-029): the dev server, a preview
+# and the GitHub Pages copy. A first-time visitor is never asked for consent,
+# Options says this copy collects nothing, the Privacy panel says analytics is
+# switched off and still lists every event the production build would send,
+# and the browser has talked to no other host, loaded no PostHog code and
+# stored no consent, PostHog key or cookie. The consent bar, the yes and the
+# no of a build WITH a key are covered by web/src/analytics/*.test.ts(x); the
+# runner has no key to give it.
+# =============================================================================
+id: privacy-panel
+feature: BASHCRAWL-029
+title: "A build with no analytics key asks nothing, sends nothing and says so"
+description: >-
+  A first-time visitor on a build without a PostHog key sees no consent bar,
+  reads in Options that this copy collects nothing, opens the Privacy panel
+  from Options and from the home page's footer, finds analytics switched off
+  and the full list of events, and has made no request to another host.
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - eval:
+      name: first-visit
+      script: |
+        localStorage.clear();
+        "cleared"
+  - goto: /?visit=privacy
+  - wait:
+      selector: ".bc-try[data-ready]"
+  - expect:
+      count:
+        selector: ".bc-consent"
+        max: 0
+  - fill:
+      selector: "#bc-try-input"
+      value: "ls -F"
+  - press: Enter
+  - expect:
+      text: "cellar/"
+  - click: 'button[aria-label="Options"]'
+  - expect:
+      visible: 'role=dialog[name="Options"]'
+  - expect:
+      text: "This copy collects nothing"
+  - wait:
+      ms: 400
+  - screenshot: options
+  - click: 'role=dialog[name="Options"] >> role=button[name="Details"]'
+  - expect:
+      visible: ".bc-privacy-note"
+  - expect:
+      text: "This copy of Bashcrawl has analytics switched off entirely: it sends nothing, and there is nothing to opt out of."
+  - expect:
+      count:
+        selector: ".bc-privacy-switch"
+        max: 0
+  - eval:
+      name: every-event-is-listed
+      script: |
+        (async () => {
+          await new Promise((done) => setTimeout(done, 400));
+          const names = [...document.querySelectorAll(".bc-privacy-events dt code")].map((code) => code.textContent.trim());
+          const all = names.length ? names : [...document.querySelectorAll(".bc-privacy-events code")].map((code) => code.textContent.trim());
+          for (const name of ["$pageview", "app_loaded", "command_first_used", "quest_completed", "reference_searched", "consent_updated"]) {
+            if (!all.includes(name)) throw new Error(`the Privacy panel does not list ${name}`);
+          }
+          if (all.length < 20) throw new Error(`the Privacy panel lists ${all.length} names, expected the whole catalogue`);
+          return { listed: all.length, first: all.slice(0, 6) };
+        })()
+  - screenshot: privacy
+  # One Escape closes one dialog: Privacy goes, the Options it was opened
+  # from stays; a second Escape closes that.
+  - press: Escape
+  - expect:
+      hidden: ".bc-privacy-note"
+  - expect:
+      visible: 'role=dialog[name="Options"]'
+  - press: Escape
+  - expect:
+      hidden: 'role=dialog[name="Options"]'
+  # The same panel from the home page's footer.
+  - click: 'main >> role=button[name="Privacy"]'
+  - expect:
+      visible: ".bc-privacy-note"
+  - press: Escape
+  - expect:
+      hidden: ".bc-privacy-note"
+  # Into the game, so the app has had every reason to report something.
+  - click: "text=Skip setup, jump in"
+  - wait:
+      url: "#/story"
+  - wait:
+      selector: "input.bc-input"
+  - click: 'role=button[name="Skip tour"]'
+  - fill:
+      selector: "input.bc-input"
+      value: "pwd"
+  - press: Enter
+  - expect:
+      visible: 'button[aria-label^="1 of 8 quests complete"]'
+  - expect:
+      count:
+        selector: ".bc-consent"
+        max: 0
+  - eval:
+      name: nothing-left-the-site
+      script: |
+        (async () => {
+          await new Promise((done) => setTimeout(done, 1500));
+          const here = location.origin;
+          const elsewhere = performance.getEntriesByType("resource").map((entry) => entry.name).filter((url) => !url.startsWith(here + "/") && !url.startsWith("data:") && !url.startsWith("blob:"));
+          if (elsewhere.length) throw new Error(`${elsewhere.length} request(s) left the site: ${elsewhere.slice(0, 3).join(" ")}`);
+          const posthog = performance.getEntriesByType("resource").map((entry) => entry.name).filter((url) => /posthog/i.test(url));
+          if (posthog.length) throw new Error(`PostHog code was loaded: ${posthog[0]}`);
+          if (typeof window.posthog !== "undefined") throw new Error("window.posthog exists");
+          const keys = Object.keys(localStorage);
+          const stored = keys.filter((key) => /^ph_|posthog|consent/i.test(key));
+          if (stored.length) throw new Error(`analytics storage was written: ${stored.join(", ")}`);
+          if (document.cookie) throw new Error(`a cookie was set: ${document.cookie.slice(0, 60)}`);
+          const foreign = [...document.querySelectorAll("script[src], iframe[src], img[src]")].map((el) => el.src).filter((src) => src && !src.startsWith(here) && !src.startsWith("data:"));
+          if (foreign.length) throw new Error(`the page embeds ${foreign[0]}`);
+          return { resources: performance.getEntriesByType("resource").length, elsewhere: 0, storageKeys: keys, cookies: document.cookie.length };
+        })()
+  - expect:
+      no_console_errors: true
+  - screenshot: story

@@ -1,0 +1,139 @@
+# =============================================================================
+# verify/scenarios/reference-fit.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The Reference door fits the window (BASHCRAWL-014): the search box, the
+# category chips and the cheatsheet cards sit inside the viewport, and the
+# footer (the door's hint, Privacy, Source on GitHub) is inside it too.
+#
+# KNOWN TO FAIL on all three viewports as of 2026-11-19, for two reasons:
+#
+#   phones   The door lays out 427px wide at every viewport up to 427px
+#            (`.bc-ref-controls` resolves its one grid column to 395px), and
+#            the shell clips what does not fit. At 390px the search box and
+#            every card lose 21px on the right and the "Command History and
+#            Shortcuts" chip 11px; at 360px the cards' text is cut mid-word.
+#            Nothing scrolls sideways, so the cut part cannot be reached.
+#   desktop  At 1280x800 the footer is squeezed to 11px and sits at 800..811px,
+#            under the bottom edge of the window (771..800px in the other
+#            three doors); with a search typed it sits at 794..805px, half cut.
+#
+# door-art.yml's `no_horizontal_scroll` cannot see the first: the document
+# itself never scrolls, the shell clips. The 2026-11-16 screenshots of the old
+# skin (git show 0791192:test/evidence/door-art/mobile-reference-dark.png and
+# desktop-reference-dark.png) show the same cut-off search box and cards and
+# no footer, so both appear to predate the redesign. This scenario goes green
+# when the door fits.
+# =============================================================================
+id: reference-fit
+feature: BASHCRAWL-014
+title: "The Reference door fits the window: search, chips, cards and footer"
+description: >-
+  A returning hero opens the Reference door; the search box, the category
+  chips and every cheatsheet card sit inside the viewport on a desktop and on
+  390 and 360 pixel phones with nothing clipped on the right, and where the
+  footer is shown it is inside the window.
+viewports:
+  - desktop
+  - mobile
+  - name: phone-360
+    width: 360
+    height: 740
+continue_on_failure: true
+steps:
+  - goto: /
+  - eval:
+      name: returning-hero
+      script: |
+        localStorage.clear();
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "reference", onboarded: true, introSeen: true });
+        "seeded"
+  - goto: /?fit=reference#/reference
+  - wait:
+      selector: "input.bc-ref-search"
+  - expect:
+      count:
+        selector: ".bc-ref-card"
+        min: 7
+  - eval:
+      name: door-width
+      script: |
+        (async () => {
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vw = document.documentElement.clientWidth;
+          const right = (selector) => Math.round(document.querySelector(selector).getBoundingClientRect().right);
+          const chips = [...document.querySelectorAll(".bc-ref-controls .bc-chip")].map((chip) => ({ label: chip.innerText.trim(), right: Math.round(chip.getBoundingClientRect().right) }));
+          return {
+            viewport: vw,
+            door: Math.round(document.querySelector("#stage").getBoundingClientRect().width),
+            searchRight: right("input.bc-ref-search"),
+            firstCardRight: right(".bc-ref-card"),
+            chipsPastTheEdge: chips.filter((chip) => chip.right > vw),
+            controlsGrid: getComputedStyle(document.querySelector(".bc-ref-controls")).gridTemplateColumns,
+          };
+        })()
+  - eval:
+      name: reference-fits-the-viewport
+      script: |
+        (async () => {
+          // A sideways scrollbar is not the only way to lose content: the shell
+          // clips, so look for boxes cut off by the viewport's edge. Boxes inside
+          // a container that scrolls sideways on purpose can be reached; banners
+          // and tooltips are passing through.
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vw = document.documentElement.clientWidth;
+          const passing = ".bc-banner, .bc-tooltip, canvas";
+          const range = document.createRange();
+          // Where an inline run paints: the spaces a pre-wrap line ends on hang
+          // past its box without painting anything, so measure the words.
+          const ink = (el) => {
+            let left = Infinity;
+            let right = -Infinity;
+            const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+              for (const word of node.textContent.matchAll(/\S+/g)) {
+                range.setStart(node, word.index);
+                range.setEnd(node, word.index + word[0].length);
+                for (const r of range.getClientRects()) {
+                  if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }
+                }
+              }
+            }
+            return { left, right };
+          };
+          const cut = [];
+          for (const el of document.querySelectorAll("body *")) {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;
+            const cs = getComputedStyle(el);
+            if (cs.visibility === "hidden" || cs.display === "none" || el.closest(passing)) continue;
+            if (cs.display === "inline") {
+              const painted = ink(el);
+              if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;
+            }
+            let box = el.parentElement;
+            let reachable = false;
+            while (box && box !== document.body) {
+              const o = getComputedStyle(box).overflowX;
+              if ((o === "auto" || o === "scroll") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }
+              box = box.parentElement;
+            }
+            if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);
+          }
+          if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(", ")}`);
+          return { viewport: vw, cutOff: 0 };
+        })()
+  - eval:
+      name: footer-inside-the-window
+      script: |
+        (async () => {
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vh = document.documentElement.clientHeight;
+          const footer = document.querySelector(".bc-footer");
+          if (!footer || getComputedStyle(footer).display === "none") return { footer: "not shown at this width", window: vh };
+          const r = footer.getBoundingClientRect();
+          if (r.bottom > vh + 1 || r.top < 0) throw new Error(`the footer sits at ${Math.round(r.top)}..${Math.round(r.bottom)}px, outside the ${vh}px window`);
+          return { footer: [Math.round(r.top), Math.round(r.bottom)], window: vh };
+        })()
+  - screenshot: reference

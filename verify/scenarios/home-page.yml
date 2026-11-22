@@ -1,0 +1,68 @@
+# =============================================================================
+# verify/scenarios/home-page.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The home page (BASHCRAWL-028): a newcomer opens the site's address, reads
+# the pitch, runs real commands in the sandbox terminal (a chip, then a typed
+# line), and skips setup straight into the Story door. The sandbox never
+# touching the saved game is covered by web/src/screens/LandingScreen.test.tsx.
+# =============================================================================
+id: home-page
+feature: BASHCRAWL-028
+title: "A newcomer lands on the home page, tries a command and starts playing"
+description: >-
+  A first-time visitor opens the site, sees what Bashcrawl is, runs pwd and
+  ls -F in the sandbox terminal, then jumps into the Story door, with no
+  console errors and no sideways scroll on a desktop or a phone.
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - eval:
+      name: first-visit
+      script: |
+        localStorage.clear();
+        "cleared"
+  - goto: /?visit=first
+  - wait:
+      selector: ".bc-try[data-ready]"
+  - expect:
+      status: 200
+  - expect:
+      text: "Learn the terminal by playing."
+  - expect:
+      hidden: ".bc-title"
+  - expect:
+      count:
+        selector: ".bc-home-door"
+        min: 4
+        max: 4
+  - click: ".bc-try-chip >> nth=0"
+  - expect:
+      text: "/entrance"
+  - fill:
+      selector: "#bc-try-input"
+      value: "ls -F"
+  - press: Enter
+  - expect:
+      text: "cellar/"
+  - eval:
+      name: sandbox-left-no-save
+      script: |
+        (() => {
+          const save = localStorage.getItem("bashcrawl-web-state-v1");
+          const history = save ? (JSON.parse(save).history ?? []) : [];
+          if (history.length) throw new Error(`the sandbox wrote ${history.length} command(s) into the saved game`);
+          return { savedCommands: history.length, hero: localStorage.getItem("bashcrawl-web-hero-v1") };
+        })()
+  - expect:
+      no_console_errors: true
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: home
+  - click: "text=Skip setup, jump in"
+  - wait:
+      url: "#/story"
+  - wait:
+      selector: "input.bc-input"
+  - expect:
+      no_horizontal_scroll: true
+  - screenshot: story

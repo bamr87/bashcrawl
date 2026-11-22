@@ -71,6 +71,10 @@ export function cycleTheme(): ThemePref {
     return next;
 }
 
+export function subscribeTheme(listener: () => void): () => void {
+    return store.subscribe(listener);
+}
+
 export function getTheme(): ThemeState {
     return store.get();
 }

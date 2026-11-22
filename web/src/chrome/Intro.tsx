@@ -5,13 +5,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { track } from "../analytics/client";
 import { MODE_META, MODES, type Mode } from "../app/modes";
 import { navigate } from "../app/useHashRoute";
 import { play } from "../audio/sfx";
 import { ArtClip } from "../fx/ArtClip";
 import { HeroFigure } from "../hero/HeroFigure";
 import { roleMeta, useHero, type Hero } from "../hero/hero-store";
-import { setPrefs } from "./prefs-store";
+import { getPrefs, setPrefs } from "./prefs-store";
 import { getUi, openOverlay, setUi, startTour, useUi } from "./ui-store";
 
 const DOOR_BLURB: Record<Mode, string> = {
@@ -27,6 +28,7 @@ function doorName(mode: Mode): string {
 }
 
 function finishIntro(hero: Hero | null): void {
+    if (!getPrefs().introSeen) track("intro_finished", { via: "seen" });
     setPrefs({ introSeen: true });
     if (!hero) {
         openOverlay("create");

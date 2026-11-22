@@ -1,0 +1,426 @@
+{
+  "id": "home-page",
+  "title": "A newcomer lands on the home page, tries a command and starts playing",
+  "features": [
+    "BASHCRAWL-028"
+  ],
+  "path": "verify/scenarios/home-page.yml",
+  "started": "2026-11-20T03:07:12.919Z",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 585
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "first-visit",
+            "script": "localStorage.clear();\n\"cleared\"\n"
+          },
+          "ok": true,
+          "value": "cleared",
+          "ms": 4
+        },
+        {
+          "step": "goto",
+          "arg": "/?visit=first",
+          "ok": true,
+          "ms": 551
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-try[data-ready]"
+          },
+          "ok": true,
+          "ms": 17
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "status": 200
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Learn the terminal by playing."
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-title"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-home-door",
+              "min": 4,
+              "max": 4
+            }
+          },
+          "ok": true,
+          "value": 4,
+          "ms": 1
+        },
+        {
+          "step": "click",
+          "arg": ".bc-try-chip >> nth=0",
+          "ok": true,
+          "ms": 20
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "/entrance"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "#bc-try-input",
+            "value": "ls -F"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 6
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "cellar/"
+          },
+          "ok": true,
+          "ms": 27
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "sandbox-left-no-save",
+            "script": "(() => {\n  const save = localStorage.getItem(\"bashcrawl-web-state-v1\");\n  const history = save ? (JSON.parse(save).history ?? []) : [];\n  if (history.length) throw new Error(`the sandbox wrote ${history.length} command(s) into the saved game`);\n  return { savedCommands: history.length, hero: localStorage.getItem(\"bashcrawl-web-hero-v1\") };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "savedCommands": 0,
+            "hero": null
+          },
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "home",
+          "ok": true,
+          "file": "test/evidence/home-page/desktop-home.png",
+          "ms": 58
+        },
+        {
+          "step": "click",
+          "arg": "text=Skip setup, jump in",
+          "ok": true,
+          "ms": 89
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 1280,
+            "cw": 1280
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/home-page/desktop-story.png",
+          "ms": 49
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/home-page/desktop-home.png",
+        "test/evidence/home-page/desktop-story.png"
+      ],
+      "evals": {
+        "first-visit": "cleared",
+        "sandbox-left-no-save": {
+          "savedCommands": 0,
+          "hero": null
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?visit=first#/story"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 585
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "first-visit",
+            "script": "localStorage.clear();\n\"cleared\"\n"
+          },
+          "ok": true,
+          "value": "cleared",
+          "ms": 5
+        },
+        {
+          "step": "goto",
+          "arg": "/?visit=first",
+          "ok": true,
+          "ms": 557
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": ".bc-try[data-ready]"
+          },
+          "ok": true,
+          "ms": 20
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "status": 200
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Learn the terminal by playing."
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": ".bc-title"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-home-door",
+              "min": 4,
+              "max": 4
+            }
+          },
+          "ok": true,
+          "value": 4,
+          "ms": 1
+        },
+        {
+          "step": "click",
+          "arg": ".bc-try-chip >> nth=0",
+          "ok": true,
+          "ms": 31
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "/entrance"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "#bc-try-input",
+            "value": "ls -F"
+          },
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 34
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "cellar/"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "sandbox-left-no-save",
+            "script": "(() => {\n  const save = localStorage.getItem(\"bashcrawl-web-state-v1\");\n  const history = save ? (JSON.parse(save).history ?? []) : [];\n  if (history.length) throw new Error(`the sandbox wrote ${history.length} command(s) into the saved game`);\n  return { savedCommands: history.length, hero: localStorage.getItem(\"bashcrawl-web-hero-v1\") };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "savedCommands": 0,
+            "hero": null
+          },
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "home",
+          "ok": true,
+          "file": "test/evidence/home-page/mobile-home.png",
+          "ms": 60
+        },
+        {
+          "step": "click",
+          "arg": "text=Skip setup, jump in",
+          "ok": true,
+          "ms": 82
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_horizontal_scroll": true
+          },
+          "ok": true,
+          "value": {
+            "sw": 390,
+            "cw": 390
+          },
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/home-page/mobile-story.png",
+          "ms": 30
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/home-page/mobile-home.png",
+        "test/evidence/home-page/mobile-story.png"
+      ],
+      "evals": {
+        "first-visit": "cleared",
+        "sandbox-left-no-save": {
+          "savedCommands": 0,
+          "hero": null
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?visit=first#/story"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-20T03:07:15.843Z",
+  "base": "http://127.0.0.1:4004"
+}

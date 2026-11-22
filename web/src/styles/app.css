@@ -1,6 +1,8 @@
-/* Bashcrawl web — Tailwind 4 over the fleet tokens, base styles, and the
- * app shell's chrome (header, tabs, buttons, toasts, dialogs). Everything
- * reads tokens from tokens.css; no colour or z-index literals here. */
+/* Bashcrawl web — Tailwind 4 over the fleet tokens, base styles, the shared
+ * primitives (card, button, key cap, eyebrow) and the app shell's chrome
+ * (header, door tabs, footer, toasts, dialogs, the consent bar). Everything
+ * reads tokens from tokens.css; no colour or z-index literals here. The
+ * visual language is described in docs/design-system.md. */
 @import "./tokens.css";
 @import "tailwindcss";
 
@@ -46,6 +48,7 @@
         font-size: var(--fleet-text-base);
         line-height: var(--fleet-leading-normal);
         -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
     }
     code,
     kbd,
@@ -60,6 +63,7 @@
     }
     a {
         color: var(--fleet-color-link);
+        text-underline-offset: 0.18em;
     }
     a:hover {
         color: var(--fleet-color-link-hover);
@@ -68,88 +72,136 @@
         outline: 2px solid var(--fleet-color-primary);
         outline-offset: 2px;
     }
+    ::selection {
+        background: color-mix(in srgb, var(--fleet-color-primary) 32%, transparent);
+    }
     [hidden] {
         display: none !important;
     }
 }
 
 @layer components {
-    /* ── pixel chrome primitives ── */
+    /* ── primitives ── */
+    /* A heading: the UI face, a little tight. (The name is historical.) */
     .bc-display {
-        font-family: var(--fleet-font-mono);
-        font-weight: var(--fleet-font-weight-bold);
+        font-family: var(--fleet-font-sans);
+        font-weight: var(--fleet-font-weight-semibold);
         letter-spacing: var(--bc-display-tracking);
-        text-transform: uppercase;
+        line-height: var(--fleet-leading-tight);
     }
-    /* A bevelled, corner-notched panel: the 9-slice window of a 16-bit HUD,
-       drawn with shadows and a clip so it follows the theme. */
+    /* The small tracked label above a heading or a group. */
+    .bc-eyebrow {
+        font-size: var(--fleet-text-xs);
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-eyebrow-tracking);
+        text-transform: uppercase;
+        color: var(--fleet-color-ink-muted);
+    }
+    /* A card: a flat surface, a hairline, a soft corner. The hairline is an
+       inset shadow so a component can add its own elevation beside it. */
     .bc-frame {
         position: relative;
         background: var(--fleet-color-bg-elevated);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
-            inset -2px -2px 0 0 var(--bc-color-bevel-lo);
-        clip-path: polygon(
-            3px 0, calc(100% - 3px) 0, 100% 3px,
-            100% calc(100% - 3px), calc(100% - 3px) 100%,
-            3px 100%, 0 calc(100% - 3px), 0 3px
-        );
+        border-radius: var(--fleet-radius-lg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
     }
     .bc-frame-sunken {
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
-            inset -2px -2px 0 0 var(--bc-color-bevel-hi);
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
     }
     .bc-btn {
         display: inline-flex;
         align-items: center;
-        gap: var(--fleet-space-2);
-        padding: 0.3rem 0.7rem;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 2rem;
+        padding: 0.3rem 0.75rem;
         border: 0;
+        border-radius: var(--fleet-radius-base);
         background: var(--fleet-color-bg-muted);
         color: var(--fleet-color-ink);
-        font-family: var(--fleet-font-mono);
+        font-family: var(--fleet-font-sans);
         font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-medium);
         line-height: 1.3;
+        text-decoration: none;
         cursor: pointer;
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
-            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
-            var(--fleet-shadow-xs);
-        clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
-        transition: transform var(--fleet-motion-fast) var(--fleet-ease), color var(--fleet-motion-fast) var(--fleet-ease);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        transition:
+            background var(--fleet-motion-fast) var(--fleet-ease),
+            box-shadow var(--fleet-motion-fast) var(--fleet-ease),
+            color var(--fleet-motion-fast) var(--fleet-ease),
+            transform var(--fleet-motion-fast) var(--fleet-ease);
         white-space: nowrap;
     }
+    .bc-btn svg {
+        flex: none;
+        width: 1rem;
+        height: 1rem;
+    }
     .bc-btn:hover {
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
+        background: color-mix(in srgb, var(--fleet-color-ink) 9%, var(--fleet-color-bg-muted));
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong);
     }
-    .bc-btn:active,
-    .bc-btn[aria-pressed="true"] {
-        transform: translate(1px, 1px);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-lo),
-            inset -2px -2px 0 0 var(--bc-color-bevel-hi);
+    .bc-btn:active {
+        transform: translateY(1px);
+    }
+    .bc-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
     .bc-btn[aria-pressed="true"] {
         color: var(--fleet-color-primary);
+        background: color-mix(in srgb, var(--fleet-color-primary) 12%, var(--fleet-color-bg-muted));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fleet-color-primary) 45%, var(--fleet-color-border));
     }
     .bc-btn-primary {
-        background: color-mix(in srgb, var(--fleet-color-primary) 22%, var(--fleet-color-bg-muted));
-        color: var(--fleet-color-primary);
+        background: var(--fleet-color-primary);
+        color: var(--bc-color-on-primary);
+        font-weight: var(--fleet-font-weight-semibold);
+        box-shadow: var(--fleet-shadow-xs);
+    }
+    .bc-btn-primary:hover {
+        color: var(--bc-color-on-primary);
+        background: color-mix(in srgb, var(--fleet-color-ink) 14%, var(--fleet-color-primary));
+        box-shadow: var(--fleet-shadow-sm);
+    }
+    /* Chrome that should not compete with content: no fill until hovered. */
+    .bc-btn-ghost {
+        background: transparent;
+        color: var(--fleet-color-ink-muted);
+        box-shadow: none;
+    }
+    .bc-btn-ghost:hover {
+        color: var(--fleet-color-ink);
+        background: var(--fleet-color-bg-muted);
+        box-shadow: none;
+    }
+    .bc-btn-icon {
+        width: 2.25rem;
+        min-height: 2.25rem;
+        padding: 0;
+    }
+    .bc-btn-icon svg {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+    .bc-btn-lg {
+        min-height: 2.75rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--fleet-radius-lg);
+        font-size: var(--fleet-text-base);
     }
     .bc-kbd {
         display: inline-block;
         min-width: 1.6em;
-        padding: 0 0.35em;
+        padding: 0.05em 0.4em;
         text-align: center;
         font-size: var(--fleet-text-xs);
-        color: var(--fleet-color-code-ink);
-        background: var(--fleet-color-code-bg);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border), var(--fleet-shadow-xs);
+        color: var(--fleet-color-ink);
+        background: var(--fleet-color-bg-muted);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border), 0 1px 0 var(--fleet-color-border);
         border-radius: var(--fleet-radius-sm);
     }
 
@@ -160,9 +212,10 @@
         top: -100%;
         z-index: var(--fleet-layer-skip-link);
         padding: var(--fleet-space-2) var(--fleet-space-3);
+        border-radius: var(--fleet-radius-base);
         background: var(--fleet-color-primary);
-        color: var(--fleet-color-bg);
-        font-weight: var(--fleet-font-weight-bold);
+        color: var(--bc-color-on-primary);
+        font-weight: var(--fleet-font-weight-semibold);
         text-decoration: none;
     }
     .bc-skip:focus {
@@ -176,56 +229,76 @@
         grid-template-rows: auto auto minmax(0, 1fr) auto auto;
         height: 100vh;
         height: 100dvh;
-        width: min(1480px, 100vw);
-        margin: 0 auto;
-        background:
-            radial-gradient(1200px 500px at 50% -10%, color-mix(in srgb, var(--bc-color-torch) 14%, transparent), transparent 70%),
-            var(--fleet-color-bg);
+        background: var(--fleet-color-bg);
         overflow: hidden;
     }
     .bc-shell > * {
         min-width: 0;
     }
+    /* Each part keeps its own row whatever else is present: the status and
+       dock slots vanish when empty, and auto-placement would otherwise move
+       <main> up into an auto row and squeeze the footer off the window. */
+    .bc-shell > .bc-header { grid-row: 1; }
+    .bc-shell > .bc-status-slot { grid-row: 2; }
+    .bc-shell > .bc-main { grid-row: 3; }
+    .bc-shell > .bc-dock-slot { grid-row: 4; }
+    .bc-shell > .bc-footer { grid-row: 5; }
     .bc-header {
         position: relative;
         z-index: var(--fleet-layer-header);
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
-        justify-content: space-between;
         gap: var(--fleet-space-3);
-        min-height: 54px;
-        padding: var(--fleet-space-2) var(--fleet-space-3);
-        background: var(--fleet-color-bg-elevated);
-        box-shadow:
-            inset 0 -2px 0 0 var(--bc-color-bevel-lo),
-            inset 0 1px 0 0 var(--bc-color-bevel-hi);
+        height: var(--bc-header-height);
+        padding: 0 var(--fleet-space-container-x);
+        background: color-mix(in srgb, var(--fleet-color-bg-elevated) 88%, transparent);
+        border-bottom: 1px solid var(--fleet-color-border);
+        backdrop-filter: blur(10px);
     }
     .bc-brand {
-        display: flex;
-        align-items: baseline;
-        gap: var(--fleet-space-2);
-        color: var(--fleet-color-primary);
-        text-shadow: 0 2px 0 var(--bc-color-bevel-lo);
+        justify-self: start;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.25rem 0.4rem 0.25rem 0.25rem;
+        margin-left: -0.25rem;
+        border: 0;
+        border-radius: var(--fleet-radius-base);
+        background: transparent;
+        color: var(--fleet-color-ink);
+        cursor: pointer;
         white-space: nowrap;
+        text-decoration: none;
     }
-    .bc-brand strong {
-        font-size: 1.05rem;
+    .bc-brand:hover {
+        color: var(--fleet-color-ink);
+        background: var(--fleet-color-bg-muted);
     }
-    .bc-brand-sub {
-        color: var(--fleet-color-ink-muted);
-        font-size: var(--fleet-text-sm);
-        letter-spacing: 0.04em;
-        text-shadow: none;
+    .bc-brand-mark {
+        flex: none;
+        width: 1.75rem;
+        height: 1.75rem;
+        color: var(--fleet-color-primary);
+    }
+    .bc-brand-name {
+        font-family: var(--fleet-font-mono);
+        font-size: 1rem;
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: -0.01em;
     }
     .bc-actions {
+        justify-self: end;
         display: flex;
         align-items: center;
-        gap: var(--fleet-space-2);
+        gap: 0.25rem;
     }
     .bc-main {
         position: relative;
         min-height: 0;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
     }
     .bc-main:focus {
         outline: none;
@@ -235,6 +308,8 @@
     .bc-stage {
         min-height: 0;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
         transform: translate3d(var(--shake-x, 0px), var(--shake-y, 0px), 0) rotate(var(--shake-rot, 0deg));
         will-change: transform;
     }
@@ -242,67 +317,75 @@
         display: flex;
         align-items: center;
         gap: var(--fleet-space-3);
-        padding: 0.4rem var(--fleet-space-3);
-        font-size: var(--fleet-text-sm);
+        padding: 0.3rem var(--fleet-space-container-x);
+        font-size: var(--fleet-text-xs);
         color: var(--fleet-color-ink-muted);
-        background: var(--fleet-color-bg-elevated);
-        box-shadow: inset 0 1px 0 0 var(--bc-color-bevel-hi);
+        border-top: 1px solid var(--fleet-color-border);
         overflow: hidden;
         white-space: nowrap;
+    }
+    .bc-footer:empty {
+        display: none;
     }
     .bc-footer-hint {
         flex: 1 1 auto;
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: var(--fleet-color-accent);
     }
-    .bc-footer a {
+    .bc-footer a,
+    .bc-footer button {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        cursor: pointer;
         text-decoration: none;
     }
+    .bc-footer a:hover,
+    .bc-footer button:hover {
+        color: var(--fleet-color-ink);
+    }
 
-    /* ── mode tabs ── */
+    /* ── door tabs: a segmented control ── */
     .bc-modes [role="tablist"] {
         display: flex;
-        gap: var(--fleet-space-1);
+        gap: 2px;
+        padding: 3px;
+        border-radius: var(--fleet-radius-pill);
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
     }
     .bc-tab {
         position: relative;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.35rem 0.85rem;
+        gap: 0.45rem;
+        padding: 0.35rem 0.9rem;
         border: 0;
+        border-radius: var(--fleet-radius-pill);
         background: transparent;
         color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-sm);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        font-weight: var(--fleet-font-weight-medium);
         cursor: pointer;
-        transition: color var(--fleet-motion-fast) var(--fleet-ease);
+        transition: color var(--fleet-motion-fast) var(--fleet-ease), background var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-tab svg {
+        flex: none;
+        width: 1rem;
+        height: 1rem;
     }
     .bc-tab:hover {
         color: var(--fleet-color-ink);
     }
-    .bc-tab::after {
-        content: "";
-        position: absolute;
-        left: 0.6rem;
-        right: 0.6rem;
-        bottom: 0;
-        height: 3px;
-        background: var(--fleet-color-primary);
-        transform: scaleX(0);
-        transform-origin: center;
-        transition: transform var(--fleet-motion-base) var(--fleet-ease);
-    }
     .bc-tab[aria-selected="true"] {
-        color: var(--fleet-color-primary);
-        text-shadow: var(--bc-glow-gold);
+        color: var(--fleet-color-ink);
+        background: var(--fleet-color-bg-muted);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-xs);
     }
-    .bc-tab[aria-selected="true"]::after {
-        transform: scaleX(1);
+    .bc-tab[aria-selected="true"] svg {
+        color: var(--fleet-color-primary);
     }
 
     /* ── toasts (one announcer, UPS-FE-18) ── */
@@ -321,16 +404,12 @@
         display: flex;
         align-items: center;
         gap: var(--fleet-space-2);
-        padding: var(--fleet-space-2) var(--fleet-space-3);
-        font-family: var(--fleet-font-mono);
+        padding: 0.6rem var(--fleet-space-3);
+        border-radius: var(--fleet-radius-lg);
         font-size: var(--fleet-text-sm);
         color: var(--fleet-color-ink);
         pointer-events: auto;
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
-            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
-            var(--fleet-shadow-md);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-md);
     }
     .bc-toast[data-variant="success"] { color: var(--fleet-color-success); }
     .bc-toast[data-variant="error"] { color: var(--fleet-color-danger); }
@@ -364,8 +443,8 @@
         display: grid;
         place-items: center;
         padding: var(--fleet-space-3);
-        background: color-mix(in srgb, var(--bc-color-overlay) 72%, transparent);
-        backdrop-filter: blur(2px);
+        background: color-mix(in srgb, var(--bc-color-overlay) 62%, transparent);
+        backdrop-filter: blur(6px);
     }
     .bc-dialog {
         width: min(640px, 100%);
@@ -375,15 +454,12 @@
         gap: var(--fleet-space-3);
         padding: var(--fleet-space-4);
         overflow: auto;
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 3px 3px 0 0 var(--bc-color-bevel-hi),
-            inset -3px -3px 0 0 var(--bc-color-bevel-lo),
-            var(--fleet-shadow-lg);
+        border-radius: var(--fleet-radius-xl);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
     }
     .bc-dialog h2 {
         margin: 0;
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
         font-size: var(--fleet-text-h2);
     }
     .bc-dialog-head {
@@ -409,18 +485,130 @@
         color: var(--fleet-color-ink-muted);
     }
 
-    /* ── plain content pages (404, error) ── */
+    /* ── the consent bar (UPS-FE-24): one question, out of the way ── */
+    .bc-consent {
+        position: fixed;
+        left: 50%;
+        bottom: calc(var(--bc-bottom-chrome, 0px) + var(--fleet-space-3) + env(safe-area-inset-bottom, 0px));
+        z-index: var(--fleet-layer-consent);
+        width: min(46rem, calc(100vw - 2 * var(--fleet-space-3)));
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-3) var(--fleet-space-4);
+        padding: var(--fleet-space-3) var(--fleet-space-4);
+        border-radius: var(--fleet-radius-xl);
+        background: var(--bc-color-surface-raised);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
+    }
+    .bc-consent-text {
+        flex: 1 1 18rem;
+        min-width: 0;
+    }
+    .bc-consent-title {
+        margin: 0 0 0.15rem;
+        font-size: var(--fleet-text-base);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-consent p {
+        margin: 0;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-consent-actions {
+        flex: none;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--fleet-space-2);
+    }
+
+    /* ── the privacy panel ── */
+    .bc-privacy {
+        width: min(720px, 100%);
+    }
+    .bc-privacy-body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fleet-space-2);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-privacy-body p,
+    .bc-privacy-body ul {
+        margin: 0;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-privacy-body ul {
+        padding-left: 1.2rem;
+        list-style: disc;
+    }
+    .bc-privacy-body li {
+        margin: 0.2rem 0;
+    }
+    .bc-privacy-body h3 {
+        margin: var(--fleet-space-2) 0 0;
+        font-size: var(--fleet-text-base);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-privacy-switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fleet-space-3);
+        padding: var(--fleet-space-3);
+        border-radius: var(--fleet-radius-lg);
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+    }
+    .bc-privacy-switch h3 {
+        margin: 0;
+    }
+    .bc-privacy-note {
+        padding: var(--fleet-space-3);
+        border-radius: var(--fleet-radius-lg);
+        background: var(--fleet-color-bg);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+    }
+    .bc-privacy-events {
+        margin: 0;
+        display: grid;
+        gap: 1px;
+        border-radius: var(--fleet-radius-lg);
+        background: var(--fleet-color-border);
+        box-shadow: 0 0 0 1px var(--fleet-color-border);
+        overflow: hidden;
+    }
+    .bc-privacy-events > div {
+        padding: 0.55rem var(--fleet-space-3);
+        background: var(--fleet-color-bg);
+    }
+    .bc-privacy-events dt span {
+        color: var(--fleet-color-ink);
+    }
+    .bc-privacy-events dd {
+        margin: 0.2rem 0 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-privacy-events code {
+        color: var(--fleet-color-code-ink);
+        font-size: var(--fleet-text-xs);
+    }
+
+    /* ── plain content pages (404, error, loading) ── */
     .bc-page {
         align-self: center;
         justify-self: center;
-        width: min(640px, 100%);
-        padding: var(--fleet-space-4);
+        width: min(640px, calc(100% - 2 * var(--fleet-space-4)));
+        padding: var(--fleet-space-5) var(--fleet-space-4);
         margin: var(--fleet-space-4);
         text-align: center;
     }
     .bc-page h1 {
         margin: 0 0 var(--fleet-space-2);
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink);
         font-size: var(--fleet-text-h1);
     }
     .bc-page p {
@@ -430,7 +618,8 @@
         text-align: left;
         max-height: 12rem;
         overflow: auto;
-        padding: var(--fleet-space-2);
+        padding: var(--fleet-space-3);
+        border-radius: var(--fleet-radius-base);
         background: var(--fleet-color-code-bg);
         color: var(--fleet-color-code-ink);
         font-size: var(--fleet-text-sm);
@@ -444,42 +633,62 @@
     }
 }
 
-/* ── small screens ── */
+/* ── small screens: one header row, the doors as a tab bar ── */
 @media (max-width: 900px) {
     .bc-header {
-        flex-wrap: wrap;
+        grid-template-columns: auto minmax(0, 1fr) auto;
         gap: var(--fleet-space-2);
-        padding: var(--fleet-space-2);
+        padding: 0 var(--fleet-space-2);
     }
-    .bc-modes {
-        order: 3;
-        width: 100%;
+    .bc-brand-name,
+    .bc-action-wide,
+    .bc-footer {
+        display: none;
+    }
+    .bc-brand {
+        margin-left: 0;
+        padding: 0.25rem;
     }
     .bc-modes [role="tablist"] {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
+        padding: 0;
+        background: none;
+        box-shadow: none;
     }
     .bc-tab {
+        flex-direction: column;
         justify-content: center;
-        padding: 0.35rem 0.2rem;
-        font-size: var(--fleet-text-xs);
+        gap: 0.1rem;
+        padding: 0.3rem 0.1rem;
+        border-radius: var(--fleet-radius-base);
+        font-size: 0.6875rem;
+        line-height: 1.2;
+    }
+    .bc-tab svg {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+    .bc-tab[aria-selected="true"] {
+        background: none;
+        box-shadow: none;
+        color: var(--fleet-color-primary);
+    }
+    .bc-consent {
+        flex-direction: column;
+        align-items: stretch;
+        padding: var(--fleet-space-3);
+    }
+    /* Stacked, the copy must not also keep its row-layout basis as a height. */
+    .bc-consent-text {
+        flex: none;
+    }
+    .bc-consent-actions .bc-btn {
+        flex: 1 1 auto;
     }
 }
-@media (max-width: 600px) {
-    .bc-brand-sub,
-    .bc-footer a {
+@media (min-width: 901px) {
+    .bc-action-narrow {
         display: none;
-    }
-    .bc-actions .bc-btn {
-        padding: 0.25rem 0.45rem;
-        font-size: var(--fleet-text-xs);
-    }
-}
-@media (max-width: 440px) {
-    .bc-tab-text {
-        display: none;
-    }
-    .bc-tab {
-        font-size: var(--fleet-text-base);
     }
 }

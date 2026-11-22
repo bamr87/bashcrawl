@@ -1,12 +1,12 @@
-// The pause menu (Escape with nothing else open, Alt+M, `menu`): Continue,
-// Journal, Hero, Options, How to play, Title screen — the same menu cursor
-// as the title. Escape or Continue returns to the game.
+// The game menu (Escape with nothing else open, Alt+M, `menu`, the header's
+// menu button on a small screen): Continue, Journal, Hero, Options, Docs,
+// How to play, Title screen. Escape or Continue returns to the game.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, type KeyboardEvent } from "react";
 
 import { play } from "../audio/sfx";
 import { focusPrompt } from "../terminal/prompt-store";
-import { closeOverlay, getUi, openOverlay, useUi, type Overlay } from "./ui-store";
+import { closeOverlay, getUi, openOverlay, setUi, useUi, type Overlay } from "./ui-store";
 
 interface Item {
     id: string;
@@ -29,6 +29,7 @@ const ITEMS: Item[] = [
     { id: "journal", label: "Journal", sub: "chronicle · quests · lore · bestiary · badges", run: to("journal") },
     { id: "hero", label: "Hero", sub: "profile and wardrobe", run: to("profile") },
     { id: "options", label: "Options", sub: "theme · sound · effects · text", run: to("options") },
+    { id: "docs", label: "Docs", sub: "commands, rooms and a glossary", run: () => { closeOverlay(); setUi({ docsOpen: true }); } },
     { id: "how", label: "How to play", sub: "the overview again", run: to("intro") },
     { id: "title", label: "Title screen", sub: "continue, new hero, or start over", run: to("title") },
 ];
@@ -74,7 +75,7 @@ export function GameMenu() {
                     onMouseDown={(event) => { if (event.target === event.currentTarget) resume(); }}
                 >
                     <motion.div className="bc-gamemenu-panel bc-frame" initial={{ y: 10, scale: 0.98 }} animate={{ y: 0, scale: 1 }} transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}>
-                        <h2 className="bc-display">Paused</h2>
+                        <h2 className="bc-display">Menu</h2>
                         <ul className="bc-menu" role="menu" aria-label="Game menu" onKeyDown={onMenuKey}>
                             {ITEMS.map((item, index) => (
                                 <li key={item.id} role="none">

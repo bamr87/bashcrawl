@@ -1,6 +1,7 @@
-/* The HUD: status bar, panels (nameplates, gauges, quest log, vignette,
- * map, pack, skills, the pixel hero), the panels overlay on small screens,
- * and the panel pulses the effects layer triggers. Tokens only. */
+/* The HUD: status bar, panels (cards with an eyebrow title: quest log,
+ * vignette, map, pack, skills, the hero sprite), gauges, the panels overlay
+ * on small screens, and the panel pulses the effects layer triggers. Tokens
+ * only. */
 @layer components {
     .bc-visually-hidden {
         position: absolute;
@@ -17,8 +18,9 @@
     .bc-success { color: var(--fleet-color-success); }
     .bc-group-label {
         margin: var(--fleet-space-2) 0 var(--fleet-space-1);
-        font-size: var(--fleet-text-xs);
-        letter-spacing: 0.1em;
+        font-size: 0.6875rem;
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-eyebrow-tracking);
         text-transform: uppercase;
         color: var(--fleet-color-ink-muted);
     }
@@ -28,9 +30,9 @@
         list-style: none;
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
+        gap: 0.2rem;
         font-size: var(--fleet-text-sm);
-        line-height: 1.35;
+        line-height: 1.4;
     }
     .bc-chips {
         display: flex;
@@ -56,8 +58,8 @@
         padding: 0.05rem 0.5rem;
         font-size: var(--fleet-text-xs);
         color: var(--fleet-color-accent);
-        background: color-mix(in srgb, var(--fleet-color-accent) 14%, var(--fleet-color-bg-muted));
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        border-radius: var(--fleet-radius-pill);
+        background: color-mix(in srgb, var(--fleet-color-accent) 14%, transparent);
     }
     .bc-cheat {
         margin: 0.25rem 0;
@@ -74,12 +76,10 @@
         display: flex;
         align-items: center;
         gap: var(--fleet-space-2);
-        min-height: 40px;
-        padding: 0.3rem var(--fleet-space-3);
-        background: var(--fleet-color-bg-elevated);
-        box-shadow:
-            inset 0 1px 0 0 var(--bc-color-bevel-hi),
-            inset 0 -2px 0 0 var(--bc-color-bevel-lo);
+        min-height: 2.5rem;
+        padding: 0.25rem var(--fleet-space-container-x);
+        border-bottom: 1px solid var(--fleet-color-border);
+        background: var(--fleet-color-bg);
     }
     .bc-status {
         flex: 1 1 auto;
@@ -96,34 +96,30 @@
         display: inline-flex;
         align-items: center;
         gap: 0.45rem;
-        padding: 0.2rem 0.6rem;
+        padding: 0.25rem 0.6rem;
         border: 0;
+        border-radius: var(--fleet-radius-base);
         background: transparent;
         color: var(--fleet-color-ink-muted);
-        font-family: var(--fleet-font-mono);
         font-size: var(--fleet-text-sm);
         line-height: 1.3;
         white-space: nowrap;
         cursor: pointer;
-        box-shadow: inset 0 0 0 1px transparent;
-        transition: color var(--fleet-motion-fast) var(--fleet-ease), box-shadow var(--fleet-motion-fast) var(--fleet-ease);
+        transition: color var(--fleet-motion-fast) var(--fleet-ease), background var(--fleet-motion-fast) var(--fleet-ease);
     }
-    .bc-status-item:hover,
-    .bc-status-item:focus-visible {
+    .bc-status-item:hover {
         color: var(--fleet-color-ink);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
-        outline: none;
+        background: var(--fleet-color-bg-muted);
     }
     .bc-status-rank {
-        color: var(--fleet-color-primary);
-        font-weight: var(--fleet-font-weight-bold);
-        text-shadow: 0 1px 0 var(--bc-color-bevel-lo);
+        color: var(--fleet-color-ink);
+        font-weight: var(--fleet-font-weight-semibold);
     }
-    .bc-status-rank-title {
-        font-family: var(--fleet-font-sans);
-        letter-spacing: 0.01em;
+    .bc-status-num {
+        color: var(--fleet-color-ink);
+        font-family: var(--fleet-font-mono);
+        font-variant-numeric: tabular-nums;
     }
-    .bc-status-num { color: var(--fleet-color-ink); }
     .bc-status-sub { font-size: var(--fleet-text-xs); }
     .bc-status-hp .bc-status-num { color: var(--fleet-color-success); }
     .bc-status-hp[data-level="mid"] .bc-status-num { color: var(--fleet-color-warning); }
@@ -143,51 +139,49 @@
         position: relative;
         display: inline-block;
         width: var(--gauge-w, 84px);
-        height: 10px;
+        height: 6px;
         vertical-align: middle;
+        border-radius: var(--fleet-radius-pill);
         background: var(--bc-color-gauge-track);
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-border),
-            inset 1px 1px 0 0 var(--bc-color-bevel-lo);
         overflow: hidden;
     }
     .bc-gauge-fill {
         position: absolute;
-        inset: 1px;
-        width: calc((100% - 2px) * var(--fill, 0) / 100);
-        background: linear-gradient(180deg, color-mix(in srgb, var(--gauge-tone) 70%, white 30%) 0 40%, var(--gauge-tone) 40%);
+        inset: 0;
+        width: calc(100% * var(--fill, 0) / 100);
+        border-radius: var(--fleet-radius-pill);
+        background: var(--gauge-tone);
         transition: width var(--fleet-motion-slow) var(--fleet-ease), background-color var(--fleet-motion-base) var(--fleet-ease);
     }
+    /* The old gauge was cut into segments; the new one is a plain bar. */
     .bc-gauge-segs {
-        position: absolute;
-        inset: 1px;
-        background: repeating-linear-gradient(
-            90deg,
-            transparent 0 calc(100% / var(--segments, 10) - 1px),
-            var(--bc-color-gauge-track) calc(100% / var(--segments, 10) - 1px) calc(100% / var(--segments, 10))
-        );
+        display: none;
     }
     .bc-gauge[data-tone="xp"] { --gauge-tone: var(--fleet-color-accent); }
     .bc-gauge[data-tone="quest"] { --gauge-tone: var(--fleet-color-primary); }
-    .bc-gauge[data-tone="skill"] { --gauge-tone: var(--fleet-color-info); width: var(--gauge-w, 52px); height: 8px; }
+    .bc-gauge[data-tone="skill"] { --gauge-tone: var(--fleet-color-info); width: var(--gauge-w, 52px); height: 5px; }
     .bc-gauge[data-tone="hp"] { --gauge-tone: var(--fleet-color-success); }
     .bc-gauge[data-tone="hp"][data-level="mid"] { --gauge-tone: var(--fleet-color-warning); }
     .bc-gauge[data-tone="hp"][data-level="low"] { --gauge-tone: var(--fleet-color-danger); }
-    .bc-gauge-wide { --gauge-w: 100%; height: 12px; }
+    .bc-gauge-wide { --gauge-w: 100%; height: 8px; }
     .bc-gauge-skill { margin-left: auto; }
 
     /* ── panels ── */
     .bc-panel {
         flex: 0 0 auto;
-        padding: var(--fleet-space-2) var(--fleet-space-3) var(--fleet-space-3);
+        padding: 0.35rem var(--fleet-space-3) var(--fleet-space-3);
+        overflow: hidden;
     }
     .bc-panel[data-collapsed] {
-        padding-bottom: var(--fleet-space-2);
+        padding-bottom: 0.35rem;
     }
     .bc-panel-title {
         margin: 0 0 var(--fleet-space-2);
-        font-size: var(--fleet-text-xs);
-        color: var(--fleet-color-primary);
+        font-size: 0.6875rem;
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-eyebrow-tracking);
+        text-transform: uppercase;
+        color: var(--fleet-color-ink-muted);
     }
     .bc-panel[data-collapsed] .bc-panel-title {
         margin-bottom: 0;
@@ -198,16 +192,15 @@
         gap: 0.4rem;
         width: calc(100% + 2 * var(--fleet-space-3));
         margin: 0 calc(-1 * var(--fleet-space-3));
-        padding: 0.25rem var(--fleet-space-3);
+        padding: 0.35rem var(--fleet-space-3);
         border: 0;
-        background: linear-gradient(180deg, color-mix(in srgb, var(--fleet-color-primary) 12%, transparent), transparent);
+        background: transparent;
         color: inherit;
         font: inherit;
         letter-spacing: inherit;
         text-transform: inherit;
         text-align: left;
         cursor: pointer;
-        box-shadow: inset 0 -1px 0 0 color-mix(in srgb, var(--fleet-color-border) 70%, transparent);
     }
     .bc-panel-toggle:hover { color: var(--fleet-color-ink); }
     .bc-panel-caret { opacity: 0.7; }
@@ -234,7 +227,8 @@
 
     /* quest */
     .bc-quest-title {
-        font-weight: var(--fleet-font-weight-bold);
+        font-size: var(--fleet-text-base);
+        font-weight: var(--fleet-font-weight-semibold);
         color: var(--fleet-color-ink);
     }
     .bc-quest-objective { line-height: 1.4; }
@@ -262,7 +256,8 @@
 
     /* room */
     .bc-room-title {
-        font-weight: var(--fleet-font-weight-bold);
+        font-size: var(--fleet-text-base);
+        font-weight: var(--fleet-font-weight-semibold);
         color: var(--fleet-color-ink);
     }
     .bc-room-path { font-family: var(--fleet-font-mono); font-size: var(--fleet-text-xs); }
@@ -288,6 +283,10 @@
     .bc-vignette[data-room-art="vault"] { color: var(--fleet-color-info); }
     .bc-vignette[data-room-art="graveyard"] { color: var(--fleet-color-ink-muted); }
     .bc-vignette[data-room-art="rift"] { color: var(--fleet-color-accent); }
+    [data-resolved="light"] .bc-vignette,
+    [data-resolved="light"] .bc-door-art {
+        filter: brightness(0.6) saturate(1.6);
+    }
     .bc-room-entries li[data-type="dir"] { color: var(--fleet-color-info); }
     .bc-room-entries li[data-type="exec"] { color: var(--fleet-color-primary); }
 
@@ -461,9 +460,9 @@
 /* ── panel pulses (the effects layer toggles these classes) ── */
 @media (prefers-reduced-motion: no-preference) {
     @keyframes bc-sparkle {
-        0%, 100% { box-shadow: inset 0 0 0 1px var(--fleet-color-border), inset 2px 2px 0 0 var(--bc-color-bevel-hi), inset -2px -2px 0 0 var(--bc-color-bevel-lo); transform: translateY(0); }
-        25% { box-shadow: 0 0 18px 4px color-mix(in srgb, var(--fleet-color-primary) 55%, transparent), inset 0 0 0 1px var(--fleet-color-primary), inset 2px 2px 0 0 var(--bc-color-bevel-hi), inset -2px -2px 0 0 var(--bc-color-bevel-lo); transform: translateY(-1px); }
-        60% { box-shadow: 0 0 12px 3px color-mix(in srgb, var(--fleet-color-accent) 55%, transparent), inset 0 0 0 1px var(--fleet-color-accent), inset 2px 2px 0 0 var(--bc-color-bevel-hi), inset -2px -2px 0 0 var(--bc-color-bevel-lo); transform: translateY(0); }
+        0%, 100% { box-shadow: inset 0 0 0 1px var(--fleet-color-border); transform: translateY(0); }
+        25% { box-shadow: 0 0 18px 4px color-mix(in srgb, var(--fleet-color-primary) 55%, transparent), inset 0 0 0 1px var(--fleet-color-primary); transform: translateY(-1px); }
+        60% { box-shadow: 0 0 12px 3px color-mix(in srgb, var(--fleet-color-accent) 55%, transparent), inset 0 0 0 1px var(--fleet-color-accent); transform: translateY(0); }
     }
     @keyframes bc-shake {
         0%, 100% { transform: translateX(0); }
@@ -575,10 +574,13 @@
         background: var(--fleet-color-bg);
         box-shadow: var(--fleet-shadow-lg);
     }
+    .bc-status-bar { padding-inline: var(--fleet-space-2); }
 }
 @media (max-width: 600px) {
-    .bc-status-bar { padding: 0.25rem var(--fleet-space-2); }
     .bc-status-item { padding: 0.15rem 0.4rem; font-size: var(--fleet-text-xs); }
+    /* The figures fit a phone; the bars beside them do not. */
+    .bc-status-xp .bc-gauge,
+    .bc-status-hp .bc-gauge { display: none; }
     .bc-status-sub { display: none; }
     .bc-gauge { --gauge-w: 56px; }
     .bc-status-rank-title {

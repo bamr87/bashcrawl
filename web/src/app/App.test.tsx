@@ -60,8 +60,16 @@ describe("the app shell", () => {
         await act(async () => { screen.getByRole("button", { name: "Close Options" }).click(); });
         expect(getUi().overlay).toBeNull();
 
-        // The brand opens the title screen; Escape (Continue) closes it.
-        await act(async () => { screen.getByRole("button", { name: "Bashcrawl: title screen" }).click(); });
+        // The brand opens the home page (its Continue leads back to the door);
+        // the prompt's `title` still opens the title screen, and Escape closes it.
+        await act(async () => { screen.getByRole("button", { name: "Bashcrawl home" }).click(); });
+        expect(window.location.hash).toBe("#/home");
+        expect(screen.getByRole("heading", { level: 1, name: "Learn the terminal by playing." })).toBeInTheDocument();
+        expect(screen.queryByRole("textbox", { name: "Command" })).toBeNull();
+        expect(container.querySelector("fleet-feedback")).toHaveAttribute("route", "#/home");
+        await act(async () => { screen.getByRole("button", { name: /Continue as Mira/ }).click(); });
+        expect(window.location.hash).toBe("#/story");
+        await act(async () => { setUi({ overlay: "title" }); });
         expect(screen.getByRole("dialog", { name: "Bashcrawl title screen" })).toBeInTheDocument();
         await act(async () => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
         expect(getUi().overlay).toBeNull();

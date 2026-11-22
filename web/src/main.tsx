@@ -9,6 +9,7 @@ import "./styles/learn.css";
 import "./styles/arcade.css";
 import "./styles/chrome.css";
 import "./styles/game.css";
+import "./styles/landing.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

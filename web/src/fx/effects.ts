@@ -313,11 +313,16 @@ function onEvent(event: FxEvent): void {
             fx.emit("confetti", { from: topPoint(), count: 60, colors: ["primary", "accent", "success", "info"], spread: 900 });
             play("celebrate");
             break;
-        case "boot":
+        case "boot": {
+            // The power-on belongs to the terminal: on the home page (no
+            // stage on screen) the game boots quietly behind it.
+            const stage = anchorPoint("stage");
+            if (!stage) break;
             if (allowed().flash) flash("poweron");
-            fx.emit("ember", { from: anchorPoint("stage") ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, count: 20, colors: ["secondary", "warning"], spread: 400 });
+            fx.emit("ember", { from: stage, count: 20, colors: ["secondary", "warning"], spread: 400 });
             play("poweron");
             break;
+        }
         case "mode": {
             // A door change: the new screen dissolves in through the pixel wipe.
             play("tab");

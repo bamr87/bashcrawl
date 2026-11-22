@@ -6,6 +6,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState, type KeyboardEvent } from "react";
 
+import { track } from "../analytics/client";
 import { navigate } from "../app/useHashRoute";
 import { play } from "../audio/sfx";
 import { getPrefs, setPrefs } from "../chrome/prefs-store";
@@ -60,6 +61,7 @@ function Wizard() {
 
     function finish() {
         const hero = createHero({ name, role, appearance });
+        track("hero_created", { path: role, skipped: false });
         setPrefs({ onboarded: true });
         // A new hero, a new chronicle: the prologue is told once the screens clear.
         resetJournal();

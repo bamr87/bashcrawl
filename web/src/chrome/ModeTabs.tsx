@@ -4,6 +4,7 @@ import type { KeyboardEvent } from "react";
 
 import { MODES, MODE_META, type Mode } from "../app/modes";
 import { navigate } from "../app/useHashRoute";
+import { ModeIcon } from "./ModeIcon";
 
 export function ModeTabs({ mode }: { mode: Mode | null }) {
     function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -35,7 +36,7 @@ export function ModeTabs({ mode }: { mode: Mode | null }) {
                             onClick={() => navigate(id)}
                             onKeyDown={(event) => onKeyDown(event, index)}
                         >
-                            <span aria-hidden="true">{meta.icon}</span>
+                            <ModeIcon mode={id} />
                             <span className="bc-tab-text">{meta.label}</span>
                         </button>
                     );

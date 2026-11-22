@@ -1,12 +1,12 @@
-// The title screen: the logo materialises out of static over a torch-lit
-// wall, then the menu every game has — Continue (hero · rank · room), New
-// game / New hero, How to play, Options. ↑/↓ move the cursor, Enter picks,
-// Escape takes the first entry. Shown on a first visit (no hero yet) and
-// from the brand button or the profile afterwards.
+// The title screen: the logo, then the menu every game has — Continue
+// (hero · rank · room), New game / New hero, How to play, Options. ↑/↓ move
+// the cursor, Enter picks, Escape takes the first entry. Shown to a
+// newcomer who arrives on a door's own link (the site's address shows the
+// home page instead), and from the game menu, the profile or the prompt's
+// `title` afterwards.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type KeyboardEvent } from "react";
 
-import { navigate } from "../app/useHashRoute";
 import { play } from "../audio/sfx";
 import { game, useGame, type GameStore } from "../engine/game-store";
 import { ArtClip } from "../fx/ArtClip";
@@ -15,10 +15,9 @@ import { clearHero, createHero, DEFAULT_NAME, roleMeta, useHero, type Hero } fro
 import { readRaw } from "../lib/storage";
 import { clearDialogues } from "../story/dialogue-store";
 import { resetJournal } from "../story/journal-store";
-import { unlockChapter } from "../story/story";
-import { getPrefs, setPrefs } from "./prefs-store";
+import { dropIn, enterGame } from "./start";
 import { toast } from "./toast-store";
-import { getUi, openOverlay, setUi, startTour, useUi } from "./ui-store";
+import { getUi, openOverlay, useUi } from "./ui-store";
 
 const SAVE_KEY = "bashcrawl-web-state-v1";
 export const VERSION = "3.2";
@@ -31,16 +30,6 @@ interface MenuItem {
     run: () => void;
 }
 
-function leave(): void {
-    setUi({ overlay: null });
-}
-
-/** Into the game: the last door, or the hero's own. */
-function enterGame(hero: Hero | null): void {
-    setPrefs({ onboarded: true });
-    leave();
-    navigate(getPrefs().mode ?? (hero ? roleMeta(hero.role).door : "story"));
-}
 
 function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
     const [confirming, setConfirming] = useState(false);
@@ -68,13 +57,6 @@ function TitleMenu({ store, hero }: { store: GameStore; hero: Hero | null }) {
         resetJournal();
         clearDialogues();
         openOverlay("create");
-    }
-    function dropIn() {
-        const who = createHero({ name: DEFAULT_NAME, role: "wanderer" });
-        resetJournal();
-        unlockChapter("prologue");
-        enterGame(who);
-        if (!getPrefs().introSeen) startTour();
     }
 
     const items: MenuItem[] = [];
@@ -171,10 +153,6 @@ export function TitleScreen({ store = game }: { store?: GameStore }) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <div className="bc-title-scene" aria-hidden="true">
-                        <span className="bc-title-torch bc-title-torch-l" />
-                        <span className="bc-title-torch bc-title-torch-r" />
-                    </div>
                     <motion.div
                         className="bc-title-card"
                         initial={{ opacity: 0, y: 16 }}

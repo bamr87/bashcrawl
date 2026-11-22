@@ -55,6 +55,9 @@ export function Tooltips() {
         let timer: ReturnType<typeof setTimeout> | null = null;
         let cooling: ReturnType<typeof setTimeout> | null = null;
         let warm = false;
+        // True from a press until the pointer next moves: whatever is under
+        // it then arrived there (a new screen), it was not pointed at.
+        let still = false;
 
         const clearTimer = () => {
             if (timer) clearTimeout(timer);
@@ -89,6 +92,7 @@ export function Tooltips() {
             current = el;
             // Take the title now, before the browser's own bubble could show.
             tipOf(el);
+            if (still) return;
             if (warm) show(el);
             else timer = setTimeout(() => { if (current === el) show(el); }, DELAY_MS);
         };
@@ -97,6 +101,16 @@ export function Tooltips() {
             const to = event.relatedTarget;
             if (to instanceof Node && current.contains(to)) return;
             hide();
+        };
+        const onDown = () => {
+            still = true;
+            hide();
+        };
+        const onMove = () => {
+            if (!still) return;
+            still = false;
+            const el = current;
+            if (el && !timer) timer = setTimeout(() => { if (current === el) show(el); }, DELAY_MS);
         };
         const onFocus = (event: Event) => {
             const el = target(event);
@@ -111,7 +125,8 @@ export function Tooltips() {
         document.addEventListener("pointerout", onOut);
         document.addEventListener("focusin", onFocus);
         document.addEventListener("focusout", hide);
-        document.addEventListener("pointerdown", hide);
+        document.addEventListener("pointerdown", onDown);
+        document.addEventListener("pointermove", onMove);
         document.addEventListener("keydown", onKey);
         window.addEventListener("scroll", hide, true);
         return () => {
@@ -121,7 +136,8 @@ export function Tooltips() {
             document.removeEventListener("pointerout", onOut);
             document.removeEventListener("focusin", onFocus);
             document.removeEventListener("focusout", hide);
-            document.removeEventListener("pointerdown", hide);
+            document.removeEventListener("pointerdown", onDown);
+            document.removeEventListener("pointermove", onMove);
             document.removeEventListener("keydown", onKey);
             window.removeEventListener("scroll", hide, true);
         };

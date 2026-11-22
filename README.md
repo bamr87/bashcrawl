@@ -22,6 +22,7 @@ Version 3.2 has one game and two doors: the classic filesystem dungeon in your t
 - **Every surface, one launcher** — `bin/bashcrawl` (plain bash, runs on macOS `/bin/bash` 3.2) reaches the classic dungeon, a full-screen terminal HUD, a telnet server, a shared telnet hub, the browser trainer, the course labs and a `doctor` health check.
 - **A learning platform everywhere** — `learn` and `lesson` run the courses, `skills` shows the skill map every command grows, `review` is a spaced-repetition drill of your weakest skills, and `explain LINE` takes any command line apart offline, with no AI call.
 - **AI playtesting** — an MCP harness lets an agent play the *real* dungeon in a sandboxed bash session, and a scorer flags content gaps.
+- **Private by default** — no account, no ads, no cookie. Your game is saved in your browser. The web trainer asks before it measures anything, and [every event it can collect is published](docs/analytics.md).
 
 ## Quick start
 

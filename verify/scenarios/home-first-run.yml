@@ -1,0 +1,188 @@
+# =============================================================================
+# verify/scenarios/home-first-run.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The home page's routing and the rest of its sandbox (BASHCRAWL-028), the
+# paths home-page.yml does not walk: a newcomer types all four suggested
+# commands (the scroll is read and the sandbox walks into the cellar without
+# saving anything), "Start playing" opens hero creation, a returning hero who
+# opens the site's address is taken to their last door and reaches the home
+# page from the brand button, and a newcomer who opens a door's own link gets
+# the title screen over it instead of the home page.
+# =============================================================================
+id: home-first-run
+feature: BASHCRAWL-028
+title: "The home page routes a newcomer, a returning hero and a door link"
+description: >-
+  A first-time visitor runs pwd, ls -F, cat scroll and cd cellar in the home
+  page's sandbox and opens hero creation with Start playing; a returning hero
+  opening the same address lands in their last door and comes back to the home
+  page from the brand button; a newcomer on a door link gets the title screen.
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - eval:
+      name: first-visit
+      script: |
+        localStorage.clear();
+        "cleared"
+  - goto: /?run=first
+  - wait:
+      selector: ".bc-try[data-ready]"
+  - expect:
+      status: 200
+  - expect:
+      text: "Learn the terminal by playing."
+  - expect:
+      hidden: ".bc-title"
+  - eval:
+      name: home-fits-the-viewport
+      script: &fits |
+        (async () => {
+          // A sideways scrollbar is not the only way to lose content: the shell
+          // clips, so look for boxes cut off by the viewport's edge. Boxes inside
+          // a container that scrolls sideways on purpose can be reached; banners
+          // and tooltips are passing through.
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vw = document.documentElement.clientWidth;
+          const passing = ".bc-banner, .bc-tooltip, canvas";
+          const range = document.createRange();
+          // Where an inline run paints: the spaces a pre-wrap line ends on hang
+          // past its box without painting anything, so measure the words.
+          const ink = (el) => {
+            let left = Infinity;
+            let right = -Infinity;
+            const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+              for (const word of node.textContent.matchAll(/\S+/g)) {
+                range.setStart(node, word.index);
+                range.setEnd(node, word.index + word[0].length);
+                for (const r of range.getClientRects()) {
+                  if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }
+                }
+              }
+            }
+            return { left, right };
+          };
+          const cut = [];
+          for (const el of document.querySelectorAll("body *")) {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;
+            const cs = getComputedStyle(el);
+            if (cs.visibility === "hidden" || cs.display === "none" || el.closest(passing)) continue;
+            if (cs.display === "inline") {
+              const painted = ink(el);
+              if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;
+            }
+            let box = el.parentElement;
+            let reachable = false;
+            while (box && box !== document.body) {
+              const o = getComputedStyle(box).overflowX;
+              if ((o === "auto" || o === "scroll") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }
+              box = box.parentElement;
+            }
+            if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);
+          }
+          if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(", ")}`);
+          return { viewport: vw, cutOff: 0 };
+        })()
+  - fill:
+      selector: "#bc-try-input"
+      value: "pwd"
+  - press: Enter
+  - fill:
+      selector: "#bc-try-input"
+      value: "ls -F"
+  - press: Enter
+  - fill:
+      selector: "#bc-try-input"
+      value: "cat scroll"
+  - press: Enter
+  - fill:
+      selector: "#bc-try-input"
+      value: "cd cellar"
+  - press: Enter
+  - eval:
+      name: sandbox-walked-and-saved-nothing
+      script: |
+        (async () => {
+          await new Promise((done) => setTimeout(done, 400));
+          const text = document.querySelector(".bc-try").innerText;
+          const want = ["/entrance $ pwd", "cellar/", "Moved to /entrance/cellar", "/entrance/cellar $"];
+          const missing = want.filter((line) => !text.includes(line));
+          if (missing.length) throw new Error(`the sandbox never printed ${JSON.stringify(missing)}`);
+          const lines = text.split("\n").length;
+          if (lines < 40) throw new Error(`cat scroll printed too little: the sandbox holds ${lines} lines`);
+          const save = localStorage.getItem("bashcrawl-web-state-v1");
+          const history = save ? (JSON.parse(save).history ?? []) : [];
+          if (history.length) throw new Error(`the sandbox wrote ${history.length} command(s) into the saved game`);
+          if (localStorage.getItem("bashcrawl-web-hero-v1")) throw new Error("the sandbox created a hero");
+          return { sandboxLines: lines, savedCommands: history.length, storageKeys: Object.keys(localStorage) };
+        })()
+  - expect:
+      no_console_errors: true
+  - screenshot: sandbox
+  - click: "role=button[name=/Start playing/]"
+  - expect:
+      visible: '[role=dialog][aria-label="Create your hero"]'
+  - expect:
+      text: "Name your hero"
+  # The dialog fades in over the page; measure and photograph it settled.
+  - wait:
+      ms: 600
+  - eval:
+      name: hero-creation-fits-the-viewport
+      script: *fits
+  - screenshot: hero-creation
+  # A returning hero: the same address goes to the door they left.
+  - eval:
+      name: returning-hero
+      script: |
+        localStorage.clear();
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "arcade", onboarded: true, introSeen: true });
+        "seeded"
+  - goto: /?run=returning
+  - wait:
+      url: "#/arcade"
+  - expect:
+      count:
+        selector: ".bc-arcade-card"
+        min: 5
+  - expect:
+      hidden: ".bc-home"
+  - click: 'button[aria-label="Bashcrawl home"]'
+  - wait:
+      url: "#/home"
+  - wait:
+      selector: ".bc-try[data-ready]"
+  - expect:
+      text: "Continue as Mira"
+  - expect:
+      no_console_errors: true
+  # The page fades in over about 200ms; photograph it settled.
+  - wait:
+      ms: 500
+  - eval:
+      name: home-fits-for-a-returning-hero
+      script: *fits
+  - screenshot: home-returning
+  # A newcomer on a door's own link: the title screen, not the home page.
+  - eval:
+      name: newcomer-again
+      script: |
+        localStorage.clear();
+        "cleared"
+  - goto: /?run=doorlink#/story
+  - expect:
+      visible: ".bc-title"
+  - expect:
+      text: "New game"
+  - expect:
+      hidden: ".bc-home"
+  - eval:
+      name: title-screen-fits-the-viewport
+      script: *fits
+  - expect:
+      no_console_errors: true
+  - screenshot: title-over-door

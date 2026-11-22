@@ -20,6 +20,8 @@ WEB = ROOT / "web"
 # React adapter into components/ (bamr87/bamr87 templates/feedback).
 PUBLIC_FILES = (
     "favicon.svg",
+    "og.png",
+    "manifest.webmanifest",
     ".nojekyll",
     "fleet-feedback.js",
     "fleet-feedback-capture.js",
@@ -39,10 +41,18 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+# The canonical link names the site's own address, so it is absolute by
+# definition; vite.config.mts writes it from VITE_SITE_URL at build time.
+CANONICAL_LINK = re.compile(r'<link rel="canonical" href="[^"]*">')
+SITE_URL_PLACEHOLDER = "%BC_SITE_URL%"
+
+
 def _relative_urls(html: str, label: str) -> list[str]:
-    """Every src/href must be relative (GitHub Pages project path), bar the repo link."""
+    """Every src/href must be relative (the same build serves from a domain
+    root and from a GitHub Pages project path), bar the repo link and the
+    canonical link."""
     problems = []
-    for src in re.findall(r'(?:src|href)="([^"]+)"', html):
+    for src in re.findall(r'(?:src|href)="([^"]+)"', CANONICAL_LINK.sub("", html)):
         if src in ALLOWED_INDEX_ABSOLUTE_HREFS:
             continue
         if src.startswith("/") or src.startswith("http://") or src.startswith("https://"):
@@ -185,6 +195,11 @@ def validate() -> dict:
         errors.extend(_engine_script_order(dist, vendor_files, "dist/index.html"))
         errors.extend(_feedback_scripts(dist, "dist/index.html"))
         errors.extend(_relative_urls(dist, "dist/index.html"))
+        if SITE_URL_PLACEHOLDER in dist:
+            errors.append(
+                f"dist/index.html still carries {SITE_URL_PLACEHOLDER}: "
+                "vite.config.mts siteMeta() did not run"
+            )
         shipped = (
             "assets/js/runtime.js",
             "data/world.json",

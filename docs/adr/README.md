@@ -17,3 +17,5 @@ This directory records decisions for bashcrawl that are hard to reverse: the sta
 | ID | Title | Status |
 | --- | --- | --- |
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | accepted |
+| 0002 | [Host production on Azure Static Web Apps](0002-host-production-on-azure-static-web-apps.md) | accepted |
+| 0003 | [Measure usage with PostHog, behind explicit consent](0003-measure-usage-with-posthog-behind-consent.md) | proposed |

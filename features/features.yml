@@ -26,6 +26,13 @@ features:
     surface: cli
     link: "web/index.html"
     docs: "README.md"
+    scenarios:
+      - "verify/scenarios/smoke-home.yml"
+    evidence:
+      - "test/evidence/smoke-home"
+    verified:
+      date: 2026-11-20
+      by: agent
   - id: BASHCRAWL-002
     title: "Classic terminal dungeon"
     description: "Classic terminal dungeon (`entrance/`, `setup.sh`)"
@@ -161,19 +168,36 @@ features:
     docs: "README.md"
     tests:
       - "web/src/screens/ReferenceScreen.test.tsx"
+    scenarios:
+      - "verify/scenarios/reference-fit.yml"
+    evidence:
+      - "test/evidence/reference-fit"
+    verified:
+      date: 2026-11-20
+      by: agent
   - id: BASHCRAWL-015
-    title: "16-bit RPG web UI"
-    description: "React 19 + Vite + TypeScript web trainer skinned as a 16-bit dungeon RPG: title screen, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112), with a terminal Ctrl+C and a welcome-back recap after a reload (#115)."
+    title: "Web trainer UI: hero, HUD and one shared prompt"
+    description: "React 19 + Vite + TypeScript web trainer that presents the game as an RPG: title menu, five-step hero creator with wardrobe, HUD sidebar and status strip (#120); one shared prompt whose path label trims from the left so the current room stays visible (#112), with a terminal Ctrl+C and a welcome-back recap after a reload (#115). Redesigned in 2026-11 from the 16-bit dungeon skin to a flat \"workbench\" design system (docs/design-system.md): one header row with the four doors as a segmented control (a tab bar on a phone), line icons, panel cards and a terminal window, in dark and light."
     implemented: true
     status: shipped
     prd: [FR13, NFR1, NFR2]
     surface: ui
     link: "web/src/app/App.tsx"
-    docs: "AGENTS.md"
+    docs: "docs/design-system.md"
     tests:
       - "web/src/app/App.test.tsx"
       - "web/src/terminal/PromptBar.test.tsx"
       - "web/src/engine/game-store.test.ts"
+      - "web/src/test/theme.test.ts"
+    scenarios:
+      - "verify/scenarios/web-doors.yml"
+      - "verify/scenarios/phone-chrome.yml"
+    evidence:
+      - "test/evidence/web-doors"
+      - "test/evidence/phone-chrome"
+    verified:
+      date: 2026-11-20
+      by: agent
   - id: BASHCRAWL-016
     title: "Training Arena and speed run"
     description: "`train` drills riddles answered with real commands (active recall); `speedrun` clears the arena's trials against the clock."
@@ -291,6 +315,13 @@ features:
       - "web/src/screens/ReferenceScreen.test.tsx"
       - "termforge/test/motion.test.js"
       - "web/src/audio/synth.test.ts"
+    scenarios:
+      - "verify/scenarios/door-art.yml"
+    evidence:
+      - "test/evidence/door-art"
+    verified:
+      date: 2026-11-20
+      by: agent
   - id: BASHCRAWL-026
     title: "Feedback widget"
     description: "An \"Improve this page\" button in the web trainer files a prefilled GitHub issue on bamr87/bashcrawl carrying the door, the browser and the console errors that led up to the report; the not-found and crash screens open it pre-typed. It is the fleet feedback kit's widget, vendored in `public/` and `components/`."
@@ -309,6 +340,9 @@ features:
       - "verify/scenarios/feedback-widget.yml"
     evidence:
       - "test/evidence/feedback-widget"
+    verified:
+      date: 2026-11-20
+      by: agent
   - id: BASHCRAWL-027
     title: "Missions in constitution §1"
     description: "Three product missions under one direction statement, ratified through amendment 0003."
@@ -317,3 +351,60 @@ features:
     prd: ["§1.1"]
     surface: docs
     docs: "docs/constitution.md"
+  - id: BASHCRAWL-028
+    title: "Home page with a sandbox terminal"
+    description: "The site's address opens a home page for newcomers: what Bashcrawl is, a working terminal that runs real commands over a sandbox copy of the dungeon (nothing is saved), the four doors with figures read from the game's content, what is taught, and the project's lineage. A returning hero goes straight to their last door and reaches the page from the brand."
+    implemented: true
+    status: shipped
+    prd: [FR14, NFR2]
+    surface: ui
+    link: "web/src/screens/LandingScreen.tsx"
+    docs: "docs/design-system.md"
+    tests:
+      - "web/src/screens/LandingScreen.test.tsx"
+      - "web/src/app/App.test.tsx"
+      - "web/src/app/useHashRoute.test.ts"
+    scenarios:
+      - "verify/scenarios/home-page.yml"
+      - "verify/scenarios/home-first-run.yml"
+    evidence:
+      - "test/evidence/home-page"
+      - "test/evidence/home-first-run"
+    verified:
+      date: 2026-11-20
+      by: agent
+  - id: BASHCRAWL-029
+    title: "Usage analytics behind explicit consent"
+    description: "PostHog product analytics, session replay, surveys, error tracking and feature flags in the web trainer, all off until the visitor allows them: the library is not downloaded before a yes, a refusal sends nothing, Global Privacy Control and Do Not Track count as a no, and withdrawing consent deletes PostHog's storage. Every event is declared in one typed catalogue that the in-app Privacy panel and docs/analytics.md are rendered from. Only the production build carries a key."
+    implemented: true
+    status: shipped
+    prd: [NFR5]
+    surface: ui
+    link: "web/src/analytics"
+    docs: "docs/analytics.md"
+    tests:
+      - "web/src/analytics/consent-store.test.ts"
+      - "web/src/analytics/client.test.ts"
+      - "web/src/analytics/install.test.ts"
+      - "web/src/analytics/catalog.test.ts"
+      - "web/src/analytics/ConsentBanner.test.tsx"
+    scenarios:
+      - "verify/scenarios/privacy-panel.yml"
+    evidence:
+      - "test/evidence/privacy-panel"
+    verified:
+      date: 2026-11-20
+      by: agent
+  - id: BASHCRAWL-030
+    title: "Production hosting on Azure Static Web Apps"
+    description: "A deploy pipeline for the web trainer on Azure Static Web Apps behind a custom domain: OIDC login with no stored token, a preview per pull request, staging from main, production from a release behind a GitHub Environment, generated security headers (a Content-Security-Policy with hashes for the build's inline scripts) and cache rules, and a check of the live /healthz and /version before a deploy reports success. Built and tested in the repository; it goes live once the maintainer runs the bootstrap and names the domain (docs/deploy.md). GitHub Pages stays as the fallback."
+    implemented: true
+    status: partial
+    prd: [NFR6]
+    surface: infra
+    link: ".github/workflows/azure-swa.yml"
+    docs: "docs/deploy.md"
+    tests:
+      - "test/unit/test_swa_config.py"
+      - "test/unit/test_verify_deploy.py"
+      - "test/integration/test_azure_infra.py"

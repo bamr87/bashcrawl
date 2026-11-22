@@ -1,12 +1,15 @@
-// The frame every door shares (UPS-FE-10/11): skip link, header with brand,
-// mode tabs and settings, exactly one <main id="main-content">, a footer of
-// hints. `status` and `dock` are slots the story fills (status strip above
-// the stage, the prompt dock below it). #stage is the screen-shake target.
+// The frame every page shares (UPS-FE-10/11): skip link, a one-row header
+// (brand, the four doors, actions), exactly one <main id="main-content">, a
+// slim footer. `status` and `dock` are slots the game fills (the status
+// strip above the stage, the prompt dock below it). #stage is the
+// screen-shake target.
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 
+import { BrandMark } from "../chrome/Brand";
 import { ModeTabs } from "../chrome/ModeTabs";
-import { openOverlay } from "../chrome/ui-store";
+import { setUi } from "../chrome/ui-store";
 import { MODE_META, type Mode } from "./modes";
+import { navigateHome } from "./useHashRoute";
 
 /** On <html>: how tall the shell's bottom edge (the prompt dock + the footer) is right now. */
 export const BOTTOM_CHROME_VAR = "--bc-bottom-chrome";
@@ -17,18 +20,20 @@ export interface AppShellProps {
     status?: ReactNode;
     dock?: ReactNode;
     hint?: string;
+    /** False where the page brings its own footer (the home page). */
+    footer?: boolean;
     children: ReactNode;
 }
 
-export function AppShell({ mode, actions, status, dock, hint, children }: AppShellProps) {
+export function AppShell({ mode, actions, status, dock, hint, footer = true, children }: AppShellProps) {
     const footerHint = hint ?? (mode ? MODE_META[mode].hint : "");
     const dockRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLElement>(null);
 
     // Publish the dock + footer height for what floats above them from outside
-    // the shell (the feedback button, mounted beside the error boundary). The
-    // dock grows with the inline hint and is gone in the Reference door, so
-    // it is measured, not assumed.
+    // the shell (the feedback button, the consent bar). The dock grows with
+    // the inline hint and is gone in the Reference door, and the footer is
+    // hidden on small screens, so both are measured, not assumed.
     useLayoutEffect(() => {
         const root = document.documentElement;
         const parts = [dockRef.current, footerRef.current].filter((el): el is HTMLElement => el !== null);
@@ -43,16 +48,15 @@ export function AppShell({ mode, actions, status, dock, hint, children }: AppShe
             observer?.disconnect();
             root.style.removeProperty(BOTTOM_CHROME_VAR);
         };
-    }, []);
+    }, [footer]);
 
     return (
-        <div className="bc-shell">
+        <div className="bc-shell" data-surface={mode ?? "page"}>
             <a className="bc-skip" href="#main-content">Skip to the game</a>
             <header className="bc-header">
-                <button type="button" className="bc-brand bc-display" onClick={() => openOverlay("title")} title="Title screen" aria-label="Bashcrawl: title screen">
-                    <span aria-hidden="true">⚔</span>
-                    <strong>Bashcrawl</strong>
-                    <span className="bc-brand-sub">Terminal Dungeon</span>
+                <button type="button" className="bc-brand" onClick={navigateHome} title="Home" aria-label="Bashcrawl home">
+                    <BrandMark />
+                    <span className="bc-brand-name">bashcrawl</span>
                 </button>
                 <ModeTabs mode={mode} />
                 <div className="bc-actions" role="group" aria-label="Settings">
@@ -64,10 +68,13 @@ export function AppShell({ mode, actions, status, dock, hint, children }: AppShe
                 <div id="stage" className="bc-stage">{children}</div>
             </main>
             <div ref={dockRef} className="bc-dock-slot">{dock}</div>
-            <footer ref={footerRef} className="bc-footer">
-                <span className="bc-footer-hint">{footerHint}</span>
-                <a href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">github.com/bamr87/bashcrawl</a>
-            </footer>
+            {footer && (
+                <footer ref={footerRef} className="bc-footer">
+                    <span className="bc-footer-hint">{footerHint}</span>
+                    <button type="button" onClick={() => setUi({ privacyOpen: true })}>Privacy</button>
+                    <a href="https://github.com/bamr87/bashcrawl" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+                </footer>
+            )}
         </div>
     );
 }

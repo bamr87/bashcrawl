@@ -16,9 +16,10 @@
         min-height: 0;
         overflow: auto;
         padding: var(--fleet-space-3) var(--fleet-space-4) var(--fleet-space-5);
-        background: linear-gradient(180deg, color-mix(in srgb, var(--fleet-color-bg-elevated) 70%, var(--fleet-color-bg)), var(--fleet-color-bg) 60%);
-        box-shadow: inset -1px 0 0 var(--fleet-color-border);
-        line-height: var(--fleet-leading-normal);
+        border-right: 1px solid var(--fleet-color-border);
+        line-height: var(--fleet-leading-loose);
+        scrollbar-width: thin;
+        scrollbar-color: var(--fleet-color-border) transparent;
         scroll-behavior: smooth;
     }
     .bc-learn-head { margin-bottom: var(--fleet-space-3); }
@@ -34,9 +35,10 @@
     .bc-reader h2 {
         margin: 0 0 0.3rem;
         font-size: var(--fleet-text-h2);
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: var(--bc-display-tracking);
         line-height: var(--fleet-leading-tight);
-        color: var(--fleet-color-primary);
-        letter-spacing: 0.06em;
+        color: var(--fleet-color-ink);
     }
     .bc-learn-hero h2 { font-size: var(--fleet-text-h1); }
     .bc-reader h3 {
@@ -58,21 +60,22 @@
     .bc-course-skills code,
     .bc-learn-foot code,
     .bc-reader section > p code {
-        padding: 0.05rem 0.35rem;
-        background: var(--fleet-color-code-bg);
-        color: var(--fleet-color-info);
-        font-size: 0.82em;
+        padding: 0.08rem 0.4rem;
+        border-radius: var(--fleet-radius-sm);
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-code-ink);
+        font-size: 0.85em;
     }
     .bc-learn-foot code,
     .bc-reader section > p code[data-fill] { cursor: pointer; }
     .bc-level {
         display: inline-block;
-        padding: 0.1rem 0.45rem;
-        border: 1px solid currentColor;
-        font-family: var(--fleet-font-mono);
-        font-size: 0.66rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        padding: 0.1rem 0.55rem;
+        border-radius: var(--fleet-radius-pill);
+        background: color-mix(in srgb, currentColor 13%, transparent);
+        font-size: 0.6875rem;
+        font-weight: var(--fleet-font-weight-semibold);
+        text-transform: capitalize;
     }
     .bc-level-beginner { color: var(--fleet-color-success); }
     .bc-level-intermediate { color: var(--fleet-color-warning); }
@@ -92,8 +95,8 @@
         height: 1.6rem;
         align-items: center;
         justify-content: center;
+        border-radius: var(--fleet-radius-circle);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
-        font-family: var(--fleet-font-mono);
         font-size: 0.75rem;
         color: var(--fleet-color-ink-muted);
         transition: background var(--fleet-motion-base) var(--fleet-ease), color var(--fleet-motion-base) var(--fleet-ease), box-shadow var(--fleet-motion-base) var(--fleet-ease);
@@ -114,14 +117,14 @@
     .learn-body li { margin: 0.2rem 0; }
     .learn-code {
         margin: 0.7rem 0;
-        padding: 0.6rem 0.8rem;
-        border-left: 3px solid var(--fleet-color-info);
+        padding: 0.7rem 0.9rem;
         background: var(--fleet-color-code-bg);
         box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         overflow-x: auto;
         font-size: 0.88rem;
         line-height: 1.5;
         white-space: pre;
+        border-radius: var(--fleet-radius-base);
     }
     .learn-code code { font-family: var(--fleet-font-mono); color: var(--fleet-color-code-ink); }
     .learn-code-line {
@@ -132,8 +135,9 @@
     }
     .learn-code-line:hover { background: color-mix(in srgb, var(--fleet-color-info) 14%, transparent); }
     .learn-code-inline {
-        padding: 0.05rem 0.35rem;
-        background: var(--fleet-color-code-bg);
+        padding: 0.08rem 0.4rem;
+        border-radius: var(--fleet-radius-sm);
+        background: var(--fleet-color-bg-muted);
         box-shadow: inset 0 0 0 1px transparent;
         color: var(--fleet-color-code-ink);
         font-size: 0.88em;
@@ -143,9 +147,9 @@
     .learn-code-inline:hover { box-shadow: inset 0 0 0 1px var(--fleet-color-primary); }
     .learn-callout {
         margin: 0.8rem 0 0;
-        padding: 0.55rem 0.75rem;
-        border-left: 3px solid var(--fleet-color-accent);
-        background: color-mix(in srgb, var(--fleet-color-accent) 8%, transparent);
+        padding: 0.65rem 0.85rem;
+        border-radius: var(--fleet-radius-base);
+        background: color-mix(in srgb, var(--fleet-color-accent) 10%, transparent);
         font-size: 0.9rem;
     }
     .learn-callout strong { color: var(--fleet-color-accent); }
@@ -159,11 +163,12 @@
         justify-content: space-between;
         margin: 0 0 0.5rem;
         font-size: var(--fleet-text-xs);
-        letter-spacing: 0.08em;
+        letter-spacing: var(--bc-eyebrow-tracking);
+        font-weight: var(--fleet-font-weight-semibold);
         text-transform: uppercase;
-        color: var(--fleet-color-primary);
+        color: var(--fleet-color-ink-muted);
     }
-    .bc-objectives-count { font-family: var(--fleet-font-mono); color: var(--fleet-color-info); }
+    .bc-objectives-count { color: var(--fleet-color-info); }
     .bc-objectives ul {
         display: grid;
         gap: 0.35rem;
@@ -179,7 +184,7 @@
         font-size: 0.9rem;
         transition: color var(--fleet-motion-base) var(--fleet-ease);
     }
-    .obj-mark { flex: 0 0 auto; font-family: var(--fleet-font-mono); }
+    .obj-mark { flex: 0 0 auto; }
     .obj-met { color: var(--fleet-color-success); }
     .obj-met .learn-code-inline { color: var(--fleet-color-success); }
     .bc-learn-next { margin: 0.6rem 0 0; font-size: var(--fleet-text-sm); }
@@ -196,52 +201,49 @@
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
-        padding: 0.9rem 0.95rem;
+        padding: var(--fleet-space-3);
         border: 0;
         color: var(--fleet-color-ink-muted);
         font: inherit;
         text-align: left;
         cursor: pointer;
+        transition: box-shadow var(--fleet-motion-base) var(--fleet-ease);
     }
     .bc-course:hover,
     .bc-course:focus-visible,
     .bc-course.is-active {
-        box-shadow:
-            inset 0 0 0 1px var(--fleet-color-info),
-            inset 2px 2px 0 0 var(--bc-color-bevel-hi),
-            inset -2px -2px 0 0 var(--bc-color-bevel-lo),
-            0 6px 20px color-mix(in srgb, var(--fleet-color-info) 18%, transparent);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-info), var(--fleet-shadow-md);
         outline: none;
     }
-    .bc-course strong { font-size: 1.02rem; color: var(--fleet-color-ink); }
+    .bc-course strong { font-size: var(--fleet-text-lg); font-weight: var(--fleet-font-weight-semibold); color: var(--fleet-color-ink); }
     .bc-course-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-family: var(--fleet-font-mono);
         font-size: 0.72rem;
     }
     .bc-course-summary { font-size: var(--fleet-text-sm); line-height: 1.45; }
     .bc-course-skills { display: flex; flex-wrap: wrap; gap: 0.25rem; }
     .bc-course-progress {
         display: block;
-        height: 6px;
+        height: 4px;
         margin-top: 0.2rem;
+        border-radius: var(--fleet-radius-pill);
         background: var(--bc-color-gauge-track);
-        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
         overflow: hidden;
     }
     .bc-course-progress > span {
         display: block;
         height: 100%;
-        background: linear-gradient(90deg, var(--fleet-color-info), var(--fleet-color-success));
+        border-radius: var(--fleet-radius-pill);
+        background: var(--fleet-color-info);
         transition: width var(--fleet-motion-slow) var(--fleet-ease);
     }
     .bc-course-meta { font-size: 0.75rem; }
     .bc-course-cta {
         margin-top: auto;
-        font-family: var(--fleet-font-mono);
-        font-size: 0.8rem;
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-semibold);
         color: var(--fleet-color-info);
     }
     .bc-course-done .bc-course-cta { color: var(--fleet-color-success); }
@@ -263,7 +265,8 @@
     }
     .bc-reader {
         padding: 0.8rem 0.9rem 1.2rem;
-        box-shadow: inset 0 -1px 0 var(--fleet-color-border);
+        border-right: 0;
+        border-bottom: 1px solid var(--fleet-color-border);
     }
     .bc-learn .bc-sidebar[data-open] { display: flex; }
 }

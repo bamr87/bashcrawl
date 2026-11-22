@@ -11,7 +11,7 @@
 Bashcrawl (v3.2) teaches real POSIX terminal commands through a fantasy dungeon crawl. **The filesystem is the game**: directories are rooms, files named `scroll` are the lessons, and executable scripts (`treasure`, `potion`, `spell`, `statue`, `ghost`, `monster`, `goblet`) are encounters. It serves learners at a real terminal or in the browser, and the people who author rooms and courses. The parts:
 
 - **Terminal-core** (`entrance/`, `help.sh` + `src/help/`, `lib/`): pure POSIX shell, no dependencies, played with real `cd`/`ls`/`cat`.
-- **Web trainer** (`web/`): a React 19 + Vite + TypeScript app (`web/src/`) over a classic-script engine (`web/assets/js/`) with four doors — Learn, Story, Practice Arcade, Reference. Its data is exported from the game by `scripts/export_static_web.py`; `npm run build` writes `web/dist/` (gitignored), which `pages.yml` deploys.
+- **Web trainer** (`web/`): a React 19 + Vite + TypeScript app (`web/src/`) over a classic-script engine (`web/assets/js/`) with a home page and four doors — Learn, Story, Practice Arcade, Reference. Its data is exported from the game by `scripts/export_static_web.py`; `npm run build` writes `web/dist/` (gitignored), which `azure-swa.yml` deploys to production (Azure Static Web Apps, [docs/deploy.md](docs/deploy.md)) and `pages.yml` to the GitHub Pages fallback. Usage analytics are off until a visitor allows them ([docs/analytics.md](docs/analytics.md)); the look is [docs/design-system.md](docs/design-system.md).
 - **TermForge** (`termforge/`): the zero-dependency terminal framework the web emulator was extracted into — the kernel (`termforge/core/`), node hosts (tty HUD, telnet, hub) and apps.
 - **Learning platform** (`courses/`): Markdown lessons whose objectives are TermForge rules, served by the `curriculum`, `mastery` and `explain` plugins on every surface.
 - **Playtest harness** (`src/playtest/`): an MCP server that lets an AI agent play the real bash game in a sandboxed PTY, plus a recorder and scorer.
@@ -35,7 +35,11 @@ make web-test            # web-build + bundle/handler parity + eslint + vitest +
 make lint                # shellcheck + yamllint + markdownlint + ruff
 make lint-js             # node --check on every tracked *.js
 make web-bundle          # build: web-build + vite build -> web/dist, with /version + /healthz (what Pages serves)
+make swa-config          # after a build: Azure's staticwebapp.config.json (CSP, cache rules) + 404.html into web/dist
+make deploy-verify URL=https://… ARGS="--commit SHA"   # check a deployed site's /healthz and /version
 ```
+
+The web build reads browser-exposed variables from `.env*` files at the repo root (`.env.example` lists them): `VITE_SITE_URL` (the canonical origin; the one place the production domain is named), `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` / `VITE_POSTHOG_UI_HOST` (analytics exists only in a build with a key) and `VITE_APP_ENV` (`production` | `staging` | `preview`; anything but production is `noindex`). None is a secret, and all are optional locally.
 
 CI (`ci.yml`) runs exactly those gates: `make lint` + `make lint-js` + `npm run lint`, then `make validate-contracts` + `make test` + `make test-js` + `make web-test` on Node 24, plus a stock macOS `/bin/bash` 3.2 smoke. A fresh-clone run (`git clone . /tmp/x && cd /tmp/x && make validate-contracts web-test test test-js`) is what CI sees.
 
@@ -76,7 +80,8 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 | `bin/bashcrawl` | The launcher |
 | `termforge/` | The framework: `core/` (source of truth), `node/` hosts, `apps/`, `motion/`, `test/` |
 | `web/` | The trainer: `src/` (React app), `assets/js/` (engine), `data/` (generated), `index.html` |
-| `public/` | Vite's `publicDir`, copied into `web/dist` as is: the favicon, `.nojekyll` and the fleet feedback widget (`fleet-feedback*.js`, vendored) |
+| `public/` | Vite's `publicDir`, copied into `web/dist` as is: the favicon, the social card (`og.png`), `manifest.webmanifest`, `.nojekyll` and the fleet feedback widget (`fleet-feedback*.js`, vendored) |
+| `infra/azure/` | Production hosting: the Bicep template, the one-time `bootstrap.sh`, `cutover.sh` for the custom domain, the 404 page |
 | `components/` | `FeedbackButton.tsx`, the feedback kit's React adapter (vendored), mounted by `web/src/chrome/Feedback.tsx` |
 | `motion/` | All art, as ASCII Motion `.asciimtn` files |
 | `scripts/` | Export, vendoring, validators, generators, lint and test runners |
@@ -106,7 +111,10 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 | Emulator kernel + platform services | `termforge/core/` (dual-mode, brand-neutral) | `web/assets/js/vendor/termforge/` |
 | Game features (arena, daily, …) | `web/assets/js/plugins/<id>.js` + `GAME_PLUGINS` in `runtime.js` + a `<script>` in `web/index.html` | a second copy of a command |
 | Game commands, presenter models, arcade games | `web/assets/js/runtime.js`, `hud.js`, `arcade.js` (`GAMES`), `vim.js` | an engine file turned ES module |
-| Web UI (screens, HUD panes, effects, sound) | `web/src/`; tokens in `web/src/styles/tokens.css`, reactions in `web/src/fx/effects.ts`, sounds in `web/src/audio/sfx.ts` | colour literals or `z-index` numbers outside `tokens.css`; the log's children (a DomSink paints them) |
+| Web UI (screens, HUD panes, effects, sound) | `web/src/`; tokens in `web/src/styles/tokens.css`, primitives in `app.css`, reactions in `web/src/fx/effects.ts`, sounds in `web/src/audio/sfx.ts` — see [docs/design-system.md](docs/design-system.md) | colour literals or `z-index` numbers outside `tokens.css`; the log's children (a DomSink paints them) |
+| Home page | `web/src/screens/LandingScreen.tsx`, `web/src/landing/TryIt.tsx`, `web/src/styles/landing.css` | figures typed by hand (read them from the game's data) |
+| Analytics (events, consent, privacy copy) | `web/src/analytics/` — declare the event in `events.ts`, then `BC_WRITE_DOCS=1 npm run test:web -- catalog` | a `posthog-js` import outside `client.ts`; an event carrying typed text; the table in `docs/analytics.md` |
+| Production deploy (headers, cache rules, environments) | `scripts/write_swa_config.py`, `.github/workflows/azure-swa.yml`, `infra/azure/` — see [docs/deploy.md](docs/deploy.md) | a committed `staticwebapp.config.json`; a hard-coded domain |
 | Feedback widget (where reports go, report links, the button's place) | `web/src/chrome/Feedback.tsx`, `--bc-bottom-chrome` in `web/src/app/AppShell.tsx` + `app.css` | `public/fleet-feedback*.js`, `components/FeedbackButton.tsx` (change the kit in the hub) |
 | Art | `motion/*.asciimtn` + `src/help/data/motion.yaml` | string literals in code |
 | TermForge apps | `termforge/apps/registry.js` (one entry per app) | if-chains in the hosts |
@@ -131,10 +139,12 @@ make generate-contract-docs                     # rewrite docs/generated/ (--che
 - **The handlers literal:** `this.handlers = { … }` in `runtime.js` stays one static literal (exactly one `this.handlers = {` in the file), one `key: ref,` per line, bare refs only; every `demo: true` entry in `src/help/data/runtime_commands.yaml` must appear there (`validate_runtime_commands.py`).
 - **Plugin order is hook order:** curriculum, then `GAME_PLUGINS` in order (`postExecute` order matters: achievements → daily → progress's rank-up → nudge's "Stuck?" line), then mastery and explain.
 - **Mini-games** are seed world + goal predicate + scoring over a scoped bare `Runtime`; never reimplement command behaviour. A new Vim Catacombs level is an `arcade.yaml` `vim_levels` entry whose `solution` wins at exactly `par` and steps on no spike (`arcade-vim.test.js`).
-- **Design tokens:** colour literals and numeric `z-index` live only in `web/src/styles/tokens.css` (`theme.test.ts`); read a colour in code with `colorOf(role)`; everything that moves is gated on `prefers-reduced-motion`.
+- **Design tokens:** colour literals and numeric `z-index` live only in `web/src/styles/tokens.css` (`theme.test.ts`); read a colour in code with `colorOf(role)`; everything that moves is gated on `prefers-reduced-motion`. Build screens from the primitives in `app.css` and use `lucide-react` line icons for chrome ([docs/design-system.md](docs/design-system.md)).
+- **Analytics is consent-first:** nothing is sent and `posthog-js` is not loaded before a visitor allows it; `web/src/analytics/client.ts` is its only importer; every event is declared in `events.ts` and carries ids, enums and counts from the game's content, never text a person typed ([docs/analytics.md](docs/analytics.md)).
 - **Art** is drawn only through `Shell#art(name)` / `<ArtClip name>`, never string literals (`art.test.js` scans `web/src` too).
 - **The reader layer** (`web/src/terminal/prose.ts`, `log-decor.ts`) never rewrites text — `prose.test.ts` round-trips every scroll byte for byte; teach the classifier a convention rather than converting a scroll to Markdown.
 - **Prompt words that open screens** (`journal`, `menu`, `hero`, `options`, `title`, …) go in `GameStore.intercept()`, not a `runtime.js` handler. Never use `AnimatePresence mode="wait"`; under jsdom assert store state, not a dialog's absence.
+- **The home page's sandbox never touches the save:** `TryIt.tsx` runs a bare `Runtime` of its own (`LandingScreen.test.tsx` checks the story's state is untouched).
 - **Saves are additive:** never rename or drop keys of the story save `bashcrawl-web-state-v1` (`game-save.test.js`); `termforge/test/fixtures/save/save-v1-legacy.json` is write-once; the `learn`/`mastery` slices are owned and sanitized by their plugins. Every `localStorage` key is listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#web-app-rules).
 - **Goldens** (`termforge/test/fixtures/transcripts/`) are the emulator's behaviour contract: a fixture diff is a claimed behaviour change, regenerated only with `node termforge/test/tools/record-goldens.js --update`.
 - **Registries** in `src/help/data/*.yaml` are the single source of truth for the help system, the web export and the docs; `progression.yaml` and `courses/` are validated by `make validate-contracts` (a Python mirror of the rule heads, parity-tested against `core/rules.js`).

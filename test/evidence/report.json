@@ -1,0 +1,166 @@
+{
+  "schema": "verify-report/v1",
+  "base": "http://127.0.0.1:4004",
+  "generated": "2026-11-20T03:07:47.392Z",
+  "by": "agent",
+  "run": null,
+  "total": 9,
+  "passed": 9,
+  "failed": 0,
+  "scenarios": [
+    {
+      "id": "door-art",
+      "title": "The Arcade and Reference doors open with an ASCII Motion clip",
+      "features": [
+        "BASHCRAWL-025"
+      ],
+      "ok": true,
+      "dir": "test/evidence/door-art",
+      "screenshots": [
+        "test/evidence/door-art/desktop-arcade-dark.png",
+        "test/evidence/door-art/desktop-reference-dark.png",
+        "test/evidence/door-art/desktop-arcade-light.png",
+        "test/evidence/door-art/desktop-reference-light.png",
+        "test/evidence/door-art/mobile-arcade-dark.png",
+        "test/evidence/door-art/mobile-reference-dark.png",
+        "test/evidence/door-art/mobile-arcade-light.png",
+        "test/evidence/door-art/mobile-reference-light.png"
+      ]
+    },
+    {
+      "id": "feedback-widget",
+      "title": "The feedback button sits clear of the prompt and opens the report dialog",
+      "features": [
+        "BASHCRAWL-026"
+      ],
+      "ok": true,
+      "dir": "test/evidence/feedback-widget",
+      "screenshots": [
+        "test/evidence/feedback-widget/phone-360-story.png",
+        "test/evidence/feedback-widget/phone-360-story-hint.png",
+        "test/evidence/feedback-widget/phone-360-dialog.png",
+        "test/evidence/feedback-widget/desktop-story.png",
+        "test/evidence/feedback-widget/desktop-story-hint.png",
+        "test/evidence/feedback-widget/desktop-dialog.png"
+      ]
+    },
+    {
+      "id": "home-first-run",
+      "title": "The home page routes a newcomer, a returning hero and a door link",
+      "features": [
+        "BASHCRAWL-028"
+      ],
+      "ok": true,
+      "dir": "test/evidence/home-first-run",
+      "screenshots": [
+        "test/evidence/home-first-run/desktop-sandbox.png",
+        "test/evidence/home-first-run/desktop-hero-creation.png",
+        "test/evidence/home-first-run/desktop-home-returning.png",
+        "test/evidence/home-first-run/desktop-title-over-door.png",
+        "test/evidence/home-first-run/mobile-sandbox.png",
+        "test/evidence/home-first-run/mobile-hero-creation.png",
+        "test/evidence/home-first-run/mobile-home-returning.png",
+        "test/evidence/home-first-run/mobile-title-over-door.png"
+      ]
+    },
+    {
+      "id": "home-page",
+      "title": "A newcomer lands on the home page, tries a command and starts playing",
+      "features": [
+        "BASHCRAWL-028"
+      ],
+      "ok": true,
+      "dir": "test/evidence/home-page",
+      "screenshots": [
+        "test/evidence/home-page/desktop-home.png",
+        "test/evidence/home-page/desktop-story.png",
+        "test/evidence/home-page/mobile-home.png",
+        "test/evidence/home-page/mobile-story.png"
+      ]
+    },
+    {
+      "id": "phone-chrome",
+      "title": "On a phone the header is one row, Panels opens the panels and Menu the game menu",
+      "features": [
+        "BASHCRAWL-015"
+      ],
+      "ok": true,
+      "dir": "test/evidence/phone-chrome",
+      "screenshots": [
+        "test/evidence/phone-chrome/mobile-story.png",
+        "test/evidence/phone-chrome/mobile-panels-open.png",
+        "test/evidence/phone-chrome/mobile-game-menu.png",
+        "test/evidence/phone-chrome/phone-360-story.png",
+        "test/evidence/phone-chrome/phone-360-panels-open.png",
+        "test/evidence/phone-chrome/phone-360-game-menu.png"
+      ]
+    },
+    {
+      "id": "privacy-panel",
+      "title": "A build with no analytics key asks nothing, sends nothing and says so",
+      "features": [
+        "BASHCRAWL-029"
+      ],
+      "ok": true,
+      "dir": "test/evidence/privacy-panel",
+      "screenshots": [
+        "test/evidence/privacy-panel/desktop-options.png",
+        "test/evidence/privacy-panel/desktop-privacy.png",
+        "test/evidence/privacy-panel/desktop-story.png",
+        "test/evidence/privacy-panel/mobile-options.png",
+        "test/evidence/privacy-panel/mobile-privacy.png",
+        "test/evidence/privacy-panel/mobile-story.png"
+      ]
+    },
+    {
+      "id": "reference-fit",
+      "title": "The Reference door fits the window: search, chips, cards and footer",
+      "features": [
+        "BASHCRAWL-014"
+      ],
+      "ok": true,
+      "dir": "test/evidence/reference-fit",
+      "screenshots": [
+        "test/evidence/reference-fit/desktop-reference.png",
+        "test/evidence/reference-fit/mobile-reference.png",
+        "test/evidence/reference-fit/phone-360-reference.png"
+      ]
+    },
+    {
+      "id": "smoke-home",
+      "title": "Home page renders and is usable",
+      "features": [
+        "BASHCRAWL-001"
+      ],
+      "ok": true,
+      "dir": "test/evidence/smoke-home",
+      "screenshots": [
+        "test/evidence/smoke-home/desktop-home.png",
+        "test/evidence/smoke-home/mobile-home.png"
+      ]
+    },
+    {
+      "id": "web-doors",
+      "title": "A hero plays a little of every door, then switches the theme",
+      "features": [
+        "BASHCRAWL-015"
+      ],
+      "ok": true,
+      "dir": "test/evidence/web-doors",
+      "screenshots": [
+        "test/evidence/web-doors/desktop-story.png",
+        "test/evidence/web-doors/desktop-learn.png",
+        "test/evidence/web-doors/desktop-arcade-run.png",
+        "test/evidence/web-doors/desktop-reference-grep.png",
+        "test/evidence/web-doors/desktop-options-light.png",
+        "test/evidence/web-doors/desktop-options-dark.png",
+        "test/evidence/web-doors/mobile-story.png",
+        "test/evidence/web-doors/mobile-learn.png",
+        "test/evidence/web-doors/mobile-arcade-run.png",
+        "test/evidence/web-doors/mobile-reference-grep.png",
+        "test/evidence/web-doors/mobile-options-light.png",
+        "test/evidence/web-doors/mobile-options-dark.png"
+      ]
+    }
+  ]
+}

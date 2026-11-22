@@ -1,0 +1,161 @@
+# =============================================================================
+# verify/scenarios/phone-chrome.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The redesigned header on a phone (BASHCRAWL-015): one row holding the brand,
+# the four doors with their labels and the journal and menu buttons; the
+# Panels button under it opens the side panels (and Close puts them away); the
+# menu button (three lines) opens the game menu, and Escape closes it.
+# =============================================================================
+id: phone-chrome
+feature: BASHCRAWL-015
+title: "On a phone the header is one row, Panels opens the panels and Menu the game menu"
+description: >-
+  A returning hero on a phone sees a single header row with four labelled door
+  tabs, opens the side panels from the Panels button, closes them, and opens
+  the game menu from the menu button, with nothing cut off and no console
+  errors at 390 and 360 pixels wide.
+viewports:
+  - mobile
+  - name: phone-360
+    width: 360
+    height: 740
+steps:
+  - goto: /
+  - eval:
+      name: returning-hero
+      script: |
+        localStorage.clear();
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "story", onboarded: true, introSeen: true });
+        "seeded"
+  - goto: /?phone=chrome
+  - wait:
+      selector: "input.bc-input"
+  - eval:
+      name: header-is-one-row
+      script: |
+        (() => {
+          // One row: every header control's centre sits on the same line, none
+          // overlaps its neighbour or leaves the viewport, each has a name, and
+          // the four doors show their label as text.
+          const header = document.querySelector(".bc-header");
+          const vw = document.documentElement.clientWidth;
+          const controls = [...header.querySelectorAll("button, a")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {
+            const r = el.getBoundingClientRect();
+            return { name: (el.getAttribute("aria-label") || el.innerText || "").trim(), text: (el.innerText || "").trim(), tab: el.getAttribute("role") === "tab", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };
+          }).sort((a, b) => a.left - b.left);
+          const middles = controls.map((c) => c.middle);
+          if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error("the header wraps onto more than one row");
+          const unnamed = controls.filter((c) => !c.name).length;
+          if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);
+          for (let i = 1; i < controls.length; i += 1) {
+            if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`"${controls[i - 1].name}" overlaps "${controls[i].name}"`);
+          }
+          if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error("a header control is cut off by the viewport");
+          const doors = controls.filter((c) => c.tab).map((c) => c.text);
+          if (doors.join(",") !== "Story,Learn,Arcade,Reference") throw new Error(`door tabs read ${JSON.stringify(doors)}`);
+          return { viewport: vw, controls: controls.map((c) => c.name), doors };
+        })()
+  - eval:
+      name: story-fits-the-viewport
+      script: &fits |
+        (async () => {
+          // A sideways scrollbar is not the only way to lose content: the shell
+          // clips, so look for boxes cut off by the viewport's edge. Boxes inside
+          // a container that scrolls sideways on purpose can be reached; banners
+          // and tooltips are passing through.
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vw = document.documentElement.clientWidth;
+          const passing = ".bc-banner, .bc-tooltip, canvas";
+          const range = document.createRange();
+          // Where an inline run paints: the spaces a pre-wrap line ends on hang
+          // past its box without painting anything, so measure the words.
+          const ink = (el) => {
+            let left = Infinity;
+            let right = -Infinity;
+            const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+              for (const word of node.textContent.matchAll(/\S+/g)) {
+                range.setStart(node, word.index);
+                range.setEnd(node, word.index + word[0].length);
+                for (const r of range.getClientRects()) {
+                  if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }
+                }
+              }
+            }
+            return { left, right };
+          };
+          const cut = [];
+          for (const el of document.querySelectorAll("body *")) {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;
+            const cs = getComputedStyle(el);
+            if (cs.visibility === "hidden" || cs.display === "none" || el.closest(passing)) continue;
+            if (cs.display === "inline") {
+              const painted = ink(el);
+              if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;
+            }
+            let box = el.parentElement;
+            let reachable = false;
+            while (box && box !== document.body) {
+              const o = getComputedStyle(box).overflowX;
+              if ((o === "auto" || o === "scroll") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }
+              box = box.parentElement;
+            }
+            if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);
+          }
+          if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(", ")}`);
+          return { viewport: vw, cutOff: 0 };
+        })()
+  - expect:
+      hidden: '[aria-label="Game status panels"]'
+  - screenshot: story
+  - expect:
+      visible: 'button.bc-panels-toggle[aria-expanded="false"]'
+  - click: 'button:has-text("Panels")'
+  - expect:
+      visible: '[aria-label="Game status panels"]'
+  - expect:
+      visible: 'button.bc-panels-toggle[aria-expanded="true"]'
+  - expect:
+      text: "THE ENTRANCE HALL"
+  - eval:
+      name: panels-leave-the-prompt-alone
+      script: |
+        (async () => {
+          await new Promise((done) => setTimeout(done, 400));
+          const panels = document.querySelector('[aria-label="Game status panels"]').getBoundingClientRect();
+          const dock = document.querySelector(".bc-dock-slot").getBoundingClientRect();
+          if (panels.bottom > dock.top + 0.5) throw new Error(`the panels (to ${Math.round(panels.bottom)}px) run under the prompt (from ${Math.round(dock.top)}px)`);
+          const titles = [...document.querySelectorAll('[aria-label="Game status panels"] h2')].map((h) => h.textContent.replace(/[^A-Za-z ]/g, "").trim());
+          return { panels: [Math.round(panels.top), Math.round(panels.bottom)], dockTop: Math.round(dock.top), titles };
+        })()
+  - eval:
+      name: panels-fit-the-viewport
+      script: *fits
+  - screenshot: panels-open
+  - click: 'button.bc-panels-toggle:has-text("Close")'
+  - expect:
+      hidden: '[aria-label="Game status panels"]'
+  - click: 'role=button[name="Menu"]'
+  - expect:
+      visible: '[role=dialog][aria-label="Game menu"]'
+  - expect:
+      count:
+        selector: '[role=dialog][aria-label="Game menu"] [role=menuitem]'
+        min: 7
+        max: 7
+  - expect:
+      text: "Title screen"
+  - wait:
+      ms: 400
+  - eval:
+      name: menu-fits-the-viewport
+      script: *fits
+  - screenshot: game-menu
+  - press: Escape
+  - expect:
+      hidden: '[role=dialog][aria-label="Game menu"]'
+  - expect:
+      no_console_errors: true

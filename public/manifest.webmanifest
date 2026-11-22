@@ -1,0 +1,14 @@
+{
+  "name": "Bashcrawl: learn the terminal by playing",
+  "short_name": "Bashcrawl",
+  "description": "A free browser dungeon crawl that teaches real bash commands.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0e13",
+  "theme_color": "#0b0e13",
+  "categories": ["education", "games"],
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

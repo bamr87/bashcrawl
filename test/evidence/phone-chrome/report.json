@@ -1,0 +1,680 @@
+{
+  "id": "phone-chrome",
+  "title": "On a phone the header is one row, Panels opens the panels and Menu the game menu",
+  "features": [
+    "BASHCRAWL-015"
+  ],
+  "path": "verify/scenarios/phone-chrome.yml",
+  "started": "2026-11-20T03:07:15.843Z",
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 592
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "localStorage.clear();\nconst save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 7
+        },
+        {
+          "step": "goto",
+          "arg": "/?phone=chrome",
+          "ok": true,
+          "ms": 557
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 19
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "header-is-one-row",
+            "script": "(() => {\n  // One row: every header control's centre sits on the same line, none\n  // overlaps its neighbour or leaves the viewport, each has a name, and\n  // the four doors show their label as text.\n  const header = document.querySelector(\".bc-header\");\n  const vw = document.documentElement.clientWidth;\n  const controls = [...header.querySelectorAll(\"button, a\")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {\n    const r = el.getBoundingClientRect();\n    return { name: (el.getAttribute(\"aria-label\") || el.innerText || \"\").trim(), text: (el.innerText || \"\").trim(), tab: el.getAttribute(\"role\") === \"tab\", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };\n  }).sort((a, b) => a.left - b.left);\n  const middles = controls.map((c) => c.middle);\n  if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error(\"the header wraps onto more than one row\");\n  const unnamed = controls.filter((c) => !c.name).length;\n  if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);\n  for (let i = 1; i < controls.length; i += 1) {\n    if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`\"${controls[i - 1].name}\" overlaps \"${controls[i].name}\"`);\n  }\n  if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error(\"a header control is cut off by the viewport\");\n  const doors = controls.filter((c) => c.tab).map((c) => c.text);\n  if (doors.join(\",\") !== \"Story,Learn,Arcade,Reference\") throw new Error(`door tabs read ${JSON.stringify(doors)}`);\n  return { viewport: vw, controls: controls.map((c) => c.name), doors };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "controls": [
+              "Bashcrawl home",
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference",
+              "Journal",
+              "Menu"
+            ],
+            "doors": [
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference"
+            ]
+          },
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 32
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/mobile-story.png",
+          "ms": 61
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.bc-panels-toggle[aria-expanded=\"false\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "button:has-text(\"Panels\")",
+          "ok": true,
+          "ms": 90
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.bc-panels-toggle[aria-expanded=\"true\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "THE ENTRANCE HALL"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "panels-leave-the-prompt-alone",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 400));\n  const panels = document.querySelector('[aria-label=\"Game status panels\"]').getBoundingClientRect();\n  const dock = document.querySelector(\".bc-dock-slot\").getBoundingClientRect();\n  if (panels.bottom > dock.top + 0.5) throw new Error(`the panels (to ${Math.round(panels.bottom)}px) run under the prompt (from ${Math.round(dock.top)}px)`);\n  const titles = [...document.querySelectorAll('[aria-label=\"Game status panels\"] h2')].map((h) => h.textContent.replace(/[^A-Za-z ]/g, \"\").trim());\n  return { panels: [Math.round(panels.top), Math.round(panels.bottom)], dockTop: Math.round(dock.top), titles };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "panels": [
+              103,
+              750
+            ],
+            "dockTop": 750,
+            "titles": [
+              "Quest",
+              "Location",
+              "Pack",
+              "Lesson",
+              "Map",
+              "Skills",
+              "Hero",
+              "This room teaches"
+            ]
+          },
+          "ms": 405
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "panels-fit-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 40
+        },
+        {
+          "step": "screenshot",
+          "arg": "panels-open",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/mobile-panels-open.png",
+          "ms": 46
+        },
+        {
+          "step": "click",
+          "arg": "button.bc-panels-toggle:has-text(\"Close\")",
+          "ok": true,
+          "ms": 37
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=button[name=\"Menu\"]",
+          "ok": true,
+          "ms": 34
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "[role=dialog][aria-label=\"Game menu\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": "[role=dialog][aria-label=\"Game menu\"] [role=menuitem]",
+              "min": 7,
+              "max": 7
+            }
+          },
+          "ok": true,
+          "value": 7,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Title screen"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 400
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "menu-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 21
+        },
+        {
+          "step": "screenshot",
+          "arg": "game-menu",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/mobile-game-menu.png",
+          "ms": 54
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 5
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[role=dialog][aria-label=\"Game menu\"]"
+          },
+          "ok": true,
+          "ms": 284
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/phone-chrome/mobile-story.png",
+        "test/evidence/phone-chrome/mobile-panels-open.png",
+        "test/evidence/phone-chrome/mobile-game-menu.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "header-is-one-row": {
+          "viewport": 390,
+          "controls": [
+            "Bashcrawl home",
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference",
+            "Journal",
+            "Menu"
+          ],
+          "doors": [
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference"
+          ]
+        },
+        "story-fits-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "panels-leave-the-prompt-alone": {
+          "panels": [
+            103,
+            750
+          ],
+          "dockTop": 750,
+          "titles": [
+            "Quest",
+            "Location",
+            "Pack",
+            "Lesson",
+            "Map",
+            "Skills",
+            "Hero",
+            "This room teaches"
+          ]
+        },
+        "panels-fit-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "menu-fits-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?phone=chrome#/story"
+    },
+    {
+      "name": "phone-360",
+      "width": 360,
+      "height": 740,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 589
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "localStorage.clear();\nconst save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 7
+        },
+        {
+          "step": "goto",
+          "arg": "/?phone=chrome",
+          "ok": true,
+          "ms": 561
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 24
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "header-is-one-row",
+            "script": "(() => {\n  // One row: every header control's centre sits on the same line, none\n  // overlaps its neighbour or leaves the viewport, each has a name, and\n  // the four doors show their label as text.\n  const header = document.querySelector(\".bc-header\");\n  const vw = document.documentElement.clientWidth;\n  const controls = [...header.querySelectorAll(\"button, a\")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {\n    const r = el.getBoundingClientRect();\n    return { name: (el.getAttribute(\"aria-label\") || el.innerText || \"\").trim(), text: (el.innerText || \"\").trim(), tab: el.getAttribute(\"role\") === \"tab\", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };\n  }).sort((a, b) => a.left - b.left);\n  const middles = controls.map((c) => c.middle);\n  if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error(\"the header wraps onto more than one row\");\n  const unnamed = controls.filter((c) => !c.name).length;\n  if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);\n  for (let i = 1; i < controls.length; i += 1) {\n    if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`\"${controls[i - 1].name}\" overlaps \"${controls[i].name}\"`);\n  }\n  if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error(\"a header control is cut off by the viewport\");\n  const doors = controls.filter((c) => c.tab).map((c) => c.text);\n  if (doors.join(\",\") !== \"Story,Learn,Arcade,Reference\") throw new Error(`door tabs read ${JSON.stringify(doors)}`);\n  return { viewport: vw, controls: controls.map((c) => c.name), doors };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 360,
+            "controls": [
+              "Bashcrawl home",
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference",
+              "Journal",
+              "Menu"
+            ],
+            "doors": [
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference"
+            ]
+          },
+          "ms": 2
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 360,
+            "cutOff": 0
+          },
+          "ms": 21
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/phone-360-story.png",
+          "ms": 39
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.bc-panels-toggle[aria-expanded=\"false\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "click",
+          "arg": "button:has-text(\"Panels\")",
+          "ok": true,
+          "ms": 74
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button.bc-panels-toggle[aria-expanded=\"true\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "THE ENTRANCE HALL"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "panels-leave-the-prompt-alone",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 400));\n  const panels = document.querySelector('[aria-label=\"Game status panels\"]').getBoundingClientRect();\n  const dock = document.querySelector(\".bc-dock-slot\").getBoundingClientRect();\n  if (panels.bottom > dock.top + 0.5) throw new Error(`the panels (to ${Math.round(panels.bottom)}px) run under the prompt (from ${Math.round(dock.top)}px)`);\n  const titles = [...document.querySelectorAll('[aria-label=\"Game status panels\"] h2')].map((h) => h.textContent.replace(/[^A-Za-z ]/g, \"\").trim());\n  return { panels: [Math.round(panels.top), Math.round(panels.bottom)], dockTop: Math.round(dock.top), titles };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "panels": [
+              103,
+              646
+            ],
+            "dockTop": 646,
+            "titles": [
+              "Quest",
+              "Location",
+              "Pack",
+              "Lesson",
+              "Map",
+              "Skills",
+              "Hero",
+              "This room teaches"
+            ]
+          },
+          "ms": 405
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "panels-fit-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 360,
+            "cutOff": 0
+          },
+          "ms": 32
+        },
+        {
+          "step": "screenshot",
+          "arg": "panels-open",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/phone-360-panels-open.png",
+          "ms": 43
+        },
+        {
+          "step": "click",
+          "arg": "button.bc-panels-toggle:has-text(\"Close\")",
+          "ok": true,
+          "ms": 39
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[aria-label=\"Game status panels\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=button[name=\"Menu\"]",
+          "ok": true,
+          "ms": 33
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "[role=dialog][aria-label=\"Game menu\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": "[role=dialog][aria-label=\"Game menu\"] [role=menuitem]",
+              "min": 7,
+              "max": 7
+            }
+          },
+          "ok": true,
+          "value": 7,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Title screen"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 402
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "menu-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 360,
+            "cutOff": 0
+          },
+          "ms": 21
+        },
+        {
+          "step": "screenshot",
+          "arg": "game-menu",
+          "ok": true,
+          "file": "test/evidence/phone-chrome/phone-360-game-menu.png",
+          "ms": 49
+        },
+        {
+          "step": "press",
+          "arg": "Escape",
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "hidden": "[role=dialog][aria-label=\"Game menu\"]"
+          },
+          "ok": true,
+          "ms": 282
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/phone-chrome/phone-360-story.png",
+        "test/evidence/phone-chrome/phone-360-panels-open.png",
+        "test/evidence/phone-chrome/phone-360-game-menu.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "header-is-one-row": {
+          "viewport": 360,
+          "controls": [
+            "Bashcrawl home",
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference",
+            "Journal",
+            "Menu"
+          ],
+          "doors": [
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference"
+          ]
+        },
+        "story-fits-the-viewport": {
+          "viewport": 360,
+          "cutOff": 0
+        },
+        "panels-leave-the-prompt-alone": {
+          "panels": [
+            103,
+            646
+          ],
+          "dockTop": 646,
+          "titles": [
+            "Quest",
+            "Location",
+            "Pack",
+            "Lesson",
+            "Map",
+            "Skills",
+            "Hero",
+            "This room teaches"
+          ]
+        },
+        "panels-fit-the-viewport": {
+          "viewport": 360,
+          "cutOff": 0
+        },
+        "menu-fits-the-viewport": {
+          "viewport": 360,
+          "cutOff": 0
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?phone=chrome#/story"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-20T03:07:21.273Z",
+  "base": "http://127.0.0.1:4004"
+}

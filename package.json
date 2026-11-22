@@ -20,7 +20,9 @@
     "lint:js": "bash -c 'for f in $(git ls-files \"*.js\"); do node --check \"$f\" || exit 1; done'"
   },
   "dependencies": {
+    "lucide-react": "*",
     "motion": "*",
+    "posthog-js": "*",
     "react": "*",
     "react-dom": "*"
   },
