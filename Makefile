@@ -71,6 +71,16 @@ web-test: web-build ## Validate the bundle, then lint, test and build the React 
 	@npm run build
 	@$(PYTHON) scripts/write_build_info.py
 
+# ── Production deploy (Azure Static Web Apps; docs/deploy.md) ──────────
+
+.PHONY: swa-config
+swa-config: ## Write Azure's staticwebapp.config.json (CSP hashes, cache rules) and 404.html into web/dist, after web-bundle or web-test
+	@$(PYTHON) scripts/write_swa_config.py
+
+.PHONY: deploy-verify
+deploy-verify: ## Check a deployed site's /healthz and /version (URL=https://… ARGS="--commit SHA --swa")
+	@$(PYTHON) scripts/verify_deploy.py $(URL) $(ARGS)
+
 # ── TermForge hosts (the same game/tools, off the browser) ─────────────
 
 .PHONY: tty-demo

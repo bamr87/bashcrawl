@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!-- The 404 page Azure Static Web Apps serves for an unknown path.
+     scripts/write_swa_config.py copies it into web/dist and points
+     staticwebapp.config.json's 404 override at it. Keep it self-contained:
+     inline CSS only, no script (the Content-Security-Policy would block
+     one), no file of its own to fetch, and absolute links, because it is
+     served at whatever path was asked for. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta name="color-scheme" content="dark light">
+    <title>No such room — Bashcrawl</title>
+    <style>
+        :root {
+            color-scheme: dark light;
+            --bg: #0b0a14;
+            --panel: #161327;
+            --ink: #ece6d6;
+            --muted: #9d96ad;
+            --border: #3a3156;
+            --gold: #f2b134;
+            --on-gold: #0b0a14;
+            --error: #e8554e;
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f5f6f8;
+                --panel: #ffffff;
+                --ink: #141a22;
+                --muted: #586474;
+                --border: #d7dce4;
+                --gold: #a25a00;
+                --on-gold: #ffffff;
+                --error: #c0302b;
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
+            background: var(--bg);
+            color: var(--ink);
+            font: 1rem/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        main { width: 100%; max-width: 34rem; }
+        h1 { margin: 0 0 0.5rem; font-size: 1.6rem; line-height: 1.25; }
+        p { margin: 0 0 1rem; color: var(--muted); }
+        pre {
+            margin: 0 0 1.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font: 0.9rem/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        }
+        .prompt { color: var(--gold); }
+        .error { color: var(--error); }
+        a.door {
+            display: inline-block;
+            padding: 0.6rem 1.1rem;
+            background: var(--gold);
+            color: var(--on-gold);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        a.door:hover, a.door:focus-visible { filter: brightness(1.1); }
+        a.door:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>You have wandered out of bounds</h1>
+        <p>There is no room at this address (error 404). The dungeon has one door, and it is at the entrance.</p>
+        <pre><span class="prompt">$</span> cd /this/room
+<span class="error">bash: cd: /this/room: No such file or directory</span>
+<span class="prompt">$</span> cd /</pre>
+        <a class="door" href="/">Back to the entrance</a>
+    </main>
+</body>
+</html>

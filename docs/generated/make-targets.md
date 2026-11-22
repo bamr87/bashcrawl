@@ -15,6 +15,8 @@
 | `make web-dev` | Vite dev server with hot reload at http://127.0.0.1:5173 |
 | `make web-preview` | Serve the production build at http://127.0.0.1:4173 |
 | `make web-test` | Validate the bundle, then lint, test and build the React app (with /version and /healthz) |
+| `make swa-config` | Write Azure's staticwebapp.config.json (CSP hashes, cache rules) and 404.html into web/dist, after web-bundle or web-test |
+| `make deploy-verify` | Check a deployed site's /healthz and /version (URL=https://… ARGS="--commit SHA --swa") |
 | `make tty-demo` | Play bashcrawl in this terminal (JS emulator on node; ARGS="--no-hud" for the classic stream) |
 | `make telnet-demo` | Serve bashcrawl at telnet://127.0.0.1:2323 (ARGS="--raw" for nc) |
 | `make telnet-hub` | Serve bashcrawl as a shared hub (who/say/shout/top) at telnet://127.0.0.1:2323 |
