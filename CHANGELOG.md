@@ -4,6 +4,14 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0](https://github.com/bamr87/bashcrawl/compare/v0.3.0...v0.4.0) (2026-11-23)
+
+
+### Added
+
+* **web:** redesign the trainer, add a home page and consent-gated analytics ([c0ad342](https://github.com/bamr87/bashcrawl/commit/c0ad342aebe8b415d9a64f5a4533e0372a74e22b))
+* **web:** redesign, home page, consent-gated analytics and Azure deploy ([d02cf7c](https://github.com/bamr87/bashcrawl/commit/d02cf7cabe2982adda8489d9b09c74f5d3580ff6))
+
 ## [0.3.0](https://github.com/bamr87/bashcrawl/compare/v0.2.1...v0.3.0) (2026-11-18)
 
 
