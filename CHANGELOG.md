@@ -4,6 +4,37 @@ All notable changes to Bashcrawl are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0](https://github.com/bamr87/bashcrawl/compare/v0.2.1...v0.3.0) (2026-11-18)
+
+
+### Added
+
+* **motion:** add the Arcade and Reference door art as ASCII Motion clips ([7a468f5](https://github.com/bamr87/bashcrawl/commit/7a468f5071cd4599165d069f8b84ef5649f5c6f4)), closes [#91](https://github.com/bamr87/bashcrawl/issues/91)
+* **story:** show quest checklist steps and tick them with feedback ([93d380c](https://github.com/bamr87/bashcrawl/commit/93d380c94f37d66e21d0de4f151ae68f6297de9b))
+* **story:** show quest checklist steps and tick them with feedback ([571bef9](https://github.com/bamr87/bashcrawl/commit/571bef9a1932732da48c479c30676de9b1954321)), closes [#113](https://github.com/bamr87/bashcrawl/issues/113)
+* **termforge:** one-line "did you mean" hints; keep the error clip off the stage ([35e4892](https://github.com/bamr87/bashcrawl/commit/35e489203ff90d465631ea811536e6b3d34c6c58)), closes [#111](https://github.com/bamr87/bashcrawl/issues/111)
+* **web:** Ctrl+C abandons the prompt line, and a reload recaps where you are ([6e702c1](https://github.com/bamr87/bashcrawl/commit/6e702c147e92f63c4253e492f8722c30550e08d4)), closes [#115](https://github.com/bamr87/bashcrawl/issues/115)
+* **web:** make hint location-aware and add a "Stuck?" nudge ([e4bfccc](https://github.com/bamr87/bashcrawl/commit/e4bfccc1b875c42f94cc7bc86a79f74e6d346eff))
+* **web:** make hint location-aware and nudge after three failed commands ([17d6005](https://github.com/bamr87/bashcrawl/commit/17d600585ef6bbbd8511987f6f17d69b6d109bfa)), closes [#105](https://github.com/bamr87/bashcrawl/issues/105)
+* **web:** mount the fleet feedback widget in the trainer ([923bb8b](https://github.com/bamr87/bashcrawl/commit/923bb8b6f6a7f5438d1f7eaad9881c8ce1abb023))
+* **web:** mount the fleet feedback widget in the trainer ([b120cba](https://github.com/bamr87/bashcrawl/commit/b120cba3b1cf2041c39b0ccc5298b81cf1e95099)), closes [#130](https://github.com/bamr87/bashcrawl/issues/130)
+* **web:** play an ASCII Motion clip on the Arcade and Reference doors ([397aa5f](https://github.com/bamr87/bashcrawl/commit/397aa5f86cc64ed6846c72aa3219f405ec0c794c))
+* **web:** play an ASCII Motion clip on the Arcade and Reference doors ([065816d](https://github.com/bamr87/bashcrawl/commit/065816d1a5f98cd95bbd88c525b89e10223b7424)), closes [#91](https://github.com/bamr87/bashcrawl/issues/91)
+* **web:** say how to cast an encounter when cat shows its source ([525b306](https://github.com/bamr87/bashcrawl/commit/525b3068dc7d3dca0311086c7316ceb9ddb4409e))
+* **web:** say how to cast an encounter when cat shows its source ([fdd99eb](https://github.com/bamr87/bashcrawl/commit/fdd99eb254f051a9ddb18a95d82174f7de9c6a94)), closes [#114](https://github.com/bamr87/bashcrawl/issues/114)
+
+
+### Fixed
+
+* **story:** map shows explored rooms as fog of war via Hud.mapModel ([db92fa6](https://github.com/bamr87/bashcrawl/commit/db92fa6709fa02a445fe80590e0f38e1ea3df6a0)), closes [#107](https://github.com/bamr87/bashcrawl/issues/107)
+* **story:** separate story and arena rank ladders, gate the top rank on the quest line ([90caa1b](https://github.com/bamr87/bashcrawl/commit/90caa1b915235e39adf490e41010f98ffff77fb1)), closes [#106](https://github.com/bamr87/bashcrawl/issues/106)
+* **termforge:** bash-faithful ls and cd, exact quest 5, one-line did-you-mean hints ([a644fbb](https://github.com/bamr87/bashcrawl/commit/a644fbbcead2ef1c16c0ce42e0dac5fb442d38e8))
+* **termforge:** parse ls options like ls(1), take cd / and cd ~ home, match quest 5 exactly ([a12b5b3](https://github.com/bamr87/bashcrawl/commit/a12b5b3ac37c9b2574d063726a083dd2f4aaa25c)), closes [#108](https://github.com/bamr87/bashcrawl/issues/108)
+* **web:** keep the room visible in the prompt, add Ctrl+C and a reload recap ([0c02dac](https://github.com/bamr87/bashcrawl/commit/0c02dac2e5039d6a0402bc6a6ce1d80b521c06b0))
+* **web:** ls plays a generic scanline instead of a hard-coded room manifest ([ea61592](https://github.com/bamr87/bashcrawl/commit/ea61592938d4d6da75d19670f69172661b3ce98e)), closes [#110](https://github.com/bamr87/bashcrawl/issues/110)
+* **web:** story rank ladder, fog-of-war map, and honest ls scan ([5369754](https://github.com/bamr87/bashcrawl/commit/5369754d70686496db922a157f8467f3514bdb0f))
+* **web:** trim the prompt's path from the left so the room stays visible ([b35c922](https://github.com/bamr87/bashcrawl/commit/b35c922231823402a3df00e67228df3ea271a998)), closes [#112](https://github.com/bamr87/bashcrawl/issues/112)
+
 ## [0.2.1](https://github.com/bamr87/bashcrawl/compare/v0.2.0...v0.2.1) (2026-11-10)
 
 
