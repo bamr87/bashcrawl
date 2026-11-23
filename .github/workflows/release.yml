@@ -30,3 +30,27 @@ jobs:
       contents: write
       pull-requests: write
     secrets: inherit
+
+  # Production deploy. When release-please has just cut a release, start
+  # azure-swa.yml for that tag as a run of its own. It is dispatched, not
+  # called: `workflow_dispatch` is one of the few events the default
+  # GITHUB_TOKEN may raise (the `release:` event it creates fires nothing),
+  # and a separate run means a production deploy waiting on its reviewer never
+  # holds this workflow's concurrency group, so release-please keeps running
+  # on later pushes. The workflow file runs from main; the tag is what it
+  # builds. Until Azure is bootstrapped azure-swa.yml skips itself
+  # (docs/deploy.md).
+  deploy-production:
+    name: Start the production deploy
+    needs: release
+    if: needs.release.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch azure-swa.yml for the release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag_name }}
+        run: gh workflow run azure-swa.yml --repo "$GITHUB_REPOSITORY" --ref main -f ref="$TAG"

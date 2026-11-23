@@ -65,6 +65,10 @@ export function setSettings(patch: Partial<Settings>): void {
     apply(next);
 }
 
+export function subscribeSettings(listener: () => void): () => void {
+    return store.subscribe(listener);
+}
+
 export function getSettings(): Settings {
     return store.get();
 }

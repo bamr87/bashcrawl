@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bashcrawl">
-  <rect width="64" height="64" rx="12" fill="#140826"/>
-  <path d="M12 20h40v28H12z" fill="#0d0d1a" stroke="#c084fc" stroke-width="3"/>
-  <path d="M20 28l8 6-8 6" fill="none" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M34 42h12" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>
+  <rect width="64" height="64" rx="15" fill="#0b0e13"/>
+  <rect x="3" y="3" width="58" height="58" rx="13" fill="#f5b545" fill-opacity="0.14" stroke="#f5b545" stroke-width="3"/>
+  <path d="M19 23l12 9-12 9" fill="none" stroke="#f5b545" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 44h12" stroke="#f5b545" stroke-width="5.5" stroke-linecap="round"/>
 </svg>

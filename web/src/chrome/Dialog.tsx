@@ -14,6 +14,9 @@ export interface DialogProps {
     initialFocus?: () => HTMLElement | null;
 }
 
+/** Open dialogs, oldest first: Escape belongs to the last one only. */
+const stack: symbol[] = [];
+
 export function Dialog({ open, title, onClose, children, className, initialFocus }: DialogProps) {
     const titleId = useId();
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -24,18 +27,23 @@ export function Dialog({ open, title, onClose, children, className, initialFocus
         restoreRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         const target = (initialFocus && initialFocus()) || closeRef.current;
         target?.focus();
+        const id = Symbol(title);
+        stack.push(id);
         const onKey = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                event.preventDefault();
-                onClose();
-            }
+            // One Escape closes one dialog: the one on top.
+            if (event.key !== "Escape" || stack[stack.length - 1] !== id) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            onClose();
         };
         document.addEventListener("keydown", onKey);
         return () => {
             document.removeEventListener("keydown", onKey);
+            const at = stack.indexOf(id);
+            if (at >= 0) stack.splice(at, 1);
             restoreRef.current?.focus();
         };
-    }, [open, onClose, initialFocus]);
+    }, [open, onClose, initialFocus, title]);
 
     return (
         <AnimatePresence>

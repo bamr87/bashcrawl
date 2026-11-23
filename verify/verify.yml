@@ -23,13 +23,16 @@ schema: verify/v1
 app:
   # Command that serves the app (run from the repo root, in the background).
   # Leave empty and set `static_dir` to serve a built directory instead.
-  start: ""
+  # Bashcrawl: the production bundle behind Vite's preview server, so the
+  # scenarios exercise what is deployed (no analytics key: nothing is sent).
+  # The port is the one vite.config.mts gives `vite preview`.
+  start: "npm run preview -- --strictPort"
   # Optional one-shot build before `start` / before serving `static_dir`.
-  build: ""
+  build: "make web-bundle"
   # Directory to serve statically when `start` is empty (e.g. _site, dist, build).
   static_dir: ""
   # Base URL the scenarios navigate against.
-  url: http://127.0.0.1:4000
+  url: http://127.0.0.1:4173
   # Path polled until it answers 200 before any scenario runs.
   ready: /
   # Seconds to wait for `ready`.

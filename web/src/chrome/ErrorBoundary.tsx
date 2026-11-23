@@ -4,6 +4,7 @@
 // error never blanks the page — the engine's own save is untouched.
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
+import { captureError } from "../analytics/client";
 import { ReportLink } from "./Feedback";
 
 interface Props {
@@ -23,6 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, info: ErrorInfo): void {
         console.error("Bashcrawl UI error:", error, info.componentStack);
+        captureError(error, { boundary: "app", component_stack: info.componentStack ?? "" });
     }
 
     render() {

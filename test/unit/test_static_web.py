@@ -121,3 +121,22 @@ def test_feedback_capture_loads_in_head_before_the_engine() -> None:
         "index.html does not load ./fleet-feedback-capture.js",
         "index.html does not load ./fleet-feedback.js",
     ]
+
+
+def test_static_urls_are_relative_bar_the_canonical_link_and_the_repo() -> None:
+    """One build serves from a domain root and from a Pages project path, so
+    assets stay relative; the canonical link is the site's own address."""
+    check = validate_static_web._relative_urls
+    page = (
+        '<link rel="canonical" href="https://example.com/">'
+        '<link rel="icon" href="./favicon.svg">'
+        '<a href="https://github.com/bamr87/bashcrawl">source</a>'
+        '<script src="./assets/js/runtime.js"></script>'
+    )
+    assert check(page, "index.html") == []
+    assert check('<script src="/assets/app.js"></script>', "index.html") == [
+        "index.html: static asset URL must be relative: /assets/app.js"
+    ]
+    assert check('<link rel="stylesheet" href="https://cdn.example.com/a.css">', "index.html") == [
+        "index.html: static asset URL must be relative: https://cdn.example.com/a.css"
+    ]

@@ -1,0 +1,465 @@
+/* The home page: the pitch beside a working terminal, then the four doors,
+ * how it works, what is taught, and the project's footer. It scrolls inside
+ * the shell's <main>; the header stays put. */
+@layer components {
+    .bc-home {
+        min-height: 0;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        background:
+            radial-gradient(60rem 28rem at 78% -6rem, color-mix(in srgb, var(--fleet-color-primary) 10%, transparent), transparent 70%),
+            radial-gradient(48rem 26rem at 8% -8rem, color-mix(in srgb, var(--fleet-color-accent) 9%, transparent), transparent 70%);
+    }
+    .bc-home > * {
+        width: min(var(--bc-content-max), calc(100% - 2 * var(--fleet-space-container-x)));
+        margin-inline: auto;
+    }
+
+    /* ── hero ── */
+    .bc-home-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+        align-items: center;
+        gap: clamp(1.5rem, 4vw, 4rem);
+        padding-block: clamp(2rem, 6vw, 5rem) var(--fleet-space-section);
+    }
+    .bc-home-eyebrow {
+        color: var(--fleet-color-primary);
+    }
+    .bc-home-title {
+        margin: 0.6rem 0 0;
+        font-size: var(--bc-text-hero);
+        font-weight: var(--fleet-font-weight-bold);
+        letter-spacing: -0.035em;
+        line-height: 1.04;
+        text-wrap: balance;
+    }
+    .bc-home-lede {
+        max-width: 34rem;
+        margin: var(--fleet-space-3) 0 0;
+        font-size: var(--fleet-text-lg);
+        line-height: 1.6;
+        color: var(--fleet-color-ink-muted);
+        text-wrap: pretty;
+    }
+    .bc-home-lede code,
+    .bc-home-skill code {
+        padding: 0.1em 0.4em;
+        border-radius: var(--fleet-radius-sm);
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-code-ink);
+        font-size: 0.9em;
+    }
+    .bc-home-cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--fleet-space-2);
+        margin-top: var(--fleet-space-4);
+    }
+    .bc-home-alert {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--fleet-space-2) var(--fleet-space-3);
+        margin: var(--fleet-space-3) 0 0;
+        padding: var(--fleet-space-2) var(--fleet-space-3);
+        border-radius: var(--fleet-radius-base);
+        background: color-mix(in srgb, var(--fleet-color-danger) 12%, transparent);
+        color: var(--fleet-color-ink);
+        font-size: var(--fleet-text-sm);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fleet-color-danger) 45%, transparent);
+    }
+    .bc-home-points {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem var(--fleet-space-3);
+        margin: var(--fleet-space-4) 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-home-points li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .bc-home-points svg {
+        width: 0.95rem;
+        height: 0.95rem;
+        color: var(--fleet-color-success);
+    }
+
+    /* ── the sandbox terminal ── */
+    .bc-try {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        border-radius: var(--fleet-radius-xl);
+        background: var(--bc-color-term-bg);
+        box-shadow: inset 0 0 0 1px var(--bc-color-border-strong), var(--fleet-shadow-lg);
+        overflow: hidden;
+    }
+    .bc-try-bar {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-3);
+        padding: 0.6rem var(--fleet-space-3);
+        border-bottom: 1px solid var(--fleet-color-border);
+        background: var(--fleet-color-bg-elevated);
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-try-dots {
+        display: inline-flex;
+        gap: 0.35rem;
+    }
+    .bc-try-dots i {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: var(--fleet-radius-circle);
+        background: var(--bc-color-border-strong);
+    }
+    .bc-try-log {
+        height: clamp(13rem, 34vh, 19rem);
+        padding: var(--fleet-space-3);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-try-prompt {
+        display: flex;
+        align-items: center;
+        gap: var(--fleet-space-2);
+        padding: 0.35rem 0.5rem 0.35rem var(--fleet-space-3);
+        border-top: 1px solid var(--fleet-color-border);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+    }
+    .bc-try-prompt:focus-within {
+        box-shadow: inset 0 0 0 2px var(--fleet-color-primary);
+    }
+    .bc-try-label {
+        flex: none;
+        color: var(--fleet-color-success);
+        font-weight: var(--fleet-font-weight-semibold);
+        white-space: nowrap;
+    }
+    .bc-try-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.4rem 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--fleet-color-ink);
+        /* 16px keeps iOS from zooming the page when the field takes focus. */
+        font-size: max(1rem, var(--fleet-text-sm));
+    }
+    .bc-try-input::placeholder {
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-try-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 0.6rem var(--fleet-space-3) var(--fleet-space-3);
+        border-top: 1px solid var(--fleet-color-border);
+        background: var(--fleet-color-bg-elevated);
+    }
+    .bc-try-chip {
+        padding: 0.25rem 0.65rem;
+        border: 0;
+        border-radius: var(--fleet-radius-pill);
+        background: var(--fleet-color-bg-muted);
+        color: var(--fleet-color-ink);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-xs);
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        transition: box-shadow var(--fleet-motion-fast) var(--fleet-ease), color var(--fleet-motion-fast) var(--fleet-ease);
+    }
+    .bc-try-chip:hover {
+        color: var(--fleet-color-primary);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-primary);
+    }
+    .bc-try-chip:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+    .bc-try-go {
+        margin-left: auto;
+        background: var(--fleet-color-primary);
+        color: var(--bc-color-on-primary);
+        font-family: var(--fleet-font-sans);
+        font-weight: var(--fleet-font-weight-semibold);
+        box-shadow: none;
+    }
+    .bc-try-go:hover {
+        color: var(--bc-color-on-primary);
+        box-shadow: var(--fleet-shadow-sm);
+    }
+
+    /* ── sections ── */
+    .bc-home-section {
+        padding-block: 0 var(--fleet-space-section);
+    }
+    .bc-home-h2 {
+        margin: 0.35rem 0 var(--fleet-space-4);
+        font-size: var(--fleet-text-h1);
+        font-weight: var(--fleet-font-weight-semibold);
+        letter-spacing: -0.02em;
+        line-height: var(--fleet-leading-tight);
+        text-wrap: balance;
+    }
+    .bc-home-h3 {
+        margin: 0;
+        font-size: var(--fleet-text-lg);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+
+    /* ── the four doors ── */
+    .bc-home-doors {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--fleet-space-3);
+    }
+    .bc-home-door {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: var(--fleet-space-4);
+        border: 0;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: box-shadow var(--fleet-motion-base) var(--fleet-ease), transform var(--fleet-motion-base) var(--fleet-ease);
+    }
+    .bc-home-door:hover,
+    .bc-home-door:focus-visible {
+        box-shadow: inset 0 0 0 1px var(--door-tint, var(--fleet-color-primary)), var(--fleet-shadow-md);
+    }
+    .bc-home-door[data-door="story"] { --door-tint: var(--fleet-color-primary); }
+    .bc-home-door[data-door="learn"] { --door-tint: var(--fleet-color-info); }
+    .bc-home-door[data-door="arcade"] { --door-tint: var(--fleet-color-accent); }
+    .bc-home-door[data-door="reference"] { --door-tint: var(--fleet-color-success); }
+    .bc-home-door-icon {
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--fleet-radius-lg);
+        background: color-mix(in srgb, var(--door-tint) 14%, transparent);
+        color: var(--door-tint);
+    }
+    .bc-home-door-icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    .bc-home-door-title {
+        margin-top: 0.25rem;
+        font-size: var(--fleet-text-lg);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-home-door-blurb {
+        flex: 1 1 auto;
+        font-size: var(--fleet-text-sm);
+        line-height: 1.55;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-home-door-stat {
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-xs);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-home-door-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.25rem;
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-semibold);
+        color: var(--door-tint);
+    }
+    .bc-home-door-cta svg {
+        width: 0.9rem;
+        height: 0.9rem;
+    }
+
+    /* ── how it works ── */
+    .bc-home-steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--fleet-space-4);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .bc-home-step {
+        padding-top: var(--fleet-space-3);
+        border-top: 1px solid var(--fleet-color-border);
+    }
+    .bc-home-step-n {
+        display: inline-grid;
+        place-items: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: var(--fleet-radius-circle);
+        background: color-mix(in srgb, var(--fleet-color-primary) 16%, transparent);
+        color: var(--fleet-color-primary);
+        font-family: var(--fleet-font-mono);
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-home-step h3 {
+        margin: 0.7rem 0 0.3rem;
+        font-size: var(--fleet-text-lg);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-home-step p {
+        margin: 0;
+        color: var(--fleet-color-ink-muted);
+    }
+
+    /* ── what you will learn ── */
+    /* Hairlines between cells, drawn by each cell so an unfilled last row
+       stays the card's own colour. */
+    .bc-home-skills {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+        border-radius: var(--fleet-radius-lg);
+        background: var(--fleet-color-bg-elevated);
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+        overflow: hidden;
+    }
+    .bc-home-skill {
+        padding: var(--fleet-space-3) var(--fleet-space-4);
+        box-shadow: 1px 0 0 0 var(--fleet-color-border), 0 1px 0 0 var(--fleet-color-border);
+    }
+    .bc-home-skill h3 {
+        margin: 0 0 0.5rem;
+        font-size: var(--fleet-text-sm);
+        font-weight: var(--fleet-font-weight-semibold);
+    }
+    .bc-home-skill p {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0;
+        font-size: var(--fleet-text-sm);
+    }
+
+    /* ── classroom / real shell ── */
+    .bc-home-duo {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--fleet-space-3);
+    }
+    .bc-home-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fleet-space-2);
+        padding: var(--fleet-space-4);
+    }
+    .bc-home-card > svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: var(--fleet-color-primary);
+    }
+    .bc-home-card p {
+        margin: 0;
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-home-card .bc-btn {
+        margin-top: auto;
+    }
+    .bc-home-code {
+        align-self: stretch;
+        margin: auto 0 0;
+        padding: var(--fleet-space-3);
+        overflow-x: auto;
+        border-radius: var(--fleet-radius-base);
+        background: var(--fleet-color-code-bg);
+        color: var(--fleet-color-code-ink);
+        font-size: var(--fleet-text-sm);
+        line-height: 1.7;
+        box-shadow: inset 0 0 0 1px var(--fleet-color-border);
+    }
+
+    /* ── footer ── */
+    .bc-home-foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fleet-space-2) var(--fleet-space-4);
+        padding-block: var(--fleet-space-4) calc(var(--fleet-space-5) + env(safe-area-inset-bottom, 0px));
+        border-top: 1px solid var(--fleet-color-border);
+        font-size: var(--fleet-text-sm);
+        color: var(--fleet-color-ink-muted);
+    }
+    .bc-home-foot p {
+        margin: 0;
+    }
+    .bc-home-foot-lead {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.45rem;
+        min-width: 0;
+    }
+    .bc-home-foot-lead svg {
+        margin-top: 0.2em;
+    }
+    .bc-home-foot svg {
+        flex: none;
+        width: 0.95rem;
+        height: 0.95rem;
+    }
+    .bc-home-foot-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem var(--fleet-space-3);
+    }
+    .bc-home-foot-links a,
+    .bc-home-foot-links button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .bc-home-foot-links a:hover,
+    .bc-home-foot-links button:hover {
+        color: var(--fleet-color-ink);
+    }
+}
+
+@media (max-width: 1000px) {
+    .bc-home-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .bc-home-doors {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 640px) {
+    .bc-home-doors,
+    .bc-home-steps,
+    .bc-home-duo {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .bc-home-cta .bc-btn {
+        flex: 1 1 100%;
+    }
+    .bc-home-foot {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

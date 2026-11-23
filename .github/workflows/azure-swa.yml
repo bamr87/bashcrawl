@@ -1,0 +1,466 @@
+name: Azure Static Web Apps
+
+# Production hosting for the web trainer (docs/deploy.md, ADR 0002). Builds
+# web/dist with `make web-test`, adds the generated staticwebapp.config.json
+# and 404 page (`make swa-config`), uploads that folder with the SWA CLI and
+# then checks the live site before reporting success (UPS-OPS-42).
+#
+#   pull request            -> SWA preview environment pr<N>   (GitHub Environment: preview)
+#   push to main            -> SWA environment `staging`       (GitHub Environment: staging)
+#   release / manual `ref`  -> SWA production                  (GitHub Environment: production)
+#
+# Production is always a `workflow_dispatch` naming a `ref`: release.yml
+# dispatches this workflow for the tag release-please just cut (a release made
+# with the default GITHUB_TOKEN fires no `release:` event, but that token may
+# dispatch a workflow), and the same dispatch by hand deploys any tag, branch
+# or commit, which is also the rollback: dispatch the previous release tag.
+#
+# No Oryx build and no stored deployment token: azure/login exchanges the
+# job's OIDC token (Entra federated credentials), the deploy token is read
+# from Azure at deploy time and masked. One-time setup:
+# ./infra/azure/bootstrap.sh. Until AZURE_CLIENT_ID is set the whole workflow
+# skips cleanly. GitHub Pages (pages.yml) is untouched and stays the fallback.
+#
+# Secrets (repository level): AZURE_CLIENT_ID, AZURE_TENANT_ID,
+#   AZURE_SUBSCRIPTION_ID.
+# Variables (repository level; public values, never secrets):
+#   VITE_SITE_URL             production's canonical origin, https, no trailing slash
+#   VITE_POSTHOG_KEY          PostHog project key for production (unset = no analytics)
+#   VITE_POSTHOG_HOST         default https://us.i.posthog.com
+#   VITE_POSTHOG_UI_HOST      optional: the PostHog app, when the host is a reverse proxy
+#   VITE_POSTHOG_KEY_STAGING  optional: a separate project key for staging
+#   VITE_SITE_URL_STAGING     optional: staging's own URL, once known
+#   AZURE_RESOURCE_GROUP, AZURE_STATIC_WEB_APP_NAME   optional (defaults below)
+#   AZURE_SWA_PREVIEWS        optional: `false` turns pull-request previews off
+# Preview builds never get an analytics key.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'web/**'
+      - 'entrance/**'
+      - 'src/help/data/**'
+      - 'termforge/**'
+      - 'motion/**'
+      - 'courses/**'
+      - 'public/**'
+      - 'components/**'
+      - 'infra/azure/404.html'
+      - 'package.json'
+      - 'vite.config.mts'
+      - 'tsconfig.node.json'
+      - 'eslint.config.mjs'
+      - 'Makefile'
+      - 'VERSION'
+      - 'scripts/build_motion.py'
+      - 'scripts/export_static_web.py'
+      - 'scripts/validate_static_web.py'
+      - 'scripts/validate_runtime_commands.py'
+      - 'scripts/vendor_termforge.py'
+      - 'scripts/write_build_info.py'
+      - 'scripts/write_swa_config.py'
+      - 'scripts/verify_deploy.py'
+      - '.github/workflows/azure-swa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'entrance/**'
+      - 'src/help/data/**'
+      - 'termforge/**'
+      - 'motion/**'
+      - 'courses/**'
+      - 'public/**'
+      - 'components/**'
+      - 'infra/azure/404.html'
+      - 'package.json'
+      - 'vite.config.mts'
+      - 'tsconfig.node.json'
+      - 'eslint.config.mjs'
+      - 'Makefile'
+      - 'VERSION'
+      - 'scripts/build_motion.py'
+      - 'scripts/export_static_web.py'
+      - 'scripts/validate_static_web.py'
+      - 'scripts/validate_runtime_commands.py'
+      - 'scripts/vendor_termforge.py'
+      - 'scripts/write_build_info.py'
+      - 'scripts/write_swa_config.py'
+      - 'scripts/verify_deploy.py'
+      - '.github/workflows/azure-swa.yml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag, branch or commit to deploy to PRODUCTION (rollback = the previous release tag, e.g. v0.2.1)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One run at a time per target, so deploys land in the order they were asked
+# for. A newer push to a pull request replaces the run in flight (and closing
+# it cancels a deploy that would re-create the preview); staging and
+# production runs are never cut short, they queue.
+concurrency:
+  group: >-
+    azure-swa-${{ inputs.ref && 'production'
+    || github.event.pull_request.number && format('pr{0}', github.event.pull_request.number)
+    || 'staging' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && inputs.ref == '' }}
+
+jobs:
+  # Decide what this run does. `secrets` is not allowed in a job-level `if:`,
+  # so "is Azure configured?" is a step output the other jobs gate on.
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      action: ${{ steps.plan.outputs.action }}            # deploy | close | skip
+      environment: ${{ steps.plan.outputs.environment }}  # preview | staging | production
+      swa_env: ${{ steps.plan.outputs.swa_env }}          # pr<N> | staging | production
+      ref: ${{ steps.plan.outputs.ref }}                  # what to check out ('' = this event's commit)
+    steps:
+      - name: Choose the target
+        id: plan
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          INPUT_REF: ${{ inputs.ref }}
+          PREVIEWS: ${{ vars.AZURE_SWA_PREVIEWS }}
+        run: |
+          set -euo pipefail
+          action=deploy
+          ref=""
+          if [ -n "$INPUT_REF" ]; then
+            # A dispatch (by release.yml, or by hand): it names a ref.
+            case "$INPUT_REF" in
+              *[!A-Za-z0-9._/-]*)
+                echo "::error::ref may only contain letters, digits, '.', '_', '/' and '-'."
+                exit 1
+                ;;
+            esac
+            environment=production
+            swa_env=production
+            ref="$INPUT_REF"
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
+            environment=preview
+            swa_env="pr${PR_NUMBER}"
+            if [ "$EVENT_ACTION" = "closed" ]; then
+              action=close
+            elif [ "$PREVIEWS" = "false" ]; then
+              action=skip
+              echo "::notice title=Preview skipped::Pull-request previews are off (AZURE_SWA_PREVIEWS=false)."
+            fi
+          else
+            environment=staging
+            swa_env=staging
+          fi
+          if [ -z "$AZURE_CLIENT_ID" ]; then
+            action=skip
+            echo "::notice title=Azure deploy skipped::AZURE_CLIENT_ID is not set. Bootstrap: docs/deploy.md."
+          fi
+          {
+            echo "action=${action}"
+            echo "environment=${environment}"
+            echo "swa_env=${swa_env}"
+            echo "ref=${ref}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Plan: ${action} ${environment} (${swa_env}) ${ref:+at ${ref}}"
+
+  build:
+    name: Build (${{ needs.plan.outputs.environment }})
+    needs: plan
+    if: needs.plan.outputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+    env:
+      # Browser-exposed build variables: public values from repository
+      # variables, never secrets. Analytics exists only in a build that gets a
+      # key: production's own, an optional separate one for staging, none for
+      # a preview.
+      VITE_APP_ENV: ${{ needs.plan.outputs.environment }}
+      VITE_SITE_URL: >-
+        ${{ needs.plan.outputs.environment == 'production' && vars.VITE_SITE_URL
+        || needs.plan.outputs.environment == 'staging' && vars.VITE_SITE_URL_STAGING
+        || '' }}
+      VITE_POSTHOG_KEY: >-
+        ${{ needs.plan.outputs.environment == 'production' && vars.VITE_POSTHOG_KEY
+        || needs.plan.outputs.environment == 'staging' && vars.VITE_POSTHOG_KEY_STAGING
+        || '' }}
+      VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST || 'https://us.i.posthog.com' }}
+      VITE_POSTHOG_UI_HOST: ${{ vars.VITE_POSTHOG_UI_HOST }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.plan.outputs.ref }}
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      # Node 24, as in pages.yml and ci.yml: vitest/jsdom need >= 22 and the
+      # fleet installs the latest of everything (no lockfile, so no npm cache).
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet --upgrade pip
+          pip install --quiet pyyaml
+          npm install --no-audit --no-fund
+
+      - name: Check the build variables
+        run: |
+          set -euo pipefail
+          case "$VITE_SITE_URL" in
+            "")
+              if [ "$VITE_APP_ENV" = "production" ]; then
+                echo "::warning title=VITE_SITE_URL is not set::Production has no canonical origin (docs/deploy.md)."
+              fi
+              ;;
+            */)
+              echo "::error title=VITE_SITE_URL::Must not end with a slash."
+              exit 1
+              ;;
+            https://*) ;;
+            *)
+              echo "::error title=VITE_SITE_URL::Must be an https origin, e.g. https://example.com."
+              exit 1
+              ;;
+          esac
+
+      # /version must report the commit that was built, which for a `ref`
+      # deploy is not the commit that triggered the run. write_build_info.py
+      # and vite.config.mts both prefer GIT_SHA over GITHUB_SHA.
+      - name: Record the commit being built
+        id: commit
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          echo "GIT_SHA=${sha}" >> "$GITHUB_ENV"
+
+      - name: Build and validate the web app
+        run: make web-test
+
+      - name: Write the Static Web Apps config (CSP hashes, cache rules, 404 page)
+        run: make swa-config
+
+      - name: Check the artifact
+        run: |
+          set -euo pipefail
+          for file in index.html 404.html staticwebapp.config.json version.json healthz.json; do
+            test -s "web/dist/${file}" || { echo "::error::web/dist/${file} is missing or empty."; exit 1; }
+          done
+          python -m json.tool web/dist/staticwebapp.config.json > /dev/null
+
+      - name: Upload the site
+        uses: actions/upload-artifact@v7
+        with:
+          name: azure-site
+          path: web/dist
+          retention-days: 3
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to ${{ needs.plan.outputs.swa_env }}
+    needs: [plan, build]
+    if: needs.plan.outputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The GitHub Environment gates the job (required reviewers on production)
+    # and sets its OIDC subject: repo:<owner>/<repo>:environment:<name>.
+    environment:
+      name: ${{ needs.plan.outputs.environment }}
+      url: ${{ steps.site.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'rg-bashcrawl-prod' }}
+      AZURE_STATIC_WEB_APP_NAME: ${{ vars.AZURE_STATIC_WEB_APP_NAME || 'swa-bashcrawl-prod' }}
+      SWA_ENV: ${{ needs.plan.outputs.swa_env }}
+      COMMIT: ${{ needs.build.outputs.commit }}
+    steps:
+      # The pipeline's own tooling, from the commit this run started on: the
+      # site being deployed comes from the artifact, whatever ref built it.
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts/verify_deploy.py
+          sparse-checkout-cone-mode: false
+
+      - name: Download the site
+        uses: actions/download-artifact@v8
+        with:
+          name: azure-site
+          path: site
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install the SWA CLI
+        run: npm install --global --no-audit --no-fund @azure/static-web-apps-cli@2
+
+      - name: Deploy the prebuilt site
+        run: |
+          set -euo pipefail
+          token="$(az staticwebapp secrets list \
+            --name "$AZURE_STATIC_WEB_APP_NAME" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --query properties.apiKey --output tsv)"
+          if [ -z "$token" ]; then
+            echo "::error::Could not read the deployment token of ${AZURE_STATIC_WEB_APP_NAME}."
+            exit 1
+          fi
+          echo "::add-mask::${token}"
+          SWA_CLI_DEPLOYMENT_TOKEN="$token" swa deploy ./site --env "$SWA_ENV"
+
+      - name: Find the deployed URL
+        id: site
+        run: |
+          set -euo pipefail
+          host=""
+          if [ "$SWA_ENV" = "production" ]; then
+            host="$(az staticwebapp show \
+              --name "$AZURE_STATIC_WEB_APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --query defaultHostname --output tsv)"
+          else
+            # A new environment can take a moment to be listed.
+            for _ in 1 2 3 4 5 6; do
+              host="$(az staticwebapp environment list \
+                --name "$AZURE_STATIC_WEB_APP_NAME" \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --query "[?name=='${SWA_ENV}' || buildId=='${SWA_ENV}'].hostname | [0]" --output tsv)"
+              if [ -n "$host" ] && [ "$host" != "None" ]; then break; fi
+              host=""
+              sleep 10
+            done
+          fi
+          if [ -z "$host" ]; then
+            echo "::error::Azure reports no hostname for the ${SWA_ENV} environment."
+            exit 1
+          fi
+          echo "url=https://${host}" >> "$GITHUB_OUTPUT"
+
+      # UPS-OPS-42: success means the live site answers /healthz and /version
+      # reports this build. --swa also requires the generated config to be in
+      # force (JSON probes, a Content-Security-Policy on the page).
+      - name: Verify the live build
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+        run: python3 scripts/verify_deploy.py "$SITE_URL" --commit "$COMMIT" --swa
+
+      - name: Summarize
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+          TARGET: ${{ needs.plan.outputs.environment }}
+        run: |
+          {
+            echo "### Deployed to ${TARGET}"
+            echo
+            echo "- URL: ${SITE_URL}"
+            echo "- Commit: \`${COMMIT}\`"
+            echo "- Verified: \`/healthz\` is ok and \`/version\` reports this commit."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment the preview URL
+        if: needs.plan.outputs.environment == 'preview'
+        uses: actions/github-script@v9
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+        with:
+          script: |
+            const marker = '<!-- azure-swa-preview -->';
+            const commit = process.env.COMMIT.slice(0, 7);
+            const body = [
+              marker,
+              `Azure Static Web Apps preview: ${process.env.SITE_URL}`,
+              '',
+              `Built from \`${commit}\`; \`/healthz\` and \`/version\` were verified on the live preview.`,
+              'It carries no analytics key and is removed when this pull request closes.',
+            ].join('\n');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # Names no environment, so on a pull_request event its OIDC subject is
+  # repo:<owner>/<repo>:pull_request (bootstrap.sh creates that credential too).
+  close-preview:
+    name: Close preview environment
+    needs: plan
+    if: needs.plan.outputs.action == 'close'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'rg-bashcrawl-prod' }}
+      AZURE_STATIC_WEB_APP_NAME: ${{ vars.AZURE_STATIC_WEB_APP_NAME || 'swa-bashcrawl-prod' }}
+      SWA_ENV: ${{ needs.plan.outputs.swa_env }}
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Delete the preview environment
+        run: |
+          set -euo pipefail
+          if env_id="$(az staticwebapp environment show \
+            --name "$AZURE_STATIC_WEB_APP_NAME" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --environment-name "$SWA_ENV" \
+            --query id --output tsv 2>/dev/null)" && [ -n "$env_id" ]; then
+            # An ARM DELETE through `az rest`, not `az staticwebapp environment
+            # delete`: that command polls the operation at a subscription-scoped
+            # endpoint this resource-group-scoped identity cannot read, and so
+            # reports an accepted delete as AuthorizationFailed (learned in the
+            # bash-365 site's pipeline). `az rest` returns on the 202.
+            az rest --method delete --url "https://management.azure.com${env_id}?api-version=2022-09-01"
+            echo "Requested deletion of preview environment ${SWA_ENV}."
+          else
+            echo "No preview environment ${SWA_ENV} to delete."
+          fi

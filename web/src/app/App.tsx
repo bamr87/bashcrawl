@@ -1,12 +1,17 @@
-// Root of the web trainer: providers, the route → screen switch (with a
-// slide between doors), the app-wide keys (Alt+1–4 doors, Alt+J/H/O/M,
-// `?` help, Escape → the game menu), the boot of the game store, the story
-// observer, and the game's own screens over it — title, hero creation, the
-// intro, the tour, the pause menu, the journal, options, the profile, the
-// title cards, the tooltips — and the fleet feedback widget.
+// Root of the web trainer: providers, the route → screen switch (the home
+// page, the four doors, not-found; with a slide between them), the app-wide
+// keys (Alt+1–4 doors, Alt+J/H/O/M, `?` help, Escape → the game menu), the
+// boot of the game store, the story observer, analytics (inert without
+// consent), and the game's own screens over it — title, hero creation, the
+// intro, the tour, the pause menu, the journal, options, privacy, the
+// profile, the title cards, the tooltips — and the fleet feedback widget.
+import { BookMarked, Keyboard, LifeBuoy, Menu, PanelLeft, Settings } from "lucide-react";
 import { motion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
 
+import { ConsentBanner } from "../analytics/ConsentBanner";
+import { PrivacyDialog } from "../analytics/PrivacyDialog";
+import { installAnalytics } from "../analytics/install";
 import { getArcade } from "../arcade/arcade-store";
 import { bindUnlock } from "../audio/synth";
 import { DocsDrawer } from "../chrome/DocsDrawer";
@@ -37,6 +42,7 @@ import { useHero } from "../hero/hero-store";
 import { HudMenu } from "../hud/HudMenu";
 import { StatusStrip } from "../hud/StatusStrip";
 import { ArcadeScreen } from "../screens/ArcadeScreen";
+import { LandingScreen } from "../screens/LandingScreen";
 import { LearnScreen } from "../screens/LearnScreen";
 import { NotFound } from "../screens/NotFound";
 import { ReferenceScreen } from "../screens/ReferenceScreen";
@@ -50,7 +56,7 @@ import { PromptDock } from "../terminal/PromptDock";
 import { initTheme } from "../theme/theme-store";
 import { AppShell } from "./AppShell";
 import { MODE_META, MODES, storyOwnsInput, type Mode } from "./modes";
-import { hrefFor, navigate, useRoute } from "./useHashRoute";
+import { HOME_HREF, hrefFor, navigate, useRoute } from "./useHashRoute";
 
 initTheme();
 initCrt();
@@ -65,11 +71,12 @@ function Booting({ error }: { error: string | null }) {
         <section className="bc-page bc-frame" aria-live="polite" aria-label="Loading">
             {error ? (
                 <>
-                    <h1 className="bc-display">The torches would not light</h1>
+                    <h1 className="bc-display">The dungeon did not load</h1>
                     <p>{error}</p>
+                    <p><button type="button" className="bc-btn bc-btn-primary" onClick={() => window.location.reload()}>Reload</button></p>
                 </>
             ) : (
-                <p className="bc-display">Lighting the torches…</p>
+                <p className="bc-loading"><span className="bc-loading-dot" aria-hidden="true" />Loading the dungeon…</p>
             )}
         </section>
     );
@@ -90,17 +97,21 @@ export function App() {
         bindUnlock();
         const offEffects = installEffects();
         const offStory = installStory();
+        const offAnalytics = installAnalytics();
         void game.boot();
         return () => {
             offEffects();
             offStory();
+            offAnalytics();
         };
     }, []);
 
-    // No hash: open the last door, or the entrance.
+    // No hash: a returning hero goes back to their last door; a newcomer
+    // gets the home page (rendered below, with the address left clean).
+    const returning = hero !== null;
     useEffect(() => {
-        if (route.kind === "none") navigate(getPrefs().mode ?? "story");
-    }, [route]);
+        if (route.kind === "none" && returning) navigate(getPrefs().mode ?? "story");
+    }, [route, returning]);
 
     // Remember the door for next time; a door change is a beat too.
     useEffect(() => {
@@ -161,32 +172,47 @@ export function App() {
     const storyChrome = ready && storyOwnsInput(mode);
     const unread = unreadCount(journal);
 
+    const hasMenu = ready && mode !== null;
+    // The header's actions: quiet icon buttons. On a small screen only the
+    // journal and the menu stay (the menu reaches the rest).
     const actions = (
         <>
-            {ready && (
-                <button type="button" className="bc-btn" onClick={() => openOverlay("journal")} title="Journal: chronicle, quests, lore, bestiary, badges (Alt+J)" aria-label={`Journal${unread ? `, ${unread} new` : ""}`}>
-                    <span aria-hidden="true">📖</span>
-                    <span className="bc-tab-text">Journal</span>
+            {ready && returning && (
+                <button type="button" className="bc-btn bc-btn-ghost bc-btn-icon bc-journal-btn" onClick={() => openOverlay("journal")} title="Journal: chronicle, quests, lore, bestiary, badges (Alt+J)" aria-label={`Journal${unread ? `, ${unread} new` : ""}`}>
+                    <BookMarked aria-hidden="true" />
                     {unread > 0 && <span className="bc-badge-count" aria-hidden="true">{unread}</span>}
                 </button>
             )}
             {storyChrome && (
-                <button type="button" className="bc-btn" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock">HUD</button>
+                <button type="button" className="bc-btn bc-btn-ghost bc-btn-icon bc-action-wide" onClick={() => setUi({ hudOpen: true })} title="Sidebar panels: show, hide, reorder, dock" aria-label="Sidebar panels">
+                    <PanelLeft aria-hidden="true" />
+                </button>
             )}
-            {ready && mode !== "reference" && (
-                <button type="button" className="bc-btn" onClick={() => setUi({ docsOpen: true })} title="Documentation drawer (F1)" aria-label="Documentation">Docs</button>
+            {ready && mode !== null && mode !== "reference" && (
+                <button type="button" className="bc-btn bc-btn-ghost bc-btn-icon bc-action-wide" onClick={() => setUi({ docsOpen: true })} title="Documentation drawer (F1)" aria-label="Documentation">
+                    <LifeBuoy aria-hidden="true" />
+                </button>
             )}
-            <button type="button" className="bc-btn" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
-            <SoundToggle />
-            <button type="button" className="bc-btn" onClick={() => openOverlay("options")} title="Options: theme, sound, effects, text (Alt+O)" aria-label="Options">
-                <span aria-hidden="true">⚙</span>
+            <button type="button" className="bc-btn bc-btn-ghost bc-btn-icon bc-action-wide" onClick={() => setUi({ helpOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
+                <Keyboard aria-hidden="true" />
             </button>
+            <SoundToggle />
+            <button type="button" className={`bc-btn bc-btn-ghost bc-btn-icon${hasMenu ? " bc-action-wide" : ""}`} onClick={() => openOverlay("options")} title="Options: theme, sound, effects, text, privacy (Alt+O)" aria-label="Options">
+                <Settings aria-hidden="true" />
+            </button>
+            {hasMenu && (
+                <button type="button" className="bc-btn bc-btn-ghost bc-btn-icon bc-action-narrow" onClick={() => openOverlay("menu")} title="Menu" aria-label="Menu">
+                    <Menu aria-hidden="true" />
+                </button>
+            )}
         </>
     );
 
+    const home = route.kind === "home" || (route.kind === "none" && !returning);
     let screen = null;
-    let screenKey: string = route.kind === "mode" ? route.mode : route.kind;
+    let screenKey: string = route.kind === "mode" ? route.mode : home ? "home" : route.kind;
     if (route.kind === "notfound") screen = <NotFound path={route.path} />;
+    else if (home) screen = <LandingScreen />;
     else if (!ready) {
         screen = <Booting error={bootError} />;
         screenKey = "booting";
@@ -197,13 +223,14 @@ export function App() {
 
     const dock = storyChrome ? <PromptDock /> : mode === "arcade" && arcade ? <PromptDock target={arcade} suggestions={false} /> : null;
     const status = ready && mode !== null && mode !== "reference" ? <StatusStrip /> : null;
-    const feedbackRoute = route.kind === "mode" ? hrefFor(route.mode) : route.kind === "notfound" ? `#${route.path}` : undefined;
+    const feedbackRoute = route.kind === "mode" ? hrefFor(route.mode) : route.kind === "notfound" ? `#${route.path}` : home ? HOME_HREF : undefined;
 
     return (
         <MotionConfig reducedMotion="user">
             <ErrorBoundary>
                 <AppShell
                     mode={mode}
+                    footer={!home}
                     actions={actions}
                     status={status && <motion.div key="status" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={SLIDE}>{status}</motion.div>}
                     dock={dock && <motion.div key="dock" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={SLIDE}>{dock}</motion.div>}
@@ -219,6 +246,8 @@ export function App() {
                 <Tooltips />
                 <ShortcutsHelp />
                 <OptionsDialog />
+                <PrivacyDialog />
+                <ConsentBanner />
                 {ready && <Pager />}
                 {ready && <HudMenu />}
                 {ready && <DocsDrawer />}

@@ -5,10 +5,11 @@
 import { motion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { track } from "../analytics/client";
 import { anchorElement } from "../fx/anchors";
 import { DEFAULT_NAME, setHero, useHero } from "../hero/hero-store";
 import { fillPrompt, focusPrompt } from "../terminal/prompt-store";
-import { endTour, setUi, useUi } from "./ui-store";
+import { endTour, getUi, setUi, useUi } from "./ui-store";
 
 interface Stop {
     anchor: string | null;
@@ -81,6 +82,7 @@ interface Box {
 }
 
 function finish(fill: boolean): void {
+    track("tour_finished", { outcome: fill ? "completed" : "skipped", step: getUi().tour ?? 0 });
     setHero({ tourDone: true });
     endTour();
     if (fill) fillPrompt("pwd");

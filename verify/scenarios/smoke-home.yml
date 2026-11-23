@@ -30,7 +30,7 @@
 # the runner executes the whole scenario once per viewport.
 # =============================================================================
 id: smoke-home
-feature: TODO-001
+feature: BASHCRAWL-001
 title: "Home page renders and is usable"
 description: "The first thing any visitor does: land on the home page, see the main content, and find the navigation."
 viewports: [desktop, mobile]

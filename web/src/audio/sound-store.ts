@@ -20,6 +20,10 @@ export function setSound(on: boolean): void {
     writeRaw(SOUND_KEY, on ? "on" : "off");
 }
 
+export function subscribeSound(listener: () => void): () => void {
+    return store.subscribe(listener);
+}
+
 export function useSound(): SoundState {
     return useStore(store);
 }

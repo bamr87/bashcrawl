@@ -8,39 +8,43 @@
  * with the effective scheme mirrored in `data-resolved` by theme-store.ts
  * and the pre-paint script in index.html, so the light block is written once.
  *
- * Skin: "16-bit dungeon RPG" — a torch-lit indigo dark mode with gold, ember
- * and arcane accents; a parchment-and-ink light mode. `--bc-*` tokens are
- * the skin's own additions (bevels, torch glow, gauge chrome).
+ * Skin: "workbench" — a calm graphite dark mode and a paper-white light mode,
+ * flat surfaces with hairline borders and soft shadows, one warm accent
+ * (amber: the torch, the prompt's caret, every primary action), a sans UI
+ * face with mono kept for the terminal and for code. `--bc-*` tokens are the
+ * skin's own additions. The language is described in docs/design-system.md.
  */
 :root {
     color-scheme: dark;
 
     /* ── colour roles ── */
-    --fleet-color-bg: #0b0a14;
-    --fleet-color-bg-elevated: #161327;
-    --fleet-color-bg-muted: #1f1a35;
-    --fleet-color-ink: #ece6d6;
-    --fleet-color-ink-muted: #9d96ad;
-    --fleet-color-border: #3a3156;
-    --fleet-color-primary: #f2b134;
-    --fleet-color-secondary: #e2673a;
-    --fleet-color-accent: #b48cff;
-    --fleet-color-success: #6fd27a;
-    --fleet-color-info: #5bc8e6;
-    --fleet-color-warning: #f5c04a;
-    --fleet-color-danger: #e8554e;
-    --fleet-color-link: #8fd3ff;
-    --fleet-color-link-hover: #c2e7ff;
-    --fleet-color-code-bg: #120f22;
-    --fleet-color-code-ink: #ffd479;
+    --fleet-color-bg: #0b0e13;
+    --fleet-color-bg-elevated: #12171f;
+    --fleet-color-bg-muted: #1b222d;
+    --fleet-color-ink: #e7edf4;
+    --fleet-color-ink-muted: #93a0b2;
+    --fleet-color-border: #283241;
+    --fleet-color-primary: #f5b545;
+    --fleet-color-secondary: #f58a5c;
+    --fleet-color-accent: #b197fc;
+    --fleet-color-success: #4ad991;
+    --fleet-color-info: #62c6f2;
+    --fleet-color-warning: #f2c14e;
+    --fleet-color-danger: #f26d6d;
+    --fleet-color-link: #7cc4ff;
+    --fleet-color-link-hover: #b3dcff;
+    --fleet-color-code-bg: #0e131a;
+    --fleet-color-code-ink: #f3cf7a;
 
     /* skin roles */
-    --bc-color-bevel-hi: #4e4374;
-    --bc-color-bevel-lo: #07060d;
-    --bc-color-torch: #ff9a3c;
-    --bc-color-gauge-track: #0f0d1c;
+    --bc-color-on-primary: #1b1202;
+    --bc-color-border-strong: #3a4658;
+    --bc-color-surface-raised: #171d27;
+    --bc-color-shadow: #000000;
+    --bc-color-term-bg: #0a0d12;
+    --bc-color-gauge-track: #1b222d;
     --bc-color-scanline: #000000;
-    --bc-color-overlay: #05040a;
+    --bc-color-overlay: #05070a;
 
     /* ── the hero's palette (art, not UI: the same in both colour modes).
        hero/sprite.ts draws colour SLOTS; hero/appearance.ts picks one of
@@ -93,14 +97,15 @@
     --bc-hero-pet-frog: #4caf50;
 
     /* ── typography (system stacks, no webfont — UPS-FE-05) ── */
-    --fleet-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --fleet-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    --fleet-text-xs: 0.72rem;
-    --fleet-text-sm: 0.82rem;
-    --fleet-text-base: 0.95rem;
-    --fleet-text-lg: 1.15rem;
-    --fleet-text-h1: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
-    --fleet-text-h2: clamp(1.2rem, 1rem + 0.9vw, 1.6rem);
+    --fleet-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --fleet-font-mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+    --fleet-text-xs: 0.75rem;
+    --fleet-text-sm: 0.8125rem;
+    --fleet-text-base: 0.9375rem;
+    --fleet-text-lg: 1.125rem;
+    --fleet-text-h1: clamp(1.6rem, 1.2rem + 1.6vw, 2.25rem);
+    --fleet-text-h2: clamp(1.2rem, 1.05rem + 0.7vw, 1.5rem);
+    --bc-text-hero: clamp(2.25rem, 1.4rem + 3.6vw, 4rem);
     --fleet-leading-tight: 1.2;
     --fleet-leading-normal: 1.55;
     --fleet-leading-loose: 1.75;
@@ -108,8 +113,9 @@
     --fleet-font-weight-medium: 500;
     --fleet-font-weight-semibold: 600;
     --fleet-font-weight-bold: 700;
-    /* the "pixel" display treatment: mono, heavy, tracked, upper-case */
-    --bc-display-tracking: 0.16em;
+    /* headings sit a little tight; the small caps "eyebrow" label is tracked */
+    --bc-display-tracking: -0.015em;
+    --bc-eyebrow-tracking: 0.07em;
 
     /* ── space ── */
     --fleet-space-0: 0;
@@ -124,22 +130,20 @@
     --fleet-space-fab-size: 3rem;
     --fleet-space-fab-gap: 0.75rem;
 
-    /* ── radius (pixel art rounds little) ── */
-    --fleet-radius-sm: 2px;
-    --fleet-radius-base: 3px;
-    --fleet-radius-lg: 6px;
-    --fleet-radius-xl: 10px;
+    /* ── radius ── */
+    --fleet-radius-sm: 6px;
+    --fleet-radius-base: 8px;
+    --fleet-radius-lg: 12px;
+    --fleet-radius-xl: 16px;
     --fleet-radius-pill: 50rem;
     --fleet-radius-circle: 50%;
 
     /* ── shadow ── */
-    --fleet-shadow-xs: 0 1px 0 var(--bc-color-bevel-lo);
-    --fleet-shadow-sm: 0 2px 0 var(--bc-color-bevel-lo);
-    --fleet-shadow-md: 0 4px 0 var(--bc-color-bevel-lo), 0 8px 24px color-mix(in srgb, var(--bc-color-overlay) 55%, transparent);
-    --fleet-shadow-lg: 0 6px 0 var(--bc-color-bevel-lo), 0 18px 48px color-mix(in srgb, var(--bc-color-overlay) 70%, transparent);
-    --fleet-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--fleet-color-primary) 55%, transparent);
-    --bc-glow-gold: 0 0 12px color-mix(in srgb, var(--fleet-color-primary) 45%, transparent);
-    --bc-glow-arcane: 0 0 12px color-mix(in srgb, var(--fleet-color-accent) 45%, transparent);
+    --fleet-shadow-xs: 0 1px 2px color-mix(in srgb, var(--bc-color-shadow) 28%, transparent);
+    --fleet-shadow-sm: 0 2px 6px color-mix(in srgb, var(--bc-color-shadow) 30%, transparent);
+    --fleet-shadow-md: 0 8px 24px color-mix(in srgb, var(--bc-color-shadow) 38%, transparent);
+    --fleet-shadow-lg: 0 20px 56px color-mix(in srgb, var(--bc-color-shadow) 48%, transparent);
+    --fleet-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--fleet-color-primary) 45%, transparent);
 
     /* ── motion ── */
     --fleet-motion-fast: 120ms;
@@ -167,40 +171,60 @@
     --fleet-layer-feedback-modal: 1096;
     --fleet-layer-skip-link: 1100;
 
+    /* ── sizes the shell shares ── */
+    --bc-header-height: 3.5rem;
+    --bc-content-max: 72rem;
+
     /* ── breakpoints (for reference in JS; media queries repeat the values) ── */
     --fleet-bp-sm: 600px;
     --fleet-bp-md: 900px;
     --fleet-bp-lg: 1200px;
 }
 
-/* Light: a daylight dungeon — parchment, ink, dark gold. Applied for an
-   explicit "light" preference or an "auto" preference that resolved light. */
+/* Light: paper white, graphite ink, a darker amber that still reads on
+   white. Applied for an explicit "light" preference or an "auto" preference
+   that resolved light. */
 :root[data-theme="light"],
 :root[data-theme="auto"][data-resolved="light"] {
     color-scheme: light;
-    --fleet-color-bg: #f3ead8;
-    --fleet-color-bg-elevated: #fbf6ea;
-    --fleet-color-bg-muted: #e8dcc2;
-    --fleet-color-ink: #2a2118;
-    --fleet-color-ink-muted: #6b5d4c;
-    --fleet-color-border: #c9b893;
-    --fleet-color-primary: #9a6100;
-    --fleet-color-secondary: #b2431c;
-    --fleet-color-accent: #6d3fc4;
-    --fleet-color-success: #1f7a3a;
-    --fleet-color-info: #0b6f8a;
-    --fleet-color-warning: #9a6a00;
-    --fleet-color-danger: #b4261f;
-    --fleet-color-link: #0b5f9a;
-    --fleet-color-link-hover: #083f66;
-    --fleet-color-code-bg: #efe4cc;
-    --fleet-color-code-ink: #7a4a00;
-    --bc-color-bevel-hi: #fffdf6;
-    --bc-color-bevel-lo: #b9a67c;
-    --bc-color-torch: #d9741c;
-    --bc-color-gauge-track: #ddd0b2;
-    --bc-color-scanline: #3a2d16;
-    --bc-color-overlay: #5a4a2c;
+    --fleet-color-bg: #f5f6f8;
+    --fleet-color-bg-elevated: #ffffff;
+    --fleet-color-bg-muted: #eceff3;
+    --fleet-color-ink: #141a22;
+    --fleet-color-ink-muted: #586474;
+    --fleet-color-border: #d7dce4;
+    --fleet-color-primary: #a25a00;
+    --fleet-color-secondary: #b8451d;
+    --fleet-color-accent: #6741d9;
+    --fleet-color-success: #17794a;
+    --fleet-color-info: #0f6f93;
+    --fleet-color-warning: #8f6400;
+    --fleet-color-danger: #c0302b;
+    --fleet-color-link: #0b62a8;
+    --fleet-color-link-hover: #084676;
+    --fleet-color-code-bg: #eef1f5;
+    --fleet-color-code-ink: #8a4b00;
+    --bc-color-on-primary: #ffffff;
+    --bc-color-border-strong: #b9c1cd;
+    --bc-color-surface-raised: #ffffff;
+    --bc-color-shadow: #1c2633;
+    --bc-color-term-bg: #ffffff;
+    --bc-color-gauge-track: #e2e6ec;
+    --bc-color-scanline: #2a3442;
+    --bc-color-overlay: #1c2633;
+    --fleet-shadow-xs: 0 1px 2px color-mix(in srgb, var(--bc-color-shadow) 8%, transparent);
+    --fleet-shadow-sm: 0 2px 6px color-mix(in srgb, var(--bc-color-shadow) 9%, transparent);
+    --fleet-shadow-md: 0 8px 24px color-mix(in srgb, var(--bc-color-shadow) 12%, transparent);
+    --fleet-shadow-lg: 0 20px 56px color-mix(in srgb, var(--bc-color-shadow) 18%, transparent);
+}
+
+/* On a phone the floating feedback button sits over the terminal: smaller,
+   and closer to the corner. */
+@media (max-width: 600px) {
+    :root {
+        --fleet-space-fab-offset: 0.5rem;
+        --fleet-space-fab-size: 2.5rem;
+    }
 }
 
 /* The transitions collapse rather than disappear, so state changes still

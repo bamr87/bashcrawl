@@ -1,0 +1,1458 @@
+{
+  "id": "web-doors",
+  "title": "A hero plays a little of every door, then switches the theme",
+  "features": [
+    "BASHCRAWL-015"
+  ],
+  "path": "verify/scenarios/web-doors.yml",
+  "started": "2026-11-20T03:07:36.923Z",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 592
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "localStorage.clear();\nconst save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 8
+        },
+        {
+          "step": "goto",
+          "arg": "/?walk=doors",
+          "ok": true,
+          "ms": 560
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 15
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "header-is-one-row",
+            "script": "(() => {\n  // One row: every header control's centre sits on the same line, none\n  // overlaps its neighbour or leaves the viewport, each has a name, and\n  // the four doors show their label as text.\n  const header = document.querySelector(\".bc-header\");\n  const vw = document.documentElement.clientWidth;\n  const controls = [...header.querySelectorAll(\"button, a\")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {\n    const r = el.getBoundingClientRect();\n    return { name: (el.getAttribute(\"aria-label\") || el.innerText || \"\").trim(), text: (el.innerText || \"\").trim(), tab: el.getAttribute(\"role\") === \"tab\", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };\n  }).sort((a, b) => a.left - b.left);\n  const middles = controls.map((c) => c.middle);\n  if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error(\"the header wraps onto more than one row\");\n  const unnamed = controls.filter((c) => !c.name).length;\n  if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);\n  for (let i = 1; i < controls.length; i += 1) {\n    if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`\"${controls[i - 1].name}\" overlaps \"${controls[i].name}\"`);\n  }\n  if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error(\"a header control is cut off by the viewport\");\n  const doors = controls.filter((c) => c.tab).map((c) => c.text);\n  if (doors.join(\",\") !== \"Story,Learn,Arcade,Reference\") throw new Error(`door tabs read ${JSON.stringify(doors)}`);\n  return { viewport: vw, controls: controls.map((c) => c.name), doors };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 1280,
+            "controls": [
+              "Bashcrawl home",
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference",
+              "Journal",
+              "Sidebar panels",
+              "Documentation",
+              "Keyboard shortcuts",
+              "Sound off. Turn sound on",
+              "Options"
+            ],
+            "doors": [
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference"
+            ]
+          },
+          "ms": 2
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 1280,
+            "cutOff": 0
+          },
+          "ms": 32
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 5
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 30
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"1 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 14
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "ls"
+          },
+          "ok": true,
+          "ms": 7
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 14
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"2 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 9
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "cd cellar"
+          },
+          "ok": true,
+          "ms": 9
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 15
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"3 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 9
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-prompt-label:has-text(\"cellar\")"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-advanced-and-the-prompt-is-clear",
+            "script": "(async () => {\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const save = JSON.parse(localStorage.getItem(\"bashcrawl-web-state-v1\") || \"{}\");\n  if (save.cwd !== \"/entrance/cellar\") throw new Error(`the save says the hero is in ${save.cwd}`);\n  if ((save.completedQuestIds || []).length !== 3) throw new Error(`the save holds ${(save.completedQuestIds || []).length} completed quests, expected 3`);\n  // The objective is told once: by the sidebar's Quest panel, or by the\n  // corner tracker that stands in for it when the panel is folded.\n  const objective = (document.querySelector(\".bc-quest-xp\")?.textContent || \"\") + (document.querySelector(\".bc-tracker\")?.textContent || \"\");\n  if (!/3\\/8 complete|Quest 4 of 8/i.test(objective)) throw new Error(`the objective reads ${JSON.stringify(objective.slice(0, 60))}`);\n  if (document.querySelector(\".bc-tracker\") && document.querySelector(\".bc-quest-xp\")?.getBoundingClientRect().height) throw new Error(\"the objective is shown twice: the Quest panel and the corner tracker\");\n  const log = document.querySelector(\"[role=log]\").innerText;\n  for (const line of [\"/entrance\", \"cellar  README.md  scroll\", \"Moved to /entrance/cellar\"]) {\n    if (!log.includes(line)) throw new Error(`the log never printed ${JSON.stringify(line)}`);\n  }\n  // Nothing may sit on the prompt dock: the feedback button, the footer,\n  // the objective card or the story's dialogue box.\n  const rect = (el) => { const r = el?.getBoundingClientRect(); return r && r.width && r.height ? r : null; };\n  const dock = rect(document.querySelector(\".bc-dock-slot\"));\n  const parts = {\n    \"feedback button\": rect(document.querySelector(\"fleet-feedback\")?.shadowRoot?.querySelector(\".fab\")),\n    footer: rect(document.querySelector(\".bc-footer\")),\n    \"objective card\": rect(document.querySelector(\".bc-tracker\")),\n    \"dialogue box\": rect(document.querySelector(\".bc-dialogue\")),\n  };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && r.bottom > dock.top + 0.5 && r.top < dock.bottom - 0.5 && r.right > dock.left && r.left < dock.right;\n  });\n  if (hits.length) throw new Error(`the ${hits.join(\" and \")} overlap(s) the prompt`);\n  return { cwd: save.cwd, quests: save.completedQuestIds.length, xp: save.xp, dock: [Math.round(dock.top), Math.round(dock.bottom)], checked: Object.keys(parts).filter((name) => parts[name]) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "cwd": "/entrance/cellar",
+            "quests": 3,
+            "xp": 235,
+            "dock": [
+              674,
+              771
+            ],
+            "checked": [
+              "feedback button",
+              "footer",
+              "dialogue box"
+            ]
+          },
+          "ms": 38
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-story.png",
+          "ms": 198
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Learn\"]",
+          "ok": true,
+          "ms": 94
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/learn"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 502
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "learn-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 1280,
+            "cutOff": 0
+          },
+          "ms": 38
+        },
+        {
+          "step": "click",
+          "arg": "main button:has-text(\"Finding Your Way\")",
+          "ok": true,
+          "ms": 58
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Where am I?"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-objectives li.obj-met",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "cd /lab/navigator"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 15
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-objectives li.obj-met"
+          },
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-objectives li.obj-met",
+              "min": 1,
+              "max": 1
+            }
+          },
+          "ok": true,
+          "value": 1,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "learn",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-learn.png",
+          "ms": 85
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Arcade\"]",
+          "ok": true,
+          "ms": 43
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/arcade"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 502
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "arcade-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 1280,
+            "cutOff": 0
+          },
+          "ms": 34
+        },
+        {
+          "step": "click",
+          "arg": ".bc-arcade-card:has-text(\"Path Navigator\")",
+          "ok": true,
+          "ms": 39
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Seek the room called"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Commands: 1"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-run",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-arcade-run.png",
+          "ms": 67
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "quit"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-arcade-card"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Reference\"]",
+          "ok": true,
+          "ms": 40
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/reference"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-ref-search",
+            "value": "grep"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "grep -r \"pattern\" ."
+          },
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "reference-filtered-to-grep",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 300));\n  const text = document.querySelector(\"main\").innerText;\n  if (text.includes(\"Print Working Directory\")) throw new Error(\"the search for grep still lists pwd\");\n  const commands = [...document.querySelectorAll(\"main .bc-ref-card code\")].filter((code) => code.getBoundingClientRect().height > 0).map((code) => code.innerText.trim());\n  if (!commands.length) throw new Error(\"no command is listed for grep\");\n  return { commands: commands.slice(0, 8) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "commands": [
+              "grep \"pattern\" <file>",
+              "grep -r \"pattern\" .",
+              "grep \"text\" <file>",
+              "grep -r \"text\" ."
+            ]
+          },
+          "ms": 302
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 502
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "reference-results-fit-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 1280,
+            "cutOff": 0
+          },
+          "ms": 26
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-grep",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-reference-grep.png",
+          "ms": 76
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Bashcrawl home\"]",
+          "ok": true,
+          "ms": 53
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/home"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Continue as Mira"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Options\"]",
+          "ok": true,
+          "ms": 42
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=radio[name=\"Light\"] >> nth=0",
+          "ok": true,
+          "ms": 255
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "html[data-theme=\"light\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 402
+        },
+        {
+          "step": "screenshot",
+          "arg": "options-light",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-options-light.png",
+          "ms": 86
+        },
+        {
+          "step": "click",
+          "arg": "role=radio[name=\"Dark\"]",
+          "ok": true,
+          "ms": 51
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "html[data-theme=\"dark\"]"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 403
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "theme-is-saved",
+            "script": "(() => {\n  const stored = localStorage.getItem(\"bashcrawl-web-theme\");\n  if (stored !== \"dark\") throw new Error(`the saved theme is ${stored}`);\n  return { stored, applied: document.documentElement.dataset.theme };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "stored": "dark",
+            "applied": "dark"
+          },
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "options-dark",
+          "ok": true,
+          "file": "test/evidence/web-doors/desktop-options-dark.png",
+          "ms": 75
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/web-doors/desktop-story.png",
+        "test/evidence/web-doors/desktop-learn.png",
+        "test/evidence/web-doors/desktop-arcade-run.png",
+        "test/evidence/web-doors/desktop-reference-grep.png",
+        "test/evidence/web-doors/desktop-options-light.png",
+        "test/evidence/web-doors/desktop-options-dark.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "header-is-one-row": {
+          "viewport": 1280,
+          "controls": [
+            "Bashcrawl home",
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference",
+            "Journal",
+            "Sidebar panels",
+            "Documentation",
+            "Keyboard shortcuts",
+            "Sound off. Turn sound on",
+            "Options"
+          ],
+          "doors": [
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference"
+          ]
+        },
+        "story-fits-the-viewport": {
+          "viewport": 1280,
+          "cutOff": 0
+        },
+        "story-advanced-and-the-prompt-is-clear": {
+          "cwd": "/entrance/cellar",
+          "quests": 3,
+          "xp": 235,
+          "dock": [
+            674,
+            771
+          ],
+          "checked": [
+            "feedback button",
+            "footer",
+            "dialogue box"
+          ]
+        },
+        "learn-fits-the-viewport": {
+          "viewport": 1280,
+          "cutOff": 0
+        },
+        "arcade-fits-the-viewport": {
+          "viewport": 1280,
+          "cutOff": 0
+        },
+        "reference-filtered-to-grep": {
+          "commands": [
+            "grep \"pattern\" <file>",
+            "grep -r \"pattern\" .",
+            "grep \"text\" <file>",
+            "grep -r \"text\" ."
+          ]
+        },
+        "reference-results-fit-the-viewport": {
+          "viewport": 1280,
+          "cutOff": 0
+        },
+        "theme-is-saved": {
+          "stored": "dark",
+          "applied": "dark"
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?walk=doors#/home"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "ok": true,
+      "steps": [
+        {
+          "step": "goto",
+          "arg": "/",
+          "ok": true,
+          "ms": 586
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "returning-hero",
+            "script": "localStorage.clear();\nconst save = (key, value) => localStorage.setItem(key, JSON.stringify(value));\nsave(\"bashcrawl-web-hero-v1\", { name: \"Mira\", role: \"wanderer\", tourDone: true });\nsave(\"bashcrawl-web-shell-v1\", { mode: \"story\", onboarded: true, introSeen: true });\n\"seeded\"\n"
+          },
+          "ok": true,
+          "value": "seeded",
+          "ms": 5
+        },
+        {
+          "step": "goto",
+          "arg": "/?walk=doors",
+          "ok": true,
+          "ms": 545
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "selector": "input.bc-input"
+          },
+          "ok": true,
+          "ms": 18
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "url": "#/story"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "header-is-one-row",
+            "script": "(() => {\n  // One row: every header control's centre sits on the same line, none\n  // overlaps its neighbour or leaves the viewport, each has a name, and\n  // the four doors show their label as text.\n  const header = document.querySelector(\".bc-header\");\n  const vw = document.documentElement.clientWidth;\n  const controls = [...header.querySelectorAll(\"button, a\")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {\n    const r = el.getBoundingClientRect();\n    return { name: (el.getAttribute(\"aria-label\") || el.innerText || \"\").trim(), text: (el.innerText || \"\").trim(), tab: el.getAttribute(\"role\") === \"tab\", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };\n  }).sort((a, b) => a.left - b.left);\n  const middles = controls.map((c) => c.middle);\n  if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error(\"the header wraps onto more than one row\");\n  const unnamed = controls.filter((c) => !c.name).length;\n  if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);\n  for (let i = 1; i < controls.length; i += 1) {\n    if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`\"${controls[i - 1].name}\" overlaps \"${controls[i].name}\"`);\n  }\n  if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error(\"a header control is cut off by the viewport\");\n  const doors = controls.filter((c) => c.tab).map((c) => c.text);\n  if (doors.join(\",\") !== \"Story,Learn,Arcade,Reference\") throw new Error(`door tabs read ${JSON.stringify(doors)}`);\n  return { viewport: vw, controls: controls.map((c) => c.name), doors };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "controls": [
+              "Bashcrawl home",
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference",
+              "Journal",
+              "Menu"
+            ],
+            "doors": [
+              "Story",
+              "Learn",
+              "Arcade",
+              "Reference"
+            ]
+          },
+          "ms": 1
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 19
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 18
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"1 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 6
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "ls"
+          },
+          "ok": true,
+          "ms": 6
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 10
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"2 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "cd cellar"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 14
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "button[aria-label^=\"3 of 8 quests complete\"]"
+          },
+          "ok": true,
+          "ms": 8
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-prompt-label:has-text(\"cellar\")"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "story-advanced-and-the-prompt-is-clear",
+            "script": "(async () => {\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const save = JSON.parse(localStorage.getItem(\"bashcrawl-web-state-v1\") || \"{}\");\n  if (save.cwd !== \"/entrance/cellar\") throw new Error(`the save says the hero is in ${save.cwd}`);\n  if ((save.completedQuestIds || []).length !== 3) throw new Error(`the save holds ${(save.completedQuestIds || []).length} completed quests, expected 3`);\n  // The objective is told once: by the sidebar's Quest panel, or by the\n  // corner tracker that stands in for it when the panel is folded.\n  const objective = (document.querySelector(\".bc-quest-xp\")?.textContent || \"\") + (document.querySelector(\".bc-tracker\")?.textContent || \"\");\n  if (!/3\\/8 complete|Quest 4 of 8/i.test(objective)) throw new Error(`the objective reads ${JSON.stringify(objective.slice(0, 60))}`);\n  if (document.querySelector(\".bc-tracker\") && document.querySelector(\".bc-quest-xp\")?.getBoundingClientRect().height) throw new Error(\"the objective is shown twice: the Quest panel and the corner tracker\");\n  const log = document.querySelector(\"[role=log]\").innerText;\n  for (const line of [\"/entrance\", \"cellar  README.md  scroll\", \"Moved to /entrance/cellar\"]) {\n    if (!log.includes(line)) throw new Error(`the log never printed ${JSON.stringify(line)}`);\n  }\n  // Nothing may sit on the prompt dock: the feedback button, the footer,\n  // the objective card or the story's dialogue box.\n  const rect = (el) => { const r = el?.getBoundingClientRect(); return r && r.width && r.height ? r : null; };\n  const dock = rect(document.querySelector(\".bc-dock-slot\"));\n  const parts = {\n    \"feedback button\": rect(document.querySelector(\"fleet-feedback\")?.shadowRoot?.querySelector(\".fab\")),\n    footer: rect(document.querySelector(\".bc-footer\")),\n    \"objective card\": rect(document.querySelector(\".bc-tracker\")),\n    \"dialogue box\": rect(document.querySelector(\".bc-dialogue\")),\n  };\n  const hits = Object.keys(parts).filter((name) => {\n    const r = parts[name];\n    return r && r.bottom > dock.top + 0.5 && r.top < dock.bottom - 0.5 && r.right > dock.left && r.left < dock.right;\n  });\n  if (hits.length) throw new Error(`the ${hits.join(\" and \")} overlap(s) the prompt`);\n  return { cwd: save.cwd, quests: save.completedQuestIds.length, xp: save.xp, dock: [Math.round(dock.top), Math.round(dock.bottom)], checked: Object.keys(parts).filter((name) => parts[name]) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "cwd": "/entrance/cellar",
+            "quests": 3,
+            "xp": 235,
+            "dock": [
+              750,
+              844
+            ],
+            "checked": [
+              "feedback button",
+              "dialogue box"
+            ]
+          },
+          "ms": 27
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "story",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-story.png",
+          "ms": 97
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Learn\"]",
+          "ok": true,
+          "ms": 83
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/learn"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 502
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "learn-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 35
+        },
+        {
+          "step": "click",
+          "arg": "main button:has-text(\"Finding Your Way\")",
+          "ok": true,
+          "ms": 66
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Where am I?"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-objectives li.obj-met",
+              "max": 0
+            }
+          },
+          "ok": true,
+          "value": 0,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "cd /lab/navigator"
+          },
+          "ok": true,
+          "ms": 3
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 17
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-objectives li.obj-met"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-objectives li.obj-met",
+              "min": 1,
+              "max": 1
+            }
+          },
+          "ok": true,
+          "value": 1,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "learn",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-learn.png",
+          "ms": 45
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Arcade\"]",
+          "ok": true,
+          "ms": 54
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/arcade"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 501
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "arcade-fits-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 25
+        },
+        {
+          "step": "click",
+          "arg": ".bc-arcade-card:has-text(\"Path Navigator\")",
+          "ok": true,
+          "ms": 38
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Seek the room called"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "pwd"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Commands: 1"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "arcade-run",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-arcade-run.png",
+          "ms": 39
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-input",
+            "value": "quit"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "press",
+          "arg": "Enter",
+          "ok": true,
+          "ms": 4
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": ".bc-arcade-card"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "count": {
+              "selector": ".bc-arcade-card",
+              "min": 5
+            }
+          },
+          "ok": true,
+          "value": 5,
+          "ms": 0
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "click",
+          "arg": "role=tab[name=\"Reference\"]",
+          "ok": true,
+          "ms": 40
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/reference"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "fill",
+          "arg": {
+            "selector": "input.bc-ref-search",
+            "value": "grep"
+          },
+          "ok": true,
+          "ms": 9
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "grep -r \"pattern\" ."
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "reference-filtered-to-grep",
+            "script": "(async () => {\n  await new Promise((done) => setTimeout(done, 300));\n  const text = document.querySelector(\"main\").innerText;\n  if (text.includes(\"Print Working Directory\")) throw new Error(\"the search for grep still lists pwd\");\n  const commands = [...document.querySelectorAll(\"main .bc-ref-card code\")].filter((code) => code.getBoundingClientRect().height > 0).map((code) => code.innerText.trim());\n  if (!commands.length) throw new Error(\"no command is listed for grep\");\n  return { commands: commands.slice(0, 8) };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "commands": [
+              "grep \"pattern\" <file>",
+              "grep -r \"pattern\" .",
+              "grep \"text\" <file>",
+              "grep -r \"text\" ."
+            ]
+          },
+          "ms": 302
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 500
+          },
+          "ok": true,
+          "ms": 501
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "reference-results-fit-the-viewport",
+            "script": "(async () => {\n  // A sideways scrollbar is not the only way to lose content: the shell\n  // clips, so look for boxes cut off by the viewport's edge. Boxes inside\n  // a container that scrolls sideways on purpose can be reached; banners\n  // and tooltips are passing through.\n  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));\n  const vw = document.documentElement.clientWidth;\n  const passing = \".bc-banner, .bc-tooltip, canvas\";\n  const range = document.createRange();\n  // Where an inline run paints: the spaces a pre-wrap line ends on hang\n  // past its box without painting anything, so measure the words.\n  const ink = (el) => {\n    let left = Infinity;\n    let right = -Infinity;\n    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);\n    for (let node = walk.nextNode(); node; node = walk.nextNode()) {\n      for (const word of node.textContent.matchAll(/\\S+/g)) {\n        range.setStart(node, word.index);\n        range.setEnd(node, word.index + word[0].length);\n        for (const r of range.getClientRects()) {\n          if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }\n        }\n      }\n    }\n    return { left, right };\n  };\n  const cut = [];\n  for (const el of document.querySelectorAll(\"body *\")) {\n    const r = el.getBoundingClientRect();\n    if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;\n    const cs = getComputedStyle(el);\n    if (cs.visibility === \"hidden\" || cs.display === \"none\" || el.closest(passing)) continue;\n    if (cs.display === \"inline\") {\n      const painted = ink(el);\n      if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;\n    }\n    let box = el.parentElement;\n    let reachable = false;\n    while (box && box !== document.body) {\n      const o = getComputedStyle(box).overflowX;\n      if ((o === \"auto\" || o === \"scroll\") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }\n      box = box.parentElement;\n    }\n    if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);\n  }\n  if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(\", \")}`);\n  return { viewport: vw, cutOff: 0 };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "viewport": 390,
+            "cutOff": 0
+          },
+          "ms": 23
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "reference-grep",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-reference-grep.png",
+          "ms": 47
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Bashcrawl home\"]",
+          "ok": true,
+          "ms": 47
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "url": "#/home"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "text": "Continue as Mira"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "click",
+          "arg": "button[aria-label=\"Options\"]",
+          "ok": true,
+          "ms": 28
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "role=dialog[name=\"Options\"]"
+          },
+          "ok": true,
+          "ms": 2
+        },
+        {
+          "step": "click",
+          "arg": "role=radio[name=\"Light\"] >> nth=0",
+          "ok": true,
+          "ms": 247
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "html[data-theme=\"light\"]"
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 402
+        },
+        {
+          "step": "screenshot",
+          "arg": "options-light",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-options-light.png",
+          "ms": 31
+        },
+        {
+          "step": "click",
+          "arg": "role=radio[name=\"Dark\"]",
+          "ok": true,
+          "ms": 33
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "visible": "html[data-theme=\"dark\"]"
+          },
+          "ok": true,
+          "ms": 1
+        },
+        {
+          "step": "wait",
+          "arg": {
+            "ms": 400
+          },
+          "ok": true,
+          "ms": 403
+        },
+        {
+          "step": "eval",
+          "arg": {
+            "name": "theme-is-saved",
+            "script": "(() => {\n  const stored = localStorage.getItem(\"bashcrawl-web-theme\");\n  if (stored !== \"dark\") throw new Error(`the saved theme is ${stored}`);\n  return { stored, applied: document.documentElement.dataset.theme };\n})()\n"
+          },
+          "ok": true,
+          "value": {
+            "stored": "dark",
+            "applied": "dark"
+          },
+          "ms": 2
+        },
+        {
+          "step": "expect",
+          "arg": {
+            "no_console_errors": true
+          },
+          "ok": true,
+          "ms": 0
+        },
+        {
+          "step": "screenshot",
+          "arg": "options-dark",
+          "ok": true,
+          "file": "test/evidence/web-doors/mobile-options-dark.png",
+          "ms": 48
+        }
+      ],
+      "console_errors": [],
+      "screenshots": [
+        "test/evidence/web-doors/mobile-story.png",
+        "test/evidence/web-doors/mobile-learn.png",
+        "test/evidence/web-doors/mobile-arcade-run.png",
+        "test/evidence/web-doors/mobile-reference-grep.png",
+        "test/evidence/web-doors/mobile-options-light.png",
+        "test/evidence/web-doors/mobile-options-dark.png"
+      ],
+      "evals": {
+        "returning-hero": "seeded",
+        "header-is-one-row": {
+          "viewport": 390,
+          "controls": [
+            "Bashcrawl home",
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference",
+            "Journal",
+            "Menu"
+          ],
+          "doors": [
+            "Story",
+            "Learn",
+            "Arcade",
+            "Reference"
+          ]
+        },
+        "story-fits-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "story-advanced-and-the-prompt-is-clear": {
+          "cwd": "/entrance/cellar",
+          "quests": 3,
+          "xp": 235,
+          "dock": [
+            750,
+            844
+          ],
+          "checked": [
+            "feedback button",
+            "dialogue box"
+          ]
+        },
+        "learn-fits-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "arcade-fits-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "reference-filtered-to-grep": {
+          "commands": [
+            "grep \"pattern\" <file>",
+            "grep -r \"pattern\" .",
+            "grep \"text\" <file>",
+            "grep -r \"text\" ."
+          ]
+        },
+        "reference-results-fit-the-viewport": {
+          "viewport": 390,
+          "cutOff": 0
+        },
+        "theme-is-saved": {
+          "stored": "dark",
+          "applied": "dark"
+        }
+      },
+      "final_url": "http://127.0.0.1:4004/?walk=doors#/home"
+    }
+  ],
+  "ok": true,
+  "finished": "2026-11-20T03:07:47.365Z",
+  "base": "http://127.0.0.1:4004"
+}

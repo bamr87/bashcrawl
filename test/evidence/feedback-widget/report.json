@@ -5,7 +5,7 @@
     "BASHCRAWL-026"
   ],
   "path": "verify/scenarios/feedback-widget.yml",
-  "started": "2026-11-16T03:19:04.313Z",
+  "started": "2026-11-20T03:07:00.005Z",
   "viewports": [
     {
       "name": "phone-360",
@@ -17,7 +17,7 @@
           "step": "goto",
           "arg": "/",
           "ok": true,
-          "ms": 595
+          "ms": 596
         },
         {
           "step": "eval",
@@ -33,7 +33,7 @@
           "step": "goto",
           "arg": "/?hero=returning#/story",
           "ok": true,
-          "ms": 546
+          "ms": 557
         },
         {
           "step": "wait",
@@ -41,7 +41,7 @@
             "selector": "input.bc-input"
           },
           "ok": true,
-          "ms": 16
+          "ms": 19
         },
         {
           "step": "expect",
@@ -54,7 +54,7 @@
           },
           "ok": true,
           "value": 1,
-          "ms": 1
+          "ms": 2
         },
         {
           "step": "expect",
@@ -73,13 +73,13 @@
           "ok": true,
           "value": {
             "button": [
-              556,
-              604
+              598,
+              638
             ],
-            "dockTop": 621,
-            "footerTop": 707
+            "dockTop": 646,
+            "footerTop": 0
           },
-          "ms": 32
+          "ms": 27
         },
         {
           "step": "expect",
@@ -99,14 +99,14 @@
             "sw": 360,
             "cw": 360
           },
-          "ms": 1
+          "ms": 0
         },
         {
           "step": "screenshot",
           "arg": "story",
           "ok": true,
           "file": "test/evidence/feedback-widget/phone-360-story.png",
-          "ms": 54
+          "ms": 65
         },
         {
           "step": "fill",
@@ -115,7 +115,7 @@
             "value": "grep"
           },
           "ok": true,
-          "ms": 11
+          "ms": 20
         },
         {
           "step": "expect",
@@ -123,7 +123,7 @@
             "visible": ".bc-inline-hint"
           },
           "ok": true,
-          "ms": 6
+          "ms": 5
         },
         {
           "step": "eval",
@@ -134,20 +134,20 @@
           "ok": true,
           "value": {
             "button": [
-              511,
-              559
+              551,
+              591
             ],
-            "dockTop": 575,
-            "footerTop": 707
+            "dockTop": 599,
+            "footerTop": 0
           },
-          "ms": 28
+          "ms": 26
         },
         {
           "step": "screenshot",
           "arg": "story-hint",
           "ok": true,
           "file": "test/evidence/feedback-widget/phone-360-story-hint.png",
-          "ms": 52
+          "ms": 65
         },
         {
           "step": "click",
@@ -161,7 +161,7 @@
             "visible": "#ff-dlg"
           },
           "ok": true,
-          "ms": 3
+          "ms": 2
         },
         {
           "step": "wait",
@@ -169,14 +169,14 @@
             "ms": 500
           },
           "ok": true,
-          "ms": 503
+          "ms": 502
         },
         {
           "step": "screenshot",
           "arg": "dialog",
           "ok": true,
           "file": "test/evidence/feedback-widget/phone-360-dialog.png",
-          "ms": 55
+          "ms": 74
         }
       ],
       "console_errors": [],
@@ -189,22 +189,22 @@
         "returning-hero": "seeded",
         "clear-of-the-dock": {
           "button": [
-            556,
-            604
+            598,
+            638
           ],
-          "dockTop": 621,
-          "footerTop": 707
+          "dockTop": 646,
+          "footerTop": 0
         },
         "clear-of-the-hint": {
           "button": [
-            511,
-            559
+            551,
+            591
           ],
-          "dockTop": 575,
-          "footerTop": 707
+          "dockTop": 599,
+          "footerTop": 0
         }
       },
-      "final_url": "http://127.0.0.1:4176/?hero=returning#/story"
+      "final_url": "http://127.0.0.1:4004/?hero=returning#/story"
     },
     {
       "name": "desktop",
@@ -216,7 +216,7 @@
           "step": "goto",
           "arg": "/",
           "ok": true,
-          "ms": 595
+          "ms": 586
         },
         {
           "step": "eval",
@@ -226,13 +226,13 @@
           },
           "ok": true,
           "value": "seeded",
-          "ms": 1
+          "ms": 6
         },
         {
           "step": "goto",
           "arg": "/?hero=returning#/story",
           "ok": true,
-          "ms": 534
+          "ms": 548
         },
         {
           "step": "wait",
@@ -240,7 +240,7 @@
             "selector": "input.bc-input"
           },
           "ok": true,
-          "ms": 11
+          "ms": 18
         },
         {
           "step": "expect",
@@ -261,7 +261,7 @@
             "visible": "button.fab"
           },
           "ok": true,
-          "ms": 1
+          "ms": 2
         },
         {
           "step": "eval",
@@ -272,13 +272,13 @@
           "ok": true,
           "value": {
             "button": [
-              616,
-              664
+              609,
+              657
             ],
-            "dockTop": 681,
-            "footerTop": 767
+            "dockTop": 674,
+            "footerTop": 771
           },
-          "ms": 30
+          "ms": 31
         },
         {
           "step": "expect",
@@ -305,7 +305,7 @@
           "arg": "story",
           "ok": true,
           "file": "test/evidence/feedback-widget/desktop-story.png",
-          "ms": 75
+          "ms": 81
         },
         {
           "step": "fill",
@@ -314,7 +314,7 @@
             "value": "grep"
           },
           "ok": true,
-          "ms": 3
+          "ms": 5
         },
         {
           "step": "expect",
@@ -333,13 +333,13 @@
           "ok": true,
           "value": {
             "button": [
-              588,
-              636
+              581,
+              629
             ],
-            "dockTop": 653,
-            "footerTop": 767
+            "dockTop": 645,
+            "footerTop": 771
           },
-          "ms": 18
+          "ms": 30
         },
         {
           "step": "screenshot",
@@ -352,7 +352,7 @@
           "step": "click",
           "arg": "button.fab",
           "ok": true,
-          "ms": 36
+          "ms": 38
         },
         {
           "step": "expect",
@@ -368,14 +368,14 @@
             "ms": 500
           },
           "ok": true,
-          "ms": 503
+          "ms": 502
         },
         {
           "step": "screenshot",
           "arg": "dialog",
           "ok": true,
           "file": "test/evidence/feedback-widget/desktop-dialog.png",
-          "ms": 82
+          "ms": 72
         }
       ],
       "console_errors": [],
@@ -388,25 +388,25 @@
         "returning-hero": "seeded",
         "clear-of-the-dock": {
           "button": [
-            616,
-            664
+            609,
+            657
           ],
-          "dockTop": 681,
-          "footerTop": 767
+          "dockTop": 674,
+          "footerTop": 771
         },
         "clear-of-the-hint": {
           "button": [
-            588,
-            636
+            581,
+            629
           ],
-          "dockTop": 653,
-          "footerTop": 767
+          "dockTop": 645,
+          "footerTop": 771
         }
       },
-      "final_url": "http://127.0.0.1:4176/?hero=returning#/story"
+      "final_url": "http://127.0.0.1:4004/?hero=returning#/story"
     }
   ],
   "ok": true,
-  "finished": "2026-11-16T03:19:08.534Z",
-  "base": "http://127.0.0.1:4176"
+  "finished": "2026-11-20T03:07:04.321Z",
+  "base": "http://127.0.0.1:4004"
 }

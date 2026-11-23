@@ -40,7 +40,7 @@ function Chronicle({ entries, readAt }: { entries: JournalEntry[]; readAt: strin
                 const rendered = entry ? renderChapter(chapter, hero) : null;
                 return (
                     <article key={chapter.key} className="bc-chapter" data-locked={!entry || undefined} data-unread={entry && Date.parse(entry.when) > since ? true : undefined}>
-                        <p className="bc-chapter-kicker">{chapter.numeral.length > 2 ? chapter.numeral : `Chapter ${chapter.numeral}`}{entry ? ` · ${when(entry.when)}` : ""}</p>
+                        <p className="bc-chapter-kicker">{/^[IVXLC]+$/.test(chapter.numeral) ? `Chapter ${chapter.numeral}` : chapter.numeral}{entry ? ` · ${when(entry.when)}` : ""}</p>
                         <h3 className="bc-display">{rendered ? rendered.title : "???"}</h3>
                         {rendered ? rendered.pages.map((page, i) => <p key={i}>{page}</p>) : <p className="bc-muted">Not yet written.</p>}
                         {rendered && chapter.next && <p className="bc-chapter-next">{chapter.next}</p>}

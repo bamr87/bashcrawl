@@ -6,13 +6,23 @@
     <title>Bashcrawl — learn the terminal by playing</title>
     <meta name="description" content="A free browser dungeon crawl that teaches real bash: take guided courses in a practice lab, explore the story dungeon, drill commands in the Practice Arcade, and keep cheatsheets at hand.">
     <meta name="color-scheme" content="dark light">
-    <meta name="theme-color" content="#0b0a14">
+    <meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Bashcrawl — learn the terminal by playing">
     <meta property="og:description" content="Real bash commands. A dungeon that is the filesystem. Free, in your browser.">
-    <meta property="og:url" content="https://bamr87.github.io/bashcrawl/">
-    <meta name="twitter:card" content="summary">
+    <meta property="og:site_name" content="Bashcrawl">
+    <meta property="og:url" content="%BC_SITE_URL%/">
+    <meta property="og:image" content="%BC_SITE_URL%/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Bashcrawl: learn the terminal by playing. A terminal showing pwd, ls and cat in a dungeon.">
+    <link rel="canonical" href="%BC_SITE_URL%/">
+    <!-- bc:robots -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="%BC_SITE_URL%/og.png">
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="manifest" href="./manifest.webmanifest">
     <!-- The feedback widget's console/error buffer (UPS-FB-04), first of all
          scripts so an error thrown while the engine loads is in the report.
          Vendored in the repo-root public/ (the fleet feedback kit); Vite
@@ -86,6 +96,15 @@
     <!-- The React app (web/src, built by Vite). A module script runs after
          every classic script above, so the engine globals are ready. -->
     <div id="root"></div>
+    <!-- Without JavaScript there is no emulator: say what this is and where
+         the game that needs none of it lives. -->
+    <noscript>
+        <main style="max-width: 40rem; margin: 4rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; line-height: 1.6;">
+            <h1>Bashcrawl: learn the terminal by playing</h1>
+            <p>Bashcrawl is a free, open-source dungeon crawl that teaches real bash commands. The browser trainer needs JavaScript to run its terminal emulator.</p>
+            <p>The original game needs only a shell: clone <a href="https://github.com/bamr87/bashcrawl">github.com/bamr87/bashcrawl</a>, run <code>./setup.sh</code>, then <code>cd entrance</code> and <code>cat scroll</code>.</p>
+        </main>
+    </noscript>
     <script type="module" src="./src/main.tsx"></script>
 </body>
 </html>

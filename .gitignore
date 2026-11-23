@@ -75,7 +75,11 @@ test/.pytest_cache/
 test/.bashcrawl_save.json
 test/agent_playtest*
 .pytest_cache/
-.env
+
+# Local environment files (UPS-OPS-03): vite.config.mts reads .env* from the
+# repo root. Only the documented example is committed.
+.env*
+!.env.example
 
 # Generated screenshots metadata
 screenshots/manifest_*.json

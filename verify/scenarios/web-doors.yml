@@ -1,0 +1,306 @@
+# =============================================================================
+# verify/scenarios/web-doors.yml — a USER SCENARIO (scenario/v1)
+# =============================================================================
+# The four doors after the 2026-11 redesign (BASHCRAWL-015): a returning hero
+# plays a little of each one. Story: pwd, ls and cd cellar each complete a
+# quest and the prompt follows into the cellar with nothing over it. Learn:
+# the first course opens on its first lesson and an objective ticks when its
+# command runs. Arcade: Path Navigator starts, counts a command, and quit
+# returns to the cards. Reference: searching grep filters the cheatsheets.
+# Then the brand button opens the home page and Options switches the theme to
+# Light and back. The redesign moved the look, not the behaviour: this is the
+# behaviour.
+#
+# "Fits" here means sideways: no box is cut off by the left or right edge of
+# the viewport. The Reference door is NOT checked for fit here, only its
+# filtered results: reference-fit.yml opens the whole door and fails, because
+# it lays out 427px wide on a phone and pushes the footer below a desktop
+# window.
+# =============================================================================
+id: web-doors
+feature: BASHCRAWL-015
+title: "A hero plays a little of every door, then switches the theme"
+description: >-
+  A returning hero completes three quests in the Story door, ticks a lesson
+  objective in Learn, starts and quits Path Navigator in the Arcade, searches
+  the Reference for grep, opens the home page from the brand button and
+  switches the theme to Light and back, with one header row, nothing over the
+  prompt, nothing cut off sideways and no console errors on a desktop or a
+  phone.
+viewports: [desktop, mobile]
+steps:
+  - goto: /
+  - eval:
+      name: returning-hero
+      script: |
+        localStorage.clear();
+        const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        save("bashcrawl-web-hero-v1", { name: "Mira", role: "wanderer", tourDone: true });
+        save("bashcrawl-web-shell-v1", { mode: "story", onboarded: true, introSeen: true });
+        "seeded"
+  - goto: /?walk=doors
+  - wait:
+      selector: "input.bc-input"
+  - expect:
+      url: "#/story"
+  - eval:
+      name: header-is-one-row
+      script: |
+        (() => {
+          // One row: every header control's centre sits on the same line, none
+          // overlaps its neighbour or leaves the viewport, each has a name, and
+          // the four doors show their label as text.
+          const header = document.querySelector(".bc-header");
+          const vw = document.documentElement.clientWidth;
+          const controls = [...header.querySelectorAll("button, a")].filter((el) => el.getBoundingClientRect().width > 0).map((el) => {
+            const r = el.getBoundingClientRect();
+            return { name: (el.getAttribute("aria-label") || el.innerText || "").trim(), text: (el.innerText || "").trim(), tab: el.getAttribute("role") === "tab", left: r.left, right: r.right, middle: (r.top + r.bottom) / 2 };
+          }).sort((a, b) => a.left - b.left);
+          const middles = controls.map((c) => c.middle);
+          if (Math.max(...middles) - Math.min(...middles) > 8) throw new Error("the header wraps onto more than one row");
+          const unnamed = controls.filter((c) => !c.name).length;
+          if (unnamed) throw new Error(`${unnamed} header control(s) have no accessible name`);
+          for (let i = 1; i < controls.length; i += 1) {
+            if (controls[i].left < controls[i - 1].right - 0.5) throw new Error(`"${controls[i - 1].name}" overlaps "${controls[i].name}"`);
+          }
+          if (controls.some((c) => c.right > vw + 0.5 || c.left < -0.5)) throw new Error("a header control is cut off by the viewport");
+          const doors = controls.filter((c) => c.tab).map((c) => c.text);
+          if (doors.join(",") !== "Story,Learn,Arcade,Reference") throw new Error(`door tabs read ${JSON.stringify(doors)}`);
+          return { viewport: vw, controls: controls.map((c) => c.name), doors };
+        })()
+  - eval:
+      name: story-fits-the-viewport
+      script: &fits |
+        (async () => {
+          // A sideways scrollbar is not the only way to lose content: the shell
+          // clips, so look for boxes cut off by the viewport's edge. Boxes inside
+          // a container that scrolls sideways on purpose can be reached; banners
+          // and tooltips are passing through.
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const vw = document.documentElement.clientWidth;
+          const passing = ".bc-banner, .bc-tooltip, canvas";
+          const range = document.createRange();
+          // Where an inline run paints: the spaces a pre-wrap line ends on hang
+          // past its box without painting anything, so measure the words.
+          const ink = (el) => {
+            let left = Infinity;
+            let right = -Infinity;
+            const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+              for (const word of node.textContent.matchAll(/\S+/g)) {
+                range.setStart(node, word.index);
+                range.setEnd(node, word.index + word[0].length);
+                for (const r of range.getClientRects()) {
+                  if (r.width) { left = Math.min(left, r.left); right = Math.max(right, r.right); }
+                }
+              }
+            }
+            return { left, right };
+          };
+          const cut = [];
+          for (const el of document.querySelectorAll("body *")) {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height || (r.right <= vw + 2 && r.left >= -2)) continue;
+            const cs = getComputedStyle(el);
+            if (cs.visibility === "hidden" || cs.display === "none" || el.closest(passing)) continue;
+            if (cs.display === "inline") {
+              const painted = ink(el);
+              if (Number.isFinite(painted.right) && painted.right <= vw + 2 && painted.left >= -2) continue;
+            }
+            let box = el.parentElement;
+            let reachable = false;
+            while (box && box !== document.body) {
+              const o = getComputedStyle(box).overflowX;
+              if ((o === "auto" || o === "scroll") && box.scrollWidth > box.clientWidth + 1) { reachable = true; break; }
+              box = box.parentElement;
+            }
+            if (!reachable) cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/)[0]} ${Math.round(r.left)}..${Math.round(r.right)}`);
+          }
+          if (cut.length) throw new Error(`${cut.length} box(es) cut off by the ${vw}px viewport: ${cut.slice(0, 4).join(", ")}`);
+          return { viewport: vw, cutOff: 0 };
+        })()
+  # ── Story: three commands, three quests ──
+  - fill:
+      selector: "input.bc-input"
+      value: "pwd"
+  - press: Enter
+  - expect:
+      visible: 'button[aria-label^="1 of 8 quests complete"]'
+  - fill:
+      selector: "input.bc-input"
+      value: "ls"
+  - press: Enter
+  - expect:
+      visible: 'button[aria-label^="2 of 8 quests complete"]'
+  - fill:
+      selector: "input.bc-input"
+      value: "cd cellar"
+  - press: Enter
+  - expect:
+      visible: 'button[aria-label^="3 of 8 quests complete"]'
+  - expect:
+      visible: '.bc-prompt-label:has-text("cellar")'
+  - eval:
+      name: story-advanced-and-the-prompt-is-clear
+      script: |
+        (async () => {
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+          const save = JSON.parse(localStorage.getItem("bashcrawl-web-state-v1") || "{}");
+          if (save.cwd !== "/entrance/cellar") throw new Error(`the save says the hero is in ${save.cwd}`);
+          if ((save.completedQuestIds || []).length !== 3) throw new Error(`the save holds ${(save.completedQuestIds || []).length} completed quests, expected 3`);
+          // The objective is told once: by the sidebar's Quest panel, or by the
+          // corner tracker that stands in for it when the panel is folded.
+          const objective = (document.querySelector(".bc-quest-xp")?.textContent || "") + (document.querySelector(".bc-tracker")?.textContent || "");
+          if (!/3\/8 complete|Quest 4 of 8/i.test(objective)) throw new Error(`the objective reads ${JSON.stringify(objective.slice(0, 60))}`);
+          if (document.querySelector(".bc-tracker") && document.querySelector(".bc-quest-xp")?.getBoundingClientRect().height) throw new Error("the objective is shown twice: the Quest panel and the corner tracker");
+          const log = document.querySelector("[role=log]").innerText;
+          for (const line of ["/entrance", "cellar  README.md  scroll", "Moved to /entrance/cellar"]) {
+            if (!log.includes(line)) throw new Error(`the log never printed ${JSON.stringify(line)}`);
+          }
+          // Nothing may sit on the prompt dock: the feedback button, the footer,
+          // the objective card or the story's dialogue box.
+          const rect = (el) => { const r = el?.getBoundingClientRect(); return r && r.width && r.height ? r : null; };
+          const dock = rect(document.querySelector(".bc-dock-slot"));
+          const parts = {
+            "feedback button": rect(document.querySelector("fleet-feedback")?.shadowRoot?.querySelector(".fab")),
+            footer: rect(document.querySelector(".bc-footer")),
+            "objective card": rect(document.querySelector(".bc-tracker")),
+            "dialogue box": rect(document.querySelector(".bc-dialogue")),
+          };
+          const hits = Object.keys(parts).filter((name) => {
+            const r = parts[name];
+            return r && r.bottom > dock.top + 0.5 && r.top < dock.bottom - 0.5 && r.right > dock.left && r.left < dock.right;
+          });
+          if (hits.length) throw new Error(`the ${hits.join(" and ")} overlap(s) the prompt`);
+          return { cwd: save.cwd, quests: save.completedQuestIds.length, xp: save.xp, dock: [Math.round(dock.top), Math.round(dock.bottom)], checked: Object.keys(parts).filter((name) => parts[name]) };
+        })()
+  - expect:
+      no_console_errors: true
+  - screenshot: story
+  # ── Learn: the first course, its first lesson, one objective ──
+  - click: 'role=tab[name="Learn"]'
+  - wait:
+      url: "#/learn"
+  # The new door slides in over about 200ms; measure it once it has settled.
+  - wait:
+      ms: 500
+  - eval:
+      name: learn-fits-the-viewport
+      script: *fits
+  - click: 'main button:has-text("Finding Your Way")'
+  - expect:
+      text: "Where am I?"
+  - expect:
+      count:
+        selector: ".bc-objectives li.obj-met"
+        max: 0
+  - fill:
+      selector: "input.bc-input"
+      value: "cd /lab/navigator"
+  - press: Enter
+  - expect:
+      visible: ".bc-objectives li.obj-met"
+  - expect:
+      count:
+        selector: ".bc-objectives li.obj-met"
+        min: 1
+        max: 1
+  - expect:
+      no_console_errors: true
+  - screenshot: learn
+  # ── Arcade: start Path Navigator, one command, quit ──
+  - click: 'role=tab[name="Arcade"]'
+  - wait:
+      url: "#/arcade"
+  - expect:
+      count:
+        selector: ".bc-arcade-card"
+        min: 5
+  # The new door slides in over about 200ms; measure it once it has settled.
+  - wait:
+      ms: 500
+  - eval:
+      name: arcade-fits-the-viewport
+      script: *fits
+  - click: '.bc-arcade-card:has-text("Path Navigator")'
+  - expect:
+      text: "Seek the room called"
+  - fill:
+      selector: "input.bc-input"
+      value: "pwd"
+  - press: Enter
+  - expect:
+      text: "Commands: 1"
+  - screenshot: arcade-run
+  - fill:
+      selector: "input.bc-input"
+      value: "quit"
+  - press: Enter
+  - expect:
+      visible: ".bc-arcade-card"
+  - expect:
+      count:
+        selector: ".bc-arcade-card"
+        min: 5
+  - expect:
+      no_console_errors: true
+  # ── Reference: search ──
+  - click: 'role=tab[name="Reference"]'
+  - wait:
+      url: "#/reference"
+  - fill:
+      selector: "input.bc-ref-search"
+      value: "grep"
+  - expect:
+      text: 'grep -r "pattern" .'
+  - eval:
+      name: reference-filtered-to-grep
+      script: |
+        (async () => {
+          await new Promise((done) => setTimeout(done, 300));
+          const text = document.querySelector("main").innerText;
+          if (text.includes("Print Working Directory")) throw new Error("the search for grep still lists pwd");
+          const commands = [...document.querySelectorAll("main .bc-ref-card code")].filter((code) => code.getBoundingClientRect().height > 0).map((code) => code.innerText.trim());
+          if (!commands.length) throw new Error("no command is listed for grep");
+          return { commands: commands.slice(0, 8) };
+        })()
+  - wait:
+      ms: 500
+  - eval:
+      name: reference-results-fit-the-viewport
+      script: *fits
+  - expect:
+      no_console_errors: true
+  - screenshot: reference-grep
+  # ── The brand opens the home page; Options switches the theme ──
+  - click: 'button[aria-label="Bashcrawl home"]'
+  - wait:
+      url: "#/home"
+  - expect:
+      text: "Continue as Mira"
+  - click: 'button[aria-label="Options"]'
+  - expect:
+      visible: 'role=dialog[name="Options"]'
+  - click: 'role=radio[name="Light"] >> nth=0'
+  - expect:
+      visible: 'html[data-theme="light"]'
+  - wait:
+      ms: 400
+  - screenshot: options-light
+  - click: 'role=radio[name="Dark"]'
+  - expect:
+      visible: 'html[data-theme="dark"]'
+  # Colours cross-fade for about 200ms; photograph the settled theme.
+  - wait:
+      ms: 400
+  - eval:
+      name: theme-is-saved
+      script: |
+        (() => {
+          const stored = localStorage.getItem("bashcrawl-web-theme");
+          if (stored !== "dark") throw new Error(`the saved theme is ${stored}`);
+          return { stored, applied: document.documentElement.dataset.theme };
+        })()
+  - expect:
+      no_console_errors: true
+  - screenshot: options-dark

@@ -5,6 +5,7 @@
 // goal predicate + scoring over a bare runtime — nothing is faked. A modal
 // trial (the Vim Catacombs) also reads raw keys through the prompt's
 // keystroke hook; its `:` and `/` lines come through execute() like any other.
+import { track } from "../analytics/client";
 import { fxBus } from "../engine/fx-bus";
 import { game, type GameStore } from "../engine/game-store";
 import { requireEngine } from "../engine/index";
@@ -141,6 +142,7 @@ export class ArcadeStore implements InputTarget {
         this.appendMany(gameDef.intro(this.ctx));
         this.flushLog();
         this.publish({ phase: "trial", gameId: gameDef.id });
+        track("arcade_game_started", { game: gameDef.id, variant: variant ?? null });
         // A modal trial reads keys from the prompt, so the prompt must have them.
         if (gameDef.keystroke) focusPrompt();
         return true;
@@ -250,6 +252,14 @@ export class ArcadeStore implements InputTarget {
             if (!rec.cleared.includes(scenarioId)) rec.cleared.push(scenarioId);
         }
         Storage.saveKey(SCORES_KEY, this.records);
+        track("arcade_game_finished", {
+            game: this.active.id,
+            outcome: success ? "won" : "lost",
+            score,
+            best: isBest,
+            seconds: Math.round((Date.now() - this.ctx.startedAt) / 1000),
+            hints: this.ctx.hints,
+        });
         const xp = Math.max(5, Math.round(score / 5));
         if (success) {
             this.appendMany([

@@ -5,7 +5,7 @@
     "BASHCRAWL-025"
   ],
   "path": "verify/scenarios/door-art.yml",
-  "started": "2026-11-16T07:33:05.852Z",
+  "started": "2026-11-20T03:06:36.368Z",
   "viewports": [
     {
       "name": "desktop",
@@ -17,7 +17,7 @@
           "step": "goto",
           "arg": "/",
           "ok": true,
-          "ms": 628
+          "ms": 659
         },
         {
           "step": "eval",
@@ -27,13 +27,13 @@
           },
           "ok": true,
           "value": "seeded",
-          "ms": 5
+          "ms": 14
         },
         {
           "step": "goto",
           "arg": "/?theme=dark#/reference",
           "ok": true,
-          "ms": 545
+          "ms": 561
         },
         {
           "step": "wait",
@@ -41,7 +41,7 @@
             "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
           },
           "ok": true,
-          "ms": 16
+          "ms": 25
         },
         {
           "step": "eval",
@@ -60,7 +60,7 @@
               "               / | \\"
             ]
           },
-          "ms": 2443
+          "ms": 2444
         },
         {
           "step": "expect",
@@ -72,7 +72,7 @@
           },
           "ok": true,
           "value": 5,
-          "ms": 2
+          "ms": 5
         },
         {
           "step": "expect",
@@ -92,14 +92,14 @@
             "sw": 1280,
             "cw": 1280
           },
-          "ms": 0
+          "ms": 2
         },
         {
           "step": "screenshot",
           "arg": "arcade-dark",
           "ok": true,
           "file": "test/evidence/door-art/desktop-arcade-dark.png",
-          "ms": 68
+          "ms": 76
         },
         {
           "step": "eval",
@@ -120,7 +120,7 @@
               "/____________|____________\\"
             ]
           },
-          "ms": 2437
+          "ms": 2441
         },
         {
           "step": "expect",
@@ -128,7 +128,7 @@
             "visible": "input.bc-ref-search"
           },
           "ok": true,
-          "ms": 3
+          "ms": 4
         },
         {
           "step": "expect",
@@ -148,14 +148,14 @@
             "sw": 1280,
             "cw": 1280
           },
-          "ms": 0
+          "ms": 1
         },
         {
           "step": "screenshot",
           "arg": "reference-dark",
           "ok": true,
           "file": "test/evidence/door-art/desktop-reference-dark.png",
-          "ms": 43
+          "ms": 41
         },
         {
           "step": "eval",
@@ -165,13 +165,13 @@
           },
           "ok": true,
           "value": "light",
-          "ms": 1
+          "ms": 0
         },
         {
           "step": "goto",
           "arg": "/?theme=light#/reference",
           "ok": true,
-          "ms": 543
+          "ms": 531
         },
         {
           "step": "wait",
@@ -179,7 +179,7 @@
             "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
           },
           "ok": true,
-          "ms": 19
+          "ms": 24
         },
         {
           "step": "eval",
@@ -198,7 +198,7 @@
               "               / | \\"
             ]
           },
-          "ms": 2430
+          "ms": 2436
         },
         {
           "step": "expect",
@@ -217,7 +217,7 @@
           "arg": "arcade-light",
           "ok": true,
           "file": "test/evidence/door-art/desktop-arcade-light.png",
-          "ms": 50
+          "ms": 64
         },
         {
           "step": "eval",
@@ -238,7 +238,7 @@
               "/____________|____________\\"
             ]
           },
-          "ms": 2432
+          "ms": 2423
         },
         {
           "step": "expect",
@@ -258,14 +258,14 @@
             "sw": 1280,
             "cw": 1280
           },
-          "ms": 2
+          "ms": 1
         },
         {
           "step": "screenshot",
           "arg": "reference-light",
           "ok": true,
           "file": "test/evidence/door-art/desktop-reference-light.png",
-          "ms": 53
+          "ms": 50
         }
       ],
       "console_errors": [],
@@ -323,7 +323,7 @@
           ]
         }
       },
-      "final_url": "http://127.0.0.1:4798/?theme=light#/reference"
+      "final_url": "http://127.0.0.1:4004/?theme=light#/reference"
     },
     {
       "name": "mobile",
@@ -335,7 +335,7 @@
           "step": "goto",
           "arg": "/",
           "ok": true,
-          "ms": 603
+          "ms": 587
         },
         {
           "step": "eval",
@@ -345,13 +345,13 @@
           },
           "ok": true,
           "value": "seeded",
-          "ms": 2
+          "ms": 5
         },
         {
           "step": "goto",
           "arg": "/?theme=dark#/reference",
           "ok": true,
-          "ms": 537
+          "ms": 555
         },
         {
           "step": "wait",
@@ -359,7 +359,7 @@
             "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
           },
           "ok": true,
-          "ms": 12
+          "ms": 24
         },
         {
           "step": "eval",
@@ -378,7 +378,7 @@
               "               / | \\"
             ]
           },
-          "ms": 2435
+          "ms": 2462
         },
         {
           "step": "expect",
@@ -410,14 +410,14 @@
             "sw": 390,
             "cw": 390
           },
-          "ms": 0
+          "ms": 1
         },
         {
           "step": "screenshot",
           "arg": "arcade-dark",
           "ok": true,
           "file": "test/evidence/door-art/mobile-arcade-dark.png",
-          "ms": 31
+          "ms": 21
         },
         {
           "step": "eval",
@@ -438,7 +438,7 @@
               "/____________|____________\\"
             ]
           },
-          "ms": 2443
+          "ms": 2423
         },
         {
           "step": "expect",
@@ -446,7 +446,7 @@
             "visible": "input.bc-ref-search"
           },
           "ok": true,
-          "ms": 3
+          "ms": 5
         },
         {
           "step": "expect",
@@ -473,7 +473,7 @@
           "arg": "reference-dark",
           "ok": true,
           "file": "test/evidence/door-art/mobile-reference-dark.png",
-          "ms": 23
+          "ms": 22
         },
         {
           "step": "eval",
@@ -483,13 +483,13 @@
           },
           "ok": true,
           "value": "light",
-          "ms": 0
+          "ms": 1
         },
         {
           "step": "goto",
           "arg": "/?theme=light#/reference",
           "ok": true,
-          "ms": 531
+          "ms": 538
         },
         {
           "step": "wait",
@@ -497,7 +497,7 @@
             "selector": ".bc-ref-controls [data-art=\"door-reference\"]"
           },
           "ok": true,
-          "ms": 9
+          "ms": 25
         },
         {
           "step": "eval",
@@ -516,7 +516,7 @@
               "               / | \\"
             ]
           },
-          "ms": 2431
+          "ms": 2426
         },
         {
           "step": "expect",
@@ -528,14 +528,14 @@
             "sw": 390,
             "cw": 390
           },
-          "ms": 0
+          "ms": 3
         },
         {
           "step": "screenshot",
           "arg": "arcade-light",
           "ok": true,
           "file": "test/evidence/door-art/mobile-arcade-light.png",
-          "ms": 19
+          "ms": 40
         },
         {
           "step": "eval",
@@ -556,7 +556,7 @@
               "/____________|____________\\"
             ]
           },
-          "ms": 2433
+          "ms": 2424
         },
         {
           "step": "expect",
@@ -583,7 +583,7 @@
           "arg": "reference-light",
           "ok": true,
           "file": "test/evidence/door-art/mobile-reference-light.png",
-          "ms": 18
+          "ms": 41
         }
       ],
       "console_errors": [],
@@ -641,10 +641,10 @@
           ]
         }
       },
-      "final_url": "http://127.0.0.1:4798/?theme=light#/reference"
+      "final_url": "http://127.0.0.1:4004/?theme=light#/reference"
     }
   ],
   "ok": true,
-  "finished": "2026-11-16T07:33:29.314Z",
-  "base": "http://127.0.0.1:4798"
+  "finished": "2026-11-20T03:07:00.004Z",
+  "base": "http://127.0.0.1:4004"
 }

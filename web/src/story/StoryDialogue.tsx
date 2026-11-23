@@ -3,7 +3,7 @@
 // the Options' text speed. Click or Enter completes the page, then turns
 // it; Escape closes. It waits while a full-screen overlay or the tour is up.
 import { motion } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { useSettings } from "../chrome/settings-store";
 import { useUi } from "../chrome/ui-store";
@@ -46,6 +46,7 @@ export function StoryDialogue() {
     const settings = useSettings();
     const [typed, setTyped] = useState(false);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const boxRef = useRef<HTMLDivElement>(null);
     const visible = current != null && overlay === null && tour === null;
     const speed = reducedMotion() ? 0 : SPEED_MS[settings.textSpeed];
     const text = current?.pages[page] ?? "";
@@ -67,6 +68,31 @@ export function StoryDialogue() {
         return () => document.removeEventListener("keydown", onKey);
     }, [visible, current?.id, page]);
 
+    // The card floats over the foot of the log. Tell the log how much to keep
+    // clear (terminal.css pads by --bc-dialogue-clear), and keep it scrolled
+    // to its end if that is where the reader was: the output of the command
+    // just run must not sit under the story.
+    const chapter = current?.id;
+    useLayoutEffect(() => {
+        const box = boxRef.current;
+        const stage = box?.closest<HTMLElement>(".bc-stage-log");
+        if (!visible || !box || !stage) return;
+        const log = stage.querySelector<HTMLElement>(".bc-log");
+        const publish = () => {
+            const atEnd = log ? log.scrollHeight - log.scrollTop - log.clientHeight < 32 : false;
+            const gap = Number.parseFloat(getComputedStyle(box).bottom) || 0;
+            stage.style.setProperty("--bc-dialogue-clear", `${Math.ceil(box.getBoundingClientRect().height + Math.min(gap, 32))}px`);
+            if (log && atEnd) log.scrollTop = log.scrollHeight;
+        };
+        publish();
+        const observer = typeof ResizeObserver === "function" ? new ResizeObserver(publish) : null;
+        observer?.observe(box);
+        return () => {
+            observer?.disconnect();
+            stage.style.removeProperty("--bc-dialogue-clear");
+        };
+    }, [visible, chapter]);
+
     function step() {
         if (!typed && speed) {
             // Finish the page at once: remount the Page with speed 0.
@@ -82,6 +108,7 @@ export function StoryDialogue() {
     // Enter-only motion: a new box per chapter, nothing to wait on when it goes.
     return (
         <motion.div
+            ref={boxRef}
             key={current.id}
             className="bc-dialogue bc-frame"
             role="dialog"

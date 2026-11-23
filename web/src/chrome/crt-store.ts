@@ -24,6 +24,14 @@ export function setCrt(on: boolean): void {
     apply(on);
 }
 
+export function crtOn(): boolean {
+    return store.get().on;
+}
+
+export function subscribeCrt(listener: () => void): () => void {
+    return store.subscribe(listener);
+}
+
 export function useCrt(): { on: boolean } {
     return useStore(store);
 }

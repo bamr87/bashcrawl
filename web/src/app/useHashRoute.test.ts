@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { currentRoute, hrefFor, navigate, parseHash } from "./useHashRoute";
+import { currentRoute, hrefFor, navigate, navigateHome, parseHash } from "./useHashRoute";
 
 describe("hash routing", () => {
     it("parses the four doors, an empty hash and anything else", () => {
@@ -11,6 +11,7 @@ describe("hash routing", () => {
         expect(parseHash("")).toEqual({ kind: "none" });
         expect(parseHash("#")).toEqual({ kind: "none" });
         expect(parseHash("#/")).toEqual({ kind: "none" });
+        expect(parseHash("#/home")).toEqual({ kind: "home" });
         expect(parseHash("#/nope")).toEqual({ kind: "notfound", path: "/nope" });
         expect(parseHash("#story")).toEqual({ kind: "mode", mode: "story" });
     });
@@ -23,5 +24,8 @@ describe("hash routing", () => {
         window.location.hash = "#/reference";
         window.dispatchEvent(new HashChangeEvent("hashchange"));
         expect(currentRoute()).toEqual({ kind: "mode", mode: "reference" });
+        navigateHome();
+        expect(window.location.hash).toBe("#/home");
+        expect(currentRoute()).toEqual({ kind: "home" });
     });
 });

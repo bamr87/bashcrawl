@@ -3,6 +3,7 @@
 import { MODES, MODE_META } from "../app/modes";
 import { hrefFor } from "../app/useHashRoute";
 import { ReportLink } from "../chrome/Feedback";
+import { ModeIcon } from "../chrome/ModeIcon";
 
 export function NotFound({ path }: { path: string }) {
     return (
@@ -14,7 +15,7 @@ export function NotFound({ path }: { path: string }) {
             <div className="bc-doors">
                 {MODES.map((mode) => (
                     <a key={mode} className="bc-btn" href={hrefFor(mode)}>
-                        <span aria-hidden="true">{MODE_META[mode].icon}</span> {MODE_META[mode].label}
+                        <ModeIcon mode={mode} /> {MODE_META[mode].label}
                     </a>
                 ))}
             </div>

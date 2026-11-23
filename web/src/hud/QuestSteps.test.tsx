@@ -36,6 +36,9 @@ describe("quest steps", () => {
         const store = new GameStore();
         await store.boot(dataLoader);
         await act(async () => { for (const line of PREP) store.execute(line); });
+        // The tracker stands in for the Quest panel, so it shows once the panel
+        // is folded; the panel's body is rendered here directly, beside it.
+        store.applyLayout({ op: "toggle", id: "quest", field: "collapsed" });
         render(<><QuestPanelBody store={store} /><QuestTracker store={store} /></>);
 
         const lists = screen.getAllByRole("list", { name: /Quest steps, 1 of 6 done/ });

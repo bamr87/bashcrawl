@@ -34,6 +34,8 @@ describe("the journal", () => {
         await act(async () => { setUi({ overlay: "journal" }); });
         const dialog = await screen.findByRole("dialog", { name: "Journal" });
         expect(within(dialog).getByRole("tab", { name: "Chronicle", selected: true })).toBeInTheDocument();
+        // Every numbered chapter says "Chapter", whatever the numeral's length.
+        for (const label of ["Chapter II", "Chapter III", "Chapter VIII"]) expect(within(dialog).getByText(label)).toBeInTheDocument();
         expect(dialog).toHaveTextContent("The Descent Begins");
         expect(dialog).toHaveTextContent("Mira");
         expect(dialog).toHaveTextContent("Know Thy Place");

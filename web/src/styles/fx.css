@@ -20,8 +20,6 @@
 .bc-stage-log.fx-play {
     box-shadow:
         inset 0 0 0 1px var(--fleet-color-border),
-        inset 2px 2px 0 0 var(--bc-color-bevel-lo),
-        inset -2px -2px 0 0 var(--bc-color-bevel-hi),
         inset 0 0 22px color-mix(in srgb, var(--fx-accent) 28%, transparent);
 }
 .bc-stage-log.fx-play::after {

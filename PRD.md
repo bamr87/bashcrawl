@@ -42,6 +42,9 @@ These missions set the course; they do not claim the work is finished. They serv
 - Classic terminal dungeon (`entrance/`, `setup.sh`)
 - XP/score persistence across modes
 - Content data (rooms, recommendations) and transcript-based tests
+- A home page with a sandbox terminal that runs real commands before a visitor commits to anything
+- Usage analytics that are off until the visitor allows them, with every collected event published
+- A production deploy on Azure Static Web Apps behind a custom domain (pipeline built; go-live pending the domain)
 
 ## Feature catalog
 
@@ -64,7 +67,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [BASHCRAWL-012](features/features.yml) | Practice Arcade mini-games | shipped | [`web/assets/js/arcade.js`](web/assets/js/arcade.js) · [`README.md`](README.md) | FR2, FR5 |
 | [BASHCRAWL-013](features/features.yml) | Vim Catacombs | shipped | [`web/src/arcade/VimStage.tsx`](web/src/arcade/VimStage.tsx) · [`README.md`](README.md) | FR5 |
 | [BASHCRAWL-014](features/features.yml) | Reference cheatsheets | shipped | [`web/src/screens/ReferenceScreen.tsx`](web/src/screens/ReferenceScreen.tsx) · [`README.md`](README.md) | FR6 |
-| [BASHCRAWL-015](features/features.yml) | 16-bit RPG web UI | shipped | [`web/src/app/App.tsx`](web/src/app/App.tsx) · [`AGENTS.md`](AGENTS.md) | FR13, NFR1, NFR2 |
+| [BASHCRAWL-015](features/features.yml) | Web trainer UI: hero, HUD and one shared prompt | shipped | [`web/src/app/App.tsx`](web/src/app/App.tsx) · [`docs/design-system.md`](docs/design-system.md) | FR13, NFR1, NFR2 |
 | [BASHCRAWL-016](features/features.yml) | Training Arena and speed run | shipped | [`web/assets/js/plugins/arena.js`](web/assets/js/plugins/arena.js) · [`AGENTS.md`](AGENTS.md) | FR5 |
 | [BASHCRAWL-017](features/features.yml) | Progression: ranks, achievements, daily challenge, bestiary | shipped | [`web/assets/js/plugins`](web/assets/js/plugins) · [`AGENTS.md`](AGENTS.md) | FR2, FR9 |
 | [BASHCRAWL-018](features/features.yml) | Save and load | shipped | [`web/assets/js/storage.js`](web/assets/js/storage.js) · [`docs/generated/runtime-commands.md`](docs/generated/runtime-commands.md) | FR2, FR12 |
@@ -77,6 +80,9 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [BASHCRAWL-025](features/features.yml) | Effects layer and chiptune SFX | shipped | [`web/src/fx`](web/src/fx) · [`AGENTS.md`](AGENTS.md) | FR13 |
 | [BASHCRAWL-026](features/features.yml) | Feedback widget | shipped | [`web/src/chrome/Feedback.tsx`](web/src/chrome/Feedback.tsx) · [`README.md`](README.md) | TBD |
 | [BASHCRAWL-027](features/features.yml) | Missions in constitution §1 | planned | [`docs/constitution.md`](docs/constitution.md) | §1.1 |
+| [BASHCRAWL-028](features/features.yml) | Home page with a sandbox terminal | shipped | [`web/src/screens/LandingScreen.tsx`](web/src/screens/LandingScreen.tsx) · [`docs/design-system.md`](docs/design-system.md) | FR14, NFR2 |
+| [BASHCRAWL-029](features/features.yml) | Usage analytics behind explicit consent | shipped | [`web/src/analytics`](web/src/analytics) · [`docs/analytics.md`](docs/analytics.md) | NFR5 |
+| [BASHCRAWL-030](features/features.yml) | Production hosting on Azure Static Web Apps | partial | [`.github/workflows/azure-swa.yml`](.github/workflows/azure-swa.yml) · [`docs/deploy.md`](docs/deploy.md) | NFR6 |
 
 **Requirement → feature trace**
 
@@ -87,7 +93,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | FR5 | BASHCRAWL-001, BASHCRAWL-012, BASHCRAWL-013, BASHCRAWL-016 |
 | FR6 | BASHCRAWL-001, BASHCRAWL-014 |
 | NFR1 | BASHCRAWL-001, BASHCRAWL-015 |
-| NFR2 | BASHCRAWL-001, BASHCRAWL-015 |
+| NFR2 | BASHCRAWL-001, BASHCRAWL-015, BASHCRAWL-028 |
 | FR3 | BASHCRAWL-002, BASHCRAWL-022, BASHCRAWL-023 |
 | FR4 | BASHCRAWL-002, BASHCRAWL-010, BASHCRAWL-011 |
 | NFR4 | BASHCRAWL-002, BASHCRAWL-019 |
@@ -100,6 +106,9 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | FR11 | BASHCRAWL-024 |
 | TBD | BASHCRAWL-026 |
 | §1.1 | BASHCRAWL-027 |
+| FR14 | BASHCRAWL-028 |
+| NFR5 | BASHCRAWL-029 |
+| NFR6 | BASHCRAWL-030 |
 <!-- features:end -->
 
 ## 5. Requirements
@@ -119,6 +128,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 - FR11: An AI agent can playtest the real dungeon in a sandbox and report content gaps (BASHCRAWL-024)
 - FR12: Players can save and restore their game state (BASHCRAWL-018)
 - FR13: The web trainer presents the game as an RPG with a hero, HUD and feedback effects (BASHCRAWL-015, BASHCRAWL-025)
+- FR14: A home page explains the product, lets a visitor run real commands in a sandbox before starting, and leads into the four doors (BASHCRAWL-028)
 
 **Non-functional**
 
@@ -126,11 +136,15 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 - NFR2: Works on mobile (BASHCRAWL-001, BASHCRAWL-015)
 - NFR3: GPL-3.0-only (project-wide; no single feature)
 - NFR4: The classic dungeon and launcher need no dependencies beyond bash and run on macOS `/bin/bash` 3.2 (BASHCRAWL-002, BASHCRAWL-019)
+- NFR5: No usage data leaves the browser before explicit consent, a refusal sends nothing, and every event that can be collected is published in the app and in the repository (BASHCRAWL-029)
+- NFR6: The web trainer is served from a production host on a custom domain, with security headers, a preview per pull request, and a deploy that verifies the live build before it reports success (BASHCRAWL-030)
 
 ## 6. Success metrics (proposed — not defined in sources)
 
-- Course completion rate
-- Return-player rate: TBD (no analytics source identified)
+- Course completion rate: `course_started` to `course_completed`, among visitors who allowed analytics ([docs/analytics.md](docs/analytics.md)); baseline TBD
+- Return-player rate: share of `app_loaded` events with `returning: true`; baseline TBD
+- First-session activation: home page to a first completed quest or lesson (`$pageview` on home, `hero_created`, `quest_completed` or `lesson_completed`); baseline TBD
+- These are measured only from consenting visitors of the production site, so they are rates over a sample, not totals
 
 ## 7. Roadmap / open questions
 
@@ -138,4 +152,4 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 
 ## 8. Links
 
-- [README.md](README.md) · [AGENTS.md](AGENTS.md) · [CHANGELOG.md](CHANGELOG.md) · [NOTICE](NOTICE)
+- [README.md](README.md) · [AGENTS.md](AGENTS.md) · [CHANGELOG.md](CHANGELOG.md) · [NOTICE](NOTICE) · [docs/analytics.md](docs/analytics.md) · [docs/deploy.md](docs/deploy.md) · [docs/design-system.md](docs/design-system.md)

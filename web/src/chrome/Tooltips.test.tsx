@@ -36,4 +36,23 @@ describe("tooltips", () => {
         await act(async () => { fireEvent.focusOut(journal); });
         expect(screen.queryByRole("tooltip")).toBeNull();
     });
+
+    it("stays quiet when a control arrives under a pointer that has not moved since its click", async () => {
+        vi.useFakeTimers();
+        render(
+            <>
+                <Tooltips />
+                <button type="button" title="100 XP to the next rank">XP</button>
+            </>,
+        );
+        const xp = screen.getByRole("button", { name: "XP" });
+        // A click elsewhere changed the screen; this control is now under the pointer.
+        await act(async () => { fireEvent.pointerDown(document.body); fireEvent.pointerOver(xp); });
+        await act(async () => { vi.advanceTimersByTime(1500); });
+        expect(screen.queryByRole("tooltip")).toBeNull();
+        // Once the pointer really moves over it, it is being pointed at.
+        await act(async () => { fireEvent.pointerMove(xp); });
+        await act(async () => { vi.advanceTimersByTime(400); });
+        expect(screen.getByRole("tooltip")).toHaveTextContent("100 XP to the next rank");
+    });
 });
